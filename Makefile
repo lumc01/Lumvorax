@@ -32,46 +32,29 @@ OBJECTS = $(OBJ_DIR)/main.o \
           $(OBJ_DIR)/persistence/data_persistence.o
 
 # Executable
-EXECUTABLE = $(BINDIR)/lum_vorax
+EXECUTABLE = $(BIN_DIR)/lum_vorax
 
 # Create object directories
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIR)/lum $(OBJ_DIR)/vorax $(OBJ_DIR)/parser $(OBJ_DIR)/binary $(OBJ_DIR)/logger $(OBJ_DIR)/optimization $(OBJ_DIR)/parallel $(OBJ_DIR)/metrics $(OBJ_DIR)/crypto $(OBJ_DIR)/persistence
 
-$(BINDIR):
-	mkdir -p $(BINDIR)
+$(BIN_DIR):
+	mkdir -p $(BIN_DIR)
 
 # Build executable
-$(EXECUTABLE): $(OBJECTS) | $(BINDIR)
+$(EXECUTABLE): $(OBJECTS) | $(BIN_DIR)
 	$(CC) $(OBJECTS) -o $@ -lpthread -lm
 
-# Compile source files
-$(OBJDIR)/%.o: $(SRCDIR)/%.c | $(OBJDIR)
+# Generic rule for all object files
+$(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Compile logger
-$(OBJ_DIR)/logger/lum_logger.o: $(SRC_DIR)/logger/lum_logger.c
-	$(CC) $(CFLAGS) -c $< -o $@
+# Specific rules for modules requiring special flags
+$(OBJ_DIR)/parallel/parallel_processor.o: $(SRC_DIR)/parallel/parallel_processor.c | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@ -pthread
 
-# Compile optimization module
-$(OBJ_DIR)/optimization/memory_optimizer.o: $(SRC_DIR)/optimization/memory_optimizer.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile parallel processing module
-$(OBJ_DIR)/parallel/parallel_processor.o: $(SRC_DIR)/parallel/parallel_processor.c
-	$(CC) $(CFLAGS) -c $< -o $@ -lpthread
-
-# Compile metrics module
-$(OBJ_DIR)/metrics/performance_metrics.o: $(SRC_DIR)/metrics/performance_metrics.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile crypto validation module
-$(OBJ_DIR)/crypto/crypto_validator.o: $(SRC_DIR)/crypto/crypto_validator.c
-	$(CC) $(CFLAGS) -c $< -o $@
-
-# Compile persistence module
-$(OBJ_DIR)/persistence/data_persistence.o: $(SRC_DIR)/persistence/data_persistence.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(OBJ_DIR)/crypto/crypto_validator.o: $(SRC_DIR)/crypto/crypto_validator.c | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@ -lm
 
 # Targets
 .PHONY: all clean run test install
@@ -79,7 +62,7 @@ $(OBJ_DIR)/persistence/data_persistence.o: $(SRC_DIR)/persistence/data_persisten
 all: $(EXECUTABLE)
 
 clean:
-	rm -rf $(OBJ_DIR) $(BINDIR) *.log
+	rm -rf $(OBJ_DIR) $(BIN_DIR) *.log
 
 run: $(EXECUTABLE)
 	./$(EXECUTABLE)
