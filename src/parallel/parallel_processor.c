@@ -1,0 +1,338 @@
+
+#include "parallel_processor.h"
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
+#include <time.h>
+#include <errno.h>
+#include <unistd.h>
+
+// Create parallel processor
+parallel_processor_t* parallel_processor_create(int worker_count) {
+    if (worker_count <= 0 || worker_count > MAX_WORKER_THREADS) {
+        worker_count = DEFAULT_WORKER_COUNT;
+    }
+    
+    parallel_processor_t* processor = malloc(sizeof(parallel_processor_t));
+    if (!processor) return NULL;
+    
+    processor->worker_count = worker_count;
+    processor->is_initialized = false;
+    processor->total_tasks_processed = 0;
+    processor->total_processing_time = 0.0;
+    
+    // Initialize task queue
+    if (!task_queue_init(&processor->task_queue)) {
+        free(processor);
+        return NULL;
+    }
+    
+    // Initialize statistics mutex
+    if (pthread_mutex_init(&processor->stats_mutex, NULL) != 0) {
+        task_queue_destroy(&processor->task_queue);
+        free(processor);
+        return NULL;
+    }
+    
+    // Create worker threads
+    for (int i = 0; i < worker_count; i++) {
+        processor->workers[i].thread_id = i;
+        processor->workers[i].is_active = false;
+        processor->workers[i].should_exit = false;
+        processor->workers[i].tasks_completed = 0;
+        
+        if (pthread_create(&processor->workers[i].thread, NULL, 
+                          worker_thread_main, processor) != 0) {
+            // Cleanup on failure
+            for (int j = 0; j < i; j++) {
+                processor->workers[j].should_exit = true;
+                pthread_join(processor->workers[j].thread, NULL);
+            }
+            pthread_mutex_destroy(&processor->stats_mutex);
+            task_queue_destroy(&processor->task_queue);
+            free(processor);
+            return NULL;
+        }
+        processor->workers[i].is_active = true;
+    }
+    
+    processor->is_initialized = true;
+    return processor;
+}
+
+void parallel_processor_destroy(parallel_processor_t* processor) {
+    if (!processor) return;
+    
+    // Signal all workers to exit
+    for (int i = 0; i < processor->worker_count; i++) {
+        if (processor->workers[i].is_active) {
+            processor->workers[i].should_exit = true;
+        }
+    }
+    
+    // Wake up all workers
+    pthread_cond_broadcast(&processor->task_queue.condition);
+    
+    // Wait for all workers to finish
+    for (int i = 0; i < processor->worker_count; i++) {
+        if (processor->workers[i].is_active) {
+            pthread_join(processor->workers[i].thread, NULL);
+        }
+    }
+    
+    task_queue_destroy(&processor->task_queue);
+    pthread_mutex_destroy(&processor->stats_mutex);
+    free(processor);
+}
+
+// Task management
+parallel_task_t* parallel_task_create(parallel_task_type_e type, void* input_data, size_t data_size) {
+    parallel_task_t* task = malloc(sizeof(parallel_task_t));
+    if (!task) return NULL;
+    
+    task->type = type;
+    task->input_data = input_data;
+    task->output_data = NULL;
+    task->data_size = data_size;
+    task->is_completed = false;
+    task->error_code = 0;
+    task->error_message[0] = '\0';
+    task->next = NULL;
+    
+    return task;
+}
+
+void parallel_task_destroy(parallel_task_t* task) {
+    if (task) {
+        // Note: input_data and output_data are managed by caller
+        free(task);
+    }
+}
+
+bool parallel_processor_submit_task(parallel_processor_t* processor, parallel_task_t* task) {
+    if (!processor || !processor->is_initialized || !task) return false;
+    
+    return task_queue_enqueue(&processor->task_queue, task);
+}
+
+bool parallel_processor_wait_for_completion(parallel_processor_t* processor) {
+    if (!processor || !processor->is_initialized) return false;
+    
+    // Simple implementation: wait until queue is empty
+    while (!task_queue_is_empty(&processor->task_queue)) {
+        usleep(1000); // Sleep 1ms
+    }
+    
+    return true;
+}
+
+// Queue operations
+bool task_queue_init(task_queue_t* queue) {
+    if (!queue) return false;
+    
+    queue->head = NULL;
+    queue->tail = NULL;
+    queue->count = 0;
+    
+    if (pthread_mutex_init(&queue->mutex, NULL) != 0) {
+        return false;
+    }
+    
+    if (pthread_cond_init(&queue->condition, NULL) != 0) {
+        pthread_mutex_destroy(&queue->mutex);
+        return false;
+    }
+    
+    return true;
+}
+
+void task_queue_destroy(task_queue_t* queue) {
+    if (!queue) return;
+    
+    pthread_mutex_lock(&queue->mutex);
+    
+    // Free all remaining tasks
+    parallel_task_t* current = queue->head;
+    while (current) {
+        parallel_task_t* next = current->next;
+        parallel_task_destroy(current);
+        current = next;
+    }
+    
+    pthread_mutex_unlock(&queue->mutex);
+    pthread_mutex_destroy(&queue->mutex);
+    pthread_cond_destroy(&queue->condition);
+}
+
+bool task_queue_enqueue(task_queue_t* queue, parallel_task_t* task) {
+    if (!queue || !task) return false;
+    
+    pthread_mutex_lock(&queue->mutex);
+    
+    if (queue->tail) {
+        queue->tail->next = task;
+    } else {
+        queue->head = task;
+    }
+    queue->tail = task;
+    task->next = NULL;
+    queue->count++;
+    
+    pthread_cond_signal(&queue->condition);
+    pthread_mutex_unlock(&queue->mutex);
+    
+    return true;
+}
+
+parallel_task_t* task_queue_dequeue(task_queue_t* queue) {
+    if (!queue) return NULL;
+    
+    pthread_mutex_lock(&queue->mutex);
+    
+    while (queue->head == NULL) {
+        pthread_cond_wait(&queue->condition, &queue->mutex);
+    }
+    
+    parallel_task_t* task = queue->head;
+    queue->head = task->next;
+    if (queue->head == NULL) {
+        queue->tail = NULL;
+    }
+    queue->count--;
+    
+    pthread_mutex_unlock(&queue->mutex);
+    
+    return task;
+}
+
+bool task_queue_is_empty(task_queue_t* queue) {
+    if (!queue) return true;
+    
+    pthread_mutex_lock(&queue->mutex);
+    bool empty = (queue->count == 0);
+    pthread_mutex_unlock(&queue->mutex);
+    
+    return empty;
+}
+
+// Worker thread main function
+void* worker_thread_main(void* arg) {
+    parallel_processor_t* processor = (parallel_processor_t*)arg;
+    if (!processor) return NULL;
+    
+    while (!processor->workers[0].should_exit) { // Use first worker's exit flag as global
+        parallel_task_t* task = task_queue_dequeue(&processor->task_queue);
+        if (!task) continue;
+        
+        clock_t start_time = clock();
+        bool success = execute_task(task);
+        clock_t end_time = clock();
+        
+        task->is_completed = true;
+        if (!success) {
+            task->error_code = 1;
+            strncpy(task->error_message, "Task execution failed", sizeof(task->error_message) - 1);
+        }
+        
+        // Update statistics
+        pthread_mutex_lock(&processor->stats_mutex);
+        processor->total_tasks_processed++;
+        processor->total_processing_time += ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+        pthread_mutex_unlock(&processor->stats_mutex);
+        
+        // Update worker statistics
+        for (int i = 0; i < processor->worker_count; i++) {
+            if (pthread_self() == processor->workers[i].thread) {
+                processor->workers[i].tasks_completed++;
+                break;
+            }
+        }
+    }
+    
+    return NULL;
+}
+
+bool execute_task(parallel_task_t* task) {
+    if (!task) return false;
+    
+    switch (task->type) {
+        case TASK_LUM_CREATE: {
+            // Create LUM from input data
+            if (task->data_size >= sizeof(lum_t)) {
+                lum_t* input = (lum_t*)task->input_data;
+                lum_t* output = lum_create(input->presence, input->position_x, 
+                                         input->position_y, input->structure_type);
+                task->output_data = output;
+                return output != NULL;
+            }
+            return false;
+        }
+        
+        case TASK_VORAX_FUSE: {
+            // Fuse two groups
+            lum_group_t** groups = (lum_group_t**)task->input_data;
+            if (task->data_size >= sizeof(lum_group_t*) * 2) {
+                vorax_result_t* result = vorax_fuse(groups[0], groups[1]);
+                task->output_data = result;
+                return result && result->success;
+            }
+            return false;
+        }
+        
+        case TASK_BINARY_CONVERT: {
+            // Convert binary to LUM
+            uint8_t* binary_data = (uint8_t*)task->input_data;
+            binary_lum_result_t* result = convert_binary_to_lum(binary_data, task->data_size);
+            task->output_data = result;
+            return result && result->success;
+        }
+        
+        default:
+            return false;
+    }
+}
+
+// Statistics
+void parallel_processor_print_stats(parallel_processor_t* processor) {
+    if (!processor) return;
+    
+    pthread_mutex_lock(&processor->stats_mutex);
+    
+    printf("=== Parallel Processor Statistics ===\n");
+    printf("Worker Threads: %d\n", processor->worker_count);
+    printf("Total Tasks Processed: %zu\n", processor->total_tasks_processed);
+    printf("Total Processing Time: %.3f seconds\n", processor->total_processing_time);
+    
+    if (processor->total_tasks_processed > 0) {
+        printf("Average Task Time: %.3f ms\n", 
+               (processor->total_processing_time * 1000.0) / processor->total_tasks_processed);
+    }
+    
+    printf("Worker Performance:\n");
+    for (int i = 0; i < processor->worker_count; i++) {
+        printf("  Worker %d: %zu tasks completed\n", i, processor->workers[i].tasks_completed);
+    }
+    
+    printf("======================================\n");
+    
+    pthread_mutex_unlock(&processor->stats_mutex);
+}
+
+double parallel_processor_get_efficiency(parallel_processor_t* processor) {
+    if (!processor || processor->total_tasks_processed == 0) return 0.0;
+    
+    pthread_mutex_lock(&processor->stats_mutex);
+    
+    // Calculate theoretical vs actual processing time
+    size_t total_worker_tasks = 0;
+    for (int i = 0; i < processor->worker_count; i++) {
+        total_worker_tasks += processor->workers[i].tasks_completed;
+    }
+    
+    double efficiency = (double)total_worker_tasks / 
+                       (processor->worker_count * processor->total_tasks_processed);
+    
+    pthread_mutex_unlock(&processor->stats_mutex);
+    
+    return efficiency;
+}
