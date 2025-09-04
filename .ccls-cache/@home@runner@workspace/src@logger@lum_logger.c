@@ -5,6 +5,21 @@
 
 static uint32_t global_sequence_counter = 1;
 
+// Global logger instance for system-wide logging
+static lum_logger_t* g_system_logger = NULL;
+
+// Forward declaration of internal function
+static void lum_log_write_entry(lum_logger_t* logger, const lum_log_entry_t* entry);
+
+// Global logger functions
+void lum_set_global_logger(lum_logger_t* logger) {
+    g_system_logger = logger;
+}
+
+lum_logger_t* lum_get_global_logger(void) {
+    return g_system_logger;
+}
+
 // Logger creation and management
 lum_logger_t* lum_logger_create(const char* log_filename, bool console_output, bool file_output) {
     lum_logger_t* logger = malloc(sizeof(lum_logger_t));

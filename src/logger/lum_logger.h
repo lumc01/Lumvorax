@@ -138,6 +138,10 @@ void lum_log_replay_destroy(lum_log_replay_t* replay);
 struct vorax_execution_context;
 bool lum_log_replay_execute(lum_log_replay_t* replay, struct vorax_execution_context* ctx);
 
+// Global logger functions
+void lum_set_global_logger(lum_logger_t* logger);
+lum_logger_t* lum_get_global_logger(void);
+
 // Utility functions
 void lum_log_message(lum_logger_t* logger, lum_log_level_e level, const char* message);
 const char* lum_log_level_to_string(lum_log_level_e level);
