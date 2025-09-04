@@ -134,7 +134,13 @@ typedef struct {
 
 lum_log_replay_t* lum_log_replay_create(const char* log_filename);
 void lum_log_replay_destroy(lum_log_replay_t* replay);
-bool lum_log_replay_execute(lum_log_replay_t* replay, vorax_execution_context_t* ctx);
+// Forward declaration
+struct vorax_execution_context;
+bool lum_log_replay_execute(lum_log_replay_t* replay, struct vorax_execution_context* ctx);
+
+// Global logger functions
+void lum_set_global_logger(lum_logger_t* logger);
+lum_logger_t* lum_get_global_logger(void);
 
 // Utility functions
 void lum_log_message(lum_logger_t* logger, lum_log_level_e level, const char* message);

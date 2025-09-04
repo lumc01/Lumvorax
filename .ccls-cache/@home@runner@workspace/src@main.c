@@ -21,7 +21,7 @@ int main(int argc, char* argv[]) {
     printf("Implementation complete du concept LUM/VORAX en C\n\n");
     
     // Initialize logging
-    lum_logger_t* logger = lum_logger_create("lum_vorax.log", true, true);
+    lum_logger_t* logger = lum_logger_create("logs/lum_vorax.log", true, true);
     if (!logger) {
         printf("Erreur: Impossible de créer le logger\n");
         return 1;
@@ -29,6 +29,12 @@ int main(int argc, char* argv[]) {
     
     lum_logger_set_level(logger, LUM_LOG_INFO);
     lum_logger_enable_tracing(logger, true);
+    
+    // Set as global logger for system-wide usage
+    lum_set_global_logger(logger);
+    
+    // Log system startup
+    lum_log_message(logger, LUM_LOG_INFO, "LUM/VORAX System Demo Started");
     
     printf("1. Test des opérations de base LUM...\n");
     demo_basic_lum_operations();
