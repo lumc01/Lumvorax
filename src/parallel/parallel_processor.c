@@ -1,11 +1,13 @@
 #define _POSIX_C_SOURCE 200809L
+#define _GNU_SOURCE
 #include "parallel_processor.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
+#include <pthread.h>
+#include <unistd.h>
 #include <time.h>
 #include <errno.h>
-#include <unistd.h>
 
 // Create parallel processor
 parallel_processor_t* parallel_processor_create(int worker_count) {

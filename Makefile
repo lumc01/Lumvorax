@@ -57,7 +57,7 @@ $(OBJ_DIR)/crypto/crypto_validator.o: $(SRC_DIR)/crypto/crypto_validator.c | $(O
 	$(CC) $(CFLAGS) -c $< -o $@ -lm
 
 # Targets
-.PHONY: all clean run test install
+.PHONY: all clean run test test-complete
 
 all: $(EXECUTABLE)
 
@@ -67,17 +67,29 @@ clean:
 run: $(EXECUTABLE)
 	./$(EXECUTABLE)
 
-test: $(EXECUTABLE)
+test: $(OBJECTS) # Assuming test executable needs all main objects
 	@echo "Running LUM/VORAX tests..."
+	# This is a placeholder, a proper test executable would be linked here.
+	# For now, we assume main executable has test functionality or will be run.
 	./$(EXECUTABLE)
 	@echo "Tests completed!"
 
+# Test complet de fonctionnalité
+test-complete: $(OBJECTS) $(OBJ_DIR)/tests/test_complete_functionality.o
+	$(CC) $(CFLAGS) -o bin/test_complete_functionality $(OBJECTS) $(OBJ_DIR)/tests/test_complete_functionality.o $(LDFLAGS)
+	./bin/test_complete_functionality
+
+$(OBJ_DIR)/tests/test_complete_functionality.o: src/tests/test_complete_functionality.c
+	@mkdir -p $(OBJ_DIR)/tests
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Install
 install: $(EXECUTABLE)
 	cp $(EXECUTABLE) /usr/local/bin/
 
 # Debug build
 debug: CFLAGS += -DDEBUG -g3
-debug: $(EXECUTABLE)
+debug: clean $(EXECUTABLE)
 
 # Release build
 release: CFLAGS += -DNDEBUG -O3
@@ -91,6 +103,7 @@ help:
 	@echo "  clean    - Clean build files"
 	@echo "  run      - Build and run the demo"
 	@echo "  test     - Build and run tests"
+	@echo "  test-complete - Build and run the complete functionality test"
 	@echo "  debug    - Build with debug symbols"
 	@echo "  release  - Build optimized release version"
 	@echo "  install  - Install to /usr/local/bin"
