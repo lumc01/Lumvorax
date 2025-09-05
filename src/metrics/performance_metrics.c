@@ -1,143 +1,59 @@
 
-#define _POSIX_C_SOURCE 199309L
-#define _GNU_SOURCE
-
 #include "performance_metrics.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include <math.h>
-#include <unistd.h>
-#include <sys/resource.h>
+#include <time.h>
 #include <sys/time.h>
+#include <sys/resource.h>
+#include <unistd.h>
+#include <math.h>
 
-// Create performance metrics context
+// Static variables for system-wide metrics
+static size_t global_memory_usage = 0;
+static double global_cpu_usage = 0.0;
+static struct timeval last_cpu_time = {0, 0};
+static clock_t last_cpu_clock = 0;
+
 performance_metrics_t* performance_metrics_create(void) {
-    performance_metrics_t* ctx = malloc(sizeof(performance_metrics_t));
-    if (!ctx) return NULL;
+    performance_metrics_t* metrics = malloc(sizeof(performance_metrics_t));
+    if (!metrics) return NULL;
     
-    ctx->metric_count = 0;
-    ctx->is_initialized = false;
-    ctx->total_operations = 0;
-    ctx->cpu_usage = 0.0;
-    ctx->memory_usage = 0;
-    ctx->peak_memory = 0;
+    metrics->total_operations = 0;
+    metrics->start_time = time(NULL);
+    metrics->last_update = metrics->start_time;
+    metrics->memory_peak = 0;
+    metrics->cpu_peak = 0.0;
+    metrics->operation_count = 0;
+    metrics->error_count = 0;
     
-    get_current_timespec(&ctx->start_time);
-    
-    // Initialize all metrics as inactive
-    for (size_t i = 0; i < MAX_METRICS_COUNT; i++) {
-        ctx->metrics[i].is_active = false;
+    // Initialize performance counters
+    for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
+        metrics->counters[i].name[0] = '\0';
+        metrics->counters[i].value = 0.0;
+        metrics->counters[i].type = METRIC_COUNTER;
+        metrics->counters[i].is_active = false;
     }
     
-    // Register default system metrics
-    performance_metrics_register(ctx, "system.cpu_usage", METRIC_GAUGE);
-    performance_metrics_register(ctx, "system.memory_usage", METRIC_GAUGE);
-    performance_metrics_register(ctx, "system.operations_total", METRIC_COUNTER);
-    performance_metrics_register(ctx, "lum.creation_time", METRIC_HISTOGRAM);
-    performance_metrics_register(ctx, "vorax.operation_time", METRIC_HISTOGRAM);
-    performance_metrics_register(ctx, "binary.conversion_time", METRIC_HISTOGRAM);
-    
-    ctx->is_initialized = true;
-    return ctx;
+    return metrics;
 }
 
-void performance_metrics_destroy(performance_metrics_t* ctx) {
-    if (ctx) {
-        free(ctx);
+void performance_metrics_destroy(performance_metrics_t* metrics) {
+    if (metrics) {
+        free(metrics);
     }
 }
 
-// Metric registration
-bool performance_metrics_register(performance_metrics_t* ctx, const char* name, metric_type_e type) {
-    if (!ctx || !name || !is_metric_name_valid(name)) return false;
-    
-    if (ctx->metric_count >= MAX_METRICS_COUNT) return false;
-    
-    // Check if metric already exists
-    for (size_t i = 0; i < ctx->metric_count; i++) {
-        if (strcmp(ctx->metrics[i].name, name) == 0) {
-            return false; // Already exists
-        }
-    }
-    
-    performance_metric_t* metric = &ctx->metrics[ctx->metric_count];
-    strncpy(metric->name, name, MAX_METRIC_NAME_LENGTH - 1);
-    metric->name[MAX_METRIC_NAME_LENGTH - 1] = '\0';
-    
-    metric->type = type;
-    metric->value = 0.0;
-    metric->min_value = INFINITY;
-    metric->max_value = -INFINITY;
-    metric->sum_value = 0.0;
-    metric->count = 0;
-    get_current_timespec(&metric->last_updated);
-    metric->is_active = true;
-    
-    ctx->metric_count++;
-    return true;
-}
-
-performance_metric_t* performance_metrics_get(performance_metrics_t* ctx, const char* name) {
-    if (!ctx || !name) return NULL;
-    
-    for (size_t i = 0; i < ctx->metric_count; i++) {
-        if (ctx->metrics[i].is_active && strcmp(ctx->metrics[i].name, name) == 0) {
-            return &ctx->metrics[i];
-        }
-    }
-    
-    return NULL;
-}
-
-// Metric operations
-bool performance_metrics_increment_counter(performance_metrics_t* ctx, const char* name, double value) {
-    performance_metric_t* metric = performance_metrics_get(ctx, name);
-    if (!metric || metric->type != METRIC_COUNTER) return false;
-    
-    metric->value += value;
-    metric->sum_value += value;
-    metric->count++;
-    get_current_timespec(&metric->last_updated);
-    
-    return true;
-}
-
-bool performance_metrics_set_gauge(performance_metrics_t* ctx, const char* name, double value) {
-    performance_metric_t* metric = performance_metrics_get(ctx, name);
-    if (!metric || metric->type != METRIC_GAUGE) return false;
-    
-    metric->value = value;
-    if (value < metric->min_value) metric->min_value = value;
-    if (value > metric->max_value) metric->max_value = value;
-    metric->sum_value += value;
-    metric->count++;
-    get_current_timespec(&metric->last_updated);
-    
-    return true;
-}
-
-bool performance_metrics_record_histogram(performance_metrics_t* ctx, const char* name, double value) {
-    performance_metric_t* metric = performance_metrics_get(ctx, name);
-    if (!metric || metric->type != METRIC_HISTOGRAM) return false;
-    
-    if (value < metric->min_value) metric->min_value = value;
-    if (value > metric->max_value) metric->max_value = value;
-    metric->sum_value += value;
-    metric->count++;
-    metric->value = metric->sum_value / metric->count; // Running average
-    get_current_timespec(&metric->last_updated);
-    
-    return true;
-}
-
-// Timer operations
 operation_timer_t* operation_timer_create(void) {
     operation_timer_t* timer = malloc(sizeof(operation_timer_t));
     if (!timer) return NULL;
     
+    timer->start_time.tv_sec = 0;
+    timer->start_time.tv_nsec = 0;
+    timer->end_time.tv_sec = 0;
+    timer->end_time.tv_nsec = 0;
     timer->is_running = false;
-    timer->elapsed_seconds = 0.0;
+    timer->total_elapsed = 0.0;
     
     return timer;
 }
@@ -149,177 +65,325 @@ void operation_timer_destroy(operation_timer_t* timer) {
 }
 
 bool operation_timer_start(operation_timer_t* timer) {
-    if (!timer || timer->is_running) return false;
+    if (!timer) return false;
     
-    get_current_timespec(&timer->start_time);
+    if (clock_gettime(CLOCK_MONOTONIC, &timer->start_time) != 0) {
+        return false;
+    }
+    
     timer->is_running = true;
-    
     return true;
 }
 
 bool operation_timer_stop(operation_timer_t* timer) {
     if (!timer || !timer->is_running) return false;
     
-    get_current_timespec(&timer->end_time);
+    if (clock_gettime(CLOCK_MONOTONIC, &timer->end_time) != 0) {
+        return false;
+    }
+    
     timer->is_running = false;
     
-    timer->elapsed_seconds = timespec_to_seconds(&timer->end_time) - 
-                            timespec_to_seconds(&timer->start_time);
+    // Calculate elapsed time in seconds
+    double start_sec = timer->start_time.tv_sec + timer->start_time.tv_nsec / 1e9;
+    double end_sec = timer->end_time.tv_sec + timer->end_time.tv_nsec / 1e9;
+    timer->total_elapsed = end_sec - start_sec;
     
     return true;
 }
 
 double operation_timer_get_elapsed(operation_timer_t* timer) {
     if (!timer) return 0.0;
-    
-    if (timer->is_running) {
-        struct timespec current_time;
-        get_current_timespec(&current_time);
-        return timespec_to_seconds(&current_time) - timespec_to_seconds(&timer->start_time);
-    }
-    
-    return timer->elapsed_seconds;
-}
-
-// System metrics
-bool performance_metrics_update_system_stats(performance_metrics_t* ctx) {
-    if (!ctx) return false;
-    
-    // Update CPU usage
-    double cpu = performance_metrics_get_cpu_usage();
-    performance_metrics_set_gauge(ctx, "system.cpu_usage", cpu);
-    ctx->cpu_usage = cpu;
-    
-    // Update memory usage
-    size_t memory = performance_metrics_get_memory_usage();
-    performance_metrics_set_gauge(ctx, "system.memory_usage", (double)memory);
-    ctx->memory_usage = memory;
-    if (memory > ctx->peak_memory) {
-        ctx->peak_memory = memory;
-    }
-    
-    // Update operations counter
-    ctx->total_operations++;
-    performance_metrics_increment_counter(ctx, "system.operations_total", 1.0);
-    
-    return true;
-}
-
-double performance_metrics_get_cpu_usage(void) {
-    struct rusage usage;
-    if (getrusage(RUSAGE_SELF, &usage) == 0) {
-        double user_time = usage.ru_utime.tv_sec + usage.ru_utime.tv_usec / 1000000.0;
-        double sys_time = usage.ru_stime.tv_sec + usage.ru_stime.tv_usec / 1000000.0;
-        return user_time + sys_time;
-    }
-    return 0.0;
+    return timer->total_elapsed;
 }
 
 size_t performance_metrics_get_memory_usage(void) {
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
-        return usage.ru_maxrss * 1024; // Convert KB to bytes
+        // Convert kilobytes to bytes
+        global_memory_usage = usage.ru_maxrss * 1024;
+        return global_memory_usage;
     }
     return 0;
 }
 
-// Reporting
-void performance_metrics_print_summary(performance_metrics_t* ctx) {
-    if (!ctx) return;
+double performance_metrics_get_cpu_usage(void) {
+    struct rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        double user_time = usage.ru_utime.tv_sec + usage.ru_utime.tv_usec / 1e6;
+        double sys_time = usage.ru_stime.tv_sec + usage.ru_stime.tv_usec / 1e6;
+        double total_cpu_time = user_time + sys_time;
+        
+        // Simple CPU usage calculation (not perfectly accurate but functional)
+        global_cpu_usage = total_cpu_time * 100.0 / (time(NULL) - last_cpu_time.tv_sec + 1);
+        if (global_cpu_usage > 100.0) global_cpu_usage = 100.0;
+        
+        gettimeofday(&last_cpu_time, NULL);
+        return global_cpu_usage;
+    }
+    return 0.0;
+}
+
+bool performance_metrics_register(performance_metrics_t* metrics, const char* name, metric_type_e type) {
+    if (!metrics || !name) return false;
+    
+    // Find empty slot
+    for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
+        if (!metrics->counters[i].is_active) {
+            strncpy(metrics->counters[i].name, name, sizeof(metrics->counters[i].name) - 1);
+            metrics->counters[i].name[sizeof(metrics->counters[i].name) - 1] = '\0';
+            metrics->counters[i].type = type;
+            metrics->counters[i].value = 0.0;
+            metrics->counters[i].is_active = true;
+            return true;
+        }
+    }
+    
+    return false; // No empty slots
+}
+
+bool performance_metrics_update_counter(performance_metrics_t* metrics, const char* name, double value) {
+    if (!metrics || !name) return false;
+    
+    for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
+        if (metrics->counters[i].is_active && strcmp(metrics->counters[i].name, name) == 0) {
+            if (metrics->counters[i].type == METRIC_COUNTER) {
+                metrics->counters[i].value += value;
+            } else {
+                metrics->counters[i].value = value;
+            }
+            return true;
+        }
+    }
+    
+    return false; // Counter not found
+}
+
+double performance_metrics_get_counter(performance_metrics_t* metrics, const char* name) {
+    if (!metrics || !name) return 0.0;
+    
+    for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
+        if (metrics->counters[i].is_active && strcmp(metrics->counters[i].name, name) == 0) {
+            return metrics->counters[i].value;
+        }
+    }
+    
+    return 0.0; // Counter not found
+}
+
+void performance_metrics_print_summary(performance_metrics_t* metrics) {
+    if (!metrics) return;
     
     printf("=== Performance Metrics Summary ===\n");
-    printf("Uptime: %.2f seconds\n", 
-           timespec_to_seconds(&ctx->start_time));
-    printf("Total Operations: %lu\n", ctx->total_operations);
-    printf("CPU Usage: %.2f%%\n", ctx->cpu_usage * 100.0);
-    printf("Memory Usage: %zu bytes\n", ctx->memory_usage);
-    printf("Peak Memory: %zu bytes\n", ctx->peak_memory);
-    printf("Active Metrics: %zu\n", ctx->metric_count);
-    printf("===================================\n");
-}
-
-void performance_metrics_print_detailed(performance_metrics_t* ctx) {
-    if (!ctx) return;
+    printf("Total Operations: %zu\n", metrics->total_operations);
+    printf("Start Time: %ld\n", metrics->start_time);
+    printf("Last Update: %ld\n", metrics->last_update);
+    printf("Memory Peak: %zu bytes\n", metrics->memory_peak);
+    printf("CPU Peak: %.2f%%\n", metrics->cpu_peak);
+    printf("Operation Count: %zu\n", metrics->operation_count);
+    printf("Error Count: %zu\n", metrics->error_count);
     
-    performance_metrics_print_summary(ctx);
-    
-    printf("\n=== Detailed Metrics ===\n");
-    for (size_t i = 0; i < ctx->metric_count; i++) {
-        performance_metric_t* metric = &ctx->metrics[i];
-        if (!metric->is_active) continue;
-        
-        const char* type_str = (metric->type == METRIC_COUNTER) ? "COUNTER" :
-                               (metric->type == METRIC_GAUGE) ? "GAUGE" :
-                               (metric->type == METRIC_HISTOGRAM) ? "HISTOGRAM" : "TIMER";
-        
-        printf("%s [%s]: ", metric->name, type_str);
-        printf("value=%.6f, count=%lu", metric->value, metric->count);
-        
-        if (metric->count > 0 && metric->type != METRIC_COUNTER) {
-            printf(", min=%.6f, max=%.6f, avg=%.6f", 
-                   metric->min_value, metric->max_value, 
-                   metric->sum_value / metric->count);
+    printf("\nActive Counters:\n");
+    for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
+        if (metrics->counters[i].is_active) {
+            printf("  %s: %.2f (%s)\n", 
+                   metrics->counters[i].name,
+                   metrics->counters[i].value,
+                   metrics->counters[i].type == METRIC_COUNTER ? "counter" : "gauge");
         }
-        printf("\n");
     }
-    printf("========================\n");
 }
 
-// Benchmarking
-bool performance_metrics_benchmark_operation(performance_metrics_t* ctx, 
-                                            const char* name, 
-                                            void (*operation)(void*), 
-                                            void* data,
-                                            int iterations) {
-    if (!ctx || !name || !operation || iterations <= 0) return false;
+void performance_metrics_update_system_stats(performance_metrics_t* metrics) {
+    if (!metrics) return;
     
-    // Register benchmark metric if not exists
-    char timer_name[MAX_METRIC_NAME_LENGTH];
-    snprintf(timer_name, sizeof(timer_name), "benchmark.%s", name);
-    performance_metrics_register(ctx, timer_name, METRIC_HISTOGRAM);
+    size_t current_memory = performance_metrics_get_memory_usage();
+    double current_cpu = performance_metrics_get_cpu_usage();
+    
+    if (current_memory > metrics->memory_peak) {
+        metrics->memory_peak = current_memory;
+    }
+    
+    if (current_cpu > metrics->cpu_peak) {
+        metrics->cpu_peak = current_cpu;
+    }
+    
+    metrics->last_update = time(NULL);
+}
+
+// Benchmark and profiling functions
+benchmark_result_t* performance_benchmark_function(void (*func)(void), int iterations) {
+    if (!func || iterations <= 0) return NULL;
+    
+    benchmark_result_t* result = malloc(sizeof(benchmark_result_t));
+    if (!result) return NULL;
     
     operation_timer_t* timer = operation_timer_create();
-    if (!timer) return false;
+    if (!timer) {
+        free(result);
+        return NULL;
+    }
+    
+    double total_time = 0.0;
+    double min_time = INFINITY;
+    double max_time = 0.0;
     
     for (int i = 0; i < iterations; i++) {
         operation_timer_start(timer);
-        operation(data);
+        func();
         operation_timer_stop(timer);
         
         double elapsed = operation_timer_get_elapsed(timer);
-        performance_metrics_record_histogram(ctx, timer_name, elapsed);
+        total_time += elapsed;
+        
+        if (elapsed < min_time) min_time = elapsed;
+        if (elapsed > max_time) max_time = elapsed;
     }
+    
+    result->iterations = iterations;
+    result->total_time = total_time;
+    result->average_time = total_time / iterations;
+    result->min_time = min_time;
+    result->max_time = max_time;
+    result->operations_per_second = iterations / total_time;
     
     operation_timer_destroy(timer);
-    return true;
+    return result;
 }
 
-// Utility functions
-double timespec_to_seconds(struct timespec* ts) {
-    if (!ts) return 0.0;
-    return ts->tv_sec + ts->tv_nsec / 1000000000.0;
-}
-
-void get_current_timespec(struct timespec* ts) {
-    if (ts) {
-        clock_gettime(CLOCK_MONOTONIC, ts);
+void benchmark_result_destroy(benchmark_result_t* result) {
+    if (result) {
+        free(result);
     }
 }
 
-bool is_metric_name_valid(const char* name) {
-    if (!name || strlen(name) == 0 || strlen(name) >= MAX_METRIC_NAME_LENGTH) {
-        return false;
-    }
+throughput_calculator_t* throughput_calculator_create(void) {
+    throughput_calculator_t* calc = malloc(sizeof(throughput_calculator_t));
+    if (!calc) return NULL;
     
-    // Check for valid characters (alphanumeric, dots, underscores)
-    for (const char* p = name; *p; p++) {
-        if (!(*p >= 'a' && *p <= 'z') && 
-            !(*p >= 'A' && *p <= 'Z') && 
-            !(*p >= '0' && *p <= '9') && 
-            *p != '.' && *p != '_') {
-            return false;
+    calc->total_operations = 0;
+    gettimeofday(&calc->start_time, NULL);
+    calc->last_update = calc->start_time;
+    calc->current_throughput = 0.0;
+    calc->peak_throughput = 0.0;
+    
+    return calc;
+}
+
+void throughput_calculator_destroy(throughput_calculator_t* calc) {
+    if (calc) {
+        free(calc);
+    }
+}
+
+void throughput_calculator_add_operations(throughput_calculator_t* calc, size_t operations) {
+    if (!calc) return;
+    
+    calc->total_operations += operations;
+    
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    
+    double time_diff = (now.tv_sec - calc->last_update.tv_sec) + 
+                      (now.tv_usec - calc->last_update.tv_usec) / 1e6;
+    
+    if (time_diff > 0.1) { // Update every 100ms
+        calc->current_throughput = operations / time_diff;
+        
+        if (calc->current_throughput > calc->peak_throughput) {
+            calc->peak_throughput = calc->current_throughput;
+        }
+        
+        calc->last_update = now;
+    }
+}
+
+double throughput_calculator_get_current(throughput_calculator_t* calc) {
+    if (!calc) return 0.0;
+    return calc->current_throughput;
+}
+
+double throughput_calculator_get_average(throughput_calculator_t* calc) {
+    if (!calc) return 0.0;
+    
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    
+    double total_time = (now.tv_sec - calc->start_time.tv_sec) + 
+                       (now.tv_usec - calc->start_time.tv_usec) / 1e6;
+    
+    if (total_time <= 0.0) return 0.0;
+    
+    return calc->total_operations / total_time;
+}
+
+double throughput_calculator_get_peak(throughput_calculator_t* calc) {
+    if (!calc) return 0.0;
+    return calc->peak_throughput;
+}
+
+// Memory footprint tracking
+memory_footprint_t* memory_footprint_create(void) {
+    memory_footprint_t* footprint = malloc(sizeof(memory_footprint_t));
+    if (!footprint) return NULL;
+    
+    footprint->heap_usage = 0;
+    footprint->stack_usage = 0;
+    footprint->peak_heap = 0;
+    footprint->peak_stack = 0;
+    footprint->allocation_count = 0;
+    footprint->deallocation_count = 0;
+    
+    return footprint;
+}
+
+void memory_footprint_destroy(memory_footprint_t* footprint) {
+    if (footprint) {
+        free(footprint);
+    }
+}
+
+void memory_footprint_update(memory_footprint_t* footprint) {
+    if (!footprint) return;
+    
+    struct rusage usage;
+    if (getrusage(RUSAGE_SELF, &usage) == 0) {
+        footprint->heap_usage = usage.ru_maxrss * 1024; // Convert KB to bytes
+        
+        if (footprint->heap_usage > footprint->peak_heap) {
+            footprint->peak_heap = footprint->heap_usage;
         }
     }
     
-    return true;
+    // Stack usage estimation (simplified)
+    void* stack_var;
+    static void* initial_stack_ptr = NULL;
+    if (initial_stack_ptr == NULL) {
+        initial_stack_ptr = &stack_var;
+    }
+    
+    footprint->stack_usage = abs((char*)initial_stack_ptr - (char*)&stack_var);
+    if (footprint->stack_usage > footprint->peak_stack) {
+        footprint->peak_stack = footprint->stack_usage;
+    }
+}
+
+size_t memory_footprint_get_heap_usage(memory_footprint_t* footprint) {
+    if (!footprint) return 0;
+    return footprint->heap_usage;
+}
+
+size_t memory_footprint_get_stack_usage(memory_footprint_t* footprint) {
+    if (!footprint) return 0;
+    return footprint->stack_usage;
+}
+
+void memory_footprint_track_allocation(memory_footprint_t* footprint, size_t size) {
+    if (!footprint) return;
+    footprint->allocation_count++;
+}
+
+void memory_footprint_track_deallocation(memory_footprint_t* footprint, size_t size) {
+    if (!footprint) return;
+    footprint->deallocation_count++;
 }
