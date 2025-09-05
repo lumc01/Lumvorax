@@ -51,6 +51,26 @@
 - `serialized_data_t` : Données sérialisées
 - `transaction_t` : Transaction de données
 
+### Types Crypto et Validation
+- `crypto_context_t` : Contexte cryptographique
+- `sha256_context_t` : Contexte SHA-256
+- `test_vector_t` : Vecteur de test crypto
+- `validation_result_t` : Résultat de validation
+- `crypto_operation_e` : Types d'opérations crypto (HASH, SIGN, VERIFY)
+
+### Types Métriques de Performance
+- `performance_counter_t` : Compteur de performance
+- `benchmark_result_t` : Résultat de benchmark
+- `execution_stats_t` : Statistiques d'exécution
+- `memory_footprint_t` : Empreinte mémoire
+- `latency_measurement_t` : Mesure de latence
+
+### Types Persistance de Données
+- `persistence_config_t` : Configuration de persistance
+- `storage_format_e` : Format de stockage (BINARY, JSON, CSV)
+- `data_stream_t` : Flux de données
+- `checkpoint_t` : Point de sauvegarde
+
 ## CONSTANTES ET ENUMS
 
 ### Constantes système
@@ -60,8 +80,22 @@
 - `VORAX_MAX_ZONES` : 256
 - `VORAX_MAX_MEMORIES` : 128
 
+### Constantes Crypto
+- `SHA256_BLOCK_SIZE` : 64
+- `SHA256_DIGEST_SIZE` : 32
+- `MAX_TEST_VECTORS` : 256
+- `CRYPTO_BUFFER_SIZE` : 4096
+
+### Constantes Performance
+- `BENCHMARK_ITERATIONS` : 1000
+- `PERFORMANCE_SAMPLE_SIZE` : 100
+- `METRICS_HISTORY_SIZE` : 1024
+- `PROFILER_MAX_ENTRIES` : 512
+
 ### Types de hachage
 - `HASH_SHA256` : Algorithme SHA-256
+- `HASH_SHA512` : Algorithme SHA-512
+- `HASH_MD5` : Algorithme MD5 (legacy)
 
 ## FONCTIONS PRINCIPALES
 
@@ -86,6 +120,24 @@
 - `metrics_collector_*()` : Collecte métriques
 - `hash_calculator_*()` : Validation crypto
 - `storage_backend_*()` : Persistance données
+
+### Crypto et Validation
+- `crypto_validate_*()` : Validation cryptographique
+- `sha256_*()` : Fonctions SHA-256
+- `test_vector_*()` : Tests vectoriels
+- `crypto_benchmark_*()` : Benchmarks crypto
+
+### Performance et Métriques
+- `performance_*()` : Mesures de performance
+- `benchmark_*()` : Tests de performance
+- `metrics_*()` : Collecte et analyse métriques
+- `profiler_*()` : Profilage système
+
+### Persistance et I/O
+- `persistence_*()` : Sauvegarde/chargement
+- `data_stream_*()` : Gestion flux données
+- `checkpoint_*()` : Points de sauvegarde
+- `export_*()` : Exportation données
 
 ## CONVENTIONS DE NOMMAGE
 
