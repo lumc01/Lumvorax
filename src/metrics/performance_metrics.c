@@ -1,5 +1,4 @@
 
-#define _GNU_SOURCE
 #include "performance_metrics.h"
 #include <stdlib.h>
 #include <string.h>
@@ -188,7 +187,7 @@ void performance_metrics_print_summary(performance_metrics_t* metrics) {
     
     printf("=== Performance Metrics Summary ===\n");
     printf("Total Operations: %zu\n", metrics->total_operations);
-    printf("Start Time: %ld\n", metrics->start_time);
+    printf("Start Time: %ld.%09ld\n", metrics->start_time.tv_sec, metrics->start_time.tv_nsec);
     printf("Last Update: %ld\n", metrics->last_update);
     printf("Memory Peak: %zu bytes\n", metrics->memory_peak);
     printf("CPU Peak: %.2f%%\n", metrics->cpu_peak);
@@ -334,35 +333,7 @@ double throughput_calculator_get_peak(throughput_calculator_t* calc) {
     return calc->peak_throughput;
 }
 
-bool performance_metrics_update_counter(performance_metrics_t* metrics, const char* name, double value) {
-    if (!metrics || !name) return false;
-    
-    for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
-        if (metrics->counters[i].is_active && strcmp(metrics->counters[i].name, name) == 0) {
-            if (metrics->counters[i].type == METRIC_COUNTER) {
-                metrics->counters[i].value += value;
-            } else {
-                metrics->counters[i].value = value;
-            }
-            clock_gettime(CLOCK_MONOTONIC, &metrics->counters[i].last_updated);
-            return true;
-        }
-    }
-    
-    return false; // Counter not found
-}
 
-double performance_metrics_get_counter(performance_metrics_t* metrics, const char* name) {
-    if (!metrics || !name) return 0.0;
-    
-    for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
-        if (metrics->counters[i].is_active && strcmp(metrics->counters[i].name, name) == 0) {
-            return metrics->counters[i].value;
-        }
-    }
-    
-    return 0.0; // Counter not found
-}
 
 // Performance counter management
 performance_counter_t* performance_counter_create(void) {
@@ -412,34 +383,7 @@ double performance_counter_stop(performance_counter_t* counter) {
     return elapsed;
 }
 
-// Benchmark result structure
-typedef struct {
-    int iterations;
-    double total_time;
-    double average_time;
-    double min_time;
-    double max_time;
-    double operations_per_second;
-} benchmark_result_t;
 
-// Throughput calculator structure
-typedef struct {
-    size_t total_operations;
-    struct timeval start_time;
-    struct timeval last_update;
-    double current_throughput;
-    double peak_throughput;
-} throughput_calculator_t;
-
-// Memory footprint structure
-typedef struct {
-    size_t heap_usage;
-    size_t stack_usage;
-    size_t peak_heap;
-    size_t peak_stack;
-    size_t allocation_count;
-    size_t deallocation_count;
-} memory_footprint_t;
 
 // Memory footprint tracking
 memory_footprint_t* memory_footprint_create(void) {
