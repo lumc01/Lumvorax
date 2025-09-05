@@ -1,4 +1,4 @@
-modules = ["c-clang14", "python-3.11"]
+modules = ["c-clang14", "cpp-clang14", "python-3.12"]
 [agent]
 expertMode = true
 
@@ -18,12 +18,18 @@ args = "LUM_VORAX_BUILD"
 name = "LUM_VORAX_BUILD"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "make run"
 
-[workflows.workflow.metadata]
-outputType = "console"
-
 [nix]
 packages = ["openssh"]
+channel = "stable-25_05"
+
+[deployment]
+deploymentTarget = "vm"
+run = ["./bin/lum_vorax"]
+build = ["make", "all"]

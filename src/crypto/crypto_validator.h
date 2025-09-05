@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include <time.h>
 
 #define SHA256_DIGEST_SIZE 32
 #define SHA256_BLOCK_SIZE 64
