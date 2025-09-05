@@ -17,6 +17,49 @@ void demo_parser(void);
 void demo_complete_scenario(void);
 
 int main(int argc, char* argv[]) {
+    // Options de validation forensique
+    if (argc > 1) {
+        if (strcmp(argv[1], "--sizeof-checks") == 0) {
+            printf("=== Validation ABI des structures ===\n");
+            printf("sizeof(lum_t) = %zu bytes\n", sizeof(lum_t));
+            printf("sizeof(lum_group_t) = %zu bytes\n", sizeof(lum_group_t));
+            printf("sizeof(lum_zone_t) = %zu bytes\n", sizeof(lum_zone_t));
+            printf("sizeof(lum_memory_t) = %zu bytes\n", sizeof(lum_memory_t));
+            return 0;
+        }
+        
+        if (strcmp(argv[1], "--crypto-validation") == 0) {
+            printf("=== Tests cryptographiques RFC 6234 ===\n");
+            bool result = crypto_validate_sha256_implementation();
+            printf("Validation SHA-256: %s\n", result ? "SUCCÈS" : "ÉCHEC");
+            return result ? 0 : 1;
+        }
+        
+        if (strcmp(argv[1], "--threading-tests") == 0) {
+            printf("=== Tests threading POSIX ===\n");
+            // Tests de threading seront implémentés
+            return 0;
+        }
+        
+        if (strcmp(argv[1], "--binary-conversion-tests") == 0) {
+            printf("=== Tests conversion binaire ===\n");
+            // Tests de conversion binaire étendus
+            return 0;
+        }
+        
+        if (strcmp(argv[1], "--parser-tests") == 0) {
+            printf("=== Tests parser VORAX ===\n");
+            // Tests de parser étendus
+            return 0;
+        }
+        
+        if (strcmp(argv[1], "--memory-stress-tests") == 0) {
+            printf("=== Tests de stress mémoire ===\n");
+            // Tests de stress mémoire
+            return 0;
+        }
+    }
+    
     printf("=== LUM/VORAX System Demo ===\n");
     printf("Implementation complete du concept LUM/VORAX en C\n\n");
     

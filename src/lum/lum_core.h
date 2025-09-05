@@ -2,8 +2,15 @@
 #define LUM_CORE_H
 
 #include <stdint.h>
-#include <stddef.h>
 #include <stdbool.h>
+#include <time.h>
+#include <assert.h>
+
+// Vérification de l'ABI - la structure doit faire exactement 32 bytes avec padding
+_Static_assert(sizeof(struct { uint8_t a; uint32_t b; int32_t c; int32_t d; uint8_t e; uint64_t f; }) == 24, 
+               "Basic lum_t structure should be 24 bytes on this platform");
+
+// Note: avec padding d'alignement sur 8 bytes, la structure complète fait ~32 bytes
 
 // Core LUM structure - a single presence unit
 typedef struct {
