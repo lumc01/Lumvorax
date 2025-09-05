@@ -168,4 +168,35 @@ void storage_result_set_error(storage_result_t* result, const char* error_messag
 void storage_result_set_success(storage_result_t* result, const char* filename,
                                size_t bytes_processed, uint32_t checksum);
 
+// Simple storage backend for testing
+typedef struct {
+    char database_path[MAX_STORAGE_PATH_LENGTH];
+    persistence_context_t* ctx;
+    bool is_initialized;
+} storage_backend_t;
+
+typedef struct {
+    uint8_t* data;
+    size_t size;
+} serialized_data_t;
+
+typedef struct {
+    uint64_t id;
+    char operation[64];
+    uint64_t timestamp;
+    bool committed;
+} transaction_t;
+
+// Test compatibility functions
+storage_backend_t* storage_backend_create(const char* database_path);
+void storage_backend_destroy(storage_backend_t* backend);
+serialized_data_t* serialize_lum(const lum_t* lum);
+lum_t* deserialize_lum(const serialized_data_t* data);
+void serialized_data_destroy(serialized_data_t* data);
+bool store_lum(storage_backend_t* backend, const char* key, const lum_t* lum);
+lum_t* load_lum(storage_backend_t* backend, const char* key);
+transaction_t* begin_transaction(storage_backend_t* backend);
+bool commit_transaction(transaction_t* transaction);
+bool storage_backend_store_batch(storage_backend_t* backend, void** objects, size_t count);
+
 #endif // DATA_PERSISTENCE_H

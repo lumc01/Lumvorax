@@ -79,26 +79,154 @@ void storage_result_destroy(storage_result_t* result) {
 }
 
 void storage_result_set_error(storage_result_t* result, const char* error_message) {
-    if (!result || !error_message) return;
-    
-    result->success = false;
-    strncpy(result->error_message, error_message, sizeof(result->error_message) - 1);
-    result->error_message[sizeof(result->error_message) - 1] = '\0';
+    if (result && error_message) {
+        result->success = false;
+        strncpy(result->error_message, error_message, sizeof(result->error_message) - 1);
+        result->error_message[sizeof(result->error_message) - 1] = '\0';
+    }
 }
 
 void storage_result_set_success(storage_result_t* result, const char* filename,
                                size_t bytes_processed, uint32_t checksum) {
-    if (!result) return;
-    
-    result->success = true;
-    if (filename) {
-        strncpy(result->filename, filename, sizeof(result->filename) - 1);
-        result->filename[sizeof(result->filename) - 1] = '\0';
+    if (result) {
+        result->success = true;
+        if (filename) {
+            strncpy(result->filename, filename, sizeof(result->filename) - 1);
+            result->filename[sizeof(result->filename) - 1] = '\0';
+        }
+        result->bytes_written = bytes_processed;
+        result->checksum = checksum;
     }
-    result->bytes_written = bytes_processed;
-    result->checksum = checksum;
-    result->error_message[0] = '\0';
 }
+
+// Test compatibility functions implementation
+storage_backend_t* storage_backend_create(const char* database_path) {
+    if (!database_path) return NULL;
+    
+    storage_backend_t* backend = malloc(sizeof(storage_backend_t));
+    if (!backend) return NULL;
+    
+    strncpy(backend->database_path, database_path, MAX_STORAGE_PATH_LENGTH - 1);
+    backend->database_path[MAX_STORAGE_PATH_LENGTH - 1] = '\0';
+    
+    backend->ctx = persistence_context_create(database_path);
+    backend->is_initialized = (backend->ctx != NULL);
+    
+    return backend;
+}
+
+void storage_backend_destroy(storage_backend_t* backend) {
+    if (backend) {
+        if (backend->ctx) {
+            persistence_context_destroy(backend->ctx);
+        }
+        free(backend);
+    }
+}
+
+serialized_data_t* serialize_lum(const lum_t* lum) {
+    if (!lum) return NULL;
+    
+    serialized_data_t* data = malloc(sizeof(serialized_data_t));
+    if (!data) return NULL;
+    
+    data->size = sizeof(lum_t);
+    data->data = malloc(data->size);
+    if (!data->data) {
+        free(data);
+        return NULL;
+    }
+    
+    memcpy(data->data, lum, data->size);
+    return data;
+}
+
+lum_t* deserialize_lum(const serialized_data_t* data) {
+    if (!data || !data->data || data->size < sizeof(lum_t)) return NULL;
+    
+    lum_t* lum = malloc(sizeof(lum_t));
+    if (!lum) return NULL;
+    
+    memcpy(lum, data->data, sizeof(lum_t));
+    return lum;
+}
+
+void serialized_data_destroy(serialized_data_t* data) {
+    if (data) {
+        if (data->data) {
+            free(data->data);
+        }
+        free(data);
+    }
+}
+
+bool store_lum(storage_backend_t* backend, const char* key, const lum_t* lum) {
+    if (!backend || !key || !lum || !backend->is_initialized) return false;
+    
+    storage_result_t* result = persistence_save_lum(backend->ctx, lum, key);
+    bool success = (result && result->success);
+    
+    if (result) {
+        storage_result_destroy(result);
+    }
+    
+    return success;
+}
+
+lum_t* load_lum(storage_backend_t* backend, const char* key) {
+    if (!backend || !key || !backend->is_initialized) return NULL;
+    
+    lum_t* lum = NULL;
+    storage_result_t* result = persistence_load_lum(backend->ctx, key, &lum);
+    
+    if (result) {
+        storage_result_destroy(result);
+    }
+    
+    return lum;
+}
+
+transaction_t* begin_transaction(storage_backend_t* backend) {
+    if (!backend || !backend->is_initialized) return NULL;
+    
+    transaction_t* transaction = malloc(sizeof(transaction_t));
+    if (!transaction) return NULL;
+    
+    transaction->id = next_transaction_id++;
+    strcpy(transaction->operation, "batch_store");
+    transaction->timestamp = (uint64_t)time(NULL);
+    transaction->committed = false;
+    
+    return transaction;
+}
+
+bool commit_transaction(transaction_t* transaction) {
+    if (!transaction) return false;
+    
+    transaction->committed = true;
+    free(transaction);
+    return true;
+}
+
+bool storage_backend_store_batch(storage_backend_t* backend, void** objects, size_t count) {
+    if (!backend || !objects || count == 0 || !backend->is_initialized) return false;
+    
+    // Simple implementation: store each object individually
+    for (size_t i = 0; i < count; i++) {
+        if (!objects[i]) continue;
+        
+        char key[64];
+        snprintf(key, sizeof(key), "batch_item_%zu", i);
+        
+        // Assume objects are lum_t for simplicity
+        if (!store_lum(backend, key, (lum_t*)objects[i])) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
 
 // LUM storage operations
 storage_result_t* persistence_save_lum(persistence_context_t* ctx,
