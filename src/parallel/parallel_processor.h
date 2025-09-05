@@ -3,6 +3,7 @@
 
 #include "../lum/lum_core.h"
 #include "../binary/binary_lum_converter.h"
+#include "../vorax/vorax_operations.h"
 #include <pthread.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -94,5 +95,33 @@ double parallel_processor_get_efficiency(parallel_processor_t* processor);
 // Internal worker functions
 void* worker_thread_main(void* arg);
 bool execute_task(parallel_task_t* task);
+
+// Thread pool compatibility layer
+typedef struct thread_pool thread_pool_t;
+
+// Result structures for high-level operations
+typedef struct {
+    bool success;
+    int processed_count;
+    double processing_time;
+    char error_message[256];
+} parallel_process_result_t;
+
+typedef struct {
+    int thread_count;
+    int total_tasks;
+    int* tasks_per_thread;
+} work_distribution_t;
+
+// Thread pool functions
+thread_pool_t* thread_pool_create(int worker_count);
+void thread_pool_destroy(thread_pool_t* pool);
+bool thread_pool_submit(thread_pool_t* pool, parallel_task_t* task);
+bool thread_pool_wait_all(thread_pool_t* pool);
+
+// High-level processing functions
+parallel_process_result_t parallel_process_lums(lum_t** lums, int count, int threads);
+bool distribute_work(lum_t** lums, int count, int threads, work_distribution_t* dist);
+double parallel_reduce_lums(lum_t** lums, int count, int threads);
 
 #endif // PARALLEL_PROCESSOR_H
