@@ -7,6 +7,12 @@
 #include <time.h>
 #include <sys/time.h>
 
+// Ensure timespec is properly defined
+#ifndef _TIME_H
+#define _GNU_SOURCE
+#include <time.h>
+#endif
+
 #define MAX_METRIC_NAME_LENGTH 64
 #define MAX_METRICS_COUNT 100
 
