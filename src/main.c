@@ -9,6 +9,7 @@
 #include "binary/binary_lum_converter.h"
 #include "logger/lum_logger.h"
 #include "crypto/crypto_validator.h"
+#include "metrics/performance_metrics.h"
 
 // Demo functions
 void demo_basic_lum_operations(void);

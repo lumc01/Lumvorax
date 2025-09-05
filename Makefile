@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -Wall -Wextra -std=c99 -O2 -g
+CFLAGS = -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE
 SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin

@@ -2,19 +2,16 @@
 #ifndef PERFORMANCE_METRICS_H
 #define PERFORMANCE_METRICS_H
 
+#define _GNU_SOURCE
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
 #include <sys/time.h>
-
-// Ensure timespec is properly defined
-#ifndef _TIME_H
-#define _GNU_SOURCE
-#include <time.h>
-#endif
+#include <stdlib.h>
 
 #define MAX_METRIC_NAME_LENGTH 64
 #define MAX_METRICS_COUNT 100
+#define MAX_PERFORMANCE_COUNTERS 50
 
 // Metric types
 typedef enum {
@@ -24,7 +21,7 @@ typedef enum {
     METRIC_TIMER
 } metric_type_e;
 
-// Individual metric
+// Individual performance counter
 typedef struct {
     char name[MAX_METRIC_NAME_LENGTH];
     metric_type_e type;
@@ -35,7 +32,10 @@ typedef struct {
     uint64_t count;
     struct timespec last_updated;
     bool is_active;
-} performance_metric_t;
+} performance_counter_t;
+
+// Individual metric (for compatibility)
+typedef performance_counter_t performance_metric_t;
 
 // Histogram bucket
 typedef struct {
@@ -45,11 +45,16 @@ typedef struct {
 
 // Performance metrics context
 typedef struct {
-    performance_metric_t metrics[MAX_METRICS_COUNT];
+    performance_counter_t counters[MAX_PERFORMANCE_COUNTERS];
     size_t metric_count;
     bool is_initialized;
     struct timespec start_time;
     uint64_t total_operations;
+    time_t last_update;
+    size_t memory_peak;
+    double cpu_peak;
+    size_t operation_count;
+    size_t error_count;
     double cpu_usage;
     size_t memory_usage;
     size_t peak_memory;
@@ -60,6 +65,7 @@ typedef struct {
     struct timespec start_time;
     struct timespec end_time;
     bool is_running;
+    double total_elapsed;
     double elapsed_seconds;
 } operation_timer_t;
 
