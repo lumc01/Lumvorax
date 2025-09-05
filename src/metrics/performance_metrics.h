@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
+#include <sys/time.h>
 
 #define MAX_METRIC_NAME_LENGTH 64
 #define MAX_METRICS_COUNT 100

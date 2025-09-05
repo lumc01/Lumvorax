@@ -3,7 +3,7 @@
 #include <string.h>
 #include <time.h>
 
-static uint32_t global_sequence_counter = 1;
+static uint32_t global_sequence_counter __attribute__((unused)) = 1;
 
 // Global logger instance for system-wide logging
 static lum_logger_t* g_system_logger = NULL;
