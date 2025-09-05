@@ -1,12 +1,13 @@
-
 #ifndef PARALLEL_PROCESSOR_H
 #define PARALLEL_PROCESSOR_H
 
 #include "../lum/lum_core.h"
-#include "../vorax/vorax_operations.h"
-#include <stdint.h>
-#include <stdbool.h>
+#include "../binary/binary_lum_converter.h"
 #include <pthread.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <time.h>
+#include <unistd.h>
 
 #define MAX_WORKER_THREADS 16
 #define DEFAULT_WORKER_COUNT 4

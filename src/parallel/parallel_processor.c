@@ -1,4 +1,5 @@
 
+#define _POSIX_C_SOURCE 200809L
 #include "parallel_processor.h"
 #include <stdlib.h>
 #include <string.h>
@@ -335,4 +336,108 @@ double parallel_processor_get_efficiency(parallel_processor_t* processor) {
     pthread_mutex_unlock(&processor->stats_mutex);
     
     return efficiency;
+}
+
+// Thread pool compatibility functions
+struct thread_pool {
+    parallel_processor_t* processor;
+};
+
+thread_pool_t* thread_pool_create(int worker_count) {
+    thread_pool_t* pool = malloc(sizeof(thread_pool_t));
+    if (!pool) return NULL;
+    
+    pool->processor = parallel_processor_create(worker_count);
+    if (!pool->processor) {
+        free(pool);
+        return NULL;
+    }
+    return pool;
+}
+
+void thread_pool_destroy(thread_pool_t* pool) {
+    if (pool) {
+        parallel_processor_destroy(pool->processor);
+        free(pool);
+    }
+}
+
+bool thread_pool_submit(thread_pool_t* pool, parallel_task_t* task) {
+    if (!pool || !pool->processor) return false;
+    return parallel_processor_submit_task(pool->processor, task);
+}
+
+bool thread_pool_wait_all(thread_pool_t* pool) {
+    if (!pool || !pool->processor) return false;
+    return parallel_processor_wait_for_completion(pool->processor);
+}
+
+// High-level processing functions
+parallel_process_result_t parallel_process_lums(lum_t** lums, int count, int threads) {
+    parallel_process_result_t result = {0};
+    
+    if (!lums || count <= 0) {
+        result.success = false;
+        strcpy(result.error_message, "Invalid input parameters");
+        return result;
+    }
+    
+    parallel_processor_t* processor = parallel_processor_create(threads);
+    if (!processor) {
+        result.success = false;
+        strcpy(result.error_message, "Failed to create processor");
+        return result;
+    }
+    
+    clock_t start_time = clock();
+    
+    // Submit all LUMs as tasks
+    for (int i = 0; i < count; i++) {
+        parallel_task_t* task = parallel_task_create(TASK_LUM_CREATE, lums[i], sizeof(lum_t));
+        if (task) {
+            parallel_processor_submit_task(processor, task);
+        }
+    }
+    
+    // Wait for completion
+    parallel_processor_wait_for_completion(processor);
+    
+    clock_t end_time = clock();
+    result.processing_time = ((double)(end_time - start_time)) / CLOCKS_PER_SEC;
+    result.processed_count = count;
+    result.success = true;
+    
+    parallel_processor_destroy(processor);
+    return result;
+}
+
+bool distribute_work(lum_t** lums, int count, int threads, work_distribution_t* dist) {
+    if (!lums || !dist || count <= 0 || threads <= 0) return false;
+    
+    dist->thread_count = threads;
+    dist->total_tasks = count;
+    dist->tasks_per_thread = malloc(threads * sizeof(int));
+    if (!dist->tasks_per_thread) return false;
+    
+    int base_tasks = count / threads;
+    int extra_tasks = count % threads;
+    
+    for (int i = 0; i < threads; i++) {
+        dist->tasks_per_thread[i] = base_tasks + (i < extra_tasks ? 1 : 0);
+    }
+    
+    return true;
+}
+
+double parallel_reduce_lums(lum_t** lums, int count, int threads) {
+    if (!lums || count <= 0) return 0.0;
+    
+    double sum = 0.0;
+    for (int i = 0; i < count; i++) {
+        if (lums[i]) {
+            sum += lums[i]->presence * (lums[i]->position_x + lums[i]->position_y);
+        }
+    }
+    
+    return sum;
 }
