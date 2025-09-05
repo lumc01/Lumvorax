@@ -6,7 +6,6 @@
 #include <stdio.h>
 #include <time.h>
 #include <errno.h>
-#include <unistd.h>
 
 // Create parallel processor
 parallel_processor_t* parallel_processor_create(int worker_count) {
