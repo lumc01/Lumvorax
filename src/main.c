@@ -2,6 +2,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <pthread.h>
+#include <math.h>
+#include <limits.h>
 
 #include "lum/lum_core.h"
 #include "vorax/vorax_operations.h"
@@ -17,6 +20,22 @@ void demo_vorax_operations(void);
 void demo_binary_conversion(void);
 void demo_parser(void);
 void demo_complete_scenario(void);
+
+// Thread test function
+void* test_thread_function(void* arg) {
+    int thread_id = *(int*)arg;
+    free(arg);
+    
+    // Simulation de travail avec calculs réels
+    double result = 0.0;
+    for (int i = 0; i < 1000; i++) {
+        result += sqrt(i * thread_id + 1);
+    }
+    
+    int* retval = malloc(sizeof(int));
+    *retval = (int)(result / 1000.0); // Moyenne
+    return retval;
+}
 
 int main(int argc, char* argv[]) {
     // Options de validation forensique
@@ -47,25 +66,135 @@ int main(int argc, char* argv[]) {
         
         if (strcmp(argv[1], "--threading-tests") == 0) {
             printf("=== Tests threading POSIX ===\n");
-            // Tests de threading seront implémentés
+            
+            // Test création et synchronisation de threads
+            pthread_t threads[4];
+            int thread_results[4] = {0};
+            
+            for (int i = 0; i < 4; i++) {
+                int* arg = malloc(sizeof(int));
+                *arg = i;
+                if (pthread_create(&threads[i], NULL, test_thread_function, arg) != 0) {
+                    printf("✗ Échec création thread %d\n", i);
+                    return 1;
+                }
+            }
+            
+            // Attendre tous les threads
+            for (int i = 0; i < 4; i++) {
+                void* retval;
+                pthread_join(threads[i], &retval);
+                thread_results[i] = *(int*)retval;
+                free(retval);
+            }
+            
+            printf("✓ Threads POSIX: 4 threads créés et synchronisés\n");
             return 0;
         }
         
         if (strcmp(argv[1], "--binary-conversion-tests") == 0) {
             printf("=== Tests conversion binaire ===\n");
-            // Tests de conversion binaire étendus
+            
+            // Test conversion nombres négatifs et positifs
+            int32_t test_values[] = {0, 1, -1, 42, -42, 255, -255, 1024, -1024, INT32_MAX, INT32_MIN};
+            int num_tests = sizeof(test_values) / sizeof(test_values[0]);
+            
+            for (int i = 0; i < num_tests; i++) {
+                binary_lum_result_t* result = convert_int32_to_lum(test_values[i]);
+                if (!result || !result->success) {
+                    printf("✗ Échec conversion %d\n", test_values[i]);
+                    return 1;
+                }
+                
+                int32_t converted_back = convert_lum_to_int32(result->lum_group);
+                if (converted_back != test_values[i]) {
+                    printf("✗ Échec bidirectionnel %d != %d\n", test_values[i], converted_back);
+                    return 1;
+                }
+                
+                binary_lum_result_destroy(result);
+            }
+            
+            printf("✓ Conversion binaire: %d tests bidirectionnels réussis\n", num_tests);
             return 0;
         }
         
         if (strcmp(argv[1], "--parser-tests") == 0) {
             printf("=== Tests parser VORAX ===\n");
-            // Tests de parser étendus
+            
+            // Test parser avec code complexe
+            const char* complex_code = 
+                "zone A, B, C, D, E;\n"
+                "mem storage1, storage2, temp;\n"
+                "emit A += 10•;\n"
+                "emit B += 5•;\n"
+                "move A -> B, 3•;\n"
+                "split B -> [C, D];\n"
+                "store C -> storage1;\n"
+                "store D -> storage2;\n"
+                "retrieve storage1 -> E;\n"
+                "cycle E, 2;\n";
+            
+            vorax_ast_node_t* ast = vorax_parse(complex_code);
+            if (!ast) {
+                printf("✗ Échec parsing code complexe\n");
+                return 1;
+            }
+            
+            // Compter les nœuds AST
+            if (ast->child_count < 10) {
+                printf("✗ AST incomplet: %zu enfants\n", ast->child_count);
+                return 1;
+            }
+            
+            // Test exécution
+            vorax_execution_context_t* ctx = vorax_execution_context_create();
+            bool exec_result = vorax_execute(ctx, ast);
+            if (!exec_result) {
+                printf("✗ Échec exécution parser\n");
+                return 1;
+            }
+            
+            printf("✓ Parser VORAX: Code complexe analysé et exécuté\n");
+            printf("  Zones créées: %zu\n", ctx->zone_count);
+            printf("  Mémoires créées: %zu\n", ctx->memory_count);
+            
+            vorax_execution_context_destroy(ctx);
+            vorax_ast_destroy(ast);
             return 0;
         }
         
         if (strcmp(argv[1], "--memory-stress-tests") == 0) {
             printf("=== Tests de stress mémoire ===\n");
-            // Tests de stress mémoire
+            
+            // Test allocation massive de LUMs
+            const int NUM_LUMS = 10000;
+            lum_t** lums = malloc(NUM_LUMS * sizeof(lum_t*));
+            
+            for (int i = 0; i < NUM_LUMS; i++) {
+                lums[i] = lum_create(i % 2, i * 0.1f, i * 0.2f, LUM_STRUCTURE_LINEAR);
+                if (!lums[i]) {
+                    printf("✗ Échec allocation LUM %d\n", i);
+                    return 1;
+                }
+            }
+            
+            // Vérification intégrité
+            for (int i = 0; i < NUM_LUMS; i++) {
+                if (lums[i]->presence != (i % 2) || 
+                    fabsf(lums[i]->position_x - i * 0.1f) > 0.001f) {
+                    printf("✗ Corruption données LUM %d\n", i);
+                    return 1;
+                }
+            }
+            
+            // Libération
+            for (int i = 0; i < NUM_LUMS; i++) {
+                lum_destroy(lums[i]);
+            }
+            free(lums);
+            
+            printf("✓ Stress mémoire: %d LUMs allouées/vérifiées/libérées\n", NUM_LUMS);
             return 0;
         }
     }

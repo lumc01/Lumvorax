@@ -58,6 +58,20 @@
 - `validation_result_t` : Résultat de validation
 - `crypto_operation_e` : Types d'opérations crypto (HASH, SIGN, VERIFY)
 
+### Constantes Crypto RFC 6234
+- `K[64]` : Constantes rondes SHA-256
+- `ROTR(x, n)` : Rotation droite macro
+- `CH(x, y, z)` : Fonction Choose
+- `MAJ(x, y, z)` : Fonction Majority
+- `SIGMA0(x)`, `SIGMA1(x)` : Fonctions Sigma majuscules
+- `sigma0(x)`, `sigma1(x)` : Fonctions sigma minuscules
+
+### Types Tests Avancés
+- `thread_test_result_t` : Résultat test thread
+- `binary_test_case_t` : Cas de test binaire
+- `parser_test_scenario_t` : Scénario test parser
+- `memory_stress_config_t` : Configuration stress mémoire
+
 ### Types Métriques de Performance
 - `performance_counter_t` : Compteur de performance
 - `benchmark_result_t` : Résultat de benchmark
@@ -122,10 +136,31 @@
 - `storage_backend_*()` : Persistance données
 
 ### Crypto et Validation
-- `crypto_validate_*()` : Validation cryptographique
-- `sha256_*()` : Fonctions SHA-256
+- `crypto_validate_sha256_implementation()` : Validation complète SHA-256 RFC 6234
+- `sha256_hash()` : Implémentation SHA-256 complète
+- `bytes_to_hex_string()` : Conversion bytes vers hexadécimal
 - `test_vector_*()` : Tests vectoriels
 - `crypto_benchmark_*()` : Benchmarks crypto
+
+### Tests Threading POSIX
+- `test_thread_function()` : Fonction test thread
+- `pthread_create()`, `pthread_join()` : APIs POSIX standard
+- `thread_results[]` : Résultats tests threads
+
+### Tests Conversion Binaire
+- `test_values[]` : Valeurs test conversion
+- `convert_int32_to_lum()` : Conversion entier vers LUM
+- `convert_lum_to_int32()` : Conversion LUM vers entier
+
+### Tests Parser VORAX
+- `complex_code` : Code VORAX test complexe
+- `vorax_parse()` : Parser principal
+- `vorax_execute()` : Exécuteur AST
+
+### Tests Stress Mémoire
+- `NUM_LUMS` : Nombre LUMs test stress
+- `lums[]` : Tableau LUMs test
+- `fabsf()` : Fonction valeur absolue flottante
 
 ### Performance et Métriques
 - `performance_*()` : Mesures de performance
