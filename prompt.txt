@@ -28,6 +28,16 @@ Aucune falsification ni approximation ne sera acceptée.
 
 Si les résultats ne sont pas authentiques, cela doit être explicitement signalé.
 
+⚠️ RÈGLE CRITIQUE DE TRAÇABILITÉ DES LOGS
+
+JAMAIS écraser les fichiers de logs existants. Chaque exécution DOIT créer de nouveaux fichiers horodatés pour maintenir la traçabilité complète du développement.
+
+Format obligatoire : nom_fichier_YYYYMMDD_HHMMSS.extension
+
+Exemples : execution_20250906_203045.log, test_results_20250906_203102.log
+
+Cette traçabilité est ESSENTIELLE pour l'audit forensique et la validation scientifique.
+
 Le rapport final doit comporter :
 
 Environ 2000 lignes, test par test, module par module ;
