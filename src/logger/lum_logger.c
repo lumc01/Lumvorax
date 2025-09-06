@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdarg.h>
 
 static uint32_t global_sequence_counter __attribute__((unused)) = 1;
 
@@ -431,4 +432,18 @@ void lum_log_analysis_destroy(lum_log_analysis_t* analysis) {
     if (analysis) {
         free(analysis);
     }
+}
+
+// Implémentation de la fonction lum_log principale
+void lum_log(lum_log_level_e level, const char* format, ...) {
+    lum_logger_t* logger = lum_get_global_logger();
+    if (!logger || !format || level < logger->min_level) return;
+    
+    char message[512];
+    va_list args;
+    va_start(args, format);
+    vsnprintf(message, sizeof(message), format, args);
+    va_end(args);
+    
+    lum_log_message(logger, level, message);
 }

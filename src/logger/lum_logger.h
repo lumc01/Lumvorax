@@ -178,6 +178,9 @@ void lum_log_monitor_stop(lum_log_monitor_t* monitor);
 
 void lum_log_flush(void);
 
+// Fonction lum_log principale pour compatibilité
+void lum_log(lum_log_level_e level, const char* format, ...);
+
 #endif // DISABLE_LOGGING
 
 #endif // LUM_LOGGER_H

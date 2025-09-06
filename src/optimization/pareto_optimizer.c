@@ -19,7 +19,8 @@ pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
     pareto_optimizer_t* optimizer = malloc(sizeof(pareto_optimizer_t));
     if (!optimizer) return NULL;
     
-    optimizer->point_capacity = 1000;
+    // Utilisation du paramètre config pour la capacité initiale
+    optimizer->point_capacity = config ? config->max_points : 1000;
     optimizer->points = malloc(sizeof(pareto_point_t) * optimizer->point_capacity);
     if (!optimizer->points) {
         free(optimizer);
@@ -182,8 +183,11 @@ vorax_result_t* pareto_optimize_split_operation(lum_group_t* group, size_t parts
     
     pareto_metrics_t baseline_metrics = pareto_evaluate_metrics(group, "baseline_split");
     
-    // Optimisation du nombre de parts selon les métriques Pareto
+    // Optimisation du nombre de parts selon les métriques Pareto baseline
     size_t optimal_parts = parts;
+    if (baseline_metrics.efficiency_ratio < 100.0) {
+        optimal_parts = parts + 1; // Augmenter le parallélisme si efficacité faible
+    }
     if (group->count > 1000 && parts < 4) {
         optimal_parts = 4; // Parallélisation optimale pour gros groupes
     }

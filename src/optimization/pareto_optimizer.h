@@ -1,4 +1,3 @@
-
 #ifndef PARETO_OPTIMIZER_H
 #define PARETO_OPTIMIZER_H
 
@@ -33,14 +32,13 @@ typedef struct {
     char vorax_optimization_script[2048]; // Script VORAX pour optimisations
 } pareto_optimizer_t;
 
-// Configuration d'optimisation
+// Configuration pour optimisations Pareto
 typedef struct {
     bool enable_simd_optimization;
     bool enable_memory_pooling;
     bool enable_parallel_processing;
-    bool enable_crypto_acceleration;
-    bool enable_logging_optimization;
-    double target_efficiency_threshold;
+    size_t max_optimization_layers;
+    size_t max_points;  // Capacité maximale de points Pareto
 } pareto_config_t;
 
 // Fonctions principales

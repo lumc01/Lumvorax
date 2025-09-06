@@ -2,12 +2,12 @@
 #include "performance_metrics.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/resource.h>
 #include <unistd.h>
 #include <math.h>
+#include <stdint.h>
 
 // Static variables for system-wide metrics
 static size_t global_memory_usage = 0;
