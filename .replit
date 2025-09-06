@@ -26,7 +26,7 @@ args = "./bin/lum_vorax"
 outputType = "console"
 
 [nix]
-packages = ["openssh"]
+packages = ["openssh", "file"]
 channel = "stable-25_05"
 
 [deployment]
