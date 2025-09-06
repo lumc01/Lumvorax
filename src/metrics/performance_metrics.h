@@ -2,7 +2,7 @@
 #ifndef PERFORMANCE_METRICS_H
 #define PERFORMANCE_METRICS_H
 
-#define _GNU_SOURCE
+// _GNU_SOURCE is already defined in Makefile
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>

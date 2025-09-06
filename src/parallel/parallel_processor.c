@@ -1,5 +1,5 @@
 #define _POSIX_C_SOURCE 200809L
-#define _GNU_SOURCE
+// _GNU_SOURCE is already defined in Makefile
 #include "parallel_processor.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -432,6 +432,8 @@ bool distribute_work(lum_t** lums, int count, int threads, work_distribution_t* 
 
 double parallel_reduce_lums(lum_t** lums, int count, int threads) {
     if (!lums || count <= 0) return 0.0;
+    
+    (void)threads; // Parameter reserved for future parallel implementation
 
     double sum = 0.0;
     for (int i = 0; i < count; i++) {

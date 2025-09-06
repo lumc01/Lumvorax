@@ -78,7 +78,9 @@ void* memory_pool_alloc(memory_pool_t* pool, size_t size) {
 
 bool memory_pool_free(memory_pool_t* pool, void* ptr, size_t size) {
     if (!pool || !ptr) return false;
-
+    
+    (void)size; // Parameter used for future free list management
+    
     // Simple implementation - mark as available for defragmentation
     // In a real implementation, this would maintain a free list
     return true;

@@ -7,29 +7,29 @@ LOG_DIR = logs
 
 # Source files
 SOURCES = $(SRC_DIR)/main.c \
-          $(SRC_DIR)/lum/lum_core.c \
-          $(SRC_DIR)/vorax/vorax_operations.c \
-          $(SRC_DIR)/parser/vorax_parser.c \
-          $(SRC_DIR)/binary/binary_lum_converter.c \
-          $(SRC_DIR)/logger/lum_logger.c \
-          $(SRC_DIR)/optimization/memory_optimizer.c \
-          $(SRC_DIR)/parallel/parallel_processor.c \
-          $(SRC_DIR)/metrics/performance_metrics.c \
-          $(SRC_DIR)/crypto/crypto_validator.c \
-          $(SRC_DIR)/persistence/data_persistence.c
+	  $(SRC_DIR)/lum/lum_core.c \
+	  $(SRC_DIR)/vorax/vorax_operations.c \
+	  $(SRC_DIR)/parser/vorax_parser.c \
+	  $(SRC_DIR)/binary/binary_lum_converter.c \
+	  $(SRC_DIR)/logger/lum_logger.c \
+	  $(SRC_DIR)/optimization/memory_optimizer.c \
+	  $(SRC_DIR)/parallel/parallel_processor.c \
+	  $(SRC_DIR)/metrics/performance_metrics.c \
+	  $(SRC_DIR)/crypto/crypto_validator.c \
+	  $(SRC_DIR)/persistence/data_persistence.c
 
 # Object files
 OBJECTS = $(OBJ_DIR)/main.o \
-          $(OBJ_DIR)/lum/lum_core.o \
-          $(OBJ_DIR)/vorax/vorax_operations.o \
-          $(OBJ_DIR)/parser/vorax_parser.o \
-          $(OBJ_DIR)/binary/binary_lum_converter.o \
-          $(OBJ_DIR)/logger/lum_logger.o \
-          $(OBJ_DIR)/optimization/memory_optimizer.o \
-          $(OBJ_DIR)/parallel/parallel_processor.o \
-          $(OBJ_DIR)/metrics/performance_metrics.o \
-          $(OBJ_DIR)/crypto/crypto_validator.o \
-          $(OBJ_DIR)/persistence/data_persistence.o
+	  $(OBJ_DIR)/lum/lum_core.o \
+	  $(OBJ_DIR)/vorax/vorax_operations.o \
+	  $(OBJ_DIR)/parser/vorax_parser.o \
+	  $(OBJ_DIR)/binary/binary_lum_converter.o \
+	  $(OBJ_DIR)/logger/lum_logger.o \
+	  $(OBJ_DIR)/optimization/memory_optimizer.o \
+	  $(OBJ_DIR)/parallel/parallel_processor.o \
+	  $(OBJ_DIR)/metrics/performance_metrics.o \
+	  $(OBJ_DIR)/crypto/crypto_validator.o \
+	  $(OBJ_DIR)/persistence/data_persistence.o
 
 # Executable
 EXECUTABLE = $(BIN_DIR)/lum_vorax
@@ -54,7 +54,7 @@ $(OBJ_DIR)/parallel/parallel_processor.o: $(SRC_DIR)/parallel/parallel_processor
 	$(CC) $(CFLAGS) -c $< -o $@ -pthread
 
 $(OBJ_DIR)/crypto/crypto_validator.o: $(SRC_DIR)/crypto/crypto_validator.c | $(OBJ_DIR)
-	$(CC) $(CFLAGS) -c $< -o $@ -lm
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Targets
 .PHONY: all clean run test test-complete

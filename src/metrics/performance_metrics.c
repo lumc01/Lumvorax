@@ -1,5 +1,5 @@
 
-#define _GNU_SOURCE
+// _GNU_SOURCE is already defined in Makefile
 #include "performance_metrics.h"
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +14,7 @@
 static size_t global_memory_usage = 0;
 static double global_cpu_usage = 0.0;
 static struct timeval last_cpu_time = {0, 0};
-static clock_t last_cpu_clock = 0;
+// Removed unused static variable last_cpu_clock
 
 performance_metrics_t* performance_metrics_create(void) {
     performance_metrics_t* metrics = malloc(sizeof(performance_metrics_t));
@@ -436,7 +436,7 @@ void memory_footprint_update(memory_footprint_t* footprint) {
         initial_stack_ptr = &stack_var;
     }
     
-    footprint->stack_usage = abs((char*)initial_stack_ptr - (char*)&stack_var);
+    footprint->stack_usage = labs((char*)initial_stack_ptr - (char*)&stack_var);
     if (footprint->stack_usage > footprint->peak_stack) {
         footprint->peak_stack = footprint->stack_usage;
     }
@@ -454,10 +454,12 @@ size_t memory_footprint_get_stack_usage(memory_footprint_t* footprint) {
 
 void memory_footprint_track_allocation(memory_footprint_t* footprint, size_t size) {
     if (!footprint) return;
+    (void)size; // Parameter used for future allocation tracking
     footprint->allocation_count++;
 }
 
 void memory_footprint_track_deallocation(memory_footprint_t* footprint, size_t size) {
     if (!footprint) return;
+    (void)size; // Parameter used for future deallocation tracking
     footprint->deallocation_count++;
 }
