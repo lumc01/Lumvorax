@@ -69,6 +69,25 @@ typedef struct {
     double elapsed_seconds;
 } operation_timer_t;
 
+// Benchmark result structure
+typedef struct {
+    int iterations;
+    double total_time;
+    double average_time;
+    double min_time;
+    double max_time;
+    double operations_per_second;
+} benchmark_result_t;
+
+// Throughput calculator structure
+typedef struct {
+    size_t total_operations;
+    struct timeval start_time;
+    struct timeval last_update;
+    double current_throughput;
+    double peak_throughput;
+} throughput_calculator_t;
+
 // Function declarations
 performance_metrics_t* performance_metrics_create(void);
 void performance_metrics_destroy(performance_metrics_t* metrics);
@@ -95,7 +114,7 @@ bool performance_metrics_start_timer(performance_metrics_t* ctx, const char* nam
 bool performance_metrics_stop_timer(performance_metrics_t* ctx, const char* name);
 
 // System metrics
-bool performance_metrics_update_system_stats(performance_metrics_t* ctx);
+void performance_metrics_update_system_stats(performance_metrics_t* ctx);
 double performance_metrics_get_cpu_usage(void);
 size_t performance_metrics_get_memory_usage(void);
 
@@ -116,6 +135,18 @@ bool performance_metrics_benchmark_operation(performance_metrics_t* ctx,
                                            void (*operation)(void*), 
                                            void* data,
                                            int iterations);
+
+// Benchmarking functions
+benchmark_result_t* performance_benchmark_function(void (*func)(void), int iterations);
+void benchmark_result_destroy(benchmark_result_t* result);
+
+// Throughput calculator functions
+throughput_calculator_t* throughput_calculator_create(void);
+void throughput_calculator_destroy(throughput_calculator_t* calc);
+void throughput_calculator_add_operations(throughput_calculator_t* calc, size_t operations);
+double throughput_calculator_get_current(throughput_calculator_t* calc);
+double throughput_calculator_get_average(throughput_calculator_t* calc);
+double throughput_calculator_get_peak(throughput_calculator_t* calc);
 
 // Utility functions
 double timespec_to_seconds(struct timespec* ts);

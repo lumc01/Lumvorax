@@ -1,6 +1,7 @@
 
 #include "crypto_validator.h"
 #include "sha256_test_vectors.h"
+#include "../lum/lum_core.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>

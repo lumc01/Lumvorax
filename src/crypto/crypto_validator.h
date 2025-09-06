@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <time.h>
+#include "../lum/lum_core.h"
 
 #define SHA256_DIGEST_SIZE 32
 #define SHA256_BLOCK_SIZE 64
@@ -14,9 +15,9 @@
 // SHA-256 context structure
 typedef struct {
     uint32_t state[8];
-    uint64_t bitlen;
+    uint64_t count;
     uint8_t buffer[SHA256_BLOCK_SIZE];
-    size_t buflen;
+    size_t buffer_length;
 } sha256_context_t;
 
 // Validation result structure
@@ -53,6 +54,7 @@ void sha256_init(sha256_context_t* ctx);
 void sha256_update(sha256_context_t* ctx, const uint8_t* data, size_t len);
 void sha256_final(sha256_context_t* ctx, uint8_t* digest);
 void sha256_hash(const uint8_t* data, size_t len, uint8_t* digest);
+void sha256_process_block(sha256_context_t* ctx, const uint8_t* block);
 
 // Hash utilities
 void bytes_to_hex_string(const uint8_t* bytes, size_t len, char* hex_string);
@@ -60,12 +62,35 @@ bool hex_string_to_bytes(const char* hex_string, uint8_t* bytes, size_t max_len)
 bool compute_file_hash(const char* filename, char* hash_string);
 bool compute_data_hash(const void* data, size_t size, char* hash_string);
 
+// Additional crypto types and enums
+typedef enum {
+    CRYPTO_ALGO_SHA256
+} crypto_algorithm_e;
+
+typedef struct {
+    crypto_algorithm_e algorithm;
+    bool is_initialized;
+    size_t total_operations;
+    time_t last_operation_time;
+} hash_calculator_t;
+
+typedef struct {
+    uint8_t signature_data[64];
+    size_t signature_length;
+    time_t timestamp;
+    bool is_valid;
+} signature_result_t;
+
+// LUM compatibility constant
+#define LUM_STRUCTURE_MAX 4
+
 // Validation functions
 crypto_validation_result_t* crypto_validate_data(const void* data, size_t size, 
                                                 const char* expected_hash);
 crypto_validation_result_t* crypto_validate_file(const char* filename, 
                                                  const char* expected_hash);
 void crypto_validation_result_destroy(crypto_validation_result_t* result);
+bool crypto_validate_sha256_implementation(void);
 
 // Integrity database management
 integrity_database_t* integrity_database_create(const char* database_path);
@@ -109,7 +134,20 @@ bool custody_chain_add_record(custody_chain_t* chain, const char* operation,
 bool custody_chain_verify(custody_chain_t* chain);
 bool custody_chain_export(custody_chain_t* chain, const char* filename);
 
+// Hash calculator functions
+hash_calculator_t* hash_calculator_create(void);
+void hash_calculator_destroy(hash_calculator_t* calc);
+bool compute_data_hash(const void* data, size_t size, char* hash_string);
+bool verify_data_integrity(const void* data, size_t data_size, const char* expected_hash);
+bool validate_lum_integrity(const lum_t* lum);
+
+// Digital signature functions
+signature_result_t* generate_digital_signature(const void* data, size_t data_size);
+bool verify_digital_signature(const void* data, size_t data_size, const signature_result_t* signature);
+void signature_result_destroy(signature_result_t* result);
+
 // Internal helper functions
+int hex_char_to_int(char c);
 uint32_t rotr(uint32_t n, uint32_t x);
 uint32_t choose(uint32_t e, uint32_t f, uint32_t g);
 uint32_t majority(uint32_t a, uint32_t b, uint32_t c);
