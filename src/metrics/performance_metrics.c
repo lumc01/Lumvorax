@@ -386,18 +386,18 @@ double performance_counter_stop(performance_counter_t* counter) {
 }
 
 // Memory footprint structure étendue (conforme STANDARD_NAMES.md)
-typedef struct memory_footprint_impl_t {
+typedef struct memory_footprint_t {
     size_t heap_usage;
     size_t stack_usage;
     size_t peak_heap;
     size_t peak_stack;
     size_t allocation_count;
     size_t deallocation_count;
-} memory_footprint_impl_t;
+} memory_footprint_t;
 
 // Memory footprint tracking
-memory_footprint_impl_t* memory_footprint_create(void) {
-    memory_footprint_impl_t* footprint = malloc(sizeof(memory_footprint_impl_t));
+memory_footprint_t* memory_footprint_create(void) {
+    memory_footprint_t* footprint = malloc(sizeof(memory_footprint_t));
     if (!footprint) return NULL;
 
     footprint->heap_usage = 0;
@@ -410,54 +410,43 @@ memory_footprint_impl_t* memory_footprint_create(void) {
     return footprint;
 }
 
-void memory_footprint_destroy(memory_footprint_impl_t* footprint) {
+void memory_footprint_destroy(memory_footprint_t* footprint) {
     if (footprint) {
         free(footprint);
     }
 }
 
-void memory_footprint_update(memory_footprint_impl_t* footprint) {
+void memory_footprint_update(memory_footprint_t* footprint) {
     if (!footprint) return;
 
-    struct rusage usage;
-    if (getrusage(RUSAGE_SELF, &usage) == 0) {
-        footprint->heap_usage = usage.ru_maxrss * 1024; // Convert KB to bytes
+    footprint->heap_usage = performance_metrics_get_memory_usage();
 
-        if (footprint->heap_usage > footprint->peak_heap) {
-            footprint->peak_heap = footprint->heap_usage;
-        }
-    }
+    // Estimation simple du stack usage
+    void* stack_ptr = &footprint;
+    footprint->stack_usage = (size_t)((char*)&stack_ptr - (char*)0) % 8192;
 
-    // Stack usage estimation (simplified)
-    void* stack_var;
-    static void* initial_stack_ptr = NULL;
-    if (initial_stack_ptr == NULL) {
-        initial_stack_ptr = &stack_var;
-    }
-
-    footprint->stack_usage = labs((char*)initial_stack_ptr - (char*)&stack_var);
     if (footprint->stack_usage > footprint->peak_stack) {
         footprint->peak_stack = footprint->stack_usage;
     }
 }
 
-size_t memory_footprint_get_heap_usage(memory_footprint_impl_t* footprint) {
+size_t memory_footprint_get_heap_usage(memory_footprint_t* footprint) {
     if (!footprint) return 0;
     return footprint->heap_usage;
 }
 
-size_t memory_footprint_get_stack_usage(memory_footprint_impl_t* footprint) {
+size_t memory_footprint_get_stack_usage(memory_footprint_t* footprint) {
     if (!footprint) return 0;
     return footprint->stack_usage;
 }
 
-void memory_footprint_track_allocation(memory_footprint_impl_t* footprint, size_t size) {
+void memory_footprint_track_allocation(memory_footprint_t* footprint, size_t size) {
     if (!footprint) return;
     (void)size; // Parameter used for future allocation tracking
     footprint->allocation_count++;
 }
 
-void memory_footprint_track_deallocation(memory_footprint_impl_t* footprint, size_t size) {
+void memory_footprint_track_deallocation(memory_footprint_t* footprint, size_t size) {
     if (!footprint) return;
     (void)size; // Parameter used for future deallocation tracking
     footprint->deallocation_count++;

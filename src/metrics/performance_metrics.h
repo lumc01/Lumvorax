@@ -154,7 +154,7 @@ double throughput_calculator_get_peak(throughput_calculator_t* calc);
 typedef struct {
     struct timespec start_time;
     bool is_running;
-} performance_counter_t;
+} test_performance_counter_t;
 
 // Memory footprint structure for tests (conforme STANDARD_NAMES.md)
 typedef struct {
@@ -162,10 +162,10 @@ typedef struct {
     size_t stack_usage;
 } memory_footprint_t;
 
-performance_counter_t* performance_counter_create(void);
-void performance_counter_destroy(performance_counter_t* counter);
-void performance_counter_start(performance_counter_t* counter);
-double performance_counter_stop(performance_counter_t* counter);
+test_performance_counter_t* performance_counter_create(void);
+void performance_counter_destroy(test_performance_counter_t* counter);
+void performance_counter_start(test_performance_counter_t* counter);
+double performance_counter_stop(test_performance_counter_t* counter);
 
 memory_footprint_t* memory_footprint_create(void);
 void memory_footprint_destroy(memory_footprint_t* footprint);
