@@ -258,7 +258,7 @@ lum_group_t* apply_parallel_optimization(lum_group_t* group, optimization_layer_
         for (size_t i = start; i < end; i++) {
             lum_t optimized_lum = group->lums[i];
             // Optimisation parallèle: distribution de charge
-            optimized_lum.structure_type = (lum_structure_e)((optimized_lum.structure_type + thread) % 4);
+            optimized_lum.structure_type = (lum_structure_type_e)((optimized_lum.structure_type + thread) % 4);
             lum_group_add(optimized, &optimized_lum);
         }
     }

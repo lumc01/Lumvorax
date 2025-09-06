@@ -1,2 +1,0 @@
-Début benchmarks sans logs: Sat Sep  6 10:44:08 PM UTC 2025
-Fin benchmarks sans logs: Sat Sep  6 10:44:09 PM UTC 2025

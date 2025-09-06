@@ -1,8 +1,0 @@
-# ANALYSE COMPARATIVE IMPACT DES LOGS
-==================================================
-
-## Programme Principal
-------------------------------
-
-## Tests Pareto
-------------------------------
