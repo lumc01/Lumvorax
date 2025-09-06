@@ -4,6 +4,9 @@
 
 2025-01-06 15:26 - memory_optimizer_t + Optimiseur de mémoire avec pools dédiés pour LUM, groupes et zones
 2025-01-07 15:30 - performance_metrics_validator_t + Validateur de cohérence des métriques de performance réalistes
+2025-01-07 16:15 - bytes_to_hex_string + Fonction de conversion bytes vers chaîne hexadécimale
+2025-01-07 16:16 - memory_footprint_impl_t + Structure interne d'implémentation pour empreinte mémoire étendue
+2025-01-07 16:17 - memory_footprint_update + Fonction de mise à jour des métriques mémoire système
 
 ## STRUCTURES DE DONNÉES
 
@@ -128,6 +131,7 @@
 ### Crypto et Validation
 - `crypto_validate_*()` : Validation cryptographique
 - `sha256_*()` : Fonctions SHA-256
+- `bytes_to_hex_string()` : Conversion bytes vers hexadécimal
 - `test_vector_*()` : Tests vectoriels
 - `crypto_benchmark_*()` : Benchmarks crypto
 
@@ -135,6 +139,7 @@
 - `performance_*()` : Mesures de performance
 - `benchmark_*()` : Tests de performance
 - `metrics_*()` : Collecte et analyse métriques
+- `memory_footprint_update()` : Mise à jour métriques mémoire
 - `profiler_*()` : Profilage système
 
 ### Persistance et I/O

@@ -1,4 +1,3 @@
-
 // _GNU_SOURCE is already defined in Makefile
 #include "performance_metrics.h"
 #include <stdlib.h>
@@ -19,7 +18,7 @@ static struct timeval last_cpu_time = {0, 0};
 performance_metrics_t* performance_metrics_create(void) {
     performance_metrics_t* metrics = malloc(sizeof(performance_metrics_t));
     if (!metrics) return NULL;
-    
+
     metrics->total_operations = 0;
     clock_gettime(CLOCK_MONOTONIC, &metrics->start_time);
     metrics->last_update = time(NULL);
@@ -32,7 +31,7 @@ performance_metrics_t* performance_metrics_create(void) {
     metrics->cpu_usage = 0.0;
     metrics->memory_usage = 0;
     metrics->peak_memory = 0;
-    
+
     // Initialize performance counters
     for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
         metrics->counters[i].name[0] = '\0';
@@ -45,7 +44,7 @@ performance_metrics_t* performance_metrics_create(void) {
         metrics->counters[i].count = 0;
         clock_gettime(CLOCK_MONOTONIC, &metrics->counters[i].last_updated);
     }
-    
+
     return metrics;
 }
 
@@ -58,7 +57,7 @@ void performance_metrics_destroy(performance_metrics_t* metrics) {
 operation_timer_t* operation_timer_create(void) {
     operation_timer_t* timer = malloc(sizeof(operation_timer_t));
     if (!timer) return NULL;
-    
+
     timer->start_time.tv_sec = 0;
     timer->start_time.tv_nsec = 0;
     timer->end_time.tv_sec = 0;
@@ -66,7 +65,7 @@ operation_timer_t* operation_timer_create(void) {
     timer->is_running = false;
     timer->total_elapsed = 0.0;
     timer->elapsed_seconds = 0.0;
-    
+
     return timer;
 }
 
@@ -78,29 +77,29 @@ void operation_timer_destroy(operation_timer_t* timer) {
 
 bool operation_timer_start(operation_timer_t* timer) {
     if (!timer) return false;
-    
+
     if (clock_gettime(CLOCK_MONOTONIC, &timer->start_time) != 0) {
         return false;
     }
-    
+
     timer->is_running = true;
     return true;
 }
 
 bool operation_timer_stop(operation_timer_t* timer) {
     if (!timer || !timer->is_running) return false;
-    
+
     if (clock_gettime(CLOCK_MONOTONIC, &timer->end_time) != 0) {
         return false;
     }
-    
+
     timer->is_running = false;
-    
+
     // Calculate elapsed time in seconds
     double start_sec = timer->start_time.tv_sec + timer->start_time.tv_nsec / 1e9;
     double end_sec = timer->end_time.tv_sec + timer->end_time.tv_nsec / 1e9;
     timer->total_elapsed = end_sec - start_sec;
-    
+
     return true;
 }
 
@@ -125,11 +124,11 @@ double performance_metrics_get_cpu_usage(void) {
         double user_time = usage.ru_utime.tv_sec + usage.ru_utime.tv_usec / 1e6;
         double sys_time = usage.ru_stime.tv_sec + usage.ru_stime.tv_usec / 1e6;
         double total_cpu_time = user_time + sys_time;
-        
+
         // Simple CPU usage calculation (not perfectly accurate but functional)
         global_cpu_usage = total_cpu_time * 100.0 / (time(NULL) - last_cpu_time.tv_sec + 1);
         if (global_cpu_usage > 100.0) global_cpu_usage = 100.0;
-        
+
         gettimeofday(&last_cpu_time, NULL);
         return global_cpu_usage;
     }
@@ -138,7 +137,7 @@ double performance_metrics_get_cpu_usage(void) {
 
 bool performance_metrics_register(performance_metrics_t* metrics, const char* name, metric_type_e type) {
     if (!metrics || !name) return false;
-    
+
     // Find empty slot
     for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
         if (!metrics->counters[i].is_active) {
@@ -150,13 +149,13 @@ bool performance_metrics_register(performance_metrics_t* metrics, const char* na
             return true;
         }
     }
-    
+
     return false; // No empty slots
 }
 
 bool performance_metrics_update_counter(performance_metrics_t* metrics, const char* name, double value) {
     if (!metrics || !name) return false;
-    
+
     for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
         if (metrics->counters[i].is_active && strcmp(metrics->counters[i].name, name) == 0) {
             if (metrics->counters[i].type == METRIC_COUNTER) {
@@ -167,25 +166,25 @@ bool performance_metrics_update_counter(performance_metrics_t* metrics, const ch
             return true;
         }
     }
-    
+
     return false; // Counter not found
 }
 
 double performance_metrics_get_counter(performance_metrics_t* metrics, const char* name) {
     if (!metrics || !name) return 0.0;
-    
+
     for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
         if (metrics->counters[i].is_active && strcmp(metrics->counters[i].name, name) == 0) {
             return metrics->counters[i].value;
         }
     }
-    
+
     return 0.0; // Counter not found
 }
 
 void performance_metrics_print_summary(performance_metrics_t* metrics) {
     if (!metrics) return;
-    
+
     printf("=== Performance Metrics Summary ===\n");
     printf("Total Operations: %zu\n", metrics->total_operations);
     printf("Start Time: %ld.%ld\n", metrics->start_time.tv_sec, metrics->start_time.tv_nsec);
@@ -194,7 +193,7 @@ void performance_metrics_print_summary(performance_metrics_t* metrics) {
     printf("CPU Peak: %.2f%%\n", metrics->cpu_peak);
     printf("Operation Count: %zu\n", metrics->operation_count);
     printf("Error Count: %zu\n", metrics->error_count);
-    
+
     printf("\nActive Counters:\n");
     for (int i = 0; i < MAX_PERFORMANCE_COUNTERS; i++) {
         if (metrics->counters[i].is_active) {
@@ -208,18 +207,18 @@ void performance_metrics_print_summary(performance_metrics_t* metrics) {
 
 void performance_metrics_update_system_stats(performance_metrics_t* metrics) {
     if (!metrics) return;
-    
+
     size_t current_memory = performance_metrics_get_memory_usage();
     double current_cpu = performance_metrics_get_cpu_usage();
-    
+
     if (current_memory > metrics->memory_peak) {
         metrics->memory_peak = current_memory;
     }
-    
+
     if (current_cpu > metrics->cpu_peak) {
         metrics->cpu_peak = current_cpu;
     }
-    
+
     metrics->last_update = time(NULL);
 }
 
@@ -228,39 +227,39 @@ void performance_metrics_update_system_stats(performance_metrics_t* metrics) {
 // Benchmark and profiling functions
 benchmark_result_t* performance_benchmark_function(void (*func)(void), int iterations) {
     if (!func || iterations <= 0) return NULL;
-    
+
     benchmark_result_t* result = malloc(sizeof(benchmark_result_t));
     if (!result) return NULL;
-    
+
     operation_timer_t* timer = operation_timer_create();
     if (!timer) {
         free(result);
         return NULL;
     }
-    
+
     double total_time = 0.0;
     double min_time = INFINITY;
     double max_time = 0.0;
-    
+
     for (int i = 0; i < iterations; i++) {
         operation_timer_start(timer);
         func();
         operation_timer_stop(timer);
-        
+
         double elapsed = operation_timer_get_elapsed(timer);
         total_time += elapsed;
-        
+
         if (elapsed < min_time) min_time = elapsed;
         if (elapsed > max_time) max_time = elapsed;
     }
-    
+
     result->iterations = iterations;
     result->total_time = total_time;
     result->average_time = total_time / iterations;
     result->min_time = min_time;
     result->max_time = max_time;
     result->operations_per_second = iterations / total_time;
-    
+
     operation_timer_destroy(timer);
     return result;
 }
@@ -274,13 +273,13 @@ void benchmark_result_destroy(benchmark_result_t* result) {
 throughput_calculator_t* throughput_calculator_create(void) {
     throughput_calculator_t* calc = malloc(sizeof(throughput_calculator_t));
     if (!calc) return NULL;
-    
+
     calc->total_operations = 0;
     gettimeofday(&calc->start_time, NULL);
     calc->last_update = calc->start_time;
     calc->current_throughput = 0.0;
     calc->peak_throughput = 0.0;
-    
+
     return calc;
 }
 
@@ -292,22 +291,22 @@ void throughput_calculator_destroy(throughput_calculator_t* calc) {
 
 void throughput_calculator_add_operations(throughput_calculator_t* calc, size_t operations) {
     if (!calc) return;
-    
+
     calc->total_operations += operations;
-    
+
     struct timeval now;
     gettimeofday(&now, NULL);
-    
+
     double time_diff = (now.tv_sec - calc->last_update.tv_sec) + 
                       (now.tv_usec - calc->last_update.tv_usec) / 1e6;
-    
+
     if (time_diff > 0.1) { // Update every 100ms
         calc->current_throughput = operations / time_diff;
-        
+
         if (calc->current_throughput > calc->peak_throughput) {
             calc->peak_throughput = calc->current_throughput;
         }
-        
+
         calc->last_update = now;
     }
 }
@@ -319,15 +318,15 @@ double throughput_calculator_get_current(throughput_calculator_t* calc) {
 
 double throughput_calculator_get_average(throughput_calculator_t* calc) {
     if (!calc) return 0.0;
-    
+
     struct timeval now;
     gettimeofday(&now, NULL);
-    
+
     double total_time = (now.tv_sec - calc->start_time.tv_sec) + 
                        (now.tv_usec - calc->start_time.tv_usec) / 1e6;
-    
+
     if (total_time <= 0.0) return 0.0;
-    
+
     return calc->total_operations / total_time;
 }
 
@@ -342,7 +341,7 @@ double throughput_calculator_get_peak(throughput_calculator_t* calc) {
 performance_counter_t* performance_counter_create(void) {
     performance_counter_t* counter = malloc(sizeof(performance_counter_t));
     if (!counter) return NULL;
-    
+
     counter->name[0] = '\0';
     counter->type = METRIC_COUNTER;
     counter->value = 0.0;
@@ -352,7 +351,7 @@ performance_counter_t* performance_counter_create(void) {
     counter->count = 0;
     counter->is_active = false;
     clock_gettime(CLOCK_MONOTONIC, &counter->last_updated);
-    
+
     return counter;
 }
 
@@ -371,94 +370,94 @@ void performance_counter_start(performance_counter_t* counter) {
 
 double performance_counter_stop(performance_counter_t* counter) {
     if (!counter || !counter->is_active) return 0.0;
-    
+
     struct timespec end_time;
     clock_gettime(CLOCK_MONOTONIC, &end_time);
-    
+
     double start_sec = counter->last_updated.tv_sec + counter->last_updated.tv_nsec / 1e9;
     double end_sec = end_time.tv_sec + end_time.tv_nsec / 1e9;
     double elapsed = end_sec - start_sec;
-    
+
     counter->value = elapsed;
     counter->is_active = false;
     counter->count++;
-    
+
     return elapsed;
 }
 
-// Memory footprint structure
-typedef struct {
+// Memory footprint structure étendue (conforme STANDARD_NAMES.md)
+typedef struct memory_footprint_impl_t {
     size_t heap_usage;
     size_t stack_usage;
     size_t peak_heap;
     size_t peak_stack;
     size_t allocation_count;
     size_t deallocation_count;
-} memory_footprint_t;
+} memory_footprint_impl_t;
 
 // Memory footprint tracking
-memory_footprint_t* memory_footprint_create(void) {
-    memory_footprint_t* footprint = malloc(sizeof(memory_footprint_t));
+memory_footprint_impl_t* memory_footprint_create(void) {
+    memory_footprint_impl_t* footprint = malloc(sizeof(memory_footprint_impl_t));
     if (!footprint) return NULL;
-    
+
     footprint->heap_usage = 0;
     footprint->stack_usage = 0;
     footprint->peak_heap = 0;
     footprint->peak_stack = 0;
     footprint->allocation_count = 0;
     footprint->deallocation_count = 0;
-    
+
     return footprint;
 }
 
-void memory_footprint_destroy(memory_footprint_t* footprint) {
+void memory_footprint_destroy(memory_footprint_impl_t* footprint) {
     if (footprint) {
         free(footprint);
     }
 }
 
-void memory_footprint_update(memory_footprint_t* footprint) {
+void memory_footprint_update(memory_footprint_impl_t* footprint) {
     if (!footprint) return;
-    
+
     struct rusage usage;
     if (getrusage(RUSAGE_SELF, &usage) == 0) {
         footprint->heap_usage = usage.ru_maxrss * 1024; // Convert KB to bytes
-        
+
         if (footprint->heap_usage > footprint->peak_heap) {
             footprint->peak_heap = footprint->heap_usage;
         }
     }
-    
+
     // Stack usage estimation (simplified)
     void* stack_var;
     static void* initial_stack_ptr = NULL;
     if (initial_stack_ptr == NULL) {
         initial_stack_ptr = &stack_var;
     }
-    
+
     footprint->stack_usage = labs((char*)initial_stack_ptr - (char*)&stack_var);
     if (footprint->stack_usage > footprint->peak_stack) {
         footprint->peak_stack = footprint->stack_usage;
     }
 }
 
-size_t memory_footprint_get_heap_usage(memory_footprint_t* footprint) {
+size_t memory_footprint_get_heap_usage(memory_footprint_impl_t* footprint) {
     if (!footprint) return 0;
     return footprint->heap_usage;
 }
 
-size_t memory_footprint_get_stack_usage(memory_footprint_t* footprint) {
+size_t memory_footprint_get_stack_usage(memory_footprint_impl_t* footprint) {
     if (!footprint) return 0;
     return footprint->stack_usage;
 }
 
-void memory_footprint_track_allocation(memory_footprint_t* footprint, size_t size) {
+void memory_footprint_track_allocation(memory_footprint_impl_t* footprint, size_t size) {
     if (!footprint) return;
     (void)size; // Parameter used for future allocation tracking
     footprint->allocation_count++;
 }
 
-void memory_footprint_track_deallocation(memory_footprint_t* footprint, size_t size) {
+void memory_footprint_track_deallocation(memory_footprint_impl_t* footprint, size_t size) {
     if (!footprint) return;
     (void)size; // Parameter used for future deallocation tracking
     footprint->deallocation_count++;

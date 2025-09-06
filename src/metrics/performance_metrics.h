@@ -1,4 +1,3 @@
-
 #ifndef PERFORMANCE_METRICS_H
 #define PERFORMANCE_METRICS_H
 
@@ -157,6 +156,7 @@ typedef struct {
     bool is_running;
 } performance_counter_t;
 
+// Memory footprint structure for tests (conforme STANDARD_NAMES.md)
 typedef struct {
     size_t heap_usage;
     size_t stack_usage;
