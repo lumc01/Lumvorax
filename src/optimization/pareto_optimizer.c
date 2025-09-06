@@ -31,14 +31,34 @@ pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
     optimizer->current_best.pareto_score = 0.0;
     optimizer->current_best.is_dominated = true;
     
-    // Configuration VORAX pour optimisations automatiques
+    // Configuration VORAX pour optimisations automatiques avec Pareto inversé
     strcpy(optimizer->vorax_optimization_script, 
-           "zone optimal_zone;\n"
-           "mem cache_mem, simd_mem;\n"
-           "on (not empty optimal_zone) {\n"
-           "  split optimal_zone -> [cache_mem, simd_mem];\n"
-           "  compress cache_mem -> omega_cache;\n"
-           "  cycle simd_mem % 8;\n"
+           "// DSL VORAX - Optimisations Pareto Inversées\n"
+           "zone optimal_zone, cache_zone, simd_zone, parallel_zone;\n"
+           "mem speed_mem, pareto_mem, inverse_mem, omega_mem;\n"
+           "\n"
+           "// Optimisation multicouche avec Pareto inversé\n"
+           "on (efficiency > 500.0) {\n"
+           "  emit optimal_zone += 1000•;\n"
+           "  split optimal_zone -> [cache_zone, simd_zone, parallel_zone];\n"
+           "  \n"
+           "  // Couche 1: Optimisation cache\n"
+           "  store speed_mem <- cache_zone, all;\n"
+           "  compress speed_mem -> omega_cache;\n"
+           "  \n"
+           "  // Couche 2: Optimisation SIMD\n"
+           "  cycle simd_zone % 8;\n"
+           "  fuse simd_zone + parallel_zone -> omega_simd;\n"
+           "  \n"
+           "  // Couche 3: Pareto inversé\n"
+           "  retrieve inverse_mem -> pareto_mem;\n"
+           "  expand omega_cache -> 16;\n"
+           "};\n"
+           "\n"
+           "// Optimisation énergétique\n"
+           "on (energy < 0.001) {\n"
+           "  compress all -> omega_ultra;\n"
+           "  cycle omega_ultra % 2;\n"
            "};\n");
     
     lum_log(LUM_LOG_INFO, "Pareto optimizer created with inverse mode enabled");

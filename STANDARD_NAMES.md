@@ -95,6 +95,12 @@
 - `pareto_point_t` : Point Pareto avec dominance et score inversé
 - `pareto_config_t` : Configuration d'optimisation (SIMD, pooling, parallélisme)
 
+### Types Optimisation Pareto Inversé Multi-Couches
+- `pareto_inverse_optimizer_t` : Optimiseur Pareto inversé avec couches spécialisées
+- `optimization_layer_t` : Couche d'optimisation spécialisée (mémoire, SIMD, parallèle, crypto, énergie)
+- `optimization_type_e` : Types d'optimisation (MEMORY, SIMD, PARALLEL, CRYPTO, ENERGY)
+- `pareto_inverse_result_t` : Résultat d'optimisation multi-couches avec métriques détaillées
+
 ## CONSTANTES ET ENUMS
 
 ### Constantes système
@@ -173,6 +179,14 @@
 - `pareto_optimize_*_operation()` : Optimisations spécialisées VORAX
 - `pareto_execute_vorax_optimization()` : Exécution scripts VORAX d'optimisation
 - `pareto_generate_optimization_script()` : Génération dynamique scripts VORAX
+
+### Optimisation Pareto Inversé Multi-Couches
+- `pareto_inverse_optimizer_*()` : Gestion optimiseur inversé multi-couches
+- `pareto_add_optimization_layer()` : Ajout couche d'optimisation spécialisée
+- `pareto_execute_multi_layer_optimization()` : Exécution optimisation séquentielle
+- `calculate_inverse_pareto_score_advanced()` : Calcul score inversé avec pondération avancée
+- `apply_*_optimization()` : Fonctions d'optimisation par type (memory, SIMD, parallel, crypto, energy)
+- `pareto_generate_multi_layer_report()` : Génération rapport détaillé par couches
 
 ## CONVENTIONS DE NOMMAGE
 

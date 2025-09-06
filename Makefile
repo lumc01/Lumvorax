@@ -14,6 +14,7 @@ SOURCES = $(SRC_DIR)/main.c \
           $(SRC_DIR)/logger/lum_logger.c \
           $(SRC_DIR)/optimization/memory_optimizer.c \
           $(SRC_DIR)/optimization/pareto_optimizer.c \
+          $(SRC_DIR)/optimization/pareto_inverse_optimizer.c \
           $(SRC_DIR)/parallel/parallel_processor.c \
           $(SRC_DIR)/metrics/performance_metrics.c \
           $(SRC_DIR)/crypto/crypto_validator.c \
@@ -28,6 +29,7 @@ OBJECTS = $(OBJ_DIR)/main.o \
           $(OBJ_DIR)/logger/lum_logger.o \
           $(OBJ_DIR)/optimization/memory_optimizer.o \
           $(OBJ_DIR)/optimization/pareto_optimizer.o \
+          $(OBJ_DIR)/optimization/pareto_inverse_optimizer.o \
           $(OBJ_DIR)/parallel/parallel_processor.o \
           $(OBJ_DIR)/metrics/performance_metrics.o \
           $(OBJ_DIR)/crypto/crypto_validator.o \
@@ -62,7 +64,10 @@ obj/optimization/memory_optimizer.o: src/optimization/memory_optimizer.c src/opt
 	$(CC) $(CFLAGS) -c src/optimization/memory_optimizer.c -o obj/optimization/memory_optimizer.o
 
 obj/optimization/pareto_optimizer.o: src/optimization/pareto_optimizer.c src/optimization/pareto_optimizer.h
-	$(CC) $(CFLAGS) -c src/optimization/pareto_optimizer.c -o obj/optimization/pareto_optimizer.o
+	$(CC) $(CFLAGS) -c $< -o $@
+
+obj/optimization/pareto_inverse_optimizer.o: src/optimization/pareto_inverse_optimizer.c src/optimization/pareto_inverse_optimizer.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Targets
 .PHONY: all clean run test test-complete test-pareto
