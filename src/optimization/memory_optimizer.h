@@ -10,6 +10,8 @@ typedef struct {
     void* pool_start;
     void* current_ptr;
     size_t size;
+    size_t pool_size;
+    size_t used_size;
     size_t alignment;
     bool is_initialized;
 } memory_pool_t;
@@ -19,6 +21,13 @@ typedef struct {
     size_t allocated_bytes;
     size_t free_bytes;
     size_t allocation_count;
+    size_t total_allocated;
+    size_t current_usage;
+    size_t peak_usage;
+    size_t total_freed;
+    size_t free_count;
+    size_t fragmentation_bytes;
+    double fragmentation_ratio;
 } memory_stats_t;
 
 // Memory optimizer context

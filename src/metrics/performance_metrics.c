@@ -386,14 +386,7 @@ double performance_counter_stop(performance_counter_t* counter) {
 }
 
 // Memory footprint structure étendue (conforme STANDARD_NAMES.md)
-typedef struct memory_footprint_t {
-    size_t heap_usage;
-    size_t stack_usage;
-    size_t peak_heap;
-    size_t peak_stack;
-    size_t allocation_count;
-    size_t deallocation_count;
-} memory_footprint_t;
+// Structure already defined in header file
 
 // Memory footprint tracking
 memory_footprint_t* memory_footprint_create(void) {

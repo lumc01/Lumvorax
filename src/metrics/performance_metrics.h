@@ -160,12 +160,16 @@ typedef struct {
 typedef struct {
     size_t heap_usage;
     size_t stack_usage;
+    size_t peak_heap;
+    size_t peak_stack;
+    size_t allocation_count;
+    size_t deallocation_count;
 } memory_footprint_t;
 
-test_performance_counter_t* performance_counter_create(void);
-void performance_counter_destroy(test_performance_counter_t* counter);
-void performance_counter_start(test_performance_counter_t* counter);
-double performance_counter_stop(test_performance_counter_t* counter);
+performance_counter_t* performance_counter_create(void);
+void performance_counter_destroy(performance_counter_t* counter);
+void performance_counter_start(performance_counter_t* counter);
+double performance_counter_stop(performance_counter_t* counter);
 
 memory_footprint_t* memory_footprint_create(void);
 void memory_footprint_destroy(memory_footprint_t* footprint);
