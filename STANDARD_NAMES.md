@@ -7,6 +7,8 @@
 2025-01-07 16:15 - bytes_to_hex_string + Fonction de conversion bytes vers chaîne hexadécimale
 2025-01-07 16:16 - memory_footprint_impl_t + Structure interne d'implémentation pour empreinte mémoire étendue
 2025-01-07 16:17 - memory_footprint_update + Fonction de mise à jour des métriques mémoire système
+2025-01-27 20:30 - LUM_STRUCTURE_GROUP + Type de structure pour les groupes de LUMs
+2025-01-27 20:31 - LUM_STRUCTURE_MAX + Valeur maximale pour validation des types de structure
 
 ## STRUCTURES DE DONNÉES
 
@@ -15,7 +17,7 @@
 - `lum_group_t` : Groupe de LUMs (lums[], count, capacity)
 - `lum_zone_t` : Zone spatiale contenant des LUMs
 - `lum_memory_t` : Mémoire pour stockage LUMs
-- `lum_structure_e` : Énumération des types de structure (LINEAR, CIRCULAR, BINARY)
+- `lum_structure_e` : Énumération des types de structure (LINEAR, CIRCULAR, BINARY, GROUP)
 
 ### Types VORAX Operations
 - `vorax_operation_e` : Types d'opérations (FUSE, SPLIT, CYCLE, MOVE, etc.)

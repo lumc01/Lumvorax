@@ -27,7 +27,9 @@ typedef struct {
 typedef enum {
     LUM_STRUCTURE_LINEAR = 0,
     LUM_STRUCTURE_CIRCULAR = 1,
-    LUM_STRUCTURE_BINARY = 2
+    LUM_STRUCTURE_BINARY = 2,
+    LUM_STRUCTURE_GROUP = 3,
+    LUM_STRUCTURE_MAX = 4
 } lum_structure_type_e;
 
 // LUM Group - collection of LUMs
