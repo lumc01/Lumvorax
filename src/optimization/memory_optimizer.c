@@ -43,6 +43,36 @@ void memory_optimizer_destroy(memory_optimizer_t* optimizer) {
     free(optimizer);
 }
 
+// Pool creation
+memory_pool_t* memory_pool_create(size_t size, size_t alignment) {
+    memory_pool_t* pool = malloc(sizeof(memory_pool_t));
+    if (!pool) return NULL;
+    
+    if (!memory_pool_init(pool, size, alignment)) {
+        free(pool);
+        return NULL;
+    }
+    
+    return pool;
+}
+
+void memory_pool_destroy(memory_pool_t* pool) {
+    if (!pool) return;
+    
+    if (pool->pool_start) {
+        free(pool->pool_start);
+    }
+    free(pool);
+}
+
+void memory_pool_get_stats(memory_pool_t* pool, memory_stats_t* stats) {
+    if (!pool || !stats) return;
+    
+    stats->allocated_bytes = pool->used_size;
+    stats->free_bytes = pool->pool_size - pool->used_size;
+    stats->allocation_count = 1; // Simple implementation
+}
+
 // Pool management implementation
 bool memory_pool_init(memory_pool_t* pool, size_t size, size_t alignment) {
     if (!pool || size == 0) return false;
