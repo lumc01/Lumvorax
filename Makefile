@@ -13,6 +13,7 @@ SOURCES = $(SRC_DIR)/main.c \
           $(SRC_DIR)/binary/binary_lum_converter.c \
           $(SRC_DIR)/logger/lum_logger.c \
           $(SRC_DIR)/optimization/memory_optimizer.c \
+          $(SRC_DIR)/optimization/pareto_optimizer.c \
           $(SRC_DIR)/parallel/parallel_processor.c \
           $(SRC_DIR)/metrics/performance_metrics.c \
           $(SRC_DIR)/crypto/crypto_validator.c \
@@ -26,6 +27,7 @@ OBJECTS = $(OBJ_DIR)/main.o \
           $(OBJ_DIR)/binary/binary_lum_converter.o \
           $(OBJ_DIR)/logger/lum_logger.o \
           $(OBJ_DIR)/optimization/memory_optimizer.o \
+          $(OBJ_DIR)/optimization/pareto_optimizer.o \
           $(OBJ_DIR)/parallel/parallel_processor.o \
           $(OBJ_DIR)/metrics/performance_metrics.o \
           $(OBJ_DIR)/crypto/crypto_validator.o \
@@ -56,8 +58,14 @@ $(OBJ_DIR)/parallel/parallel_processor.o: $(SRC_DIR)/parallel/parallel_processor
 $(OBJ_DIR)/crypto/crypto_validator.o: $(SRC_DIR)/crypto/crypto_validator.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
+obj/optimization/memory_optimizer.o: src/optimization/memory_optimizer.c src/optimization/memory_optimizer.h
+	$(CC) $(CFLAGS) -c src/optimization/memory_optimizer.c -o obj/optimization/memory_optimizer.o
+
+obj/optimization/pareto_optimizer.o: src/optimization/pareto_optimizer.c src/optimization/pareto_optimizer.h
+	$(CC) $(CFLAGS) -c src/optimization/pareto_optimizer.c -o obj/optimization/pareto_optimizer.o
+
 # Targets
-.PHONY: all clean run test test-complete
+.PHONY: all clean run test test-complete test-pareto
 
 all: $(EXECUTABLE)
 
@@ -75,13 +83,12 @@ test: $(OBJECTS) # Assuming test executable needs all main objects
 	@echo "Tests completed!"
 
 # Test complet de fonctionnalité
-test-complete: $(OBJ_DIR)/tests/test_complete_functionality.o $(filter-out $(OBJ_DIR)/main.o, $(OBJECTS))
-	$(CC) $(CFLAGS) -o bin/test_complete_functionality $(filter-out $(OBJ_DIR)/main.o, $(OBJECTS)) $(OBJ_DIR)/tests/test_complete_functionality.o -lpthread -lm
+test-complete: src/tests/test_complete_functionality.c $(EXECUTABLE)
+	$(CC) $(CFLAGS) src/tests/test_complete_functionality.c -o bin/test_complete_functionality $(filter-out $(OBJ_DIR)/main.o, $(OBJECTS)) -lm -lpthread
 	./bin/test_complete_functionality
 
-$(OBJ_DIR)/tests/test_complete_functionality.o: src/tests/test_complete_functionality.c
-	@mkdir -p $(OBJ_DIR)/tests
-	$(CC) $(CFLAGS) -c $< -o $@
+test_pareto: src/tests/test_pareto_optimization.c $(EXECUTABLE)
+	$(CC) $(CFLAGS) src/tests/test_pareto_optimization.c -o bin/test_pareto $(filter-out $(OBJ_DIR)/main.o, $(OBJECTS)) -lm -lpthread
 
 # Install
 install: $(EXECUTABLE)
@@ -104,6 +111,7 @@ help:
 	@echo "  run      - Build and run the demo"
 	@echo "  test     - Build and run tests"
 	@echo "  test-complete - Build and run the complete functionality test"
+	@echo "  test-pareto - Build and run the pareto optimization test"
 	@echo "  debug    - Build with debug symbols"
 	@echo "  release  - Build optimized release version"
 	@echo "  install  - Install to /usr/local/bin"

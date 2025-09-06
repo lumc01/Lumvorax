@@ -1,10 +1,11 @@
 #define _POSIX_C_SOURCE 200809L
 // _GNU_SOURCE is already defined in Makefile
 #include "parallel_processor.h"
-#include <stdio.h>
+#include "../logger/lum_logger.h"
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
+#include <stdio.h>
 #include <unistd.h>
 #include <time.h>
 #include <errno.h>
@@ -446,7 +447,7 @@ bool distribute_work(lum_t** lums, int count, int threads, work_distribution_t* 
 
 double parallel_reduce_lums(lum_t** lums, int count, int threads) {
     if (!lums || count <= 0) return 0.0;
-    
+
     (void)threads; // Parameter reserved for future parallel implementation
 
     double sum = 0.0;

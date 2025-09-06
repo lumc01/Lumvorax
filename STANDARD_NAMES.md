@@ -14,6 +14,10 @@
 2025-01-27 20:45 - test_complete_results_$(date).log + Résultats complets des tests de fonctionnalité
 2025-01-27 20:45 - evidence/checksums_$(date).txt + Empreintes SHA-256 pour validation forensique
 2025-01-27 20:31 - LUM_STRUCTURE_MAX + Valeur maximale pour validation des types de structure
+2025-09-06 20:45 - pareto_optimizer_t + Optimiseur Pareto inversé pour optimisations multicritères
+2025-09-06 20:45 - pareto_metrics_t + Métriques d'évaluation Pareto (efficacité, mémoire, temps, énergie)
+2025-09-06 20:45 - pareto_point_t + Point dans l'espace Pareto avec score de dominance
+2025-09-06 20:45 - pareto_config_t + Configuration des optimisations Pareto
 
 ## STRUCTURES DE DONNÉES
 
@@ -85,6 +89,12 @@
 - `data_stream_t` : Flux de données
 - `checkpoint_t` : Point de sauvegarde
 
+### Types Optimisation Pareto
+- `pareto_optimizer_t` : Optimiseur principal avec front de Pareto
+- `pareto_metrics_t` : Métriques multicritères (efficacité, mémoire, temps, énergie)
+- `pareto_point_t` : Point Pareto avec dominance et score inversé
+- `pareto_config_t` : Configuration d'optimisation (SIMD, pooling, parallélisme)
+
 ## CONSTANTES ET ENUMS
 
 ### Constantes système
@@ -154,6 +164,15 @@
 - `data_stream_*()` : Gestion flux données
 - `checkpoint_*()` : Points de sauvegarde
 - `export_*()` : Exportation données
+
+### Optimisation Pareto
+- `pareto_optimizer_*()` : Gestion optimiseur Pareto
+- `pareto_evaluate_metrics()` : Évaluation métriques multicritères
+- `pareto_is_dominated()` : Test de dominance Pareto
+- `pareto_calculate_inverse_score()` : Calcul score Pareto inversé
+- `pareto_optimize_*_operation()` : Optimisations spécialisées VORAX
+- `pareto_execute_vorax_optimization()` : Exécution scripts VORAX d'optimisation
+- `pareto_generate_optimization_script()` : Génération dynamique scripts VORAX
 
 ## CONVENTIONS DE NOMMAGE
 

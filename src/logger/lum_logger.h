@@ -5,7 +5,16 @@
 #include "../vorax/vorax_operations.h"
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
+#include <stddef.h>
 
+// Système de désactivation des logs pour benchmark performance
+#ifdef DISABLE_LOGGING
+#define lum_log(level, format, ...) do { } while(0)
+#define lum_log_init(filename) (true)
+#define lum_log_destroy() do { } while(0)
+#define lum_log_flush() do { } while(0)
+#else
 // Log levels
 typedef enum {
     LUM_LOG_DEBUG = 0,
@@ -166,5 +175,9 @@ lum_log_monitor_t* lum_log_monitor_create(lum_logger_t* logger,
 void lum_log_monitor_destroy(lum_log_monitor_t* monitor);
 bool lum_log_monitor_start(lum_log_monitor_t* monitor);
 void lum_log_monitor_stop(lum_log_monitor_t* monitor);
+
+void lum_log_flush(void);
+
+#endif // DISABLE_LOGGING
 
 #endif // LUM_LOGGER_H
