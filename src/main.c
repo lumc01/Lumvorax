@@ -346,9 +346,8 @@ void demo_pareto_optimization(void) {
         .enable_simd_optimization = true,
         .enable_memory_pooling = true,
         .enable_parallel_processing = true,
-        .enable_crypto_acceleration = false,
-        .enable_logging_optimization = true,
-        .target_efficiency_threshold = 500.0
+        .max_optimization_layers = 4,
+        .max_points = 1000
     };
 
     pareto_optimizer_t* optimizer = pareto_optimizer_create(&config);
