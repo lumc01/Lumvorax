@@ -1,0 +1,30 @@
+=== BENCHMARK PERFORMANCE LUM/VORAX ===
+Début des tests de performance...
+
+=== TEST PERFORMANCE LUM ===
+Création/destruction de 50000 LUMs: 0.001 secondes
+Performance: 35769265 LUMs/seconde
+
+=== TEST PERFORMANCE CRYPTO ===
+SHA-256 10000 itérations: 0.011 secondes
+Performance: 912341 hashes/seconde
+Débit: 75.70 MB/s
+
+=== TEST PERFORMANCE CONVERSION ===
+Conversion bidirectionnelle 5000 entiers: 0.005 secondes
+Performance: 929218 conversions/seconde
+
+=== TEST PERFORMANCE VORAX ===
+Opérations FUSE 1000 fois: 0.009 secondes
+Performance: 112599 opérations/seconde
+
+=== TEST USAGE MÉMOIRE ===
+1000 LUMs - Création: 0.000s, Destruction: 0.000s
+5000 LUMs - Création: 0.000s, Destruction: 0.000s
+10000 LUMs - Création: 0.000s, Destruction: 0.000s
+20000 LUMs - Création: 0.001s, Destruction: 0.000s
+
+=== RÉSUMÉ PERFORMANCE ===
+Temps total: 0.029 secondes
+Système: 8 cœurs CPU
+Tests terminés avec succès!
