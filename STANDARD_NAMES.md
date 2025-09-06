@@ -1,5 +1,9 @@
-
 # FICHIER DES NOMS STANDARDISÉS - SYSTÈME LUM/VORAX
+
+## Historique des noms normalisés
+
+2025-01-06 15:26 - memory_optimizer_t + Optimiseur de mémoire avec pools dédiés pour LUM, groupes et zones
+2025-01-07 15:30 - performance_metrics_validator_t + Validateur de cohérence des métriques de performance réalistes
 
 ## STRUCTURES DE DONNÉES
 

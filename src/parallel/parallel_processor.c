@@ -222,9 +222,23 @@ void* worker_thread_main(void* arg) {
     parallel_processor_t* processor = (parallel_processor_t*)arg;
     if (!processor) return NULL;
 
-    while (!processor->workers[0].should_exit) { // Use first worker's exit flag as global
+    // Identifier le worker actuel
+    int worker_id = -1;
+    pthread_t current_thread = pthread_self();
+    for (int i = 0; i < processor->worker_count; i++) {
+        if (pthread_equal(processor->workers[i].thread, current_thread)) {
+            worker_id = i;
+            break;
+        }
+    }
+
+    while (worker_id >= 0 && !processor->workers[worker_id].should_exit) {
         parallel_task_t* task = task_queue_dequeue(&processor->task_queue);
-        if (!task) continue;
+        if (!task) {
+            // Vérifier à nouveau la condition de sortie après attente
+            if (processor->workers[worker_id].should_exit) break;
+            continue;
+        }
 
         clock_t start_time = clock();
         bool success = execute_task(task);
@@ -273,10 +287,10 @@ bool execute_task(parallel_task_t* task) {
         case TASK_VORAX_FUSE: {
             // Fuse two groups
             lum_group_t** groups = (lum_group_t**)task->input_data;
-            if (task->data_size >= sizeof(lum_group_t*) * 2) {
-                vorax_result_t* result = vorax_fuse(groups[0], groups[1]);
-                task->output_data = result;
-                return result && result->success;
+            if (task->data_size >= sizeof(lum_group_t*) * 2 && groups[0] && groups[1]) {
+                vorax_result_t* fusion_result = vorax_fuse(groups[0], groups[1]);
+                task->output_data = fusion_result;
+                return fusion_result && fusion_result->success;
             }
             return false;
         }

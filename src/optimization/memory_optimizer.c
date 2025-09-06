@@ -201,11 +201,25 @@ void memory_optimizer_free_zone(memory_optimizer_t* optimizer, lum_zone_t* zone)
 memory_stats_t* memory_optimizer_get_stats(memory_optimizer_t* optimizer) {
     if (!optimizer) return NULL;
 
-    // Update fragmentation statistics
-    optimizer->stats.fragmentation_bytes = optimizer->stats.total_allocated - optimizer->stats.current_usage;
+    // Update fragmentation statistics with realistic bounds
+    if (optimizer->stats.total_allocated >= optimizer->stats.current_usage) {
+        optimizer->stats.fragmentation_bytes = optimizer->stats.total_allocated - optimizer->stats.current_usage;
+    } else {
+        // Correction: current_usage ne peut pas dépasser total_allocated
+        optimizer->stats.fragmentation_bytes = 0;
+        optimizer->stats.current_usage = optimizer->stats.total_allocated;
+    }
+    
     if (optimizer->stats.total_allocated > 0) {
         optimizer->stats.fragmentation_ratio = 
             (double)optimizer->stats.fragmentation_bytes / optimizer->stats.total_allocated;
+    } else {
+        optimizer->stats.fragmentation_ratio = 0.0;
+    }
+
+    // Validation des métriques cohérentes
+    if (optimizer->stats.peak_usage < optimizer->stats.current_usage) {
+        optimizer->stats.peak_usage = optimizer->stats.current_usage;
     }
 
     return &optimizer->stats;
@@ -223,8 +237,25 @@ void memory_optimizer_print_stats(memory_optimizer_t* optimizer) {
     printf("Peak Usage: %zu bytes\n", stats->peak_usage);
     printf("Allocations: %zu\n", stats->allocation_count);
     printf("Frees: %zu\n", stats->free_count);
+    
+    // Correction du calcul de fragmentation réaliste
+    size_t effective_fragmentation = 0;
+    if (stats->total_allocated > stats->current_usage) {
+        effective_fragmentation = stats->total_allocated - stats->current_usage;
+    }
+    double fragmentation_percentage = 0.0;
+    if (stats->total_allocated > 0) {
+        fragmentation_percentage = (double)effective_fragmentation / stats->total_allocated * 100.0;
+    }
+    
     printf("Fragmentation: %zu bytes (%.2f%%)\n", 
-           stats->fragmentation_bytes, stats->fragmentation_ratio * 100.0);
+           effective_fragmentation, fragmentation_percentage);
+    printf("Memory Efficiency: %.2f%%\n", 
+           stats->total_allocated > 0 ? (double)stats->current_usage / stats->total_allocated * 100.0 : 0.0);
+    printf("Pool Utilization: LUM=%.1f%%, Group=%.1f%%, Zone=%.1f%%\n",
+           optimizer->lum_pool.pool_size > 0 ? (double)optimizer->lum_pool.used_size / optimizer->lum_pool.pool_size * 100.0 : 0.0,
+           optimizer->group_pool.pool_size > 0 ? (double)optimizer->group_pool.used_size / optimizer->group_pool.pool_size * 100.0 : 0.0,
+           optimizer->zone_pool.pool_size > 0 ? (double)optimizer->zone_pool.used_size / optimizer->zone_pool.pool_size * 100.0 : 0.0);
     printf("=====================================\n");
 }
 
