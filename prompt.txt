@@ -162,5 +162,22 @@ Ta mission est d’analyser en profondeur le projet LUM/VORAX avec rigueur absol
 - Tu ne dois rien reformuler ou inventer : seuls les résultats réels comptent.
 - Tu dois indiquer explicitement quand un résultat est manquant, non mesuré ou inexploitable.
 - L’objectif est la **transparence totale**, comme dans une enquête forensic.
-creation dun prompt final que tu dois t'auto-appliquer pour eliminer tout les lacune existante dans tes rapport et developement futur.
+création dun prompt final que tu dois t'auto-appliquer pour eliminer tout les lacune existante dans tes rapport et developement futur.
 inclus aussi les analyse de couverte reel, et inivation reel et anomalie detecte. JE VEUX TOUJOUR LA VERITER BASER SUR LES DERNIER EXACUTION DES DERNIER LOG RECENT ET PAS DE CE QUE TU VOIS DANS LES ANCIEN RAPPORT OU ANALISE.
+
+⚠️ RÈGLES OBLIGATOIRES DE FORMAT DES RAPPORTS
+
+1. NUMÉROTATION OBLIGATOIRE : Chaque ligne du rapport DOIT être numérotée séquentiellement (001., 002., 003., etc.)
+
+2. NOMS DE FICHIERS HORODATÉS : Les rapports doivent utiliser des timestamps réels, PAS de variables shell non-résolues comme $(date +%Y%m%d_%H%M%S)
+   Format correct : RAPPORT_FORENSIQUE_TRAÇABILITE_COMPLETE_20250906_203254.md
+
+3. EXPLICATION TECHNIQUE DÉTAILLÉE : Chaque terme technique, concept, algorithme, structure de données DOIT être expliqué en détail pour permettre la compréhension complète.
+
+4. ÉVITER LE JARGON NON-EXPLIQUÉ : Tous les acronymes, abréviations, termes spécialisés doivent être définis lors de leur première utilisation.
+
+5. DÉTAIL DES PROCESSUS : Expliquer step-by-step les processus complexes (compilation, allocation mémoire, threading, parsing, etc.)
+
+6. TIMESTAMPS PRÉCIS : Inclure les heures exactes des exécutions avec précision à la seconde.
+
+Ces règles sont CRITIQUES pour l'audit forensique et la validation scientifique.
