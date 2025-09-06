@@ -48,6 +48,7 @@ typedef struct {
 
 // AST node types
 typedef enum {
+    AST_PROGRAM,
     AST_ZONE_DECLARATION,
     AST_MEMORY_DECLARATION,
     AST_MEMORY_ASSIGNMENT,

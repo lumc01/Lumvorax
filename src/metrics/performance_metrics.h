@@ -2,12 +2,15 @@
 #ifndef PERFORMANCE_METRICS_H
 #define PERFORMANCE_METRICS_H
 
-// _GNU_SOURCE is already defined in Makefile
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE
+#endif
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
 #include <sys/time.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 #define MAX_METRIC_NAME_LENGTH 64
 #define MAX_METRICS_COUNT 100
@@ -147,6 +150,26 @@ void throughput_calculator_add_operations(throughput_calculator_t* calc, size_t 
 double throughput_calculator_get_current(throughput_calculator_t* calc);
 double throughput_calculator_get_average(throughput_calculator_t* calc);
 double throughput_calculator_get_peak(throughput_calculator_t* calc);
+
+// Performance counter functions (for tests)
+typedef struct {
+    struct timespec start_time;
+    bool is_running;
+} performance_counter_t;
+
+typedef struct {
+    size_t heap_usage;
+    size_t stack_usage;
+} memory_footprint_t;
+
+performance_counter_t* performance_counter_create(void);
+void performance_counter_destroy(performance_counter_t* counter);
+void performance_counter_start(performance_counter_t* counter);
+double performance_counter_stop(performance_counter_t* counter);
+
+memory_footprint_t* memory_footprint_create(void);
+void memory_footprint_destroy(memory_footprint_t* footprint);
+void memory_footprint_update(memory_footprint_t* footprint);
 
 // Utility functions
 double timespec_to_seconds(struct timespec* ts);

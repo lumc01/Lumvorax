@@ -1,4 +1,3 @@
-
 #ifndef MEMORY_OPTIMIZER_H
 #define MEMORY_OPTIMIZER_H
 
@@ -10,22 +9,16 @@
 typedef struct {
     void* pool_start;
     void* current_ptr;
-    size_t pool_size;
-    size_t used_size;
+    size_t size;
     size_t alignment;
     bool is_initialized;
 } memory_pool_t;
 
 // Memory statistics structure
 typedef struct {
-    size_t total_allocated;
-    size_t total_freed;
-    size_t current_usage;
-    size_t peak_usage;
+    size_t allocated_bytes;
+    size_t free_bytes;
     size_t allocation_count;
-    size_t free_count;
-    size_t fragmentation_bytes;
-    double fragmentation_ratio;
 } memory_stats_t;
 
 // Memory optimizer context
@@ -39,15 +32,15 @@ typedef struct {
 } memory_optimizer_t;
 
 // Function declarations
-memory_optimizer_t* memory_optimizer_create(size_t initial_pool_size);
-void memory_optimizer_destroy(memory_optimizer_t* optimizer);
-
-// Pool management
+memory_pool_t* memory_pool_create(size_t size, size_t alignment);
+void memory_pool_destroy(memory_pool_t* pool);
 bool memory_pool_init(memory_pool_t* pool, size_t size, size_t alignment);
 void* memory_pool_alloc(memory_pool_t* pool, size_t size);
 bool memory_pool_free(memory_pool_t* pool, void* ptr, size_t size);
 void memory_pool_reset(memory_pool_t* pool);
-void memory_pool_defragment(memory_pool_t* pool);
+size_t memory_pool_get_used_size(memory_pool_t* pool);
+size_t memory_pool_get_free_size(memory_pool_t* pool);
+void memory_pool_get_stats(memory_pool_t* pool, memory_stats_t* stats);
 
 // Optimized LUM allocations
 lum_t* memory_optimizer_alloc_lum(memory_optimizer_t* optimizer);
