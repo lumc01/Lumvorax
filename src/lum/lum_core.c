@@ -5,6 +5,7 @@
 #include <time.h>
 
 static uint32_t lum_id_counter = 1;
+static pthread_mutex_t id_counter_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Core LUM functions
 lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e type) {
@@ -220,7 +221,10 @@ lum_group_t* lum_memory_retrieve(lum_memory_t* memory) {
 
 // Utility functions
 uint32_t lum_generate_id(void) {
-    return lum_id_counter++;
+    pthread_mutex_lock(&id_counter_mutex);
+    uint32_t id = lum_id_counter++;
+    pthread_mutex_unlock(&id_counter_mutex);
+    return id;
 }
 
 uint64_t lum_get_timestamp(void) {

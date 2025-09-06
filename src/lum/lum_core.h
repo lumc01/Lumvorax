@@ -5,6 +5,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <assert.h>
+#include <pthread.h>
 
 // Vérification de l'ABI - la structure doit faire exactement 32 bytes avec padding
 _Static_assert(sizeof(struct { uint8_t a; uint32_t b; int32_t c; int32_t d; uint8_t e; uint64_t f; }) == 32, 
