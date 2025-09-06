@@ -8,6 +8,11 @@
 2025-01-07 16:16 - memory_footprint_impl_t + Structure interne d'implémentation pour empreinte mémoire étendue
 2025-01-07 16:17 - memory_footprint_update + Fonction de mise à jour des métriques mémoire système
 2025-01-27 20:30 - LUM_STRUCTURE_GROUP + Type de structure pour les groupes de LUMs
+2025-01-27 20:45 - execution_$(date).log + Log d'exécution horodaté du système principal
+2025-01-27 20:45 - conservation_results_$(date).log + Résultats des tests de conservation mathématique
+2025-01-27 20:45 - performance_results_$(date).log + Métriques de performance en temps réel
+2025-01-27 20:45 - test_complete_results_$(date).log + Résultats complets des tests de fonctionnalité
+2025-01-27 20:45 - evidence/checksums_$(date).txt + Empreintes SHA-256 pour validation forensique
 2025-01-27 20:31 - LUM_STRUCTURE_MAX + Valeur maximale pour validation des types de structure
 
 ## STRUCTURES DE DONNÉES
