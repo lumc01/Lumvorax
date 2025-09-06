@@ -12,18 +12,18 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM_VORAX_BUILD"
+args = "LUM_VORAX_DEMO"
 
 [[workflows.workflow]]
-name = "LUM_VORAX_BUILD"
+name = "LUM_VORAX_DEMO"
 author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "make run"
+args = "./bin/lum_vorax"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh"]
