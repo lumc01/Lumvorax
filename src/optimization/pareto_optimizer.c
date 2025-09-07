@@ -69,14 +69,16 @@ void pareto_optimizer_destroy(pareto_optimizer_t* optimizer) {
     if (!optimizer) return;
 
     if (optimizer->points) {
-        for (size_t i = 0; i < optimizer->point_count; i++) {
-            // optimization_path est un tableau statique, pas besoin de free
-            optimizer->points[i].optimization_path[0] = '\0';
-        }
+        // Les optimization_path sont des tableaux statiques dans la structure,
+        // pas besoin de les nettoyer individuellement
         free(optimizer->points);
         optimizer->points = NULL;
     }
 
+    // Assurer que l'optimizer n'est pas utilisé après destruction
+    optimizer->point_count = 0;
+    optimizer->point_capacity = 0;
+    
     free(optimizer);
 }
 

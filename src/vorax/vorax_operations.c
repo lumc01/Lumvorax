@@ -300,18 +300,30 @@ vorax_result_t* vorax_result_create(void) {
 }
 
 void vorax_result_destroy(vorax_result_t* result) {
-    if (result) {
-        if (result->result_group) {
-            lum_group_destroy(result->result_group);
-        }
-        if (result->result_groups) {
-            for (size_t i = 0; i < result->result_count; i++) {
-                lum_group_destroy(result->result_groups[i]);
-            }
-            free(result->result_groups);
-        }
-        free(result);
+    if (!result) return;
+    
+    // Destruction sécurisée du groupe principal
+    if (result->result_group) {
+        lum_group_destroy(result->result_group);
+        result->result_group = NULL;
     }
+    
+    // Destruction sécurisée des groupes multiples
+    if (result->result_groups && result->result_count > 0) {
+        for (size_t i = 0; i < result->result_count; i++) {
+            if (result->result_groups[i]) {
+                lum_group_destroy(result->result_groups[i]);
+                result->result_groups[i] = NULL;
+            }
+        }
+        free(result->result_groups);
+        result->result_groups = NULL;
+    }
+    
+    // Réinitialiser les compteurs pour éviter réutilisation
+    result->result_count = 0;
+    
+    free(result);
 }
 
 void vorax_result_set_success(vorax_result_t* result, const char* message) {

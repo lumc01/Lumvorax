@@ -479,12 +479,24 @@ void demo_pareto_optimization(void) {
     pareto_generate_performance_report(optimizer, report_filename);
     printf("  ✓ Rapport généré: %s\n", report_filename);
 
-    // Nettoyage
-    if (fuse_result) vorax_result_destroy(fuse_result);
-    if (split_result) vorax_result_destroy(split_result);
-    if (cycle_result) vorax_result_destroy(cycle_result);
+    // Nettoyage sécurisé avec vérification NULL
     lum_group_destroy(group1);
     lum_group_destroy(group2);
+    
+    // Destruction sécurisée des résultats VORAX
+    if (fuse_result) {
+        vorax_result_destroy(fuse_result);
+        fuse_result = NULL;
+    }
+    if (split_result) {
+        vorax_result_destroy(split_result);
+        split_result = NULL;
+    }
+    if (cycle_result) {
+        vorax_result_destroy(cycle_result);
+        cycle_result = NULL;
+    }
+    
     pareto_optimizer_destroy(optimizer);
 
     printf("  ✅ Démonstration optimisation Pareto terminée\n");
