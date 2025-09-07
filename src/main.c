@@ -214,10 +214,7 @@ void demo_vorax_operations(void) {
         lum_group_destroy(group2);
         group2 = NULL;
     }
-    if (fuse_result) {
-        vorax_result_destroy(fuse_result);
-        fuse_result = NULL;
-    }
+    // fuse_result déjà détruit ci-dessus, pas de double-free
 }
 
 void demo_binary_conversion(void) {
