@@ -14,6 +14,7 @@ SOURCES = $(SRC_DIR)/main.c \
 	  $(SRC_DIR)/optimization/memory_optimizer.c \
 	  $(SRC_DIR)/optimization/pareto_optimizer.c \
 	  $(SRC_DIR)/optimization/pareto_inverse_optimizer.c \
+	  $(SRC_DIR)/optimization/simd_optimizer.c \
 	  $(SRC_DIR)/parallel/parallel_processor.c \
 	  $(SRC_DIR)/metrics/performance_metrics.c \
 	  $(SRC_DIR)/crypto/crypto_validator.c \
@@ -28,6 +29,7 @@ OBJECTS = $(OBJ_DIR)/main.o \
 	  $(OBJ_DIR)/optimization/memory_optimizer.o \
 	  $(OBJ_DIR)/optimization/pareto_optimizer.o \
 	  $(OBJ_DIR)/optimization/pareto_inverse_optimizer.o \
+	  $(OBJ_DIR)/optimization/simd_optimizer.o \
 	  $(OBJ_DIR)/parallel/parallel_processor.o \
 	  $(OBJ_DIR)/metrics/performance_metrics.o \
 	  $(OBJ_DIR)/crypto/crypto_validator.o \

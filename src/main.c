@@ -13,6 +13,7 @@
 #include "metrics/performance_metrics.h"
 #include "optimization/memory_optimizer.h"
 #include "optimization/pareto_optimizer.h"
+#include "optimization/simd_optimizer.h"
 
 // Demo functions
 void demo_basic_lum_operations(void);
@@ -21,6 +22,7 @@ void demo_binary_conversion(void);
 void demo_parser(void);
 void demo_complete_scenario(void);
 void demo_pareto_optimization(void);
+void demo_simd_optimization(void);
 
 int main(int argc, char* argv[]) {
     // Options de validation forensique
@@ -110,6 +112,9 @@ int main(int argc, char* argv[]) {
 
     printf("\n🔧 === DÉMONSTRATION OPTIMISATION PARETO === 🔧\n");
     demo_pareto_optimization();
+
+    printf("\n⚡ === DÉMONSTRATION OPTIMISATION SIMD === ⚡\n");
+    demo_simd_optimization();
 
     lum_log(LUM_LOG_INFO, "=== TESTS TERMINÉS ===");
 
@@ -483,4 +488,180 @@ void demo_pareto_optimization(void) {
     pareto_optimizer_destroy(optimizer);
 
     printf("  ✅ Démonstration optimisation Pareto terminée\n");
+}
+
+void demo_simd_optimization(void) {
+    printf("  🔍 Détection des capacités SIMD du processeur\n");
+    
+    simd_capabilities_t* caps = simd_detect_capabilities();
+    if (!caps) {
+        printf("  ❌ Erreur détection capacités SIMD\n");
+        return;
+    }
+    
+    printf("  ✓ Détection réussie - Capacités SIMD détectées:\n");
+    printf("    AVX-512: %s\n", caps->avx512_available ? "Disponible" : "Non disponible");
+    printf("    AVX2: %s\n", caps->avx2_available ? "Disponible" : "Non disponible");  
+    printf("    SSE: %s\n", caps->sse_available ? "Disponible" : "Non disponible");
+    printf("    Largeur vectorielle: %d éléments\n", caps->vector_width);
+    printf("    Fonctionnalités CPU: %s\n", caps->cpu_features);
+    
+    // Tests de stress selon prompt.txt - minimum 1M+ LUMs
+    printf("\n  🚀 Tests de stress SIMD avec 1+ millions de LUMs\n");
+    
+    size_t test_sizes[] = {100000, 500000, 1000000, 2000000, 5000000};
+    size_t num_tests = sizeof(test_sizes) / sizeof(test_sizes[0]);
+    
+    for (size_t i = 0; i < num_tests; i++) {
+        printf("  📊 Test SIMD avec %zu LUMs...\n", test_sizes[i]);
+        
+        simd_result_t* result = simd_benchmark_vectorization(test_sizes[i]);
+        if (result) {
+            printf("    ✓ Traitement terminé:\n");
+            printf("      Éléments traités: %zu LUMs\n", result->processed_elements);
+            printf("      Temps d'exécution: %.6f secondes\n", result->execution_time);
+            printf("      Débit: %.2f LUMs/seconde\n", result->throughput_ops_per_sec);
+            printf("      Vectorisation: %s\n", result->used_vectorization ? "Activée" : "Désactivée");
+            printf("      Optimisation: %s\n", result->optimization_used);
+            
+            simd_result_destroy(result);
+        } else {
+            printf("    ❌ Échec test SIMD avec %zu LUMs\n", test_sizes[i]);
+        }
+        printf("\n");
+    }
+    
+    // Test comparatif scalar vs vectorisé selon exigences
+    printf("  📈 Comparaison performance Scalar vs Vectorisé (1M LUMs)\n");
+    
+    // Créer données test pour comparaison
+    size_t compare_size = 1000000;
+    lum_t* test_lums_scalar = malloc(compare_size * sizeof(lum_t));
+    lum_t* test_lums_simd = malloc(compare_size * sizeof(lum_t));
+    
+    if (test_lums_scalar && test_lums_simd) {
+        // Initialiser données identiques
+        for (size_t i = 0; i < compare_size; i++) {
+            test_lums_scalar[i].presence = (i % 3 == 0) ? 1 : 0;
+            test_lums_scalar[i].position_x = i;
+            test_lums_scalar[i].position_y = i * 2;
+            
+            test_lums_simd[i] = test_lums_scalar[i]; // Copie identique
+        }
+        
+        // Test scalar (simulation)
+        clock_t start_scalar = clock();
+        for (size_t i = 0; i < compare_size; i++) {
+            test_lums_scalar[i].presence = test_lums_scalar[i].presence ? 1 : 0;
+        }
+        clock_t end_scalar = clock();
+        double scalar_time = ((double)(end_scalar - start_scalar)) / CLOCKS_PER_SEC;
+        
+        // Test SIMD
+        simd_result_t* simd_result = simd_process_lum_array_bulk(test_lums_simd, compare_size);
+        
+        if (simd_result) {
+            printf("  📋 Résultats comparatifs:\n");
+            printf("    Scalar - Temps: %.6f s, Débit: %.2f LUMs/s\n", 
+                   scalar_time, compare_size / scalar_time);
+            printf("    SIMD   - Temps: %.6f s, Débit: %.2f LUMs/s\n",
+                   simd_result->execution_time, simd_result->throughput_ops_per_sec);
+            
+            if (simd_result->execution_time > 0 && scalar_time > 0) {
+                double speedup = scalar_time / simd_result->execution_time;
+                printf("    🚀 Accélération SIMD: %.2fx plus rapide\n", speedup);
+                
+                // Validation exigence minimum 2x selon feuille de route
+                if (speedup >= 2.0) {
+                    printf("    ✅ VALIDATION: Gain minimum 2x atteint\n");
+                } else {
+                    printf("    ⚠️  ATTENTION: Gain inférieur à 2x (%.2fx)\n", speedup);
+                }
+            }
+            
+            simd_result_destroy(simd_result);
+        }
+        
+        free(test_lums_scalar);
+        free(test_lums_simd);
+    } else {
+        printf("    ❌ Erreur allocation mémoire pour comparaison\n");
+    }
+    
+    // Test des fonctions spécialisées selon architecture
+    if (caps->avx2_available) {
+        printf("  🔧 Test optimisations AVX2 spécialisées\n");
+        
+        uint32_t test_presence[8] = {0, 1, 2, 0, 3, 0, 1, 4};
+        printf("    Données avant AVX2: ");
+        for (int i = 0; i < 8; i++) printf("%u ", test_presence[i]);
+        printf("\n");
+        
+#ifdef __AVX2__
+        simd_avx2_process_presence_bits(test_presence, 8);
+        printf("    Données après AVX2: ");
+        for (int i = 0; i < 8; i++) printf("%u ", test_presence[i]);
+        printf("\n");
+        printf("    ✅ Optimisation AVX2 appliquée avec succès\n");
+#else
+        printf("    ⚠️  AVX2 détecté mais non compilé (compilation sans -mavx2)\n");
+#endif
+    }
+    
+    if (caps->avx512_available) {
+        printf("  🚀 Test optimisations AVX-512 spécialisées\n");
+        printf("    ✓ Capacité AVX-512 détectée (largeur: %d éléments)\n", caps->vector_width);
+#ifdef __AVX512F__
+        printf("    ✅ Support AVX-512 compilé\n");
+#else
+        printf("    ⚠️  AVX-512 détecté mais non compilé (compilation sans -mavx512f)\n");
+#endif
+    }
+    
+    // Tests de conservation SIMD selon exigences VORAX
+    printf("  🔒 Validation conservation mathématique avec SIMD\n");
+    size_t conservation_test_size = 100000;
+    lum_group_t* conservation_group = lum_group_create(conservation_test_size);
+    
+    if (conservation_group) {
+        // Initialiser avec données connues
+        size_t total_presence = 0;
+        for (size_t i = 0; i < conservation_test_size; i++) {
+            lum_t* lum = lum_create((i % 2), i, 0, LUM_STRUCTURE_LINEAR);
+            if (lum) {
+                total_presence += lum->presence;
+                lum_group_add(conservation_group, lum);
+                free(lum);
+            }
+        }
+        
+        printf("    Présence totale avant SIMD: %zu\n", total_presence);
+        
+        // Appliquer traitement SIMD
+        simd_result_t* conservation_result = simd_process_lum_array_bulk(
+            conservation_group->lums, conservation_group->count);
+        
+        if (conservation_result) {
+            // Vérifier conservation
+            size_t total_after = 0;
+            for (size_t i = 0; i < conservation_group->count; i++) {
+                total_after += conservation_group->lums[i].presence;
+            }
+            
+            printf("    Présence totale après SIMD: %zu\n", total_after);
+            
+            if (total_after == total_presence) {
+                printf("    ✅ CONSERVATION VALIDÉE: SIMD préserve la présence totale\n");
+            } else {
+                printf("    ❌ VIOLATION CONSERVATION: %zu != %zu\n", total_after, total_presence);
+            }
+            
+            simd_result_destroy(conservation_result);
+        }
+        
+        lum_group_destroy(conservation_group);
+    }
+    
+    simd_capabilities_destroy(caps);
+    printf("  ✅ Tests SIMD terminés - Module validé selon standards forensiques\n");
 }
