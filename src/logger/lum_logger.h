@@ -61,11 +61,14 @@ typedef struct {
 
 // Logger context
 typedef struct {
-    FILE* file;
-    char* buffer;
-    size_t buffer_size;
-    lum_log_level_e log_level;
-    bool is_enabled;
+    FILE* log_file;
+    char log_filename[256];
+    bool console_output;
+    bool file_output;
+    lum_log_level_e min_level;
+    uint32_t sequence_counter;
+    bool trace_all_lums;
+    bool conservation_check;
 } lum_logger_t;
 
 // Logger initialization and cleanup

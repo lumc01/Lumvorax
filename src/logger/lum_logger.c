@@ -437,10 +437,7 @@ void lum_log_analysis_destroy(lum_log_analysis_t* analysis) {
 // Implémentation complète du système de logging
 void lum_log_init(lum_logger_t* logger, lum_log_level_e level) {
     if (!logger) return;
-    // Fix: Add missing fields to lum_logger_t structure
-    // These fields will be added to the header file
-    logger->log_level = level;
-    logger->is_enabled = true;
+    logger->min_level = level;
 }
 
 void lum_log(lum_log_level_e level, const char* format, ...) {
