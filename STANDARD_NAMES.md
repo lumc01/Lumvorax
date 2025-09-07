@@ -18,6 +18,10 @@
 2025-09-06 20:45 - pareto_metrics_t + Métriques d'évaluation Pareto (efficacité, mémoire, temps, énergie)
 2025-09-06 20:45 - pareto_point_t + Point dans l'espace Pareto avec score de dominance
 2025-09-06 20:45 - pareto_config_t + Configuration des optimisations Pareto
+2025-01-07 15:44 - lum_log + Fonction de logging avec formatage et horodatage
+2025-01-07 15:44 - lum_log_init + Initialisation système de logging
+2025-01-07 15:44 - performance_metrics_validator_t + Validateur métriques de performance
+2025-01-07 15:44 - memory_footprint_impl_t + Implémentation interne empreinte mémoire
 
 ## STRUCTURES DE DONNÉES
 

@@ -1,11 +1,14 @@
 #ifndef LUM_LOGGER_H
 #define LUM_LOGGER_H
 
+#include <stdbool.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <time.h>
+
 #include "../lum/lum_core.h"
 #include "../vorax/vorax_operations.h"
 #include <stdint.h>
-#include <stdio.h>
-#include <stdbool.h>
 #include <stddef.h>
 
 // Système de désactivation des logs pour benchmark performance
