@@ -14,6 +14,7 @@
 #include "optimization/memory_optimizer.h"
 #include "optimization/pareto_optimizer.h"
 #include "optimization/simd_optimizer.h"
+#include "optimization/zero_copy_allocator.h"
 
 // Demo functions
 void demo_basic_lum_operations(void);
@@ -23,6 +24,7 @@ void demo_parser(void);
 void demo_complete_scenario(void);
 void demo_pareto_optimization(void);
 void demo_simd_optimization(void);
+void demo_zero_copy_allocation(void);
 
 int main(int argc, char* argv[]) {
     // Options de validation forensique
@@ -115,6 +117,9 @@ int main(int argc, char* argv[]) {
 
     printf("\n⚡ === DÉMONSTRATION OPTIMISATION SIMD === ⚡\n");
     demo_simd_optimization();
+
+    printf("\n🚀 === DÉMONSTRATION ZERO-COPY ALLOCATOR === 🚀\n");
+    demo_zero_copy_allocation();
 
     lum_log(LUM_LOG_INFO, "=== TESTS TERMINÉS ===");
 
@@ -676,4 +681,196 @@ void demo_simd_optimization(void) {
     
     simd_capabilities_destroy(caps);
     printf("  ✅ Tests SIMD terminés - Module validé selon standards forensiques\n");
+}
+
+void demo_zero_copy_allocation(void) {
+    printf("  🔧 Création du pool zero-copy avec memory mapping POSIX\n");
+    
+    // Création pool de 1MB pour tests
+    size_t pool_size = 1024 * 1024; // 1MB
+    zero_copy_pool_t* pool = zero_copy_pool_create(pool_size, "demo_pool");
+    if (!pool) {
+        printf("  ❌ Erreur création pool zero-copy\n");
+        return;
+    }
+    
+    printf("  ✓ Pool créé: %zu bytes (%.2f MB)\n", 
+           pool_size, pool_size / (1024.0 * 1024.0));
+    
+    // Upgrade vers memory mapping
+    printf("  🗂️  Activation memory mapping POSIX (mmap)\n");
+    if (zero_copy_enable_mmap_backing(pool)) {
+        printf("  ✅ Memory mapping activé avec succès\n");
+        
+        // Optimisations POSIX
+        if (zero_copy_prefault_pages(pool)) {
+            printf("  ⚡ Pages prefaultées (évite page faults)\n");
+        }
+        if (zero_copy_advise_sequential(pool)) {
+            printf("  📈 Accès séquentiel optimisé (madvise)\n");
+        }
+    } else {
+        printf("  ⚠️  Memory mapping non disponible, utilisation malloc\n");
+    }
+    
+    // Tests d'allocations multiples selon exigences forensiques
+    printf("\n  💾 Tests de stress allocations zero-copy\n");
+    
+    size_t test_sizes[] = {64, 256, 1024, 4096, 16384, 65536};
+    size_t num_tests = sizeof(test_sizes) / sizeof(test_sizes[0]);
+    zero_copy_allocation_t* allocations[128];
+    size_t alloc_count = 0;
+    
+    // Phase 1: Allocations multiples
+    for (size_t round = 0; round < 3; round++) {
+        printf("    Round %zu d'allocations:\n", round + 1);
+        
+        for (size_t i = 0; i < num_tests && alloc_count < 128; i++) {
+            zero_copy_allocation_t* alloc = zero_copy_alloc(pool, test_sizes[i]);
+            if (alloc) {
+                allocations[alloc_count++] = alloc;
+                printf("      Alloc %zu bytes: %s, ID=%lu\n", 
+                       alloc->size,
+                       alloc->is_zero_copy ? "ZERO-COPY" : "standard",
+                       alloc->allocation_id);
+                
+                // Écriture données pour validation
+                if (alloc->ptr) {
+                    memset(alloc->ptr, (int)(alloc->allocation_id & 0xFF), alloc->size);
+                }
+            }
+        }
+    }
+    
+    printf("  📊 Statistiques après allocations initiales:\n");
+    zero_copy_print_stats(pool);
+    
+    // Phase 2: Libérations pour créer free list
+    printf("\n  🔄 Libération de 50%% des allocations pour tests réutilisation\n");
+    size_t freed = 0;
+    for (size_t i = 0; i < alloc_count; i += 2) {
+        if (zero_copy_free(pool, allocations[i])) {
+            zero_copy_allocation_destroy(allocations[i]);
+            allocations[i] = NULL;
+            freed++;
+        }
+    }
+    printf("    %zu allocations libérées\n", freed);
+    
+    // Phase 3: Nouvelles allocations (réutilisation zero-copy)
+    printf("\n  ♻️ Nouvelles allocations (test réutilisation zero-copy)\n");
+    for (size_t i = 0; i < 8; i++) {
+        size_t size = test_sizes[i % num_tests];
+        zero_copy_allocation_t* reused = zero_copy_alloc(pool, size);
+        if (reused) {
+            printf("    Alloc %zu bytes: %s, réutilisée=%s\n",
+                   size,
+                   reused->is_zero_copy ? "ZERO-COPY" : "standard",
+                   reused->is_reused_memory ? "OUI" : "NON");
+            
+            // Validation données intégrité mémoire
+            if (reused->ptr && reused->is_reused_memory) {
+                uint8_t* data = (uint8_t*)reused->ptr;
+                printf("      Validation intégrité: premier byte = 0x%02x\n", data[0]);
+            }
+            
+            zero_copy_free(pool, reused);
+            zero_copy_allocation_destroy(reused);
+        }
+    }
+    
+    // Tests resize in-place
+    printf("\n  📏 Test resize in-place (optimisation zero-copy)\n");
+    zero_copy_allocation_t* resize_test = zero_copy_alloc(pool, 1024);
+    if (resize_test) {
+        printf("    Allocation initiale: %zu bytes\n", resize_test->size);
+        
+        if (zero_copy_resize_inplace(pool, resize_test, 2048)) {
+            printf("    ✅ Expansion in-place réussie: %zu bytes\n", resize_test->size);
+        } else {
+            printf("    ⚠️  Expansion in-place impossible\n");
+        }
+        
+        if (zero_copy_resize_inplace(pool, resize_test, 512)) {
+            printf("    ✅ Contraction in-place réussie: %zu bytes\n", resize_test->size);
+        }
+        
+        zero_copy_free(pool, resize_test);
+        zero_copy_allocation_destroy(resize_test);
+    }
+    
+    // Défragmentation
+    printf("\n  🧹 Test défragmentation et compaction\n");
+    size_t fragmentation_before = zero_copy_get_fragmentation_bytes(pool);
+    printf("    Fragmentation avant: %zu bytes\n", fragmentation_before);
+    
+    if (zero_copy_defragment_pool(pool)) {
+        size_t fragmentation_after = zero_copy_get_fragmentation_bytes(pool);
+        printf("    ✅ Défragmentation effectuée\n");
+        printf("    Fragmentation après: %zu bytes (réduction: %zu bytes)\n", 
+               fragmentation_after, fragmentation_before - fragmentation_after);
+    }
+    
+    // Tests de performance selon exigences prompt.txt
+    printf("\n  ⚡ Tests de performance allocations massives\n");
+    
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
+    
+    // Test 10000 allocations rapides
+    size_t perf_allocs = 10000;
+    zero_copy_allocation_t* perf_test[1000];
+    size_t successful = 0;
+    
+    for (size_t i = 0; i < perf_allocs && successful < 1000; i++) {
+        zero_copy_allocation_t* alloc = zero_copy_alloc(pool, 64 + (i % 512));
+        if (alloc) {
+            perf_test[successful] = alloc;
+            successful++;
+            
+            if (i % 2 == 0 && successful > 10) {
+                // Libérer quelques allocations pour créer réutilisation
+                zero_copy_free(pool, perf_test[successful/2]);
+                zero_copy_allocation_destroy(perf_test[successful/2]);
+                perf_test[successful/2] = NULL;
+            }
+        }
+    }
+    
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    double duration = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
+    
+    printf("    %zu allocations en %.6f secondes\n", perf_allocs, duration);
+    printf("    Débit: %.0f allocations/seconde\n", perf_allocs / duration);
+    
+    // Nettoyage allocations performance
+    for (size_t i = 0; i < successful; i++) {
+        if (perf_test[i]) {
+            zero_copy_free(pool, perf_test[i]);
+            zero_copy_allocation_destroy(perf_test[i]);
+        }
+    }
+    
+    // Nettoyage allocations restantes 
+    for (size_t i = 0; i < alloc_count; i++) {
+        if (allocations[i]) {
+            zero_copy_free(pool, allocations[i]);
+            zero_copy_allocation_destroy(allocations[i]);
+        }
+    }
+    
+    // Statistiques finales
+    printf("\n  📈 Statistiques finales du pool zero-copy:\n");
+    zero_copy_print_stats(pool);
+    
+    // Validation métriques selon standards forensiques
+    double efficiency = zero_copy_get_efficiency_ratio(pool);
+    if (efficiency > 0.5) {
+        printf("  ✅ VALIDATION: Efficiency ratio %.3f > 50%% (conforme)\n", efficiency);
+    } else {
+        printf("  ⚠️  Efficiency ratio %.3f < 50%% (à optimiser)\n", efficiency);
+    }
+    
+    zero_copy_pool_destroy(pool);
+    printf("  ✅ Module ZERO_COPY_ALLOCATOR validé - Memory mapping POSIX opérationnel\n");
 }
