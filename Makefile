@@ -67,6 +67,12 @@ $(BIN_DIR)/test_stress_safe: $(SRC_DIR)/tests/test_stress_safe.c $(STRESS_OBJECT
 $(BIN_DIR)/test_million_lums: $(SRC_DIR)/tests/test_million_lums_stress.c $(STRESS_OBJECTS) | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $< $(STRESS_OBJECTS) -lpthread -lm
 
+test_complete: $(OBJECTS)
+	$(CC) $(CFLAGS) -o $(BINDIR)/test_complete src/tests/test_complete_functionality.c $(OBJECTS) $(LDFLAGS)
+
+test_stress_auth: $(OBJECTS)
+	$(CC) $(CFLAGS) -fsanitize=address,undefined -o $(BINDIR)/test_stress_authenticated src/tests/test_stress_authenticated.c $(OBJECTS) $(LDFLAGS)
+
 test_complete: $(BIN_DIR)/test_complete
 	./$(BIN_DIR)/test_complete
 
