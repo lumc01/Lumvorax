@@ -28,15 +28,25 @@ Aucune falsification ni approximation ne sera acceptée.
 
 Si les résultats ne sont pas authentiques, cela doit être explicitement signalé.
 
-⚠️ RÈGLE CRITIQUE DE TRAÇABILITÉ DES LOGS
+⚠️ RÈGLE CRITIQUE DE TRAÇABILITÉ DES LOGS ET RAPPORTS
 
-JAMAIS écraser les fichiers de logs existants. Chaque exécution DOIT créer de nouveaux fichiers horodatés pour maintenir la traçabilité complète du développement.
+JAMAIS écraser les fichiers de logs OU RAPPORTS existants. Chaque exécution DOIT créer de nouveaux fichiers horodatés pour maintenir la traçabilité complète du développement.
 
 Format obligatoire : nom_fichier_YYYYMMDD_HHMMSS.extension
 
-Exemples : execution_20250906_203045.log, test_results_20250906_203102.log
+Exemples : execution_20250906_203045.log, test_results_20250906_203102.log, RAPPORT_FORENSIQUE_20250906_203102.md
 
 Cette traçabilité est ESSENTIELLE pour l'audit forensique et la validation scientifique.
+
+⚠️ TESTS DE STRESS OBLIGATOIRES
+
+Tous les modules DOIVENT être testés avec des charges maximales :
+- Tests avec 1+ millions de LUMs minimum
+- Tests de performance sous stress extrême 
+- Mesures de dégradation gracieuse
+- Validation limites système réelles
+
+Ces tests sont CRITIQUES pour validation industrielle.
 
 Le rapport final doit comporter :
 

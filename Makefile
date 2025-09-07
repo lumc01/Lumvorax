@@ -17,7 +17,10 @@ SOURCES = $(SRC_DIR)/main.c \
           $(SRC_DIR)/parallel/parallel_processor.c \
           $(SRC_DIR)/metrics/performance_metrics.c \
           $(SRC_DIR)/crypto/crypto_validator.c \
-          $(SRC_DIR)/persistence/data_persistence.c
+          $(SRC_DIR)/persistence/data_persistence.c \
+          $(SRC_DIR)/optimization/simd_optimizer.c \
+          $(SRC_DIR)/optimization/zero_copy_allocator.c \
+          $(SRC_DIR)/vorax/vorax_complex_calculations.c
 
 OBJECTS = $(OBJ_DIR)/main.o \
           $(OBJ_DIR)/lum/lum_core.o \
@@ -31,7 +34,17 @@ OBJECTS = $(OBJ_DIR)/main.o \
           $(OBJ_DIR)/parallel/parallel_processor.o \
           $(OBJ_DIR)/metrics/performance_metrics.o \
           $(OBJ_DIR)/crypto/crypto_validator.o \
-          $(OBJ_DIR)/persistence/data_persistence.o
+          $(OBJ_DIR)/persistence/data_persistence.o \
+          $(OBJ_DIR)/optimization/simd_optimizer.o \
+          $(OBJ_DIR)/optimization/zero_copy_allocator.o \
+          $(OBJ_DIR)/vorax/vorax_complex_calculations.o
+
+# Optimization objects
+OPTIMIZATION_OBJS = $(OBJ_DIR)/optimization/memory_optimizer.o \
+                    $(OBJ_DIR)/optimization/pareto_optimizer.o \
+                    $(OBJ_DIR)/optimization/pareto_inverse_optimizer.o \
+                    $(OBJ_DIR)/optimization/simd_optimizer.o \
+                    $(OBJ_DIR)/optimization/zero_copy_allocator.o
 
 EXECUTABLE = $(BIN_DIR)/lum_vorax
 
@@ -52,6 +65,16 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 
 $(OBJ_DIR)/parallel/parallel_processor.o: $(SRC_DIR)/parallel/parallel_processor.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -pthread -c $< -o $@
+
+# Test de stress avec millions de LUMs
+$(BIN_DIR)/test_stress_million: $(SRC_DIR)/tests/test_stress_million_lums.c $(ALL_OBJS) | $(BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ $< $(ALL_OBJS) $(LIBS)
+
+test_complete: $(BIN_DIR)/test_complete
+	./$(BIN_DIR)/test_complete
+
+test_stress_million: $(BIN_DIR)/test_stress_million
+	./$(BIN_DIR)/test_stress_million
 
 .PHONY: all clean run test
 .DEFAULT_GOAL := all

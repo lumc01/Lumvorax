@@ -205,8 +205,19 @@ void demo_vorax_operations(void) {
     }
     vorax_result_destroy(fuse_result);
 
-    lum_group_destroy(group1);
-    lum_group_destroy(group2);
+    // Cleanup avec protection double-free
+    if (group1) {
+        lum_group_destroy(group1);
+        group1 = NULL;
+    }
+    if (group2) {
+        lum_group_destroy(group2);
+        group2 = NULL;
+    }
+    if (fuse_result) {
+        vorax_result_destroy(fuse_result);
+        fuse_result = NULL;
+    }
 }
 
 void demo_binary_conversion(void) {

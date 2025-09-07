@@ -34,6 +34,26 @@ typedef enum {
     TOKEN_EVERY,          // every
     TOKEN_MS,             // ms
     TOKEN_ALL,            // all
+    TOKEN_CALCULATE,      // calculate
+    TOKEN_TRANSFORM,      // transform  
+    TOKEN_MATRIX,         // matrix
+    TOKEN_VECTOR,         // vector
+    TOKEN_DERIVATIVE,     // derivative
+    TOKEN_INTEGRAL,       // integral
+    TOKEN_SIN,            // sin
+    TOKEN_COS,            // cos
+    TOKEN_LOG,            // log
+    TOKEN_EXP,            // exp
+    TOKEN_SQRT,           // sqrt
+    TOKEN_POW,            // pow
+    TOKEN_COMPLEX,        // complex
+    TOKEN_REAL,           // real
+    TOKEN_IMAG,           // imag
+    TOKEN_DOT,            // .
+    TOKEN_MULTIPLY,       // *
+    TOKEN_DIVIDE,         // /
+    TOKEN_POWER,          // ^
+    TOKEN_EQUALS,         // =
     TOKEN_EOF,            // End of file
     TOKEN_UNKNOWN         // Unknown token
 } vorax_token_type_e;
@@ -61,7 +81,15 @@ typedef enum {
     AST_FUSE_STATEMENT,
     AST_ON_STATEMENT,
     AST_EVERY_STATEMENT,
-    AST_IF_STATEMENT
+    AST_IF_STATEMENT,
+    AST_CALCULATE_STATEMENT,
+    AST_TRANSFORM_STATEMENT,
+    AST_MATRIX_OPERATION,
+    AST_VECTOR_OPERATION,
+    AST_COMPLEX_OPERATION,
+    AST_MATHEMATICAL_FUNCTION,
+    AST_DERIVATIVE_OPERATION,
+    AST_INTEGRAL_OPERATION
 } vorax_ast_node_type_e;
 
 // AST node structure

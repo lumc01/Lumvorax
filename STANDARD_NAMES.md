@@ -105,6 +105,21 @@
 - `optimization_type_e` : Types d'optimisation (MEMORY, SIMD, PARALLEL, CRYPTO, ENERGY)
 - `pareto_inverse_result_t` : Résultat d'optimisation multi-couches avec métriques détaillées
 
+### Types Optimisation SIMD
+- `simd_capabilities_t` : Détection capacités SIMD (AVX2, AVX-512, SSE)
+- `simd_result_t` : Résultat opérations vectorisées avec métriques performance
+- `simd_vector_size` : Taille vecteur selon architecture (8/16/1)
+
+### Types Allocateur Zero-Copy
+- `zero_copy_pool_t` : Pool mémoire zero-copy avec memory mapping
+- `zero_copy_allocation_t` : Allocation zero-copy avec métadonnées
+- `free_block_t` : Block libre pour réutilisation zero-copy
+
+### Types Tests de Stress
+- `stress_test_result_t` : Résultats tests stress avec millions de LUMs
+- `MILLION_LUMS` : Constante 1,000,000 pour tests stress
+- `MAX_STRESS_LUMS` : Constante 10,000,000 pour tests extrêmes
+
 ## CONSTANTES ET ENUMS
 
 ### Constantes système
