@@ -2,6 +2,7 @@
 #include "performance_metrics.h"
 #include <stdlib.h>
 #include <string.h>
+#include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/resource.h>
@@ -414,9 +415,9 @@ void memory_footprint_update(memory_footprint_t* footprint) {
 
     footprint->heap_usage = performance_metrics_get_memory_usage();
 
-    // Estimation simple du stack usage
+    // Estimation simple du stack usage (eviter null pointer arithmetic)
     void* stack_ptr = &footprint;
-    footprint->stack_usage = (size_t)((char*)&stack_ptr - (char*)0) % 8192;
+    footprint->stack_usage = (size_t)((uintptr_t)stack_ptr % 8192);
 
     if (footprint->stack_usage > footprint->peak_stack) {
         footprint->peak_stack = footprint->stack_usage;
