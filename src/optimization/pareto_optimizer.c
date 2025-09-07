@@ -70,10 +70,8 @@ void pareto_optimizer_destroy(pareto_optimizer_t* optimizer) {
 
     if (optimizer->points) {
         for (size_t i = 0; i < optimizer->point_count; i++) {
-            if (optimizer->points[i].optimization_path) {
-                free(optimizer->points[i].optimization_path);
-                optimizer->points[i].optimization_path = NULL; // Éviter double free
-            }
+            // optimization_path est un tableau statique, pas besoin de free
+            optimizer->points[i].optimization_path[0] = '\0';
         }
         free(optimizer->points);
         optimizer->points = NULL;
