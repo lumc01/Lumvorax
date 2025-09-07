@@ -63,6 +63,10 @@ STRESS_OBJECTS = $(filter-out $(OBJ_DIR)/main.o, $(OBJECTS))
 $(BIN_DIR)/test_stress_safe: $(SRC_DIR)/tests/test_stress_safe.c $(STRESS_OBJECTS) | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $< $(STRESS_OBJECTS) -lpthread -lm
 
+# Test stress million LUMs selon prompt.txt
+$(BIN_DIR)/test_million_lums: $(SRC_DIR)/tests/test_million_lums_stress.c $(STRESS_OBJECTS) | $(BIN_DIR)
+	$(CC) $(CFLAGS) -o $@ $< $(STRESS_OBJECTS) -lpthread -lm
+
 test_complete: $(BIN_DIR)/test_complete
 	./$(BIN_DIR)/test_complete
 
