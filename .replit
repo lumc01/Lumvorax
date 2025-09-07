@@ -49,26 +49,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX Demo"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "Main LUM/VORAX Demo"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "LUM/VORAX Clean Demo"
 
-[[workflows.workflow]]
-name = "LUM/VORAX Demo"
-author = "agent"
-
 [[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax --sizeof-checks && echo \"=== Running Crypto Validation ===\" && ./bin/lum_vorax --crypto-validation"
-
-[workflows.workflow.metadata]
-outputType = "console"
+task = "workflow.run"
+args = "LUM/VORAX Demo"
 
 [[workflows.workflow]]
 name = "Main LUM/VORAX Demo"
@@ -116,6 +105,17 @@ args = "echo \"Toutes corrections appliquées conformément aux standards\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"Rapport mis à jour avec données authentiques\""
+
+[[workflows.workflow]]
+name = "LUM/VORAX Demo"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax --sizeof-checks && echo \"=== Running Crypto Validation ===\" && ./bin/lum_vorax --crypto-validation"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh", "file"]
