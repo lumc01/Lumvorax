@@ -5,42 +5,9 @@
 #include <time.h>   // Added for time()
 #include <stdio.h>  // Added for printf()
 
-// Forward declaration of the lum_log function if it's not defined in memory_tracker.h
-// Assuming a basic implementation for demonstration if not provided.
-#ifndef LUM_LOG_DEBUG
-#define LUM_LOG_DEBUG 0
-#define LUM_LOG_ERROR 1
-#define LUM_LOG_WARNING 2
-#endif
+#include "../logger/lum_logger.h" // Include for lum_log function
 
-void lum_log(int level, const char* format, ...); // Declaration assuming it exists elsewhere
-
-#define MAX_MEMORY_ENTRIES 1024 // Define a maximum for entries
-
-// Define a structure for memory entries
-typedef struct {
-    void* ptr;
-    size_t size;
-    const char* file;
-    int line;
-    const char* function;
-    time_t allocated_time;
-    int is_freed;
-    time_t freed_time;
-    const char* freed_file;
-    int freed_line;
-    const char* freed_function;
-} memory_entry_t;
-
-// Define the memory tracker structure
-typedef struct {
-    memory_entry_t entries[MAX_MEMORY_ENTRIES];
-    size_t count;
-    size_t total_allocated;
-    size_t total_freed;
-    size_t current_usage;
-    size_t peak_usage;
-} memory_tracker_t;
+// Remove duplicate definitions - already defined in header
 
 static memory_tracker_t g_tracker = {0};
 static pthread_mutex_t g_tracker_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -195,6 +162,7 @@ void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const 
 
     pthread_mutex_lock(&g_tracker_mutex);
     int entry_idx = find_entry(ptr); // Find active entry
+    int found_any_entry_idx = -1; // Declare here for wider scope
     size_t old_size = 0;
 
     if (entry_idx != -1) {
@@ -210,7 +178,6 @@ void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const 
         // If the pointer was not found as active, it might be a double realloc or an untracked pointer.
         // For realloc, we still need to proceed if it's a valid pointer, but we should log a warning.
         // We search for any entry to get the old size if available.
-        int found_any_entry_idx = -1;
         for (size_t i = 0; i < g_tracker.count; i++) {
             if (g_tracker.entries[i].ptr == ptr) {
                 found_any_entry_idx = (int)i;
@@ -340,23 +307,4 @@ void memory_tracker_destroy(void) {
     pthread_mutex_unlock(&g_tracker_mutex);
 }
 
-// Dummy implementation of lum_log if not provided elsewhere.
-// In a real scenario, this would be defined in a logging utility header/source.
-#ifndef LUM_LOG_IMPLEMENTATION
-#define LUM_LOG_IMPLEMENTATION
-void lum_log(int level, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    // Basic logging to stderr. A real implementation would be more sophisticated.
-    fprintf(stderr, "[LUM_LOG] ");
-    switch (level) {
-        case LUM_LOG_DEBUG: fprintf(stderr, "DEBUG: "); break;
-        case LUM_LOG_ERROR: fprintf(stderr, "ERROR: "); break;
-        case LUM_LOG_WARNING: fprintf(stderr, "WARNING: "); break;
-        default: fprintf(stderr, "INFO: "); break;
-    }
-    vfprintf(stderr, format, args);
-    fprintf(stderr, "\n");
-    va_end(args);
-}
-#endif
+// lum_log is defined in the logger module

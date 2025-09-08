@@ -310,7 +310,7 @@ void vorax_result_destroy(vorax_result_t* result) {
     // Vérifier si déjà détruit
     for (size_t i = 0; i < destroyed_count; i++) {
         if (destroyed_results && destroyed_results[i] == result) {
-            lum_log(LUM_LOG_WARNING, "Tentative double destruction vorax_result_t évitée");
+            lum_log(LUM_LOG_WARN, "Tentative double destruction vorax_result_t évitée");
             return;
         }
     }
