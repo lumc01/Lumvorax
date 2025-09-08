@@ -1,4 +1,5 @@
 #include "vorax_operations.h"
+#include "../logger/lum_logger.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
