@@ -15,6 +15,7 @@
 #include "optimization/pareto_optimizer.h"
 #include "optimization/simd_optimizer.h"
 #include "optimization/zero_copy_allocator.h"
+#include "debug/memory_tracker.h"
 
 // Demo functions
 void demo_basic_lum_operations(void);
@@ -81,7 +82,11 @@ int main(int argc, char* argv[]) {
     printf("=== LUM/VORAX System Demo ===\n");
     printf("Implementation complete du concept LUM/VORAX en C\n\n");
 
-    // Initialize logging
+    // Initialize memory tracking
+    memory_tracker_init();
+    printf("[MAIN] Memory tracking initialized\n");
+
+    // Initialize logger
     lum_logger_t* logger = lum_logger_create("logs/lum_vorax.log", true, true);
     if (!logger) {
         printf("Erreur: Impossible de créer le logger\n");
@@ -125,6 +130,12 @@ int main(int argc, char* argv[]) {
 
     printf("\nDémo terminée avec succès!\n");
     printf("Consultez le fichier lum_vorax.log pour les détails.\n");
+
+    // Rapport final mémoire avant fermeture
+    printf("\n=== MEMORY CLEANUP REPORT ===\n");
+    memory_tracker_report();
+    memory_tracker_check_leaks();
+    memory_tracker_destroy();
 
     lum_logger_destroy(logger);
     return 0;
@@ -442,7 +453,7 @@ void demo_pareto_optimization(void) {
     if (script_success) {
         printf("  ✓ Script VORAX d'optimisation exécuté avec succès\n");
     } else {
-        printf("  ⚠️ Échec exécution script VORAX d'optimisation\n");
+        printf("  ⚠️  Échec exécution script VORAX d'optimisation\n");
     }
 
     // Génération de script d'optimisation dynamique
@@ -487,7 +498,7 @@ void demo_pareto_optimization(void) {
     // Nettoyage sécurisé avec vérification NULL
     lum_group_destroy(group1);
     lum_group_destroy(group2);
-    
+
     // Destruction sécurisée des résultats VORAX
     if (fuse_result) {
         vorax_result_destroy(fuse_result);
@@ -501,7 +512,7 @@ void demo_pareto_optimization(void) {
         vorax_result_destroy(cycle_result);
         cycle_result = NULL;
     }
-    
+
     pareto_optimizer_destroy(optimizer);
 
     printf("  ✅ Démonstration optimisation Pareto terminée\n");
@@ -509,29 +520,29 @@ void demo_pareto_optimization(void) {
 
 void demo_simd_optimization(void) {
     printf("  🔍 Détection des capacités SIMD du processeur\n");
-    
+
     simd_capabilities_t* caps = simd_detect_capabilities();
     if (!caps) {
         printf("  ❌ Erreur détection capacités SIMD\n");
         return;
     }
-    
+
     printf("  ✓ Détection réussie - Capacités SIMD détectées:\n");
     printf("    AVX-512: %s\n", caps->avx512_available ? "Disponible" : "Non disponible");
     printf("    AVX2: %s\n", caps->avx2_available ? "Disponible" : "Non disponible");  
     printf("    SSE: %s\n", caps->sse_available ? "Disponible" : "Non disponible");
     printf("    Largeur vectorielle: %d éléments\n", caps->vector_width);
     printf("    Fonctionnalités CPU: %s\n", caps->cpu_features);
-    
+
     // Tests de stress selon prompt.txt - minimum 1M+ LUMs
     printf("\n  🚀 Tests de stress SIMD avec 1+ millions de LUMs\n");
-    
+
     size_t test_sizes[] = {100000, 500000, 1000000, 2000000, 5000000};
     size_t num_tests = sizeof(test_sizes) / sizeof(test_sizes[0]);
-    
+
     for (size_t i = 0; i < num_tests; i++) {
         printf("  📊 Test SIMD avec %zu LUMs...\n", test_sizes[i]);
-        
+
         simd_result_t* result = simd_benchmark_vectorization(test_sizes[i]);
         if (result) {
             printf("    ✓ Traitement terminé:\n");
@@ -540,32 +551,32 @@ void demo_simd_optimization(void) {
             printf("      Débit: %.2f LUMs/seconde\n", result->throughput_ops_per_sec);
             printf("      Vectorisation: %s\n", result->used_vectorization ? "Activée" : "Désactivée");
             printf("      Optimisation: %s\n", result->optimization_used);
-            
+
             simd_result_destroy(result);
         } else {
             printf("    ❌ Échec test SIMD avec %zu LUMs\n", test_sizes[i]);
         }
         printf("\n");
     }
-    
+
     // Test comparatif scalar vs vectorisé selon exigences
     printf("  📈 Comparaison performance Scalar vs Vectorisé (1M LUMs)\n");
-    
+
     // Créer données test pour comparaison
     size_t compare_size = 1000000;
     lum_t* test_lums_scalar = malloc(compare_size * sizeof(lum_t));
     lum_t* test_lums_simd = malloc(compare_size * sizeof(lum_t));
-    
+
     if (test_lums_scalar && test_lums_simd) {
         // Initialiser données identiques
         for (size_t i = 0; i < compare_size; i++) {
             test_lums_scalar[i].presence = (i % 3 == 0) ? 1 : 0;
             test_lums_scalar[i].position_x = i;
             test_lums_scalar[i].position_y = i * 2;
-            
+
             test_lums_simd[i] = test_lums_scalar[i]; // Copie identique
         }
-        
+
         // Test scalar (simulation)
         clock_t start_scalar = clock();
         for (size_t i = 0; i < compare_size; i++) {
@@ -573,21 +584,21 @@ void demo_simd_optimization(void) {
         }
         clock_t end_scalar = clock();
         double scalar_time = ((double)(end_scalar - start_scalar)) / CLOCKS_PER_SEC;
-        
+
         // Test SIMD
         simd_result_t* simd_result = simd_process_lum_array_bulk(test_lums_simd, compare_size);
-        
+
         if (simd_result) {
             printf("  📋 Résultats comparatifs:\n");
             printf("    Scalar - Temps: %.6f s, Débit: %.2f LUMs/s\n", 
                    scalar_time, compare_size / scalar_time);
             printf("    SIMD   - Temps: %.6f s, Débit: %.2f LUMs/s\n",
                    simd_result->execution_time, simd_result->throughput_ops_per_sec);
-            
+
             if (simd_result->execution_time > 0 && scalar_time > 0) {
                 double speedup = scalar_time / simd_result->execution_time;
                 printf("    🚀 Accélération SIMD: %.2fx plus rapide\n", speedup);
-                
+
                 // Validation exigence minimum 2x selon feuille de route
                 if (speedup >= 2.0) {
                     printf("    ✅ VALIDATION: Gain minimum 2x atteint\n");
@@ -595,25 +606,25 @@ void demo_simd_optimization(void) {
                     printf("    ⚠️  ATTENTION: Gain inférieur à 2x (%.2fx)\n", speedup);
                 }
             }
-            
+
             simd_result_destroy(simd_result);
         }
-        
+
         free(test_lums_scalar);
         free(test_lums_simd);
     } else {
         printf("    ❌ Erreur allocation mémoire pour comparaison\n");
     }
-    
+
     // Test des fonctions spécialisées selon architecture
     if (caps->avx2_available) {
         printf("  🔧 Test optimisations AVX2 spécialisées\n");
-        
+
         uint32_t test_presence[8] = {0, 1, 2, 0, 3, 0, 1, 4};
         printf("    Données avant AVX2: ");
         for (int i = 0; i < 8; i++) printf("%u ", test_presence[i]);
         printf("\n");
-        
+
 #ifdef __AVX2__
         simd_avx2_process_presence_bits(test_presence, 8);
         printf("    Données après AVX2: ");
@@ -624,7 +635,7 @@ void demo_simd_optimization(void) {
         printf("    ⚠️  AVX2 détecté mais non compilé (compilation sans -mavx2)\n");
 #endif
     }
-    
+
     if (caps->avx512_available) {
         printf("  🚀 Test optimisations AVX-512 spécialisées\n");
         printf("    ✓ Capacité AVX-512 détectée (largeur: %d éléments)\n", caps->vector_width);
@@ -634,12 +645,12 @@ void demo_simd_optimization(void) {
         printf("    ⚠️  AVX-512 détecté mais non compilé (compilation sans -mavx512f)\n");
 #endif
     }
-    
+
     // Tests de conservation SIMD selon exigences VORAX
     printf("  🔒 Validation conservation mathématique avec SIMD\n");
     size_t conservation_test_size = 100000;
     lum_group_t* conservation_group = lum_group_create(conservation_test_size);
-    
+
     if (conservation_group) {
         // Initialiser avec données connues
         size_t total_presence = 0;
@@ -651,41 +662,41 @@ void demo_simd_optimization(void) {
                 free(lum);
             }
         }
-        
+
         printf("    Présence totale avant SIMD: %zu\n", total_presence);
-        
+
         // Appliquer traitement SIMD
         simd_result_t* conservation_result = simd_process_lum_array_bulk(
             conservation_group->lums, conservation_group->count);
-        
+
         if (conservation_result) {
             // Vérifier conservation
             size_t total_after = 0;
             for (size_t i = 0; i < conservation_group->count; i++) {
                 total_after += conservation_group->lums[i].presence;
             }
-            
+
             printf("    Présence totale après SIMD: %zu\n", total_after);
-            
+
             if (total_after == total_presence) {
                 printf("    ✅ CONSERVATION VALIDÉE: SIMD préserve la présence totale\n");
             } else {
                 printf("    ❌ VIOLATION CONSERVATION: %zu != %zu\n", total_after, total_presence);
             }
-            
+
             simd_result_destroy(conservation_result);
         }
-        
+
         lum_group_destroy(conservation_group);
     }
-    
+
     simd_capabilities_destroy(caps);
     printf("  ✅ Tests SIMD terminés - Module validé selon standards forensiques\n");
 }
 
 void demo_zero_copy_allocation(void) {
     printf("  🔧 Création du pool zero-copy avec memory mapping POSIX\n");
-    
+
     // Création pool de 1MB pour tests
     size_t pool_size = 1024 * 1024; // 1MB
     zero_copy_pool_t* pool = zero_copy_pool_create(pool_size, "demo_pool");
@@ -693,15 +704,15 @@ void demo_zero_copy_allocation(void) {
         printf("  ❌ Erreur création pool zero-copy\n");
         return;
     }
-    
+
     printf("  ✓ Pool créé: %zu bytes (%.2f MB)\n", 
            pool_size, pool_size / (1024.0 * 1024.0));
-    
+
     // Upgrade vers memory mapping
     printf("  🗂️  Activation memory mapping POSIX (mmap)\n");
     if (zero_copy_enable_mmap_backing(pool)) {
         printf("  ✅ Memory mapping activé avec succès\n");
-        
+
         // Optimisations POSIX
         if (zero_copy_prefault_pages(pool)) {
             printf("  ⚡ Pages prefaultées (évite page faults)\n");
@@ -712,19 +723,19 @@ void demo_zero_copy_allocation(void) {
     } else {
         printf("  ⚠️  Memory mapping non disponible, utilisation malloc\n");
     }
-    
-    // Tests d'allocations multiples selon exigences forensiques
+
+    // Tests de stress allocations multiple selon exigences forensiques
     printf("\n  💾 Tests de stress allocations zero-copy\n");
-    
+
     size_t test_sizes[] = {64, 256, 1024, 4096, 16384, 65536};
     size_t num_tests = sizeof(test_sizes) / sizeof(test_sizes[0]);
     zero_copy_allocation_t* allocations[128];
     size_t alloc_count = 0;
-    
+
     // Phase 1: Allocations multiples
     for (size_t round = 0; round < 3; round++) {
         printf("    Round %zu d'allocations:\n", round + 1);
-        
+
         for (size_t i = 0; i < num_tests && alloc_count < 128; i++) {
             zero_copy_allocation_t* alloc = zero_copy_alloc(pool, test_sizes[i]);
             if (alloc) {
@@ -733,7 +744,7 @@ void demo_zero_copy_allocation(void) {
                        alloc->size,
                        alloc->is_zero_copy ? "ZERO-COPY" : "standard",
                        alloc->allocation_id);
-                
+
                 // Écriture données pour validation
                 if (alloc->ptr) {
                     memset(alloc->ptr, (int)(alloc->allocation_id & 0xFF), alloc->size);
@@ -741,10 +752,10 @@ void demo_zero_copy_allocation(void) {
             }
         }
     }
-    
+
     printf("  📊 Statistiques après allocations initiales:\n");
     zero_copy_print_stats(pool);
-    
+
     // Phase 2: Libérations pour créer free list
     printf("\n  🔄 Libération de 50%% des allocations pour tests réutilisation\n");
     size_t freed = 0;
@@ -756,7 +767,7 @@ void demo_zero_copy_allocation(void) {
         }
     }
     printf("    %zu allocations libérées\n", freed);
-    
+
     // Phase 3: Nouvelles allocations (réutilisation zero-copy)
     printf("\n  ♻️ Nouvelles allocations (test réutilisation zero-copy)\n");
     for (size_t i = 0; i < 8; i++) {
@@ -767,67 +778,67 @@ void demo_zero_copy_allocation(void) {
                    size,
                    reused->is_zero_copy ? "ZERO-COPY" : "standard",
                    reused->is_reused_memory ? "OUI" : "NON");
-            
+
             // Validation données intégrité mémoire
             if (reused->ptr && reused->is_reused_memory) {
                 uint8_t* data = (uint8_t*)reused->ptr;
                 printf("      Validation intégrité: premier byte = 0x%02x\n", data[0]);
             }
-            
+
             zero_copy_free(pool, reused);
             zero_copy_allocation_destroy(reused);
         }
     }
-    
+
     // Tests resize in-place
     printf("\n  📏 Test resize in-place (optimisation zero-copy)\n");
     zero_copy_allocation_t* resize_test = zero_copy_alloc(pool, 1024);
     if (resize_test) {
         printf("    Allocation initiale: %zu bytes\n", resize_test->size);
-        
+
         if (zero_copy_resize_inplace(pool, resize_test, 2048)) {
             printf("    ✅ Expansion in-place réussie: %zu bytes\n", resize_test->size);
         } else {
             printf("    ⚠️  Expansion in-place impossible\n");
         }
-        
+
         if (zero_copy_resize_inplace(pool, resize_test, 512)) {
             printf("    ✅ Contraction in-place réussie: %zu bytes\n", resize_test->size);
         }
-        
+
         zero_copy_free(pool, resize_test);
         zero_copy_allocation_destroy(resize_test);
     }
-    
+
     // Défragmentation
     printf("\n  🧹 Test défragmentation et compaction\n");
     size_t fragmentation_before = zero_copy_get_fragmentation_bytes(pool);
     printf("    Fragmentation avant: %zu bytes\n", fragmentation_before);
-    
+
     if (zero_copy_defragment_pool(pool)) {
         size_t fragmentation_after = zero_copy_get_fragmentation_bytes(pool);
         printf("    ✅ Défragmentation effectuée\n");
         printf("    Fragmentation après: %zu bytes (réduction: %zu bytes)\n", 
                fragmentation_after, fragmentation_before - fragmentation_after);
     }
-    
+
     // Tests de performance selon exigences prompt.txt
     printf("\n  ⚡ Tests de performance allocations massives\n");
-    
+
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    
+
     // Test 10000 allocations rapides
     size_t perf_allocs = 10000;
     zero_copy_allocation_t* perf_test[1000];
     size_t successful = 0;
-    
+
     for (size_t i = 0; i < perf_allocs && successful < 1000; i++) {
         zero_copy_allocation_t* alloc = zero_copy_alloc(pool, 64 + (i % 512));
         if (alloc) {
             perf_test[successful] = alloc;
             successful++;
-            
+
             if (i % 2 == 0 && successful > 10) {
                 // Libérer quelques allocations pour créer réutilisation
                 zero_copy_free(pool, perf_test[successful/2]);
@@ -836,13 +847,13 @@ void demo_zero_copy_allocation(void) {
             }
         }
     }
-    
+
     clock_gettime(CLOCK_MONOTONIC, &end);
     double duration = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-    
+
     printf("    %zu allocations en %.6f secondes\n", perf_allocs, duration);
     printf("    Débit: %.0f allocations/seconde\n", perf_allocs / duration);
-    
+
     // Nettoyage allocations performance
     for (size_t i = 0; i < successful; i++) {
         if (perf_test[i]) {
@@ -850,7 +861,7 @@ void demo_zero_copy_allocation(void) {
             zero_copy_allocation_destroy(perf_test[i]);
         }
     }
-    
+
     // Nettoyage allocations restantes 
     for (size_t i = 0; i < alloc_count; i++) {
         if (allocations[i]) {
@@ -858,11 +869,11 @@ void demo_zero_copy_allocation(void) {
             zero_copy_allocation_destroy(allocations[i]);
         }
     }
-    
+
     // Statistiques finales
     printf("\n  📈 Statistiques finales du pool zero-copy:\n");
     zero_copy_print_stats(pool);
-    
+
     // Validation métriques selon standards forensiques
     double efficiency = zero_copy_get_efficiency_ratio(pool);
     if (efficiency > 0.5) {
@@ -870,7 +881,7 @@ void demo_zero_copy_allocation(void) {
     } else {
         printf("  ⚠️  Efficiency ratio %.3f < 50%% (à optimiser)\n", efficiency);
     }
-    
+
     zero_copy_pool_destroy(pool);
     printf("  ✅ Module ZERO_COPY_ALLOCATOR validé - Memory mapping POSIX opérationnel\n");
 }

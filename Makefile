@@ -5,6 +5,24 @@ OBJ_DIR = obj
 BIN_DIR = bin
 LOG_DIR = logs
 
+# Object files
+MAIN_OBJ = $(OBJ_DIR)/main.o
+LUM_CORE_OBJ = $(OBJ_DIR)/lum/lum_core.o
+VORAX_OPS_OBJ = $(OBJ_DIR)/vorax/vorax_operations.o
+PARSER_OBJ = $(OBJ_DIR)/parser/vorax_parser.o
+BINARY_CONV_OBJ = $(OBJ_DIR)/binary/binary_lum_converter.o
+LOGGER_OBJ = $(OBJ_DIR)/logger/lum_logger.o
+MEMORY_OPT_OBJ = $(OBJ_DIR)/optimization/memory_optimizer.o
+PARETO_OPT_OBJ = $(OBJ_DIR)/optimization/pareto_optimizer.o
+PARETO_INV_OPT_OBJ = $(OBJ_DIR)/optimization/pareto_inverse_optimizer.o
+SIMD_OPT_OBJ = $(OBJ_DIR)/optimization/simd_optimizer.o
+ZERO_COPY_OBJ = $(OBJ_DIR)/optimization/zero_copy_allocator.o
+PARALLEL_PROC_OBJ = $(OBJ_DIR)/parallel/parallel_processor.o
+PERF_METRICS_OBJ = $(OBJ_DIR)/metrics/performance_metrics.o
+CRYPTO_VAL_OBJ = $(OBJ_DIR)/crypto/crypto_validator.o
+DATA_PERSIST_OBJ = $(OBJ_DIR)/persistence/data_persistence.o
+MEMORY_TRACKER_OBJ = $(OBJ_DIR)/debug/memory_tracker.o
+
 SOURCES = $(SRC_DIR)/main.c \
 	  $(SRC_DIR)/lum/lum_core.c \
 	  $(SRC_DIR)/vorax/vorax_operations.c \
@@ -19,7 +37,8 @@ SOURCES = $(SRC_DIR)/main.c \
 	  $(SRC_DIR)/parallel/parallel_processor.c \
 	  $(SRC_DIR)/metrics/performance_metrics.c \
 	  $(SRC_DIR)/crypto/crypto_validator.c \
-	  $(SRC_DIR)/persistence/data_persistence.c
+	  $(SRC_DIR)/persistence/data_persistence.c \
+	  $(SRC_DIR)/debug/memory_tracker.c
 
 OBJECTS = $(OBJ_DIR)/main.o \
 	  $(OBJ_DIR)/lum/lum_core.o \
@@ -35,17 +54,23 @@ OBJECTS = $(OBJ_DIR)/main.o \
 	  $(OBJ_DIR)/parallel/parallel_processor.o \
 	  $(OBJ_DIR)/metrics/performance_metrics.o \
 	  $(OBJ_DIR)/crypto/crypto_validator.o \
-	  $(OBJ_DIR)/persistence/data_persistence.o
+	  $(OBJ_DIR)/persistence/data_persistence.o \
+	  $(OBJ_DIR)/debug/memory_tracker.o
 
-# Optimization objects  
+# Optimization objects
 OPTIMIZATION_OBJS = $(OBJ_DIR)/optimization/memory_optimizer.o \
 	            $(OBJ_DIR)/optimization/pareto_optimizer.o \
 	            $(OBJ_DIR)/optimization/pareto_inverse_optimizer.o
 
 EXECUTABLE = $(BIN_DIR)/lum_vorax
+TARGET = $(EXECUTABLE)
+LDFLAGS = -lpthread -lm
+
+# Create object directories
+OBJ_DIRS = obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug
 
 $(OBJ_DIR):
-	mkdir -p $(OBJ_DIR)/lum $(OBJ_DIR)/vorax $(OBJ_DIR)/parser $(OBJ_DIR)/binary $(OBJ_DIR)/logger $(OBJ_DIR)/optimization $(OBJ_DIR)/parallel $(OBJ_DIR)/metrics $(OBJ_DIR)/crypto $(OBJ_DIR)/persistence
+	mkdir -p $(OBJ_DIRS)
 
 $(BIN_DIR):
 	mkdir -p $(BIN_DIR)
@@ -53,8 +78,9 @@ $(BIN_DIR):
 $(LOG_DIR):
 	mkdir -p $(LOG_DIR)
 
-$(EXECUTABLE): $(OBJECTS) | $(BIN_DIR)
-	$(CC) $(OBJECTS) -o $@ -lpthread -lm
+# Main executable
+$(TARGET): $(MAIN_OBJ) $(LUM_CORE_OBJ) $(VORAX_OPS_OBJ) $(PARSER_OBJ) $(BINARY_CONV_OBJ) $(LOGGER_OBJ) $(MEMORY_OPT_OBJ) $(PARETO_OPT_OBJ) $(PARETO_INV_OPT_OBJ) $(SIMD_OPT_OBJ) $(ZERO_COPY_OBJ) $(PARALLEL_PROC_OBJ) $(PERF_METRICS_OBJ) $(CRYPTO_VAL_OBJ) $(DATA_PERSIST_OBJ) $(MEMORY_TRACKER_OBJ)
+	$(CC) $^ -o $@ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
@@ -71,20 +97,47 @@ $(BIN_DIR)/test_stress_safe: $(SRC_DIR)/tests/test_stress_safe.c $(STRESS_OBJECT
 $(BIN_DIR)/test_million_lums: $(SRC_DIR)/tests/test_million_lums_stress.c $(STRESS_OBJECTS) | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $< $(STRESS_OBJECTS) -lpthread -lm
 
-test_complete: $(OBJECTS)
-	$(CC) $(CFLAGS) -o $(BINDIR)/test_complete src/tests/test_complete_functionality.c $(OBJECTS) $(LDFLAGS)
+# Test targets
+test_core: $(CORE_TEST_TARGET)
+	./$(CORE_TEST_TARGET)
 
-test_stress_auth: $(OBJECTS)
-	$(CC) $(CFLAGS) -fsanitize=address,undefined -o $(BINDIR)/test_stress_authenticated src/tests/test_stress_authenticated.c $(OBJECTS) $(LDFLAGS)
+test_advanced: $(ADVANCED_TEST_TARGET)
+	./$(ADVANCED_TEST_TARGET)
 
-test_complete: $(BIN_DIR)/test_complete
-	./$(BIN_DIR)/test_complete
+# Complete functionality test (unified target)
+test_complete: $(COMPLETE_TEST_TARGET)
+	./$(COMPLETE_TEST_TARGET)
 
-test_stress_million: $(BIN_DIR)/test_stress_million
-	./$(BIN_DIR)/test_stress_million
+$(COMPLETE_TEST_TARGET): $(OBJ_DIR)/tests/test_complete_functionality.o $(LUM_CORE_OBJ) $(VORAX_OPS_OBJ) $(PARSER_OBJ) $(BINARY_CONV_OBJ) $(LOGGER_OBJ) $(MEMORY_OPT_OBJ) $(PARETO_OPT_OBJ) $(PARALLEL_PROC_OBJ) $(PERF_METRICS_OBJ) $(CRYPTO_VAL_OBJ) $(DATA_PERSIST_OBJ)
+	$(CC) $^ -o $@ $(LDFLAGS)
+
+# Compilation of objects for tests
+$(OBJ_DIR)/tests/test_complete_functionality.o: $(SRC_DIR)/tests/test_complete_functionality.c $(OBJECTS) | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compilation of objects for tests
+$(OBJ_DIR)/tests/test_stress_safe.o: $(SRC_DIR)/tests/test_stress_safe.c $(STRESS_OBJECTS) | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compilation of objects for tests
+$(OBJ_DIR)/tests/test_million_lums_stress.o: $(SRC_DIR)/tests/test_million_lums_stress.c $(STRESS_OBJECTS) | $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Compilation of debug objects
+$(OBJ_DIR)/debug/memory_tracker.o: $(SRC_DIR)/debug/memory_tracker.c | $(OBJ_DIR)
+	$(CC) $(CFLAGS) $(PTHREAD_FLAGS) -c $< -o $@
+
+# Link test executables
+$(CORE_TEST_TARGET): $(SRC_DIR)/tests/test_core.c $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+$(ADVANCED_TEST_TARGET): $(SRC_DIR)/tests/test_advanced.c $(OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+$(COMPLETE_TEST_TARGET): $(SRC_DIR)/tests/test_complete_functionality.c $(OBJECTS) $(MEMORY_TRACKER_OBJ)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 .PHONY: all clean run test
-.DEFAULT_GOAL := all
 
 all: $(EXECUTABLE) | $(LOG_DIR)
 

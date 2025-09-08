@@ -177,8 +177,8 @@ bool zero_copy_free(zero_copy_pool_t* pool, zero_copy_allocation_t* allocation) 
     
     // Si c'est une allocation zero-copy dans le pool, ajouter à la free list
     if (allocation->is_zero_copy && 
-        allocation->ptr >= pool->memory_region && 
-        allocation->ptr < (uint8_t*)pool->memory_region + pool->total_size) {
+        (uint8_t*)allocation->ptr >= (uint8_t*)pool->memory_region && 
+        (uint8_t*)allocation->ptr < (uint8_t*)pool->memory_region + pool->total_size) {
         
         // Créer un nouveau free block
         free_block_t* free_block = malloc(sizeof(free_block_t));

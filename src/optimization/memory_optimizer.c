@@ -1,8 +1,15 @@
 #include "memory_optimizer.h"
+#include "../debug/memory_tracker.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+
+// Remplacer malloc/free par versions tracées
+#define malloc(size) TRACKED_MALLOC(size)
+#define free(ptr) do { if (ptr) { TRACKED_FREE(ptr); ptr = NULL; } } while(0)
+#define calloc(nmemb, size) TRACKED_CALLOC(nmemb, size)
+#define realloc(ptr, size) TRACKED_REALLOC(ptr, size)
 
 // Create memory optimizer
 memory_optimizer_t* memory_optimizer_create(size_t initial_pool_size) {
@@ -36,10 +43,28 @@ memory_optimizer_t* memory_optimizer_create(size_t initial_pool_size) {
 void memory_optimizer_destroy(memory_optimizer_t* optimizer) {
     if (!optimizer) return;
 
-    if (optimizer->lum_pool.pool_start) free(optimizer->lum_pool.pool_start);
-    if (optimizer->group_pool.pool_start) free(optimizer->group_pool.pool_start);
-    if (optimizer->zone_pool.pool_start) free(optimizer->zone_pool.pool_start);
+    printf("[MEMORY_OPTIMIZER] Destroying optimizer %p\n", (void*)optimizer);
+    
+    // Libération sécurisée avec vérification et nullification
+    if (optimizer->lum_pool.pool_start) {
+        printf("[MEMORY_OPTIMIZER] Freeing lum_pool at %p\n", optimizer->lum_pool.pool_start);
+        free(optimizer->lum_pool.pool_start);
+        optimizer->lum_pool.pool_start = NULL;
+    }
+    
+    if (optimizer->group_pool.pool_start) {
+        printf("[MEMORY_OPTIMIZER] Freeing group_pool at %p\n", optimizer->group_pool.pool_start);
+        free(optimizer->group_pool.pool_start);
+        optimizer->group_pool.pool_start = NULL;
+    }
+    
+    if (optimizer->zone_pool.pool_start) {
+        printf("[MEMORY_OPTIMIZER] Freeing zone_pool at %p\n", optimizer->zone_pool.pool_start);
+        free(optimizer->zone_pool.pool_start);
+        optimizer->zone_pool.pool_start = NULL;
+    }
 
+    printf("[MEMORY_OPTIMIZER] Freeing optimizer structure at %p\n", (void*)optimizer);
     free(optimizer);
 }
 
@@ -59,9 +84,21 @@ memory_pool_t* memory_pool_create(size_t size, size_t alignment) {
 void memory_pool_destroy(memory_pool_t* pool) {
     if (!pool) return;
     
+    printf("[MEMORY_POOL] Destroying pool %p\n", (void*)pool);
+    
     if (pool->pool_start) {
+        printf("[MEMORY_POOL] Freeing pool memory at %p\n", pool->pool_start);
         free(pool->pool_start);
+        pool->pool_start = NULL;
     }
+    
+    // Réinitialiser les champs pour éviter réutilisation
+    pool->current_ptr = NULL;
+    pool->pool_size = 0;
+    pool->used_size = 0;
+    pool->is_initialized = false;
+    
+    printf("[MEMORY_POOL] Freeing pool structure at %p\n", (void*)pool);
     free(pool);
 }
 
