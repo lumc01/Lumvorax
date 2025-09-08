@@ -22,6 +22,8 @@
 2025-01-07 15:44 - lum_log_init + Initialisation système de logging
 2025-01-07 15:44 - performance_metrics_validator_t + Validateur métriques de performance
 2025-01-07 15:44 - memory_footprint_impl_t + Implémentation interne empreinte mémoire
+2025-01-09 15:30 - double_free_protection + Protection contre libération multiple de pointeurs
+2025-01-09 15:30 - cleanup_safety_check + Vérification sécurisée du cleanup mémoire
 
 ## STRUCTURES DE DONNÉES
 
