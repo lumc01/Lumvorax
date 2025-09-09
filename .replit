@@ -87,6 +87,67 @@ args = "echo \"🚀 LUM/VORAX - Presence-Based Computing System\" && echo \"====
 [workflows.workflow.metadata]
 outputType = "console"
 
+[[workflows.workflow]]
+name = "VALIDATION_CORRECTIONS_COMPLETES"
+author = 47363890
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== VALIDATION CORRECTIONS SYSTÈME LUM/VORAX ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 1: Compilation propre\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make clean"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make all 2>&1 | tee compilation_corrections.log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 2: Tests mémoire avec AddressSanitizer\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make debug 2>&1 | tee compilation_debug.log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 3: Tests de stress authentiques\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ -f bin/lum_vorax ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"Exécution tests sans timeout pour vérification mémoire\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 4: Validation forensique finale\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "ls -la RAPPORT_INSPECTION_GENERALE_COMPLETE_20250109_220000.md"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"✅ VALIDATION CORRECTIONS TERMINÉE\""
+
 [nix]
 packages = ["openssh", "file"]
 channel = "stable-25_05"

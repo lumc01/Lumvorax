@@ -22,6 +22,7 @@ typedef struct {
     lum_group_t* result_group;
     size_t result_count;
     lum_group_t** result_groups;
+    uint32_t magic_number;  // Protection double free
 } vorax_result_t;
 
 // Core VORAX operations

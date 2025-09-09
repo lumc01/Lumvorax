@@ -85,9 +85,7 @@ void tracked_free(void* ptr, const char* file, int line, const char* func) {
 
     pthread_mutex_lock(&g_tracker_mutex);
 
-    int entry_idx = find_entry(ptr); // find_entry only finds active entries
-    
-    // Need to search for any entry with the pointer, regardless of is_freed status, to detect double free.
+    // Chercher directement l'entrée avec le pointeur pour détecter double free
     int found_any_entry_idx = -1;
     for (size_t i = 0; i < g_tracker.count; i++) {
         if (g_tracker.entries[i].ptr == ptr) {

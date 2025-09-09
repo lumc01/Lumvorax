@@ -24,6 +24,17 @@
 2025-01-07 15:44 - memory_footprint_impl_t + Implémentation interne empreinte mémoire
 2025-01-09 15:30 - double_free_protection + Protection contre libération multiple de pointeurs
 2025-01-09 15:30 - cleanup_safety_check + Vérification sécurisée du cleanup mémoire
+2025-01-09 22:30 - VORAX_RESULT_MAGIC + Constante magique protection double free vorax_result_t
+2025-01-09 22:30 - magic_number + Champ protection double destruction dans structures
+2025-01-09 22:30 - simd_fma_lums + Fonction SIMD Fused Multiply-Add sur LUMs
+2025-01-09 22:30 - zero_copy_hits + Compteur succès allocations zero-copy
+2025-01-09 22:30 - memory_copies + Compteur fallback copies mémoire classiques
+2025-01-09 22:30 - fragmentation_ratio + Ratio fragmentation mémoire zero-copy
+2025-01-09 22:30 - MAP_ANONYMOUS + Flag mmap allocation anonyme zero-copy
+2025-01-09 22:30 - MADV_HUGEPAGE + Conseil noyau utilisation huge pages
+2025-01-09 22:30 - avx512_supported + Support détecté instructions AVX-512
+2025-01-09 22:30 - peak_memory_mb + Pic mémoire utilisée en mégabytes
+2025-01-09 22:30 - execution_time_s + Temps exécution total en secondes
 
 ## STRUCTURES DE DONNÉES
 

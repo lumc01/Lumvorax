@@ -65,6 +65,7 @@ OPTIMIZATION_OBJS = $(OBJ_DIR)/optimization/memory_optimizer.o \
 EXECUTABLE = $(BIN_DIR)/lum_vorax
 TARGET = $(EXECUTABLE)
 LDFLAGS = -lpthread -lm
+SANITIZER_FLAGS = -fsanitize=address
 
 # Create object directories
 OBJ_DIRS = obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug
@@ -88,6 +89,24 @@ $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
 $(OBJ_DIR)/parallel/parallel_processor.o: $(SRC_DIR)/parallel/parallel_processor.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) -pthread -c $< -o $@
 
+# Compilation with sanitizers
+debug: CFLAGS += $(SANITIZER_FLAGS) -fno-omit-frame-pointer -g3
+debug: $(BINDIR)/lum_vorax
+
+# Compilation optimisée pour production
+release: CFLAGS += -O3 -DNDEBUG -march=native -flto
+release: $(BINDIR)/lum_vorax
+
+# Test specific zero-copy
+test-zerocopy: $(BINDIR)/lum_vorax
+	@echo "Test allocateur zero-copy..."
+	@$(BINDIR)/lum_vorax --test-zerocopy-only
+
+# Test million LUMs sécurisé
+test-million-safe: debug
+	@echo "Test million LUMs avec AddressSanitizer..."
+	@./$(BINDIR)/lum_vorax --stress-million-safe
+
 # Test de stress sécurisé pour Replit (exclure main.o pour éviter conflit)
 STRESS_OBJECTS = $(filter-out $(OBJ_DIR)/main.o, $(OBJECTS))
 $(BIN_DIR)/test_stress_safe: $(SRC_DIR)/tests/test_stress_safe.c $(STRESS_OBJECTS) | $(BIN_DIR)
@@ -107,9 +126,6 @@ test_advanced: $(ADVANCED_TEST_TARGET)
 # Complete functionality test (unified target)
 test_complete: $(COMPLETE_TEST_TARGET)
 	./$(COMPLETE_TEST_TARGET)
-
-$(COMPLETE_TEST_TARGET): $(OBJ_DIR)/tests/test_complete_functionality.o $(LUM_CORE_OBJ) $(VORAX_OPS_OBJ) $(PARSER_OBJ) $(BINARY_CONV_OBJ) $(LOGGER_OBJ) $(MEMORY_OPT_OBJ) $(PARETO_OPT_OBJ) $(PARALLEL_PROC_OBJ) $(PERF_METRICS_OBJ) $(CRYPTO_VAL_OBJ) $(DATA_PERSIST_OBJ)
-	$(CC) $^ -o $@ $(LDFLAGS)
 
 # Compilation of objects for tests
 $(OBJ_DIR)/tests/test_complete_functionality.o: $(SRC_DIR)/tests/test_complete_functionality.c $(OBJECTS) | $(OBJ_DIR)

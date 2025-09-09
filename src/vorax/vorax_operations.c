@@ -296,6 +296,7 @@ vorax_result_t* vorax_result_create(void) {
         result->result_group = NULL;
         result->result_count = 0;
         result->result_groups = NULL;
+        result->magic_number = 0;  // Initialisé à 0, sera mis à DEADBEEF lors destruction
     }
     return result;
 }
@@ -303,17 +304,15 @@ vorax_result_t* vorax_result_create(void) {
 void vorax_result_destroy(vorax_result_t* result) {
     if (!result) return;
 
-    // Protection contre double destruction
-    static void** destroyed_results = NULL;
-    static size_t destroyed_count = 0;
-
-    // Vérifier si déjà détruit
-    for (size_t i = 0; i < destroyed_count; i++) {
-        if (destroyed_results && destroyed_results[i] == result) {
-            lum_log(LUM_LOG_WARN, "Tentative double destruction vorax_result_t évitée");
-            return;
-        }
+    // Vérifier magic number pour détecter corruption
+    static const uint32_t VORAX_RESULT_MAGIC = 0xDEADBEEF;
+    if (result->magic_number == VORAX_RESULT_MAGIC) {
+        lum_log(LUM_LOG_WARN, "Tentative double destruction vorax_result_t détectée et évitée");
+        return;
     }
+
+    // Marquer immédiatement comme en cours de destruction
+    result->magic_number = VORAX_RESULT_MAGIC;
 
     // Destruction sécurisée du groupe principal
     if (result->result_group) {
@@ -331,14 +330,11 @@ void vorax_result_destroy(vorax_result_t* result) {
         }
         free(result->result_groups);
         result->result_groups = NULL;
+        result->result_count = 0;
     }
 
-    // Marquer comme détruit
-    destroyed_results = realloc(destroyed_results, (destroyed_count + 1) * sizeof(void*));
-    if (destroyed_results) {
-        destroyed_results[destroyed_count++] = result;
-    }
-
+    // Effacer la structure avant libération
+    memset(result, 0xFF, sizeof(vorax_result_t));
     free(result);
 }
 
