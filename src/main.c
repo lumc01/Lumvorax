@@ -67,7 +67,6 @@ int main(int argc, char* argv[]) {
             
             // Start timing for forensic report
             clock_t start_time_clock = clock();
-            double start_time = (double)start_time_clock / CLOCKS_PER_SEC;
             
             // Create 1 million LUMs test - MANDATORY per prompt.txt
             const size_t TEST_COUNT = 1000000; // 1 million minimum
@@ -137,7 +136,6 @@ int main(int argc, char* argv[]) {
             // Test VORAX operations on large dataset - MANDATORY stress testing
             printf("\n=== Testing VORAX Operations on Large Dataset ===\n");
             clock_t ops_start_clock = clock();
-            double ops_start = (double)ops_start_clock / CLOCKS_PER_SEC;
             
             // Split operation test with large data  
             printf("Testing SPLIT operation...\n");

@@ -10,7 +10,7 @@ static pthread_mutex_t id_counter_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Core LUM functions
 lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e type) {
-    lum_t* lum = tracked_malloc(sizeof(lum_t));
+    lum_t* lum = TRACKED_MALLOC(sizeof(lum_t));
     if (!lum) return NULL;
 
     lum->presence = (presence > 0) ? 1 : 0;
@@ -35,11 +35,11 @@ void lum_destroy(lum_t* lum) {
 
 // LUM Group functions
 lum_group_t* lum_group_create(size_t initial_capacity) {
-    lum_group_t* group = tracked_malloc(sizeof(lum_group_t));
+    lum_group_t* group = TRACKED_MALLOC(sizeof(lum_group_t));
     if (!group) return NULL;
 
     // Allouer la mémoire pour les LUMs avec une capacité initiale
-    group->lums = tracked_malloc(sizeof(lum_t) * initial_capacity);
+    group->lums = TRACKED_MALLOC(sizeof(lum_t) * initial_capacity);
     if (!group->lums) {
         free(group); // Utiliser free car group n'est pas suivi par memory_tracker
         return NULL;
@@ -141,7 +141,7 @@ size_t lum_group_size(lum_group_t* group) {
 
 // Zone functions
 lum_zone_t* lum_zone_create(const char* name) {
-    lum_zone_t* zone = tracked_malloc(sizeof(lum_zone_t));
+    lum_zone_t* zone = TRACKED_MALLOC(sizeof(lum_zone_t));
     if (!zone) return NULL;
 
     // S'assurer que la copie de la chaîne ne dépasse pas la taille du buffer
@@ -149,7 +149,7 @@ lum_zone_t* lum_zone_create(const char* name) {
     zone->name[sizeof(zone->name) - 1] = '\0'; // Assurer la terminaison nulle
 
     // Allouer la mémoire pour les pointeurs vers les groupes
-    zone->groups = tracked_malloc(sizeof(lum_group_t*) * 10); // Capacité initiale de 10 groupes
+    zone->groups = TRACKED_MALLOC(sizeof(lum_group_t*) * 10); // Capacité initiale de 10 groupes
     if (!zone->groups) {
         free(zone); // Utiliser free pour la zone elle-même
         return NULL;
@@ -226,7 +226,7 @@ bool lum_zone_is_empty(lum_zone_t* zone) {
 
 // Memory functions
 lum_memory_t* lum_memory_create(const char* name) {
-    lum_memory_t* memory = tracked_malloc(sizeof(lum_memory_t));
+    lum_memory_t* memory = TRACKED_MALLOC(sizeof(lum_memory_t));
     if (!memory) return NULL;
 
     // Copier le nom de manière sûre
@@ -268,7 +268,7 @@ bool lum_memory_store(lum_memory_t* memory, lum_group_t* group) {
 
     // Allocation de mémoire pour la copie profonde du groupe
     // On alloue juste la taille nécessaire pour les éléments actuels
-    memory->stored_group.lums = tracked_malloc(sizeof(lum_t) * group->count);
+    memory->stored_group.lums = TRACKED_MALLOC(sizeof(lum_t) * group->count);
     if (!memory->stored_group.lums) {
         // lum_log("Échec de l'allocation mémoire pour stocker le groupe."); // Optionnel
         memory->stored_group.capacity = 0; // Réinitialiser la capacité en cas d'échec
