@@ -38,6 +38,12 @@
 2025-01-09 22:35 - sse42_supported + Support détecté SSE4.2 pour compatibilité
 2025-01-09 22:35 - avx2_supported + Support détecté AVX2 pour compatibilité
 2025-01-09 22:35 - avx512_supported + Support détecté AVX-512 pour compatibilité
+2025-01-10 00:00 - lum_group_safe_destroy + Destruction sécurisée groupes LUM avec protection double-free
+2025-01-10 00:00 - vorax_result_safe_destroy + Destruction sécurisée résultats VORAX avec protection double-free
+2025-01-10 00:00 - memory_tracker_enable + Contrôle runtime activation tracking mémoire
+2025-01-10 00:00 - memory_tracker_is_enabled + Vérification état tracking mémoire actif
+2025-01-10 00:00 - memory_tracker_export_json + Export métriques mémoire format JSON
+2025-01-10 00:00 - memory_tracker_set_release_mode + Configuration mode release sans overhead tracking
 
 ## STRUCTURES DE DONNÉES
 

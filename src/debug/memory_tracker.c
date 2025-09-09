@@ -9,6 +9,48 @@
 
 // Remove duplicate definitions - already defined in header
 
+static memory_entry_t g_entries[MAX_MEMORY_ENTRIES]; // Array to store memory entries
+static size_t g_count = 0; // Current number of active allocations
+static size_t g_total_allocated = 0; // Total bytes ever allocated
+static size_t g_total_freed = 0; // Total bytes ever freed
+static bool g_initialized = false; // Tracker initialization status
+static bool g_tracking_enabled = true; // Flag to enable/disable tracking
+static bool g_release_mode = false; // Flag for release mode
+
+void memory_tracker_enable(bool enable) {
+    g_tracking_enabled = enable;
+}
+
+bool memory_tracker_is_enabled(void) {
+    return g_tracking_enabled && !g_release_mode;
+}
+
+void memory_tracker_set_release_mode(bool mode) {
+    g_release_mode = mode;
+    if (mode) {
+        g_tracking_enabled = false;  // Désactive en mode release
+    }
+}
+
+void memory_tracker_export_json(const char* filename) {
+    if (!memory_tracker_is_enabled()) return;
+
+    FILE* fp = fopen(filename, "w");
+    if (!fp) {
+        fprintf(stderr, "[MEMORY_TRACKER] ERROR: Could not open file %s for writing.\n", filename);
+        return;
+    }
+
+    fprintf(fp, "{\n");
+    fprintf(fp, "  \"total_allocated\": %zu,\n", g_total_allocated);
+    fprintf(fp, "  \"total_freed\": %zu,\n", g_total_freed);
+    fprintf(fp, "  \"current_allocations\": %zu,\n", g_count);
+    fprintf(fp, "  \"leak_detection\": %s\n", (g_total_allocated > g_total_freed) ? "true" : "false");
+    fprintf(fp, "}\n");
+
+    fclose(fp);
+}
+
 static memory_tracker_t g_tracker = {0};
 static pthread_mutex_t g_tracker_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int g_tracker_initialized = 0;
@@ -65,6 +107,7 @@ static void add_entry(void* ptr, size_t size, const char* file, int line, const 
 
 void* tracked_malloc(size_t size, const char* file, int line, const char* func) {
     if (!g_tracker_initialized) memory_tracker_init();
+    if (!memory_tracker_is_enabled()) return malloc(size);
 
     void* ptr = malloc(size);
     if (ptr) {
@@ -80,6 +123,10 @@ void tracked_free(void* ptr, const char* file, int line, const char* func) {
     if (!ptr) return;
     if (!g_tracker_initialized) {
         printf("[MEMORY_TRACKER] ERROR: Free called before init at %s:%d\n", file, line);
+        return;
+    }
+    if (!memory_tracker_is_enabled()) {
+        free(ptr);
         return;
     }
 
@@ -140,6 +187,7 @@ void tracked_free(void* ptr, const char* file, int line, const char* func) {
 
 void* tracked_calloc(size_t nmemb, size_t size, const char* file, int line, const char* func) {
     if (!g_tracker_initialized) memory_tracker_init();
+    if (!memory_tracker_is_enabled()) return calloc(nmemb, size);
 
     void* ptr = calloc(nmemb, size);
     if (ptr) {
@@ -152,6 +200,7 @@ void* tracked_calloc(size_t nmemb, size_t size, const char* file, int line, cons
 
 void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const char* func) {
     if (!g_tracker_initialized) memory_tracker_init();
+    if (!memory_tracker_is_enabled()) return realloc(ptr, size);
 
     // If ptr is NULL, equivalent to malloc
     if (!ptr) {
@@ -231,6 +280,10 @@ void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const 
 
 void memory_tracker_report(void) {
     if (!g_tracker_initialized) return;
+    if (!memory_tracker_is_enabled()) {
+        printf("[MEMORY_TRACKER] Tracking is disabled.\n");
+        return;
+    }
 
     pthread_mutex_lock(&g_tracker_mutex);
 
@@ -270,6 +323,10 @@ void memory_tracker_report(void) {
 
 void memory_tracker_check_leaks(void) {
     if (!g_tracker_initialized) return;
+     if (!memory_tracker_is_enabled()) {
+        printf("[MEMORY_TRACKER] Leak check skipped: tracking is disabled.\n");
+        return;
+    }
 
     pthread_mutex_lock(&g_tracker_mutex);
 

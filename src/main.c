@@ -819,7 +819,7 @@ void demo_zero_copy_allocation(void) {
         zero_copy_allocation_destroy(resize_test);
     }
 
-    // Défragmentation
+    // Tests de défragmentation
     printf("\n  🧹 Test défragmentation et compaction\n");
     size_t fragmentation_before = zero_copy_get_fragmentation_bytes(pool);
     printf("    Fragmentation avant: %zu bytes\n", fragmentation_before);
@@ -883,7 +883,7 @@ void demo_zero_copy_allocation(void) {
     printf("\n  📈 Statistiques finales du pool zero-copy:\n");
     zero_copy_print_stats(pool);
 
-    // Validation métriques selon standards forensiques
+    // Validation métriques selon exigences prompt.txt
     double efficiency = zero_copy_get_efficiency_ratio(pool);
     if (efficiency > 0.5) {
         printf("  ✅ VALIDATION: Efficiency ratio %.3f > 50%% (conforme)\n", efficiency);

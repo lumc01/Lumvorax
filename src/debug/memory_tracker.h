@@ -1,4 +1,3 @@
-
 #ifndef MEMORY_TRACKER_H
 #define MEMORY_TRACKER_H
 
@@ -6,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <stdbool.h> // Include for bool type
 
 // Configuration du debugging mémoire
 #define MEMORY_DEBUG_ENABLED 1
@@ -42,12 +42,16 @@ typedef struct {
 
 // Fonctions publiques
 void memory_tracker_init(void);
-void* tracked_malloc(size_t size, const char* file, int line, const char* func);
-void tracked_free(void* ptr, const char* file, int line, const char* func);
-void* tracked_calloc(size_t nmemb, size_t size, const char* file, int line, const char* func);
-void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const char* func);
+void memory_tracker_cleanup(void);
+void memory_tracker_alloc(void* ptr, size_t size, const char* file, int line);
+void memory_tracker_free(void* ptr, const char* file, int line);
 void memory_tracker_report(void);
-void memory_tracker_check_leaks(void);
-void memory_tracker_destroy(void);
+
+// Contrôle runtime tracking
+void memory_tracker_enable(bool enable);
+bool memory_tracker_is_enabled(void);
+void memory_tracker_export_json(const char* filename);
+void memory_tracker_set_release_mode(bool release_mode);
+
 
 #endif // MEMORY_TRACKER_H

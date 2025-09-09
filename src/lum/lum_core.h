@@ -8,7 +8,7 @@
 #include <pthread.h>
 
 // Vérification de l'ABI - la structure doit faire exactement 32 bytes avec padding
-_Static_assert(sizeof(struct { uint8_t a; uint32_t b; int32_t c; int32_t d; uint8_t e; uint64_t f; }) == 32, 
+_Static_assert(sizeof(struct { uint8_t a; uint32_t b; int32_t c; int32_t d; uint8_t e; uint64_t f; }) == 32,
                "Basic lum_t structure should be 32 bytes on this platform");
 
 // Note: avec padding d'alignement sur 8 bytes, la structure complète fait 32 bytes
@@ -65,6 +65,7 @@ void lum_destroy(lum_t* lum);
 
 lum_group_t* lum_group_create(size_t initial_capacity);
 void lum_group_destroy(lum_group_t* group);
+void lum_group_safe_destroy(lum_group_t** group_ptr);
 bool lum_group_add(lum_group_t* group, lum_t* lum);
 lum_t* lum_group_get(lum_group_t* group, size_t index);
 size_t lum_group_size(lum_group_t* group);

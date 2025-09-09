@@ -38,6 +38,7 @@ vorax_result_t* vorax_expand(lum_group_t* compressed_group, size_t parts);
 // Utility functions
 vorax_result_t* vorax_result_create(void);
 void vorax_result_destroy(vorax_result_t* result);
+void vorax_result_safe_destroy(vorax_result_t** result_ptr);
 void vorax_result_set_success(vorax_result_t* result, const char* message);
 void vorax_result_set_error(vorax_result_t* result, const char* message);
 
