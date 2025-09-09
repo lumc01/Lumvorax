@@ -1,8 +1,8 @@
 #include "lum_core.h"
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <time.h>
+#include "../debug/memory_tracker.h"
 #include <pthread.h> // Nécessaire pour pthread_mutex_t et les fonctions associées
 
 static uint32_t lum_id_counter = 1;
@@ -10,7 +10,7 @@ static pthread_mutex_t id_counter_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 // Core LUM functions
 lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e type) {
-    lum_t* lum = malloc(sizeof(lum_t));
+    lum_t* lum = tracked_malloc(sizeof(lum_t));
     if (!lum) return NULL;
 
     lum->presence = (presence > 0) ? 1 : 0;
@@ -25,19 +25,23 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
 
 void lum_destroy(lum_t* lum) {
     if (lum) {
+        // Utiliser tracked_free ici si memory_tracker.h fournit cette fonction
+        // Si memory_tracker.h ne fournit que tracked_malloc, il faut s'assurer que free() est toujours appelé
+        // ou que tracked_malloc gère la libération via free() en interne.
+        // En supposant que tracked_malloc enveloppe malloc, free doit être utilisé pour la libération.
         free(lum);
     }
 }
 
 // LUM Group functions
 lum_group_t* lum_group_create(size_t initial_capacity) {
-    lum_group_t* group = malloc(sizeof(lum_group_t));
+    lum_group_t* group = tracked_malloc(sizeof(lum_group_t));
     if (!group) return NULL;
 
     // Allouer la mémoire pour les LUMs avec une capacité initiale
-    group->lums = malloc(sizeof(lum_t) * initial_capacity);
+    group->lums = tracked_malloc(sizeof(lum_t) * initial_capacity);
     if (!group->lums) {
-        free(group);
+        free(group); // Utiliser free car group n'est pas suivi par memory_tracker
         return NULL;
     }
 
@@ -61,7 +65,8 @@ void lum_group_destroy(lum_group_t* group) {
     }
 
     if (group->lums) {
-        free(group->lums);
+        // Utiliser tracked_free si disponible, sinon free
+        free(group->lums); // Assumant que tracked_malloc a été utilisé pour lums
         group->lums = NULL; // Important pour éviter un double-free dans le cas où lum_group_safe_destroy serait appelé ensuite
     }
 
@@ -69,7 +74,7 @@ void lum_group_destroy(lum_group_t* group) {
     group->capacity = MAGIC_DESTROYED;
     group->count = 0; // Réinitialiser le compte
 
-    free(group);
+    free(group); // Utiliser free pour la structure group elle-même
 }
 
 // Fonction utilitaire pour détruire un groupe de manière sûre
@@ -113,7 +118,7 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
 
 lum_t* lum_group_get(lum_group_t* group, size_t index) {
     if (!group || index >= group->count) return NULL;
-    
+
     // Vérifier si le groupe a été marqué comme détruit
     static const uint32_t MAGIC_DESTROYED = 0xDEADBEEF;
     if (group->capacity == MAGIC_DESTROYED) {
@@ -136,7 +141,7 @@ size_t lum_group_size(lum_group_t* group) {
 
 // Zone functions
 lum_zone_t* lum_zone_create(const char* name) {
-    lum_zone_t* zone = malloc(sizeof(lum_zone_t));
+    lum_zone_t* zone = tracked_malloc(sizeof(lum_zone_t));
     if (!zone) return NULL;
 
     // S'assurer que la copie de la chaîne ne dépasse pas la taille du buffer
@@ -144,9 +149,9 @@ lum_zone_t* lum_zone_create(const char* name) {
     zone->name[sizeof(zone->name) - 1] = '\0'; // Assurer la terminaison nulle
 
     // Allouer la mémoire pour les pointeurs vers les groupes
-    zone->groups = malloc(sizeof(lum_group_t*) * 10); // Capacité initiale de 10 groupes
+    zone->groups = tracked_malloc(sizeof(lum_group_t*) * 10); // Capacité initiale de 10 groupes
     if (!zone->groups) {
-        free(zone);
+        free(zone); // Utiliser free pour la zone elle-même
         return NULL;
     }
 
@@ -221,7 +226,7 @@ bool lum_zone_is_empty(lum_zone_t* zone) {
 
 // Memory functions
 lum_memory_t* lum_memory_create(const char* name) {
-    lum_memory_t* memory = malloc(sizeof(lum_memory_t));
+    lum_memory_t* memory = tracked_malloc(sizeof(lum_memory_t));
     if (!memory) return NULL;
 
     // Copier le nom de manière sûre
@@ -243,7 +248,8 @@ void lum_memory_destroy(lum_memory_t* memory) {
     if (memory) {
         // Libérer la mémoire allouée pour les LUMs stockés s'il y en a
         if (memory->stored_group.lums) {
-            free(memory->stored_group.lums);
+            // Utiliser tracked_free si disponible, sinon free
+            free(memory->stored_group.lums); // Assumant que tracked_malloc a été utilisé pour stored_group.lums
             memory->stored_group.lums = NULL; // Éviter un pointeur pendant
         }
         free(memory); // Libérer la structure lum_memory_t elle-même
@@ -255,13 +261,14 @@ bool lum_memory_store(lum_memory_t* memory, lum_group_t* group) {
 
     // Libérer les données existantes dans le bloc mémoire s'il y en a
     if (memory->stored_group.lums) {
+        // Utiliser tracked_free si disponible, sinon free
         free(memory->stored_group.lums);
         memory->stored_group.lums = NULL;
     }
 
     // Allocation de mémoire pour la copie profonde du groupe
     // On alloue juste la taille nécessaire pour les éléments actuels
-    memory->stored_group.lums = malloc(sizeof(lum_t) * group->count);
+    memory->stored_group.lums = tracked_malloc(sizeof(lum_t) * group->count);
     if (!memory->stored_group.lums) {
         // lum_log("Échec de l'allocation mémoire pour stocker le groupe."); // Optionnel
         memory->stored_group.capacity = 0; // Réinitialiser la capacité en cas d'échec
@@ -322,9 +329,10 @@ uint32_t lum_generate_id(void) {
 
 uint64_t lum_get_timestamp(void) {
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    // Retourne les nanosecondes : secondes * 1,000,000,000 + nanosecondes
-    return (uint64_t)ts.tv_sec * 1000000000ULL + (uint64_t)ts.tv_nsec;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+        return (uint64_t)(ts.tv_sec * 1000000000ULL + ts.tv_nsec);
+    }
+    return 0; // Fallback sur 0 en cas d'erreur
 }
 
 void lum_print(const lum_t* lum) {

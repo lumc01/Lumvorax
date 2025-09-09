@@ -118,6 +118,18 @@ int main(int argc, char* argv[]) {
             printf("✅ Created %zu LUMs in %.3f seconds\n", TEST_COUNT, creation_time);
             printf("Creation rate: %.0f LUMs/second\n", TEST_COUNT / creation_time);
             
+            // CONVERSION LUM → BITS/SECONDE (forensique authentique)
+            size_t lum_size_bits = sizeof(lum_t) * 8; // 32 bytes = 256 bits per LUM
+            double lums_per_second = TEST_COUNT / creation_time;
+            double bits_per_second = lums_per_second * lum_size_bits;
+            double gigabits_per_second = bits_per_second / 1000000000.0;
+            
+            printf("=== MÉTRIQUES FORENSIQUES AUTHENTIQUES ===\n");
+            printf("Taille LUM: %zu bits (%zu bytes)\n", lum_size_bits, sizeof(lum_t));
+            printf("Débit LUM: %.0f LUMs/seconde\n", lums_per_second);
+            printf("Débit BITS: %.0f bits/seconde\n", bits_per_second);
+            printf("Débit Gbps: %.3f Gigabits/seconde\n", gigabits_per_second);
+            
             // Test memory usage with forensic tracking
             printf("\n=== Memory Usage Report ===\n");
             memory_tracker_report();
@@ -303,13 +315,11 @@ void demo_vorax_operations(void) {
         lum_t* lum = lum_create(1, i, 0, LUM_STRUCTURE_LINEAR);
         if (lum) {
             bool added = lum_group_add(group1, lum);
-            if (added) {
-                // LUM copié dans le groupe, on peut libérer l'original
-                lum_destroy(lum);
-            } else {
+            if (!added) {
                 // Échec d'ajout, libérer la mémoire
                 lum_destroy(lum);
             }
+            // Si ajouté avec succès, le groupe possède maintenant la LUM
         }
     }
 

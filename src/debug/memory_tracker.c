@@ -366,18 +366,18 @@ void memory_tracker_destroy(void) {
 
 void memory_tracker_cleanup(void) {
     if (!g_tracker_initialized) return;
-    
+
     printf("[MEMORY_TRACKER] Cleanup initiated\n");
     memory_tracker_report();
     memory_tracker_check_leaks();
-    
+
     pthread_mutex_lock(&g_tracker_mutex);
-    
+
     // Reset all entries
     memset(&g_tracker, 0, sizeof(g_tracker));
     g_tracker_initialized = false;
     g_tracking_enabled = true; // Reset to default
-    
+
     pthread_mutex_unlock(&g_tracker_mutex);
     printf("[MEMORY_TRACKER] Cleanup completed\n");
 }

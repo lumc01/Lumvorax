@@ -28,7 +28,7 @@ pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
     }
 
     optimizer->point_count = 0;
-    // Configuration du mode Pareto depuis config (utilise les couches d'optimisation)
+    // Mode Pareto inversé basé sur configuration (pas forcé)
     optimizer->inverse_pareto_mode = config ? (config->max_optimization_layers > 2) : false;
     optimizer->current_best.pareto_score = 0.0;
     optimizer->current_best.is_dominated = true;
@@ -80,7 +80,7 @@ void pareto_optimizer_destroy(pareto_optimizer_t* optimizer) {
     // Assurer que l'optimizer n'est pas utilisé après destruction
     optimizer->point_count = 0;
     optimizer->point_capacity = 0;
-    
+
     free(optimizer);
 }
 
@@ -105,7 +105,7 @@ pareto_metrics_t pareto_evaluate_metrics(lum_group_t* group, const char* operati
     }
     double real_end = get_microseconds();
     double measured_cost_per_lum = (real_end - real_start) / (double)(group_size > 0 ? group_size : 1);
-    
+
     // Efficacité basée sur mesures RÉELLES, pas sur des valeurs inventées
     double base_cost = group_size * measured_cost_per_lum;
     metrics.efficiency_ratio = 1000000.0 / (base_cost + 1.0);
