@@ -27,8 +27,8 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
 void lum_destroy(lum_t* lum) {
     if (!lum) return;
     
-    // PROTECTION DOUBLE FREE: Vérifier magic pattern
-    static const uint64_t DESTROYED_MAGIC = 0xDEADBEEFCAFEBABE;
+    // PROTECTION DOUBLE FREE: Vérifier magic pattern - CORRECTION TYPE STRICTE
+    static const uint32_t DESTROYED_MAGIC = 0xDEADBEEF;  // uint32_t pour correspondre au type id
     if (lum->id == DESTROYED_MAGIC) {
         return; // Déjà détruit
     }
