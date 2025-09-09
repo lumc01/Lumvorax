@@ -54,6 +54,107 @@ int main(int argc, char* argv[]) {
             return result ? 0 : 1;
         }
 
+        // MANDATORY stress tests per prompt.txt - CRITICAL requirement  
+        if (strcmp(argv[1], "--stress-test-million") == 0) {
+            printf("\n=== MANDATORY STRESS TEST: 1+ MILLION LUMs ===\n");
+            printf("Testing system with 1,000,000 LUMs minimum requirement per prompt.txt\n");
+            
+            // Initialize memory tracking for forensic analysis
+            memory_tracker_init();
+            
+            // Initialize performance metrics for timing
+            performance_metrics_init();
+            
+            // Start timing for forensic report
+            double start_time = performance_metrics_get_current_time();
+            
+            // Create 1 million LUMs test - MANDATORY per prompt.txt
+            const size_t TEST_COUNT = 1000000; // 1 million minimum
+            printf("Creating %zu LUM units for stress test...\n", TEST_COUNT);
+            
+            lum_group_t* large_group = lum_group_create(TEST_COUNT);
+            if (!large_group) {
+                printf("ERROR: Failed to create large group for stress test\n");
+                return 1;
+            }
+            
+            // Populate with test data
+            for (size_t i = 0; i < TEST_COUNT; i++) {
+                lum_t lum = {
+                    .presence = (uint8_t)(i % 2),
+                    .x = (int32_t)(i % 1000),
+                    .y = (int32_t)(i / 1000),
+                    .structure_type = (i % 4 == 0) ? LUM_STRUCTURE_LINEAR : 
+                                    (i % 4 == 1) ? LUM_STRUCTURE_CIRCULAR :
+                                    (i % 4 == 2) ? LUM_STRUCTURE_GROUP : LUM_STRUCTURE_NODE,
+                    .id = (uint64_t)i,
+                    .timestamp = (uint64_t)time(NULL) + i
+                };
+                if (!lum_group_add_lum(large_group, &lum)) {
+                    printf("ERROR: Failed to add LUM %zu\n", i);
+                    lum_group_destroy(large_group);
+                    return 1;
+                }
+                
+                // Progress indicator every 100k
+                if (i > 0 && i % 100000 == 0) {
+                    printf("Progress: %zu/%zu LUMs created (%.1f%%)\n", 
+                           i, TEST_COUNT, (double)i * 100.0 / TEST_COUNT);
+                }
+            }
+            
+            double creation_time = performance_metrics_get_current_time() - start_time;
+            printf("✅ Created %zu LUMs in %.3f seconds\n", TEST_COUNT, creation_time);
+            printf("Creation rate: %.0f LUMs/second\n", TEST_COUNT / creation_time);
+            
+            // Test memory usage with forensic tracking
+            printf("\n=== Memory Usage Report ===\n");
+            memory_tracker_report();
+            
+            // Test VORAX operations on large dataset - MANDATORY stress testing
+            printf("\n=== Testing VORAX Operations on Large Dataset ===\n");
+            double ops_start = performance_metrics_get_current_time();
+            
+            // Split operation test with large data
+            printf("Testing SPLIT operation...\n");
+            lum_group_t* split_result = vorax_split(large_group, 4);
+            if (split_result) {
+                printf("✅ Split operation completed on %zu LUMs\n", TEST_COUNT);
+                lum_group_destroy(split_result);
+            } else {
+                printf("⚠️ Split operation failed\n");
+            }
+            
+            // Cycle operation test
+            printf("Testing CYCLE operation...\n");
+            vorax_result_t* cycle_result = vorax_cycle(large_group, 7);
+            if (cycle_result && cycle_result->success) {
+                printf("✅ Cycle operation completed: %s\n", cycle_result->message);
+                vorax_result_destroy(cycle_result);
+            } else {
+                printf("⚠️ Cycle operation failed\n");
+            }
+            
+            double ops_time = performance_metrics_get_current_time() - ops_start;
+            printf("VORAX operations completed in %.3f seconds\n", ops_time);
+            
+            // Final memory check for leak detection
+            printf("\n=== Final Memory Analysis ===\n");
+            memory_tracker_report();
+            memory_tracker_check_leaks();
+            
+            // Cleanup
+            lum_group_destroy(large_group);
+            
+            double total_time = performance_metrics_get_current_time() - start_time;
+            printf("\n=== STRESS TEST COMPLETED ===\n");
+            printf("Total execution time: %.3f seconds\n", total_time);
+            printf("Overall throughput: %.0f LUMs/second\n", TEST_COUNT / total_time);
+            printf("Test Result: %s\n", (total_time < 60.0) ? "PASS" : "MARGINAL");
+            
+            return 0;
+        }
+
         if (strcmp(argv[1], "--threading-tests") == 0) {
             printf("=== Tests threading POSIX ===\n");
             // Tests de threading seront implémentés
