@@ -57,7 +57,7 @@ typedef struct {
 static inline lum_encoded32_t* lum_create_encoded32(int32_t x, int32_t y, uint8_t type, uint8_t presence) {
     lum_encoded32_t* lum = malloc(sizeof(lum_encoded32_t));
     if (lum) {
-        lum->timestamp = time(NULL);
+        lum->timestamp = lum_get_timestamp();
         lum->encoded_data = ENCODE_LUM32(presence, type, x, y);
     }
     return lum;
@@ -66,7 +66,7 @@ static inline lum_encoded32_t* lum_create_encoded32(int32_t x, int32_t y, uint8_
 static inline lum_hybrid_t* lum_create_hybrid(int16_t x, int16_t y, uint8_t type, uint8_t presence) {
     lum_hybrid_t* lum = malloc(sizeof(lum_hybrid_t));
     if (lum) {
-        lum->timestamp = time(NULL);
+        lum->timestamp = lum_get_timestamp();
         lum->position_x = x;
         lum->position_y = y;
         lum->type_presence = ENCODE_TYPE_PRESENCE(type, presence);
@@ -77,7 +77,7 @@ static inline lum_hybrid_t* lum_create_hybrid(int16_t x, int16_t y, uint8_t type
 static inline lum_compact_noid_t* lum_create_compact_noid(int32_t x, int32_t y, uint8_t type, uint8_t presence) {
     lum_compact_noid_t* lum = malloc(sizeof(lum_compact_noid_t));
     if (lum) {
-        lum->timestamp = time(NULL);
+        lum->timestamp = lum_get_timestamp();
         lum->position_x = x;
         lum->position_y = y;
         lum->presence = presence;

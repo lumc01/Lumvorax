@@ -84,8 +84,8 @@ typedef struct {
 // Throughput calculator structure
 typedef struct {
     size_t total_operations;
-    struct timeval start_time;
-    struct timeval last_update;
+    struct timespec start_time;
+    struct timespec last_update;
     double current_throughput;
     double peak_throughput;
 } throughput_calculator_t;

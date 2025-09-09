@@ -276,7 +276,7 @@ throughput_calculator_t* throughput_calculator_create(void) {
     if (!calc) return NULL;
 
     calc->total_operations = 0;
-    gettimeofday(&calc->start_time, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &calc->start_time);
     calc->last_update = calc->start_time;
     calc->current_throughput = 0.0;
     calc->peak_throughput = 0.0;
@@ -295,11 +295,11 @@ void throughput_calculator_add_operations(throughput_calculator_t* calc, size_t 
 
     calc->total_operations += operations;
 
-    struct timeval now;
-    gettimeofday(&now, NULL);
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
 
     double time_diff = (now.tv_sec - calc->last_update.tv_sec) + 
-                      (now.tv_usec - calc->last_update.tv_usec) / 1e6;
+                      (now.tv_nsec - calc->last_update.tv_nsec) / 1e9;
 
     if (time_diff > 0.1) { // Update every 100ms
         calc->current_throughput = operations / time_diff;
@@ -320,11 +320,11 @@ double throughput_calculator_get_current(throughput_calculator_t* calc) {
 double throughput_calculator_get_average(throughput_calculator_t* calc) {
     if (!calc) return 0.0;
 
-    struct timeval now;
-    gettimeofday(&now, NULL);
+    struct timespec now;
+    clock_gettime(CLOCK_MONOTONIC, &now);
 
     double total_time = (now.tv_sec - calc->start_time.tv_sec) + 
-                       (now.tv_usec - calc->start_time.tv_usec) / 1e6;
+                       (now.tv_nsec - calc->start_time.tv_nsec) / 1e9;
 
     if (total_time <= 0.0) return 0.0;
 
