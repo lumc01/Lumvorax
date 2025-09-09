@@ -10,9 +10,31 @@
 
 static double get_microseconds(void) {
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    // Retourne les microsecondes monotonic : (secondes * 1,000,000) + (nanosecondes / 1,000)
-    return (double)ts.tv_sec * 1000000.0 + (double)ts.tv_nsec / 1000.0;
+    
+    // CORRECTION CRITIQUE: Mesure temps monotone robuste pour éviter zéros
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+        double microseconds = (double)ts.tv_sec * 1000000.0 + (double)ts.tv_nsec / 1000.0;
+        
+        // Validation: s'assurer que le timestamp n'est pas zéro
+        if (microseconds == 0.0) {
+            // Fallback sur CLOCK_REALTIME si MONOTONIC retourne 0
+            if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+                microseconds = (double)ts.tv_sec * 1000000.0 + (double)ts.tv_nsec / 1000.0;
+            }
+        }
+        
+        // Dernier recours: utiliser time() avec conversion microseconde
+        if (microseconds == 0.0) {
+            time_t current_time = time(NULL);
+            microseconds = (double)current_time * 1000000.0;
+        }
+        
+        return microseconds;
+    }
+    
+    // Fallback robuste en cas d'erreur clock_gettime
+    time_t current_time = time(NULL);
+    return (double)current_time * 1000000.0;
 }
 
 pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
@@ -28,8 +50,22 @@ pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
     }
 
     optimizer->point_count = 0;
-    // Mode Pareto inversé basé sur configuration (pas forcé)
-    optimizer->inverse_pareto_mode = config ? (config->max_optimization_layers > 2) : false;
+    // CORRECTION CONFLIT: Mode Pareto inversé basé sur configuration réelle, pas forcé
+    if (config) {
+        // Vérifier cohérence logique: pas de conflit entre Pareto normal et inversé
+        bool has_complex_optimization = (config->max_optimization_layers > 2);
+        bool has_advanced_pareto = (config->max_points > 500);
+        
+        // Mode inversé seulement si justifié par la complexité ET compatible
+        optimizer->inverse_pareto_mode = has_complex_optimization && has_advanced_pareto;
+        
+        if (optimizer->inverse_pareto_mode) {
+            lum_log(LUM_LOG_INFO, "Pareto inversé activé: couches=%d, points=%d", 
+                    config->max_optimization_layers, config->max_points);
+        }
+    } else {
+        optimizer->inverse_pareto_mode = false; // Pas de conflit par défaut
+    }
     optimizer->current_best.pareto_score = 0.0;
     optimizer->current_best.is_dominated = true;
 
