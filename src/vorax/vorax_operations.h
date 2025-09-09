@@ -21,6 +21,7 @@ typedef struct {
     char message[256];
     lum_group_t* result_group;          // Groupe résultat principal
     lum_group_t* output_group;          // Alias compatibilité (nouveau STANDARD_NAMES 2025-01-10)
+    lum_group_t** result_groups;        // Array de groupes pour opérations split (restauré)
     size_t result_count;
     double execution_time;
     uint32_t magic_number;              // Protection double-free (conforme STANDARD_NAMES)

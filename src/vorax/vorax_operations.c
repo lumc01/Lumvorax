@@ -61,6 +61,15 @@ vorax_result_t* vorax_split(lum_group_t* group, size_t parts) {
         result->result_groups[i] = lum_group_create(group->count / parts + 1);
         if (!result->result_groups[i]) {
             vorax_result_set_error(result, "Failed to create split group");
+            // Clean up already allocated groups before returning
+            for (size_t j = 0; j < i; j++) {
+                if (result->result_groups[j]) {
+                    lum_group_destroy(result->result_groups[j]);
+                }
+            }
+            free(result->result_groups);
+            result->result_groups = NULL;
+            result->result_count = 0;
             return result;
         }
     }

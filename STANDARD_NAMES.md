@@ -50,10 +50,7 @@
 2025-01-10 01:00 - position_x + Coordonnée spatiale X standardisée int32_t
 2025-01-10 01:00 - position_y + Coordonnée spatiale Y standardisée int32_t
 2025-01-10 01:00 - structure_type + Type de structure LUM standardisé uint8_t
-2025-01-10 01:30 - calculate_system_efficiency + Calcul efficacité système pour résolution conflit Pareto
-2025-01-10 01:30 - convert_lums_per_second_to_bits_per_second + Conversion métriques LUM vers bits/seconde
-2025-01-10 01:30 - convert_lums_per_second_to_gigabits_per_second + Conversion métriques LUM vers Gigabits/seconde
-2025-01-10 01:30 - calculate_authentic_lum_throughput + Calcul débit LUM authentique depuis métriques temporelles
+2025-01-10 02:00 - result_groups + Array groupes multiples opérations split VORAX (restauré)
 
 ## STRUCTURES DE DONNÉES
 
