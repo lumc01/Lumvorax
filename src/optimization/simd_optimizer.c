@@ -13,8 +13,11 @@ simd_capabilities_t* simd_detect_capabilities(void) {
     if (!caps) return NULL;
 
     caps->avx512_available = false;
+    caps->avx512_supported = false;
     caps->avx2_available = false;
+    caps->avx2_supported = false;
     caps->sse_available = false;
+    caps->sse42_supported = false;
     caps->vector_width = 1;
     strcpy(caps->cpu_features, "scalar");
 
@@ -26,6 +29,7 @@ simd_capabilities_t* simd_detect_capabilities(void) {
         // Check SSE support
         if (edx & (1 << 25)) {
             caps->sse_available = true;
+            caps->sse42_supported = true;
             caps->vector_width = 4;
             strcpy(caps->cpu_features, "SSE");
         }
@@ -35,6 +39,7 @@ simd_capabilities_t* simd_detect_capabilities(void) {
             if (__get_cpuid_count(7, 0, &eax, &ebx, &ecx, &edx)) {
                 if (ebx & (1 << 5)) {
                     caps->avx2_available = true;
+                    caps->avx2_supported = true;
                     caps->vector_width = 8;
                     strcat(caps->cpu_features, "+AVX2");
                 }
@@ -42,6 +47,7 @@ simd_capabilities_t* simd_detect_capabilities(void) {
                 // Check AVX-512 support
                 if (ebx & (1 << 16)) {
                     caps->avx512_available = true;
+                    caps->avx512_supported = true;
                     caps->vector_width = 16;
                     strcat(caps->cpu_features, "+AVX512");
                 }

@@ -35,6 +35,9 @@
 2025-01-09 22:30 - avx512_supported + Support détecté instructions AVX-512
 2025-01-09 22:30 - peak_memory_mb + Pic mémoire utilisée en mégabytes
 2025-01-09 22:30 - execution_time_s + Temps exécution total en secondes
+2025-01-09 22:35 - sse42_supported + Support détecté SSE4.2 pour compatibilité
+2025-01-09 22:35 - avx2_supported + Support détecté AVX2 pour compatibilité
+2025-01-09 22:35 - avx512_supported + Support détecté AVX-512 pour compatibilité
 
 ## STRUCTURES DE DONNÉES
 

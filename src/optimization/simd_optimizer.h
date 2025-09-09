@@ -19,8 +19,11 @@
 // SIMD optimization configuration
 typedef struct {
     bool avx512_available;
+    bool avx512_supported;     // Ajouté pour compatibilité
     bool avx2_available;
+    bool avx2_supported;       // Ajouté pour compatibilité
     bool sse_available;
+    bool sse42_supported;      // Ajouté pour compatibilité
     int vector_width;
     char cpu_features[256];
 } simd_capabilities_t;
