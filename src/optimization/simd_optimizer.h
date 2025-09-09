@@ -25,6 +25,21 @@ typedef struct {
     char cpu_features[256];
 } simd_capabilities_t;
 
+// SIMD optimizer configuration
+typedef struct {
+    simd_capabilities_t capabilities;
+    bool initialized;
+    char processor_info[256];
+} simd_optimizer_t;
+
+// SIMD operation types
+typedef enum {
+    SIMD_VECTOR_ADD,
+    SIMD_VECTOR_MULTIPLY,
+    SIMD_PARALLEL_TRANSFORM,
+    SIMD_FUSED_MULTIPLY_ADD
+} simd_operation_e;
+
 // SIMD operation results
 typedef struct {
     size_t processed_elements;
@@ -32,6 +47,10 @@ typedef struct {
     double throughput_ops_per_sec;
     bool used_vectorization;
     char optimization_used[64];
+    size_t vectorized_count;
+    size_t scalar_fallback_count;
+    double performance_gain;
+    uint64_t execution_time_ns;
 } simd_result_t;
 
 // Function declarations
@@ -59,5 +78,17 @@ void simd_avx512_vectorized_conservation_check(uint64_t* conservation_data, size
 simd_result_t* simd_benchmark_vectorization(size_t test_size);
 void simd_result_destroy(simd_result_t* result);
 void simd_print_performance_comparison(simd_result_t* scalar, simd_result_t* vectorized);
+
+// SIMD optimization functions
+bool simd_optimize_lum_operations(simd_optimizer_t* optimizer, 
+                                   lum_group_t* group, 
+                                   simd_operation_e operation,
+                                   simd_result_t* result);
+
+// Operation-specific functions
+bool simd_vector_add_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_result_t* result);
+bool simd_vector_multiply_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_result_t* result);
+bool simd_parallel_transform_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_result_t* result);
+bool simd_fma_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_result_t* result);
 
 #endif // SIMD_OPTIMIZER_H

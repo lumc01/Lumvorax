@@ -130,8 +130,14 @@
 
 ### Types Optimisation SIMD
 - `simd_capabilities_t` : Détection capacités SIMD (AVX2, AVX-512, SSE)
-- `simd_result_t` : Résultat opérations vectorisées avec métriques performance
-- `simd_vector_size` : Taille vecteur selon architecture (8/16/1)
+- `simd_optimizer_t` : Optimiseur SIMD principal avec configuration processeur
+- `simd_operation_e` : Types d'opérations SIMD (ADD, MULTIPLY, TRANSFORM, FMA)
+- `simd_result_t` : Résultat opérations vectorisées avec métriques performance complètes
+- `simd_vector_size` : Taille vecteur selon architecture (4/8/16)
+- `vectorized_count` : Nombre d'éléments traités en mode vectorisé
+- `scalar_fallback_count` : Nombre d'éléments traités en mode scalaire
+- `performance_gain` : Gain de performance vectorisation vs scalaire
+- `execution_time_ns` : Temps d'exécution en nanosecondes précises
 
 ### Types Allocateur Zero-Copy
 - `zero_copy_pool_t` : Pool mémoire zero-copy avec memory mapping
