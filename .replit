@@ -1,4 +1,4 @@
-modules = ["c-clang14", "cpp-clang14", "bash", "python-3.12", "c-clang"]
+modules = ["c-clang14", "cpp-clang14", "bash", "python-3.12"]
 [agent]
 expertMode = true
 

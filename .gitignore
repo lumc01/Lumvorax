@@ -45,10 +45,29 @@ Thumbs.db
 !replit.md
 !.replit
 
-# Evidence and reports (forensic tracking - keep these)
-evidence/
-reports/
-*.md
+# C/C++ compiled objects and executables
+*.out
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.la
+*.lo
+
+# Debug files
+*.su
+*.idb
+*.pdb
+
+# Performance and test artifacts (keep some for forensic tracking)
+perf_results.txt
+performance_test_results.txt
+benchmark_results.txt
+compilation_log.txt
+conservation_results.txt
+
+# Evidence and reports (keep these for forensic tracking)
 
 # Test results
 *.txt
