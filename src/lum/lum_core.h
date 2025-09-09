@@ -17,12 +17,14 @@ _Static_assert(sizeof(struct { uint8_t a; uint32_t b; int32_t c; int32_t d; uint
 typedef struct {
     uint32_t id;                    // Identifiant unique
     uint8_t presence;               // État de présence (0 ou 1)
-    uint16_t x, y;                  // Position spatiale
-    uint8_t type;                   // Type de LUM
+    int32_t position_x;             // Position spatiale X (conforme STANDARD_NAMES)
+    int32_t position_y;             // Position spatiale Y (conforme STANDARD_NAMES)
+    uint8_t structure_type;         // Type de LUM (conforme STANDARD_NAMES)
     uint64_t timestamp;             // Timestamp de création nanoseconde
     void* memory_address;           // Adresse mémoire pour traçabilité
     uint32_t checksum;              // Vérification intégrité
-    uint32_t reserved;              // Padding pour alignement 32 bytes
+    uint8_t is_destroyed;           // Protection double-free (nouveau STANDARD_NAMES 2025-01-10)
+    uint8_t reserved[3];            // Padding pour alignement 32 bytes
 } lum_t;
 
 // LUM structure types
@@ -38,11 +40,12 @@ typedef enum {
 
 // LUM Group - collection of LUMs
 typedef struct {
-    lum_t* lums;              // Array of LUMs
+    lum_t* lums;              // Array of LUMs (stockage par valeur)
     size_t count;             // Number of LUMs
     size_t capacity;          // Allocated capacity
     uint32_t group_id;        // Group identifier
     lum_structure_type_e type; // Group structure type
+    uint32_t magic_number;    // Protection double-free (nouveau STANDARD_NAMES 2025-01-10)
 } lum_group_t;
 
 // Zone - spatial container for LUMs

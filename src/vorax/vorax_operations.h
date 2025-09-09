@@ -19,10 +19,11 @@ typedef enum {
 typedef struct {
     bool success;
     char message[256];
-    lum_group_t* result_group;
+    lum_group_t* result_group;          // Groupe résultat principal
+    lum_group_t* output_group;          // Alias compatibilité (nouveau STANDARD_NAMES 2025-01-10)
     size_t result_count;
-    lum_group_t** result_groups;
-    uint32_t magic_number;  // Protection double free
+    double execution_time;
+    uint32_t magic_number;              // Protection double-free (conforme STANDARD_NAMES)
 } vorax_result_t;
 
 // Core VORAX operations

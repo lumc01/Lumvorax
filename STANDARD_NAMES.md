@@ -44,6 +44,12 @@
 2025-01-10 00:00 - memory_tracker_is_enabled + Vérification état tracking mémoire actif
 2025-01-10 00:00 - memory_tracker_export_json + Export métriques mémoire format JSON
 2025-01-10 00:00 - memory_tracker_set_release_mode + Configuration mode release sans overhead tracking
+2025-01-10 01:00 - is_destroyed + Champ protection double-free structure lum_t
+2025-01-10 01:00 - magic_number + Champ protection double-free structure lum_group_t  
+2025-01-10 01:00 - output_group + Alias compatibilité vorax_result_t pour rétrocompatibilité
+2025-01-10 01:00 - position_x + Coordonnée spatiale X standardisée int32_t
+2025-01-10 01:00 - position_y + Coordonnée spatiale Y standardisée int32_t
+2025-01-10 01:00 - structure_type + Type de structure LUM standardisé uint8_t
 
 ## STRUCTURES DE DONNÉES
 

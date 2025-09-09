@@ -104,8 +104,11 @@ int main(int argc, char* argv[]) {
                     .structure_type = (i % 4 == 0) ? LUM_STRUCTURE_LINEAR : 
                                     (i % 4 == 1) ? LUM_STRUCTURE_CIRCULAR :
                                     (i % 4 == 2) ? LUM_STRUCTURE_GROUP : LUM_STRUCTURE_NODE,
-                    .id = (uint64_t)i,
-                    .timestamp = (uint64_t)time(NULL) + i
+                    .id = (uint32_t)i,
+                    .timestamp = lum_get_timestamp(),
+                    .memory_address = NULL,
+                    .checksum = 0,
+                    .is_destroyed = 0
                 };
                 lum_t* lum_ptr = malloc(sizeof(lum_t));
                 if (lum_ptr) {
