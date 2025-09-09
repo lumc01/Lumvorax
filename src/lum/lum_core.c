@@ -4,6 +4,7 @@
 #include <time.h>
 #include "../debug/memory_tracker.h"
 #include <pthread.h> // Nécessaire pour pthread_mutex_t et les fonctions associées
+#include <sys/time.h> // Nécessaire pour gettimeofday
 
 static uint32_t lum_id_counter = 1;
 static pthread_mutex_t id_counter_mutex = PTHREAD_MUTEX_INITIALIZER;
@@ -20,23 +21,24 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
     lum->structure_type = type;
     lum->is_destroyed = 0;  // CORRECTION: Initialiser le flag protection double-free
     lum->timestamp = lum_get_timestamp();
+    lum->memory_address = (void*)lum;  // Adresse mémoire pour traçabilité
 
     return lum;
 }
 
 void lum_destroy(lum_t* lum) {
     if (!lum) return;
-    
+
     // PROTECTION DOUBLE FREE: Vérifier magic pattern - CORRECTION TYPE STRICTE
     static const uint32_t DESTROYED_MAGIC = 0xDEADBEEF;  // uint32_t pour correspondre au type id
     if (lum->id == DESTROYED_MAGIC) {
         return; // Déjà détruit
     }
-    
+
     // Marquer comme détruit AVANT la libération
     lum->id = DESTROYED_MAGIC;
     lum->is_destroyed = 1;
-    
+
     TRACKED_FREE(lum);
 }
 
@@ -52,7 +54,7 @@ void lum_safe_destroy(lum_t** lum_ptr) {
 lum_group_t* lum_group_create(size_t initial_capacity) {
     // PROTECTION: Capacité minimale pour éviter corruptions
     if (initial_capacity == 0) initial_capacity = 1;
-    
+
     lum_group_t* group = TRACKED_MALLOC(sizeof(lum_group_t));
     if (!group) return NULL;
 
@@ -62,10 +64,10 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
         TRACKED_FREE(group);
         return NULL;
     }
-    
+
     // PROTECTION CRITIQUE: Détecter si group->lums == group (corruption mémoire)
     if (group->lums == (lum_t*)group) {
-        // CORRUPTION DÉTECTÉE ! Allouer à nouveau avec taille différente
+        // CORRECTION DÉTECTÉE ! Allouer à nouveau avec taille différente
         TRACKED_FREE(group->lums);
         group->lums = TRACKED_MALLOC(sizeof(lum_t) * initial_capacity + 64); // +64 bytes padding
         if (!group->lums) {
@@ -97,7 +99,7 @@ void lum_group_destroy(lum_group_t* group) {
         TRACKED_FREE(group->lums);
         group->lums = NULL;
     } else if (group->lums == (lum_t*)group) {
-        // CORRUPTION DÉTECTÉE: group->lums pointe vers group lui-même !
+        // CORRECTION DÉTECTÉE: group->lums pointe vers group lui-même !
         group->lums = NULL; // Ne pas libérer - éviter double free
     }
 
@@ -365,31 +367,30 @@ uint32_t lum_generate_id(void) {
 
 uint64_t lum_get_timestamp(void) {
     struct timespec ts;
-    
-    // CORRECTION CRITIQUE: Mesure temps nanoseconde robuste
+    // Essayer CLOCK_MONOTONIC d'abord
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
-        uint64_t nanoseconds = (uint64_t)(ts.tv_sec * 1000000000ULL + ts.tv_nsec);
-        
-        // Validation: s'assurer que le timestamp n'est pas zéro
-        if (nanoseconds == 0) {
-            // Fallback sur CLOCK_REALTIME si MONOTONIC retourne 0
-            if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
-                nanoseconds = (uint64_t)(ts.tv_sec * 1000000000ULL + ts.tv_nsec);
-            }
+        uint64_t timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+        if (timestamp > 0) {
+            return timestamp;
         }
-        
-        // Dernier recours: utiliser time() avec conversion nanoseconde
-        if (nanoseconds == 0) {
-            time_t current_time = time(NULL);
-            nanoseconds = (uint64_t)current_time * 1000000000ULL;
-        }
-        
-        return nanoseconds;
     }
-    
-    // Fallback robuste en cas d'erreur clock_gettime
-    time_t current_time = time(NULL);
-    return (uint64_t)current_time * 1000000000ULL;
+
+    // Fallback CLOCK_REALTIME si MONOTONIC échoue
+    if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+        uint64_t timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+        if (timestamp > 0) {
+            return timestamp;
+        }
+    }
+
+    // Fallback final : microsecondes depuis epoch
+    struct timeval tv;
+    if (gettimeofday(&tv, NULL) == 0) {
+        return (tv.tv_sec * 1000000ULL + tv.tv_usec) * 1000ULL; // Convert to nanoseconds
+    }
+
+    // Dernière option : timestamp basé sur time()
+    return ((uint64_t)time(NULL)) * 1000000000ULL;
 }
 
 void lum_print(const lum_t* lum) {

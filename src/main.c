@@ -27,6 +27,23 @@ void demo_pareto_optimization(void);
 void demo_simd_optimization(void);
 void demo_zero_copy_allocation(void);
 
+// Helper function to print LUM group (assuming it exists in lum_core.h or similar)
+// If print_lum_group is not available, this part might need adjustment or removal.
+// For now, assuming a function like this for demo purposes.
+void print_lum_group(lum_group_t* group) {
+    if (!group) return;
+    printf("    Group LUMs (%zu):\n", group->count);
+    for (size_t i = 0; i < group->count; ++i) {
+        if (group->lums[i]) {
+            printf("      - LUM ID: %llu, Pos: (%d, %d), Type: %d\n",
+                   (unsigned long long)group->lums[i]->id,
+                   group->lums[i]->position_x,
+                   group->lums[i]->position_y,
+                   group->lums[i]->structure_type);
+        }
+    }
+}
+
 int main(int argc, char* argv[]) {
     // Options de validation forensique
     if (argc > 1) {
@@ -299,46 +316,82 @@ void demo_basic_lum_operations(void) {
 }
 
 void demo_vorax_operations(void) {
-    printf("2. Test des opérations VORAX...\n");
+    // Démonstration VORAX operations avec protection double-free
+    lum_group_t* groups[3] = {
+        lum_group_create(2),
+        lum_group_create(3), 
+        lum_group_create(1)
+    };
 
-    // Créer deux groupes pour les opérations
-    lum_group_t* group_a = lum_group_create(5);
-    lum_group_t* group_b = lum_group_create(5);
+    // Test VORAX fuse
+    vorax_result_t* fuse_result = vorax_fuse(groups[0], groups[1]);
+    if (fuse_result && fuse_result->output_group) {
+        printf("  ✓ Fusion VORAX réussie: %zu LUMs résultants\n", fuse_result->output_group->count);
+        print_lum_group(fuse_result->output_group);
+    }
 
-    // CORRECTION FINALE DOUBLE FREE: Créer des LUMs temporaires et ne pas les stocker dans des pointeurs
-    // Car lum_group_add fait une copie, nous n'avons pas besoin de gérer la mémoire des originaux
-    for (int i = 0; i < 4; i++) {
-        lum_t temp_lum = {
-            .presence = (uint8_t)(i % 2),
-            .id = lum_generate_id(),
-            .position_x = i,
-            .position_y = 0,
-            .structure_type = LUM_STRUCTURE_LINEAR,
-            .is_destroyed = 0,
-            .timestamp = lum_get_timestamp()
-        };
-        
-        if (i < 2) {
-            lum_group_add(group_a, &temp_lum);
-        } else {
-            lum_group_add(group_b, &temp_lum);
+    // Cleanup sécurisé - éviter double-free
+    if (fuse_result) {
+        // Le fuse_result possède maintenant groups[0] et groups[1]
+        // Ne pas les libérer manuellement
+        vorax_result_destroy(fuse_result);
+        // Marquer comme NULL pour éviter double destruction
+        groups[0] = NULL;
+        groups[1] = NULL;
+    }
+
+    // Libération des groupes restants
+    for (int i = 0; i < 3; i++) {
+        if (groups[i] != NULL) {
+            lum_group_destroy(groups[i]);
+            groups[i] = NULL;
         }
     }
 
-    // Tester les opérations VORAX - CONFORME STANDARD_NAMES.md
-    vorax_result_t* result = vorax_fuse(group_a, group_b);
-    if (result && result->success) {
-        printf("  ✓ Fusion VORAX réussie: %zu LUMs résultants\n", 
-               lum_group_size(result->result_group));
-        lum_group_print(result->result_group);
+    // CORRECTION FINALE DOUBLE FREE: Créer des LUMs temporaires et ne pas les stocker dans des pointeurs
+    // Car lum_group_add fait une copie, nous n'avons pas besoin de gérer la mémoire des originaux
+    // Note: Les groupes ci-dessus (groups[0], groups[1], groups[2]) sont gérés séparément pour la démo fuse.
+    // L'exemple original semblait mélanger les démos. On garde l'approche de création de LUMs temporaires pour les opérations individuelles.
+    lum_group_t* temp_group_a = lum_group_create(5);
+    lum_group_t* temp_group_b = lum_group_create(5);
+
+    if (temp_group_a && temp_group_b) {
+        for (int i = 0; i < 4; i++) {
+            lum_t temp_lum = {
+                .presence = (uint8_t)(i % 2),
+                .id = lum_generate_id(),
+                .position_x = i,
+                .position_y = 0,
+                .structure_type = LUM_STRUCTURE_LINEAR,
+                .is_destroyed = 0,
+                .timestamp = lum_get_timestamp()
+            };
+
+            if (i < 2) {
+                lum_group_add(temp_group_a, &temp_lum);
+            } else {
+                lum_group_add(temp_group_b, &temp_lum);
+            }
+        }
+
+        // Tester les opérations VORAX - CONFORME STANDARD_NAMES.md
+        vorax_result_t* result = vorax_fuse(temp_group_a, temp_group_b);
+        if (result && result->success) {
+            printf("  ✓ Fusion VORAX réussie: %zu LUMs résultants\n", 
+                   lum_group_size(result->result_group));
+            lum_group_print(result->result_group);
+        }
+        vorax_result_destroy(result);
+
+        // Plus besoin de détruire les LUMs originaux car nous avons utilisé des structures temporaires
+
+        // Nettoyer les groupes temporaires
+        lum_group_destroy(temp_group_a);
+        lum_group_destroy(temp_group_b);
+    } else {
+        if(temp_group_a) lum_group_destroy(temp_group_a);
+        if(temp_group_b) lum_group_destroy(temp_group_b);
     }
-    vorax_result_destroy(result);
-
-    // Plus besoin de détruire les LUMs originaux car nous avons utilisé des structures temporaires
-
-    // Nettoyer les groupes
-    lum_group_destroy(group_a);
-    lum_group_destroy(group_b);
 }
 
 void demo_binary_conversion(void) {

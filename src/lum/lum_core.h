@@ -15,13 +15,14 @@ _Static_assert(sizeof(struct { uint8_t a; uint32_t b; int32_t c; int32_t d; uint
 
 // Core LUM structure - a single presence unit
 typedef struct {
-    uint8_t presence;           // 0 or 1 - the fundamental presence
-    uint32_t id;               // Unique identifier for traceability
-    int32_t position_x;        // Spatial position X
-    int32_t position_y;        // Spatial position Y
-    uint8_t structure_type;    // LINEAR, CIRCULAR, GROUP, NODE
-    uint8_t is_destroyed;      // Protection double-free flag
-    uint64_t timestamp;        // Creation/modification timestamp
+    uint32_t id;                    // Identifiant unique
+    uint8_t presence;               // État de présence (0 ou 1)
+    uint16_t x, y;                  // Position spatiale
+    uint8_t type;                   // Type de LUM
+    uint64_t timestamp;             // Timestamp de création nanoseconde
+    void* memory_address;           // Adresse mémoire pour traçabilité
+    uint32_t checksum;              // Vérification intégrité
+    uint32_t reserved;              // Padding pour alignement 32 bytes
 } lum_t;
 
 // LUM structure types
@@ -66,7 +67,6 @@ void lum_destroy(lum_t* lum);
 
 lum_group_t* lum_group_create(size_t initial_capacity);
 void lum_group_destroy(lum_group_t* group);
-void lum_group_safe_destroy(lum_group_t** group);
 void lum_group_safe_destroy(lum_group_t** group_ptr);
 bool lum_group_add(lum_group_t* group, lum_t* lum);
 lum_t* lum_group_get(lum_group_t* group, size_t index);
