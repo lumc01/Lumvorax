@@ -298,20 +298,32 @@ void demo_vorax_operations(void) {
         return;
     }
 
-    // Ajouter des LUMs aux groupes
+    // Ajouter des LUMs aux groupes - CORRECTION DOUBLE FREE
     for (int i = 0; i < 3; i++) {
         lum_t* lum = lum_create(1, i, 0, LUM_STRUCTURE_LINEAR);
         if (lum) {
-            lum_group_add(group1, lum);
-            free(lum);
+            bool added = lum_group_add(group1, lum);
+            if (added) {
+                // LUM copié dans le groupe, on peut libérer l'original
+                lum_destroy(lum);
+            } else {
+                // Échec d'ajout, libérer la mémoire
+                lum_destroy(lum);
+            }
         }
     }
 
     for (int i = 0; i < 2; i++) {
         lum_t* lum = lum_create(1, i, 1, LUM_STRUCTURE_LINEAR);
         if (lum) {
-            lum_group_add(group2, lum);
-            free(lum);
+            bool added = lum_group_add(group2, lum);
+            if (added) {
+                // LUM copié dans le groupe, on peut libérer l'original
+                lum_destroy(lum);
+            } else {
+                // Échec d'ajout, libérer la mémoire
+                lum_destroy(lum);
+            }
         }
     }
 
