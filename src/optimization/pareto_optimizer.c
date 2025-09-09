@@ -1,6 +1,11 @@
 #include "pareto_optimizer.h"
 #include "memory_optimizer.h"
 #include "../metrics/performance_metrics.h"
+#include "../logger/lum_logger.h"
+#include <stdio.h>
+#include <string.h>
+#include <time.h>
+#include <stdlib.h>
 
 // Fonction calcul efficacité système pour résolution conflit Pareto
 static double calculate_system_efficiency(void) {
@@ -62,7 +67,8 @@ pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
     // CORRECTION CONFLIT: Mode Pareto inversé basé sur configuration réelle, pas forcé
     if (config) {
         // Résolution conflit Pareto/Pareto inversé avec logique adaptative (conforme STANDARD_NAMES)
-        if (config->use_pareto && config->use_pareto_inverse) {
+        // Note: pareto_config_t doesn't have use_pareto fields, using boolean logic based on other settings
+        if (config->enable_simd_optimization && config->enable_parallel_processing) {
             printf("[PARETO] Mode hybride activé: sélection dynamique selon métriques\n");
 
             // Décision basée sur l'efficacité courante du système
@@ -71,11 +77,11 @@ pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
             if (current_efficiency > 0.75) {
                 // Haute efficacité : utiliser Pareto standard pour maintenir performance
                 printf("[PARETO] Efficacité %.2f > 0.75 : Mode Pareto standard sélectionné\n", current_efficiency);
-                config->use_pareto_inverse = false;
+                optimizer->inverse_pareto_mode = false;
             } else {
                 // Faible efficacité : utiliser Pareto inversé pour optimisation agressive
                 printf("[PARETO] Efficacité %.2f <= 0.75 : Mode Pareto inversé sélectionné\n", current_efficiency);
-                config->use_pareto = false;
+                optimizer->inverse_pareto_mode = true;
             }
         }
     } else {
