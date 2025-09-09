@@ -112,6 +112,18 @@ void* tracked_malloc(size_t size, const char* file, int line, const char* func) 
     void* ptr = malloc(size);
     if (ptr) {
         pthread_mutex_lock(&g_tracker_mutex);
+        
+        // CORRECTION CRITIQUE: Vérifier réutilisation d'adresse
+        for (size_t i = 0; i < g_tracker.count; i++) {
+            if (g_tracker.entries[i].ptr == ptr && !g_tracker.entries[i].is_freed) {
+                printf("[MEMORY_TRACKER] CRITICAL ERROR: Address %p reused while still active!\n", ptr);
+                printf("[MEMORY_TRACKER] Previous allocation at %s:%d in %s()\n",
+                       g_tracker.entries[i].file, g_tracker.entries[i].line, g_tracker.entries[i].function);
+                pthread_mutex_unlock(&g_tracker_mutex);
+                abort(); // Arrêt immédiat sur réutilisation
+            }
+        }
+        
         add_entry(ptr, size, file, line, func);
         pthread_mutex_unlock(&g_tracker_mutex);
     }
@@ -132,42 +144,40 @@ void tracked_free(void* ptr, const char* file, int line, const char* func) {
 
     pthread_mutex_lock(&g_tracker_mutex);
 
-    // Chercher directement l'entrée avec le pointeur pour détecter double free
-    int found_any_entry_idx = -1;
+    // CORRECTION CRITIQUE: Validation intégrité avant libération
+    int found_entry_idx = -1;
     for (size_t i = 0; i < g_tracker.count; i++) {
         if (g_tracker.entries[i].ptr == ptr) {
-            found_any_entry_idx = (int)i;
+            found_entry_idx = (int)i;
             break;
         }
     }
 
-    if (found_any_entry_idx == -1) {
-        // Pointer was never tracked or already processed in a way that it's not found.
-        printf("[MEMORY_TRACKER] ERROR: Free of untracked pointer %p at %s:%d in %s()\n",
+    if (found_entry_idx == -1) {
+        printf("[MEMORY_TRACKER] CRITICAL ERROR: Free of untracked pointer %p at %s:%d in %s()\n",
                ptr, file, line, func);
+        printf("[MEMORY_TRACKER] This indicates memory corruption or double-free!\n");
         pthread_mutex_unlock(&g_tracker_mutex);
-        // In a real scenario, you might want to decide whether to abort or just log and continue.
-        // For safety, we can abort if it's a critical error.
-        abort();
-        return;
+        abort(); // Arrêt immédiat sur pointeur non suivi
     }
 
-    memory_entry_t* entry = &g_tracker.entries[found_any_entry_idx];
+    memory_entry_t* entry = &g_tracker.entries[found_entry_idx];
 
+    // PROTECTION ABSOLUE: Vérifier double-free
     if (entry->is_freed) {
-        // Double free detected
-        printf("[MEMORY_TRACKER] ERROR: Double free detected for pointer %p at %s:%d in %s()\n",
-               ptr, file, line, func);
-        printf("[MEMORY_TRACKER] Previously freed at %s:%d in %s()\n",
+        printf("[MEMORY_TRACKER] CRITICAL ERROR: DOUBLE FREE DETECTED!\n");
+        printf("[MEMORY_TRACKER] Pointer %p at %s:%d in %s()\n", ptr, file, line, func);
+        printf("[MEMORY_TRACKER] Previously freed at %s:%d in %s() at time %ld\n",
                entry->freed_file ? entry->freed_file : "N/A",
                entry->freed_line,
-               entry->freed_function ? entry->freed_function : "N/A");
+               entry->freed_function ? entry->freed_function : "N/A",
+               entry->freed_time);
+        printf("[MEMORY_TRACKER] SYSTEM HALTED TO PREVENT CORRUPTION\n");
         pthread_mutex_unlock(&g_tracker_mutex);
-        abort(); // Abort on double free
-        return;
+        abort(); // Arrêt immédiat sur double-free
     }
 
-    // Mark as freed
+    // Marquer comme libéré avec validation
     entry->is_freed = 1;
     entry->freed_time = time(NULL);
     entry->freed_file = file;
@@ -182,7 +192,11 @@ void tracked_free(void* ptr, const char* file, int line, const char* func) {
 
     pthread_mutex_unlock(&g_tracker_mutex);
 
+    // LIBÉRATION SÉCURISÉE
     free(ptr);
+    
+    // INVALIDATION du pointeur (note: ne peut pas modifier ptr directement)
+    // Le code appelant doit mettre ptr = NULL après cette fonction
 }
 
 void* tracked_calloc(size_t nmemb, size_t size, const char* file, int line, const char* func) {

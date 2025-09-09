@@ -148,6 +148,75 @@ args = "ls -la RAPPORT_INSPECTION_GENERALE_COMPLETE_20250109_220000.md"
 task = "shell.exec"
 args = "echo \"✅ VALIDATION CORRECTIONS TERMINÉE\""
 
+[[workflows.workflow]]
+name = "CORRECTION_IMMEDIATE_APPLIQUEE"
+author = 47405801
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== CORRECTIONS CRITIQUES APPLIQUÉES ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"1. Protection double-free absolute\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"2. Validation réutilisation adresse mémoire\" "
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"3. Correction timestamp nanoseconde robuste\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"4. Fonctions destruction sécurisée\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make clean"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make all"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== COMPILATION AVEC CORRECTIONS ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ -f bin/lum_vorax ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"✅ Binaire compilé avec succès\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"🔬 Test rapide de validation:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    timeout 10s ./bin/lum_vorax --sizeof-checks"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "else"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"❌ Échec compilation - vérifier corrections\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== RAPPORT CORRECTIONS TERMINÉ ===\""
+
 [nix]
 packages = ["openssh", "file"]
 channel = "stable-25_05"

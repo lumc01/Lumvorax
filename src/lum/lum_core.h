@@ -88,3 +88,30 @@ void lum_print(const lum_t* lum);
 void lum_group_print(const lum_group_t* group);
 
 #endif // LUM_CORE_H
+// Fonction de destruction sécurisée
+void lum_safe_destroy(lum_t** lum_ptr);
+
+// Constantes de validation mémoire
+#define LUM_MAGIC_DESTROYED 0xDEADBEEF
+#define LUM_VALIDATION_PATTERN 0xCAFEBABE
+
+// Macros de validation
+#define VALIDATE_LUM_PTR(ptr) \
+    do { \
+        if (!(ptr)) { \
+            printf("ERROR: NULL LUM pointer at %s:%d\n", __FILE__, __LINE__); \
+            return false; \
+        } \
+    } while(0)
+
+#define VALIDATE_GROUP_PTR(ptr) \
+    do { \
+        if (!(ptr)) { \
+            printf("ERROR: NULL Group pointer at %s:%d\n", __FILE__, __LINE__); \
+            return false; \
+        } \
+        if ((ptr)->capacity == LUM_MAGIC_DESTROYED) { \
+            printf("ERROR: Use of destroyed group at %s:%d\n", __FILE__, __LINE__); \
+            return false; \
+        } \
+    } while(0)

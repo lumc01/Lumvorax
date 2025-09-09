@@ -25,11 +25,18 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
 
 void lum_destroy(lum_t* lum) {
     if (lum) {
-        // Utiliser tracked_free ici si memory_tracker.h fournit cette fonction
-        // Si memory_tracker.h ne fournit que tracked_malloc, il faut s'assurer que free() est toujours appelé
-        // ou que tracked_malloc gère la libération via free() en interne.
-        // En supposant que tracked_malloc enveloppe malloc, free doit être utilisé pour la libération.
-        free(lum);
+        // CORRECTION CRITIQUE: Utiliser tracked_free pour cohérence
+        TRACKED_FREE(lum);
+        // Note: le pointeur lum n'est pas modifié ici car c'est un paramètre
+        // Le code appelant doit faire lum = NULL après cette fonction
+    }
+}
+
+// Fonction sécurisée pour destruction avec invalidation
+void lum_safe_destroy(lum_t** lum_ptr) {
+    if (lum_ptr && *lum_ptr) {
+        TRACKED_FREE(*lum_ptr);
+        *lum_ptr = NULL; // Invalidation du pointeur
     }
 }
 
@@ -329,10 +336,31 @@ uint32_t lum_generate_id(void) {
 
 uint64_t lum_get_timestamp(void) {
     struct timespec ts;
+    
+    // CORRECTION CRITIQUE: Mesure temps nanoseconde robuste
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
-        return (uint64_t)(ts.tv_sec * 1000000000ULL + ts.tv_nsec);
+        uint64_t nanoseconds = (uint64_t)(ts.tv_sec * 1000000000ULL + ts.tv_nsec);
+        
+        // Validation: s'assurer que le timestamp n'est pas zéro
+        if (nanoseconds == 0) {
+            // Fallback sur CLOCK_REALTIME si MONOTONIC retourne 0
+            if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+                nanoseconds = (uint64_t)(ts.tv_sec * 1000000000ULL + ts.tv_nsec);
+            }
+        }
+        
+        // Dernier recours: utiliser time() avec conversion nanoseconde
+        if (nanoseconds == 0) {
+            time_t current_time = time(NULL);
+            nanoseconds = (uint64_t)current_time * 1000000000ULL;
+        }
+        
+        return nanoseconds;
     }
-    return 0; // Fallback sur 0 en cas d'erreur
+    
+    // Fallback robuste en cas d'erreur clock_gettime
+    time_t current_time = time(NULL);
+    return (uint64_t)current_time * 1000000000ULL;
 }
 
 void lum_print(const lum_t* lum) {
