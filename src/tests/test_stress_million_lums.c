@@ -192,11 +192,15 @@ stress_test_result_t* run_million_lum_operations_test(void) {
     // Opérations de stress sur le méga-groupe
     printf("  Exécution opérations VORAX sur %zu LUMs...\n", result->lum_count);
 
-    // Test CYCLE sur groupe massif
+    // Test CYCLE sur groupe massif - PROTECTION DOUBLE FREE
     vorax_result_t* cycle_result = vorax_cycle(mega_group, 1000000);
     if (!cycle_result || !cycle_result->success) {
         strcpy(result->bottleneck, "CYCLE operation");
         result->graceful_degradation = false;
+    } else {
+        // CRITIQUE: Ne pas détruire ici car la destruction sera faite à la fin
+        // Le cycle_result->result_group sera détruit par vorax_result_destroy
+        printf("  ✅ Cycle operation réussie sur %zu LUMs\n", mega_group->count);
     }
 
     // Test conservation sur volume massif
