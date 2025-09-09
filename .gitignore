@@ -1,0 +1,66 @@
+# Build artifacts
+obj/
+bin/
+logs/
+*.o
+*.log
+
+# Executable files
+lum_vorax
+Lumvorax
+test_complete
+test_complete_*
+test_simd
+conservation_test
+performance_test
+
+# Debugging files
+*.dSYM/
+core
+vgcore.*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+
+# Replit files (keep these)
+!replit.md
+!.replit
+
+# Evidence and reports (forensic tracking - keep these)
+evidence/
+reports/
+*.md
+
+# Test results
+*.txt
+perf_results.txt
+performance_test_results.txt
+conservation_results.txt
+benchmark_results.txt
+warnings_fixed.txt
+compilation_log.txt
+metadata.json
+
+# Generated scripts
+execute_*.sh
+generate_*.sh
+validate_*.sh

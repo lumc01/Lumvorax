@@ -80,12 +80,12 @@ args = "LUM/VORAX System Demo"
 name = "LUM/VORAX System Demo"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"🚀 LUM/VORAX - Presence-Based Computing System\" && echo \"===============================================\" && echo && echo \"🔧 Building system...\" && make clean && make all && echo && echo \"✅ System built successfully!\" && echo && echo \"📊 Running system validation tests:\" && echo && ./bin/lum_vorax --sizeof-checks && echo && ./bin/lum_vorax --crypto-validation && echo && echo \"🎯 Running interactive demo (note: may have memory cleanup issues at end):\" && echo && timeout 25 ./bin/lum_vorax || echo \"Demo completed with timeout to prevent memory issues\""
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"🚀 LUM/VORAX - Presence-Based Computing System\" && echo \"===============================================\" && echo && echo \"🔧 Building system...\" && make clean && make all && echo && echo \"✅ System built successfully!\" && echo && echo \"📊 Running system validation tests:\" && echo && ./bin/lum_vorax --sizeof-checks && echo && ./bin/lum_vorax --crypto-validation && echo && echo \"🎯 Running main system demo:\" && echo && ./bin/lum_vorax"
 
 [[workflows.workflow]]
 name = "VALIDATION_CORRECTIONS_COMPLETES"
