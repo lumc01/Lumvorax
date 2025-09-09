@@ -100,6 +100,7 @@ pareto_metrics_t pareto_evaluate_metrics(lum_group_t* group, const char* operati
     double real_start = get_microseconds();
     // Exécution d'opérations LUM réelles pour mesurer le coût authentique
     volatile uint64_t operations_performed = 0;
+    (void)operations_performed; // Suppress unused variable warning
     for (size_t i = 0; i < group_size && i < 1000; i++) {
         operations_performed += group->lums[i].presence + group->lums[i].position_x;
     }

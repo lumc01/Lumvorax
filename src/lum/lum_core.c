@@ -48,7 +48,7 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
     // Allouer la mémoire pour les LUMs avec une capacité initiale
     group->lums = TRACKED_MALLOC(sizeof(lum_t) * initial_capacity);
     if (!group->lums) {
-        free(group); // Utiliser free car group n'est pas suivi par memory_tracker
+        TRACKED_FREE(group); // Utiliser TRACKED_FREE pour cohérence
         return NULL;
     }
 
@@ -72,16 +72,16 @@ void lum_group_destroy(lum_group_t* group) {
     }
 
     if (group->lums) {
-        // Utiliser tracked_free si disponible, sinon free
-        free(group->lums); // Assumant que tracked_malloc a été utilisé pour lums
-        group->lums = NULL; // Important pour éviter un double-free dans le cas où lum_group_safe_destroy serait appelé ensuite
+        // CORRECTION CRITIQUE: Utiliser TRACKED_FREE pour cohérence
+        TRACKED_FREE(group->lums);
+        group->lums = NULL; // Important pour éviter un double-free
     }
 
     // Marquer comme détruit en utilisant un champ qui ne sera pas utilisé autrement (ici, capacity)
     group->capacity = MAGIC_DESTROYED;
     group->count = 0; // Réinitialiser le compte
 
-    free(group); // Utiliser free pour la structure group elle-même
+    TRACKED_FREE(group); // Utiliser TRACKED_FREE pour cohérence
 }
 
 // Fonction utilitaire pour détruire un groupe de manière sûre
@@ -158,7 +158,7 @@ lum_zone_t* lum_zone_create(const char* name) {
     // Allouer la mémoire pour les pointeurs vers les groupes
     zone->groups = TRACKED_MALLOC(sizeof(lum_group_t*) * 10); // Capacité initiale de 10 groupes
     if (!zone->groups) {
-        free(zone); // Utiliser free pour la zone elle-même
+        TRACKED_FREE(zone); // Utiliser TRACKED_FREE pour cohérence
         return NULL;
     }
 
@@ -177,10 +177,10 @@ void lum_zone_destroy(lum_zone_t* zone) {
                 // Utiliser la fonction de destruction sûre pour chaque groupe
                 lum_group_safe_destroy(&zone->groups[i]);
             }
-            free(zone->groups); // Libérer le tableau de pointeurs vers les groupes
+            TRACKED_FREE(zone->groups); // Libérer le tableau de pointeurs vers les groupes
             zone->groups = NULL;
         }
-        free(zone); // Libérer la zone elle-même
+        TRACKED_FREE(zone); // Libérer la zone elle-même
     }
 }
 
@@ -255,11 +255,11 @@ void lum_memory_destroy(lum_memory_t* memory) {
     if (memory) {
         // Libérer la mémoire allouée pour les LUMs stockés s'il y en a
         if (memory->stored_group.lums) {
-            // Utiliser tracked_free si disponible, sinon free
-            free(memory->stored_group.lums); // Assumant que tracked_malloc a été utilisé pour stored_group.lums
+            // CORRECTION CRITIQUE: Utiliser TRACKED_FREE pour cohérence
+            TRACKED_FREE(memory->stored_group.lums);
             memory->stored_group.lums = NULL; // Éviter un pointeur pendant
         }
-        free(memory); // Libérer la structure lum_memory_t elle-même
+        TRACKED_FREE(memory); // Libérer la structure lum_memory_t elle-même
     }
 }
 
@@ -268,8 +268,8 @@ bool lum_memory_store(lum_memory_t* memory, lum_group_t* group) {
 
     // Libérer les données existantes dans le bloc mémoire s'il y en a
     if (memory->stored_group.lums) {
-        // Utiliser tracked_free si disponible, sinon free
-        free(memory->stored_group.lums);
+        // CORRECTION CRITIQUE: Utiliser TRACKED_FREE pour cohérence
+        TRACKED_FREE(memory->stored_group.lums);
         memory->stored_group.lums = NULL;
     }
 
