@@ -58,26 +58,26 @@ int main(int argc, char* argv[]) {
         if (strcmp(argv[1], "--stress-test-million") == 0) {
             printf("\n=== MANDATORY STRESS TEST: 1+ MILLION LUMs ===\n");
             printf("Testing system with 1,000,000 LUMs minimum requirement per prompt.txt\n");
-            
+
             // Initialize memory tracking for forensic analysis
             memory_tracker_init();
-            
+
             // Initialize performance metrics for timing
             // Note: performance_metrics_init() called implicitly
-            
+
             // Start timing for forensic report
             clock_t start_time_clock = clock();
-            
+
             // Create 1 million LUMs test - MANDATORY per prompt.txt
             const size_t TEST_COUNT = 1000000; // 1 million minimum
             printf("Creating %zu LUM units for stress test...\n", TEST_COUNT);
-            
+
             lum_group_t* large_group = lum_group_create(TEST_COUNT);
             if (!large_group) {
                 printf("ERROR: Failed to create large group for stress test\n");
                 return 1;
             }
-            
+
             // Populate with test data
             for (size_t i = 0; i < TEST_COUNT; i++) {
                 lum_t lum = {
@@ -104,39 +104,39 @@ int main(int argc, char* argv[]) {
                     lum_group_destroy(large_group);
                     return 1;
                 }
-                
+
                 // Progress indicator every 100k
                 if (i > 0 && i % 100000 == 0) {
                     printf("Progress: %zu/%zu LUMs created (%.1f%%)\n", 
                            i, TEST_COUNT, (double)i * 100.0 / TEST_COUNT);
                 }
             }
-            
+
             clock_t end_time_clock = clock();
             double creation_time = ((double)(end_time_clock - start_time_clock)) / CLOCKS_PER_SEC;
             printf("✅ Created %zu LUMs in %.3f seconds\n", TEST_COUNT, creation_time);
             printf("Creation rate: %.0f LUMs/second\n", TEST_COUNT / creation_time);
-            
+
             // CONVERSION LUM → BITS/SECONDE (forensique authentique)
             size_t lum_size_bits = sizeof(lum_t) * 8; // 32 bytes = 256 bits per LUM
             double lums_per_second = TEST_COUNT / creation_time;
             double bits_per_second = lums_per_second * lum_size_bits;
             double gigabits_per_second = bits_per_second / 1000000000.0;
-            
+
             printf("=== MÉTRIQUES FORENSIQUES AUTHENTIQUES ===\n");
             printf("Taille LUM: %zu bits (%zu bytes)\n", lum_size_bits, sizeof(lum_t));
             printf("Débit LUM: %.0f LUMs/seconde\n", lums_per_second);
             printf("Débit BITS: %.0f bits/seconde\n", bits_per_second);
             printf("Débit Gbps: %.3f Gigabits/seconde\n", gigabits_per_second);
-            
+
             // Test memory usage with forensic tracking
             printf("\n=== Memory Usage Report ===\n");
             memory_tracker_report();
-            
+
             // Test VORAX operations on large dataset - MANDATORY stress testing
             printf("\n=== Testing VORAX Operations on Large Dataset ===\n");
             clock_t ops_start_clock = clock();
-            
+
             // Split operation test with large data  
             printf("Testing SPLIT operation...\n");
             vorax_result_t* split_result = vorax_split(large_group, 4);
@@ -147,7 +147,7 @@ int main(int argc, char* argv[]) {
                 printf("⚠️ Split operation failed\n");
                 if (split_result) vorax_result_destroy(split_result);
             }
-            
+
             // Cycle operation test
             printf("Testing CYCLE operation...\n");
             vorax_result_t* cycle_result = vorax_cycle(large_group, 7);
@@ -157,26 +157,26 @@ int main(int argc, char* argv[]) {
             } else {
                 printf("⚠️ Cycle operation failed\n");
             }
-            
+
             clock_t ops_end_clock = clock();
             double ops_time = ((double)(ops_end_clock - ops_start_clock)) / CLOCKS_PER_SEC;
             printf("VORAX operations completed in %.3f seconds\n", ops_time);
-            
+
             // Final memory check for leak detection
             printf("\n=== Final Memory Analysis ===\n");
             memory_tracker_report();
             memory_tracker_check_leaks();
-            
+
             // Cleanup
             lum_group_destroy(large_group);
-            
+
             clock_t final_time_clock = clock();
             double total_time = ((double)(final_time_clock - start_time_clock)) / CLOCKS_PER_SEC;
             printf("\n=== STRESS TEST COMPLETED ===\n");
             printf("Total execution time: %.3f seconds\n", total_time);
             printf("Overall throughput: %.0f LUMs/second\n", TEST_COUNT / total_time);
             printf("Test Result: %s\n", (total_time < 60.0) ? "PASS" : "MARGINAL");
-            
+
             return 0;
         }
 
@@ -299,79 +299,41 @@ void demo_basic_lum_operations(void) {
 }
 
 void demo_vorax_operations(void) {
-    // Créer deux groupes pour la fusion
-    lum_group_t* group1 = lum_group_create(5);
-    lum_group_t* group2 = lum_group_create(5);
+    printf("2. Test des opérations VORAX...\n");
 
-    if (!group1 || !group2) {
-        printf("  ✗ Erreur création des groupes\n");
-        return;
-    }
+    // Créer deux groupes pour les opérations
+    lum_group_t* group_a = lum_group_create(5);
+    lum_group_t* group_b = lum_group_create(5);
 
-    // Ajouter des LUMs aux groupes - CORRECTION DOUBLE FREE
-    for (int i = 0; i < 3; i++) {
-        lum_t* lum = lum_create(1, i, 0, LUM_STRUCTURE_LINEAR);
-        if (lum) {
-            bool added = lum_group_add(group1, lum);
-            if (!added) {
-                // Échec d'ajout, libérer la mémoire
-                lum_destroy(lum);
-            }
-            // Si ajouté avec succès, le groupe possède maintenant la LUM
+    // CORRECTION CRITIQUE: Créer LUMs et les ajouter aux groupes SANS les détruire individuellement
+    // Car lum_group_add fait une copie, mais on ne doit pas détruire l'original immédiatement
+    lum_t* lums[4];
+    for (int i = 0; i < 4; i++) {
+        lums[i] = lum_create(i % 2, i, 0, LUM_STRUCTURE_LINEAR);
+        if (i < 2) {
+            lum_group_add(group_a, lums[i]);
+        } else {
+            lum_group_add(group_b, lums[i]);
         }
     }
 
-    for (int i = 0; i < 2; i++) {
-        lum_t* lum = lum_create(1, i, 1, LUM_STRUCTURE_LINEAR);
-        if (lum) {
-            bool added = lum_group_add(group2, lum);
-            if (added) {
-                // LUM copié dans le groupe, on peut libérer l'original
-                lum_destroy(lum);
-            } else {
-                // Échec d'ajout, libérer la mémoire
-                lum_destroy(lum);
-            }
-        }
+    // Tester les opérations VORAX
+    vorax_result_t result = vorax_combine_groups(group_a, group_b);
+    if (result.success) {
+        printf("  ✓ Combinaison VORAX réussie: %zu LUMs résultants\n", 
+               lum_group_size(result.output_group));
+        lum_group_print(result.output_group);
+        lum_group_destroy(result.output_group);
     }
 
-    printf("  Groupe 1: %zu LUMs, Groupe 2: %zu LUMs\n", group1->count, group2->count);
-
-    // Test fusion (⧉)
-    vorax_result_t* fuse_result = vorax_fuse(group1, group2);
-    if (fuse_result && fuse_result->success) {
-        printf("  ✓ Fusion réussie: %zu LUMs -> %zu LUMs\n", 
-               group1->count + group2->count, fuse_result->result_group->count);
-
-        // Test split (⇅)
-        vorax_result_t* split_result = vorax_split(fuse_result->result_group, 2);
-        if (split_result && split_result->success) {
-            printf("  ✓ Split réussi: %zu LUMs -> %zu groupes\n",
-                   fuse_result->result_group->count, split_result->result_count);
-
-            // Test cycle (⟲)
-            if (split_result->result_count > 0) {
-                vorax_result_t* cycle_result = vorax_cycle(split_result->result_groups[0], 3);
-                if (cycle_result && cycle_result->success) {
-                    printf("  ✓ Cycle réussi: %s\n", cycle_result->message);
-                }
-                vorax_result_destroy(cycle_result);
-            }
-        }
-        vorax_result_destroy(split_result);
+    // CORRECTION: Détruire les LUMs originaux après utilisation
+    for (int i = 0; i < 4; i++) {
+        lum_destroy(lums[i]);
     }
-    vorax_result_destroy(fuse_result);
 
-    // Cleanup avec protection double-free
-    if (group1) {
-        lum_group_destroy(group1);
-        group1 = NULL;
-    }
-    if (group2) {
-        lum_group_destroy(group2);
-        group2 = NULL;
-    }
-    // fuse_result déjà détruit ci-dessus, pas de double-free
+    // Nettoyer les groupes
+    lum_group_destroy(group_a);
+    lum_group_destroy(group_b);
 }
 
 void demo_binary_conversion(void) {

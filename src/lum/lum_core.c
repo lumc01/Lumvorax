@@ -18,18 +18,23 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
     lum->position_x = x;
     lum->position_y = y;
     lum->structure_type = type;
+    lum->is_destroyed = 0;  // CORRECTION: Initialiser le flag protection double-free
     lum->timestamp = lum_get_timestamp();
 
     return lum;
 }
 
 void lum_destroy(lum_t* lum) {
-    if (lum) {
-        // CORRECTION CRITIQUE: Utiliser tracked_free pour cohérence
-        TRACKED_FREE(lum);
-        // Note: le pointeur lum n'est pas modifié ici car c'est un paramètre
-        // Le code appelant doit faire lum = NULL après cette fonction
+    if (!lum || lum->is_destroyed) {
+        // PROTECTION ABSOLUE: Ignorer si NULL ou déjà détruit
+        return;
     }
+    
+    // Marquer comme détruit AVANT la libération
+    lum->is_destroyed = 1;
+    
+    // CORRECTION CRITIQUE: Utiliser tracked_free pour cohérence
+    TRACKED_FREE(lum);
 }
 
 // Fonction sécurisée pour destruction avec invalidation

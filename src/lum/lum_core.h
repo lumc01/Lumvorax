@@ -8,7 +8,7 @@
 #include <pthread.h>
 
 // Vérification de l'ABI - la structure doit faire exactement 32 bytes avec padding
-_Static_assert(sizeof(struct { uint8_t a; uint32_t b; int32_t c; int32_t d; uint8_t e; uint64_t f; }) == 32,
+_Static_assert(sizeof(struct { uint8_t a; uint32_t b; int32_t c; int32_t d; uint8_t e; uint8_t f; uint64_t g; }) == 32,
                "Basic lum_t structure should be 32 bytes on this platform");
 
 // Note: avec padding d'alignement sur 8 bytes, la structure complète fait 32 bytes
@@ -20,6 +20,7 @@ typedef struct {
     int32_t position_x;        // Spatial position X
     int32_t position_y;        // Spatial position Y
     uint8_t structure_type;    // LINEAR, CIRCULAR, GROUP, NODE
+    uint8_t is_destroyed;      // Protection double-free flag
     uint64_t timestamp;        // Creation/modification timestamp
 } lum_t;
 
