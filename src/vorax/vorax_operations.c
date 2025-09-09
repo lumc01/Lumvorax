@@ -4,6 +4,13 @@
 #include <string.h>
 #include <stdio.h>
 
+// Simple wrapper pour lum_log si logger non disponible
+void lum_log(lum_log_level_t level, const char* message) {
+    const char* level_str = (level == LUM_LOG_WARN) ? "WARN" : 
+                           (level == LUM_LOG_ERROR) ? "ERROR" : "INFO";
+    printf("[%s] %s\n", level_str, message);
+}
+
 // Fuse operation: ⧉ - Combines two groups into one
 vorax_result_t* vorax_fuse(lum_group_t* group1, lum_group_t* group2) {
     vorax_result_t* result = vorax_result_create();

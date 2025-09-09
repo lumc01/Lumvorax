@@ -65,6 +65,7 @@ void lum_destroy(lum_t* lum);
 
 lum_group_t* lum_group_create(size_t initial_capacity);
 void lum_group_destroy(lum_group_t* group);
+void lum_group_safe_destroy(lum_group_t** group);
 void lum_group_safe_destroy(lum_group_t** group_ptr);
 bool lum_group_add(lum_group_t* group, lum_t* lum);
 lum_t* lum_group_get(lum_group_t* group, size_t index);

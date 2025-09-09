@@ -52,6 +52,7 @@ void memory_tracker_enable(bool enable);
 bool memory_tracker_is_enabled(void);
 void memory_tracker_export_json(const char* filename);
 void memory_tracker_set_release_mode(bool release_mode);
+void memory_tracker_cleanup(void);
 
 
 #endif // MEMORY_TRACKER_H

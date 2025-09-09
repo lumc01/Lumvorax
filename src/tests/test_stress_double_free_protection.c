@@ -29,10 +29,12 @@ bool test_stress_double_free_protection_million_lums(void) {
     
     // Test destruction sécurisée massive
     for (size_t i = 0; i < test_count; i++) {
-        lum_group_safe_destroy(&groups[i]);  // Protection double-free
-        
-        // Vérification protection effective
-        assert(groups[i] == NULL);
+        if (groups[i]) {
+            lum_group_safe_destroy(&groups[i]);  // Protection double-free
+            
+            // Vérification protection effective
+            assert(groups[i] == NULL);
+        }
         
         if (i % 100000 == 0) {
             printf("✓ Détruit %zu/%zu groupes (protection active)\n", i + 1, test_count);

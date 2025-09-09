@@ -42,7 +42,7 @@ Cette traçabilité est ESSENTIELLE pour l'audit forensique et la validation sci
 
 Tous les modules DOIVENT être testés avec des charges maximales :
 - Tests avec 1+ millions de LUMs minimum
-- Tests de performance sous stress extrême 
+- Tests de performance sous stress extrême
 - Mesures de dégradation gracieuse
 - Validation limites système réelles
 

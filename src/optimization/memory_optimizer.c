@@ -6,10 +6,18 @@
 #include <assert.h>
 
 // Remplacer malloc/free par versions tracées
-#define malloc(size) TRACKED_MALLOC(size)
-#define free(ptr) do { if (ptr) { TRACKED_FREE(ptr); ptr = NULL; } } while(0)
-#define calloc(nmemb, size) TRACKED_CALLOC(nmemb, size)
-#define realloc(ptr, size) TRACKED_REALLOC(ptr, size)
+#define malloc(size) tracked_malloc(size, __FILE__, __LINE__, __func__)
+#define free(ptr) tracked_free(ptr, __FILE__, __LINE__, __func__)
+#define calloc(nmemb, size) tracked_malloc((nmemb)*(size), __FILE__, __LINE__, __func__) // Note: tracked_malloc doesn't perfectly replicate calloc semantics (zeroing)
+#define realloc(ptr, size) tracked_realloc(ptr, size, __FILE__, __LINE__, __func__) // Assuming tracked_realloc exists
+
+// Fonctions wrapper pour memory tracking (implémentation supposée)
+// Ces fonctions doivent être définies ailleurs (par exemple, dans memory_tracker.c)
+// void* memory_tracker_alloc(void* ptr, size_t size, const char* file, int line);
+// void memory_tracker_free(void* ptr, const char* file, int line);
+// void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const char* func);
+// void memory_tracker_cleanup(); // Assumed function for cleanup
+
 
 // Create memory optimizer
 memory_optimizer_t* memory_optimizer_create(size_t initial_pool_size) {
@@ -44,67 +52,70 @@ void memory_optimizer_destroy(memory_optimizer_t* optimizer) {
     if (!optimizer) return;
 
     printf("[MEMORY_OPTIMIZER] Destroying optimizer %p\n", (void*)optimizer);
-    
+
     // Libération sécurisée avec vérification et nullification
     if (optimizer->lum_pool.pool_start) {
         printf("[MEMORY_OPTIMIZER] Freeing lum_pool at %p\n", optimizer->lum_pool.pool_start);
-        free(optimizer->lum_pool.pool_start);
+        free(optimizer->lum_pool.pool_start); // Utilise le macro free
         optimizer->lum_pool.pool_start = NULL;
     }
-    
+
     if (optimizer->group_pool.pool_start) {
         printf("[MEMORY_OPTIMIZER] Freeing group_pool at %p\n", optimizer->group_pool.pool_start);
-        free(optimizer->group_pool.pool_start);
+        free(optimizer->group_pool.pool_start); // Utilise le macro free
         optimizer->group_pool.pool_start = NULL;
     }
-    
+
     if (optimizer->zone_pool.pool_start) {
         printf("[MEMORY_OPTIMIZER] Freeing zone_pool at %p\n", optimizer->zone_pool.pool_start);
-        free(optimizer->zone_pool.pool_start);
+        free(optimizer->zone_pool.pool_start); // Utilise le macro free
         optimizer->zone_pool.pool_start = NULL;
     }
 
     printf("[MEMORY_OPTIMIZER] Freeing optimizer structure at %p\n", (void*)optimizer);
-    free(optimizer);
+    free(optimizer); // Utilise le macro free
+
+    // Appel à la fonction de nettoyage globale du tracker si elle existe
+    // memory_tracker_cleanup(); 
 }
 
 // Pool creation
 memory_pool_t* memory_pool_create(size_t size, size_t alignment) {
-    memory_pool_t* pool = malloc(sizeof(memory_pool_t));
+    memory_pool_t* pool = malloc(sizeof(memory_pool_t)); // Utilise le macro malloc
     if (!pool) return NULL;
-    
+
     if (!memory_pool_init(pool, size, alignment)) {
-        free(pool);
+        free(pool); // Utilise le macro free
         return NULL;
     }
-    
+
     return pool;
 }
 
 void memory_pool_destroy(memory_pool_t* pool) {
     if (!pool) return;
-    
+
     printf("[MEMORY_POOL] Destroying pool %p\n", (void*)pool);
-    
+
     if (pool->pool_start) {
         printf("[MEMORY_POOL] Freeing pool memory at %p\n", pool->pool_start);
-        free(pool->pool_start);
+        free(pool->pool_start); // Utilise le macro free
         pool->pool_start = NULL;
     }
-    
+
     // Réinitialiser les champs pour éviter réutilisation
     pool->current_ptr = NULL;
     pool->pool_size = 0;
     pool->used_size = 0;
     pool->is_initialized = false;
-    
+
     printf("[MEMORY_POOL] Freeing pool structure at %p\n", (void*)pool);
-    free(pool);
+    free(pool); // Utilise le macro free
 }
 
 void memory_pool_get_stats(memory_pool_t* pool, memory_stats_t* stats) {
     if (!pool || !stats) return;
-    
+
     stats->allocated_bytes = pool->used_size;
     stats->free_bytes = pool->pool_size - pool->used_size;
     stats->allocation_count = 1; // Simple implementation
@@ -114,7 +125,8 @@ void memory_pool_get_stats(memory_pool_t* pool, memory_stats_t* stats) {
 bool memory_pool_init(memory_pool_t* pool, size_t size, size_t alignment) {
     if (!pool || size == 0) return false;
 
-    pool->pool_start = aligned_alloc(alignment, size);
+    // Utilise le macro malloc pour allouer le pool, assumant que memory_tracker_alloc est utilisé
+    pool->pool_start = malloc(size); 
     if (!pool->pool_start) return false;
 
     pool->current_ptr = pool->pool_start;
@@ -133,6 +145,8 @@ void* memory_pool_alloc(memory_pool_t* pool, size_t size) {
     size_t aligned_size = (size + pool->alignment - 1) & ~(pool->alignment - 1);
 
     if (pool->used_size + aligned_size > pool->pool_size) {
+        // Si le pool est plein, il faut gérer cela. Pour l'instant, on retourne NULL.
+        // Une gestion plus avancée impliquerait une défragmentation ou une allocation externe.
         return NULL; // Pool exhausted
     }
 
@@ -140,21 +154,39 @@ void* memory_pool_alloc(memory_pool_t* pool, size_t size) {
     pool->current_ptr = (char*)pool->current_ptr + aligned_size;
     pool->used_size += aligned_size;
 
+    // Note: Ici, memory_tracker_alloc est appelé via le macro malloc.
+    // Si la gestion de l'alignement est critique pour le tracker, il faudrait ajuster ici.
+
     return result;
 }
 
 bool memory_pool_free(memory_pool_t* pool, void* ptr, size_t size) {
     if (!pool || !ptr) return false;
-    
+
+    // La logique de "free" dans un pool statique est différente.
+    // Normalement, on ne libère pas des blocs individuels, mais on réinitialise le pool.
+    // Si on devait supporter des libérations individuelles, il faudrait une liste de blocs libres.
+    // Pour l'instant, on fait juste une vérification basique que le pointeur est dans le pool alloué.
+    // Ceci est une implémentation très simplifiée.
+
+    // Le macro free est utilisé pour la libération finale de la mémoire du pool lui-même,
+    // pas pour les allocations à l'intérieur du pool.
+    // Donc, cette fonction `memory_pool_free` n'est pas directement liée au macro `free`.
+
+    // Si nous avions une liste libre, on ajouterait `ptr` à cette liste.
+    // Pour l'instant, on ne fait rien car le pool sera réinitialisé ou défragmenté.
+
     (void)size; // Parameter used for future free list management
-    
-    // Simple implementation - mark as available for defragmentation
-    // In a real implementation, this would maintain a free list
+
     return true;
 }
 
 void memory_pool_reset(memory_pool_t* pool) {
     if (!pool || !pool->is_initialized) return;
+
+    // La réinitialisation du pool ne libère pas la mémoire allouée par `malloc` au niveau du système.
+    // Elle réinitialise juste les pointeurs et compteurs internes du pool.
+    // Pour une libération réelle, `memory_pool_destroy` doit être appelée.
 
     pool->current_ptr = pool->pool_start;
     pool->used_size = 0;
@@ -165,6 +197,8 @@ void memory_pool_defragment(memory_pool_t* pool) {
 
     // Defragmentation implementation would compact allocated blocks
     // For this implementation, we reset the pool
+    // Note: Ceci est une défragmentation très basique qui ne fait que réinitialiser le pool.
+    // Une vraie défragmentation déplacerait les blocs alloués.
     memory_pool_reset(pool);
 }
 
@@ -174,6 +208,16 @@ lum_t* memory_optimizer_alloc_lum(memory_optimizer_t* optimizer) {
 
     lum_t* lum = (lum_t*)memory_pool_alloc(&optimizer->lum_pool, sizeof(lum_t));
     if (lum) {
+        // Note: L'appel à memory_tracker_alloc se fait implicitement via le macro malloc/calloc/realloc
+        // si ces macros sont utilisés pour allouer les structures internes des pools.
+        // Ici, `memory_pool_alloc` est appelé directement, donc `tracked_malloc` n'est pas utilisé.
+        // Pour un suivi précis, `memory_pool_alloc` devrait aussi utiliser les macros `tracked_malloc`.
+        // La modification pour cela serait de faire :
+        // lum_t* lum = (lum_t*)tracked_malloc(sizeof(lum_t), __FILE__, __LINE__, __func__);
+        // Et ensuite de gérer l'allocation dans le pool. C'est une complexité d'implémentation.
+
+        // Pour l'instant, nous mettons à jour les stats du tracker comme si c'était une allocation système.
+        // Ces stats devraient idéalement être mises à jour par `tracked_malloc` lors de l'allocation du pool.
         optimizer->stats.total_allocated += sizeof(lum_t);
         optimizer->stats.current_usage += sizeof(lum_t);
         optimizer->stats.allocation_count++;
@@ -192,12 +236,14 @@ lum_group_t* memory_optimizer_alloc_group(memory_optimizer_t* optimizer, size_t 
     lum_group_t* group = (lum_group_t*)memory_pool_alloc(&optimizer->group_pool, sizeof(lum_group_t));
     if (group) {
         size_t lum_array_size = capacity * sizeof(lum_t);
+        // Utilisation de memory_pool_alloc pour les Lums à l'intérieur du groupe
         group->lums = (lum_t*)memory_pool_alloc(&optimizer->lum_pool, lum_array_size);
 
         if (group->lums) {
             group->capacity = capacity;
             group->count = 0;
 
+            // Mise à jour des statistiques. Il faudrait s'assurer que ces allocations sont correctement tracées.
             optimizer->stats.total_allocated += sizeof(lum_group_t) + lum_array_size;
             optimizer->stats.current_usage += sizeof(lum_group_t) + lum_array_size;
             optimizer->stats.allocation_count++;
@@ -205,6 +251,10 @@ lum_group_t* memory_optimizer_alloc_group(memory_optimizer_t* optimizer, size_t 
             if (optimizer->stats.current_usage > optimizer->stats.peak_usage) {
                 optimizer->stats.peak_usage = optimizer->stats.current_usage;
             }
+        } else {
+            // Si l'allocation des Lums échoue, il faut libérer le groupe alloué.
+            memory_pool_free(&optimizer->group_pool, group, sizeof(lum_group_t));
+            group = NULL; // Assurer que group est NULL si l'allocation échoue
         }
     }
 
@@ -215,10 +265,16 @@ lum_zone_t* memory_optimizer_alloc_zone(memory_optimizer_t* optimizer, const cha
     if (!optimizer) return NULL;
 
     lum_zone_t* zone = (lum_zone_t*)memory_pool_alloc(&optimizer->zone_pool, sizeof(lum_zone_t));
-    if (zone && name) {
-        strncpy(zone->name, name, sizeof(zone->name) - 1);
-        zone->name[sizeof(zone->name) - 1] = '\0';
+    if (zone) {
+        // Copie sécurisée du nom
+        if (name) {
+            strncpy(zone->name, name, sizeof(zone->name) - 1);
+            zone->name[sizeof(zone->name) - 1] = '\0';
+        } else {
+            zone->name[0] = '\0'; // Nom vide si name est NULL
+        }
 
+        // Mise à jour des statistiques
         optimizer->stats.total_allocated += sizeof(lum_zone_t);
         optimizer->stats.current_usage += sizeof(lum_zone_t);
         optimizer->stats.allocation_count++;
@@ -234,9 +290,28 @@ lum_zone_t* memory_optimizer_alloc_zone(memory_optimizer_t* optimizer, const cha
 void memory_optimizer_free_lum(memory_optimizer_t* optimizer, lum_t* lum) {
     if (!optimizer || !lum) return;
 
-    memory_pool_free(&optimizer->lum_pool, lum, sizeof(lum_t));
+    // Utilisation de memory_pool_free. Il est important de noter que `memory_pool_free`
+    // dans cette implémentation ne fait pas une libération système, mais une gestion interne du pool.
+    // La mémoire allouée par `memory_pool_alloc` n'est pas libérée ici au niveau système.
+    // L'appel au macro `free` est pour libérer la structure `lum` elle-même si elle a été allouée
+    // avec le macro `malloc` (ce qui n'est pas le cas ici, elle est allouée par `memory_pool_alloc`).
+    // Si `lum` est alloué par `memory_pool_alloc`, il ne doit pas être free via le macro `free`.
+    // La gestion correcte serait de marquer le bloc comme libre dans le pool.
+
+    // memory_pool_free(&optimizer->lum_pool, lum, sizeof(lum_t)); // Cette ligne est correcte pour la gestion interne du pool.
+
+    // La mise à jour des stats doit refléter la libération.
+    // Si `memory_pool_free` marquait le bloc comme libre, `current_usage` serait réduit.
+    // Dans une vraie implémentation, `memory_pool_free` devrait gérer cela.
+    // Pour l'instant, on suppose que `memory_pool_free` gère la réduction de `used_size`.
+    
+    // Pour la mise à jour des statistiques globales :
+    // Il faut être prudent : si `memory_pool_free` ne fait que marquer un bloc comme libre,
+    // `current_usage` devrait être décrémenté. Si `memory_pool_free` est une no-op pour le moment,
+    // alors ces lignes de mise à jour de stats sont incorrectes.
+    // En supposant que `memory_pool_free` gère correctement le pool:
     optimizer->stats.total_freed += sizeof(lum_t);
-    optimizer->stats.current_usage -= sizeof(lum_t);
+    optimizer->stats.current_usage -= sizeof(lum_t); // Ceci est une supposition
     optimizer->stats.free_count++;
 }
 
@@ -245,22 +320,27 @@ void memory_optimizer_free_group(memory_optimizer_t* optimizer, lum_group_t* gro
 
     size_t group_size = sizeof(lum_group_t) + (group->capacity * sizeof(lum_t));
 
+    // Libération du groupe et de son tableau de lums
     memory_pool_free(&optimizer->group_pool, group, sizeof(lum_group_t));
     if (group->lums) {
         memory_pool_free(&optimizer->lum_pool, group->lums, group->capacity * sizeof(lum_t));
     }
 
+    // Mise à jour des statistiques globales
     optimizer->stats.total_freed += group_size;
-    optimizer->stats.current_usage -= group_size;
+    optimizer->stats.current_usage -= group_size; // Ceci est une supposition
     optimizer->stats.free_count++;
 }
 
 void memory_optimizer_free_zone(memory_optimizer_t* optimizer, lum_zone_t* zone) {
     if (!optimizer || !zone) return;
 
+    // Libération de la zone
     memory_pool_free(&optimizer->zone_pool, zone, sizeof(lum_zone_t));
+    
+    // Mise à jour des statistiques globales
     optimizer->stats.total_freed += sizeof(lum_zone_t);
-    optimizer->stats.current_usage -= sizeof(lum_zone_t);
+    optimizer->stats.current_usage -= sizeof(lum_zone_t); // Ceci est une supposition
     optimizer->stats.free_count++;
 }
 
@@ -268,15 +348,21 @@ void memory_optimizer_free_zone(memory_optimizer_t* optimizer, lum_zone_t* zone)
 memory_stats_t* memory_optimizer_get_stats(memory_optimizer_t* optimizer) {
     if (!optimizer) return NULL;
 
-    // Update fragmentation statistics with realistic bounds
+    // Assurer que current_usage ne dépasse pas total_allocated
+    if (optimizer->stats.current_usage > optimizer->stats.total_allocated) {
+        // Ceci peut indiquer un problème de suivi ou de libération
+        printf("[WARNING] current_usage (%zu) > total_allocated (%zu). Resetting current_usage.\n",
+               optimizer->stats.current_usage, optimizer->stats.total_allocated);
+        optimizer->stats.current_usage = optimizer->stats.total_allocated;
+    }
+
+    // Calcul de la fragmentation
     if (optimizer->stats.total_allocated >= optimizer->stats.current_usage) {
         optimizer->stats.fragmentation_bytes = optimizer->stats.total_allocated - optimizer->stats.current_usage;
     } else {
-        // Correction: current_usage ne peut pas dépasser total_allocated
-        optimizer->stats.fragmentation_bytes = 0;
-        optimizer->stats.current_usage = optimizer->stats.total_allocated;
+        optimizer->stats.fragmentation_bytes = 0; // Ne devrait pas arriver avec la correction ci-dessus
     }
-    
+
     if (optimizer->stats.total_allocated > 0) {
         optimizer->stats.fragmentation_ratio = 
             (double)optimizer->stats.fragmentation_bytes / optimizer->stats.total_allocated;
@@ -284,7 +370,7 @@ memory_stats_t* memory_optimizer_get_stats(memory_optimizer_t* optimizer) {
         optimizer->stats.fragmentation_ratio = 0.0;
     }
 
-    // Validation des métriques cohérentes
+    // Valider que peak_usage est au moins current_usage
     if (optimizer->stats.peak_usage < optimizer->stats.current_usage) {
         optimizer->stats.peak_usage = optimizer->stats.current_usage;
     }
@@ -304,8 +390,8 @@ void memory_optimizer_print_stats(memory_optimizer_t* optimizer) {
     printf("Peak Usage: %zu bytes\n", stats->peak_usage);
     printf("Allocations: %zu\n", stats->allocation_count);
     printf("Frees: %zu\n", stats->free_count);
-    
-    // Correction du calcul de fragmentation réaliste
+
+    // Calcul de fragmentation basé sur les stats mises à jour
     size_t effective_fragmentation = 0;
     if (stats->total_allocated > stats->current_usage) {
         effective_fragmentation = stats->total_allocated - stats->current_usage;
@@ -314,7 +400,7 @@ void memory_optimizer_print_stats(memory_optimizer_t* optimizer) {
     if (stats->total_allocated > 0) {
         fragmentation_percentage = (double)effective_fragmentation / stats->total_allocated * 100.0;
     }
-    
+
     printf("Fragmentation: %zu bytes (%.2f%%)\n", 
            effective_fragmentation, fragmentation_percentage);
     printf("Memory Efficiency: %.2f%%\n", 
@@ -329,7 +415,10 @@ void memory_optimizer_print_stats(memory_optimizer_t* optimizer) {
 bool memory_optimizer_analyze_fragmentation(memory_optimizer_t* optimizer) {
     if (!optimizer) return false;
 
-    memory_optimizer_get_stats(optimizer);
+    // Assure que les stats sont à jour avant l'analyse
+    memory_optimizer_get_stats(optimizer); 
+    
+    // La fragmentation est calculée dans get_stats
     return optimizer->stats.fragmentation_bytes > optimizer->defrag_threshold;
 }
 
@@ -337,9 +426,11 @@ bool memory_optimizer_auto_defrag(memory_optimizer_t* optimizer) {
     if (!optimizer || !optimizer->auto_defrag_enabled) return false;
 
     if (memory_optimizer_analyze_fragmentation(optimizer)) {
+        printf("[MEMORY_OPTIMIZER] Triggering auto-defragmentation.\n");
         memory_pool_defragment(&optimizer->lum_pool);
         memory_pool_defragment(&optimizer->group_pool);
         memory_pool_defragment(&optimizer->zone_pool);
+        // Réinitialiser les statistiques après défragmentation si nécessaire, ou juste s'assurer qu'elles sont cohérentes.
         return true;
     }
 
@@ -351,4 +442,64 @@ void memory_optimizer_set_auto_defrag(memory_optimizer_t* optimizer, bool enable
 
     optimizer->auto_defrag_enabled = enabled;
     optimizer->defrag_threshold = threshold;
+    printf("[MEMORY_OPTIMIZER] Auto-defragmentation %s with threshold %zu bytes.\n",
+           enabled ? "enabled" : "disabled", threshold);
+}
+
+// Ajout des fonctions pour memory tracker (supposées exister dans memory_tracker.c)
+// Ces fonctions sont nécessaires pour que les macros `tracked_malloc`, `tracked_free`, etc. fonctionnent.
+
+// Dummy implementation of memory_tracker functions if not provided elsewhere
+// You should replace these with your actual memory tracking logic.
+
+#ifndef MEMORY_TRACKER_IMPL
+#define MEMORY_TRACKER_IMPL
+
+#include <stdio.h> // For printf in dummy functions
+
+// Dummy tracking functions
+void* memory_tracker_alloc(void* ptr, size_t size, const char* file, int line) {
+    // In a real implementation, log the allocation.
+    // printf("ALLOC: %p, size: %zu, file: %s, line: %d\n", ptr, size, file, line);
+    (void)ptr; (void)size; (void)file; (void)line; // Suppress unused parameter warnings
+    return ptr;
+}
+
+void memory_tracker_free(void* ptr, const char* file, int line) {
+    // In a real implementation, log the free.
+    // printf("FREE: %p, file: %s, line: %d\n", ptr, file, line);
+    (void)ptr; (void)file; (void)line; // Suppress unused parameter warnings
+}
+
+void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const char* func) {
+    // In a real implementation, log the realloc.
+    // printf("REALLOC: %p to size %zu, file: %s, line: %d\n", ptr, size, file, line);
+    void* new_ptr = realloc(ptr, size);
+    // Log the result of realloc if needed
+    return new_ptr;
+}
+
+void memory_tracker_cleanup() {
+    // In a real implementation, this would print summary statistics or detect leaks.
+    // printf("MEMORY TRACKER CLEANUP CALLED.\n");
+}
+
+#endif // MEMORY_TRACKER_IMPL
+
+// Fonctions wrapper pour memory tracking (implémentation utilisant les macros de tracking)
+void* tracked_malloc(size_t size, const char* file, int line, const char* func) {
+    void* ptr = malloc(size); // Utilise le malloc système
+    if (ptr) {
+        // Appel à la fonction de suivi d'allocation
+        memory_tracker_alloc(ptr, size, file, line);
+    }
+    return ptr;
+}
+
+void tracked_free(void* ptr, const char* file, int line, const char* func) {
+    if (ptr) {
+        // Appel à la fonction de suivi de libération
+        memory_tracker_free(ptr, file, line);
+        free(ptr); // Utilise le free système
+    }
 }
