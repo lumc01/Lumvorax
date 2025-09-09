@@ -305,15 +305,23 @@ void demo_vorax_operations(void) {
     lum_group_t* group_a = lum_group_create(5);
     lum_group_t* group_b = lum_group_create(5);
 
-    // CORRECTION CRITIQUE: Créer LUMs et les ajouter aux groupes SANS les détruire individuellement
-    // Car lum_group_add fait une copie, mais on ne doit pas détruire l'original immédiatement
-    lum_t* lums[4];
+    // CORRECTION FINALE DOUBLE FREE: Créer des LUMs temporaires et ne pas les stocker dans des pointeurs
+    // Car lum_group_add fait une copie, nous n'avons pas besoin de gérer la mémoire des originaux
     for (int i = 0; i < 4; i++) {
-        lums[i] = lum_create(i % 2, i, 0, LUM_STRUCTURE_LINEAR);
+        lum_t temp_lum = {
+            .presence = (uint8_t)(i % 2),
+            .id = lum_generate_id(),
+            .position_x = i,
+            .position_y = 0,
+            .structure_type = LUM_STRUCTURE_LINEAR,
+            .is_destroyed = 0,
+            .timestamp = lum_get_timestamp()
+        };
+        
         if (i < 2) {
-            lum_group_add(group_a, lums[i]);
+            lum_group_add(group_a, &temp_lum);
         } else {
-            lum_group_add(group_b, lums[i]);
+            lum_group_add(group_b, &temp_lum);
         }
     }
 
@@ -326,10 +334,7 @@ void demo_vorax_operations(void) {
     }
     vorax_result_destroy(result);
 
-    // CORRECTION: Détruire les LUMs originaux après utilisation
-    for (int i = 0; i < 4; i++) {
-        lum_destroy(lums[i]);
-    }
+    // Plus besoin de détruire les LUMs originaux car nous avons utilisé des structures temporaires
 
     // Nettoyer les groupes
     lum_group_destroy(group_a);
