@@ -10,6 +10,31 @@
 #include <math.h>
 #include <stdint.h>
 
+// Constantes pour conversions métriques LUM (conforme STANDARD_NAMES)
+#define LUM_SIZE_BYTES 32
+#define LUM_SIZE_BITS (LUM_SIZE_BYTES * 8)  // 256 bits par LUM
+#define BITS_PER_GIGABIT 1000000000ULL
+#define MICROSECONDS_PER_SECOND 1000000ULL
+
+// Conversion LUMs/seconde vers bits/seconde
+uint64_t convert_lums_per_second_to_bits_per_second(uint64_t lums_per_second) {
+    return lums_per_second * LUM_SIZE_BITS;
+}
+
+// Conversion LUMs/seconde vers Gigabits/seconde
+double convert_lums_per_second_to_gigabits_per_second(uint64_t lums_per_second) {
+    uint64_t bits_per_second = convert_lums_per_second_to_bits_per_second(lums_per_second);
+    return (double)bits_per_second / (double)BITS_PER_GIGABIT;
+}
+
+// Calcul débit LUM authentique depuis métriques temporelles
+uint64_t calculate_authentic_lum_throughput(uint64_t lum_count, uint64_t microseconds_elapsed) {
+    if (microseconds_elapsed == 0) return 0;
+
+    // LUMs/seconde = (lum_count * 1000000) / microseconds_elapsed
+    return (lum_count * MICROSECONDS_PER_SECOND) / microseconds_elapsed;
+}
+
 // Static variables for system-wide metrics
 static size_t global_memory_usage = 0;
 static double global_cpu_usage = 0.0;

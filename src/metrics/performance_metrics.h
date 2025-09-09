@@ -180,4 +180,13 @@ double timespec_to_seconds(struct timespec* ts);
 void get_current_timespec(struct timespec* ts);
 bool is_metric_name_valid(const char* name);
 
+// Performance monitoring functions
+void performance_start_timer(void);
+uint64_t performance_get_elapsed_microseconds(void);
+
+// Métriques LUM conversions (conforme STANDARD_NAMES 2025-01-10)
+uint64_t convert_lums_per_second_to_bits_per_second(uint64_t lums_per_second);
+double convert_lums_per_second_to_gigabits_per_second(uint64_t lums_per_second);
+uint64_t calculate_authentic_lum_throughput(uint64_t lum_count, uint64_t microseconds_elapsed);
+
 #endif // PERFORMANCE_METRICS_H

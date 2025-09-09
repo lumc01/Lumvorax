@@ -34,12 +34,14 @@ void print_lum_group(lum_group_t* group) {
     if (!group) return;
     printf("    Group LUMs (%zu):\n", group->count);
     for (size_t i = 0; i < group->count; ++i) {
-        if (group->lums[i]) {
-            printf("      - LUM ID: %llu, Pos: (%d, %d), Type: %d\n",
-                   (unsigned long long)group->lums[i]->id,
-                   group->lums[i]->position_x,
-                   group->lums[i]->position_y,
-                   group->lums[i]->structure_type);
+        // Validation présence LUM avant affichage (conforme STANDARD_NAMES)
+        if (group->lums[i].presence) {
+            printf("  LUM %zu: ID=%u, Pos=(%d,%d), Type=%d\n",
+                   i,
+                   group->lums[i].id,
+                   group->lums[i].position_x,
+                   group->lums[i].position_y,
+                   group->lums[i].structure_type);
         }
     }
 }
@@ -71,7 +73,7 @@ int main(int argc, char* argv[]) {
             return result ? 0 : 1;
         }
 
-        // MANDATORY stress tests per prompt.txt - CRITICAL requirement  
+        // MANDATORY stress tests per prompt.txt - CRITICAL requirement
         if (strcmp(argv[1], "--stress-test-million") == 0) {
             printf("\n=== MANDATORY STRESS TEST: 1+ MILLION LUMs ===\n");
             printf("Testing system with 1,000,000 LUMs minimum requirement per prompt.txt\n");
@@ -101,7 +103,7 @@ int main(int argc, char* argv[]) {
                     .presence = (uint8_t)(i % 2),
                     .position_x = (int32_t)(i % 1000),
                     .position_y = (int32_t)(i / 1000),
-                    .structure_type = (i % 4 == 0) ? LUM_STRUCTURE_LINEAR : 
+                    .structure_type = (i % 4 == 0) ? LUM_STRUCTURE_LINEAR :
                                     (i % 4 == 1) ? LUM_STRUCTURE_CIRCULAR :
                                     (i % 4 == 2) ? LUM_STRUCTURE_GROUP : LUM_STRUCTURE_NODE,
                     .id = (uint32_t)i,
@@ -127,7 +129,7 @@ int main(int argc, char* argv[]) {
 
                 // Progress indicator every 100k
                 if (i > 0 && i % 100000 == 0) {
-                    printf("Progress: %zu/%zu LUMs created (%.1f%%)\n", 
+                    printf("Progress: %zu/%zu LUMs created (%.1f%%)\n",
                            i, TEST_COUNT, (double)i * 100.0 / TEST_COUNT);
                 }
             }
@@ -157,7 +159,7 @@ int main(int argc, char* argv[]) {
             printf("\n=== Testing VORAX Operations on Large Dataset ===\n");
             clock_t ops_start_clock = clock();
 
-            // Split operation test with large data  
+            // Split operation test with large data
             printf("Testing SPLIT operation...\n");
             vorax_result_t* split_result = vorax_split(large_group, 4);
             if (split_result && split_result->success) {
@@ -322,7 +324,7 @@ void demo_vorax_operations(void) {
     // Démonstration VORAX operations avec protection double-free
     lum_group_t* groups[3] = {
         lum_group_create(2),
-        lum_group_create(3), 
+        lum_group_create(3),
         lum_group_create(1)
     };
 
@@ -380,7 +382,7 @@ void demo_vorax_operations(void) {
         // Tester les opérations VORAX - CONFORME STANDARD_NAMES.md
         vorax_result_t* result = vorax_fuse(temp_group_a, temp_group_b);
         if (result && result->success) {
-            printf("  ✓ Fusion VORAX réussie: %zu LUMs résultants\n", 
+            printf("  ✓ Fusion VORAX réussie: %zu LUMs résultants\n",
                    lum_group_size(result->result_group));
             lum_group_print(result->result_group);
         }
@@ -415,8 +417,8 @@ void demo_binary_conversion(void) {
 
         // Test conversion inverse
         int32_t converted_back = convert_lum_to_int32(result->lum_group);
-        printf("  ✓ Conversion inverse: %d -> %d %s\n", 
-               test_value, converted_back, 
+        printf("  ✓ Conversion inverse: %d -> %d %s\n",
+               test_value, converted_back,
                (test_value == converted_back) ? "(OK)" : "(ERREUR)");
     }
     binary_lum_result_destroy(result);
@@ -434,7 +436,7 @@ void demo_binary_conversion(void) {
 }
 
 void demo_parser(void) {
-    const char* vorax_code = 
+    const char* vorax_code =
         "zone A, B, C;\n"
         "mem buf;\n"
         "emit A += 3•;\n"
@@ -597,7 +599,7 @@ void demo_pareto_optimization(void) {
 
     // Test du DSL VORAX pour optimisations
     printf("  📝 Test exécution script VORAX d'optimisation\n");
-    const char* vorax_optimization_script = 
+    const char* vorax_optimization_script =
         "zone perf_zone, cache_zone;\n"
         "mem boost_mem, pareto_mem;\n"
         "\n"
@@ -697,7 +699,7 @@ void demo_simd_optimization(void) {
 
     printf("  ✓ Détection réussie - Capacités SIMD détectées:\n");
     printf("    AVX-512: %s\n", caps->avx512_available ? "Disponible" : "Non disponible");
-    printf("    AVX2: %s\n", caps->avx2_available ? "Disponible" : "Non disponible");  
+    printf("    AVX2: %s\n", caps->avx2_available ? "Disponible" : "Non disponible");
     printf("    SSE: %s\n", caps->sse_available ? "Disponible" : "Non disponible");
     printf("    Largeur vectorielle: %d éléments\n", caps->vector_width);
     printf("    Fonctionnalités CPU: %s\n", caps->cpu_features);
@@ -758,7 +760,7 @@ void demo_simd_optimization(void) {
 
         if (simd_result) {
             printf("  📋 Résultats comparatifs:\n");
-            printf("    Scalar - Temps: %.6f s, Débit: %.2f LUMs/s\n", 
+            printf("    Scalar - Temps: %.6f s, Débit: %.2f LUMs/s\n",
                    scalar_time, compare_size / scalar_time);
             printf("    SIMD   - Temps: %.6f s, Débit: %.2f LUMs/s\n",
                    simd_result->execution_time, simd_result->throughput_ops_per_sec);
@@ -873,7 +875,7 @@ void demo_zero_copy_allocation(void) {
         return;
     }
 
-    printf("  ✓ Pool créé: %zu bytes (%.2f MB)\n", 
+    printf("  ✓ Pool créé: %zu bytes (%.2f MB)\n",
            pool_size, pool_size / (1024.0 * 1024.0));
 
     // Upgrade vers memory mapping
@@ -908,7 +910,7 @@ void demo_zero_copy_allocation(void) {
             zero_copy_allocation_t* alloc = zero_copy_alloc(pool, test_sizes[i]);
             if (alloc) {
                 allocations[alloc_count++] = alloc;
-                printf("      Alloc %zu bytes: %s, ID=%lu\n", 
+                printf("      Alloc %zu bytes: %s, ID=%lu\n",
                        alloc->size,
                        alloc->is_zero_copy ? "ZERO-COPY" : "standard",
                        alloc->allocation_id);
@@ -986,7 +988,7 @@ void demo_zero_copy_allocation(void) {
     if (zero_copy_defragment_pool(pool)) {
         size_t fragmentation_after = zero_copy_get_fragmentation_bytes(pool);
         printf("    ✅ Défragmentation effectuée\n");
-        printf("    Fragmentation après: %zu bytes (réduction: %zu bytes)\n", 
+        printf("    Fragmentation après: %zu bytes (réduction: %zu bytes)\n",
                fragmentation_after, fragmentation_before - fragmentation_after);
     }
 
@@ -1030,7 +1032,7 @@ void demo_zero_copy_allocation(void) {
         }
     }
 
-    // Nettoyage allocations restantes 
+    // Nettoyage allocations restantes
     for (size_t i = 0; i < alloc_count; i++) {
         if (allocations[i]) {
             zero_copy_free(pool, allocations[i]);

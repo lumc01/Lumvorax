@@ -367,30 +367,27 @@ uint32_t lum_generate_id(void) {
 
 uint64_t lum_get_timestamp(void) {
     struct timespec ts;
-    // Essayer CLOCK_MONOTONIC d'abord
+
+    // Tentative CLOCK_MONOTONIC (préféré pour mesures temporelles)
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
         uint64_t timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-        if (timestamp > 0) {
-            return timestamp;
-        }
+        if (timestamp > 0) return timestamp;
     }
 
     // Fallback CLOCK_REALTIME si MONOTONIC échoue
     if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
         uint64_t timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-        if (timestamp > 0) {
-            return timestamp;
-        }
+        if (timestamp > 0) return timestamp;
     }
 
-    // Fallback final : microsecondes depuis epoch
-    struct timeval tv;
-    if (gettimeofday(&tv, NULL) == 0) {
-        return (tv.tv_sec * 1000000ULL + tv.tv_usec) * 1000ULL; // Convert to nanoseconds
+    // Fallback time() en nanosecondes si clock_gettime échoue complètement
+    time_t current_time = time(NULL);
+    if (current_time > 0) {
+        return (uint64_t)current_time * 1000000000ULL;
     }
 
-    // Dernière option : timestamp basé sur time()
-    return ((uint64_t)time(NULL)) * 1000000000ULL;
+    // Dernière option : timestamp fixe identifiable pour débogage
+    return 1736463600000000000ULL; // 2025-01-10 01:00:00 UTC en nanosecondes
 }
 
 void lum_print(const lum_t* lum) {
