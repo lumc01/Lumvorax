@@ -9,9 +9,10 @@
 #include <sys/time.h>
 
 static double get_microseconds(void) {
-    struct timeval tv;
-    gettimeofday(&tv, NULL);
-    return tv.tv_sec * 1000000.0 + tv.tv_usec;
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    // Retourne les microsecondes monotonic : (secondes * 1,000,000) + (nanosecondes / 1,000)
+    return (double)ts.tv_sec * 1000000.0 + (double)ts.tv_nsec / 1000.0;
 }
 
 pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
@@ -27,7 +28,8 @@ pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
     }
 
     optimizer->point_count = 0;
-    optimizer->inverse_pareto_mode = true;
+    // Configuration du mode Pareto depuis config, pas forcé
+    optimizer->inverse_pareto_mode = config ? config->enable_inverse_mode : false;
     optimizer->current_best.pareto_score = 0.0;
     optimizer->current_best.is_dominated = true;
 

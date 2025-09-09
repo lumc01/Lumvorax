@@ -321,7 +321,10 @@ uint32_t lum_generate_id(void) {
 }
 
 uint64_t lum_get_timestamp(void) {
-    return (uint64_t)time(NULL);
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    // Retourne les nanosecondes : secondes * 1,000,000,000 + nanosecondes
+    return (uint64_t)ts.tv_sec * 1000000000ULL + (uint64_t)ts.tv_nsec;
 }
 
 void lum_print(const lum_t* lum) {
