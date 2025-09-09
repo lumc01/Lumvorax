@@ -380,4 +380,4 @@ void memory_tracker_cleanup(void) {
     
     pthread_mutex_unlock(&g_tracker_mutex);
     printf("[MEMORY_TRACKER] Cleanup completed\n");
-}ule
+}

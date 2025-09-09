@@ -5,38 +5,27 @@
 #include <stdio.h>
 #include <assert.h>
 
-// Remplacer malloc/free par versions tracées
-#define malloc(size) tracked_malloc(size, __FILE__, __LINE__, __func__)
-#define free(ptr) tracked_free(ptr, __FILE__, __LINE__, __func__)
-#define calloc(nmemb, size) tracked_malloc((nmemb)*(size), __FILE__, __LINE__, __func__) // Note: tracked_malloc doesn't perfectly replicate calloc semantics (zeroing)
-#define realloc(ptr, size) tracked_realloc(ptr, size, __FILE__, __LINE__, __func__) // Assuming tracked_realloc exists
-
-// Fonctions wrapper pour memory tracking (implémentation supposée)
-// Ces fonctions doivent être définies ailleurs (par exemple, dans memory_tracker.c)
-// void* memory_tracker_alloc(void* ptr, size_t size, const char* file, int line);
-// void memory_tracker_free(void* ptr, const char* file, int line);
-// void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const char* func);
-// void memory_tracker_cleanup(); // Assumed function for cleanup
+// Les fonctions de memory tracking sont définies dans memory_tracker.c
 
 
 // Create memory optimizer
 memory_optimizer_t* memory_optimizer_create(size_t initial_pool_size) {
-    memory_optimizer_t* optimizer = malloc(sizeof(memory_optimizer_t));
+    memory_optimizer_t* optimizer = TRACKED_MALLOC(sizeof(memory_optimizer_t));
     if (!optimizer) return NULL;
 
     // Initialize pools
     if (!memory_pool_init(&optimizer->lum_pool, initial_pool_size / 4, sizeof(lum_t))) {
-        free(optimizer);
+        TRACKED_FREE(optimizer);
         return NULL;
     }
 
     if (!memory_pool_init(&optimizer->group_pool, initial_pool_size / 4, sizeof(lum_group_t))) {
-        free(optimizer);
+        TRACKED_FREE(optimizer);
         return NULL;
     }
 
     if (!memory_pool_init(&optimizer->zone_pool, initial_pool_size / 2, sizeof(lum_zone_t))) {
-        free(optimizer);
+        TRACKED_FREE(optimizer);
         return NULL;
     }
 
@@ -56,24 +45,24 @@ void memory_optimizer_destroy(memory_optimizer_t* optimizer) {
     // Libération sécurisée avec vérification et nullification
     if (optimizer->lum_pool.pool_start) {
         printf("[MEMORY_OPTIMIZER] Freeing lum_pool at %p\n", optimizer->lum_pool.pool_start);
-        free(optimizer->lum_pool.pool_start); // Utilise le macro free
+        TRACKED_FREE(optimizer->lum_pool.pool_start);
         optimizer->lum_pool.pool_start = NULL;
     }
 
     if (optimizer->group_pool.pool_start) {
         printf("[MEMORY_OPTIMIZER] Freeing group_pool at %p\n", optimizer->group_pool.pool_start);
-        free(optimizer->group_pool.pool_start); // Utilise le macro free
+        TRACKED_FREE(optimizer->group_pool.pool_start);
         optimizer->group_pool.pool_start = NULL;
     }
 
     if (optimizer->zone_pool.pool_start) {
         printf("[MEMORY_OPTIMIZER] Freeing zone_pool at %p\n", optimizer->zone_pool.pool_start);
-        free(optimizer->zone_pool.pool_start); // Utilise le macro free
+        TRACKED_FREE(optimizer->zone_pool.pool_start);
         optimizer->zone_pool.pool_start = NULL;
     }
 
     printf("[MEMORY_OPTIMIZER] Freeing optimizer structure at %p\n", (void*)optimizer);
-    free(optimizer); // Utilise le macro free
+    TRACKED_FREE(optimizer);
 
     // Appel à la fonction de nettoyage globale du tracker si elle existe
     // memory_tracker_cleanup(); 
@@ -81,11 +70,11 @@ void memory_optimizer_destroy(memory_optimizer_t* optimizer) {
 
 // Pool creation
 memory_pool_t* memory_pool_create(size_t size, size_t alignment) {
-    memory_pool_t* pool = malloc(sizeof(memory_pool_t)); // Utilise le macro malloc
+    memory_pool_t* pool = TRACKED_MALLOC(sizeof(memory_pool_t));
     if (!pool) return NULL;
 
     if (!memory_pool_init(pool, size, alignment)) {
-        free(pool); // Utilise le macro free
+        TRACKED_FREE(pool);
         return NULL;
     }
 
@@ -99,7 +88,7 @@ void memory_pool_destroy(memory_pool_t* pool) {
 
     if (pool->pool_start) {
         printf("[MEMORY_POOL] Freeing pool memory at %p\n", pool->pool_start);
-        free(pool->pool_start); // Utilise le macro free
+        TRACKED_FREE(pool->pool_start);
         pool->pool_start = NULL;
     }
 
@@ -110,7 +99,7 @@ void memory_pool_destroy(memory_pool_t* pool) {
     pool->is_initialized = false;
 
     printf("[MEMORY_POOL] Freeing pool structure at %p\n", (void*)pool);
-    free(pool); // Utilise le macro free
+    TRACKED_FREE(pool);
 }
 
 void memory_pool_get_stats(memory_pool_t* pool, memory_stats_t* stats) {
@@ -126,7 +115,7 @@ bool memory_pool_init(memory_pool_t* pool, size_t size, size_t alignment) {
     if (!pool || size == 0) return false;
 
     // Utilise le macro malloc pour allouer le pool, assumant que memory_tracker_alloc est utilisé
-    pool->pool_start = malloc(size); 
+    pool->pool_start = TRACKED_MALLOC(size); 
     if (!pool->pool_start) return false;
 
     pool->current_ptr = pool->pool_start;
@@ -446,60 +435,4 @@ void memory_optimizer_set_auto_defrag(memory_optimizer_t* optimizer, bool enable
            enabled ? "enabled" : "disabled", threshold);
 }
 
-// Ajout des fonctions pour memory tracker (supposées exister dans memory_tracker.c)
-// Ces fonctions sont nécessaires pour que les macros `tracked_malloc`, `tracked_free`, etc. fonctionnent.
-
-// Dummy implementation of memory_tracker functions if not provided elsewhere
-// You should replace these with your actual memory tracking logic.
-
-#ifndef MEMORY_TRACKER_IMPL
-#define MEMORY_TRACKER_IMPL
-
-#include <stdio.h> // For printf in dummy functions
-
-// Dummy tracking functions
-void* memory_tracker_alloc(void* ptr, size_t size, const char* file, int line) {
-    // In a real implementation, log the allocation.
-    // printf("ALLOC: %p, size: %zu, file: %s, line: %d\n", ptr, size, file, line);
-    (void)ptr; (void)size; (void)file; (void)line; // Suppress unused parameter warnings
-    return ptr;
-}
-
-void memory_tracker_free(void* ptr, const char* file, int line) {
-    // In a real implementation, log the free.
-    // printf("FREE: %p, file: %s, line: %d\n", ptr, file, line);
-    (void)ptr; (void)file; (void)line; // Suppress unused parameter warnings
-}
-
-void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const char* func) {
-    // In a real implementation, log the realloc.
-    // printf("REALLOC: %p to size %zu, file: %s, line: %d\n", ptr, size, file, line);
-    void* new_ptr = realloc(ptr, size);
-    // Log the result of realloc if needed
-    return new_ptr;
-}
-
-void memory_tracker_cleanup() {
-    // In a real implementation, this would print summary statistics or detect leaks.
-    // printf("MEMORY TRACKER CLEANUP CALLED.\n");
-}
-
-#endif // MEMORY_TRACKER_IMPL
-
-// Fonctions wrapper pour memory tracking (implémentation utilisant les macros de tracking)
-void* tracked_malloc(size_t size, const char* file, int line, const char* func) {
-    void* ptr = malloc(size); // Utilise le malloc système
-    if (ptr) {
-        // Appel à la fonction de suivi d'allocation
-        memory_tracker_alloc(ptr, size, file, line);
-    }
-    return ptr;
-}
-
-void tracked_free(void* ptr, const char* file, int line, const char* func) {
-    if (ptr) {
-        // Appel à la fonction de suivi de libération
-        memory_tracker_free(ptr, file, line);
-        free(ptr); // Utilise le free système
-    }
-}
+// Fonctions de memory tracking définies dans memory_tracker.c
