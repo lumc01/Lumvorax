@@ -317,14 +317,14 @@ void demo_vorax_operations(void) {
         }
     }
 
-    // Tester les opérations VORAX
-    vorax_result_t result = vorax_combine_groups(group_a, group_b);
-    if (result.success) {
-        printf("  ✓ Combinaison VORAX réussie: %zu LUMs résultants\n", 
-               lum_group_size(result.output_group));
-        lum_group_print(result.output_group);
-        lum_group_destroy(result.output_group);
+    // Tester les opérations VORAX - CONFORME STANDARD_NAMES.md
+    vorax_result_t* result = vorax_fuse(group_a, group_b);
+    if (result && result->success) {
+        printf("  ✓ Fusion VORAX réussie: %zu LUMs résultants\n", 
+               lum_group_size(result->result_group));
+        lum_group_print(result->result_group);
     }
+    vorax_result_destroy(result);
 
     // CORRECTION: Détruire les LUMs originaux après utilisation
     for (int i = 0; i < 4; i++) {
