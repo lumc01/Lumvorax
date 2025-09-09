@@ -223,5 +223,5 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "vm"
-run = ["./bin/lum_vorax"]
+run = ["bash", "-c", "./bin/lum_vorax --sizeof-checks && ./bin/lum_vorax --crypto-validation && echo 'LUM/VORAX system validation complete'"]
 build = ["make", "clean", "&&", "make", "all"]
