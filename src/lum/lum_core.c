@@ -50,14 +50,28 @@ void lum_safe_destroy(lum_t** lum_ptr) {
 
 // LUM Group functions
 lum_group_t* lum_group_create(size_t initial_capacity) {
+    // PROTECTION: Capacité minimale pour éviter corruptions
+    if (initial_capacity == 0) initial_capacity = 1;
+    
     lum_group_t* group = TRACKED_MALLOC(sizeof(lum_group_t));
     if (!group) return NULL;
 
-    // Allouer la mémoire pour les LUMs avec une capacité initiale
+    // Allouer la mémoire pour les LUMs avec une capacité initiale sécurisée
     group->lums = TRACKED_MALLOC(sizeof(lum_t) * initial_capacity);
     if (!group->lums) {
-        TRACKED_FREE(group); // Utiliser TRACKED_FREE pour cohérence
+        TRACKED_FREE(group);
         return NULL;
+    }
+    
+    // PROTECTION CRITIQUE: Détecter si group->lums == group (corruption mémoire)
+    if (group->lums == (lum_t*)group) {
+        // CORRUPTION DÉTECTÉE ! Allouer à nouveau avec taille différente
+        TRACKED_FREE(group->lums);
+        group->lums = TRACKED_MALLOC(sizeof(lum_t) * initial_capacity + 64); // +64 bytes padding
+        if (!group->lums) {
+            TRACKED_FREE(group);
+            return NULL;
+        }
     }
 
     group->count = 0;

@@ -88,7 +88,9 @@ vorax_result_t* vorax_cycle(lum_group_t* group, size_t modulo) {
         new_count = modulo;
     }
 
-    lum_group_t* cycled = lum_group_create(new_count);
+    // CORRECTION CRITIQUE: Utiliser capacité plus grande pour éviter confusion pointeurs
+    size_t safe_capacity = (new_count > 0) ? new_count + 8 : 9; // +8 pour éviter collision
+    lum_group_t* cycled = lum_group_create(safe_capacity);
     if (!cycled) {
         vorax_result_set_error(result, "Failed to create cycled group");
         return result;
