@@ -25,15 +25,18 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
 }
 
 void lum_destroy(lum_t* lum) {
-    if (!lum || lum->is_destroyed) {
-        // PROTECTION ABSOLUE: Ignorer si NULL ou déjà détruit
-        return;
+    if (!lum) return;
+    
+    // PROTECTION DOUBLE FREE: Vérifier magic pattern
+    static const uint64_t DESTROYED_MAGIC = 0xDEADBEEFCAFEBABE;
+    if (lum->id == DESTROYED_MAGIC) {
+        return; // Déjà détruit
     }
     
     // Marquer comme détruit AVANT la libération
+    lum->id = DESTROYED_MAGIC;
     lum->is_destroyed = 1;
     
-    // CORRECTION CRITIQUE: Utiliser tracked_free pour cohérence
     TRACKED_FREE(lum);
 }
 
@@ -72,21 +75,23 @@ void lum_group_destroy(lum_group_t* group) {
     // Protection contre double destruction
     static const uint32_t MAGIC_DESTROYED = 0xDEADBEEF;
     if (group->capacity == MAGIC_DESTROYED) {
-        // lum_log("Tentative de destruction d'un groupe déjà détruit."); // Optionnel: loguer si vous avez une fonction lum_log
         return; // Déjà détruit
     }
 
-    if (group->lums) {
-        // CORRECTION CRITIQUE: Utiliser TRACKED_FREE pour cohérence
+    // PROTECTION CRITIQUE : Vérifier corruption pointeur
+    if (group->lums && group->lums != (lum_t*)group) {
         TRACKED_FREE(group->lums);
-        group->lums = NULL; // Important pour éviter un double-free
+        group->lums = NULL;
+    } else if (group->lums == (lum_t*)group) {
+        // CORRUPTION DÉTECTÉE: group->lums pointe vers group lui-même !
+        group->lums = NULL; // Ne pas libérer - éviter double free
     }
 
-    // Marquer comme détruit en utilisant un champ qui ne sera pas utilisé autrement (ici, capacity)
+    // Marquer comme détruit
     group->capacity = MAGIC_DESTROYED;
-    group->count = 0; // Réinitialiser le compte
+    group->count = 0;
 
-    TRACKED_FREE(group); // Utiliser TRACKED_FREE pour cohérence
+    TRACKED_FREE(group);
 }
 
 // Fonction utilitaire pour détruire un groupe de manière sûre
@@ -108,12 +113,17 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
     }
 
     if (group->count >= group->capacity) {
-        // Redimensionner le tableau si nécessaire
-        size_t new_capacity = (group->capacity == 0) ? 10 : group->capacity * 2; // Gérer le cas initial où capacity est 0
-        lum_t* new_lums = realloc(group->lums, sizeof(lum_t) * new_capacity);
+        // CORRECTION CRITIQUE: Utiliser TRACKED_MALLOC au lieu de realloc pour éviter corruption
+        size_t new_capacity = (group->capacity == 0) ? 10 : group->capacity * 2;
+        lum_t* new_lums = TRACKED_MALLOC(sizeof(lum_t) * new_capacity);
         if (!new_lums) {
-            // lum_log("Échec du redimensionnement du groupe LUM."); // Optionnel: loguer si vous avez une fonction lum_log
             return false;
+        }
+
+        // Copier les données existantes
+        if (group->lums && group->count > 0) {
+            memcpy(new_lums, group->lums, sizeof(lum_t) * group->count);
+            TRACKED_FREE(group->lums);
         }
 
         group->lums = new_lums;
