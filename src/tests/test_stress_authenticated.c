@@ -14,7 +14,7 @@
 // Test de stress authentique selon prompt.txt
 int test_stress_million_lums_authenticated(void) {
     struct timeval start, end;
-    lum_logger_t* logger = lum_log_init("stress_test_authenticated.log");
+    // lum_logger_t* logger = lum_logger_create("stress_test_authenticated.log", true, true);
     
     printf("001. === TEST STRESS AUTHENTIQUE MILLION LUMS ===\n");
     printf("002. Standards appliqués: ISO/IEC 27037, NIST SP 800-86, IEEE 1012\n");
@@ -26,8 +26,11 @@ int test_stress_million_lums_authenticated(void) {
     assert(group != NULL);
     
     for (int i = 0; i < MILLION_LUMS; i++) {
-        lum_t lum = lum_create(1, i, i, LUM_STRUCTURE_LINEAR);
-        lum_group_add(group, lum);
+        lum_t* lum = lum_create(1, i, i, LUM_STRUCTURE_LINEAR);
+        if (lum) {
+            lum_group_add(group, lum);
+            lum_destroy(lum);
+        }
     }
     
     gettimeofday(&end, NULL);
@@ -40,16 +43,20 @@ int test_stress_million_lums_authenticated(void) {
     gettimeofday(&start, NULL);
     lum_group_t* group2 = lum_group_create(MILLION_LUMS / 2);
     for (int i = 0; i < MILLION_LUMS / 2; i++) {
-        lum_t lum = lum_create(1, i + MILLION_LUMS, i + MILLION_LUMS, LUM_STRUCTURE_CIRCULAR);
-        lum_group_add(group2, lum);
+        lum_t* lum = lum_create(1, i + MILLION_LUMS, i + MILLION_LUMS, LUM_STRUCTURE_CIRCULAR);
+        if (lum) {
+            lum_group_add(group2, lum);
+            lum_destroy(lum);
+        }
     }
     
-    vorax_result_t result = vorax_fuse(group, group2);
+    vorax_result_t* result = vorax_fuse(group, group2);
     gettimeofday(&end, NULL);
     double time_fuse = (end.tv_sec - start.tv_sec) + (end.tv_usec - start.tv_usec) / 1000000.0;
     
     printf("006. Fusion 1.5M LUMs: %.6f secondes\n", time_fuse);
-    printf("007. Conservation vérifiée: %s\n", result.success ? "OUI" : "NON");
+    printf("007. Conservation vérifiée: %s\n", (result && result->success) ? "OUI" : "NON");
+    if (result) vorax_result_destroy(result);
     
     // Test 3: Stress maximum 10M LUMs
     printf("008. === TEST STRESS MAXIMUM 10M LUMS ===\n");
@@ -60,8 +67,11 @@ int test_stress_million_lums_authenticated(void) {
         if (i % 1000000 == 0) {
             printf("009. Progression: %d M LUMs créés\n", i / 1000000);
         }
-        lum_t lum = lum_create(1, i, i, LUM_STRUCTURE_GROUP);
-        lum_group_add(stress_group, lum);
+        lum_t* lum = lum_create(1, i, i, LUM_STRUCTURE_GROUP);
+        if (lum) {
+            lum_group_add(stress_group, lum);
+            lum_destroy(lum);
+        }
     }
     
     gettimeofday(&end, NULL);
