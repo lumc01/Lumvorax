@@ -63,10 +63,11 @@ int main(int argc, char* argv[]) {
             memory_tracker_init();
             
             // Initialize performance metrics for timing
-            performance_metrics_init();
+            // Note: performance_metrics_init() called implicitly
             
             // Start timing for forensic report
-            double start_time = performance_metrics_get_current_time();
+            clock_t start_time_clock = clock();
+            double start_time = (double)start_time_clock / CLOCKS_PER_SEC;
             
             // Create 1 million LUMs test - MANDATORY per prompt.txt
             const size_t TEST_COUNT = 1000000; // 1 million minimum
@@ -82,16 +83,25 @@ int main(int argc, char* argv[]) {
             for (size_t i = 0; i < TEST_COUNT; i++) {
                 lum_t lum = {
                     .presence = (uint8_t)(i % 2),
-                    .x = (int32_t)(i % 1000),
-                    .y = (int32_t)(i / 1000),
+                    .position_x = (int32_t)(i % 1000),
+                    .position_y = (int32_t)(i / 1000),
                     .structure_type = (i % 4 == 0) ? LUM_STRUCTURE_LINEAR : 
                                     (i % 4 == 1) ? LUM_STRUCTURE_CIRCULAR :
                                     (i % 4 == 2) ? LUM_STRUCTURE_GROUP : LUM_STRUCTURE_NODE,
                     .id = (uint64_t)i,
                     .timestamp = (uint64_t)time(NULL) + i
                 };
-                if (!lum_group_add_lum(large_group, &lum)) {
-                    printf("ERROR: Failed to add LUM %zu\n", i);
+                lum_t* lum_ptr = malloc(sizeof(lum_t));
+                if (lum_ptr) {
+                    *lum_ptr = lum;
+                    if (!lum_group_add(large_group, lum_ptr)) {
+                        printf("ERROR: Failed to add LUM %zu\n", i);
+                        free(lum_ptr);
+                        lum_group_destroy(large_group);
+                        return 1;
+                    }
+                } else {
+                    printf("ERROR: Memory allocation failed for LUM %zu\n", i);
                     lum_group_destroy(large_group);
                     return 1;
                 }
@@ -103,7 +113,8 @@ int main(int argc, char* argv[]) {
                 }
             }
             
-            double creation_time = performance_metrics_get_current_time() - start_time;
+            clock_t end_time_clock = clock();
+            double creation_time = ((double)(end_time_clock - start_time_clock)) / CLOCKS_PER_SEC;
             printf("✅ Created %zu LUMs in %.3f seconds\n", TEST_COUNT, creation_time);
             printf("Creation rate: %.0f LUMs/second\n", TEST_COUNT / creation_time);
             
@@ -113,16 +124,18 @@ int main(int argc, char* argv[]) {
             
             // Test VORAX operations on large dataset - MANDATORY stress testing
             printf("\n=== Testing VORAX Operations on Large Dataset ===\n");
-            double ops_start = performance_metrics_get_current_time();
+            clock_t ops_start_clock = clock();
+            double ops_start = (double)ops_start_clock / CLOCKS_PER_SEC;
             
-            // Split operation test with large data
+            // Split operation test with large data  
             printf("Testing SPLIT operation...\n");
-            lum_group_t* split_result = vorax_split(large_group, 4);
-            if (split_result) {
+            vorax_result_t* split_result = vorax_split(large_group, 4);
+            if (split_result && split_result->success) {
                 printf("✅ Split operation completed on %zu LUMs\n", TEST_COUNT);
-                lum_group_destroy(split_result);
+                vorax_result_destroy(split_result);
             } else {
                 printf("⚠️ Split operation failed\n");
+                if (split_result) vorax_result_destroy(split_result);
             }
             
             // Cycle operation test
@@ -135,7 +148,8 @@ int main(int argc, char* argv[]) {
                 printf("⚠️ Cycle operation failed\n");
             }
             
-            double ops_time = performance_metrics_get_current_time() - ops_start;
+            clock_t ops_end_clock = clock();
+            double ops_time = ((double)(ops_end_clock - ops_start_clock)) / CLOCKS_PER_SEC;
             printf("VORAX operations completed in %.3f seconds\n", ops_time);
             
             // Final memory check for leak detection
@@ -146,7 +160,8 @@ int main(int argc, char* argv[]) {
             // Cleanup
             lum_group_destroy(large_group);
             
-            double total_time = performance_metrics_get_current_time() - start_time;
+            clock_t final_time_clock = clock();
+            double total_time = ((double)(final_time_clock - start_time_clock)) / CLOCKS_PER_SEC;
             printf("\n=== STRESS TEST COMPLETED ===\n");
             printf("Total execution time: %.3f seconds\n", total_time);
             printf("Overall throughput: %.0f LUMs/second\n", TEST_COUNT / total_time);
