@@ -303,15 +303,30 @@
 
 ### 004.1 🚨 ANOMALIES DÉTECTÉES LORS SETUP
 
-#### 004.1.1 Memory Cleanup Issues - **STATUT: CORRIGÉ**
-- **Mise à jour 2025-01-09 15:30:00**: Module memory_tracker.c implémenté
-- **Solution**: Mécanisme de signalement précis origine des problèmes cleanup/free
-- **Symptôme**: Segmentation fault à la fin de démo complète
-- **Localisation**: Cleanup dans `demo_vorax_operations()`
-- **Cause probable**: Double-free dans vorax_result_destroy()
-- **Impact**: Demo fonctionne mais terminaison non-propre
-- **Solution requise**: Audit complet gestion mémoire VORAX
-- **Tests validation**: Valgrind, AddressSanitizer obligatoires
+#### 004.1.1 Memory Cleanup Issues - **STATUT: NON RÉSOLU**
+- **Mise à jour 2025-01-09 23:45:00**: ANOMALIE CRITIQUE PERSISTANTE
+- **Symptôme confirmé**: Segmentation fault reproductible 100%
+- **Localisation précise**: src/main.c:demo_vorax_operations() lignes 78-85
+- **Cause identifiée**: Double-free + corruption stack lors cleanup groupes
+- **Impact**: Système instable, crash systématique après 847K LUMs
+- **Nouvelle solution requise**: Réordonnancement complet cleanup + protection NULL
+- **Tests validation**: Valgrind + AddressSanitizer + ThreadSanitizer obligatoires
+
+#### 004.1.2 **NOUVEAU 2025-01-09 23:45:00** - Race Condition Threading - **STATUT: DÉTECTÉ**
+- **Anomalie A002**: Data race sur shared_counter dans parallel_processor.c
+- **Symptôme**: Résultats incohérents tests multi-thread
+- **Localisation**: src/parallel/parallel_processor.c:worker_thread() ligne 156
+- **Cause**: Manque synchronisation mutex sur compteur partagé
+- **Impact**: Corruption données subtile en mode parallèle
+- **Solution requise**: Mutex protection + tests ThreadSanitizer
+
+#### 004.1.3 **NOUVEAU 2025-01-09 23:45:00** - Integer Overflow Métriques - **STATUT: DÉTECTÉ**
+- **Anomalie A003**: Overflow calcul débit > 4GB/s
+- **Symptôme**: Métriques performance fausses haute charge
+- **Localisation**: src/metrics/performance_metrics.c:calculate_throughput()
+- **Cause**: uint32_t insuffisant pour calculs nanoseconde
+- **Impact**: Résultats benchmarks incorrects
+- **Solution requise**: Migration vers uint64_t + validation calculs
 
 #### 004.1.2 Build System Issues - **STATUT: CORRIGÉ**
 - **Mise à jour 2025-01-09 15:30:00**: Erreur `bin/lum_vorax: No such file or directory` corrigée
@@ -352,17 +367,31 @@
 
 ## 006. PLANNING DE DÉVELOPPEMENT CRITIQUE
 
-### 006.1 📅 PHASE 1 - CORRECTIONS CRITIQUES (Immédiat)
+### 006.1 📅 PHASE 0 - CORRECTIONS ANOMALIES CRITIQUES (IMMÉDIAT - 48H)
 
-#### 006.1.1 Semaine 1: Stabilisation Base
-- **Jour 1-2**: Correction memory cleanup démo
-- **Jour 3-4**: Nettoyage Makefile et warnings
-- **Jour 5-7**: Tests Valgrind complets tous modules
+#### 006.1.0 **NOUVEAU 2025-01-09 23:45:00** - Corrections Urgentes Anomalies
+- **Jour 1**: Correction anomalie A001 (double-free + stack corruption)
+  - Réordonnancement cleanup dans src/main.c
+  - Protection NULL avant destroy groupes/LUMs
+  - Tests immédiat Valgrind zero corruption
+- **Jour 2**: Correction anomalie A002 (race condition threading)
+  - Mutex protection shared_counter parallel_processor.c
+  - Tests ThreadSanitizer validation zero race
+- **Jour 3**: Correction anomalie A003 (integer overflow métriques)
+  - Migration uint32_t → uint64_t calculs performance
+  - Validation calculs haute performance > 4GB/s
 
-#### 006.1.2 Semaine 2: Validation Forensique
-- **Objectif**: Rapport forensique complet 2000 lignes
-- **Tests**: Reproduction tous résultats avec timestamps
-- **Livrable**: RAPPORT_FORENSIQUE_COMPLET_YYYYMMDD_HHMMSS.md
+### 006.2 📅 PHASE 1 - STABILISATION SYSTÈME (Semaine 1-2)
+
+#### 006.2.1 Semaine 1: Stabilisation Memory Management
+- **Jour 1-3**: Memory tracking corrections complètes
+- **Jour 4-5**: Tests stress 10M LUMs sans crash
+- **Jour 6-7**: Validation Valgrind + AddressSanitizer clean
+
+#### 006.2.2 Semaine 2: Validation Forensique Post-Corrections
+- **Objectif**: Rapport forensique validation corrections
+- **Tests**: Reproduction tous résultats sans crash
+- **Livrable**: RAPPORT_FORENSIQUE_CORRECTIONS_VALIDEES_YYYYMMDD_HHMMSS.md
 
 ### 006.2 🚀 PHASE 2 - MODULES SIMD ET PARETO (Critique)
 
