@@ -43,9 +43,17 @@ typedef struct {
 // Fonctions publiques
 void memory_tracker_init(void);
 void memory_tracker_cleanup(void);
+void memory_tracker_check_leaks(void);
+void memory_tracker_destroy(void);
 void memory_tracker_alloc(void* ptr, size_t size, const char* file, int line);
 void memory_tracker_free(void* ptr, const char* file, int line);
 void memory_tracker_report(void);
+
+// Fonctions tracked pour macros
+void* tracked_malloc(size_t size, const char* file, int line, const char* func);
+void tracked_free(void* ptr, const char* file, int line, const char* func);
+void* tracked_calloc(size_t nmemb, size_t size, const char* file, int line, const char* func);
+void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const char* func);
 
 // Contrôle runtime tracking
 void memory_tracker_enable(bool enable);
