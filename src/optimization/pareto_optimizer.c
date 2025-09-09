@@ -1,6 +1,6 @@
 #include "pareto_optimizer.h"
 #include "memory_optimizer.h"
-#include "performance_metrics.h"
+#include "../metrics/performance_metrics.h"
 
 // Fonction calcul efficacité système pour résolution conflit Pareto
 static double calculate_system_efficiency(void) {
