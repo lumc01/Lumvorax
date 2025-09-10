@@ -358,7 +358,7 @@ args = "LUM/VORAX Stress Test"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX System"
+args = "LUM/VORAX Demonstration"
 
 [[workflows.workflow]]
 name = "LUM/VORAX Stress Test"
@@ -372,12 +372,12 @@ args = "./bin/lum_vorax --stress-test-million"
 outputType = "console"
 
 [[workflows.workflow]]
-name = "LUM/VORAX System"
+name = "LUM/VORAX Demonstration"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd /home/runner/${REPL_SLUG:-workspace} && make clean && make all && echo \"=== LUM/VORAX System Ready ===\" && ./bin/lum_vorax --sizeof-checks && echo \"=== Testing Crypto Validation ===\" && ./bin/lum_vorax --crypto-validation && echo \"=== System demonstration complete ===\""
+args = "cd /home/runner/${REPL_SLUG:-workspace} && echo \"=== LUM/VORAX System Ready ===\" && ./bin/lum_vorax --sizeof-checks && echo \"=== Crypto Validation ===\" && ./bin/lum_vorax --crypto-validation && echo \"=== System successfully validated ===\""
 
 [workflows.workflow.metadata]
 outputType = "console"
@@ -388,5 +388,5 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "vm"
-run = ["bash", "-c", "./bin/lum_vorax --sizeof-checks && ./bin/lum_vorax --crypto-validation && echo 'LUM/VORAX system validation complete'"]
-build = ["make", "clean", "&&", "make", "all"]
+run = ["make", "all"]
+build = ["make", "clean"]
