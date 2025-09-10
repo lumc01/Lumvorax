@@ -6,6 +6,7 @@
 #include <string.h>
 #include <time.h>
 #include <stdbool.h> // Include for bool type
+#include <stdint.h>  // CORRECTION: Include pour uint64_t
 
 // Configuration du debugging mémoire
 #define MEMORY_DEBUG_ENABLED 1
@@ -23,6 +24,7 @@ typedef struct {
     const char* freed_file;
     int freed_line;
     const char* freed_function;
+    uint64_t generation;  // CORRECTION: Gestion génération pour réutilisation pointeurs
 } memory_entry_t;
 
 typedef struct {
@@ -39,6 +41,8 @@ typedef struct {
 #define TRACKED_FREE(ptr) tracked_free(ptr, __FILE__, __LINE__, __func__)
 #define TRACKED_CALLOC(nmemb, size) tracked_calloc(nmemb, size, __FILE__, __LINE__, __func__)
 #define TRACKED_REALLOC(ptr, size) tracked_realloc(ptr, size, __FILE__, __LINE__, __func__)
+#define TRACKED_STRDUP(str) tracked_strdup(str, __FILE__, __LINE__, __func__)  // NOUVEAU
+#define TRACKED_STRNDUP(str, n) tracked_strndup(str, n, __FILE__, __LINE__, __func__)  // NOUVEAU
 
 // Fonctions publiques
 void memory_tracker_init(void);
@@ -54,6 +58,8 @@ void* tracked_malloc(size_t size, const char* file, int line, const char* func);
 void tracked_free(void* ptr, const char* file, int line, const char* func);
 void* tracked_calloc(size_t nmemb, size_t size, const char* file, int line, const char* func);
 void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const char* func);
+char* tracked_strdup(const char* str, const char* file, int line, const char* func);  // NOUVEAU
+char* tracked_strndup(const char* str, size_t n, const char* file, int line, const char* func);  // NOUVEAU
 
 // Contrôle runtime tracking
 void memory_tracker_enable(bool enable);

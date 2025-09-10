@@ -1,5 +1,6 @@
 #include "vorax_operations.h"
 #include "../logger/lum_logger.h"
+#include "../debug/memory_tracker.h"  // CORRECTION: Include pour TRACKED_MALLOC/FREE
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -48,7 +49,7 @@ vorax_result_t* vorax_split(lum_group_t* group, size_t parts) {
     }
 
     // Create result groups
-    result->result_groups = malloc(sizeof(lum_group_t*) * parts);
+    result->result_groups = TRACKED_MALLOC(sizeof(lum_group_t*) * parts);
     if (!result->result_groups) {
         vorax_result_set_error(result, "Memory allocation failed for split result");
         return result;
@@ -67,7 +68,7 @@ vorax_result_t* vorax_split(lum_group_t* group, size_t parts) {
                     lum_group_destroy(result->result_groups[j]);
                 }
             }
-            free(result->result_groups);
+            TRACKED_FREE(result->result_groups);
             result->result_groups = NULL;
             result->result_count = 0;
             return result;
@@ -254,7 +255,7 @@ vorax_result_t* vorax_compress(lum_group_t* group) {
     }
 
     lum_group_add(compressed, omega_lum);
-    free(omega_lum);
+    lum_destroy(omega_lum); // CORRECTION: Utiliser lum_destroy au lieu de free
 
     result->result_group = compressed;
     char msg[256];
@@ -289,7 +290,7 @@ vorax_result_t* vorax_expand(lum_group_t* compressed_group, size_t parts) {
         lum_t* new_lum = lum_create(1, (int32_t)i, 0, LUM_STRUCTURE_LINEAR);
         if (new_lum) {
             lum_group_add(expanded, new_lum);
-            free(new_lum);
+            lum_destroy(new_lum); // CORRECTION: Utiliser lum_destroy au lieu de free
         }
     }
 
@@ -302,7 +303,7 @@ vorax_result_t* vorax_expand(lum_group_t* compressed_group, size_t parts) {
 
 // Utility functions
 vorax_result_t* vorax_result_create(void) {
-    vorax_result_t* result = malloc(sizeof(vorax_result_t));
+    vorax_result_t* result = TRACKED_MALLOC(sizeof(vorax_result_t));
     if (result) {
         result->success = false;
         result->message[0] = '\0';
@@ -341,14 +342,14 @@ void vorax_result_destroy(vorax_result_t* result) {
                 result->result_groups[i] = NULL;
             }
         }
-        free(result->result_groups);
+        TRACKED_FREE(result->result_groups);
         result->result_groups = NULL;
         result->result_count = 0;
     }
 
     // Effacer la structure avant libération
     memset(result, 0xFF, sizeof(vorax_result_t));
-    free(result);
+    TRACKED_FREE(result);
 }
 
 void vorax_result_set_success(vorax_result_t* result, const char* message) {
@@ -406,15 +407,15 @@ vorax_result_t* vorax_create_node(lum_group_t* group1, lum_group_t* group2) {
     if (node_lum1 && node_lum2) {
         lum_group_add(node, node_lum1);
         lum_group_add(node, node_lum2);
-        free(node_lum1);
-        free(node_lum2);
+        lum_destroy(node_lum1);
+        lum_destroy(node_lum2);
 
         result->result_group = node;
         vorax_result_set_success(result, "Node created successfully");
     } else {
         lum_group_destroy(node);
-        if (node_lum1) free(node_lum1);
-        if (node_lum2) free(node_lum2);
+        if (node_lum1) lum_destroy(node_lum1);
+        if (node_lum2) lum_destroy(node_lum2);
         vorax_result_set_error(result, "Failed to create node LUMs");
     }
 
@@ -439,7 +440,7 @@ vorax_result_t* vorax_emit_lums(lum_zone_t* zone, size_t count) {
         lum_t* new_lum = lum_create(1, (int32_t)i, 0, LUM_STRUCTURE_LINEAR);
         if (new_lum) {
             lum_group_add(emitted, new_lum);
-            free(new_lum);
+            lum_destroy(new_lum); // CORRECTION: Utiliser lum_destroy
         }
     }
 

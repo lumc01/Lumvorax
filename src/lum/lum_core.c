@@ -231,7 +231,7 @@ bool lum_zone_add_group(lum_zone_t* zone, lum_group_t* group) {
     if (zone->group_count >= zone->group_capacity) {
         // Augmenter la capacité du tableau de groupes
         size_t new_capacity = zone->group_capacity * 2;
-        lum_group_t** new_groups = realloc(zone->groups, sizeof(lum_group_t*) * new_capacity);
+        lum_group_t** new_groups = TRACKED_REALLOC(zone->groups, sizeof(lum_group_t*) * new_capacity);
         if (!new_groups) {
             // lum_log("Échec du redimensionnement du tableau de groupes dans la zone."); // Optionnel
             return false;

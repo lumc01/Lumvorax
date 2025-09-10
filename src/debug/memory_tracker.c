@@ -51,6 +51,7 @@ void memory_tracker_export_json(const char* filename) {
 static memory_tracker_t g_tracker = {0};
 static pthread_mutex_t g_tracker_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int g_tracker_initialized = 0;
+static uint64_t g_global_generation = 1;  // CORRECTION: Compteur génération global
 
 void memory_tracker_init(void) {
     pthread_mutex_lock(&g_tracker_mutex);
@@ -63,21 +64,46 @@ void memory_tracker_init(void) {
 }
 
 static int find_entry(void* ptr) {
+    // CORRECTION: Chercher l'entrée active la plus récente pour ce pointeur
+    int latest_index = -1;
+    uint64_t latest_generation = 0;
+    
     for (size_t i = 0; i < g_tracker.count; i++) {
         if (g_tracker.entries[i].ptr == ptr && !g_tracker.entries[i].is_freed) {
-            return (int)i;
+            if (g_tracker.entries[i].generation > latest_generation) {
+                latest_generation = g_tracker.entries[i].generation;
+                latest_index = (int)i;
+            }
         }
     }
-    return -1;
+    return latest_index;
 }
 
 static void add_entry(void* ptr, size_t size, const char* file, int line, const char* func) {
-    if (g_tracker.count >= MAX_MEMORY_ENTRIES) {
-        printf("[MEMORY_TRACKER] WARNING: Max entries reached!\n");
-        return;
+    // CORRECTION: Chercher si on peut réutiliser une entrée libérée avec même adresse
+    int reuse_index = -1;
+    for (size_t i = 0; i < g_tracker.count; i++) {
+        if (g_tracker.entries[i].ptr == ptr && g_tracker.entries[i].is_freed) {
+            reuse_index = (int)i;
+            break;
+        }
+    }
+    
+    memory_entry_t* entry;
+    if (reuse_index >= 0) {
+        // CORRECTION: Réutiliser entrée existante avec nouvelle génération
+        entry = &g_tracker.entries[reuse_index];
+    } else {
+        // Créer nouvelle entrée
+        if (g_tracker.count >= MAX_MEMORY_ENTRIES) {
+            printf("[MEMORY_TRACKER] WARNING: Max entries reached!\n");
+            return;
+        }
+        entry = &g_tracker.entries[g_tracker.count];
+        g_tracker.count++;
     }
 
-    memory_entry_t* entry = &g_tracker.entries[g_tracker.count];
+    // CORRECTION: Réinitialiser complètement l'entrée avec nouvelle génération
     entry->ptr = ptr;
     entry->size = size;
     entry->file = file;
@@ -89,8 +115,8 @@ static void add_entry(void* ptr, size_t size, const char* file, int line, const 
     entry->freed_file = NULL;
     entry->freed_line = 0;
     entry->freed_function = NULL;
+    entry->generation = g_global_generation++;  // CORRECTION: Nouvelle génération
 
-    g_tracker.count++;
     g_tracker.total_allocated += size;
     g_tracker.current_usage += size;
 
