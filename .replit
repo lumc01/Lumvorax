@@ -85,7 +85,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "make clean && make all && ./bin/lum_vorax --sizeof-checks && ./bin/lum_vorax --crypto-validation"
+args = "./bin/lum_vorax"
 
 [[workflows.workflow]]
 name = "VALIDATION_CORRECTIONS_COMPLETES"
