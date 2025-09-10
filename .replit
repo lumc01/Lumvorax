@@ -354,15 +354,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX Basic Tests"
+args = "LUM/VORAX Stress Test"
 
 [[workflows.workflow]]
-name = "LUM/VORAX Basic Tests"
+name = "LUM/VORAX Stress Test"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "./bin/lum_vorax --crypto-validation && ./bin/lum_vorax --sizeof-checks"
+args = "./bin/lum_vorax --stress-test-million"
 
 [workflows.workflow.metadata]
 outputType = "console"
