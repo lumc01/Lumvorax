@@ -83,7 +83,7 @@ matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_ca
     }
 
     clock_gettime(CLOCK_MONOTONIC, &end);
-    result->execution_time_ns = (end.tv_sec - start.tv_sec) * 1000000000L + 
+    result->execution_time_ns = (end.tv_sec - start.tv_sec) * 1000000000L +
                                 (end.tv_nsec - start.tv_nsec);
     result->operation_success = true;
 
@@ -185,8 +185,8 @@ void lum_matrix_destroy(lum_matrix_t** matrix_ptr) {
     lum_matrix_t* matrix = *matrix_ptr;
 
     // Vérification double-free
-    if (matrix->magic_number != MATRIX_MAGIC_NUMBER || 
-        matrix->memory_address != (void*)matrix || 
+    if (matrix->magic_number != MATRIX_MAGIC_NUMBER ||
+        matrix->memory_address != (void*)matrix ||
         matrix->is_destroyed) {
         return; // Déjà détruit
     }
@@ -250,7 +250,7 @@ matrix_lum_result_t* matrix_add(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, 
     }
 
     clock_gettime(CLOCK_MONOTONIC, &end);
-    result->execution_time_ns = (end.tv_sec - start.tv_sec) * 1000000000ULL + 
+    result->execution_time_ns = (end.tv_sec - start.tv_sec) * 1000000000ULL +
                                 (end.tv_nsec - start.tv_nsec);
     result->success = true;
     strcpy(result->error_message, "Matrix addition completed successfully");
@@ -307,7 +307,7 @@ matrix_lum_result_t* matrix_multiply(lum_matrix_t* matrix_a, lum_matrix_t* matri
     }
 
     clock_gettime(CLOCK_MONOTONIC, &end);
-    result->execution_time_ns = (end.tv_sec - start.tv_sec) * 1000000000ULL + 
+    result->execution_time_ns = (end.tv_sec - start.tv_sec) * 1000000000ULL +
                                 (end.tv_nsec - start.tv_nsec);
     result->success = true;
     strcpy(result->error_message, "Matrix multiplication completed successfully");
@@ -337,7 +337,7 @@ bool matrix_stress_test_100m_lums(matrix_config_t* config) {
     }
 
     clock_gettime(CLOCK_MONOTONIC, &end);
-    double creation_time = (end.tv_sec - start.tv_sec) + 
+    double creation_time = (end.tv_sec - start.tv_sec) +
                           (end.tv_nsec - start.tv_nsec) / 1000000000.0;
 
     printf("✅ Created %lu LUMs in %.3f seconds\n", total_lums, creation_time);
@@ -449,3 +449,10 @@ void matrix_calculator_demo(void) {
         printf("❌ Échec création matrices pour multiplication.\n");
     }
 }
+
+// Fonction destruction alias pour compatibilité
+void matrix_result_destroy(matrix_result_t** result_ptr) {
+    matrix_calculator_result_destroy((matrix_calculator_result_t**)result_ptr);
+}
+
+// Fonction de test simple
