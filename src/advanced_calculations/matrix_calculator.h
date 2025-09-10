@@ -3,6 +3,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
+#include "../lum/lum_core.h"
 
 // Structure calculateur matriciel
 typedef struct matrix_calculator_t {
@@ -74,6 +76,12 @@ typedef struct {
 } matrix_config_t;
 
 // Fonctions principales
+matrix_calculator_t* matrix_calculator_create(size_t rows, size_t cols);
+void matrix_calculator_destroy(matrix_calculator_t** calc);
+void matrix_set_element(matrix_calculator_t* calc, size_t row, size_t col, double value);
+matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_calculator_t* b, void* config);
+void matrix_result_destroy(matrix_result_t** result_ptr);
+
 lum_matrix_t* lum_matrix_create(size_t rows, size_t cols);
 void lum_matrix_destroy(lum_matrix_t** matrix_ptr);
 bool lum_matrix_set_lum(lum_matrix_t* matrix, size_t row, size_t col, lum_t* lum);

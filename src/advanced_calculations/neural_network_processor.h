@@ -144,3 +144,49 @@ bool neural_validate_network_architecture(size_t* layer_sizes, size_t layer_coun
 #define NEURAL_DEFAULT_BIAS 0.0
 
 #endif // NEURAL_NETWORK_PROCESSOR_H
+#ifndef NEURAL_NETWORK_PROCESSOR_H
+#define NEURAL_NETWORK_PROCESSOR_H
+
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+// Types d'activation
+typedef enum {
+    ACTIVATION_LINEAR = 0,
+    ACTIVATION_RELU = 1,
+    ACTIVATION_SIGMOID = 2,
+    ACTIVATION_TANH = 3
+} activation_type_e;
+
+// Structure couche neuronale
+typedef struct {
+    size_t neuron_count;
+    size_t input_size;
+    double* weights;
+    double* biases;
+    double* outputs;
+    activation_type_e activation_type;
+    uint32_t magic_number;
+    void* memory_address;
+} neural_layer_t;
+
+// Configuration réseau
+typedef struct {
+    double learning_rate;
+    size_t batch_size;
+    size_t epochs;
+    bool use_dropout;
+    double dropout_rate;
+    void* memory_address;
+} neural_config_t;
+
+// Fonctions principales
+neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_type_e activation);
+bool neural_layer_forward_pass(neural_layer_t* layer, double* inputs);
+void neural_layer_destroy(neural_layer_t** layer_ptr);
+
+neural_config_t* neural_config_create_default(void);
+void neural_config_destroy(neural_config_t** config_ptr);
+
+#endif // NEURAL_NETWORK_PROCESSOR_H

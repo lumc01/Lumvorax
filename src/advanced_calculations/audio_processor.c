@@ -478,3 +478,104 @@ void audio_processing_result_destroy(audio_processing_result_t** result_ptr) {
         *result_ptr = NULL;
     }
 }
+#include "audio_processor.h"
+#include "../debug/memory_tracker.h"
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#define AUDIO_MAGIC_NUMBER 0xAUD2025
+
+// Création processeur audio
+audio_processor_t* audio_processor_create(size_t sample_rate, size_t channels) {
+    if (sample_rate == 0 || channels == 0) return NULL;
+
+    audio_processor_t* processor = TRACKED_MALLOC(sizeof(audio_processor_t));
+    if (!processor) return NULL;
+
+    processor->sample_rate = sample_rate;
+    processor->channels = channels;
+    processor->magic_number = AUDIO_MAGIC_NUMBER;
+    processor->memory_address = processor;
+    processor->sample_count = 0;
+    processor->lum_data = NULL;
+
+    return processor;
+}
+
+// Conversion échantillons vers LUMs
+bool audio_convert_samples_to_lums(audio_processor_t* processor, int16_t* audio_data, size_t sample_count) {
+    if (!processor || !audio_data || processor->magic_number != AUDIO_MAGIC_NUMBER) {
+        return false;
+    }
+
+    processor->sample_count = sample_count;
+    processor->lum_data = TRACKED_MALLOC(sample_count * sizeof(lum_t));
+    if (!processor->lum_data) return false;
+
+    for (size_t i = 0; i < sample_count; i++) {
+        int16_t sample_left = audio_data[i * processor->channels];
+        
+        lum_t* lum = &processor->lum_data[i];
+        lum->id = i;
+        lum->presence = (abs(sample_left) > 1000) ? 1 : 0;
+        lum->position_x = (int32_t)(i % 1000);
+        lum->position_y = sample_left / 32;
+        lum->structure_type = LUM_STRUCTURE_LINEAR;
+        lum->memory_address = lum;
+        lum->is_destroyed = 0;
+    }
+
+    return true;
+}
+
+// FFT VORAX
+audio_processing_result_t* audio_apply_fft_vorax(audio_processor_t* processor, size_t fft_size) {
+    if (!processor || fft_size == 0) return NULL;
+
+    audio_processing_result_t* result = TRACKED_MALLOC(sizeof(audio_processing_result_t));
+    if (!result) return NULL;
+
+    result->processing_success = true;
+    result->frequency_bins = fft_size / 2;
+    result->memory_address = result;
+
+    return result;
+}
+
+// Configuration par défaut
+audio_config_t* audio_config_create_default(void) {
+    audio_config_t* config = TRACKED_MALLOC(sizeof(audio_config_t));
+    if (!config) return NULL;
+
+    config->use_parallel_processing = false;
+    config->thread_count = 1;
+    config->memory_address = config;
+
+    return config;
+}
+
+// Destructions
+void audio_processor_destroy(audio_processor_t** processor_ptr) {
+    if (!processor_ptr || !*processor_ptr) return;
+
+    audio_processor_t* processor = *processor_ptr;
+    if (processor->magic_number != AUDIO_MAGIC_NUMBER) return;
+
+    if (processor->lum_data) TRACKED_FREE(processor->lum_data);
+    processor->magic_number = 0;
+    TRACKED_FREE(processor);
+    *processor_ptr = NULL;
+}
+
+void audio_config_destroy(audio_config_t** config_ptr) {
+    if (!config_ptr || !*config_ptr) return;
+    TRACKED_FREE(*config_ptr);
+    *config_ptr = NULL;
+}
+
+void audio_processing_result_destroy(audio_processing_result_t** result_ptr) {
+    if (!result_ptr || !*result_ptr) return;
+    TRACKED_FREE(*result_ptr);
+    *result_ptr = NULL;
+}

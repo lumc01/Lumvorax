@@ -73,6 +73,8 @@ OBJECTS = obj/main.o obj/lum/lum_core.o obj/vorax/vorax_operations.o obj/parser/
 	  obj/advanced_calculations/matrix_calculator.o \
 	  obj/advanced_calculations/quantum_simulator.o \
 	  obj/advanced_calculations/neural_network_processor.o \
+	  obj/advanced_calculations/image_processor.o \
+	  obj/advanced_calculations/audio_processor.o \
 	  obj/complex_modules/realtime_analytics.o \
 	  obj/complex_modules/distributed_computing.o \
 	  obj/complex_modules/ai_optimization.o

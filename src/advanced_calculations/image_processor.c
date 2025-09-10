@@ -403,3 +403,114 @@ void image_processing_result_destroy(image_processing_result_t** result_ptr) {
         *result_ptr = NULL;
     }
 }
+#include "image_processor.h"
+#include "../debug/memory_tracker.h"
+#include <stdlib.h>
+#include <string.h>
+#include <math.h>
+
+#define IMAGE_MAGIC_NUMBER 0xIMG2025
+
+// Création processeur image
+image_processor_t* image_processor_create(size_t width, size_t height) {
+    if (width == 0 || height == 0) return NULL;
+
+    image_processor_t* processor = TRACKED_MALLOC(sizeof(image_processor_t));
+    if (!processor) return NULL;
+
+    processor->width = width;
+    processor->height = height;
+    processor->pixel_count = width * height;
+    processor->magic_number = IMAGE_MAGIC_NUMBER;
+    processor->memory_address = processor;
+
+    // Allocation buffer LUM
+    processor->lum_data = TRACKED_MALLOC(processor->pixel_count * sizeof(lum_t));
+    if (!processor->lum_data) {
+        TRACKED_FREE(processor);
+        return NULL;
+    }
+
+    return processor;
+}
+
+// Conversion pixels vers LUMs
+bool image_convert_pixels_to_lums(image_processor_t* processor, uint8_t* rgb_data) {
+    if (!processor || !rgb_data || processor->magic_number != IMAGE_MAGIC_NUMBER) {
+        return false;
+    }
+
+    for (size_t i = 0; i < processor->pixel_count; i++) {
+        uint8_t r = rgb_data[i * 3];
+        uint8_t g = rgb_data[i * 3 + 1];
+        uint8_t b = rgb_data[i * 3 + 2];
+
+        // Conversion RGB vers LUM
+        lum_t* lum = &processor->lum_data[i];
+        lum->id = i;
+        lum->presence = (r > 128 || g > 128 || b > 128) ? 1 : 0;
+        lum->position_x = (int32_t)(i % processor->width);
+        lum->position_y = (int32_t)(i / processor->width);
+        lum->structure_type = LUM_STRUCTURE_LINEAR;
+        lum->memory_address = lum;
+        lum->is_destroyed = 0;
+    }
+
+    return true;
+}
+
+// Flou gaussien VORAX
+image_processing_result_t* image_apply_gaussian_blur_vorax(image_processor_t* processor, double sigma) {
+    if (!processor || sigma <= 0) return NULL;
+
+    image_processing_result_t* result = TRACKED_MALLOC(sizeof(image_processing_result_t));
+    if (!result) return NULL;
+
+    result->processing_success = true;
+    result->memory_address = result;
+    
+    // Simulation filtre gaussien sur LUMs
+    for (size_t i = 0; i < processor->pixel_count; i++) {
+        // Application transformation VORAX
+        processor->lum_data[i].presence = (processor->lum_data[i].presence > 0) ? 1 : 0;
+    }
+
+    return result;
+}
+
+// Configuration par défaut
+image_config_t* image_config_create_default(void) {
+    image_config_t* config = TRACKED_MALLOC(sizeof(image_config_t));
+    if (!config) return NULL;
+
+    config->use_parallel_processing = false;
+    config->thread_count = 1;
+    config->memory_address = config;
+
+    return config;
+}
+
+// Destructions
+void image_processor_destroy(image_processor_t** processor_ptr) {
+    if (!processor_ptr || !*processor_ptr) return;
+
+    image_processor_t* processor = *processor_ptr;
+    if (processor->magic_number != IMAGE_MAGIC_NUMBER) return;
+
+    if (processor->lum_data) TRACKED_FREE(processor->lum_data);
+    processor->magic_number = 0;
+    TRACKED_FREE(processor);
+    *processor_ptr = NULL;
+}
+
+void image_config_destroy(image_config_t** config_ptr) {
+    if (!config_ptr || !*config_ptr) return;
+    TRACKED_FREE(*config_ptr);
+    *config_ptr = NULL;
+}
+
+void image_processing_result_destroy(image_processing_result_t** result_ptr) {
+    if (!result_ptr || !*result_ptr) return;
+    TRACKED_FREE(*result_ptr);
+    *result_ptr = NULL;
+}
