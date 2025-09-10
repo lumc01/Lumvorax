@@ -111,7 +111,7 @@ bool quantum_validate_state_vector(double complex* state_vector, size_t size);
 #define QUANTUM_MAX_QUBITS 64
 #define QUANTUM_MIN_FIDELITY 0.95
 #define QUANTUM_PLANCK_CONSTANT 6.62607015e-34
-#define QUANTUM_MAGIC_NUMBER 0xABCDEF00
+#define QUANTUM_MAGIC_NUMBER 0x51554E54
 #define QUANTUM_DESTROYED_MAGIC 0xDEADBEEF
 
 #endif // QUANTUM_SIMULATOR_H
