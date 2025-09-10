@@ -22,6 +22,7 @@
 #include "advanced_calculations/tsp_optimizer.h"
 #include "advanced_calculations/knapsack_optimizer.h"
 #include "advanced_calculations/collatz_analyzer.h"
+#include "complex_modules/ai_optimization.h"
 
 // Demo functions
 void demo_basic_lum_operations(void);
