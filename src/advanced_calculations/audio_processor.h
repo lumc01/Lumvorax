@@ -2,52 +2,85 @@
 #ifndef AUDIO_PROCESSOR_H
 #define AUDIO_PROCESSOR_H
 
-#include "../lum/lum_core.h"
 #include <stdint.h>
-#include <complex.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include "../lum/lum_core.h"
 
-// Structure échantillon audio comme LUM temporel
-typedef struct {
-    uint32_t memory_address;
-    double amplitude;
-    double frequency;
-    uint64_t time_sample_ns;
-    double presence_energy;
-    uint16_t channel; // Stéréo/5.1/7.1 support
-} audio_sample_lum_t;
+// Constantes
+#define AUDIO_MAX_CHANNELS 8
+#define AUDIO_MAX_SAMPLE_RATE 192000
+#define AUDIO_PROCESSOR_MAGIC 0x41554450 // "AUDP"
+#define AUDIO_DESTROYED_MAGIC 0xDEADBEEF
+#define AUDIO_RESULT_MAGIC 0x41554452    // "AUDR"
 
-// Configuration traitement audio
+// Types de filtres
+typedef enum {
+    AUDIO_FILTER_LOWPASS = 0,
+    AUDIO_FILTER_HIGHPASS,
+    AUDIO_FILTER_BANDPASS,
+    AUDIO_FILTER_NOTCH,
+    AUDIO_FILTER_FFT
+} audio_filter_type_e;
+
+// Structure processeur audio
 typedef struct {
-    uint32_t sample_rate; // 44100, 48000, 96000, 192000 Hz
-    uint16_t bit_depth;   // 16, 24, 32 bits
-    uint8_t channels;     // 1=mono, 2=stéréo, 6=5.1, 8=7.1
-    size_t max_samples_supported; // Minimum 100M pour conformité
-    bool enable_fft_acceleration;
-    bool enable_realtime_processing;
+    size_t sample_rate;
+    size_t channels;
+    size_t buffer_size;
+    
+    lum_t* sample_lums;     // LUMs pour échantillons
+    lum_t* processed_lums;  // LUMs après traitement
+    
+    double* fft_real;       // Buffer FFT partie réelle
+    double* fft_imag;       // Buffer FFT partie imaginaire
+    
+    uint64_t creation_timestamp;
+    uint64_t last_processing_time;
+    
+    size_t total_samples_processed;
+    size_t filters_applied;
+    size_t frequency_analysis_count;
+    
+    void* memory_address;
+    uint32_t processor_magic;
+} audio_processor_t;
+
+// Configuration
+typedef struct {
+    size_t max_sample_rate;
+    size_t max_channels;
+    size_t buffer_size_ms;
+    bool enable_real_time_processing;
+    size_t fft_window_size;
+    void* memory_address;
 } audio_config_t;
 
-// Fonctions principales
-bool audio_processor_init(audio_config_t* config);
-audio_sample_lum_t* audio_to_lum_sequence(int16_t* audio_data, size_t sample_count, uint32_t sample_rate);
-int16_t* lum_sequence_to_audio(audio_sample_lum_t* lum_samples, size_t count);
+// Résultat traitement
+typedef struct {
+    bool processing_success;
+    uint64_t processing_time_ns;
+    size_t samples_processed;
+    audio_filter_type_e filter_applied;
+    size_t frequency_bins;
+    double quality_metric;
+    char error_message[256];
+    void* memory_address;
+    uint32_t result_magic;
+} audio_processing_result_t;
 
-// Transformations VORAX audio
-bool apply_vorax_fft_cycle(audio_sample_lum_t* samples, size_t count, double complex* frequency_domain);
-bool apply_vorax_ifft_split(double complex* frequency_domain, size_t count, audio_sample_lum_t* time_domain);
-bool apply_vorax_frequency_filter(audio_sample_lum_t* samples, size_t count, double low_freq, double high_freq);
+// Fonctions publiques
+audio_processor_t* audio_processor_create(size_t sample_rate, size_t channels);
+void audio_processor_destroy(audio_processor_t** processor_ptr);
 
-// Test stress obligatoire 100M+ échantillons
+bool audio_convert_samples_to_lums(audio_processor_t* processor, int16_t* audio_samples, size_t sample_count);
+audio_processing_result_t* audio_apply_fft_vorax(audio_processor_t* processor, size_t fft_size);
+audio_processing_result_t* audio_apply_lowpass_filter_vorax(audio_processor_t* processor, double cutoff_freq);
+
 bool audio_stress_test_100m_samples(audio_config_t* config);
 
-// Métriques performance temps réel
-typedef struct {
-    double samples_per_second;
-    double realtime_factor; // 1.0 = temps réel, >1.0 = plus rapide
-    double latency_ms;
-    double fft_execution_time_ns;
-    size_t memory_usage_bytes;
-} audio_performance_metrics_t;
-
-audio_performance_metrics_t audio_get_performance_metrics(void);
+audio_config_t* audio_config_create_default(void);
+void audio_config_destroy(audio_config_t** config_ptr);
+void audio_processing_result_destroy(audio_processing_result_t** result_ptr);
 
 #endif // AUDIO_PROCESSOR_H

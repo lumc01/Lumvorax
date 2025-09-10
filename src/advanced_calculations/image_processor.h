@@ -2,48 +2,81 @@
 #ifndef IMAGE_PROCESSOR_H
 #define IMAGE_PROCESSOR_H
 
-#include "../lum/lum_core.h"
 #include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include "../lum/lum_core.h"
 
-// Structure pixel comme LUM étendu
-typedef struct {
-    uint32_t memory_address;
-    uint8_t red, green, blue, alpha;
-    uint16_t x, y;
-    double presence_intensity;
-    uint64_t timestamp_ns;
-} pixel_lum_t;
+// Constantes
+#define IMAGE_MAX_DIMENSION 65536
+#define IMAGE_MAX_CHANNELS 4
+#define IMAGE_PROCESSOR_MAGIC 0x494D4750 // "IMGP"
+#define IMAGE_DESTROYED_MAGIC 0xDEADBEEF
+#define IMAGE_RESULT_MAGIC 0x494D4752    // "IMGR"
 
-// Configuration traitement image
+// Types de filtres
+typedef enum {
+    IMAGE_FILTER_BLUR = 0,
+    IMAGE_FILTER_SHARPEN,
+    IMAGE_FILTER_EDGE_DETECTION,
+    IMAGE_FILTER_EMBOSS,
+    IMAGE_FILTER_GAUSSIAN
+} image_filter_type_e;
+
+// Structure processeur d'images
 typedef struct {
-    size_t width, height;
-    size_t max_pixels_supported; // Minimum 100M pour conformité
-    char filter_type[64];
-    double filter_parameters[8];
-    bool enable_simd_vectorization;
+    size_t width;
+    size_t height;
+    size_t pixel_count;
+    
+    lum_t* pixel_lums;      // LUMs pour pixels
+    lum_t* processed_lums;  // LUMs après traitement
+    
+    uint64_t creation_timestamp;
+    uint64_t last_processing_time;
+    
+    size_t total_pixels_processed;
+    size_t filters_applied;
+    double compression_ratio;
+    
+    void* memory_address;
+    uint32_t processor_magic;
+} image_processor_t;
+
+// Configuration
+typedef struct {
+    size_t max_image_size_mb;
+    bool enable_gpu_acceleration;
+    double default_filter_quality;
+    int compression_level;
+    bool enable_parallel_processing;
+    void* memory_address;
 } image_config_t;
 
-// Fonctions principales
-bool image_processor_init(image_config_t* config);
-pixel_lum_t* image_to_lum_matrix(uint8_t* image_data, size_t width, size_t height);
-uint8_t* lum_matrix_to_image(pixel_lum_t* lum_pixels, size_t width, size_t height);
+// Résultat traitement
+typedef struct {
+    bool processing_success;
+    uint64_t processing_time_ns;
+    size_t pixels_processed;
+    image_filter_type_e filter_applied;
+    double quality_metric;
+    char error_message[256];
+    void* memory_address;
+    uint32_t result_magic;
+} image_processing_result_t;
 
-// Filtres VORAX sur images
-bool apply_vorax_filter_split(pixel_lum_t* pixels, size_t count);
-bool apply_vorax_filter_cycle(pixel_lum_t* pixels, size_t count);
-bool apply_vorax_edge_detection(pixel_lum_t* pixels, size_t width, size_t height);
+// Fonctions publiques
+image_processor_t* image_processor_create(size_t width, size_t height);
+void image_processor_destroy(image_processor_t** processor_ptr);
 
-// Test stress obligatoire 100M+ pixels
+bool image_convert_pixels_to_lums(image_processor_t* processor, uint8_t* rgb_data);
+image_processing_result_t* image_apply_gaussian_blur_vorax(image_processor_t* processor, double sigma);
+image_processing_result_t* image_apply_edge_detection_vorax(image_processor_t* processor);
+
 bool image_stress_test_100m_pixels(image_config_t* config);
 
-// Métriques performance
-typedef struct {
-    double pixels_per_second;
-    double mbytes_per_second;
-    double filter_execution_time_ns;
-    size_t memory_usage_bytes;
-} image_performance_metrics_t;
-
-image_performance_metrics_t image_get_performance_metrics(void);
+image_config_t* image_config_create_default(void);
+void image_config_destroy(image_config_t** config_ptr);
+void image_processing_result_destroy(image_processing_result_t** result_ptr);
 
 #endif // IMAGE_PROCESSOR_H

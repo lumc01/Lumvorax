@@ -1186,7 +1186,7 @@ void demo_ai_optimization_module() {
     // Création groupe LUM de test
     lum_group_t* initial_solution = lum_group_create(1000);
     if (!initial_solution) {
-        ai_optimization_config_destroy(&config); // Corrected from &config
+        ai_optimization_config_destroy(&config);
         printf("❌ Échec création groupe LUM initial\n");
         return;
     }
@@ -1217,13 +1217,13 @@ void demo_ai_optimization_module() {
         printf("    Temps: %.3f ms\n", result->total_time_ns / 1000000.0);
         printf("    Algorithme: %s\n", result->algorithm_used);
 
-        ai_optimization_result_destroy(&result); // Corrected from &result
+        ai_optimization_result_destroy(&result);
     } else {
         printf("❌ Échec optimisation IA\n");
     }
 
     // Cleanup
-    lum_group_destroy(initial_solution); // Corrected from &initial_solution
+    lum_group_destroy(initial_solution);
     ai_optimization_config_destroy(&config);
 
     printf("  ✅ Démonstration Module IA Optimization terminée\n");
@@ -1244,7 +1244,7 @@ void demo_tsp_optimizer_module() {
     const size_t city_count = 10;
     tsp_city_t** cities = malloc(city_count * sizeof(tsp_city_t*));
     if (!cities) {
-        tsp_config_destroy(&config); // Corrected from &config
+        tsp_config_destroy(&config);
         printf("❌ Échec allocation villes\n");
         return;
     }
@@ -1263,7 +1263,7 @@ void demo_tsp_optimizer_module() {
                 tsp_city_destroy(&cities[j]);
             }
             free(cities);
-            tsp_config_destroy(&config); // Corrected from &config
+            tsp_config_destroy(&config);
             return;
         }
     }
@@ -1278,7 +1278,7 @@ void demo_tsp_optimizer_module() {
         printf("    Algorithme: %s\n", result->algorithm_used);
         printf("    Villes visitées: %zu\n", result->optimal_tour->city_count);
 
-        tsp_result_destroy(&result); // Corrected from &result
+        tsp_result_destroy(&result);
     } else {
         printf("❌ Échec optimisation TSP\n");
     }
@@ -1310,7 +1310,7 @@ void demo_knapsack_optimizer_module() {
 
     knapsack_item_t** items = malloc(item_count * sizeof(knapsack_item_t*));
     if (!items) {
-        knapsack_config_destroy(&config); // Corrected from &config
+        knapsack_config_destroy(&config);
         printf("❌ Échec allocation items\n");
         return;
     }
@@ -1328,7 +1328,7 @@ void demo_knapsack_optimizer_module() {
                 knapsack_item_destroy(&items[j]);
             }
             free(items);
-            knapsack_config_destroy(&config); // Corrected from &config
+            knapsack_config_destroy(&config);
             return;
         }
     }
@@ -1344,7 +1344,7 @@ void demo_knapsack_optimizer_module() {
         printf("    Algorithme: %s\n", result->algorithm_used);
         printf("    Efficacité: %.3f\n", result->efficiency_ratio);
 
-        knapsack_result_destroy(&result); // Corrected from &result
+        knapsack_result_destroy(&result);
     } else {
         printf("❌ Échec optimisation Knapsack\n");
     }
@@ -1379,7 +1379,7 @@ void demo_collatz_analyzer_module() {
         printf("    Étapes jusqu'à 1: %lu\n", result->record_steps);
         printf("    Temps: %.3f ms\n", result->total_time_ns / 1000000.0);
 
-        collatz_result_destroy(&result); // Corrected from &result
+        collatz_result_destroy(&result);
     } else {
         printf("❌ Échec analyse Collatz de base\n");
     }
@@ -1396,12 +1396,12 @@ void demo_collatz_analyzer_module() {
         printf("    Temps total: %.3f ms\n", result->total_time_ns / 1000000.0);
         printf("    Taux de convergence: %lu%%\n", result->statistics->convergence_rate);
 
-        collatz_result_destroy(&result); // Corrected from &result
+        collatz_result_destroy(&result);
     } else {
         printf("❌ Échec analyse Collatz statistique\n");
     }
 
-    collatz_config_destroy(&config); // Corrected from &config
+    collatz_config_destroy(&config);
 
     printf("  ✅ Démonstration Module Collatz Analyzer terminée\n");
 }
