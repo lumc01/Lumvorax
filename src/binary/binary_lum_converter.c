@@ -1,4 +1,5 @@
 #include "binary_lum_converter.h"
+#include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -34,7 +35,7 @@ binary_lum_result_t* convert_binary_to_lum(const uint8_t* binary_data, size_t by
                                    LUM_STRUCTURE_LINEAR);
             if (lum) {
                 lum_group_add(lum_group, lum);
-                free(lum);
+                lum_destroy(lum); // CORRECTION: Utiliser lum_destroy
             }
         }
     }
@@ -79,7 +80,7 @@ binary_lum_result_t* convert_bits_to_lum(const char* bit_string) {
         lum_t* lum = lum_create(bit_val, (int32_t)i, 0, LUM_STRUCTURE_LINEAR);
         if (lum) {
             lum_group_add(lum_group, lum);
-            free(lum);
+            lum_destroy(lum); // CORRECTION: Utiliser lum_destroy
         }
     }
     
@@ -105,7 +106,7 @@ lum_binary_result_t* convert_lum_to_binary(const lum_group_t* lum_group) {
     size_t bit_count = lum_group->count;
     size_t byte_count = (bit_count + 7) / 8;  // Round up to nearest byte
     
-    result->binary_data = calloc(byte_count, sizeof(uint8_t));
+    result->binary_data = TRACKED_CALLOC(byte_count, sizeof(uint8_t));
     if (!result->binary_data) {
         result->success = false;
         strcpy(result->error_message, "Memory allocation failed");
@@ -146,7 +147,7 @@ lum_binary_result_t* convert_lum_to_bits(const lum_group_t* lum_group) {
     
     size_t bit_count = lum_group->count;
     
-    result->binary_data = malloc(bit_count + 1);  // +1 for null terminator
+    result->binary_data = TRACKED_MALLOC(bit_count + 1);  // +1 for null terminator
     if (!result->binary_data) {
         result->success = false;
         strcpy(result->error_message, "Memory allocation failed");
@@ -269,7 +270,7 @@ double convert_lum_to_double(const lum_group_t* lum_group) {
 
 // Utility functions
 binary_lum_result_t* binary_lum_result_create(void) {
-    binary_lum_result_t* result = malloc(sizeof(binary_lum_result_t));
+    binary_lum_result_t* result = TRACKED_MALLOC(sizeof(binary_lum_result_t));
     if (result) {
         result->lum_group = NULL;
         result->success = false;
@@ -284,12 +285,12 @@ void binary_lum_result_destroy(binary_lum_result_t* result) {
         if (result->lum_group) {
             lum_group_destroy(result->lum_group);
         }
-        free(result);
+        TRACKED_FREE(result);
     }
 }
 
 lum_binary_result_t* lum_binary_result_create(void) {
-    lum_binary_result_t* result = malloc(sizeof(lum_binary_result_t));
+    lum_binary_result_t* result = TRACKED_MALLOC(sizeof(lum_binary_result_t));
     if (result) {
         result->binary_data = NULL;
         result->byte_count = 0;
@@ -303,9 +304,9 @@ lum_binary_result_t* lum_binary_result_create(void) {
 void lum_binary_result_destroy(lum_binary_result_t* result) {
     if (result) {
         if (result->binary_data) {
-            free(result->binary_data);
+            TRACKED_FREE(result->binary_data);
         }
-        free(result);
+        TRACKED_FREE(result);
     }
 }
 
@@ -313,7 +314,7 @@ void lum_binary_result_destroy(lum_binary_result_t* result) {
 char* lum_group_to_binary_string(const lum_group_t* lum_group) {
     if (!lum_group || lum_group->count == 0) return NULL;
     
-    char* result = malloc(lum_group->count + 1);
+    char* result = TRACKED_MALLOC(lum_group->count + 1);
     if (!result) return NULL;
     
     for (size_t i = 0; i < lum_group->count; i++) {
@@ -334,7 +335,7 @@ char* lum_group_to_hex_string(const lum_group_t* lum_group) {
     }
     
     size_t hex_len = binary_result->byte_count * 2 + 1;
-    char* hex_string = malloc(hex_len);
+    char* hex_string = TRACKED_MALLOC(hex_len);
     if (!hex_string) {
         lum_binary_result_destroy(binary_result);
         return NULL;
@@ -383,7 +384,7 @@ binary_lum_result_t* convert_binary_to_lum_little_endian(const uint8_t* binary_d
     if (!binary_data || byte_count == 0) return NULL;
     
     // Reverse the byte order
-    uint8_t* reversed_data = malloc(byte_count);
+    uint8_t* reversed_data = TRACKED_MALLOC(byte_count);
     if (!reversed_data) return NULL;
     
     for (size_t i = 0; i < byte_count; i++) {
@@ -391,7 +392,7 @@ binary_lum_result_t* convert_binary_to_lum_little_endian(const uint8_t* binary_d
     }
     
     binary_lum_result_t* result = convert_binary_to_lum(reversed_data, byte_count);
-    free(reversed_data);
+    TRACKED_FREE(reversed_data);
     
     return result;
 }
@@ -425,7 +426,7 @@ binary_lum_result_t* convert_hex_string_to_lum(const char* hex_string) {
     }
     
     size_t byte_count = hex_len / 2;
-    uint8_t* binary_data = malloc(byte_count);
+    uint8_t* binary_data = TRACKED_MALLOC(byte_count);
     if (!binary_data) {
         result->success = false;
         strcpy(result->error_message, "Memory allocation failed");
@@ -439,7 +440,7 @@ binary_lum_result_t* convert_hex_string_to_lum(const char* hex_string) {
     }
     
     binary_lum_result_t* lum_result = convert_binary_to_lum(binary_data, byte_count);
-    free(binary_data);
+    TRACKED_FREE(binary_data);
     
     if (lum_result) {
         result->lum_group = lum_result->lum_group;

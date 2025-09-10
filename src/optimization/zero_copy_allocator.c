@@ -1,5 +1,6 @@
 #include "zero_copy_allocator.h"
 #include "../logger/lum_logger.h"
+#include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
 #include <sys/mman.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -24,7 +25,7 @@ static uint64_t get_timestamp_us(void) {
 }
 
 zero_copy_pool_t* zero_copy_pool_create(size_t size, const char* name) {
-    zero_copy_pool_t* pool = malloc(sizeof(zero_copy_pool_t));
+    zero_copy_pool_t* pool = TRACKED_MALLOC(sizeof(zero_copy_pool_t));
     if (!pool) {
         lum_log(LUM_LOG_ERROR, "Failed to allocate zero_copy_pool_t structure");
         return NULL;
@@ -43,17 +44,17 @@ zero_copy_pool_t* zero_copy_pool_create(size_t size, const char* name) {
     pool->memory_reused_bytes = 0;
 
     // Nom de région pour debugging
-    pool->region_name = malloc(strlen(name) + 1);
+    pool->region_name = TRACKED_MALLOC(strlen(name) + 1);
     if (pool->region_name) {
         strcpy(pool->region_name, name);
     }
 
     // Allocation initiale (standard malloc, upgradée à mmap plus tard si demandé)
-    pool->memory_region = malloc(size);
+    pool->memory_region = TRACKED_MALLOC(size);
     if (!pool->memory_region) {
         lum_log(LUM_LOG_ERROR, "Failed to allocate %zu bytes for zero-copy pool", size);
-        free(pool->region_name);
-        free(pool);
+        TRACKED_FREE(pool->region_name);
+        TRACKED_FREE(pool);
         return NULL;
     }
 
@@ -77,7 +78,7 @@ void zero_copy_pool_destroy(zero_copy_pool_t* pool) {
     free_block_t* current = pool->free_list;
     while (current) {
         free_block_t* next = current->next;
-        free(current);
+        TRACKED_FREE(current);
         current = next;
     }
 
@@ -90,11 +91,11 @@ void zero_copy_pool_destroy(zero_copy_pool_t* pool) {
             close(pool->mmap_fd);
         }
     } else {
-        free(pool->memory_region);
+        TRACKED_FREE(pool->memory_region);
     }
 
-    free(pool->region_name);
-    free(pool);
+    TRACKED_FREE(pool->region_name);
+    TRACKED_FREE(pool);
 }
 
 zero_copy_allocation_t* zero_copy_alloc(zero_copy_pool_t* pool, size_t size) {
@@ -103,7 +104,7 @@ zero_copy_allocation_t* zero_copy_alloc(zero_copy_pool_t* pool, size_t size) {
     // Aligner la taille sur la granularité du pool
     size_t aligned_size = (size + pool->alignment - 1) & ~(pool->alignment - 1);
 
-    zero_copy_allocation_t* allocation = malloc(sizeof(zero_copy_allocation_t));
+    zero_copy_allocation_t* allocation = TRACKED_MALLOC(sizeof(zero_copy_allocation_t));
     if (!allocation) return NULL;
 
     allocation->size = aligned_size;
@@ -139,7 +140,7 @@ zero_copy_allocation_t* zero_copy_alloc(zero_copy_pool_t* pool, size_t size) {
             lum_log(LUM_LOG_DEBUG, "Zero-copy reuse: %zu bytes, reused after %lu μs", 
                     aligned_size, reuse_time);
 
-            free(current);
+            TRACKED_FREE(current);
             pool->allocations_served++;
             return allocation;
         }
@@ -161,9 +162,9 @@ zero_copy_allocation_t* zero_copy_alloc(zero_copy_pool_t* pool, size_t size) {
     }
 
     // Phase 3: Fallback allocation standard (non zero-copy)
-    allocation->ptr = malloc(aligned_size);
+    allocation->ptr = TRACKED_MALLOC(aligned_size);
     if (!allocation->ptr) {
-        free(allocation);
+        TRACKED_FREE(allocation);
         return NULL;
     }
 
@@ -181,7 +182,7 @@ bool zero_copy_free(zero_copy_pool_t* pool, zero_copy_allocation_t* allocation) 
         (uint8_t*)allocation->ptr < (uint8_t*)pool->memory_region + pool->total_size) {
 
         // Créer un nouveau free block
-        free_block_t* free_block = malloc(sizeof(free_block_t));
+        free_block_t* free_block = TRACKED_MALLOC(sizeof(free_block_t));
         if (free_block) {
             free_block->ptr = allocation->ptr;
             free_block->size = allocation->size;
@@ -201,7 +202,7 @@ bool zero_copy_free(zero_copy_pool_t* pool, zero_copy_allocation_t* allocation) 
         }
     } else {
         // Allocation standard - libérer directement
-        free(allocation->ptr);
+        TRACKED_FREE(allocation->ptr);
     }
 
     return true;
@@ -285,7 +286,7 @@ bool zero_copy_enable_mmap_backing(zero_copy_pool_t* pool) {
     }
 
     // Basculer vers mmap
-    free(pool->memory_region);
+    TRACKED_FREE(pool->memory_region);
     pool->memory_region = mapped;
     pool->is_mmap_backed = true;
     pool->mmap_fd = fd;
@@ -428,7 +429,7 @@ bool zero_copy_compact_free_list(zero_copy_pool_t* pool) {
         if (prev && (uint8_t*)prev->ptr + prev->size == current->ptr) {
             prev->size += current->size;
             prev->next = current->next;
-            free(current);
+            TRACKED_FREE(current);
             pool->free_blocks_count--;
             current = prev; // Pour fusion avec suivant
         }
@@ -456,6 +457,6 @@ void zero_copy_allocation_destroy(zero_copy_allocation_t* allocation) {
     if (allocation) {
         // Note: ne libère PAS le pointeur allocation->ptr 
         // car c'est fait par zero_copy_free()
-        free(allocation);
+        TRACKED_FREE(allocation);
     }
 }

@@ -1,4 +1,5 @@
 #include "vorax_parser.h"
+#include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -193,7 +194,7 @@ vorax_token_t vorax_lexer_next_token(vorax_parser_context_t* ctx) {
 
 // AST utility functions
 vorax_ast_node_t* vorax_ast_create_node(vorax_ast_node_type_e type, const char* data) {
-    vorax_ast_node_t* node = malloc(sizeof(vorax_ast_node_t));
+    vorax_ast_node_t* node = TRACKED_MALLOC(sizeof(vorax_ast_node_t));
     if (!node) return NULL;
     
     node->type = type;
@@ -216,7 +217,7 @@ void vorax_ast_add_child(vorax_ast_node_t* parent, vorax_ast_node_t* child) {
     
     if (parent->child_count >= parent->child_capacity) {
         size_t new_capacity = parent->child_capacity == 0 ? 4 : parent->child_capacity * 2;
-        vorax_ast_node_t** new_children = realloc(parent->children, 
+        vorax_ast_node_t** new_children = TRACKED_REALLOC(parent->children, 
                                                   sizeof(vorax_ast_node_t*) * new_capacity);
         if (!new_children) return;
         
@@ -233,8 +234,8 @@ void vorax_ast_destroy(vorax_ast_node_t* node) {
         for (size_t i = 0; i < node->child_count; i++) {
             vorax_ast_destroy(node->children[i]);
         }
-        free(node->children);
-        free(node);
+        TRACKED_FREE(node->children);
+        TRACKED_FREE(node);
     }
 }
 
@@ -438,16 +439,16 @@ vorax_ast_node_t* vorax_parse_move_statement(vorax_parser_context_t* ctx) {
 
 // Execution context implementation
 vorax_execution_context_t* vorax_execution_context_create(void) {
-    vorax_execution_context_t* ctx = malloc(sizeof(vorax_execution_context_t));
+    vorax_execution_context_t* ctx = TRACKED_MALLOC(sizeof(vorax_execution_context_t));
     if (!ctx) return NULL;
     
-    ctx->zones = malloc(sizeof(lum_zone_t*) * 10);
-    ctx->memories = malloc(sizeof(lum_memory_t*) * 10);
+    ctx->zones = TRACKED_MALLOC(sizeof(lum_zone_t*) * 10);
+    ctx->memories = TRACKED_MALLOC(sizeof(lum_memory_t*) * 10);
     
     if (!ctx->zones || !ctx->memories) {
-        free(ctx->zones);
-        free(ctx->memories);
-        free(ctx);
+        TRACKED_FREE(ctx->zones);
+        TRACKED_FREE(ctx->memories);
+        TRACKED_FREE(ctx);
         return NULL;
     }
     
@@ -469,9 +470,9 @@ void vorax_execution_context_destroy(vorax_execution_context_t* ctx) {
         for (size_t i = 0; i < ctx->memory_count; i++) {
             lum_memory_destroy(ctx->memories[i]);
         }
-        free(ctx->zones);
-        free(ctx->memories);
-        free(ctx);
+        TRACKED_FREE(ctx->zones);
+        TRACKED_FREE(ctx->memories);
+        TRACKED_FREE(ctx);
     }
 }
 
@@ -535,7 +536,7 @@ bool vorax_context_add_zone(vorax_execution_context_t* ctx, const char* name) {
     
     if (ctx->zone_count >= ctx->zone_capacity) {
         size_t new_capacity = ctx->zone_capacity * 2;
-        lum_zone_t** new_zones = realloc(ctx->zones, sizeof(lum_zone_t*) * new_capacity);
+        lum_zone_t** new_zones = TRACKED_REALLOC(ctx->zones, sizeof(lum_zone_t*) * new_capacity);
         if (!new_zones) return false;
         
         ctx->zones = new_zones;
@@ -556,7 +557,7 @@ bool vorax_context_add_memory(vorax_execution_context_t* ctx, const char* name) 
     
     if (ctx->memory_count >= ctx->memory_capacity) {
         size_t new_capacity = ctx->memory_capacity * 2;
-        lum_memory_t** new_memories = realloc(ctx->memories, sizeof(lum_memory_t*) * new_capacity);
+        lum_memory_t** new_memories = TRACKED_REALLOC(ctx->memories, sizeof(lum_memory_t*) * new_capacity);
         if (!new_memories) return false;
         
         ctx->memories = new_memories;

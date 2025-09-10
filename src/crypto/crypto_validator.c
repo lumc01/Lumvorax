@@ -2,6 +2,7 @@
 #include "crypto_validator.h"
 #include "sha256_test_vectors.h"
 #include "../lum/lum_core.h"
+#include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -218,7 +219,7 @@ int hex_char_to_int(char c) {
 
 // Hash calculator implementation
 hash_calculator_t* hash_calculator_create(void) {
-    hash_calculator_t* calc = malloc(sizeof(hash_calculator_t));
+    hash_calculator_t* calc = TRACKED_MALLOC(sizeof(hash_calculator_t));
     if (!calc) return NULL;
     
     calc->algorithm = CRYPTO_ALGO_SHA256;
@@ -231,7 +232,7 @@ hash_calculator_t* hash_calculator_create(void) {
 
 void hash_calculator_destroy(hash_calculator_t* calc) {
     if (calc) {
-        free(calc);
+        TRACKED_FREE(calc);
     }
 }
 
@@ -270,7 +271,7 @@ bool validate_lum_integrity(const lum_t* lum) {
 }
 
 signature_result_t* generate_digital_signature(const void* data, size_t data_size) {
-    signature_result_t* result = malloc(sizeof(signature_result_t));
+    signature_result_t* result = TRACKED_MALLOC(sizeof(signature_result_t));
     if (!result) return NULL;
     
     // Simple signature = hash + timestamp
@@ -296,6 +297,6 @@ bool verify_digital_signature(const void* data, size_t data_size, const signatur
 
 void signature_result_destroy(signature_result_t* result) {
     if (result) {
-        free(result);
+        TRACKED_FREE(result);
     }
 }

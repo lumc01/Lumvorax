@@ -2,6 +2,7 @@
 // _GNU_SOURCE is already defined in Makefile
 #include "parallel_processor.h"
 #include "../logger/lum_logger.h"
+#include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
@@ -16,7 +17,7 @@ parallel_processor_t* parallel_processor_create(int worker_count) {
         worker_count = DEFAULT_WORKER_COUNT;
     }
 
-    parallel_processor_t* processor = malloc(sizeof(parallel_processor_t));
+    parallel_processor_t* processor = TRACKED_MALLOC(sizeof(parallel_processor_t));
     if (!processor) return NULL;
 
     processor->worker_count = worker_count;
@@ -26,14 +27,14 @@ parallel_processor_t* parallel_processor_create(int worker_count) {
 
     // Initialize task queue
     if (!task_queue_init(&processor->task_queue)) {
-        free(processor);
+        TRACKED_FREE(processor);
         return NULL;
     }
 
     // Initialize statistics mutex
     if (pthread_mutex_init(&processor->stats_mutex, NULL) != 0) {
         task_queue_destroy(&processor->task_queue);
-        free(processor);
+        TRACKED_FREE(processor);
         return NULL;
     }
 
@@ -53,7 +54,7 @@ parallel_processor_t* parallel_processor_create(int worker_count) {
             }
             pthread_mutex_destroy(&processor->stats_mutex);
             task_queue_destroy(&processor->task_queue);
-            free(processor);
+            TRACKED_FREE(processor);
             return NULL;
         }
         processor->workers[i].is_active = true;
@@ -85,12 +86,12 @@ void parallel_processor_destroy(parallel_processor_t* processor) {
 
     task_queue_destroy(&processor->task_queue);
     pthread_mutex_destroy(&processor->stats_mutex);
-    free(processor);
+    TRACKED_FREE(processor);
 }
 
 // Task management
 parallel_task_t* parallel_task_create(parallel_task_type_e type, void* input_data, size_t data_size) {
-    parallel_task_t* task = malloc(sizeof(parallel_task_t));
+    parallel_task_t* task = TRACKED_MALLOC(sizeof(parallel_task_t));
     if (!task) return NULL;
 
     task->type = type;
@@ -108,7 +109,7 @@ parallel_task_t* parallel_task_create(parallel_task_type_e type, void* input_dat
 void parallel_task_destroy(parallel_task_t* task) {
     if (task) {
         // Note: input_data and output_data are managed by caller
-        free(task);
+        TRACKED_FREE(task);
     }
 }
 
@@ -360,12 +361,12 @@ struct thread_pool {
 };
 
 thread_pool_t* thread_pool_create(int worker_count) {
-    thread_pool_t* pool = malloc(sizeof(thread_pool_t));
+    thread_pool_t* pool = TRACKED_MALLOC(sizeof(thread_pool_t));
     if (!pool) return NULL;
 
     pool->processor = parallel_processor_create(worker_count);
     if (!pool->processor) {
-        free(pool);
+        TRACKED_FREE(pool);
         return NULL;
     }
     return pool;
@@ -374,7 +375,7 @@ thread_pool_t* thread_pool_create(int worker_count) {
 void thread_pool_destroy(thread_pool_t* pool) {
     if (pool) {
         parallel_processor_destroy(pool->processor);
-        free(pool);
+        TRACKED_FREE(pool);
     }
 }
 
@@ -432,7 +433,7 @@ bool distribute_work(lum_t** lums, int count, int threads, work_distribution_t* 
 
     dist->thread_count = threads;
     dist->total_tasks = count;
-    dist->tasks_per_thread = malloc(threads * sizeof(int));
+    dist->tasks_per_thread = TRACKED_MALLOC(threads * sizeof(int));
     if (!dist->tasks_per_thread) return false;
 
     int base_tasks = count / threads;

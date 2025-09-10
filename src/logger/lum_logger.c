@@ -1,4 +1,5 @@
 #include "lum_logger.h"
+#include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -23,7 +24,7 @@ lum_logger_t* lum_get_global_logger(void) {
 
 // Logger creation and management
 lum_logger_t* lum_logger_create(const char* log_filename, bool console_output, bool file_output) {
-    lum_logger_t* logger = malloc(sizeof(lum_logger_t));
+    lum_logger_t* logger = TRACKED_MALLOC(sizeof(lum_logger_t));
     if (!logger) return NULL;
 
     logger->log_file = NULL;
@@ -41,7 +42,7 @@ lum_logger_t* lum_logger_create(const char* log_filename, bool console_output, b
         if (file_output) {
             logger->log_file = fopen(log_filename, "a");
             if (!logger->log_file) {
-                free(logger);
+                TRACKED_FREE(logger);
                 return NULL;
             }
         }
@@ -57,7 +58,7 @@ void lum_logger_destroy(lum_logger_t* logger) {
         if (logger->log_file) {
             fclose(logger->log_file);
         }
-        free(logger);
+        TRACKED_FREE(logger);
     }
 }
 
@@ -407,7 +408,7 @@ bool lum_log_export_csv(const char* log_filename, const char* csv_filename) {
 lum_log_analysis_t* lum_log_analyze(const char* log_filename) {
     if (!log_filename) return NULL;
 
-    lum_log_analysis_t* analysis = malloc(sizeof(lum_log_analysis_t));
+    lum_log_analysis_t* analysis = TRACKED_MALLOC(sizeof(lum_log_analysis_t));
     if (!analysis) return NULL;
 
     memset(analysis, 0, sizeof(lum_log_analysis_t));
@@ -430,7 +431,7 @@ void lum_log_print_analysis(const lum_log_analysis_t* analysis) {
 
 void lum_log_analysis_destroy(lum_log_analysis_t* analysis) {
     if (analysis) {
-        free(analysis);
+        TRACKED_FREE(analysis);
     }
 }
 
