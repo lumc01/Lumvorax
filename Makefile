@@ -15,6 +15,11 @@ COMPLEX_MODULES_SOURCES = src/complex_modules/realtime_analytics.c \
                          src/complex_modules/distributed_computing.c \
                          src/complex_modules/ai_optimization.c
 
+# TSP, Knapsack, Collatz modules
+TSP_MODULE_SOURCE = src/advanced_calculations/tsp_optimizer.c
+KNAPSACK_MODULE_SOURCE = src/advanced_calculations/knapsack_optimizer.c
+COLLATZ_MODULE_SOURCE = src/advanced_calculations/collatz_analyzer.c
+
 # Object files
 MAIN_OBJ = $(OBJ_DIR)/main.o
 LUM_CORE_OBJ = $(OBJ_DIR)/lum/lum_core.o
@@ -32,6 +37,11 @@ PERF_METRICS_OBJ = $(OBJ_DIR)/metrics/performance_metrics.o
 CRYPTO_VAL_OBJ = $(OBJ_DIR)/crypto/crypto_validator.o
 DATA_PERSIST_OBJ = $(OBJ_DIR)/persistence/data_persistence.o
 MEMORY_TRACKER_OBJ = $(OBJ_DIR)/debug/memory_tracker.o
+
+# New objects for TSP, Knapsack, Collatz
+TSP_OBJ = $(OBJ_DIR)/advanced_calculations/tsp_optimizer.o
+KNAPSACK_OBJ = $(OBJ_DIR)/advanced_calculations/knapsack_optimizer.o
+COLLATZ_OBJ = $(OBJ_DIR)/advanced_calculations/collatz_analyzer.o
 
 SOURCES = $(SRC_DIR)/main.c \
 	  $(SRC_DIR)/lum/lum_core.c \
@@ -67,6 +77,9 @@ OBJECTS = obj/main.o obj/lum/lum_core.o obj/vorax/vorax_operations.o obj/parser/
           obj/complex_modules/distributed_computing.o \
           obj/complex_modules/ai_optimization.o
 
+# Add new objects to the list of all objects
+OBJECTS += $(TSP_OBJ) $(KNAPSACK_OBJ) $(COLLATZ_OBJ)
+
 # Optimization objects
 OPTIMIZATION_OBJS = $(OBJ_DIR)/optimization/memory_optimizer.o \
 	            $(OBJ_DIR)/optimization/pareto_optimizer.o \
@@ -90,7 +103,7 @@ $(LOG_DIR):
 	mkdir -p $(LOG_DIR)
 
 # Main executable
-$(TARGET): $(MAIN_OBJ) $(LUM_CORE_OBJ) $(VORAX_OPS_OBJ) $(PARSER_OBJ) $(BINARY_CONV_OBJ) $(LOGGER_OBJ) $(MEMORY_OPT_OBJ) $(PARETO_OPT_OBJ) $(PARETO_INV_OPT_OBJ) $(SIMD_OPT_OBJ) $(ZERO_COPY_OBJ) $(PARALLEL_PROC_OBJ) $(PERF_METRICS_OBJ) $(CRYPTO_VAL_OBJ) $(DATA_PERSIST_OBJ) $(MEMORY_TRACKER_OBJ) | $(BIN_DIR)
+$(TARGET): $(MAIN_OBJ) $(LUM_CORE_OBJ) $(VORAX_OPS_OBJ) $(PARSER_OBJ) $(BINARY_CONV_OBJ) $(LOGGER_OBJ) $(MEMORY_OPT_OBJ) $(PARETO_OPT_OBJ) $(PARETO_INV_OPT_OBJ) $(SIMD_OPT_OBJ) $(ZERO_COPY_OBJ) $(PARALLEL_PROC_OBJ) $(PERF_METRICS_OBJ) $(CRYPTO_VAL_OBJ) $(DATA_PERSIST_OBJ) $(MEMORY_TRACKER_OBJ) $(TSP_OBJ) $(KNAPSACK_OBJ) $(COLLATZ_OBJ) | $(BIN_DIR)
 	$(CC) $^ -o $@ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)
@@ -175,6 +188,21 @@ obj/advanced_calculations/quantum_simulator.o: src/advanced_calculations/quantum
 obj/advanced_calculations/neural_network_processor.o: src/advanced_calculations/neural_network_processor.c src/advanced_calculations/neural_network_processor.h
 	mkdir -p obj/advanced_calculations
 	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/neural_network_processor.c -o obj/advanced_calculations/neural_network_processor.o
+
+# New TSP module compilation
+$(TSP_OBJ): $(TSP_MODULE_SOURCE) src/advanced_calculations/matrix_calculator.h
+	mkdir -p $(OBJ_DIR)/advanced_calculations
+	$(CC) $(CFLAGS) -c $(TSP_MODULE_SOURCE) -o $(TSP_OBJ)
+
+# New Knapsack module compilation
+$(KNAPSACK_OBJ): $(KNAPSACK_MODULE_SOURCE) src/advanced_calculations/matrix_calculator.h
+	mkdir -p $(OBJ_DIR)/advanced_calculations
+	$(CC) $(CFLAGS) -c $(KNAPSACK_MODULE_SOURCE) -o $(KNAPSACK_OBJ)
+
+# New Collatz module compilation
+$(COLLATZ_OBJ): $(COLLATZ_MODULE_SOURCE) src/advanced_calculations/matrix_calculator.h
+	mkdir -p $(OBJ_DIR)/advanced_calculations
+	$(CC) $(CFLAGS) -c $(COLLATZ_MODULE_SOURCE) -o $(COLLATZ_OBJ)
 
 # Complex modules
 obj/complex_modules/realtime_analytics.o: src/complex_modules/realtime_analytics.c src/complex_modules/realtime_analytics.h
