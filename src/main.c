@@ -151,6 +151,8 @@ int main(int argc, char* argv[]) {
                         lum_group_destroy(large_group);
                         return 1;
                     }
+                    // CORRECTION CRITIQUE: Libérer pointeur temporaire après copie dans groupe
+                    TRACKED_FREE(lum_ptr);
                 } else {
                     printf("ERROR: Memory allocation failed for LUM %zu\n", i);
                     lum_group_destroy(large_group);
@@ -169,8 +171,8 @@ int main(int argc, char* argv[]) {
             printf("✅ Created %zu LUMs in %.3f seconds\n", TEST_COUNT, creation_time);
             printf("Creation rate: %.0f LUMs/second\n", TEST_COUNT / creation_time);
 
-            // CONVERSION LUM → BITS/SECONDE (forensique authentique)
-            size_t lum_size_bits = sizeof(lum_t) * 8; // 32 bytes = 256 bits per LUM
+            // CONVERSION LUM → BITS/SECONDE (forensique authentique)  
+            size_t lum_size_bits = sizeof(lum_t) * 8; // 48 bytes = 384 bits per LUM
             double lums_per_second = TEST_COUNT / creation_time;
             double bits_per_second = lums_per_second * lum_size_bits;
             double gigabits_per_second = bits_per_second / 1000000000.0;

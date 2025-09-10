@@ -1,4 +1,4 @@
-#define _GNU_SOURCE  // Pour strnlen et strndup
+// _GNU_SOURCE défini par les flags de compilation
 #include "memory_tracker.h"
 #include <pthread.h>
 #include <string.h> // Added for strncpy
