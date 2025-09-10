@@ -1,0 +1,90 @@
+#ifndef MATRIX_CALCULATOR_H
+#define MATRIX_CALCULATOR_H
+
+#include "../lum/lum_core.h"
+#include <stdint.h>
+#include <stdbool.h>
+
+// Module de Calcul Matriciel Avancé pour LUM/VORAX
+// Conforme prompt.txt - nouveau module calculs avancés
+
+// Structure matrice LUM avec protection mémoire intégrée
+typedef struct {
+    lum_t** matrix_data;           // Matrice de pointeurs LUM
+    size_t rows;                   // Nombre de lignes
+    size_t cols;                   // Nombre de colonnes
+    void* memory_address;          // Protection double-free OBLIGATOIRE
+    uint32_t magic_number;         // Validation intégrité
+    uint64_t timestamp;            // Horodatage création
+    bool is_destroyed;             // Flag destruction
+} lum_matrix_t;
+
+// Types d'opérations matricielles
+typedef enum {
+    MATRIX_OP_ADD = 0,             // Addition matricielle
+    MATRIX_OP_MULTIPLY = 1,        // Multiplication matricielle
+    MATRIX_OP_TRANSPOSE = 2,       // Transposition
+    MATRIX_OP_DETERMINANT = 3,     // Calcul déterminant
+    MATRIX_OP_INVERSE = 4,         // Inversion matricielle
+    MATRIX_OP_EIGENVALUES = 5,     // Valeurs propres
+    MATRIX_OP_DECOMPOSE_LU = 6,    // Décomposition LU
+    MATRIX_OP_SOLVE_LINEAR = 7     // Résolution système linéaire
+} matrix_operation_e;
+
+// Résultat opération matricielle
+typedef struct {
+    lum_matrix_t* result_matrix;   // Matrice résultat
+    double* scalar_results;        // Résultats scalaires (déterminant, etc.)
+    size_t scalar_count;           // Nombre de résultats scalaires
+    bool success;                  // Succès opération
+    char error_message[256];       // Message d'erreur
+    double execution_time_ns;      // Temps d'exécution nanosecondes
+    uint64_t operations_count;     // Nombre d'opérations effectuées
+    void* memory_address;          // Protection double-free OBLIGATOIRE
+} matrix_result_t;
+
+// Configuration calculs matriciels
+typedef struct {
+    bool use_simd_acceleration;    // Accélération SIMD
+    bool use_parallel_processing;  // Traitement parallèle
+    size_t thread_count;           // Nombre de threads
+    double precision_threshold;    // Seuil de précision
+    bool enable_caching;           // Cache résultats intermédiaires
+    void* memory_address;          // Protection double-free OBLIGATOIRE
+} matrix_config_t;
+
+// Fonctions principales
+lum_matrix_t* lum_matrix_create(size_t rows, size_t cols);
+void lum_matrix_destroy(lum_matrix_t** matrix_ptr);
+bool lum_matrix_set_lum(lum_matrix_t* matrix, size_t row, size_t col, lum_t* lum);
+lum_t* lum_matrix_get_lum(lum_matrix_t* matrix, size_t row, size_t col);
+
+// Opérations matricielles avancées
+matrix_result_t* matrix_add(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config);
+matrix_result_t* matrix_multiply(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config);
+matrix_result_t* matrix_transpose(lum_matrix_t* matrix, matrix_config_t* config);
+matrix_result_t* matrix_calculate_determinant(lum_matrix_t* matrix, matrix_config_t* config);
+matrix_result_t* matrix_inverse(lum_matrix_t* matrix, matrix_config_t* config);
+matrix_result_t* matrix_eigenvalues(lum_matrix_t* matrix, matrix_config_t* config);
+
+// Opérations spécialisées
+matrix_result_t* matrix_lu_decomposition(lum_matrix_t* matrix, matrix_config_t* config);
+matrix_result_t* matrix_solve_linear_system(lum_matrix_t* coefficient_matrix, lum_matrix_t* constants, matrix_config_t* config);
+
+// Tests stress pour 100M+ LUMs
+bool matrix_stress_test_100m_lums(matrix_config_t* config);
+matrix_result_t* matrix_benchmark_operations(size_t matrix_size, matrix_config_t* config);
+
+// Utilitaires
+matrix_config_t* matrix_config_create_default(void);
+void matrix_config_destroy(matrix_config_t** config_ptr);
+void matrix_result_destroy(matrix_result_t** result_ptr);
+bool matrix_validate_dimensions(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_operation_e operation);
+
+// Constantes
+#define MATRIX_MAX_SIZE 10000
+#define MATRIX_MIN_DETERMINANT_THRESHOLD 1e-12
+#define MATRIX_MAGIC_NUMBER 0xCAFEBABE
+#define MATRIX_DESTROYED_MAGIC 0xDEADBEEF
+
+#endif // MATRIX_CALCULATOR_H

@@ -4,33 +4,40 @@
 
 #include <stdint.h>
 #include <time.h>
+#include <stdlib.h>
 
-// Variante ultra-compacte (12 bytes) - encodage total dans uint32_t
+// CORRECTION PROMPT.TXT: Toutes variantes LUM DOIVENT avoir memory_address pour double-free protection
+
+// Variante ultra-compacte (20 bytes) - encodage total dans uint32_t + memory_address
 #pragma pack(push, 1)
 typedef struct {
     time_t    timestamp;       // 8 bytes
     uint32_t  encoded_data;    // 4 bytes (presence+type+posX+posY encodés)
+    void*     memory_address;  // 8 bytes - OBLIGATOIRE protection double-free
 } lum_encoded32_t;
 #pragma pack(pop)
 
-// Variante hybride (13 bytes) - compromis performance/compacité
+// Variante hybride (21 bytes) - compromis performance/compacité + memory_address
 #pragma pack(push, 1)
 typedef struct {
     time_t   timestamp;        // 8 bytes
     int16_t  position_x;       // 2 bytes
     int16_t  position_y;       // 2 bytes  
     uint8_t  type_presence;    // 1 byte (type + presence fusionnés)
+    void*    memory_address;   // 8 bytes - OBLIGATOIRE protection double-free
 } lum_hybrid_t;
 #pragma pack(pop)
 
-// Variante compacte sans ID (18 bytes aligné) - meilleure performance
+// Variante compacte sans ID (24 bytes aligné) - meilleure performance + memory_address
 typedef struct {
     time_t   timestamp;        // 8 bytes
     int32_t  position_x;       // 4 bytes
     int32_t  position_y;       // 4 bytes
     uint8_t  presence;         // 1 byte
     uint8_t  structure_type;   // 1 byte
-    // padding automatique pour alignement 8
+    uint8_t  is_destroyed;     // 1 byte - protection double-free
+    uint8_t  reserved;         // 1 byte - padding
+    void*    memory_address;   // 8 bytes - OBLIGATOIRE protection double-free
 } lum_compact_noid_t;
 
 // Macros pour encodage/décodage lum_encoded32_t
@@ -53,12 +60,16 @@ typedef struct {
 #define DECODE_TYPE(type_presence) ((type_presence) >> 1)
 #define DECODE_PRESENCE(type_presence) ((type_presence) & 1)
 
-// Fonctions utilitaires
+// DÉCLARATION EXTERNE OBLIGATOIRE
+extern uint64_t lum_get_timestamp(void);
+
+// Fonctions utilitaires AVEC memory_address pour protection double-free
 static inline lum_encoded32_t* lum_create_encoded32(int32_t x, int32_t y, uint8_t type, uint8_t presence) {
     lum_encoded32_t* lum = malloc(sizeof(lum_encoded32_t));
     if (lum) {
         lum->timestamp = lum_get_timestamp();
         lum->encoded_data = ENCODE_LUM32(presence, type, x, y);
+        lum->memory_address = (void*)lum;  // PROTECTION DOUBLE-FREE OBLIGATOIRE
     }
     return lum;
 }
@@ -70,6 +81,7 @@ static inline lum_hybrid_t* lum_create_hybrid(int16_t x, int16_t y, uint8_t type
         lum->position_x = x;
         lum->position_y = y;
         lum->type_presence = ENCODE_TYPE_PRESENCE(type, presence);
+        lum->memory_address = (void*)lum;  // PROTECTION DOUBLE-FREE OBLIGATOIRE
     }
     return lum;
 }
@@ -82,8 +94,48 @@ static inline lum_compact_noid_t* lum_create_compact_noid(int32_t x, int32_t y, 
         lum->position_y = y;
         lum->presence = presence;
         lum->structure_type = type;
+        lum->is_destroyed = 0;  // Protection double-free initialisée
+        lum->memory_address = (void*)lum;  // PROTECTION DOUBLE-FREE OBLIGATOIRE
     }
     return lum;
+}
+
+// Fonctions de destruction sécurisées pour TOUTES les variantes
+static inline void lum_destroy_encoded32(lum_encoded32_t** lum_ptr) {
+    if (lum_ptr && *lum_ptr) {
+        // Vérification double-free via memory_address
+        if ((*lum_ptr)->memory_address != (void*)(*lum_ptr)) {
+            return; // Déjà détruit
+        }
+        (*lum_ptr)->memory_address = NULL; // Marquer comme détruit
+        free(*lum_ptr);
+        *lum_ptr = NULL;
+    }
+}
+
+static inline void lum_destroy_hybrid(lum_hybrid_t** lum_ptr) {
+    if (lum_ptr && *lum_ptr) {
+        // Vérification double-free via memory_address
+        if ((*lum_ptr)->memory_address != (void*)(*lum_ptr)) {
+            return; // Déjà détruit
+        }
+        (*lum_ptr)->memory_address = NULL; // Marquer comme détruit
+        free(*lum_ptr);
+        *lum_ptr = NULL;
+    }
+}
+
+static inline void lum_destroy_compact_noid(lum_compact_noid_t** lum_ptr) {
+    if (lum_ptr && *lum_ptr) {
+        // Vérification double-free via is_destroyed ET memory_address
+        if ((*lum_ptr)->is_destroyed || (*lum_ptr)->memory_address != (void*)(*lum_ptr)) {
+            return; // Déjà détruit
+        }
+        (*lum_ptr)->is_destroyed = 1; // Marquer comme détruit
+        (*lum_ptr)->memory_address = NULL; // Invalidation adresse
+        free(*lum_ptr);
+        *lum_ptr = NULL;
+    }
 }
 
 #endif // LUM_OPTIMIZED_VARIANTS_H

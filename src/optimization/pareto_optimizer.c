@@ -465,7 +465,17 @@ void pareto_benchmark_against_baseline(pareto_optimizer_t* optimizer, const char
     // Métriques baseline authentiques mesurées
     lum_group_t* baseline_group = lum_group_create(1000);
     for (size_t i = 0; i < 1000; i++) {
-        lum_t baseline_lum = {1, (uint32_t)i, (uint32_t)i, LUM_STRUCTURE_LINEAR, lum_get_timestamp() + i, (uint64_t)i, false};
+        lum_t baseline_lum = {
+            .presence = 1,
+            .id = (uint32_t)i, 
+            .position_x = (int32_t)i, 
+            .position_y = (int32_t)i, 
+            .structure_type = LUM_STRUCTURE_LINEAR, 
+            .timestamp = lum_get_timestamp() + i, 
+            .memory_address = NULL,
+            .checksum = 0,
+            .is_destroyed = 0
+        };
         lum_group_add(baseline_group, &baseline_lum);
     }
     pareto_metrics_t baseline = pareto_evaluate_metrics(baseline_group, baseline_operation);

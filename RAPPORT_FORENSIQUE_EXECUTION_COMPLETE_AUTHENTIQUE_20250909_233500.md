@@ -467,7 +467,7 @@ CONFORMITÉ STANDARDS TECHNIQUES:
 ```
 TESTS ADDITIONNELS RECOMMANDÉS:
 ===============================
-1. Stress 10M+ LUMs: Validation scalabilité extrême
+1. 
 2. Multi-threading: Tests concurrent access
 3. Persistence: Sauvegarde/restauration intégrité
 4. Network: Distribution LUMs multi-nodes
