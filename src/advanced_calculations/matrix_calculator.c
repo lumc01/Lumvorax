@@ -106,10 +106,10 @@ void matrix_calculator_destroy(matrix_calculator_t** calc) {
 }
 
 // Destruction du résultat matriciel
-void matrix_result_destroy(matrix_result_t** result_ptr) {
+void matrix_calculator_result_destroy(matrix_calculator_result_t** result_ptr) {
     if (!result_ptr || !*result_ptr) return;
 
-    matrix_result_t* result = *result_ptr;
+    matrix_calculator_result_t* result = *result_ptr;
     if (result->magic_number != MATRIX_CALCULATOR_MAGIC) return;
 
     if (result->result_data) {

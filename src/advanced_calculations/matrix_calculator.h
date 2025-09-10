@@ -16,8 +16,8 @@ typedef struct matrix_calculator_t {
     void* memory_address;
 } matrix_calculator_t;
 
-// Structure résultat matriciel
-typedef struct matrix_result_t {
+// Structure résultat calculateur matriciel simple
+typedef struct matrix_calculator_result_t {
     uint32_t magic_number;
     double* result_data;
     size_t rows;
@@ -25,7 +25,7 @@ typedef struct matrix_result_t {
     bool operation_success;
     double execution_time_ns;
     void* memory_address;
-} matrix_result_t;
+} matrix_calculator_result_t;
 
 // Module de Calcul Matriciel Avancé pour LUM/VORAX
 // Conforme prompt.txt - nouveau module calculs avancés
@@ -79,8 +79,8 @@ typedef struct {
 matrix_calculator_t* matrix_calculator_create(size_t rows, size_t cols);
 void matrix_calculator_destroy(matrix_calculator_t** calc);
 void matrix_set_element(matrix_calculator_t* calc, size_t row, size_t col, double value);
-matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_calculator_t* b, void* config);
-void matrix_result_destroy(matrix_result_t** result_ptr);
+matrix_calculator_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_calculator_t* b, void* config);
+void matrix_calculator_result_destroy(matrix_calculator_result_t** result_ptr);
 
 lum_matrix_t* lum_matrix_create(size_t rows, size_t cols);
 void lum_matrix_destroy(lum_matrix_t** matrix_ptr);
