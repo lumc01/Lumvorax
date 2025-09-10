@@ -377,11 +377,11 @@ bool ai_stress_test_100m_lums(ai_optimization_config_t* config) {
                agent->success_rate * 100.0);
         printf("Learning rate adapted to: %.6f\n", agent->learning_rate);
 
-        lum_group_destroy(&decision);
+        lum_group_destroy(decision);
     }
 
     // Cleanup
-    lum_group_destroy(&test_group);
+    lum_group_destroy(test_group);
     ai_agent_destroy(&agent);
 
     printf("✅ AI optimization stress test 100M+ LUMs completed successfully\n");

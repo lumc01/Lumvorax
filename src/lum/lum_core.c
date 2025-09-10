@@ -124,19 +124,24 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
     // Vérifier si le groupe a été marqué comme détruit
     static const uint32_t MAGIC_DESTROYED = 0xDEADBEEF;
     if (group->capacity == MAGIC_DESTROYED) {
-        // lum_log("Tentative d'ajout à un groupe déjà détruit."); // Optionnel: loguer si vous avez une fonction lum_log
+        return false;
+    }
+
+    // CORRECTION CRITIQUE: Vérifier l'ownership de la LUM pour éviter double free
+    if (lum->memory_address && lum->memory_address != lum) {
+        // Cette LUM est déjà possédée par un autre groupe/structure
         return false;
     }
 
     if (group->count >= group->capacity) {
-        // CORRECTION CRITIQUE: Utiliser TRACKED_MALLOC au lieu de realloc pour éviter corruption
+        // CORRECTION: Utiliser TRACKED_MALLOC au lieu de realloc
         size_t new_capacity = (group->capacity == 0) ? 10 : group->capacity * 2;
         lum_t* new_lums = TRACKED_MALLOC(sizeof(lum_t) * new_capacity);
         if (!new_lums) {
             return false;
         }
 
-        // Copier les données existantes
+        // Copier les données existantes SANS transférer ownership
         if (group->lums && group->count > 0) {
             memcpy(new_lums, group->lums, sizeof(lum_t) * group->count);
             TRACKED_FREE(group->lums);
@@ -146,9 +151,13 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
         group->capacity = new_capacity;
     }
 
-    // Copie profonde du LUM dans le groupe
-    // Assurez-vous que lum_t ne contient pas de pointeurs qui nécessitent une copie profonde séparée
+    // CORRECTION CRITIQUE: Copie des valeurs SEULEMENT, pas des pointeurs de gestion mémoire
     group->lums[group->count] = *lum;
+    
+    // IMPORTANT: Réinitialiser les métadonnées de gestion mémoire pour cette copie
+    group->lums[group->count].memory_address = &group->lums[group->count];
+    group->lums[group->count].is_destroyed = 0;
+    
     group->count++;
 
     return true;
