@@ -7,13 +7,13 @@ LOG_DIR = logs
 
 # Advanced calculations
 ADVANCED_CALC_SOURCES = src/advanced_calculations/matrix_calculator.c \
-                       src/advanced_calculations/quantum_simulator.c \
-                       src/advanced_calculations/neural_network_processor.c
+	               src/advanced_calculations/quantum_simulator.c \
+	               src/advanced_calculations/neural_network_processor.c
 
 # Complex modules  
 COMPLEX_MODULES_SOURCES = src/complex_modules/realtime_analytics.c \
-                         src/complex_modules/distributed_computing.c \
-                         src/complex_modules/ai_optimization.c
+	                 src/complex_modules/distributed_computing.c \
+	                 src/complex_modules/ai_optimization.c
 
 # TSP, Knapsack, Collatz modules
 TSP_MODULE_SOURCE = src/advanced_calculations/tsp_optimizer.c
@@ -63,19 +63,19 @@ SOURCES = $(SRC_DIR)/main.c \
       $(COMPLEX_MODULES_SOURCES)
 
 OBJECTS = obj/main.o obj/lum/lum_core.o obj/vorax/vorax_operations.o obj/parser/vorax_parser.o \
-          obj/binary/binary_lum_converter.o obj/logger/lum_logger.o \
-          obj/optimization/memory_optimizer.o obj/optimization/pareto_optimizer.o \
-          obj/optimization/pareto_inverse_optimizer.o obj/optimization/simd_optimizer.o \
-          obj/optimization/zero_copy_allocator.o \
-          obj/parallel/parallel_processor.o obj/metrics/performance_metrics.o \
-          obj/crypto/crypto_validator.o obj/persistence/data_persistence.o \
-          obj/debug/memory_tracker.o \
-          obj/advanced_calculations/matrix_calculator.o \
-          obj/advanced_calculations/quantum_simulator.o \
-          obj/advanced_calculations/neural_network_processor.o \
-          obj/complex_modules/realtime_analytics.o \
-          obj/complex_modules/distributed_computing.o \
-          obj/complex_modules/ai_optimization.o
+	  obj/binary/binary_lum_converter.o obj/logger/lum_logger.o \
+	  obj/optimization/memory_optimizer.o obj/optimization/pareto_optimizer.o \
+	  obj/optimization/pareto_inverse_optimizer.o obj/optimization/simd_optimizer.o \
+	  obj/optimization/zero_copy_allocator.o \
+	  obj/parallel/parallel_processor.o obj/metrics/performance_metrics.o \
+	  obj/crypto/crypto_validator.o obj/persistence/data_persistence.o \
+	  obj/debug/memory_tracker.o \
+	  obj/advanced_calculations/matrix_calculator.o \
+	  obj/advanced_calculations/quantum_simulator.o \
+	  obj/advanced_calculations/neural_network_processor.o \
+	  obj/complex_modules/realtime_analytics.o \
+	  obj/complex_modules/distributed_computing.o \
+	  obj/complex_modules/ai_optimization.o
 
 # Add new objects to the list of all objects
 OBJECTS += $(TSP_OBJ) $(KNAPSACK_OBJ) $(COLLATZ_OBJ)
@@ -103,7 +103,7 @@ $(LOG_DIR):
 	mkdir -p $(LOG_DIR)
 
 # Main executable
-$(TARGET): $(MAIN_OBJ) $(LUM_CORE_OBJ) $(VORAX_OPS_OBJ) $(PARSER_OBJ) $(BINARY_CONV_OBJ) $(LOGGER_OBJ) $(MEMORY_OPT_OBJ) $(PARETO_OPT_OBJ) $(PARETO_INV_OPT_OBJ) $(SIMD_OPT_OBJ) $(ZERO_COPY_OBJ) $(PARALLEL_PROC_OBJ) $(PERF_METRICS_OBJ) $(CRYPTO_VAL_OBJ) $(DATA_PERSIST_OBJ) $(MEMORY_TRACKER_OBJ) $(TSP_OBJ) $(KNAPSACK_OBJ) $(COLLATZ_OBJ) | $(BIN_DIR)
+$(TARGET): $(OBJECTS) | $(BIN_DIR)
 	$(CC) $^ -o $@ $(LDFLAGS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c | $(OBJ_DIR)

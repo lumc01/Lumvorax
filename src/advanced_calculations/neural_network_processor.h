@@ -140,6 +140,7 @@ bool neural_validate_network_architecture(size_t* layer_sizes, size_t layer_coun
 #define NEURAL_MIN_LEARNING_RATE 1e-6
 #define NEURAL_MAX_LEARNING_RATE 1.0
 #define NEURAL_MAGIC_NUMBER 0xDEADBEEF
+#define NEURAL_DESTROYED_MAGIC 0x00000000
 #define NEURAL_DEFAULT_BIAS 0.0
 
 #endif // NEURAL_NETWORK_PROCESSOR_H

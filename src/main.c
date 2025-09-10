@@ -1169,46 +1169,7 @@ void demo_zero_copy_allocation(void) {
 }
 
 
-// Dummy implementations for new stress test functions (replace with actual implementations)
-bool tsp_stress_test_100m_cities(tsp_config_t* config) {
-    (void)config; // Suppress unused parameter warning
-    // Simulate a long-running test
-    printf("    (Simulating TSP stress test with 100M+ cities...)\n");
-    // In a real scenario, this would involve creating a large number of cities
-    // and running an optimization algorithm.
-    // For now, let's return true to indicate success for the demo.
-    return true;
-}
-
-bool knapsack_stress_test_100m_items(knapsack_config_t* config) {
-    (void)config; // Suppress unused parameter warning
-    // Simulate a long-running test
-    printf("    (Simulating Knapsack stress test with 100M+ items...)\n");
-    // In a real scenario, this would involve creating a large number of items
-    // and solving the knapsack problem.
-    // For now, let's return true to indicate success for the demo.
-    return true;
-}
-
-bool collatz_stress_test_100m_numbers(collatz_config_t* config) {
-    (void)config; // Suppress unused parameter warning
-    // Simulate a long-running test
-    printf("    (Simulating Collatz stress test with 100M+ numbers...)\n");
-    // In a real scenario, this would involve analyzing a large range of numbers
-    // for the Collatz conjecture.
-    // For now, let's return true to indicate success for the demo.
-    return true;
-}
-
-bool ai_stress_test_100m_lums(ai_optimization_config_t* config) {
-     (void)config; // Suppress unused parameter warning
-    // Simulate a long-running test
-    printf("    (Simulating AI optimization stress test with 100M+ LUMs...)\n");
-    // In a real scenario, this would involve creating a large number of LUMs
-    // and applying AI optimization techniques.
-    // For now, let's return true to indicate success for the demo.
-    return true;
-}
+// Note: stress test functions are implemented in their respective module files
 
 
 // Placeholder for demo_ai_optimization_module
