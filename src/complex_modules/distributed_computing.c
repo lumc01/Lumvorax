@@ -309,7 +309,7 @@ bool distributed_stress_test_100m_lums(distributed_config_t* config) {
         compute_node_t* node = compute_node_create(i, ip, DISTRIBUTED_DEFAULT_PORT + i);
         if (node && compute_cluster_add_node(cluster, node)) {
             compute_node_send_heartbeat(node);
-            printf("Node %zu added: %s:%u\n", i, ip, DISTRIBUTED_DEFAULT_PORT + i);
+            printf("Node %zu added: %s:%lu\n", i, ip, (unsigned long)(DISTRIBUTED_DEFAULT_PORT + i));
         }
     }
     
@@ -383,7 +383,7 @@ bool distributed_stress_test_100m_lums(distributed_config_t* config) {
     printf("Projected time for %zu LUMs: %.1f seconds\n", lum_count, projected_time);
     
     // Cleanup
-    lum_group_destroy(&test_group);
+    lum_group_destroy(test_group);
     compute_cluster_destroy(&cluster);
     
     printf("✅ Distributed stress test 100M+ LUMs completed successfully\n");

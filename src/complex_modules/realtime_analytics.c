@@ -195,7 +195,7 @@ bool analytics_update_metrics(analytics_metrics_t* metrics, lum_t* lum) {
         // Calcul jitter (variation de latence)
         static uint64_t last_latency = 0;
         if (last_latency > 0) {
-            metrics->jitter_ns = abs((int64_t)metrics->latency_ns - (int64_t)last_latency);
+            metrics->jitter_ns = labs((int64_t)metrics->latency_ns - (int64_t)last_latency);
         }
         last_latency = metrics->latency_ns;
         
