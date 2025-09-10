@@ -1,5 +1,5 @@
 CC = clang
-CFLAGS = -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -I./src/debug
+CFLAGS = -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug
 SRC_DIR = src
 OBJ_DIR = obj
 BIN_DIR = bin
@@ -87,7 +87,7 @@ OPTIMIZATION_OBJS = $(OBJ_DIR)/optimization/memory_optimizer.o \
 
 EXECUTABLE = $(BIN_DIR)/lum_vorax
 TARGET = $(EXECUTABLE)
-LDFLAGS = -lpthread -lm
+LDFLAGS = -lpthread -lm -lrt -lm
 SANITIZER_FLAGS = -fsanitize=address
 
 # Create object directories

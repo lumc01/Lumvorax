@@ -1,9 +1,29 @@
 #ifndef MATRIX_CALCULATOR_H
 #define MATRIX_CALCULATOR_H
 
-#include "../lum/lum_core.h"
 #include <stdint.h>
 #include <stdbool.h>
+
+// Structure calculateur matriciel
+typedef struct matrix_calculator_t {
+    uint32_t magic_number;
+    size_t rows;
+    size_t cols;
+    double* data;
+    bool is_initialized;
+    void* memory_address;
+} matrix_calculator_t;
+
+// Structure résultat matriciel
+typedef struct matrix_result_t {
+    uint32_t magic_number;
+    double* result_data;
+    size_t rows;
+    size_t cols;
+    bool operation_success;
+    double execution_time_ns;
+    void* memory_address;
+} matrix_result_t;
 
 // Module de Calcul Matriciel Avancé pour LUM/VORAX
 // Conforme prompt.txt - nouveau module calculs avancés

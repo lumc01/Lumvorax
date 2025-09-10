@@ -4,6 +4,20 @@
 #include <time.h>
 #include <string.h>
 #include <stdbool.h>
+#include <math.h>
+#include <unistd.h>
+
+// Définitions pour compatibilité
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
+#ifndef CLOCK_MONOTONIC
+#define CLOCK_MONOTONIC 1
+#endif
+
+// Feature test pour clock_gettime
+#define _POSIX_C_SOURCE 199309L
 #include <unistd.h>
 
 // TESTS STRESS 100M+ LUMs pour TOUS MODULES - CONFORME PROMPT.TXT
