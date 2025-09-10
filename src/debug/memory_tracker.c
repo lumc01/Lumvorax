@@ -1,3 +1,4 @@
+#define _GNU_SOURCE  // Pour strnlen et strndup
 #include "memory_tracker.h"
 #include <pthread.h>
 #include <string.h> // Added for strncpy
@@ -321,6 +322,32 @@ void* tracked_realloc(void* ptr, size_t size, const char* file, int line, const 
     }
 
     return new_ptr;
+}
+
+// NOUVELLES FONCTIONS : tracked_strdup et tracked_strndup
+char* tracked_strdup(const char* str, const char* file, int line, const char* func) {
+    if (!str) return NULL;
+    if (!memory_tracker_is_enabled()) return strdup(str);
+    
+    size_t len = strlen(str) + 1;
+    char* copy = tracked_malloc(len, file, line, func);
+    if (copy) {
+        memcpy(copy, str, len);
+    }
+    return copy;
+}
+
+char* tracked_strndup(const char* str, size_t n, const char* file, int line, const char* func) {
+    if (!str) return NULL;
+    if (!memory_tracker_is_enabled()) return strndup(str, n);
+    
+    size_t len = strnlen(str, n);
+    char* copy = tracked_malloc(len + 1, file, line, func);
+    if (copy) {
+        memcpy(copy, str, len);
+        copy[len] = '\0';
+    }
+    return copy;
 }
 
 void memory_tracker_report(void) {

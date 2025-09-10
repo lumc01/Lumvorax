@@ -142,12 +142,12 @@ int main(int argc, char* argv[]) {
                     .checksum = 0,
                     .is_destroyed = 0
                 };
-                lum_t* lum_ptr = malloc(sizeof(lum_t));
+                lum_t* lum_ptr = TRACKED_MALLOC(sizeof(lum_t));
                 if (lum_ptr) {
                     *lum_ptr = lum;
                     if (!lum_group_add(large_group, lum_ptr)) {
                         printf("ERROR: Failed to add LUM %zu\n", i);
-                        free(lum_ptr);
+                        TRACKED_FREE(lum_ptr);
                         lum_group_destroy(large_group);
                         return 1;
                     }
@@ -524,7 +524,7 @@ void demo_binary_conversion(void) {
         char* binary_str = lum_group_to_binary_string(result->lum_group);
         if (binary_str) {
             printf("  Binaire: %s\n", binary_str);
-            free(binary_str);
+            TRACKED_FREE(binary_str);
         }
 
         // Test conversion inverse
@@ -671,14 +671,14 @@ void demo_pareto_optimization(void) {
         lum_t* lum1 = lum_create(i % 2, (int32_t)i, 0, LUM_STRUCTURE_LINEAR);
         if (lum1) {
             lum_group_add(group1, lum1);
-            free(lum1);
+            TRACKED_FREE(lum1);
         }
 
         if (i < 800) {
             lum_t* lum2 = lum_create((i+1) % 2, (int32_t)i, 1, LUM_STRUCTURE_CIRCULAR);
             if (lum2) {
                 lum_group_add(group2, lum2);
-                free(lum2);
+                TRACKED_FREE(lum2);
             }
         }
     }
@@ -741,7 +741,7 @@ void demo_pareto_optimization(void) {
 
     char* generated_script = pareto_generate_optimization_script(&target_metrics);
     printf("  📄 Script généré dynamiquement:\n%s\n", generated_script);
-    free(generated_script);
+    TRACKED_FREE(generated_script);
 
     // Benchmark contre baseline
     printf("  📊 Benchmark contre opérations standard\n");
@@ -846,8 +846,8 @@ void demo_simd_optimization(void) {
 
     // Créer données test pour comparaison
     size_t compare_size = 1000000;
-    lum_t* test_lums_scalar = malloc(compare_size * sizeof(lum_t));
-    lum_t* test_lums_simd = malloc(compare_size * sizeof(lum_t));
+    lum_t* test_lums_scalar = TRACKED_MALLOC(compare_size * sizeof(lum_t));
+    lum_t* test_lums_simd = TRACKED_MALLOC(compare_size * sizeof(lum_t));
 
     if (test_lums_scalar && test_lums_simd) {
         // Initialiser données identiques
@@ -892,8 +892,8 @@ void demo_simd_optimization(void) {
             simd_result_destroy(simd_result);
         }
 
-        free(test_lums_scalar);
-        free(test_lums_simd);
+        TRACKED_FREE(test_lums_scalar);
+        TRACKED_FREE(test_lums_simd);
     } else {
         printf("    ❌ Erreur allocation mémoire pour comparaison\n");
     }
@@ -941,7 +941,7 @@ void demo_simd_optimization(void) {
             if (lum) {
                 total_presence += lum->presence;
                 lum_group_add(conservation_group, lum);
-                free(lum);
+                TRACKED_FREE(lum);
             }
         }
 
@@ -1242,7 +1242,7 @@ void demo_tsp_optimizer_module() {
 
     // Création villes de test
     const size_t city_count = 10;
-    tsp_city_t** cities = malloc(city_count * sizeof(tsp_city_t*));
+    tsp_city_t** cities = TRACKED_MALLOC(city_count * sizeof(tsp_city_t*));
     if (!cities) {
         tsp_config_destroy(&config);
         printf("❌ Échec allocation villes\n");
@@ -1262,7 +1262,7 @@ void demo_tsp_optimizer_module() {
             for (size_t j = 0; j < i; j++) {
                 tsp_city_destroy(&cities[j]);
             }
-            free(cities);
+            TRACKED_FREE(cities);
             tsp_config_destroy(&config);
             return;
         }
@@ -1308,7 +1308,7 @@ void demo_knapsack_optimizer_module() {
     const size_t item_count = 20;
     const size_t knapsack_capacity = 100;
 
-    knapsack_item_t** items = malloc(item_count * sizeof(knapsack_item_t*));
+    knapsack_item_t** items = TRACKED_MALLOC(item_count * sizeof(knapsack_item_t*));
     if (!items) {
         knapsack_config_destroy(&config);
         printf("❌ Échec allocation items\n");
@@ -1327,7 +1327,7 @@ void demo_knapsack_optimizer_module() {
             for (size_t j = 0; j < i; j++) {
                 knapsack_item_destroy(&items[j]);
             }
-            free(items);
+            TRACKED_FREE(items);
             knapsack_config_destroy(&config);
             return;
         }
