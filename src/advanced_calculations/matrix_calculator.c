@@ -4,9 +4,10 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <inttypes.h>
 
 // Constante magique pour protection double-free
-#define MATRIX_CALCULATOR_MAGIC 0xCALC2025
+#define MATRIX_CALCULATOR_MAGIC 0x4D415452
 
 // Création calculateur matriciel
 matrix_calculator_t* matrix_calculator_create(size_t rows, size_t cols) {
@@ -43,6 +44,7 @@ void matrix_set_element(matrix_calculator_t* calc, size_t row, size_t col, doubl
 
 // Multiplication matricielle optimisée LUM
 matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_calculator_t* b, void* config) {
+    (void)config; // Suppress unused parameter warning
     if (!a || !b || a->magic_number != MATRIX_CALCULATOR_MAGIC || b->magic_number != MATRIX_CALCULATOR_MAGIC) {
         return NULL;
     }
@@ -83,8 +85,8 @@ matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_ca
     }
 
     clock_gettime(CLOCK_MONOTONIC, &end);
-    result->execution_time_ns = (end.tv_sec - start.tv_sec) * 1000000000L +
-                                (end.tv_nsec - start.tv_nsec);
+    result->execution_time_ns = (uint64_t)((end.tv_sec - start.tv_sec) * 1000000000ULL +
+                                (end.tv_nsec - start.tv_nsec));
     result->operation_success = true;
 
     return result;
@@ -430,7 +432,7 @@ void matrix_calculator_demo(void) {
         matrix_result_t* result = matrix_multiply_lum_optimized(mat_a, mat_b, NULL);
         if (result) {
             printf("✅ Multiplication matricielle effectuée avec succès.\n");
-            printf("Temps d'exécution: %llu ns\n", result->execution_time_ns);
+            printf("Temps d'exécution: %" PRIu64 " ns\n", result->execution_time_ns);
             printf("Résultat (2x2):\n");
             for(size_t i = 0; i < result->rows; ++i) {
                 for(size_t j = 0; j < result->cols; ++j) {

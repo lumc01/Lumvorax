@@ -1,4 +1,4 @@
-#define _POSIX_C_SOURCE 200809L
+// _POSIX_C_SOURCE défini par Makefile
 // _GNU_SOURCE is already defined in Makefile
 #include "parallel_processor.h"
 #include "../logger/lum_logger.h"

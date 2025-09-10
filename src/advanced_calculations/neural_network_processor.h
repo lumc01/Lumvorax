@@ -35,17 +35,19 @@ typedef enum {
     ACTIVATION_GELU = 7           // GELU (Gaussian Error Linear Unit)
 } activation_function_e;
 
-// Couche de réseau de neurones
+// Couche de réseau de neurones (modèle flat arrays canonique)
 typedef struct {
-    neural_lum_t** neurons;       // Array de neurones LUM
     size_t neuron_count;          // Nombre de neurones
-    activation_function_e activation; // Fonction d'activation
-    double* layer_output;         // Sortie de la couche
-    double* layer_error;          // Erreur de la couche
     size_t input_size;            // Taille d'entrée
     size_t output_size;           // Taille de sortie
-    void* memory_address;         // Protection double-free OBLIGATOIRE
+    activation_function_e activation; // Fonction d'activation
+    double* weights;              // Poids (neuron_count * input_size)
+    double* biases;               // Biais (neuron_count)
+    double* outputs;              // Sorties (neuron_count)
+    double* layer_error;          // Erreur de la couche (neuron_count)
     uint32_t layer_id;            // Identifiant unique couche
+    uint32_t magic_number;        // Magic number pour validation
+    void* memory_address;         // Protection double-free OBLIGATOIRE
 } neural_layer_t;
 
 // Réseau de neurones complet
@@ -139,54 +141,13 @@ bool neural_validate_network_architecture(size_t* layer_sizes, size_t layer_coun
 #define NEURAL_MAX_NEURONS_PER_LAYER 10000
 #define NEURAL_MIN_LEARNING_RATE 1e-6
 #define NEURAL_MAX_LEARNING_RATE 1.0
-#define NEURAL_MAGIC_NUMBER 0xDEADBEEF
-#define NEURAL_DESTROYED_MAGIC 0x00000000
+#ifndef NEURAL_MAGIC_NUMBER
+#define NEURAL_MAGIC_NUMBER 0x4E455552  // "NEUR" en ASCII
+#define NEURAL_DESTROYED_MAGIC 0xDEADDEAD
+#endif
+
+// Alias de compatibilité pour le code existant
+typedef activation_function_e activation_type_e;
 #define NEURAL_DEFAULT_BIAS 0.0
-
-#endif // NEURAL_NETWORK_PROCESSOR_H
-#ifndef NEURAL_NETWORK_PROCESSOR_H
-#define NEURAL_NETWORK_PROCESSOR_H
-
-#include <stdint.h>
-#include <stdbool.h>
-#include <stddef.h>
-
-// Types d'activation
-typedef enum {
-    ACTIVATION_LINEAR = 0,
-    ACTIVATION_RELU = 1,
-    ACTIVATION_SIGMOID = 2,
-    ACTIVATION_TANH = 3
-} activation_type_e;
-
-// Structure couche neuronale
-typedef struct {
-    size_t neuron_count;
-    size_t input_size;
-    double* weights;
-    double* biases;
-    double* outputs;
-    activation_type_e activation_type;
-    uint32_t magic_number;
-    void* memory_address;
-} neural_layer_t;
-
-// Configuration réseau
-typedef struct {
-    double learning_rate;
-    size_t batch_size;
-    size_t epochs;
-    bool use_dropout;
-    double dropout_rate;
-    void* memory_address;
-} neural_config_t;
-
-// Fonctions principales
-neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_type_e activation);
-bool neural_layer_forward_pass(neural_layer_t* layer, double* inputs);
-void neural_layer_destroy(neural_layer_t** layer_ptr);
-
-neural_config_t* neural_config_create_default(void);
-void neural_config_destroy(neural_config_t** config_ptr);
 
 #endif // NEURAL_NETWORK_PROCESSOR_H

@@ -23,7 +23,7 @@ typedef struct matrix_calculator_result_t {
     size_t rows;
     size_t cols;
     bool operation_success;
-    double execution_time_ns;
+    uint64_t execution_time_ns;
     void* memory_address;
 } matrix_calculator_result_t;
 
@@ -63,7 +63,7 @@ typedef struct matrix_lum_result_t {
     size_t scalar_count;           // Nombre de résultats scalaires
     bool success;                  // Succès opération
     char error_message[256];       // Message d'erreur
-    double execution_time_ns;      // Temps d'exécution nanosecondes
+    uint64_t execution_time_ns;     // Temps d'exécution nanosecondes
     uint64_t operations_count;     // Nombre d'opérations effectuées
     void* memory_address;          // Protection double-free OBLIGATOIRE
 } matrix_lum_result_t;

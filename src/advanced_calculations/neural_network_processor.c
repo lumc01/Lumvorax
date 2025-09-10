@@ -156,7 +156,7 @@ double activation_gelu(double x) {
     return 0.5 * x * (1.0 + tanh(sqrt(2.0/M_PI) * (x + 0.044715 * x * x * x)));
 }
 
-// Création couche neuronale
+// Création couche neuronale (modèle flat arrays canonique)
 neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_function_e activation) {
     if (neuron_count == 0 || neuron_count > NEURAL_MAX_NEURONS_PER_LAYER || input_size == 0) {
         return NULL;
@@ -165,76 +165,133 @@ neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, acti
     neural_layer_t* layer = TRACKED_MALLOC(sizeof(neural_layer_t));
     if (!layer) return NULL;
     
+    // Configuration des champs de base
     layer->neuron_count = neuron_count;
     layer->input_size = input_size;
     layer->output_size = neuron_count;
     layer->activation = activation;
     layer->layer_id = 0;
+    layer->magic_number = NEURAL_MAGIC_NUMBER;
     layer->memory_address = (void*)layer;
     
-    // Allocation neurones
-    layer->neurons = TRACKED_MALLOC(neuron_count * sizeof(neural_lum_t*));
-    layer->layer_output = TRACKED_MALLOC(neuron_count * sizeof(double));
-    layer->layer_error = TRACKED_MALLOC(neuron_count * sizeof(double));
-    
-    if (!layer->neurons || !layer->layer_output || !layer->layer_error) {
-        if (layer->neurons) TRACKED_FREE(layer->neurons);
-        if (layer->layer_output) TRACKED_FREE(layer->layer_output);
-        if (layer->layer_error) TRACKED_FREE(layer->layer_error);
+    // Allocation arrays flat
+    layer->weights = TRACKED_MALLOC(neuron_count * input_size * sizeof(double));
+    if (!layer->weights) {
         TRACKED_FREE(layer);
         return NULL;
     }
     
-    // Création neurones
+    layer->biases = TRACKED_MALLOC(neuron_count * sizeof(double));
+    if (!layer->biases) {
+        TRACKED_FREE(layer->weights);
+        TRACKED_FREE(layer);
+        return NULL;
+    }
+    
+    layer->outputs = TRACKED_MALLOC(neuron_count * sizeof(double));
+    if (!layer->outputs) {
+        TRACKED_FREE(layer->biases);
+        TRACKED_FREE(layer->weights);
+        TRACKED_FREE(layer);
+        return NULL;
+    }
+    
+    layer->layer_error = TRACKED_MALLOC(neuron_count * sizeof(double));
+    if (!layer->layer_error) {
+        TRACKED_FREE(layer->outputs);
+        TRACKED_FREE(layer->biases);
+        TRACKED_FREE(layer->weights);
+        TRACKED_FREE(layer);
+        return NULL;
+    }
+    
+    // Initialisation Xavier pour poids
+    double limit = sqrt(6.0 / (input_size + neuron_count));
+    srand((unsigned int)time(NULL));
+    
+    for (size_t i = 0; i < neuron_count * input_size; i++) {
+        layer->weights[i] = ((double)rand() / RAND_MAX - 0.5) * 2.0 * limit;
+    }
+    
     for (size_t i = 0; i < neuron_count; i++) {
-        layer->neurons[i] = neural_lum_create(i % 100, i / 100, input_size, activation);
-        if (!layer->neurons[i]) {
-            // Cleanup en cas d'échec
-            for (size_t j = 0; j < i; j++) {
-                neural_lum_destroy(&layer->neurons[j]);
-            }
-            TRACKED_FREE(layer->neurons);
-            TRACKED_FREE(layer->layer_output);
-            TRACKED_FREE(layer->layer_error);
-            TRACKED_FREE(layer);
-            return NULL;
-        }
-        layer->layer_output[i] = 0.0;
+        layer->biases[i] = NEURAL_DEFAULT_BIAS;
+        layer->outputs[i] = 0.0;
         layer->layer_error[i] = 0.0;
     }
     
     return layer;
 }
 
-// Destruction couche
+// Destruction couche (modèle flat arrays)
 void neural_layer_destroy(neural_layer_t** layer_ptr) {
     if (!layer_ptr || !*layer_ptr) return;
     
     neural_layer_t* layer = *layer_ptr;
     
-    if (layer->memory_address != (void*)layer) return;
-    
-    if (layer->neurons) {
-        for (size_t i = 0; i < layer->neuron_count; i++) {
-            neural_lum_destroy(&layer->neurons[i]);
-        }
-        TRACKED_FREE(layer->neurons);
+    // Validation sécurité
+    if (layer->memory_address != (void*)layer || 
+        layer->magic_number != NEURAL_MAGIC_NUMBER) {
+        return;
     }
     
-    if (layer->layer_output) TRACKED_FREE(layer->layer_output);
+    // Libération arrays flat
+    if (layer->weights) TRACKED_FREE(layer->weights);
+    if (layer->biases) TRACKED_FREE(layer->biases);
+    if (layer->outputs) TRACKED_FREE(layer->outputs);
     if (layer->layer_error) TRACKED_FREE(layer->layer_error);
     
+    // Nettoyage sécurisé
+    layer->weights = NULL;
+    layer->biases = NULL;
+    layer->outputs = NULL;
+    layer->layer_error = NULL;
+    layer->magic_number = NEURAL_DESTROYED_MAGIC;
     layer->memory_address = NULL;
+    
     TRACKED_FREE(layer);
     *layer_ptr = NULL;
 }
 
-// Propagation avant
+// Propagation avant (modèle flat arrays)
 bool neural_layer_forward_pass(neural_layer_t* layer, double* inputs) {
-    if (!layer || !inputs) return false;
+    if (!layer || !inputs || layer->magic_number != NEURAL_MAGIC_NUMBER) {
+        return false;
+    }
     
-    for (size_t i = 0; i < layer->neuron_count; i++) {
-        layer->layer_output[i] = neural_lum_activate(layer->neurons[i], inputs, layer->activation);
+    // Calcul pour chaque neurone
+    for (size_t n = 0; n < layer->neuron_count; n++) {
+        double sum = layer->biases[n];
+        
+        // Produit scalaire weights[n*input_size : (n+1)*input_size] · inputs
+        for (size_t i = 0; i < layer->input_size; i++) {
+            sum += layer->weights[n * layer->input_size + i] * inputs[i];
+        }
+        
+        // Application fonction d'activation
+        switch (layer->activation) {
+            case ACTIVATION_SIGMOID:
+                layer->outputs[n] = activation_sigmoid(sum);
+                break;
+            case ACTIVATION_TANH:
+                layer->outputs[n] = activation_tanh(sum);
+                break;
+            case ACTIVATION_RELU:
+                layer->outputs[n] = activation_relu(sum);
+                break;
+            case ACTIVATION_LEAKY_RELU:
+                layer->outputs[n] = activation_leaky_relu(sum, 0.01);
+                break;
+            case ACTIVATION_SWISH:
+                layer->outputs[n] = activation_swish(sum);
+                break;
+            case ACTIVATION_GELU:
+                layer->outputs[n] = activation_gelu(sum);
+                break;
+            case ACTIVATION_LINEAR:
+            default:
+                layer->outputs[n] = sum;
+                break;
+        }
     }
     
     return true;
@@ -325,141 +382,6 @@ void neural_config_destroy(neural_config_t** config_ptr) {
     
     neural_config_t* config = *config_ptr;
     if (config->memory_address == (void*)config) {
-        TRACKED_FREE(config);
-        *config_ptr = NULL;
-    }
-}
-#include "neural_network_processor.h"
-#include "../debug/memory_tracker.h"
-#include <stdlib.h>
-#include <string.h>
-#include <math.h>
-#include <time.h>
-
-// Constantes
-#define NEURAL_MAGIC_NUMBER 0xNEUR2025
-
-// Création couche neuronale
-neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_type_e activation) {
-    if (neuron_count == 0 || input_size == 0) return NULL;
-
-    neural_layer_t* layer = TRACKED_MALLOC(sizeof(neural_layer_t));
-    if (!layer) return NULL;
-
-    layer->neuron_count = neuron_count;
-    layer->input_size = input_size;
-    layer->activation_type = activation;
-    layer->magic_number = NEURAL_MAGIC_NUMBER;
-    layer->memory_address = layer;
-
-    // Allocation poids
-    layer->weights = TRACKED_MALLOC(neuron_count * input_size * sizeof(double));
-    if (!layer->weights) {
-        TRACKED_FREE(layer);
-        return NULL;
-    }
-
-    // Allocation biais
-    layer->biases = TRACKED_MALLOC(neuron_count * sizeof(double));
-    if (!layer->biases) {
-        TRACKED_FREE(layer->weights);
-        TRACKED_FREE(layer);
-        return NULL;
-    }
-
-    // Allocation sorties
-    layer->outputs = TRACKED_MALLOC(neuron_count * sizeof(double));
-    if (!layer->outputs) {
-        TRACKED_FREE(layer->biases);
-        TRACKED_FREE(layer->weights);
-        TRACKED_FREE(layer);
-        return NULL;
-    }
-
-    // Initialisation aléatoire
-    srand(time(NULL));
-    for (size_t i = 0; i < neuron_count * input_size; i++) {
-        layer->weights[i] = ((double)rand() / RAND_MAX - 0.5) * 2.0;
-    }
-
-    for (size_t i = 0; i < neuron_count; i++) {
-        layer->biases[i] = ((double)rand() / RAND_MAX - 0.5) * 2.0;
-        layer->outputs[i] = 0.0;
-    }
-
-    return layer;
-}
-
-// Forward pass
-bool neural_layer_forward_pass(neural_layer_t* layer, double* inputs) {
-    if (!layer || !inputs || layer->magic_number != NEURAL_MAGIC_NUMBER) {
-        return false;
-    }
-
-    // Calcul neurone par neurone
-    for (size_t n = 0; n < layer->neuron_count; n++) {
-        double sum = layer->biases[n];
-        
-        for (size_t i = 0; i < layer->input_size; i++) {
-            sum += inputs[i] * layer->weights[n * layer->input_size + i];
-        }
-
-        // Application fonction d'activation
-        switch (layer->activation_type) {
-            case ACTIVATION_RELU:
-                layer->outputs[n] = (sum > 0) ? sum : 0;
-                break;
-            case ACTIVATION_SIGMOID:
-                layer->outputs[n] = 1.0 / (1.0 + exp(-sum));
-                break;
-            case ACTIVATION_TANH:
-                layer->outputs[n] = tanh(sum);
-                break;
-            default:
-                layer->outputs[n] = sum; // Linear
-        }
-    }
-
-    return true;
-}
-
-// Configuration par défaut
-neural_config_t* neural_config_create_default(void) {
-    neural_config_t* config = TRACKED_MALLOC(sizeof(neural_config_t));
-    if (!config) return NULL;
-
-    config->learning_rate = 0.001;
-    config->batch_size = 32;
-    config->epochs = 100;
-    config->use_dropout = false;
-    config->dropout_rate = 0.0;
-    config->memory_address = config;
-
-    return config;
-}
-
-// Destruction couche
-void neural_layer_destroy(neural_layer_t** layer_ptr) {
-    if (!layer_ptr || !*layer_ptr) return;
-
-    neural_layer_t* layer = *layer_ptr;
-    if (layer->magic_number != NEURAL_MAGIC_NUMBER) return;
-
-    if (layer->weights) TRACKED_FREE(layer->weights);
-    if (layer->biases) TRACKED_FREE(layer->biases);
-    if (layer->outputs) TRACKED_FREE(layer->outputs);
-
-    layer->magic_number = 0;
-    TRACKED_FREE(layer);
-    *layer_ptr = NULL;
-}
-
-// Destruction configuration
-void neural_config_destroy(neural_config_t** config_ptr) {
-    if (!config_ptr || !*config_ptr) return;
-
-    neural_config_t* config = *config_ptr;
-    if (config->memory_address == config) {
         TRACKED_FREE(config);
         *config_ptr = NULL;
     }
