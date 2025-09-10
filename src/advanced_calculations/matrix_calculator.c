@@ -211,7 +211,7 @@ void lum_matrix_destroy(lum_matrix_t** matrix_ptr) {
 }
 
 // Addition matricielle
-matrix_result_t* matrix_add(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config) {
+matrix_lum_result_t* matrix_add(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config) {
     if (!matrix_a || !matrix_b || !config) return NULL;
 
     if (matrix_a->rows != matrix_b->rows || matrix_a->cols != matrix_b->cols) {
@@ -221,7 +221,7 @@ matrix_result_t* matrix_add(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matr
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
 
-    matrix_result_t* result = TRACKED_MALLOC(sizeof(matrix_result_t));
+    matrix_lum_result_t* result = TRACKED_MALLOC(sizeof(matrix_lum_result_t));
     if (!result) return NULL;
 
     result->result_matrix = lum_matrix_create(matrix_a->rows, matrix_a->cols);
@@ -259,7 +259,7 @@ matrix_result_t* matrix_add(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matr
 }
 
 // Multiplication matricielle optimisée
-matrix_result_t* matrix_multiply(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config) {
+matrix_lum_result_t* matrix_multiply(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config) {
     if (!matrix_a || !matrix_b || !config) return NULL;
 
     if (matrix_a->cols != matrix_b->rows) {
@@ -269,7 +269,7 @@ matrix_result_t* matrix_multiply(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b,
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
 
-    matrix_result_t* result = TRACKED_MALLOC(sizeof(matrix_result_t));
+    matrix_lum_result_t* result = TRACKED_MALLOC(sizeof(matrix_lum_result_t));
     if (!result) return NULL;
 
     result->result_matrix = lum_matrix_create(matrix_a->rows, matrix_b->cols);
@@ -380,10 +380,10 @@ void matrix_config_destroy(matrix_config_t** config_ptr) {
 }
 
 // Destruction résultat (pour LUM matrices)
-void matrix_result_destroy_lum(matrix_result_t** result_ptr) {
+void matrix_lum_result_destroy(matrix_lum_result_t** result_ptr) {
     if (!result_ptr || !*result_ptr) return;
 
-    matrix_result_t* result = *result_ptr;
+    matrix_lum_result_t* result = *result_ptr;
     if (result->memory_address == (void*)result) { // Utiliser memory_address pour la vérification
         if (result->result_matrix) {
             lum_matrix_destroy(&result->result_matrix);

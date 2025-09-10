@@ -53,8 +53,8 @@ typedef enum {
     MATRIX_OP_SOLVE_LINEAR = 7     // Résolution système linéaire
 } matrix_operation_e;
 
-// Résultat opération matricielle
-typedef struct {
+// Résultat opération matricielle LUM  
+typedef struct matrix_lum_result_t {
     lum_matrix_t* result_matrix;   // Matrice résultat
     double* scalar_results;        // Résultats scalaires (déterminant, etc.)
     size_t scalar_count;           // Nombre de résultats scalaires
@@ -63,7 +63,7 @@ typedef struct {
     double execution_time_ns;      // Temps d'exécution nanosecondes
     uint64_t operations_count;     // Nombre d'opérations effectuées
     void* memory_address;          // Protection double-free OBLIGATOIRE
-} matrix_result_t;
+} matrix_lum_result_t;
 
 // Configuration calculs matriciels
 typedef struct {
@@ -88,16 +88,16 @@ bool lum_matrix_set_lum(lum_matrix_t* matrix, size_t row, size_t col, lum_t* lum
 lum_t* lum_matrix_get_lum(lum_matrix_t* matrix, size_t row, size_t col);
 
 // Opérations matricielles avancées
-matrix_result_t* matrix_add(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config);
-matrix_result_t* matrix_multiply(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config);
-matrix_result_t* matrix_transpose(lum_matrix_t* matrix, matrix_config_t* config);
-matrix_result_t* matrix_calculate_determinant(lum_matrix_t* matrix, matrix_config_t* config);
-matrix_result_t* matrix_inverse(lum_matrix_t* matrix, matrix_config_t* config);
-matrix_result_t* matrix_eigenvalues(lum_matrix_t* matrix, matrix_config_t* config);
+matrix_lum_result_t* matrix_add(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config);
+matrix_lum_result_t* matrix_multiply(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config);
+matrix_lum_result_t* matrix_transpose(lum_matrix_t* matrix, matrix_config_t* config);
+matrix_lum_result_t* matrix_calculate_determinant(lum_matrix_t* matrix, matrix_config_t* config);
+matrix_lum_result_t* matrix_inverse(lum_matrix_t* matrix, matrix_config_t* config);
+matrix_lum_result_t* matrix_eigenvalues(lum_matrix_t* matrix, matrix_config_t* config);
 
 // Opérations spécialisées
-matrix_result_t* matrix_lu_decomposition(lum_matrix_t* matrix, matrix_config_t* config);
-matrix_result_t* matrix_solve_linear_system(lum_matrix_t* coefficient_matrix, lum_matrix_t* constants, matrix_config_t* config);
+matrix_lum_result_t* matrix_lu_decomposition(lum_matrix_t* matrix, matrix_config_t* config);
+matrix_lum_result_t* matrix_solve_linear_system(lum_matrix_t* coefficient_matrix, lum_matrix_t* constants, matrix_config_t* config);
 
 // Tests stress pour 100M+ LUMs
 bool matrix_stress_test_100m_lums(matrix_config_t* config);
@@ -106,7 +106,7 @@ matrix_result_t* matrix_benchmark_operations(size_t matrix_size, matrix_config_t
 // Utilitaires
 matrix_config_t* matrix_config_create_default(void);
 void matrix_config_destroy(matrix_config_t** config_ptr);
-void matrix_result_destroy(matrix_result_t** result_ptr);
+void matrix_lum_result_destroy(matrix_lum_result_t** result_ptr);
 bool matrix_validate_dimensions(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_operation_e operation);
 
 // Constantes
