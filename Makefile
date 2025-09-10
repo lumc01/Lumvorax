@@ -5,6 +5,16 @@ OBJ_DIR = obj
 BIN_DIR = bin
 LOG_DIR = logs
 
+# Advanced calculations
+ADVANCED_CALC_SOURCES = src/advanced_calculations/matrix_calculator.c \
+                       src/advanced_calculations/quantum_simulator.c \
+                       src/advanced_calculations/neural_network_processor.c
+
+# Complex modules  
+COMPLEX_MODULES_SOURCES = src/complex_modules/realtime_analytics.c \
+                         src/complex_modules/distributed_computing.c \
+                         src/complex_modules/ai_optimization.c
+
 # Object files
 MAIN_OBJ = $(OBJ_DIR)/main.o
 LUM_CORE_OBJ = $(OBJ_DIR)/lum/lum_core.o
@@ -38,24 +48,24 @@ SOURCES = $(SRC_DIR)/main.c \
 	  $(SRC_DIR)/metrics/performance_metrics.c \
 	  $(SRC_DIR)/crypto/crypto_validator.c \
 	  $(SRC_DIR)/persistence/data_persistence.c \
-	  $(SRC_DIR)/debug/memory_tracker.c
+	  $(SRC_DIR)/debug/memory_tracker.c \
+      $(ADVANCED_CALC_SOURCES) \
+      $(COMPLEX_MODULES_SOURCES)
 
-OBJECTS = $(OBJ_DIR)/main.o \
-	  $(OBJ_DIR)/lum/lum_core.o \
-	  $(OBJ_DIR)/vorax/vorax_operations.o \
-	  $(OBJ_DIR)/parser/vorax_parser.o \
-	  $(OBJ_DIR)/binary/binary_lum_converter.o \
-	  $(OBJ_DIR)/logger/lum_logger.o \
-	  $(OBJ_DIR)/optimization/memory_optimizer.o \
-	  $(OBJ_DIR)/optimization/pareto_optimizer.o \
-	  $(OBJ_DIR)/optimization/pareto_inverse_optimizer.o \
-	  $(OBJ_DIR)/optimization/simd_optimizer.o \
-	  $(OBJ_DIR)/optimization/zero_copy_allocator.o \
-	  $(OBJ_DIR)/parallel/parallel_processor.o \
-	  $(OBJ_DIR)/metrics/performance_metrics.o \
-	  $(OBJ_DIR)/crypto/crypto_validator.o \
-	  $(OBJ_DIR)/persistence/data_persistence.o \
-	  $(OBJ_DIR)/debug/memory_tracker.o
+OBJECTS = obj/main.o obj/lum/lum_core.o obj/vorax/vorax_operations.o obj/parser/vorax_parser.o \
+          obj/binary/binary_lum_converter.o obj/logger/lum_logger.o \
+          obj/optimization/memory_optimizer.o obj/optimization/pareto_optimizer.o \
+          obj/optimization/pareto_inverse_optimizer.o obj/optimization/simd_optimizer.o \
+          obj/optimization/zero_copy_allocator.o \
+          obj/parallel/parallel_processor.o obj/metrics/performance_metrics.o \
+          obj/crypto/crypto_validator.o obj/persistence/data_persistence.o \
+          obj/debug/memory_tracker.o \
+          obj/advanced_calculations/matrix_calculator.o \
+          obj/advanced_calculations/quantum_simulator.o \
+          obj/advanced_calculations/neural_network_processor.o \
+          obj/complex_modules/realtime_analytics.o \
+          obj/complex_modules/distributed_computing.o \
+          obj/complex_modules/ai_optimization.o
 
 # Optimization objects
 OPTIMIZATION_OBJS = $(OBJ_DIR)/optimization/memory_optimizer.o \
@@ -68,7 +78,7 @@ LDFLAGS = -lpthread -lm
 SANITIZER_FLAGS = -fsanitize=address
 
 # Create object directories
-OBJ_DIRS = obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug
+OBJ_DIRS = obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug obj/advanced_calculations obj/complex_modules
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIRS)
@@ -140,7 +150,7 @@ $(OBJ_DIR)/tests/test_million_lums_stress.o: $(SRC_DIR)/tests/test_million_lums_
 	$(CC) $(CFLAGS) -c $< -o $@
 
 # Compilation of debug objects
-$(OBJ_DIR)/debug/memory_tracker.o: $(SRC_DIR)/debug/memory_tracker.c | $(OBJ_DIR)
+$(OBJ_DIR)/debug/memory_tracker.o: src/debug/memory_tracker.c | $(OBJ_DIR)
 	$(CC) $(CFLAGS) $(PTHREAD_FLAGS) -c $< -o $@
 
 # Link test executables
@@ -152,6 +162,32 @@ $(ADVANCED_TEST_TARGET): $(SRC_DIR)/tests/test_advanced.c $(OBJECTS)
 
 $(COMPLETE_TEST_TARGET): $(SRC_DIR)/tests/test_complete_functionality.c $(OBJECTS) $(MEMORY_TRACKER_OBJ)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Advanced calculations modules
+obj/advanced_calculations/matrix_calculator.o: src/advanced_calculations/matrix_calculator.c src/advanced_calculations/matrix_calculator.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/matrix_calculator.c -o obj/advanced_calculations/matrix_calculator.o
+
+obj/advanced_calculations/quantum_simulator.o: src/advanced_calculations/quantum_simulator.c src/advanced_calculations/quantum_simulator.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/quantum_simulator.c -o obj/advanced_calculations/quantum_simulator.o
+
+obj/advanced_calculations/neural_network_processor.o: src/advanced_calculations/neural_network_processor.c src/advanced_calculations/neural_network_processor.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/neural_network_processor.c -o obj/advanced_calculations/neural_network_processor.o
+
+# Complex modules
+obj/complex_modules/realtime_analytics.o: src/complex_modules/realtime_analytics.c src/complex_modules/realtime_analytics.h
+	mkdir -p obj/complex_modules
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/complex_modules/realtime_analytics.c -o obj/complex_modules/realtime_analytics.o
+
+obj/complex_modules/distributed_computing.o: src/complex_modules/distributed_computing.c src/complex_modules/distributed_computing.h
+	mkdir -p obj/complex_modules
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/complex_modules/distributed_computing.c -o obj/complex_modules/distributed_computing.o
+
+obj/complex_modules/ai_optimization.o: src/complex_modules/ai_optimization.c src/complex_modules/ai_optimization.h
+	mkdir -p obj/complex_modules
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/complex_modules/ai_optimization.c -o obj/complex_modules/ai_optimization.o
 
 .PHONY: all clean run test
 

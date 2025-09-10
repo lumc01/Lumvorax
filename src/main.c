@@ -58,20 +58,28 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-        if (strcmp(argv[1], "--crypto-validation") == 0) {
+        else if (strcmp(argv[1], "--crypto-validation") == 0) {
             printf("=== Tests cryptographiques RFC 6234 ===\n");
-            bool result = crypto_validate_sha256_implementation();
-            printf("Validation SHA-256: %s\n", result ? "SUCCÈS" : "ÉCHEC");
-
-            if (result) {
-                printf("✓ Vecteur test 1 (chaîne vide): VALIDÉ\n");
-                printf("✓ Vecteur test 2 ('abc'): VALIDÉ\n");
-                printf("✓ Vecteur test 3 (chaîne longue): VALIDÉ\n");
+            if (crypto_validate_sha256()) {
                 printf("✓ Conformité RFC 6234: COMPLÈTE\n");
+            } else {
+                printf("✗ Échec validation cryptographique\n");
+                return 1;
             }
+        } else if (argc > 1 && strcmp(argv[1], "--stress-test-all-modules") == 0) {
+        printf("=== LANCEMENT TESTS STRESS 100M+ TOUS MODULES ===\n");
+        printf("Exécution du binaire de test dédié...\n");
 
-            return result ? 0 : 1;
+        // Compilation et exécution du test stress
+        system("cd src/tests && clang -std=c99 -O2 -I.. -I../debug test_stress_100m_all_modules.c -o ../../bin/test_stress_modules -lm");
+
+        if (system("./bin/test_stress_modules") == 0) {
+            printf("✅ TOUS LES TESTS STRESS 100M+ RÉUSSIS\n");
+        } else {
+            printf("❌ ÉCHECS DÉTECTÉS DANS TESTS STRESS\n");
+            return 1;
         }
+    }
 
         // MANDATORY stress tests per prompt.txt - CRITICAL requirement
         if (strcmp(argv[1], "--stress-test-million") == 0) {
