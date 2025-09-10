@@ -162,7 +162,7 @@ static int test_stress_complex_modules(void) {
     return 1;
 }
 
-// Fonction principale - UNIQUE
+// Fonction principale test stress global - UNIQUE
 int main(int argc, char* argv[]) {
     (void)argc;
     (void)argv;

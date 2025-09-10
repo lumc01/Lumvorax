@@ -1224,7 +1224,7 @@ void demo_ai_optimization_module() {
 
     // Cleanup
     lum_group_destroy(initial_solution); // Corrected from &initial_solution
-    ai_optimization_config_destroy(config); // Corrected from &config
+    ai_optimization_config_destroy(&config);
 
     printf("  ✅ Démonstration Module IA Optimization terminée\n");
 }
@@ -1288,7 +1288,7 @@ void demo_tsp_optimizer_module() {
         tsp_city_destroy(&cities[i]);
     }
     free(cities);
-    tsp_config_destroy(config); // Corrected from &config
+    tsp_config_destroy(&config);
 
     printf("  ✅ Démonstration Module TSP Optimizer terminée\n");
 }
@@ -1354,7 +1354,7 @@ void demo_knapsack_optimizer_module() {
         knapsack_item_destroy(&items[i]);
     }
     free(items);
-    knapsack_config_destroy(config); // Corrected from &config
+    knapsack_config_destroy(&config);
 
     printf("  ✅ Démonstration Module Knapsack Optimizer terminée\n");
 }

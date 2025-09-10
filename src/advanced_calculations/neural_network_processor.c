@@ -8,6 +8,7 @@
 
 // Création neurone LUM
 neural_lum_t* neural_lum_create(int32_t x, int32_t y, size_t input_count, activation_function_e activation) {
+    (void)activation; // Suppression warning unused parameter
     (void)activation; // Suppression warning paramètre inutilisé
     if (input_count == 0 || input_count > NEURAL_MAX_NEURONS_PER_LAYER) {
         return NULL;

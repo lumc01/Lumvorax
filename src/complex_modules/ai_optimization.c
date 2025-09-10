@@ -39,7 +39,7 @@ void ai_agent_destroy(ai_agent_t** agent_ptr) {
     }
 
     if (agent->knowledge_base) {
-        lum_group_destroy(&agent->knowledge_base);
+        lum_group_destroy(agent->knowledge_base);
     }
 
     agent->agent_magic = AI_DESTROYED_MAGIC;
@@ -184,7 +184,7 @@ void genetic_optimizer_destroy(genetic_optimizer_t** optimizer_ptr) {
     if (optimizer->population) {
         for (size_t i = 0; i < optimizer->population_size; i++) {
             if (optimizer->population[i]) {
-                lum_group_destroy(&optimizer->population[i]);
+                lum_group_destroy(optimizer->population[i]);
             }
         }
         TRACKED_FREE(optimizer->population);
@@ -195,7 +195,7 @@ void genetic_optimizer_destroy(genetic_optimizer_t** optimizer_ptr) {
     }
 
     if (optimizer->best_solution) {
-        lum_group_destroy(&optimizer->best_solution);
+        lum_group_destroy(optimizer->best_solution);
     }
 
     optimizer->memory_address = NULL;
