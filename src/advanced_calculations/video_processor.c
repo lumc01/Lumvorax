@@ -28,7 +28,7 @@ video_processor_t* video_processor_create(uint32_t width, uint32_t height,
         return NULL;
     }
     
-    video_processor_t* processor = malloc(sizeof(video_processor_t));
+    video_processor_t* processor = TRACKED_MALLOC(sizeof(video_processor_t));
     if (!processor) return NULL;
     
     memset(processor, 0, sizeof(video_processor_t));
@@ -57,7 +57,7 @@ video_processor_t* video_processor_create(uint32_t width, uint32_t height,
             processor->bytes_per_pixel = 1.5;  // Approximation YUV 4:2:0
             break;
         default:
-            free(processor);
+            TRACKED_FREE(processor);
             return NULL;
     }
     
@@ -66,17 +66,17 @@ video_processor_t* video_processor_create(uint32_t width, uint32_t height,
     // Buffer par défaut pour 1000 frames (environ 30 secondes à 30fps)
     processor->max_frames = 1000;
     processor->total_buffer_size = processor->max_frames * processor->frame_size_bytes;
-    processor->frame_buffer = malloc(processor->total_buffer_size);
+    processor->frame_buffer = TRACKED_MALLOC(processor->total_buffer_size);
     if (!processor->frame_buffer) {
-        free(processor);
+        TRACKED_FREE(processor);
         return NULL;
     }
     
     // Allocation matrice LUM 3D (x, y, temps)
     processor->spatial_temporal_lums = lum_group_create(processor->pixels_per_frame * processor->max_frames);
     if (!processor->spatial_temporal_lums) {
-        free(processor->frame_buffer);
-        free(processor);
+        TRACKED_FREE(processor->frame_buffer);
+        TRACKED_FREE(processor);
         return NULL;
     }
     
@@ -106,7 +106,7 @@ void video_processor_destroy(video_processor_t** processor_ptr) {
     
     // Libération ressources
     if (processor->frame_buffer) {
-        free(processor->frame_buffer);
+        TRACKED_FREE(processor->frame_buffer);
         processor->frame_buffer = NULL;
     }
     
@@ -115,7 +115,7 @@ void video_processor_destroy(video_processor_t** processor_ptr) {
         processor->spatial_temporal_lums = NULL;
     }
     
-    free(processor);
+    TRACKED_FREE(processor);
     *processor_ptr = NULL;
 }
 
@@ -126,7 +126,7 @@ video_processing_result_t* video_convert_frames_to_lum3d(video_processor_t* proc
     
     uint64_t start_time = get_monotonic_nanoseconds();
     
-    video_processing_result_t* result = malloc(sizeof(video_processing_result_t));
+    video_processing_result_t* result = TRACKED_MALLOC(sizeof(video_processing_result_t));
     if (!result) return NULL;
     
     memset(result, 0, sizeof(video_processing_result_t));
@@ -224,7 +224,7 @@ video_processing_result_t* video_apply_temporal_compression(video_processor_t* p
     
     uint64_t start_time = get_monotonic_nanoseconds();
     
-    video_processing_result_t* result = malloc(sizeof(video_processing_result_t));
+    video_processing_result_t* result = TRACKED_MALLOC(sizeof(video_processing_result_t));
     if (!result) return NULL;
     
     memset(result, 0, sizeof(video_processing_result_t));
@@ -300,7 +300,7 @@ video_processing_result_t* video_detect_motion_differential(video_processor_t* p
     
     uint64_t start_time = get_monotonic_nanoseconds();
     
-    video_processing_result_t* result = malloc(sizeof(video_processing_result_t));
+    video_processing_result_t* result = TRACKED_MALLOC(sizeof(video_processing_result_t));
     if (!result) return NULL;
     
     memset(result, 0, sizeof(video_processing_result_t));
@@ -381,7 +381,7 @@ bool video_stress_test_100m_frames(video_processor_t* processor) {
         printf("Extending video buffer to support %u frames...\n", frames_needed);
         
         size_t new_buffer_size = (size_t)frames_needed * processor->frame_size_bytes;
-        void* new_buffer = realloc(processor->frame_buffer, new_buffer_size);
+        void* new_buffer = TRACKED_REALLOC(processor->frame_buffer, new_buffer_size);
         if (!new_buffer) {
             printf("❌ Impossible d'allouer buffer %u frames\n", frames_needed);
             return false;
@@ -467,6 +467,6 @@ void video_processing_result_destroy(video_processing_result_t** result_ptr) {
     }
     
     result->magic_number = 0;
-    free(result);
+    TRACKED_FREE(result);
     *result_ptr = NULL;
 }

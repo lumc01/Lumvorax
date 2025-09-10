@@ -30,7 +30,7 @@ static uint64_t get_monotonic_nanoseconds(void) {
 
 // Création optimiseur Golden Score avec protection memory_address
 golden_score_optimizer_t* golden_score_optimizer_create(void) {
-    golden_score_optimizer_t* optimizer = malloc(sizeof(golden_score_optimizer_t));
+    golden_score_optimizer_t* optimizer = TRACKED_MALLOC(sizeof(golden_score_optimizer_t));
     if (!optimizer) return NULL;
     
     memset(optimizer, 0, sizeof(golden_score_optimizer_t));
@@ -76,7 +76,7 @@ void golden_score_optimizer_destroy(golden_score_optimizer_t** optimizer_ptr) {
     optimizer->is_destroyed = 1;
     optimizer->magic_number = 0;
     
-    free(optimizer);
+    TRACKED_FREE(optimizer);
     *optimizer_ptr = NULL;
 }
 
@@ -177,7 +177,7 @@ golden_optimization_result_t* golden_score_optimize_system(golden_score_optimize
     
     uint64_t start_time = get_monotonic_nanoseconds();
     
-    golden_optimization_result_t* result = malloc(sizeof(golden_optimization_result_t));
+    golden_optimization_result_t* result = TRACKED_MALLOC(sizeof(golden_optimization_result_t));
     if (!result) return NULL;
     
     memset(result, 0, sizeof(golden_optimization_result_t));
@@ -270,7 +270,7 @@ golden_optimization_result_t* golden_score_optimize_system(golden_score_optimize
 golden_comparison_t* golden_score_compare_industrial_standards(const golden_optimization_result_t* result) {
     if (!result) return NULL;
     
-    golden_comparison_t* comparison = malloc(sizeof(golden_comparison_t));
+    golden_comparison_t* comparison = TRACKED_MALLOC(sizeof(golden_comparison_t));
     if (!comparison) return NULL;
     
     memset(comparison, 0, sizeof(golden_comparison_t));
@@ -417,7 +417,7 @@ void golden_optimization_result_destroy(golden_optimization_result_t** result_pt
     }
     
     result->magic_number = 0;
-    free(result);
+    TRACKED_FREE(result);
     *result_ptr = NULL;
 }
 
@@ -432,6 +432,6 @@ void golden_comparison_destroy(golden_comparison_t** comparison_ptr) {
     }
     
     comparison->magic_number = 0;
-    free(comparison);
+    TRACKED_FREE(comparison);
     *comparison_ptr = NULL;
 }

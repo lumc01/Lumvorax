@@ -1,5 +1,6 @@
 
 #include "pareto_inverse_optimizer.h"
+#include "../debug/memory_tracker.h"
 #include "../logger/lum_logger.h"
 #include <stdlib.h>
 #include <string.h>
@@ -14,14 +15,14 @@ static double get_high_precision_time(void) {
 }
 
 pareto_inverse_optimizer_t* pareto_inverse_optimizer_create(void) {
-    pareto_inverse_optimizer_t* optimizer = malloc(sizeof(pareto_inverse_optimizer_t));
+    pareto_inverse_optimizer_t* optimizer = TRACKED_MALLOC(sizeof(pareto_inverse_optimizer_t));
     if (!optimizer) return NULL;
     
     optimizer->layer_count = 0;
     optimizer->max_layers = 10;
-    optimizer->layers = malloc(sizeof(optimization_layer_t) * optimizer->max_layers);
+    optimizer->layers = TRACKED_MALLOC(sizeof(optimization_layer_t) * optimizer->max_layers);
     if (!optimizer->layers) {
-        free(optimizer);
+        TRACKED_FREE(optimizer);
         return NULL;
     }
     
@@ -66,8 +67,8 @@ pareto_inverse_optimizer_t* pareto_inverse_optimizer_create(void) {
 
 void pareto_inverse_optimizer_destroy(pareto_inverse_optimizer_t* optimizer) {
     if (optimizer) {
-        free(optimizer->layers);
-        free(optimizer);
+        TRACKED_FREE(optimizer->layers);
+        TRACKED_FREE(optimizer);
         lum_log(LUM_LOG_INFO, "Pareto Inverse Optimizer détruit");
     }
 }

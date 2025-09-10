@@ -1,4 +1,5 @@
 #include "pareto_optimizer.h"
+#include "../debug/memory_tracker.h"
 #include "memory_optimizer.h"
 #include "../metrics/performance_metrics.h"
 #include "../logger/lum_logger.h"
@@ -52,14 +53,14 @@ static double get_microseconds(void) {
 }
 
 pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
-    pareto_optimizer_t* optimizer = malloc(sizeof(pareto_optimizer_t));
+    pareto_optimizer_t* optimizer = TRACKED_MALLOC(sizeof(pareto_optimizer_t));
     if (!optimizer) return NULL;
 
     // Utilisation du paramètre config pour la capacité initiale
     optimizer->point_capacity = config ? config->max_points : 1000;
-    optimizer->points = malloc(sizeof(pareto_point_t) * optimizer->point_capacity);
+    optimizer->points = TRACKED_MALLOC(sizeof(pareto_point_t) * optimizer->point_capacity);
     if (!optimizer->points) {
-        free(optimizer);
+        TRACKED_FREE(optimizer);
         return NULL;
     }
 
@@ -130,7 +131,7 @@ void pareto_optimizer_destroy(pareto_optimizer_t* optimizer) {
     if (optimizer->points) {
         // Les optimization_path sont des tableaux statiques dans la structure,
         // pas besoin de les nettoyer individuellement
-        free(optimizer->points);
+        TRACKED_FREE(optimizer->points);
         optimizer->points = NULL;
     }
 
@@ -138,7 +139,7 @@ void pareto_optimizer_destroy(pareto_optimizer_t* optimizer) {
     optimizer->point_count = 0;
     optimizer->point_capacity = 0;
 
-    free(optimizer);
+    TRACKED_FREE(optimizer);
 }
 
 pareto_metrics_t pareto_evaluate_metrics(lum_group_t* group, const char* operation_sequence) {
@@ -396,7 +397,7 @@ void pareto_add_point(pareto_optimizer_t* optimizer, const pareto_metrics_t* met
     if (optimizer->point_count >= optimizer->point_capacity) {
         // Redimensionnement du tableau
         optimizer->point_capacity *= 2;
-        pareto_point_t* new_points = realloc(optimizer->points, 
+        pareto_point_t* new_points = TRACKED_REALLOC(optimizer->points, 
                                            sizeof(pareto_point_t) * optimizer->point_capacity);
         if (!new_points) return;
         optimizer->points = new_points;

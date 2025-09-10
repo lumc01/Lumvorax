@@ -1,4 +1,5 @@
 #include "data_persistence.h"
+#include "../debug/memory_tracker.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -14,7 +15,7 @@ static uint64_t next_transaction_id = 1;
 persistence_context_t* persistence_context_create(const char* storage_directory) {
     if (!storage_directory) return NULL;
 
-    persistence_context_t* ctx = malloc(sizeof(persistence_context_t));
+    persistence_context_t* ctx = TRACKED_MALLOC(sizeof(persistence_context_t));
     if (!ctx) return NULL;
 
     strncpy(ctx->storage_directory, storage_directory, MAX_STORAGE_PATH_LENGTH - 1);
@@ -40,7 +41,7 @@ void persistence_context_destroy(persistence_context_t* ctx) {
         fclose(ctx->transaction_log);
     }
 
-    free(ctx);
+    TRACKED_FREE(ctx);
 }
 
 bool persistence_context_configure(persistence_context_t* ctx,
@@ -60,7 +61,7 @@ bool persistence_context_configure(persistence_context_t* ctx,
 
 // Storage result management
 storage_result_t* storage_result_create(void) {
-    storage_result_t* result = malloc(sizeof(storage_result_t));
+    storage_result_t* result = TRACKED_MALLOC(sizeof(storage_result_t));
     if (!result) return NULL;
 
     result->success = false;
@@ -75,7 +76,7 @@ storage_result_t* storage_result_create(void) {
 
 void storage_result_destroy(storage_result_t* result) {
     if (result) {
-        free(result);
+        TRACKED_FREE(result);
     }
 }
 
@@ -104,7 +105,7 @@ void storage_result_set_success(storage_result_t* result, const char* filename,
 storage_backend_t* storage_backend_create(const char* database_path) {
     if (!database_path) return NULL;
 
-    storage_backend_t* backend = malloc(sizeof(storage_backend_t));
+    storage_backend_t* backend = TRACKED_MALLOC(sizeof(storage_backend_t));
     if (!backend) return NULL;
 
     strncpy(backend->database_path, database_path, MAX_STORAGE_PATH_LENGTH - 1);
@@ -121,20 +122,20 @@ void storage_backend_destroy(storage_backend_t* backend) {
         if (backend->ctx) {
             persistence_context_destroy(backend->ctx);
         }
-        free(backend);
+        TRACKED_FREE(backend);
     }
 }
 
 serialized_data_t* serialize_lum(const lum_t* lum) {
     if (!lum) return NULL;
 
-    serialized_data_t* data = malloc(sizeof(serialized_data_t));
+    serialized_data_t* data = TRACKED_MALLOC(sizeof(serialized_data_t));
     if (!data) return NULL;
 
     data->size = sizeof(lum_t);
-    data->data = malloc(data->size);
+    data->data = TRACKED_MALLOC(data->size);
     if (!data->data) {
-        free(data);
+        TRACKED_FREE(data);
         return NULL;
     }
 
@@ -145,7 +146,7 @@ serialized_data_t* serialize_lum(const lum_t* lum) {
 lum_t* deserialize_lum(const serialized_data_t* data) {
     if (!data || !data->data || data->size < sizeof(lum_t)) return NULL;
 
-    lum_t* lum = malloc(sizeof(lum_t));
+    lum_t* lum = TRACKED_MALLOC(sizeof(lum_t));
     if (!lum) return NULL;
 
     memcpy(lum, data->data, sizeof(lum_t));
@@ -155,9 +156,9 @@ lum_t* deserialize_lum(const serialized_data_t* data) {
 void serialized_data_destroy(serialized_data_t* data) {
     if (data) {
         if (data->data) {
-            free(data->data);
+            TRACKED_FREE(data->data);
         }
-        free(data);
+        TRACKED_FREE(data);
     }
 }
 
@@ -190,7 +191,7 @@ lum_t* load_lum(storage_backend_t* backend, const char* key) {
 transaction_t* begin_transaction(storage_backend_t* backend) {
     if (!backend || !backend->is_initialized) return NULL;
 
-    transaction_t* transaction = malloc(sizeof(transaction_t));
+    transaction_t* transaction = TRACKED_MALLOC(sizeof(transaction_t));
     if (!transaction) return NULL;
 
     transaction->id = next_transaction_id++;
@@ -205,7 +206,7 @@ bool commit_transaction(transaction_t* transaction) {
     if (!transaction) return false;
 
     transaction->committed = true;
-    free(transaction);
+    TRACKED_FREE(transaction);
     return true;
 }
 
@@ -333,7 +334,7 @@ storage_result_t* persistence_load_lum(persistence_context_t* ctx,
     }
 
     // Allocate LUM
-    *lum = malloc(sizeof(lum_t));
+    *lum = TRACKED_MALLOC(sizeof(lum_t));
     if (!*lum) {
         fclose(file);
         storage_result_set_error(result, "Memory allocation failed");
@@ -343,7 +344,7 @@ storage_result_t* persistence_load_lum(persistence_context_t* ctx,
     // Read LUM data
     if (fread(*lum, sizeof(lum_t), 1, file) != 1) {
         fclose(file);
-        free(*lum);
+        TRACKED_FREE(*lum);
         *lum = NULL;
         storage_result_set_error(result, "Failed to read LUM data");
         return result;
@@ -355,7 +356,7 @@ storage_result_t* persistence_load_lum(persistence_context_t* ctx,
     if (ctx->integrity_checking_enabled) {
         uint32_t calculated_checksum = persistence_calculate_checksum(*lum, sizeof(lum_t));
         if (calculated_checksum != header.checksum) {
-            free(*lum);
+            TRACKED_FREE(*lum);
             *lum = NULL;
             storage_result_set_error(result, "Data integrity check failed");
             return result;

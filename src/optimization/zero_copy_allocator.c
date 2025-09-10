@@ -439,7 +439,7 @@ bool zero_copy_compact_free_list(zero_copy_pool_t* pool) {
             free_block_t* next = current->next;
             current->size += next->size;
             current->next = next->next;
-            free(next);
+            TRACKED_FREE(next);
             pool->free_blocks_count--;
         }
     }

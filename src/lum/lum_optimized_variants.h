@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <time.h>
 #include <stdlib.h>
+#include "../debug/memory_tracker.h"
 
 // CORRECTION PROMPT.TXT: Toutes variantes LUM DOIVENT avoir memory_address pour double-free protection
 
@@ -65,7 +66,7 @@ extern uint64_t lum_get_timestamp(void);
 
 // Fonctions utilitaires AVEC memory_address pour protection double-free
 static inline lum_encoded32_t* lum_create_encoded32(int32_t x, int32_t y, uint8_t type, uint8_t presence) {
-    lum_encoded32_t* lum = malloc(sizeof(lum_encoded32_t));
+    lum_encoded32_t* lum = TRACKED_MALLOC(sizeof(lum_encoded32_t));
     if (lum) {
         lum->timestamp = lum_get_timestamp();
         lum->encoded_data = ENCODE_LUM32(presence, type, x, y);
@@ -75,7 +76,7 @@ static inline lum_encoded32_t* lum_create_encoded32(int32_t x, int32_t y, uint8_
 }
 
 static inline lum_hybrid_t* lum_create_hybrid(int16_t x, int16_t y, uint8_t type, uint8_t presence) {
-    lum_hybrid_t* lum = malloc(sizeof(lum_hybrid_t));
+    lum_hybrid_t* lum = TRACKED_MALLOC(sizeof(lum_hybrid_t));
     if (lum) {
         lum->timestamp = lum_get_timestamp();
         lum->position_x = x;
@@ -87,7 +88,7 @@ static inline lum_hybrid_t* lum_create_hybrid(int16_t x, int16_t y, uint8_t type
 }
 
 static inline lum_compact_noid_t* lum_create_compact_noid(int32_t x, int32_t y, uint8_t type, uint8_t presence) {
-    lum_compact_noid_t* lum = malloc(sizeof(lum_compact_noid_t));
+    lum_compact_noid_t* lum = TRACKED_MALLOC(sizeof(lum_compact_noid_t));
     if (lum) {
         lum->timestamp = lum_get_timestamp();
         lum->position_x = x;
@@ -108,7 +109,7 @@ static inline void lum_destroy_encoded32(lum_encoded32_t** lum_ptr) {
             return; // Déjà détruit
         }
         (*lum_ptr)->memory_address = NULL; // Marquer comme détruit
-        free(*lum_ptr);
+        TRACKED_FREE(*lum_ptr);
         *lum_ptr = NULL;
     }
 }
@@ -120,7 +121,7 @@ static inline void lum_destroy_hybrid(lum_hybrid_t** lum_ptr) {
             return; // Déjà détruit
         }
         (*lum_ptr)->memory_address = NULL; // Marquer comme détruit
-        free(*lum_ptr);
+        TRACKED_FREE(*lum_ptr);
         *lum_ptr = NULL;
     }
 }
@@ -133,7 +134,7 @@ static inline void lum_destroy_compact_noid(lum_compact_noid_t** lum_ptr) {
         }
         (*lum_ptr)->is_destroyed = 1; // Marquer comme détruit
         (*lum_ptr)->memory_address = NULL; // Invalidation adresse
-        free(*lum_ptr);
+        TRACKED_FREE(*lum_ptr);
         *lum_ptr = NULL;
     }
 }

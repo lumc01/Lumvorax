@@ -1,4 +1,5 @@
 #include "simd_optimizer.h"
+#include "../debug/memory_tracker.h"
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -9,7 +10,7 @@
 #endif
 
 simd_capabilities_t* simd_detect_capabilities(void) {
-    simd_capabilities_t* caps = malloc(sizeof(simd_capabilities_t));
+    simd_capabilities_t* caps = TRACKED_MALLOC(sizeof(simd_capabilities_t));
     if (!caps) return NULL;
 
     caps->avx512_available = false;
@@ -61,14 +62,14 @@ simd_capabilities_t* simd_detect_capabilities(void) {
 
 void simd_capabilities_destroy(simd_capabilities_t* caps) {
     if (caps) {
-        free(caps);
+        TRACKED_FREE(caps);
     }
 }
 
 simd_result_t* simd_process_lum_array_bulk(lum_t* lums, size_t count) {
     if (!lums || count == 0) return NULL;
 
-    simd_result_t* result = malloc(sizeof(simd_result_t));
+    simd_result_t* result = TRACKED_MALLOC(sizeof(simd_result_t));
     if (!result) return NULL;
 
     clock_t start = clock();
@@ -201,7 +202,7 @@ void simd_avx512_vectorized_conservation_check(uint64_t* conservation_data, size
 #endif
 
 simd_result_t* simd_benchmark_vectorization(size_t test_size) {
-    lum_t* test_lums = malloc(test_size * sizeof(lum_t));
+    lum_t* test_lums = TRACKED_MALLOC(test_size * sizeof(lum_t));
     if (!test_lums) return NULL;
 
     // Initialize test data
@@ -213,13 +214,13 @@ simd_result_t* simd_benchmark_vectorization(size_t test_size) {
 
     simd_result_t* result = simd_process_lum_array_bulk(test_lums, test_size);
 
-    free(test_lums);
+    TRACKED_FREE(test_lums);
     return result;
 }
 
 void simd_result_destroy(simd_result_t* result) {
     if (result) {
-        free(result);
+        TRACKED_FREE(result);
     }
 }
 

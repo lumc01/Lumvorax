@@ -1,5 +1,6 @@
 // _GNU_SOURCE is already defined in Makefile
 #include "performance_metrics.h"
+#include "../debug/memory_tracker.h"
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -42,7 +43,7 @@ static struct timeval last_cpu_time = {0, 0};
 // Removed unused static variable last_cpu_clock
 
 performance_metrics_t* performance_metrics_create(void) {
-    performance_metrics_t* metrics = malloc(sizeof(performance_metrics_t));
+    performance_metrics_t* metrics = TRACKED_MALLOC(sizeof(performance_metrics_t));
     if (!metrics) return NULL;
 
     metrics->total_operations = 0;
@@ -76,12 +77,12 @@ performance_metrics_t* performance_metrics_create(void) {
 
 void performance_metrics_destroy(performance_metrics_t* metrics) {
     if (metrics) {
-        free(metrics);
+        TRACKED_FREE(metrics);
     }
 }
 
 operation_timer_t* operation_timer_create(void) {
-    operation_timer_t* timer = malloc(sizeof(operation_timer_t));
+    operation_timer_t* timer = TRACKED_MALLOC(sizeof(operation_timer_t));
     if (!timer) return NULL;
 
     timer->start_time.tv_sec = 0;
@@ -97,7 +98,7 @@ operation_timer_t* operation_timer_create(void) {
 
 void operation_timer_destroy(operation_timer_t* timer) {
     if (timer) {
-        free(timer);
+        TRACKED_FREE(timer);
     }
 }
 
@@ -254,12 +255,12 @@ void performance_metrics_update_system_stats(performance_metrics_t* metrics) {
 benchmark_result_t* performance_benchmark_function(void (*func)(void), int iterations) {
     if (!func || iterations <= 0) return NULL;
 
-    benchmark_result_t* result = malloc(sizeof(benchmark_result_t));
+    benchmark_result_t* result = TRACKED_MALLOC(sizeof(benchmark_result_t));
     if (!result) return NULL;
 
     operation_timer_t* timer = operation_timer_create();
     if (!timer) {
-        free(result);
+        TRACKED_FREE(result);
         return NULL;
     }
 
@@ -292,12 +293,12 @@ benchmark_result_t* performance_benchmark_function(void (*func)(void), int itera
 
 void benchmark_result_destroy(benchmark_result_t* result) {
     if (result) {
-        free(result);
+        TRACKED_FREE(result);
     }
 }
 
 throughput_calculator_t* throughput_calculator_create(void) {
-    throughput_calculator_t* calc = malloc(sizeof(throughput_calculator_t));
+    throughput_calculator_t* calc = TRACKED_MALLOC(sizeof(throughput_calculator_t));
     if (!calc) return NULL;
 
     calc->total_operations = 0;
@@ -311,7 +312,7 @@ throughput_calculator_t* throughput_calculator_create(void) {
 
 void throughput_calculator_destroy(throughput_calculator_t* calc) {
     if (calc) {
-        free(calc);
+        TRACKED_FREE(calc);
     }
 }
 
@@ -365,7 +366,7 @@ double throughput_calculator_get_peak(throughput_calculator_t* calc) {
 
 // Performance counter management
 performance_counter_t* performance_counter_create(void) {
-    performance_counter_t* counter = malloc(sizeof(performance_counter_t));
+    performance_counter_t* counter = TRACKED_MALLOC(sizeof(performance_counter_t));
     if (!counter) return NULL;
 
     counter->name[0] = '\0';
@@ -383,7 +384,7 @@ performance_counter_t* performance_counter_create(void) {
 
 void performance_counter_destroy(performance_counter_t* counter) {
     if (counter) {
-        free(counter);
+        TRACKED_FREE(counter);
     }
 }
 
@@ -416,7 +417,7 @@ double performance_counter_stop(performance_counter_t* counter) {
 
 // Memory footprint tracking
 memory_footprint_t* memory_footprint_create(void) {
-    memory_footprint_t* footprint = malloc(sizeof(memory_footprint_t));
+    memory_footprint_t* footprint = TRACKED_MALLOC(sizeof(memory_footprint_t));
     if (!footprint) return NULL;
 
     footprint->heap_usage = 0;
@@ -431,7 +432,7 @@ memory_footprint_t* memory_footprint_create(void) {
 
 void memory_footprint_destroy(memory_footprint_t* footprint) {
     if (footprint) {
-        free(footprint);
+        TRACKED_FREE(footprint);
     }
 }
 
