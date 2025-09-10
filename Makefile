@@ -10,7 +10,7 @@ ADVANCED_CALC_SOURCES = src/advanced_calculations/matrix_calculator.c \
 	               src/advanced_calculations/quantum_simulator.c \
 	               src/advanced_calculations/neural_network_processor.c
 
-# Complex modules  
+# Complex modules
 COMPLEX_MODULES_SOURCES = src/complex_modules/realtime_analytics.c \
 	                 src/complex_modules/distributed_computing.c \
 	                 src/complex_modules/ai_optimization.c
@@ -203,6 +203,24 @@ $(KNAPSACK_OBJ): $(KNAPSACK_MODULE_SOURCE) src/advanced_calculations/matrix_calc
 $(COLLATZ_OBJ): $(COLLATZ_MODULE_SOURCE) src/advanced_calculations/matrix_calculator.h
 	mkdir -p $(OBJ_DIR)/advanced_calculations
 	$(CC) $(CFLAGS) -c $(COLLATZ_MODULE_SOURCE) -o $(COLLATZ_OBJ)
+
+# New multimedia and golden score modules compilation
+obj/advanced_calculations/image_processor.o: src/advanced_calculations/image_processor.c src/advanced_calculations/image_processor.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/image_processor.c -o obj/advanced_calculations/image_processor.o
+
+obj/advanced_calculations/audio_processor.o: src/advanced_calculations/audio_processor.c src/advanced_calculations/audio_processor.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/audio_processor.c -o obj/advanced_calculations/audio_processor.o
+
+obj/advanced_calculations/video_processor.o: src/advanced_calculations/video_processor.c src/advanced_calculations/video_processor.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/video_processor.c -o obj/advanced_calculations/video_processor.o
+
+obj/advanced_calculations/golden_score_optimizer.o: src/advanced_calculations/golden_score_optimizer.c src/advanced_calculations/golden_score_optimizer.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/golden_score_optimizer.c -o obj/advanced_calculations/golden_score_optimizer.o
+
 
 # Complex modules
 obj/complex_modules/realtime_analytics.o: src/complex_modules/realtime_analytics.c src/complex_modules/realtime_analytics.h
