@@ -68,26 +68,6 @@ task = "shell.exec"
 args = "echo \"Rapport mis à jour avec données authentiques\""
 
 [[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "LUM/VORAX System Demo"
-
-[[workflows.workflow]]
-name = "LUM/VORAX System Demo"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax"
-
-[[workflows.workflow]]
 name = "VALIDATION_CORRECTIONS_COMPLETES"
 author = 47363890
 mode = "sequential"
@@ -366,6 +346,26 @@ args = "echo \"\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"=== RAPPORT FORENSIQUE FINAL GÉNÉRATION ===\""
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "LUM/VORAX Basic Tests"
+
+[[workflows.workflow]]
+name = "LUM/VORAX Basic Tests"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax --crypto-validation && ./bin/lum_vorax --sizeof-checks"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh", "file"]
