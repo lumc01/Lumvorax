@@ -77,7 +77,7 @@ static uint64_t mod_exp(uint64_t base, uint64_t exp, uint64_t mod) {
 }
 
 // Number Theoretic Transform (NTT) pour polynômes
-static void ntt_forward(uint64_t* poly, size_t degree, uint64_t modulus) __attribute__((unused));
+__attribute__((unused)) static void ntt_forward(uint64_t* poly, size_t degree, uint64_t modulus) {
     // Guards de sécurité critiques
     if (!poly || degree <= 1 || degree > HE_MAX_POLYNOMIAL_DEGREE) {
         printf("ERROR: NTT forward invalid params - poly=%p, degree=%zu\n", 
@@ -115,7 +115,7 @@ static void ntt_forward(uint64_t* poly, size_t degree, uint64_t modulus) __attri
 }
 
 // Inverse NTT
-static void ntt_inverse(uint64_t* poly, size_t degree, uint64_t modulus) __attribute__((unused));
+__attribute__((unused)) static void ntt_inverse(uint64_t* poly, size_t degree, uint64_t modulus) {
     // Guards de sécurité critiques
     if (!poly || degree <= 1 || degree > HE_MAX_POLYNOMIAL_DEGREE) {
         printf("ERROR: NTT inverse invalid params - poly=%p, degree=%zu\n", 
