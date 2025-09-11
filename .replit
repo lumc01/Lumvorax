@@ -730,6 +730,27 @@ args = "echo \"✅ VALIDATION TERMINÉE - Logs disponibles:\""
 task = "shell.exec"
 args = "ls -la logs/*/*.log"
 
+[[workflows.workflow]]
+name = "VALIDATION_LOGS_FONCTIONNELS_CORRIGES"
+author = 47457509
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== LANCEMENT VALIDATION AVEC LOGS CORRIGÉS ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "chmod +x run_validation_complete.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./run_validation_complete.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== VALIDATION TERMINÉE ===\""
+
 [nix]
 packages = ["openssh", "file"]
 channel = "stable-25_05"
