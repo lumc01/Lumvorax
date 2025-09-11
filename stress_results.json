@@ -1,7 +1,0 @@
-{
-  "test_date": "2025-09-11T15:40:22.176464",
-  "performance": {},
-  "memory": {},
-  "validation": {},
-  "error": "[Errno 2] No such file or directory: 'stress_results.log'"
-}
