@@ -77,7 +77,7 @@ static uint64_t mod_exp(uint64_t base, uint64_t exp, uint64_t mod) {
 }
 
 // Number Theoretic Transform (NTT) pour polynômes
-static void ntt_forward(uint64_t* poly, size_t degree, uint64_t modulus) {
+static void ntt_forward(uint64_t* poly, size_t degree, uint64_t modulus) __attribute__((unused));
     // Guards de sécurité critiques
     if (!poly || degree <= 1 || degree > HE_MAX_POLYNOMIAL_DEGREE) {
         printf("ERROR: NTT forward invalid params - poly=%p, degree=%zu\n", 
@@ -115,7 +115,7 @@ static void ntt_forward(uint64_t* poly, size_t degree, uint64_t modulus) {
 }
 
 // Inverse NTT
-static void ntt_inverse(uint64_t* poly, size_t degree, uint64_t modulus) {
+static void ntt_inverse(uint64_t* poly, size_t degree, uint64_t modulus) __attribute__((unused));
     // Guards de sécurité critiques
     if (!poly || degree <= 1 || degree > HE_MAX_POLYNOMIAL_DEGREE) {
         printf("ERROR: NTT inverse invalid params - poly=%p, degree=%zu\n", 
@@ -611,8 +611,8 @@ he_ciphertext_t* he_ciphertext_create(he_context_t* context) {
     
     // Validation critique des tailles
     if (required_bytes < context->params->polynomial_modulus_degree * sizeof(uint64_t)) {
-        printf("ERROR: Buffer underflow risk - degree=%zu, bytes=%zu\n", 
-               context->params->polynomial_modulus_degree, required_bytes);
+        printf("ERROR: Buffer underflow risk - degree=%u, bytes=%zu\n", 
+               (unsigned int)context->params->polynomial_modulus_degree, required_bytes);
         TRACKED_FREE(ciphertext);
         return NULL;
     }
@@ -974,8 +974,8 @@ void he_print_context_info(const he_context_t* context) {
     printf("Schéma: %s\n", scheme_names[context->scheme]);
     printf("Degré polynôme: %u\n", context->params->polynomial_modulus_degree);
     printf("Niveau sécurité: %u bits\n", context->params->security_level);
-    printf("Opérations effectuées: %llu\n", context->operations_performed);
-    printf("Temps total opérations: %llu ns\n", context->total_operation_time_ns);
+    printf("Opérations effectuées: %lu\n", (unsigned long)context->operations_performed);
+    printf("Temps total opérations: %lu ns\n", (unsigned long)context->total_operation_time_ns);
     printf("Niveau bruit actuel: %.2f\n", context->current_noise_level);
     printf("Nombre encryptions: %u\n", context->encryption_count);
     printf("Nombre decryptions: %u\n", context->decryption_count);
@@ -994,7 +994,7 @@ void he_print_ciphertext_info(const he_ciphertext_t* ciphertext) {
     printf("Nombre polynômes: %u\n", ciphertext->polynomial_count);
     printf("Taille données: %zu bytes\n", ciphertext->ciphertext_size);
     printf("Opérations subies: %u\n", ciphertext->operation_count);
-    printf("Timestamp création: %llu ns\n", ciphertext->creation_timestamp);
+    printf("Timestamp création: %lu ns\n", (unsigned long)ciphertext->creation_timestamp);
     printf("=====================\n");
 }
 
@@ -1055,7 +1055,7 @@ he_stress_result_t* he_stress_test_100m_operations(he_context_t* context, he_str
     
     uint64_t test_start_time = get_monotonic_nanoseconds();
     uint64_t total_operations = 0;
-    uint64_t peak_memory = 0;
+    // uint64_t peak_memory = 0;  // Supprimé variable inutilisée
     
     // Préparation données test
     he_plaintext_t* plaintext_a = he_plaintext_create(config->scheme);
@@ -1149,7 +1149,7 @@ he_stress_result_t* he_stress_test_100m_operations(he_context_t* context, he_str
         // Rapport progression
         if (batch % 1000 == 0) {
             printf("Batch %zu/%zu - Opérations: %llu - Budget bruit: %.2f\n", 
-                   batch, total_batches, total_operations, he_get_noise_budget(ciphertext_a));
+                   batch, total_batches, (unsigned long long)total_operations, he_get_noise_budget(ciphertext_a));
         }
     }
     
@@ -1180,7 +1180,7 @@ he_stress_result_t* he_stress_test_100m_operations(he_context_t* context, he_str
         "Consommation bruit: %.6f par opération\n"
         "Taux succès: %.1f%%\n"
         "Statut: %s",
-        total_operations,
+        (unsigned long long)total_operations,
         (double)result->total_time_ns / 1000000000.0,
         result->operations_per_second,
         result->initial_noise_budget,
@@ -1191,7 +1191,7 @@ he_stress_result_t* he_stress_test_100m_operations(he_context_t* context, he_str
     );
     
     printf("✅ Test stress homomorphique terminé: %llu opérations en %.3f sec\n", 
-           total_operations, (double)result->total_time_ns / 1000000000.0);
+           (unsigned long long)total_operations, (double)result->total_time_ns / 1000000000.0);
     printf("Débit atteint: %.0f opérations/seconde\n", result->operations_per_second);
     
 cleanup:

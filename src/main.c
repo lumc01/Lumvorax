@@ -1635,7 +1635,7 @@ bool he_stress_test_100m_operations_wrapper(void) {
         if (result->test_success) {
             printf("  ✅ STRESS TEST RÉUSSI!\n");
             printf("  📊 Opérations: %llu en %.3f secondes\n", 
-                   result->total_operations,
+                   (unsigned long long)result->total_operations,
                    (double)result->total_time_ns / 1000000000.0);
             printf("  ⚡ Débit: %.0f opérations/seconde\n", 
                    result->operations_per_second);
