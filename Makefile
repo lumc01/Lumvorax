@@ -115,8 +115,12 @@ $(OBJ_DIR)/parallel/parallel_processor.o: $(SRC_DIR)/parallel/parallel_processor
 	$(CC) $(CFLAGS) -pthread -c $< -o $@
 
 # Compilation with sanitizers
-debug: CFLAGS += $(SANITIZER_FLAGS) -fno-omit-frame-pointer -g3
-debug: $(BINDIR)/lum_vorax
+debug: CFLAGS += -g -DDEBUG
+debug: $(TARGET)
+
+debug_asan: CFLAGS += -fsanitize=address,undefined -g -O1 -DDEBUG
+debug_asan: LDFLAGS += -fsanitize=address,undefined
+debug_asan: $(TARGET)
 
 # Compilation optimisée pour production
 release: CFLAGS += -O3 -DNDEBUG -march=native -flto
@@ -237,7 +241,7 @@ obj/complex_modules/ai_optimization.o: src/complex_modules/ai_optimization.c src
 	mkdir -p obj/complex_modules
 	$(CC) $(CFLAGS) $(INCLUDES) -c src/complex_modules/ai_optimization.c -o obj/complex_modules/ai_optimization.o
 
-.PHONY: all clean run test
+.PHONY: all clean debug test forensic-validation benchmark-baselines crypto-validation memory-analysis
 
 all: $(EXECUTABLE) | $(LOG_DIR)
 
@@ -248,4 +252,19 @@ run: $(EXECUTABLE)
 	./$(EXECUTABLE)
 
 test: $(EXECUTABLE)
-	./$(EXECUTABLE) --test
+	@echo "Running tests..."
+	@cd src/tests && $(CC) $(CFLAGS) -I../lum -I../vorax -I../parser -I../binary -I../logger test_lum_core.c ../lum/lum_core.c ../logger/lum_logger.c -o test_lum_core -lm
+	@cd src/tests && ./test_lum_core
+
+forensic-validation:
+	./ci/run_full_validation.sh
+
+benchmark-baselines:
+	./benchmark_baseline/run_all_benchmarks.sh
+
+crypto-validation:
+	./ci/run_crypto_validation.sh
+
+memory-analysis:
+	$(MAKE) debug_asan
+	ASAN_OPTIONS=detect_leaks=1 ./bin/lum_vorax --stress-test-million &> asan_report.txt

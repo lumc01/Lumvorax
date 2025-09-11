@@ -367,6 +367,47 @@ args = "./bin/lum_vorax --stress-test-million"
 [workflows.workflow.metadata]
 outputType = "console"
 
+[[workflows.workflow]]
+name = "VALIDATION_FORENSIQUE_COMPLETE"
+author = 47457509
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== DÉMARRAGE VALIDATION FORENSIQUE COMPLÈTE ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "chmod +x build.sh ci/*.sh benchmark_baseline/*.sh tools/*.py"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./ci/run_full_validation.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== PARSING RÉSULTATS ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 tools/parse_stress_log.py stress_results.log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== VALIDATION TERMINÉE ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Artefacts disponibles dans artifacts/\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Métriques dans stress_results.json\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "ls -la artifacts/ stress_results.json"
+
 [nix]
 packages = ["openssh", "file"]
 channel = "stable-25_05"
