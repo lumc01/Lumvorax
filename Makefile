@@ -1,3 +1,6 @@
+.PHONY: all clean debug debug_asan release
+all: $(TARGET)
+
 CC = clang
 CFLAGS = -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug
 SRC_DIR = src
@@ -35,6 +38,7 @@ ZERO_COPY_OBJ = $(OBJ_DIR)/optimization/zero_copy_allocator.o
 PARALLEL_PROC_OBJ = $(OBJ_DIR)/parallel/parallel_processor.o
 PERF_METRICS_OBJ = $(OBJ_DIR)/metrics/performance_metrics.o
 CRYPTO_VAL_OBJ = $(OBJ_DIR)/crypto/crypto_validator.o
+HOMOMORPHIC_OBJ = $(OBJ_DIR)/crypto/homomorphic_encryption.o
 DATA_PERSIST_OBJ = $(OBJ_DIR)/persistence/data_persistence.o
 MEMORY_TRACKER_OBJ = $(OBJ_DIR)/debug/memory_tracker.o
 
@@ -57,6 +61,7 @@ SOURCES = $(SRC_DIR)/main.c \
 	  $(SRC_DIR)/parallel/parallel_processor.c \
 	  $(SRC_DIR)/metrics/performance_metrics.c \
 	  $(SRC_DIR)/crypto/crypto_validator.c \
+	  $(SRC_DIR)/crypto/homomorphic_encryption.c \
 	  $(SRC_DIR)/persistence/data_persistence.c \
 	  $(SRC_DIR)/debug/memory_tracker.c \
       $(ADVANCED_CALC_SOURCES) \
@@ -68,7 +73,7 @@ OBJECTS = obj/main.o obj/lum/lum_core.o obj/vorax/vorax_operations.o obj/parser/
 	  obj/optimization/pareto_inverse_optimizer.o obj/optimization/simd_optimizer.o \
 	  obj/optimization/zero_copy_allocator.o \
 	  obj/parallel/parallel_processor.o obj/metrics/performance_metrics.o \
-	  obj/crypto/crypto_validator.o obj/persistence/data_persistence.o \
+	  obj/crypto/crypto_validator.o obj/crypto/homomorphic_encryption.o obj/persistence/data_persistence.o \
 	  obj/debug/memory_tracker.o \
 	  obj/advanced_calculations/matrix_calculator.o \
 	  obj/advanced_calculations/quantum_simulator.o \
@@ -124,17 +129,17 @@ debug_asan: $(TARGET)
 
 # Compilation optimisée pour production
 release: CFLAGS += -O3 -DNDEBUG -march=native -flto
-release: $(BINDIR)/lum_vorax
+release: $(BIN_DIR)/lum_vorax
 
 # Test specific zero-copy
-test-zerocopy: $(BINDIR)/lum_vorax
+test-zerocopy: $(BIN_DIR)/lum_vorax
 	@echo "Test allocateur zero-copy..."
-	@$(BINDIR)/lum_vorax --test-zerocopy-only
+	@$(BIN_DIR)/lum_vorax --test-zerocopy-only
 
 # Test million LUMs sécurisé
 test-million-safe: debug
 	@echo "Test million LUMs avec AddressSanitizer..."
-	@./$(BINDIR)/lum_vorax --stress-million-safe
+	@./$(BIN_DIR)/lum_vorax --stress-million-safe
 
 # Test de stress sécurisé pour Replit (exclure main.o pour éviter conflit)
 STRESS_OBJECTS = $(filter-out $(OBJ_DIR)/main.o, $(OBJECTS))
