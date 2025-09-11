@@ -569,6 +569,167 @@ args = "ls -la logs/"
 task = "shell.exec"
 args = "echo \"Validation terminée: $(date -u)\""
 
+[[workflows.workflow]]
+name = "VALIDATION_LOGS_CORRIGEE"
+author = 47457509
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== VALIDATION AVEC LOGS FONCTIONNELS ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 0: Préparation environnement\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "chmod +x prepare_logs.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./prepare_logs.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "SESSION=$(cat logs/current_session.txt)"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Session: $SESSION\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 1: Compilation avec logs\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make clean"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make all 2>&1 | tee \"logs/compilation/build_${SESSION}.log\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"✅ Compilation loggée dans logs/compilation/build_${SESSION}.log\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 2: Test stress avec logs détaillés\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ -f bin/lum_vorax ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"Lancement test 1M LUMs avec logging complet\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax --stress-test-million 2>&1 | tee \"logs/stress_tests/stress_${SESSION}.log\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"✅ Test stress loggé dans logs/stress_tests/stress_${SESSION}.log\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "else"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"❌ Pas de binaire - voir logs/compilation/build_${SESSION}.log\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    cat \"logs/compilation/build_${SESSION}.log\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    exit 1"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 3: Parsing résultats\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 tools/parse_stress_log.py \"logs/stress_tests/stress_${SESSION}.log\" 2>&1 | tee \"logs/parsing_results/parsed_${SESSION}.log\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 4: Vérification logs créés\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== CONTENU LOGS GÉNÉRÉS ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = 'find logs/ -name "*.log" -exec echo "📄 {}" \; -exec head -20 {} \; -exec echo "---" \;'
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== MÉTRIQUES PARSÉES ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ -f stress_results.json ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    cat stress_results.json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "else"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"❌ Pas de stress_results.json généré\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"✅ VALIDATION TERMINÉE - Logs disponibles:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "ls -la logs/*/*.log"
+
 [nix]
 packages = ["openssh", "file"]
 channel = "stable-25_05"

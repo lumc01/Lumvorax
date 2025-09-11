@@ -52,13 +52,49 @@ def parse_stress_log(log_file):
 
         return results
     except FileNotFoundError:
-        return {
-            "test_date": datetime.now().isoformat(),
-            "performance": {},
-            "memory": {},
-            "validation": {},
-            "error": f"[Errno 2] No such file or directory: '{log_file}'"
-        }
+        # Chercher dans plusieurs répertoires possibles
+        possible_paths = [
+            log_file,
+            f"logs/{log_file}",
+            f"logs/stress_tests/{log_file}",
+            "logs/stress_test_*.log"
+        ]
+        
+        for path in possible_paths:
+            if '*' in path:
+                import glob
+                files = glob.glob(path)
+                if files:
+                    log_file = files[-1]  # Prendre le plus récent
+                    break
+            elif os.path.exists(path):
+                log_file = path
+                break
+        else:
+            return {
+                "test_date": datetime.now().isoformat(),
+                "performance": {},
+                "memory": {},
+                "validation": {},
+                "error": f"Aucun fichier trouvé dans: {possible_paths}",
+                "debug": {
+                    "cwd": os.getcwd(),
+                    "logs_content": os.listdir("logs") if os.path.exists("logs") else "logs/ n'existe pas"
+                }
+            }
+            
+        # Retry avec le fichier trouvé
+        try:
+            with open(log_file, 'r') as f:
+                content = f.read()
+        except Exception as e:
+            return {
+                "test_date": datetime.now().isoformat(), 
+                "performance": {},
+                "memory": {},
+                "validation": {},
+                "error": f"Erreur lecture {log_file}: {str(e)}"
+            }
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
