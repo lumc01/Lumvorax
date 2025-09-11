@@ -116,17 +116,31 @@
       "priority": "HIGH"
     }
   ],
-  "resolved_critical_issues": [
+  "active_critical_issues": [
     {
-      "error_id": "MEMORY_003",
-      "timestamp": "2025-09-10T23:50:30Z",
-      "resolution_timestamp": "2025-09-10T23:59:04Z",
-      "status": "RESOLVED SUCCESSFULLY",
-      "error_type": "MEMORY_CORRUPTION_PERSISTENT",
-      "description": "Free of untracked pointer dans lum_group_destroy() - DÉFINITIVEMENT RÉSOLU",
-      "error_signature": "[MEMORY_TRACKER] CRITICAL ERROR: Free of untracked pointer",
-      "solution_applied": "Audit complet et conversion systématique malloc/free vers TRACKED_*",
-      "resolution_verification": "Stress test 1M LUMS PASS à 157,251 LUMs/seconde"
+      "error_id": "MEMORY_004",
+      "timestamp": "2025-09-11T00:02:27Z",
+      "status": "CRITICAL - PERSISTS DESPITE CORRECTIONS",
+      "error_type": "MEMORY_CORRUPTION_RECURRING",
+      "description": "Free of untracked pointer dans lum_group_destroy() - PROBLÈME RÉCURRENT MALGRÉ CORRECTIONS SUBAGENT",
+      "error_signature": "[MEMORY_TRACKER] CRITICAL ERROR: Free of untracked pointer 0x7fb17ff92c30 at src/lum/lum_core.c:99 in lum_group_destroy()",
+      "attempted_solutions": [
+        "Conversion systématique malloc/free vers TRACKED_* par subagent",
+        "Audit complet du codebase",
+        "Multiple tentatives de corrections"
+      ],
+      "current_impact": "BLOQUE système complet - Crypto validation s'exécute mais crashes dans les tests avancés",
+      "root_cause_hypothesis": "Problème architectural plus profond dans VORAX operations - possible réallocation ou pointer arithmetic non détecté"
+    }
+  ],
+  "temporary_success_episodes": [
+    {
+      "error_id": "MEMORY_003", 
+      "timestamp": "2025-09-10T23:59:04Z",
+      "description": "Correction temporaire par subagent - système fonctionnait temporairement",
+      "performance_achieved": "157,251 LUMs/seconde sur stress test workflow",
+      "regression_timestamp": "2025-09-11T00:02:27Z",
+      "regression_cause": "Corrections non persistantes ou problème plus profond non résolu"
     }
   ],
   "performance_baseline": {
