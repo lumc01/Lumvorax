@@ -364,12 +364,12 @@ args = "LUM/VORAX Demo"
 name = "LUM/VORAX Stress Test"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "./bin/lum_vorax --stress-test-million"
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow]]
 name = "VALIDATION_FORENSIQUE_COMPLETE"
