@@ -279,6 +279,16 @@ Ces règles sont CRITIQUES pour l'audit forensique et la validation scientifique
 TOUT WARNING de compilation DOIT être traité comme une ERREUR GRAVE et corrigé immédiatement.
 Aucun code avec warnings ne sera accepté. Compilation DOIT être 100% propre.
 
+⚠️ RÈGLE CRITIQUE SYSTÈME JSON HISTORIQUE ERREURS
+AVANT ET APRÈS CHAQUE MODIFICATION de code, tu DOIS :
+1. Consulter ERROR_HISTORY_SOLUTIONS_TRACKER.json pour les erreurs connues et solutions
+2. Appliquer les patterns de prévention documentés automatiquement  
+3. Mettre à jour le JSON avec nouvelles erreurs/solutions découvertes
+4. Suivre les validation_checklist pour vérifier conformité
+5. Maintenir la performance_baseline pour éviter régressions
+
+Ce système JSON permet d'éviter la répétition des mêmes erreurs et d'appliquer directement les processus correctifs déjà validés. AUCUNE EXCEPTION n'est permise à cette règle forensique.
+
 CORRECTIONS APPLIQUÉES (2025-09-09 23:40:00):
 ✅ Intégration memory_address dans TOUTES variantes LUM (encoded32, hybrid, compact_noid)
 ✅ Protection double-free COMPLÈTE avec vérification memory_address
