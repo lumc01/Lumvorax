@@ -356,6 +356,10 @@ author = "agent"
 task = "workflow.run"
 args = "LUM/VORAX Stress Test"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "LUM/VORAX Demo"
+
 [[workflows.workflow]]
 name = "LUM/VORAX Stress Test"
 author = "agent"
@@ -750,6 +754,17 @@ args = "./run_validation_complete.sh"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"=== VALIDATION TERMINÉE ===\""
+
+[[workflows.workflow]]
+name = "LUM/VORAX Demo"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax --sizeof-checks"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh", "file"]
