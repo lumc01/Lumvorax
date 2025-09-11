@@ -142,22 +142,13 @@ int main(int argc, char* argv[]) {
                     .checksum = 0,
                     .is_destroyed = 0
                 };
-                lum_t* lum_ptr = TRACKED_MALLOC(sizeof(lum_t));
-                if (lum_ptr) {
-                    *lum_ptr = lum;
-                    if (!lum_group_add(large_group, lum_ptr)) {
-                        printf("ERROR: Failed to add LUM %zu\n", i);
-                        TRACKED_FREE(lum_ptr);
-                        lum_group_destroy(large_group);
-                        return 1;
-                    }
-                    // CORRECTION CRITIQUE: Libérer pointeur temporaire après copie dans groupe
-                    TRACKED_FREE(lum_ptr);
-                } else {
-                    printf("ERROR: Memory allocation failed for LUM %zu\n", i);
+                // CORRECTION ALLOCATION CRITIQUE: lum_group_add prend pointeur, pas copie
+                if (!lum_group_add(large_group, &lum)) {
+                    printf("ERROR: Failed to add LUM %zu\n", i);
                     lum_group_destroy(large_group);
                     return 1;
                 }
+                // Plus besoin d'allocation séparée - structure temporaire stack-based
 
                 // Progress indicator every 100k
                 if (i > 0 && i % 100000 == 0) {

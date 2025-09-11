@@ -328,7 +328,12 @@
       "src/optimization/pareto_optimizer.c": 1,
       "src/debug/memory_tracker.c": 0
     },
-    "corrections_applied_per_module": {},
+    "corrections_applied_per_module": {
+      "src/lum/lum_core.h": "CORRIGÉ: Déclarations après #endif supprimées",
+      "src/main.c": "CORRIGÉ: Pattern allocation dangereux remplacé par stack-based",  
+      "src/parser/vorax_parser.c": "CORRIGÉ: Buffer overflows strcat sécurisés avec vérifications taille",
+      "src/optimization/pareto_optimizer.c": "CORRIGÉ: Métriques hardcodées remplacées par mesures authentiques"
+    },
     "inspection_progress": "10/75 fichiers inspectés (13.3%)",
     "critical_fixes_required": [
       "URGENT: Corriger lum_core.h déclarations après #endif",

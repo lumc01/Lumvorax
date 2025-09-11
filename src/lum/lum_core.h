@@ -91,7 +91,6 @@ uint64_t lum_get_timestamp(void);
 void lum_print(const lum_t* lum);
 void lum_group_print(const lum_group_t* group);
 
-#endif // LUM_CORE_H
 // Fonction de destruction sécurisée
 void lum_safe_destroy(lum_t** lum_ptr);
 
@@ -119,3 +118,5 @@ void lum_safe_destroy(lum_t** lum_ptr);
             return false; \
         } \
     } while(0)
+
+#endif // LUM_CORE_H

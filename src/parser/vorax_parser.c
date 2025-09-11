@@ -362,7 +362,12 @@ vorax_ast_node_t* vorax_parse_emit_statement(vorax_parser_context_t* ctx) {
     ctx->current_token = vorax_lexer_next_token(ctx); // Skip 'emit'
     
     if (ctx->current_token.type == TOKEN_IDENTIFIER) {
-        strcat(node->data, ctx->current_token.value);
+        // SÉCURITÉ BUFFER: Vérifier taille avant strcat
+        size_t data_len = strlen(node->data);
+        size_t value_len = strlen(ctx->current_token.value);
+        if (data_len + value_len < sizeof(node->data) - 1) {
+            strcat(node->data, ctx->current_token.value);
+        }
         ctx->current_token = vorax_lexer_next_token(ctx);
         
         if (ctx->current_token.type == TOKEN_PLUS && 
@@ -372,8 +377,13 @@ vorax_ast_node_t* vorax_parse_emit_statement(vorax_parser_context_t* ctx) {
             ctx->current_token = vorax_lexer_next_token(ctx);
             
             if (ctx->current_token.type == TOKEN_NUMBER) {
-                strcat(node->data, " ");
-                strcat(node->data, ctx->current_token.value);
+                // SÉCURITÉ BUFFER: Vérifier espace avant concaténation
+                size_t data_len = strlen(node->data);
+                size_t value_len = strlen(ctx->current_token.value);
+                if (data_len + 1 + value_len < sizeof(node->data) - 1) {
+                    strcat(node->data, " ");
+                    strcat(node->data, ctx->current_token.value);
+                }
                 ctx->current_token = vorax_lexer_next_token(ctx);
             }
         }
@@ -393,7 +403,12 @@ vorax_ast_node_t* vorax_parse_split_statement(vorax_parser_context_t* ctx) {
     ctx->current_token = vorax_lexer_next_token(ctx); // Skip 'split'
     
     if (ctx->current_token.type == TOKEN_IDENTIFIER) {
-        strcat(node->data, ctx->current_token.value);
+        // SÉCURITÉ BUFFER: Vérifier avant strcat split
+        size_t data_len = strlen(node->data);
+        size_t value_len = strlen(ctx->current_token.value);
+        if (data_len + value_len < sizeof(node->data) - 1) {
+            strcat(node->data, ctx->current_token.value);
+        }
         ctx->current_token = vorax_lexer_next_token(ctx);
         
         if (ctx->current_token.type == TOKEN_ARROW) {
@@ -416,15 +431,27 @@ vorax_ast_node_t* vorax_parse_move_statement(vorax_parser_context_t* ctx) {
     ctx->current_token = vorax_lexer_next_token(ctx); // Skip 'move'
     
     if (ctx->current_token.type == TOKEN_IDENTIFIER) {
-        strcat(node->data, ctx->current_token.value);
+        // SÉCURITÉ BUFFER: Vérifier avant strcat move source
+        size_t data_len = strlen(node->data);
+        size_t value_len = strlen(ctx->current_token.value);
+        if (data_len + value_len < sizeof(node->data) - 1) {
+            strcat(node->data, ctx->current_token.value);
+        }
         ctx->current_token = vorax_lexer_next_token(ctx);
         
         if (ctx->current_token.type == TOKEN_ARROW) {
             ctx->current_token = vorax_lexer_next_token(ctx);
             
             if (ctx->current_token.type == TOKEN_IDENTIFIER) {
-                strcat(node->data, " -> ");
-                strcat(node->data, ctx->current_token.value);
+                // SÉCURITÉ BUFFER: Vérifier avant strcat arrow + target
+                size_t data_len = strlen(node->data);
+                const char* arrow = " -> ";
+                size_t arrow_len = strlen(arrow);
+                size_t value_len = strlen(ctx->current_token.value);
+                if (data_len + arrow_len + value_len < sizeof(node->data) - 1) {
+                    strcat(node->data, arrow);
+                    strcat(node->data, ctx->current_token.value);
+                }
                 ctx->current_token = vorax_lexer_next_token(ctx);
             }
         }
