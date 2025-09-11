@@ -30,6 +30,7 @@ void memory_tracker_set_release_mode(bool mode) {
     }
 }
 
+
 void memory_tracker_export_json(const char* filename) {
     if (!memory_tracker_is_enabled()) return;
 
@@ -62,6 +63,14 @@ void memory_tracker_init(void) {
         printf("[MEMORY_TRACKER] Initialized - tracking enabled\n");
     }
     pthread_mutex_unlock(&g_tracker_mutex);
+}
+
+size_t memory_tracker_get_current_usage(void) {
+    if (!g_tracker_initialized) return 0;
+    pthread_mutex_lock(&g_tracker_mutex);
+    size_t current = g_tracker.current_usage;
+    pthread_mutex_unlock(&g_tracker_mutex);
+    return current;
 }
 
 static int find_entry(void* ptr) {

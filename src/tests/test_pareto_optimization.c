@@ -40,7 +40,7 @@ void test_pareto_metrics_evaluation(void) {
         lum_t* test_lum = lum_create(i % 2, (int32_t)i, 0, LUM_STRUCTURE_LINEAR);
         if (test_lum) {
             lum_group_add(test_group, test_lum);
-            free(test_lum);
+            lum_destroy(test_lum);
         }
     }
     

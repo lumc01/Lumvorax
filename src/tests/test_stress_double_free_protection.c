@@ -14,7 +14,7 @@ bool test_stress_double_free_protection_million_lums(void) {
     memory_tracker_enable(true);
     
     const size_t test_count = 1000000;  // 1M LUMs minimum requis prompt.txt
-    lum_group_t** groups = malloc(test_count * sizeof(lum_group_t*));
+    lum_group_t** groups = TRACKED_MALLOC(test_count * sizeof(lum_group_t*));
     
     // Création 1M groupes
     for (size_t i = 0; i < test_count; i++) {
@@ -41,7 +41,7 @@ bool test_stress_double_free_protection_million_lums(void) {
         }
     }
     
-    free(groups);
+    TRACKED_FREE(groups);
     
     // Export métriques JSON
     memory_tracker_export_json("logs/stress_double_free_metrics.json");

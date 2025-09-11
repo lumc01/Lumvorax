@@ -81,7 +81,7 @@ void test_multi_layer_optimization_execution(void) {
         lum_t* test_lum = lum_create(i % 2, (int32_t)i, (int32_t)(i % 100), LUM_STRUCTURE_LINEAR);
         if (test_lum) {
             lum_group_add(test_group, test_lum);
-            free(test_lum);
+            lum_destroy(test_lum);
         }
     }
     
@@ -148,7 +148,7 @@ void test_specialized_optimization_functions(void) {
         lum_t* test_lum = lum_create(1, (int32_t)i, (int32_t)i, LUM_STRUCTURE_LINEAR);
         if (test_lum) {
             lum_group_add(test_group, test_lum);
-            free(test_lum);
+            lum_destroy(test_lum);
         }
     }
     
@@ -253,7 +253,7 @@ void test_extreme_optimization_scenarios(void) {
                                    (lum_structure_e)(i % 4));
         if (test_lum) {
             lum_group_add(large_group, test_lum);
-            free(test_lum);
+            lum_destroy(test_lum);
         }
     }
     

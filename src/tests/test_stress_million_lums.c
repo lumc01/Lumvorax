@@ -87,7 +87,7 @@ int main() {
 }
 
 stress_test_result_t* run_million_lum_creation_test(void) {
-    stress_test_result_t* result = malloc(sizeof(stress_test_result_t));
+    stress_test_result_t* result = TRACKED_MALLOC(sizeof(stress_test_result_t));
     if (!result) return NULL;
 
     result->lum_count = MILLION_LUMS;
@@ -105,7 +105,7 @@ stress_test_result_t* run_million_lum_creation_test(void) {
     clock_t start = clock();
 
     // Allocation de masse
-    lum_t** lums = malloc(MILLION_LUMS * sizeof(lum_t*));
+    lum_t** lums = TRACKED_MALLOC(MILLION_LUMS * sizeof(lum_t*));
     if (!lums) {
         memory_optimizer_destroy(optimizer);
         strcpy(result->bottleneck, "Array allocation");
@@ -147,7 +147,7 @@ stress_test_result_t* run_million_lum_creation_test(void) {
     for (size_t i = 0; i < result->lum_count; i++) {
         memory_optimizer_free_lum(optimizer, lums[i]);
     }
-    free(lums);
+    TRACKED_FREE(lums);
     end = clock();
     result->destruction_time = ((double)(end - start)) / CLOCKS_PER_SEC;
 
@@ -156,7 +156,7 @@ stress_test_result_t* run_million_lum_creation_test(void) {
 }
 
 stress_test_result_t* run_million_lum_operations_test(void) {
-    stress_test_result_t* result = malloc(sizeof(stress_test_result_t));
+    stress_test_result_t* result = TRACKED_MALLOC(sizeof(stress_test_result_t));
     if (!result) return NULL;
 
     result->lum_count = MILLION_LUMS;
@@ -222,7 +222,7 @@ stress_test_result_t* run_million_lum_operations_test(void) {
 }
 
 stress_test_result_t* run_scalability_stress_test(size_t max_lums) {
-    stress_test_result_t* result = malloc(sizeof(stress_test_result_t));
+    stress_test_result_t* result = TRACKED_MALLOC(sizeof(stress_test_result_t));
     if (!result) return NULL;
 
     strcpy(result->bottleneck, "None");
@@ -287,7 +287,7 @@ stress_test_result_t* run_scalability_stress_test(size_t max_lums) {
 }
 
 stress_test_result_t* run_memory_pressure_test(void) {
-    stress_test_result_t* result = malloc(sizeof(stress_test_result_t));
+    stress_test_result_t* result = TRACKED_MALLOC(sizeof(stress_test_result_t));
     if (!result) return NULL;
 
     strcpy(result->bottleneck, "None");
@@ -347,7 +347,7 @@ stress_test_result_t* run_memory_pressure_test(void) {
 }
 
 stress_test_result_t* run_parallel_stress_test(void) {
-    stress_test_result_t* result = malloc(sizeof(stress_test_result_t));
+    stress_test_result_t* result = TRACKED_MALLOC(sizeof(stress_test_result_t));
     if (!result) return NULL;
 
     strcpy(result->bottleneck, "None");
@@ -404,7 +404,7 @@ stress_test_result_t* run_parallel_stress_test(void) {
 stress_test_result_t* test_million_lum_group_operations(void) {
     printf("  Test: Opérations sur groupe de 1 million de LUMs\n");
 
-    stress_test_result_t* result = malloc(sizeof(stress_test_result_t));
+    stress_test_result_t* result = TRACKED_MALLOC(sizeof(stress_test_result_t));
     if (!result) return NULL;
 
     result->lum_count = MILLION_LUMS;
@@ -560,6 +560,6 @@ void print_stress_results(stress_test_result_t* result, const char* test_name) {
 
 void stress_test_result_destroy(stress_test_result_t* result) {
     if (result) {
-        free(result);
+        TRACKED_FREE(result);
     }
 }

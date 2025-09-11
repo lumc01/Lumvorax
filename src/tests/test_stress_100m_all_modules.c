@@ -144,7 +144,7 @@ bool test_neural_network_100m(void) {
     printf("Testing forward passes...\n");
     const size_t forward_passes = 100000; // 100K passes = 100M activations neuronales
 
-    double* inputs = malloc(input_size * sizeof(double));
+    double* inputs = TRACKED_MALLOC(input_size * sizeof(double));
     if (!inputs) {
         neural_layer_destroy(&layer);
         neural_config_destroy(&config);
@@ -189,7 +189,7 @@ bool test_neural_network_100m(void) {
         printf("❌ Neural network operations failed\n");
     }
 
-    free(inputs);
+    TRACKED_FREE(inputs);
     neural_layer_destroy(&layer);
     neural_config_destroy(&config);
 
@@ -226,7 +226,7 @@ bool test_image_processing_100m(void) {
 
     // Génération données RGB
     printf("Generating %zu RGB pixels...\n", pixel_count);
-    uint8_t* rgb_data = malloc(pixel_count * 3);
+    uint8_t* rgb_data = TRACKED_MALLOC(pixel_count * 3);
     if (!rgb_data) {
         image_processor_destroy(&processor);
         image_config_destroy(&config);
@@ -279,7 +279,7 @@ bool test_image_processing_100m(void) {
     printf("Total time: %.3f seconds\n", total_time);
     printf("Throughput: %.0f pixels/second\n", pixel_count / total_time);
 
-    free(rgb_data);
+    TRACKED_FREE(rgb_data);
     image_processor_destroy(&processor);
     image_config_destroy(&config);
 
@@ -316,7 +316,7 @@ bool test_audio_processing_100m(void) {
 
     // Génération signal audio
     printf("Generating %zu audio samples...\n", sample_count);
-    int16_t* audio_data = malloc(sample_count * channels * sizeof(int16_t));
+    int16_t* audio_data = TRACKED_MALLOC(sample_count * channels * sizeof(int16_t));
     if (!audio_data) {
         audio_processor_destroy(&processor);
         audio_config_destroy(&config);
@@ -371,7 +371,7 @@ bool test_audio_processing_100m(void) {
     double projected_time = total_time * 100; // 100x plus d'échantillons
     printf("Projected time for 100M samples: %.1f seconds\n", projected_time);
 
-    free(audio_data);
+    TRACKED_FREE(audio_data);
     audio_processor_destroy(&processor);
     audio_config_destroy(&config);
 
