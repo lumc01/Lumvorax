@@ -1,27 +1,36 @@
-
 #!/bin/bash
-set -e
+# Préparation structure logs standardisée
 
-echo "=== PRÉPARATION ENVIRONNEMENT LOGS ==="
-echo "Date: $(date -u)"
+set -euo pipefail
 
-# Créer structure logs avec permissions
-mkdir -p logs/compilation
-mkdir -p logs/stress_tests  
-mkdir -p logs/validation
-mkdir -p logs/parsing_results
+echo "=== PRÉPARATION LOGS STANDARDISÉS ==="
 
-# Nettoyer anciens logs
-rm -f logs/*.log logs/*.json 2>/dev/null || true
+# Structure logs complète
+mkdir -p logs/{compilation,stress_tests,optimization,parsing_results,crypto,benchmarks}
 
-# Créer timestamp unique
-TIMESTAMP=$(date +%Y%m%d_%H%M%S)
-echo "Timestamp session: $TIMESTAMP"
+# Session tracking
+SESSION=$(date +%Y%m%d_%H%M%S)
+echo "$SESSION" > logs/current_session.txt
 
-# Export pour utilisation
-export LOG_SESSION="$TIMESTAMP"
-echo "$TIMESTAMP" > logs/current_session.txt
+echo "Session: $SESSION"
+echo "📁 Structure logs créée:"
+tree logs/ || ls -la logs/
 
-echo "✅ Environnement logs préparé"
-echo "Session: $TIMESTAMP"
-ls -la logs/
+# Templates logs
+cat > logs/README.md << 'LOGEOF'
+# Structure Logs LUM/VORAX
+
+## Dossiers
+- `compilation/` : Logs build et compilation
+- `stress_tests/` : Tests stress 1M+ LUMs  
+- `optimization/` : Tests optimisations SIMD/Memory/Pareto
+- `parsing_results/` : Résultats parsés en JSON
+- `crypto/` : Validation cryptographique
+- `benchmarks/` : Benchmarks comparatifs
+
+## Format noms fichiers
+- `{type}_{session}.log` : YYYYMMDD_HHMMSS
+- Exemple: `stress_20250912_143052.log`
+LOGEOF
+
+echo "✅ Logs standardisés préparés"
