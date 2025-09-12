@@ -1,4 +1,4 @@
-.PHONY: all clean debug debug_asan release
+.PHONY: all clean debug debug_asan release test test-stress test-complete
 all: $(TARGET)
 
 CC = clang
@@ -150,16 +150,43 @@ $(BIN_DIR)/test_stress_safe: $(SRC_DIR)/tests/test_stress_safe.c $(STRESS_OBJECT
 $(BIN_DIR)/test_million_lums: $(SRC_DIR)/tests/test_million_lums_stress.c $(STRESS_OBJECTS) | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $< $(STRESS_OBJECTS) -lpthread -lm
 
-# Test targets
-test_core: $(CORE_TEST_TARGET)
-	./$(CORE_TEST_TARGET)
+# Test targets - COMPLETS TOUS MODULES
+test: bin/test_lum_core bin/test_advanced_modules bin/test_unit_complete bin/test_integration_complete bin/test_regression_complete bin/test_advanced_complete
+	@echo "Running all unit tests..."
+	./bin/test_lum_core
+	./bin/test_advanced_modules
+	./bin/test_unit_complete
+	./bin/test_integration_complete
+	./bin/test_regression_complete
+	./bin/test_advanced_complete
 
-test_advanced: $(ADVANCED_TEST_TARGET)
-	./$(ADVANCED_TEST_TARGET)
+test-stress: bin/lum_vorax bin/test_stress_100m_all_modules
+	@echo "Running comprehensive stress tests..."
+	./bin/lum_vorax --stress-test-million
+	./bin/test_stress_100m_all_modules
 
-# Complete functionality test (unified target)
-test_complete: $(COMPLETE_TEST_TARGET)
-	./$(COMPLETE_TEST_TARGET)
+test-complete: test test-stress
+	@echo "All tests completed successfully!"
+
+# Tests unitaires complets
+bin/test_unit_complete: $(OBJ_DIR)/tests/test_unit_lum_core_complete.o $(LUM_OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Tests intégration complets  
+bin/test_integration_complete: $(OBJ_DIR)/tests/test_integration_complete.o $(LUM_OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Tests régression complets
+bin/test_regression_complete: $(OBJ_DIR)/tests/test_regression_complete.o $(LUM_OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Tests avancés complets
+bin/test_advanced_complete: $(OBJ_DIR)/tests/test_advanced_complete.o $(LUM_OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+
+# Tests stress 100M tous modules
+bin/test_stress_100m_all_modules: $(OBJ_DIR)/tests/test_stress_100m_all_modules.o $(LUM_OBJECTS)
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
 
 # Compilation of objects for tests
 $(OBJ_DIR)/tests/test_complete_functionality.o: $(SRC_DIR)/tests/test_complete_functionality.c $(OBJECTS) | $(OBJ_DIR)
