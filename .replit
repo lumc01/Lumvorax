@@ -767,7 +767,7 @@ args = "./bin/lum_vorax --sizeof-checks"
 outputType = "console"
 
 [nix]
-packages = ["openssh", "file"]
+packages = ["openssh", "file", "tree"]
 channel = "stable-25_05"
 
 [deployment]
