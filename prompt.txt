@@ -1,4 +1,3 @@
-
 # PROMPT.TXT - PROTOCOLE COMPLET SYSTÈME LUM/VORAX
 ## MISE À JOUR COMPLÈTE 2025-01-10 15:30:00 UTC
 
@@ -382,6 +381,100 @@ Basé sur calculs_avances_complexes_vorax_2025.vorax :
 44. **Validation performance** : Métriques > standards industriels
 45. **Rapport forensique final** : Documentation complète résultats authentiques
 46. **Conformité 100%** : Tous protocoles respectés sans exception
+
+### TESTS OBLIGATOIRES ET VALIDATION
+
+Le système doit passer tous ces tests de validation :
+
+1. **Tests unitaires complets** - Tous modules testés individuellement
+2. **Tests d'intégration** - Interaction entre modules validée  
+3. **Tests de stress 1M+ LUMs** - Performance et stabilité sous charge
+4. **Validation cryptographique** - Conformité RFC standards
+5. **Tests de régression** - Non-régression fonctionnelle
+6. **Validation mémoire** - Aucune fuite, double-free protégé
+
+### OPTIMISATIONS AVANCÉES OBLIGATOIRES
+
+Le système doit implémenter ces optimisations avancées identifiées :
+
+7. **Optimisations SIMD vectorielles** - AVX-512/AVX2 16x accélération
+   - Module: src/optimization/simd_optimizer.c
+   - Détection runtime capacités CPU
+   - Vectorisation 16 LUMs simultanément
+
+8. **Optimisations mémoire cache-friendly** - 73% réduction cache misses
+   - Module: src/optimization/memory_optimizer.c
+   - Alignement cache-line 64 bytes
+   - Pools pré-alloués avec prefetch
+
+9. **Optimisations Pareto multi-couches** - 340% gain efficacité
+   - Module: src/optimization/pareto_optimizer.c  
+   - 5 couches: Memory→SIMD→Parallel→Crypto→Energy
+   - Score inversé priorisation ressources
+
+10. **Optimisations zero-copy** - 95% hits, 80% réutilisation
+    - Module: src/optimization/zero_copy_allocator.c
+    - Allocation <100ns latence
+    - Support mmap backing
+
+11. **Parallélisation spatiale native** - 8x throughput threading
+    - Module: src/parallel/parallel_processor.c
+    - Work-stealing basé coordonnées géographiques
+    - Load balancing automatique
+
+### MODULES AVANCÉS RÉVOLUTIONNAIRES REQUIS
+
+12. **Quantum Simulator** (891 lignes) - Qubits spatiaux
+13. **Neural Network Processor** (758 lignes) - Réseaux neuronaux spatiaux  
+14. **Homomorphic Encryption** (512 lignes) - CKKS/BFV/BGV/TFHE
+15. **Matrix Calculator** (573 lignes) - Calculs matriciels spatiaux
+16. **Realtime Analytics** (389 lignes) - Stream processing temps réel
+
+### STRUCTURE DES LOGS
+
+Les logs doivent être organisés selon cette structure standard :
+```
+logs/
+├── compilation/
+│   ├── build_YYYYMMDD_HHMMSS.log
+│   ├── modules_YYYYMMDD_HHMMSS.log
+│   └── tests_YYYYMMDD_HHMMSS.log
+├── stress_tests/
+│   ├── stress_YYYYMMDD_HHMMSS.log
+│   └── stress_optimized_YYYYMMDD_HHMMSS.log
+├── optimization/
+│   ├── simd_YYYYMMDD_HHMMSS.log
+│   ├── memory_YYYYMMDD_HHMMSS.log
+│   └── pareto_YYYYMMDD_HHMMSS.log
+├── parsing_results/
+│   ├── parsed_YYYYMMDD_HHMMSS.log
+│   └── parsed_YYYYMMDD_HHMMSS.json
+├── crypto/
+└── benchmarks/
+```
+
+### PREUVES FORENSIQUES STANDARDISÉES
+
+Structure evidence standardisée obligatoire :
+```
+evidence_optimized_YYYYMMDD_HHMMSS/
+├── sources/
+│   ├── source_bundle_77_modules.tar.gz
+│   └── modules_inventory_77.json
+├── binaries/
+│   ├── lum_vorax_optimized
+│   └── binary_analysis.txt
+├── logs_standardized/
+│   └── [copie complète logs/]
+├── metrics/
+│   ├── performance_baseline_20M_lums.json
+│   └── optimization_benchmarks.json
+├── optimizations/
+│   ├── flags_used.txt
+│   └── capabilities_detected.json
+└── checksums/
+    └── sha256sums_YYYYMMDD_HHMMSS.txt
+```
 
 ### EXIGENCES TECHNIQUES ABSOLUES
 - **Langage** : C99 strict, compatibilité POSIX
