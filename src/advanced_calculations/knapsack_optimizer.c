@@ -241,14 +241,24 @@ knapsack_result_t* knapsack_optimize_greedy(knapsack_item_t** items, size_t item
     knapsack_result_t* result = TRACKED_MALLOC(sizeof(knapsack_result_t));
     if (!result) return NULL;
     
+    // Initialize all fields to safe values
+    memset(result, 0, sizeof(*result));
     result->memory_address = (void*)result;
-    strcpy(result->algorithm_used, "Greedy");
     result->optimization_success = false;
+    result->optimal_knapsack = NULL;
+    result->items_selected = 0;
+    result->iterations_performed = 0;
+    result->best_value = 0;
+    result->best_weight = 0;
+    result->efficiency_ratio = 0.0;
+    strcpy(result->algorithm_used, "Greedy");
+    result->error_message[0] = '\0';
     
     // Création sac optimal
     result->optimal_knapsack = knapsack_create(capacity);
     if (!result->optimal_knapsack) {
         strcpy(result->error_message, "Failed to create knapsack");
+        result->optimal_knapsack = NULL;  // Ensure NULL on error
         return result;
     }
     
@@ -302,14 +312,24 @@ knapsack_result_t* knapsack_optimize_dynamic_programming(knapsack_item_t** items
     knapsack_result_t* result = TRACKED_MALLOC(sizeof(knapsack_result_t));
     if (!result) return NULL;
     
+    // Initialize all fields to safe values
+    memset(result, 0, sizeof(*result));
     result->memory_address = (void*)result;
-    strcpy(result->algorithm_used, "Dynamic Programming");
     result->optimization_success = false;
+    result->optimal_knapsack = NULL;
+    result->items_selected = 0;
+    result->iterations_performed = 0;
+    result->best_value = 0;
+    result->best_weight = 0;
+    result->efficiency_ratio = 0.0;
+    strcpy(result->algorithm_used, "Dynamic Programming");
+    result->error_message[0] = '\0';
     
     // Création table DP
     knapsack_dp_table_t* dp_table = knapsack_dp_table_create(item_count, capacity);
     if (!dp_table) {
         strcpy(result->error_message, "Failed to create DP table");
+        result->optimal_knapsack = NULL;  // Ensure NULL on error
         return result;
     }
     
