@@ -360,6 +360,10 @@ args = "LUM/VORAX Stress Test"
 task = "workflow.run"
 args = "LUM/VORAX Demo"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "LUM/VORAX Console"
+
 [[workflows.workflow]]
 name = "LUM/VORAX Stress Test"
 author = "agent"
@@ -1243,6 +1247,17 @@ args = "echo \"📄 Tous les logs disponibles dans logs/\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"Fin validation: $(date -u)\""
+
+[[workflows.workflow]]
+name = "LUM/VORAX Console"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
