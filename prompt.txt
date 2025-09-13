@@ -1,3 +1,49 @@
+
+# RÈGLES VALIDATION COMPLÈTE - AUCUN OUBLI AUTORISÉ
+
+## RÈGLES OBLIGATOIRES AVANT TOUTE MODIFICATION
+
+1. **LECTURE TRIPLE OBLIGATOIRE** :
+   - Lire STANDARD_NAMES.md 3x avant toute création
+   - Vérifier aucune duplication de nom/fonction
+   - Valider conformité nommage existant
+
+2. **TESTS OBLIGATOIRES POUR CHAQUE MODULE** :
+   - Test unitaire : `test_[module]_complete.c`
+   - Test intégration : `test_integration_[module]_complete.c`  
+   - Test stress : `test_stress_[module]_100m.c`
+   - AUCUNE EXCEPTION - Tous modules doivent avoir ces 3 tests
+
+3. **VALIDATION FORENSIQUE OBLIGATOIRE** :
+   - Script validation : `validate_[feature]_complete.sh`
+   - Parser résultats : Python avec métriques JSON
+   - Evidence horodatée : Logs avec checksums SHA-256
+
+4. **MAKEFILE OBLIGATOIRE** :
+   - Cible test : `test-[feature]-complete`
+   - Cible validation : `validate-[feature]-complete`
+   - Dépendances correctes : Tous objets requis
+
+5. **FICHIERS À METTRE À JOUR - COMMANDES EXACTES** :
+   - STANDARD_NAMES.md : Ajouter nouveaux éléments
+   - Makefile : Ajouter cibles test/validation  
+   - src/tests/ : Créer tests complets
+   - ci/ : Script validation forensique
+
+6. **INFORMATIONS SYSTÈME OBLIGATOIRES** :
+   ```bash
+   # Commande récupération infos Replit
+   free -h && df -h && cat /proc/cpuinfo | grep "model name"
+   ```
+
+7. **AUCUNE CRÉATION SANS VALIDATION** :
+   - Tout nouveau module DOIT avoir tests complets
+   - Tout script DOIT être exécuté et validé
+   - Toute infrastructure DOIT être prouvée fonctionnelle
+
+**CETTE RÈGLE EST ABSOLUE - AUCUN CONTOURNEMENT AUTORISÉ**
+
+
 # PROMPT.TXT - PROTOCOLE COMPLET SYSTÈME LUM/VORAX
 ## MISE À JOUR COMPLÈTE 2025-01-10 15:30:00 UTC
 
