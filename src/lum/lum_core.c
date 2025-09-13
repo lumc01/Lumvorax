@@ -108,6 +108,7 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
     group->capacity = initial_capacity;
     group->group_id = lum_generate_id();
     group->type = LUM_STRUCTURE_GROUP;
+    group->magic_number = LUM_VALIDATION_PATTERN;  // Initialize magic number
 
     return group;
 }
@@ -116,12 +117,22 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
 void lum_group_destroy(lum_group_t* group) {
     if (!group) return;
 
-    // Protection contre double destruction
-    static const uint32_t MAGIC_DESTROYED = 0xDEADBEEF;
-    if (group->capacity == MAGIC_DESTROYED) {
+    // CRITICAL: Check magic number first before accessing any other fields
+    if (group->magic_number == LUM_MAGIC_DESTROYED) {
         printf("[DEBUG] lum_group_destroy: group already destroyed\n");
         return; // Déjà détruit
     }
+    
+    // Validate magic number - if corrupted, don't trust other fields
+    if (group->magic_number != LUM_VALIDATION_PATTERN) {
+        printf("[ERROR] lum_group_destroy: invalid magic number 0x%X, treating as corruption\n", 
+               group->magic_number);
+        group->magic_number = LUM_MAGIC_DESTROYED; // Mark as destroyed
+        return; // Don't trust corrupted structure
+    }
+    
+    // Mark as destroyed FIRST before accessing other fields
+    group->magic_number = LUM_MAGIC_DESTROYED;
 
     // VALIDATION CRITIQUE: Vérifier intégrité complète du groupe
     bool is_corrupted = false;
@@ -176,9 +187,9 @@ void lum_group_destroy(lum_group_t* group) {
         group->lums = NULL;
     }
 
-    // Marquer comme détruit avec validation
-    group->capacity = MAGIC_DESTROYED;
+    // Clear other fields safely after marking as destroyed
     group->count = 0;
+    group->capacity = 0;
     group->group_id = 0;
 
     // PROTECTION FINALE: Vérifier que le pointeur groupe lui-même n'est pas corrompu
@@ -202,10 +213,21 @@ void lum_group_safe_destroy(lum_group_t** group_ptr) {
 bool lum_group_add(lum_group_t* group, lum_t* lum) {
     if (!group || !lum) return false;
 
-    // Vérifier si le groupe a été marqué comme détruit
-    static const uint32_t MAGIC_DESTROYED = 0xDEADBEEF;
-    if (group->capacity == MAGIC_DESTROYED) {
+    // Vérifier si le groupe a été marqué comme détruit  
+    if (group->magic_number == LUM_MAGIC_DESTROYED) {
         return false;
+    }
+    
+    // Validate magic number before using group
+    if (group->magic_number != LUM_VALIDATION_PATTERN) {
+        return false; // Corrupted group
+    }
+    
+    // Safety check: ensure count doesn't exceed capacity
+    if (group->count >= group->capacity) {
+        if (group->capacity > 100000000) { // Corruption check
+            return false;
+        }
     }
 
     // CORRECTION CRITIQUE: Vérifier l'ownership de la LUM pour éviter double free
@@ -248,10 +270,13 @@ lum_t* lum_group_get(lum_group_t* group, size_t index) {
     if (!group || index >= group->count) return NULL;
 
     // Vérifier si le groupe a été marqué comme détruit
-    static const uint32_t MAGIC_DESTROYED = 0xDEADBEEF;
-    if (group->capacity == MAGIC_DESTROYED) {
-        // lum_log("Tentative d'accès à un groupe déjà détruit."); // Optionnel: loguer si vous avez une fonction lum_log
+    if (group->magic_number == LUM_MAGIC_DESTROYED) {
         return NULL;
+    }
+    
+    // Validate magic number
+    if (group->magic_number != LUM_VALIDATION_PATTERN) {
+        return NULL; // Corrupted group
     }
 
     return &group->lums[index];
@@ -260,9 +285,13 @@ lum_t* lum_group_get(lum_group_t* group, size_t index) {
 size_t lum_group_size(lum_group_t* group) {
     if (!group) return 0;
     // Retourner 0 si le groupe a été marqué comme détruit
-    static const uint32_t MAGIC_DESTROYED = 0xDEADBEEF;
-    if (group->capacity == MAGIC_DESTROYED) {
+    if (group->magic_number == LUM_MAGIC_DESTROYED) {
         return 0;
+    }
+    
+    // Validate magic number
+    if (group->magic_number != LUM_VALIDATION_PATTERN) {
+        return 0; // Corrupted group
     }
     return group->count;
 }
@@ -491,9 +520,14 @@ void lum_print(const lum_t* lum) {
 void lum_group_print(const lum_group_t* group) {
     if (group) {
         // Vérifier si le groupe a été marqué comme détruit avant de l'imprimer
-        static const uint32_t MAGIC_DESTROYED = 0xDEADBEEF;
-        if (group->capacity == MAGIC_DESTROYED) {
-            printf("Group (destroyed): %zu LUMs\n", group->count); // Afficher l'état détruit
+        if (group->magic_number == LUM_MAGIC_DESTROYED) {
+            printf("Group (destroyed): previously destroyed\n");
+            return;
+        }
+        
+        // Validate magic number
+        if (group->magic_number != LUM_VALIDATION_PATTERN) {
+            printf("Group (corrupted): invalid magic number 0x%X\n", group->magic_number);
             return;
         }
 

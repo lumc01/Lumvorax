@@ -113,8 +113,12 @@ void lum_safe_destroy(lum_t** lum_ptr);
             printf("ERROR: NULL Group pointer at %s:%d\n", __FILE__, __LINE__); \
             return false; \
         } \
-        if ((ptr)->capacity == LUM_MAGIC_DESTROYED) { \
+        if ((ptr)->magic_number == LUM_MAGIC_DESTROYED) { \
             printf("ERROR: Use of destroyed group at %s:%d\n", __FILE__, __LINE__); \
+            return false; \
+        } \
+        if ((ptr)->magic_number != LUM_VALIDATION_PATTERN) { \
+            printf("ERROR: Corrupted group (magic=0x%X) at %s:%d\n", (ptr)->magic_number, __FILE__, __LINE__); \
             return false; \
         } \
     } while(0)
