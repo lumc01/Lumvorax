@@ -1245,7 +1245,7 @@ task = "shell.exec"
 args = "echo \"Fin validation: $(date -u)\""
 
 [nix]
-packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb"]
+packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
 channel = "stable-25_05"
 
 [deployment]
