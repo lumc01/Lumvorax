@@ -184,9 +184,8 @@ bool ai_configure_pareto_optimizer(ai_dynamic_config_manager_t* manager,
         .enable_simd_optimization = enable_simd,
         .enable_memory_pooling = enable_memory_pooling,
         .enable_parallel_processing = enable_parallel,
-        .enable_crypto_acceleration = enable_crypto,
-        .enable_logging_optimization = true,
-        .target_efficiency_threshold = efficiency_threshold
+        .max_optimization_layers = 10,
+        .max_points = 1000
     };
 
     bool registered = ai_register_module_for_management(manager, 
@@ -221,7 +220,7 @@ bool ai_configure_pareto_optimizer(ai_dynamic_config_manager_t* manager,
         }
     }
 
-    snprintf("✅ Pareto Optimizer configured via AI: SIMD=%s, Memory=%s, Parallel=%s, Crypto=%s\n",
+    LOG_INFOF("✅ Pareto Optimizer configured via AI: SIMD=%s, Memory=%s, Parallel=%s, Crypto=%s",
            enable_simd ? "ON" : "OFF",
            enable_memory_pooling ? "ON" : "OFF", 
            enable_parallel ? "ON" : "OFF",
@@ -259,7 +258,7 @@ bool ai_configure_neural_network(ai_dynamic_config_manager_t* manager,
     // CORRECTION FUITE MÉMOIRE: libérer config après registration
     neural_config_destroy(&config);
 
-    snprintf("✅ Neural Network configured via AI: epochs=%zu, threshold=%.6f, momentum=%s\n",
+    LOG_INFOF("✅ Neural Network configured via AI: epochs=%zu, threshold=%.6f, momentum=%s",
            max_epochs, convergence_threshold, use_momentum ? "ON" : "OFF");
 
     return registered;
@@ -286,10 +285,10 @@ ai_dynamic_optimization_result_t* ai_optimize_all_system_parameters(
 
     manager->optimization_cycles_count++;
 
-    snprintf("=== AI SYSTEM-WIDE OPTIMIZATION CYCLE #%lu ===\n", 
+    LOG_INFOF("=== AI SYSTEM-WIDE OPTIMIZATION CYCLE #%lu ===", 
            manager->optimization_cycles_count);
-    snprintf("Target performance: %.3f\n", performance_target);
-    snprintf("Active modules under AI control: %zu/%d\n", 
+    LOG_INFOF("Target performance: %.3f", performance_target);
+    LOG_INFOF("Active modules under AI control: %zu/%d", 
            manager->active_modules_count, MODULE_COUNT);
 
     // Utilisation agent maître pour décision optimisation
@@ -367,13 +366,13 @@ ai_dynamic_optimization_result_t* ai_optimize_all_system_parameters(
         result->performance_improvement_ratio = 
             (double)result->modules_optimized_count / MODULE_COUNT;
         
-        snprintf("✅ AI optimization completed successfully\n");
-        snprintf("   Modules optimized: %zu/%d (%.1f%%)\n",
-               result->modules_optimized_count, MODULE_COUNT,
+        LOG_INFOF("✅ AI optimization completed successfully");
+        LOG_INFOF("   Modules optimized: %zu/%d (%.1f%%)",
+               result->modules_optimized_count, (int)MODULE_COUNT,
                result->performance_improvement_ratio * 100.0);
-        snprintf("   Optimization time: %.3f ms\n", result->total_optimization_time_ms);
+        LOG_INFOF("   Optimization time: %.3f ms", result->total_optimization_time_ms);
     } else {
-        snprintf("❌ AI optimization failed or no improvements found\n");
+        LOG_ERRORF("❌ AI optimization failed or no improvements found");
     }
 
     return result;
@@ -383,7 +382,7 @@ ai_dynamic_optimization_result_t* ai_optimize_all_system_parameters(
 bool ai_stress_test_100m_parameters(ai_dynamic_config_manager_t* manager) {
     if (!manager) return false;
 
-    snprintf("=== AI DYNAMIC CONFIG STRESS TEST: 100M+ Parameters ===\n");
+    LOG_INFOF("=== AI DYNAMIC CONFIG STRESS TEST: 100M+ Parameters ===");
 
     const size_t param_count = 100000000; // 100M paramètres
     const size_t test_params = 100000;    // 100K test representatif
@@ -391,7 +390,7 @@ bool ai_stress_test_100m_parameters(ai_dynamic_config_manager_t* manager) {
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
 
-    snprintf("Testing AI parameter management at scale...\n");
+    LOG_INFOF("Testing AI parameter management at scale...");
 
     // Test configuration massive modules
     size_t configs_created = 0;
@@ -407,7 +406,7 @@ bool ai_stress_test_100m_parameters(ai_dynamic_config_manager_t* manager) {
         if (success) configs_created++;
 
         if (i > 0 && (i % 10000) == 0) {
-            snprintf("   Progress: %zu/%zu configurations processed (%.1f%%)\n",
+            LOG_INFOF("   Progress: %zu/%zu configurations processed (%.1f%%)",
                    i, test_params, (i * 100.0) / test_params);
         }
     }
@@ -416,19 +415,19 @@ bool ai_stress_test_100m_parameters(ai_dynamic_config_manager_t* manager) {
     double config_time = (end.tv_sec - start.tv_sec) + 
                         (end.tv_nsec - start.tv_nsec) / 1000000000.0;
 
-    snprintf("✅ AI configuration test completed\n");
-    snprintf("   Configurations created: %zu/%zu (%.1f%% success)\n",
+    LOG_INFOF("✅ AI configuration test completed");
+    LOG_INFOF("   Configurations created: %zu/%zu (%.1f%% success)",
            configs_created, test_params, (configs_created * 100.0) / test_params);
-    snprintf("   Configuration time: %.3f seconds\n", config_time);
-    snprintf("   Configuration rate: %.0f configs/second\n", configs_created / config_time);
+    LOG_INFOF("   Configuration time: %.3f seconds", config_time);
+    LOG_INFOF("   Configuration rate: %.0f configs/second", configs_created / config_time);
 
     // Projection pour 100M
     double projected_time = config_time * (param_count / (double)test_params);
-    snprintf("   Projected time for %zu parameters: %.1f seconds\n", 
+    LOG_INFOF("   Projected time for %zu parameters: %.1f seconds", 
            param_count, projected_time);
 
     // Test optimisation système complète
-    snprintf("\nTesting system-wide AI optimization...\n");
+    LOG_INFOF("Testing system-wide AI optimization...");
     clock_gettime(CLOCK_REALTIME, &start);
 
     ai_dynamic_optimization_result_t* opt_result = 
@@ -437,9 +436,9 @@ bool ai_stress_test_100m_parameters(ai_dynamic_config_manager_t* manager) {
     clock_gettime(CLOCK_REALTIME, &end);
 
     if (opt_result) {
-        snprintf("✅ System optimization completed successfully\n");
-        snprintf("   Performance improvement: %.3f\n", opt_result->performance_improvement_ratio);
-        snprintf("   Modules optimized: %zu\n", opt_result->modules_optimized_count);
+        LOG_INFOF("✅ System optimization completed successfully");
+        LOG_INFOF("   Performance improvement: %.3f", opt_result->performance_improvement_ratio);
+        LOG_INFOF("   Modules optimized: %zu", opt_result->modules_optimized_count);
 
         if (opt_result->optimized_parameters) {
             lum_group_destroy(opt_result->optimized_parameters);
@@ -447,7 +446,7 @@ bool ai_stress_test_100m_parameters(ai_dynamic_config_manager_t* manager) {
         TRACKED_FREE(opt_result);
     }
 
-    snprintf("✅ AI Dynamic Config Manager stress test 100M+ parameters completed\n");
+    LOG_INFOF("✅ AI Dynamic Config Manager stress test 100M+ parameters completed");
     return true;
 }
 
@@ -459,31 +458,31 @@ bool ai_export_system_configuration(ai_dynamic_config_manager_t* manager,
     FILE* file = fopen(filename, "w");
     if (!file) return false;
 
-    fsnprintf(file, "# AI Dynamic Config Manager - System Configuration Export\n");
-    fsnprintf(file, "# Generated at: %lu\n", (unsigned long)time(NULL));
-    fsnprintf(file, "# Active modules: %zu/%d\n", manager->active_modules_count, MODULE_COUNT);
-    fsnprintf(file, "# Optimization cycles: %lu\n", manager->optimization_cycles_count);
-    fsnprintf(file, "\n[GLOBAL_SETTINGS]\n");
-    fsnprintf(file, "auto_optimization_enabled=%s\n", 
+    fprintf(file, "# AI Dynamic Config Manager - System Configuration Export\n");
+    fprintf(file, "# Generated at: %lu\n", (unsigned long)time(NULL));
+    fprintf(file, "# Active modules: %zu/%d\n", manager->active_modules_count, MODULE_COUNT);
+    fprintf(file, "# Optimization cycles: %lu\n", manager->optimization_cycles_count);
+    fprintf(file, "\n[GLOBAL_SETTINGS]\n");
+    fprintf(file, "auto_optimization_enabled=%s\n", 
             manager->auto_optimization_enabled ? "true" : "false");
-    fsnprintf(file, "global_performance_target=%.6f\n", manager->global_performance_target);
-    fsnprintf(file, "learning_rate_global=%.6f\n", manager->learning_rate_global);
+    fprintf(file, "global_performance_target=%.6f\n", manager->global_performance_target);
+    fprintf(file, "learning_rate_global=%.6f\n", manager->learning_rate_global);
 
-    fsnprintf(file, "\n[MANAGED_MODULES]\n");
+    fprintf(file, "\n[MANAGED_MODULES]\n");
     for (size_t i = 0; i < MODULE_COUNT; i++) {
         if (manager->managed_configs[i]) {
             ai_module_config_t* config = manager->managed_configs[i];
-            fsnprintf(file, "[MODULE_%s]\n", config->module_name);
-            fsnprintf(file, "type=%d\n", (int)config->module_type);
-            fsnprintf(file, "is_active=%s\n", config->is_active ? "true" : "false");
-            fsnprintf(file, "performance_weight=%.6f\n", config->performance_weight);
-            fsnprintf(file, "last_updated=%lu\n", config->last_updated_timestamp);
-            fsnprintf(file, "config_size=%zu\n", config->config_size);
-            fsnprintf(file, "\n");
+            fprintf(file, "[MODULE_%s]\n", config->module_name);
+            fprintf(file, "type=%d\n", (int)config->module_type);
+            fprintf(file, "is_active=%s\n", config->is_active ? "true" : "false");
+            fprintf(file, "performance_weight=%.6f\n", config->performance_weight);
+            fprintf(file, "last_updated=%lu\n", config->last_updated_timestamp);
+            fprintf(file, "config_size=%zu\n", config->config_size);
+            fprintf(file, "\n");
         }
     }
 
     fclose(file);
-    snprintf("✅ System configuration exported to: %s\n", filename);
+    LOG_INFOF("✅ System configuration exported to: %s", filename);
     return true;
 }

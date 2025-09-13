@@ -184,6 +184,15 @@ void lum_log_flush(void);
 // Fonction lum_log principale pour compatibilité
 void lum_log(lum_log_level_e level, const char* format, ...);
 
+// Variadic logging helper for replacing incorrect snprintf usage
+void lum_logf(lum_log_level_e level, const char* format, ...);
+
+// Convenience macros
+#define LOG_INFOF(fmt, ...) lum_logf(LUM_LOG_INFO, fmt, ##__VA_ARGS__)
+#define LOG_ERRORF(fmt, ...) lum_logf(LUM_LOG_ERROR, fmt, ##__VA_ARGS__)
+#define LOG_WARNF(fmt, ...) lum_logf(LUM_LOG_WARN, fmt, ##__VA_ARGS__)
+#define LOG_DEBUGF(fmt, ...) lum_logf(LUM_LOG_DEBUG, fmt, ##__VA_ARGS__)
+
 #endif // DISABLE_LOGGING
 
 #endif // LUM_LOGGER_H

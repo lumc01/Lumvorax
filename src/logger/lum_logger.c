@@ -441,6 +441,29 @@ void lum_log_init(lum_logger_t* logger, lum_log_level_e level) {
     logger->min_level = level;
 }
 
+// Variadic logging helper for replacing incorrect snprintf usage
+void lum_logf(lum_log_level_e level, const char* format, ...) {
+    if (!format) return;
+    
+    char buffer[1024];
+    va_list args;
+    va_start(args, format);
+    vsnprintf(buffer, sizeof(buffer), format, args);
+    va_end(args);
+    
+    // Ensure null termination
+    buffer[sizeof(buffer) - 1] = '\0';
+    
+    // Use the global logger if available, otherwise fallback to stderr
+    lum_logger_t* logger = lum_get_global_logger();
+    if (logger) {
+        lum_log_message(logger, level, buffer);
+    } else {
+        // Fallback to stderr if no global logger
+        fprintf(stderr, "[%s] %s\n", lum_log_level_to_string(level), buffer);
+    }
+}
+
 void lum_log(lum_log_level_e level, const char* format, ...) {
     if (!format) return;
 

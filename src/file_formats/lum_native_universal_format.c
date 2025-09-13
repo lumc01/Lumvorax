@@ -261,7 +261,7 @@ lum_file_operation_result_t* lum_add_text_content(lum_universal_file_manager_t* 
     result->bytes_processed = text_length;
     strcpy(result->error_message, "Text content added successfully");
 
-    snprintf("✅ Text content added: %zu bytes, %u LUMs, %.3f ms\n",
+    LOG_INFOF("✅ Text content added: %zu bytes, %u LUMs, %.3f ms",
            text_length, result->lums_affected, result->processing_time_ms);
 
     return result;
@@ -309,7 +309,7 @@ lum_file_operation_result_t* lum_add_json_content(lum_universal_file_manager_t* 
             manager->sections[last_section]->content_type = LUM_CONTENT_JSON;
         }
         
-        snprintf("✅ JSON content validated and added: %zu bytes\n", json_length);
+        LOG_INFOF("✅ JSON content validated and added: %zu bytes", json_length);
     }
 
     return result;
@@ -426,7 +426,7 @@ lum_file_operation_result_t* lum_add_image_rgb24(lum_universal_file_manager_t* m
     result->operation_success = true;
     result->bytes_processed = image_size;
 
-    snprintf("✅ RGB24 Image added: %ux%u pixels, %zu bytes, %u LUMs, %.3f ms\n",
+    LOG_INFOF("✅ RGB24 Image added: %ux%u pixels, %zu bytes, %u LUMs, %.3f ms",
            width, height, image_size, result->lums_affected, result->processing_time_ms);
 
     return result;
@@ -546,7 +546,7 @@ lum_file_operation_result_t* lum_add_som_data(lum_universal_file_manager_t* mana
     result->operation_success = true;
     result->bytes_processed = som_data_size;
 
-    snprintf("✅ SOM Kohonen data added: %ux%u grid, %u dims, %zu bytes, %u LUMs, %.3f ms\n",
+    LOG_INFOF("✅ SOM Kohonen data added: %ux%u grid, %u dims, %zu bytes, %u LUMs, %.3f ms",
            som_width, som_height, input_dimension, som_data_size, 
            result->lums_affected, result->processing_time_ms);
 
@@ -557,7 +557,7 @@ lum_file_operation_result_t* lum_add_som_data(lum_universal_file_manager_t* mana
 bool lum_stress_test_100m_elements(const char* test_file_path) {
     if (!test_file_path) return false;
 
-    snprintf("=== LUM UNIVERSAL FILE STRESS TEST: 100M+ Elements ===\n");
+    LOG_INFOF("=== LUM UNIVERSAL FILE STRESS TEST: 100M+ Elements ===");
 
     const size_t element_count = 100000000; // 100M éléments
     const size_t test_elements = 100000;    // 100K test représentatif
@@ -568,19 +568,19 @@ bool lum_stress_test_100m_elements(const char* test_file_path) {
     // Création manager fichier test
     lum_universal_file_manager_t* manager = lum_universal_file_create(test_file_path);
     if (!manager) {
-        snprintf("❌ Failed to create LUM file manager\n");
+        LOG_ERRORF("❌ Failed to create LUM file manager");
         return false;
     }
 
-    snprintf("✅ LUM file manager created successfully\n");
-    snprintf("Testing with %zu elements (representative of %zu)...\n", 
+    LOG_INFOF("✅ LUM file manager created successfully");
+    LOG_INFOF("Testing with %zu elements (representative of %zu)...", 
            test_elements, element_count);
 
     // Test ajout contenu texte massif
     char* test_text = TRACKED_MALLOC(test_elements * 10); // 10 chars par élément
     if (!test_text) {
         lum_universal_file_destroy(&manager);
-        snprintf("❌ Failed to allocate test text\n");
+        LOG_ERRORF("❌ Failed to allocate test text");
         return false;
     }
 
@@ -594,7 +594,7 @@ bool lum_stress_test_100m_elements(const char* test_file_path) {
     if (!test_lums) {
         TRACKED_FREE(test_text);
         lum_universal_file_destroy(&manager);
-        snprintf("❌ Failed to create test LUMs group\n");
+        LOG_ERRORF("❌ Failed to create test LUMs group");
         return false;
     }
 
@@ -611,7 +611,7 @@ bool lum_stress_test_100m_elements(const char* test_file_path) {
     }
     test_lums->count = test_elements;
 
-    snprintf("Test data prepared: %zu text bytes, %zu LUMs\n", 
+    LOG_INFOF("Test data prepared: %zu text bytes, %zu LUMs", 
            test_elements * 10, test_elements);
 
     // Test ajout contenu avec timing
@@ -627,21 +627,21 @@ bool lum_stress_test_100m_elements(const char* test_file_path) {
         double add_time = (end.tv_sec - start.tv_sec) + 
                          (end.tv_nsec - start.tv_nsec) / 1000000000.0;
 
-        snprintf("✅ Content addition completed in %.3f seconds\n", add_time);
-        snprintf("   Bytes processed: %lu\n", add_result->bytes_processed);
-        snprintf("   LUMs affected: %u\n", add_result->lums_affected);
-        snprintf("   Processing rate: %.0f elements/second\n", test_elements / add_time);
+        LOG_INFOF("✅ Content addition completed in %.3f seconds", add_time);
+        LOG_INFOF("   Bytes processed: %lu", add_result->bytes_processed);
+        LOG_INFOF("   LUMs affected: %u", add_result->lums_affected);
+        LOG_INFOF("   Processing rate: %.0f elements/second", test_elements / add_time);
 
         // Projection pour 100M
         double projected_time = add_time * (element_count / (double)test_elements);
-        snprintf("   Projected time for %zu elements: %.1f seconds\n", 
+        LOG_INFOF("   Projected time for %zu elements: %.1f seconds", 
                element_count, projected_time);
 
         TRACKED_FREE(add_result);
     } else {
-        snprintf("❌ Content addition failed\n");
+        LOG_ERRORF("❌ Content addition failed");
         if (add_result) {
-            snprintf("   Error: %s\n", add_result->error_message);
+            LOG_ERRORF("   Error: %s", add_result->error_message);
             TRACKED_FREE(add_result);
         }
     }
@@ -651,6 +651,6 @@ bool lum_stress_test_100m_elements(const char* test_file_path) {
     TRACKED_FREE(test_text);
     lum_universal_file_destroy(&manager);
 
-    snprintf("✅ LUM Universal File stress test 100M+ elements completed\n");
+    LOG_INFOF("✅ LUM Universal File stress test 100M+ elements completed");
     return true;
 }
