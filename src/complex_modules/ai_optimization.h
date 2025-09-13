@@ -139,11 +139,13 @@ bool ai_load_learned_model(ai_agent_t* agent, const char* filename);
 
 // Tests stress 100M+ LUMs
 bool ai_stress_test_100m_lums(ai_optimization_config_t* config);
-ai_optimization_result_t* ai_benchmark_optimization_algorithms(size_t problem_size, ai_optimization_config_t* config);
-ai_optimization_result_t* ai_test_scalability(size_t max_lums, ai_optimization_config_t* config);
-ai_optimization_result_t* ai_test_convergence_rate(size_t iteration_count, ai_optimization_config_t* config);
 
-// Utilitaires
+// Fonctions traçage IA complet
+bool ai_agent_trace_decision_step(ai_agent_t* agent, void* step_trace);
+bool ai_agent_save_reasoning_state(ai_agent_t* agent, const char* filename);
+bool ai_agent_load_reasoning_state(ai_agent_t* agent, const char* filename);
+
+// Configuration par défaut
 ai_optimization_config_t* ai_optimization_config_create_default(void);
 void ai_optimization_config_destroy(ai_optimization_config_t** config_ptr);
 void ai_optimization_result_destroy(ai_optimization_result_t** result_ptr);

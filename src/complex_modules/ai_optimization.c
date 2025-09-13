@@ -4,6 +4,40 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <stdio.h>
+
+// Structure traçage raisonnement IA
+typedef struct {
+    uint64_t step_id;
+    uint64_t timestamp_ns;
+    char decision_type[64];
+    char reasoning_explanation[512];
+    double confidence_score;
+    double input_state[16];
+    double output_action[16];
+    char context_description[256];
+    void* memory_address;
+    uint32_t trace_magic;
+} ai_reasoning_trace_t;
+
+// Structure traçage étape de décision
+typedef struct {
+    uint64_t step_number;
+    char operation_name[128];
+    double input_values[32];
+    size_t input_count;
+    double intermediate_result;
+    double final_output;
+    char calculation_formula[256];
+    uint64_t computation_time_ns;
+    void* memory_address;
+    uint32_t step_magic;
+} decision_step_trace_t;
+
+#define AI_TRACE_MAGIC 0xAI12ACE9
+#define NEURAL_TRACE_MAGIC 0xNE45RAL7
+#define MAX_REASONING_STEPS 1000
+#define MAX_DECISION_STEPS 500
 
 // Création agent IA
 ai_agent_t* ai_agent_create(size_t brain_layers[], size_t layer_count) {
@@ -103,7 +137,92 @@ bool ai_agent_learn_from_experience(ai_agent_t* agent, lum_group_t* state, lum_g
     return true;
 }
 
-// Prise de décision IA
+// Traçage étape de décision IA granulaire
+bool ai_agent_trace_decision_step(ai_agent_t* agent, decision_step_trace_t* step_trace) {
+    if (!agent || !step_trace) return false;
+    
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    
+    step_trace->step_number = agent->decisions_made;
+    step_trace->computation_time_ns = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+    step_trace->memory_address = (void*)step_trace;
+    step_trace->step_magic = AI_TRACE_MAGIC;
+    
+    // Trace des calculs intermédiaires
+    snprintf(step_trace->calculation_formula, sizeof(step_trace->calculation_formula),
+             "success_rate(%.3f) > threshold(0.5) ? conservative : exploratory", 
+             agent->success_rate);
+    
+    step_trace->intermediate_result = agent->success_rate;
+    step_trace->final_output = (agent->success_rate > 0.5) ? 1.0 : 0.0;
+    
+    return true;
+}
+
+// Sauvegarde état de raisonnement complet
+bool ai_agent_save_reasoning_state(ai_agent_t* agent, const char* filename) {
+    if (!agent || !filename) return false;
+    
+    FILE* file = fopen(filename, "wb");
+    if (!file) return false;
+    
+    // Sauvegarde métadonnées agent
+    fwrite(&agent->learning_rate, sizeof(double), 1, file);
+    fwrite(&agent->success_rate, sizeof(double), 1, file);
+    fwrite(&agent->decisions_made, sizeof(uint64_t), 1, file);
+    fwrite(&agent->experience_count, sizeof(uint64_t), 1, file);
+    
+    // Sauvegarde base de connaissances si présente
+    if (agent->knowledge_base) {
+        uint64_t kb_count = agent->knowledge_base->count;
+        fwrite(&kb_count, sizeof(uint64_t), 1, file);
+        
+        for (size_t i = 0; i < kb_count; i++) {
+            fwrite(&agent->knowledge_base->lums[i], sizeof(lum_t), 1, file);
+        }
+    } else {
+        uint64_t zero = 0;
+        fwrite(&zero, sizeof(uint64_t), 1, file);
+    }
+    
+    fclose(file);
+    return true;
+}
+
+// Chargement état de raisonnement persisté
+bool ai_agent_load_reasoning_state(ai_agent_t* agent, const char* filename) {
+    if (!agent || !filename) return false;
+    
+    FILE* file = fopen(filename, "rb");
+    if (!file) return false;
+    
+    // Chargement métadonnées
+    fread(&agent->learning_rate, sizeof(double), 1, file);
+    fread(&agent->success_rate, sizeof(double), 1, file);
+    fread(&agent->decisions_made, sizeof(uint64_t), 1, file);
+    fread(&agent->experience_count, sizeof(uint64_t), 1, file);
+    
+    // Chargement base de connaissances
+    uint64_t kb_count;
+    fread(&kb_count, sizeof(uint64_t), 1, file);
+    
+    if (kb_count > 0) {
+        if (!agent->knowledge_base) {
+            agent->knowledge_base = lum_group_create(kb_count);
+        }
+        
+        for (size_t i = 0; i < kb_count && i < agent->knowledge_base->capacity; i++) {
+            fread(&agent->knowledge_base->lums[i], sizeof(lum_t), 1, file);
+            agent->knowledge_base->count++;
+        }
+    }
+    
+    fclose(file);
+    return true;
+}
+
+// Prise de décision IA avec traçage complet
 lum_group_t* ai_agent_make_decision(ai_agent_t* agent, lum_group_t* current_state) {
     if (!agent || !current_state) return NULL;
 
@@ -111,27 +230,79 @@ lum_group_t* ai_agent_make_decision(ai_agent_t* agent, lum_group_t* current_stat
 
     agent->decisions_made++;
 
+    // Traçage raisonnement complet
+    ai_reasoning_trace_t reasoning_trace = {0};
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    
+    reasoning_trace.step_id = agent->decisions_made;
+    reasoning_trace.timestamp_ns = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+    reasoning_trace.confidence_score = agent->success_rate;
+    reasoning_trace.memory_address = (void*)&reasoning_trace;
+    reasoning_trace.trace_magic = AI_TRACE_MAGIC;
+    
+    snprintf(reasoning_trace.decision_type, sizeof(reasoning_trace.decision_type),
+             "strategic_positioning_%s", (agent->success_rate > 0.5) ? "conservative" : "exploratory");
+    
+    snprintf(reasoning_trace.reasoning_explanation, sizeof(reasoning_trace.reasoning_explanation),
+             "Agent with success_rate=%.3f chose %s strategy based on threshold 0.5. "
+             "Experience count: %lu, Learning rate: %.6f",
+             agent->success_rate, 
+             (agent->success_rate > 0.5) ? "conservative" : "exploratory",
+             agent->experience_count, agent->learning_rate);
+
     // Création groupe de décision
     lum_group_t* decision = lum_group_create(current_state->count);
     if (!decision) return NULL;
 
-    // Logique de décision basée sur l'expérience
+    // Logique de décision basée sur l'expérience avec traçage
     for (size_t i = 0; i < current_state->count; i++) {
         decision->lums[i] = current_state->lums[i];
+        
+        // Traçage étape de décision individuelle
+        decision_step_trace_t step_trace = {0};
+        ai_agent_trace_decision_step(agent, &step_trace);
+        
+        snprintf(step_trace.operation_name, sizeof(step_trace.operation_name),
+                 "position_update_lum_%zu", i);
+        
+        step_trace.input_values[0] = (double)current_state->lums[i].position_x;
+        step_trace.input_values[1] = (double)current_state->lums[i].position_y;
+        step_trace.input_count = 2;
 
         // Modification basée sur l'expérience
         if (agent->success_rate > 0.5) {
             // Stratégie conservatrice si bon taux de succès
             decision->lums[i].position_x += 1;
             decision->lums[i].position_y += 1;
+            
+            snprintf(step_trace.calculation_formula, sizeof(step_trace.calculation_formula),
+                     "conservative: pos_x = %d + 1, pos_y = %d + 1",
+                     current_state->lums[i].position_x, current_state->lums[i].position_y);
         } else {
             // Stratégie exploratoire si mauvais taux
             decision->lums[i].position_x = rand() % 1000;
             decision->lums[i].position_y = rand() % 1000;
+            
+            snprintf(step_trace.calculation_formula, sizeof(step_trace.calculation_formula),
+                     "exploratory: pos_x = rand() %% 1000 = %d, pos_y = rand() %% 1000 = %d",
+                     decision->lums[i].position_x, decision->lums[i].position_y);
         }
 
         decision->lums[i].id = i;
         decision->count++;
+        
+        // Stockage du traçage (peut être étendu pour persistence)
+        step_trace.final_output = sqrt(decision->lums[i].position_x * decision->lums[i].position_x + 
+                                      decision->lums[i].position_y * decision->lums[i].position_y);
+    }
+    
+    // Sauvegarde automatique de l'état si demandé
+    static bool auto_save_enabled = true;
+    if (auto_save_enabled) {
+        char filename[256];
+        snprintf(filename, sizeof(filename), "ai_reasoning_state_%lu.dat", agent->decisions_made);
+        ai_agent_save_reasoning_state(agent, filename);
     }
 
     return decision;

@@ -116,6 +116,19 @@
 2025-09-10 23:59 - TRACKED_FREE + Libération mémoire trackée pour prévention double-free
 2025-09-10 23:59 - TRACKED_CALLOC + Allocation initialisée trackée pour safety mémoire
 2025-09-10 23:59 - TRACKED_REALLOC + Réallocation mémoire trackée pour continuité tracking
+2025-01-15 14:31 - ai_agent_trace_decision_step + Fonction traçage granulaire étapes de décision IA
+2025-01-15 14:31 - ai_agent_save_reasoning_state + Sauvegarde état de raisonnement complet agent IA
+2025-01-15 14:31 - ai_agent_load_reasoning_state + Chargement état de raisonnement persisté
+2025-01-15 14:31 - neural_layer_trace_activations + Traçage activations couches cachées réseau neuronal
+2025-01-15 14:31 - neural_layer_save_gradients + Sauvegarde gradients complets backpropagation
+2025-01-15 14:31 - realtime_analytics_full_trace + Traçage complet processus analytique temps réel
+2025-01-15 14:31 - ai_reasoning_trace_t + Structure traçage raisonnement IA avec étapes détaillées
+2025-01-15 14:31 - neural_activation_trace_t + Structure traçage activations neuronales complètes
+2025-01-15 14:31 - decision_step_trace_t + Structure traçage étape individuelle de décision
+2025-01-15 14:31 - AI_TRACE_MAGIC + Constante magique protection structures traçage IA
+2025-01-15 14:31 - NEURAL_TRACE_MAGIC + Constante magique protection traçage neuronal
+2025-01-15 14:31 - reasoning_persistence_file + Fichier persistance base connaissances agent
+2025-01-15 14:31 - trace_granularity_level + Niveau granularité traçage (BASIC/DETAILED/EXHAUSTIVE)
 
 ## STRUCTURES DE DONNÉES
 

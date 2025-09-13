@@ -209,7 +209,60 @@ bool analytics_update_metrics(analytics_metrics_t* metrics, lum_t* lum) {
     return true;
 }
 
-// Analyse stream temps réel
+// Traçage complet processus analytique temps réel
+bool realtime_analytics_full_trace(realtime_stream_t* stream, const char* trace_file) {
+    if (!stream || !trace_file) return false;
+    
+    FILE* file = fopen(trace_file, "w");
+    if (!file) return false;
+    
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    
+    fprintf(file, "=== REALTIME ANALYTICS FULL TRACE ===\n");
+    fprintf(file, "Timestamp: %lu.%09lu\n", ts.tv_sec, ts.tv_nsec);
+    fprintf(file, "Stream buffer size: %zu\n", stream->buffer_size);
+    fprintf(file, "Read index: %zu\n", stream->read_index);
+    fprintf(file, "Write index: %zu\n", stream->write_index);
+    fprintf(file, "Total processed: %lu\n", stream->total_processed);
+    fprintf(file, "Processing rate: %.3f LUMs/sec\n", stream->processing_rate);
+    fprintf(file, "Is streaming: %s\n", stream->is_streaming ? "true" : "false");
+    
+    fprintf(file, "\n=== DETAILED LUM ANALYSIS ===\n");
+    
+    // Analyse détaillée de chaque LUM
+    size_t current_index = stream->read_index;
+    size_t trace_count = 0;
+    
+    while (current_index != stream->write_index && trace_count < 1000) {
+        lum_t* lum = stream->data_buffer[current_index];
+        if (lum) {
+            fprintf(file, "LUM[%zu]: id=%lu, presence=%u, pos=(%d,%d), type=%u, timestamp=%lu\n",
+                   trace_count, lum->id, lum->presence, lum->position_x, lum->position_y,
+                   lum->structure_type, lum->timestamp);
+            
+            // Calculs analytiques détaillés
+            double distance_from_origin = sqrt(lum->position_x * lum->position_x + 
+                                             lum->position_y * lum->position_y);
+            fprintf(file, "  -> Distance from origin: %.6f\n", distance_from_origin);
+            fprintf(file, "  -> Quadrant: %s\n", 
+                   (lum->position_x >= 0 && lum->position_y >= 0) ? "Q1" :
+                   (lum->position_x < 0 && lum->position_y >= 0) ? "Q2" :
+                   (lum->position_x < 0 && lum->position_y < 0) ? "Q3" : "Q4");
+            
+            trace_count++;
+        }
+        current_index = (current_index + 1) % stream->buffer_size;
+    }
+    
+    fprintf(file, "\n=== TRACE SUMMARY ===\n");
+    fprintf(file, "Total LUMs traced: %zu\n", trace_count);
+    
+    fclose(file);
+    return true;
+}
+
+// Analyse stream temps réel avec traçage complet
 analytics_result_t* realtime_analyze_stream(realtime_stream_t* stream, analytics_config_t* config) {
     if (!stream || !config) return NULL;
 
@@ -224,6 +277,12 @@ analytics_result_t* realtime_analyze_stream(realtime_stream_t* stream, analytics
     result->cpu_usage_percent = 0.0;
     result->memory_usage_gb = 0.0;
 
+    // Traçage complet automatique
+    char trace_filename[256];
+    snprintf(trace_filename, sizeof(trace_filename), 
+             "realtime_analysis_trace_%lu.txt", start.tv_sec);
+    realtime_analytics_full_trace(stream, trace_filename);
+
     // Création métriques
     result->current_metrics = analytics_metrics_create();
     if (!result->current_metrics) {
@@ -231,15 +290,28 @@ analytics_result_t* realtime_analyze_stream(realtime_stream_t* stream, analytics
         return NULL;
     }
 
-    // Analyse de tous les LUMs dans le stream
+    // Analyse de tous les LUMs dans le stream avec traçage détaillé
     size_t analyzed_count = 0;
     size_t current_index = stream->read_index;
+    double sum_distances = 0.0;
+    size_t quadrant_counts[4] = {0, 0, 0, 0}; // Q1, Q2, Q3, Q4
 
     while (current_index != stream->write_index) {
         lum_t* lum = stream->data_buffer[current_index];
         if (lum) {
             analytics_update_metrics(result->current_metrics, lum);
             analyzed_count++;
+            
+            // Calculs analytiques additionnels pour traçage
+            double distance = sqrt(lum->position_x * lum->position_x + 
+                                 lum->position_y * lum->position_y);
+            sum_distances += distance;
+            
+            // Classification par quadrant
+            if (lum->position_x >= 0 && lum->position_y >= 0) quadrant_counts[0]++;
+            else if (lum->position_x < 0 && lum->position_y >= 0) quadrant_counts[1]++;
+            else if (lum->position_x < 0 && lum->position_y < 0) quadrant_counts[2]++;
+            else quadrant_counts[3]++;
         }
         current_index = (current_index + 1) % stream->buffer_size;
     }
@@ -250,7 +322,16 @@ analytics_result_t* realtime_analyze_stream(realtime_stream_t* stream, analytics
 
     if (analyzed_count > 0) {
         result->analysis_success = true;
-        strcpy(result->error_message, "Stream analysis completed successfully");
+        
+        // Métriques avancées avec traçage
+        double avg_distance = sum_distances / analyzed_count;
+        snprintf(result->error_message, sizeof(result->error_message),
+                 "Stream analysis completed: %zu LUMs, avg_dist=%.3f, "
+                 "Q1=%zu, Q2=%zu, Q3=%zu, Q4=%zu, trace_file=%s",
+                 analyzed_count, avg_distance, 
+                 quadrant_counts[0], quadrant_counts[1], 
+                 quadrant_counts[2], quadrant_counts[3],
+                 trace_filename);
 
         // Calcul variance finale
         if (result->current_metrics->total_lums > 1) {

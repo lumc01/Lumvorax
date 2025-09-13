@@ -5,6 +5,24 @@
 #include <string.h>
 #include <math.h>
 #include <time.h>
+#include <stdio.h>
+
+// Structure traçage activations neuronales
+typedef struct {
+    size_t layer_id;
+    size_t neuron_count;
+    double* hidden_activations;
+    double* gradients_trace;
+    uint64_t forward_pass_timestamp;
+    uint64_t backward_pass_timestamp;
+    char activation_function_name[64];
+    double layer_loss;
+    void* memory_address;
+    uint32_t trace_magic;
+} neural_activation_trace_t;
+
+#define NEURAL_TRACE_MAGIC 0xNE45RAL7
+#define MAX_TRACE_LAYERS 32
 
 // Création neurone LUM
 neural_lum_t* neural_lum_create(int32_t x, int32_t y, size_t input_count, activation_function_e activation) {
@@ -251,22 +269,122 @@ void neural_layer_destroy(neural_layer_t** layer_ptr) {
     *layer_ptr = NULL;
 }
 
-// Propagation avant (modèle flat arrays)
+// Traçage activations couches cachées
+neural_activation_trace_t* neural_layer_trace_activations(neural_layer_t* layer) {
+    if (!layer) return NULL;
+    
+    neural_activation_trace_t* trace = TRACKED_MALLOC(sizeof(neural_activation_trace_t));
+    if (!trace) return NULL;
+    
+    trace->layer_id = layer->layer_id;
+    trace->neuron_count = layer->neuron_count;
+    trace->memory_address = (void*)trace;
+    trace->trace_magic = NEURAL_TRACE_MAGIC;
+    
+    // Allocation arrays de traçage
+    trace->hidden_activations = TRACKED_MALLOC(layer->neuron_count * sizeof(double));
+    trace->gradients_trace = TRACKED_MALLOC(layer->neuron_count * sizeof(double));
+    
+    if (!trace->hidden_activations || !trace->gradients_trace) {
+        if (trace->hidden_activations) TRACKED_FREE(trace->hidden_activations);
+        if (trace->gradients_trace) TRACKED_FREE(trace->gradients_trace);
+        TRACKED_FREE(trace);
+        return NULL;
+    }
+    
+    // Copie activations pour traçage
+    for (size_t i = 0; i < layer->neuron_count; i++) {
+        trace->hidden_activations[i] = layer->outputs[i];
+        trace->gradients_trace[i] = layer->layer_error[i];
+    }
+    
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    trace->forward_pass_timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+    
+    // Nom fonction d'activation
+    switch (layer->activation) {
+        case ACTIVATION_SIGMOID: strcpy(trace->activation_function_name, "sigmoid"); break;
+        case ACTIVATION_TANH: strcpy(trace->activation_function_name, "tanh"); break;
+        case ACTIVATION_RELU: strcpy(trace->activation_function_name, "relu"); break;
+        case ACTIVATION_LEAKY_RELU: strcpy(trace->activation_function_name, "leaky_relu"); break;
+        case ACTIVATION_SWISH: strcpy(trace->activation_function_name, "swish"); break;
+        case ACTIVATION_GELU: strcpy(trace->activation_function_name, "gelu"); break;
+        default: strcpy(trace->activation_function_name, "linear"); break;
+    }
+    
+    return trace;
+}
+
+// Sauvegarde gradients complets
+bool neural_layer_save_gradients(neural_layer_t* layer, const char* filename) {
+    if (!layer || !filename) return false;
+    
+    FILE* file = fopen(filename, "ab"); // Mode append pour gradients multiples
+    if (!file) return false;
+    
+    // Header avec métadonnées
+    fprintf(file, "LAYER_GRADIENTS_DUMP\n");
+    fprintf(file, "layer_id=%zu\n", layer->layer_id);
+    fprintf(file, "neuron_count=%zu\n", layer->neuron_count);
+    fprintf(file, "input_size=%zu\n", layer->input_size);
+    fprintf(file, "timestamp=%lu\n", (unsigned long)time(NULL));
+    
+    // Sauvegarde weights complets
+    fprintf(file, "WEIGHTS_MATRIX\n");
+    for (size_t n = 0; n < layer->neuron_count; n++) {
+        fprintf(file, "neuron_%zu: ", n);
+        for (size_t i = 0; i < layer->input_size; i++) {
+            fprintf(file, "%.8f ", layer->weights[n * layer->input_size + i]);
+        }
+        fprintf(file, "\n");
+    }
+    
+    // Sauvegarde biases
+    fprintf(file, "BIASES\n");
+    for (size_t n = 0; n < layer->neuron_count; n++) {
+        fprintf(file, "bias_%zu: %.8f\n", n, layer->biases[n]);
+    }
+    
+    // Sauvegarde erreurs (gradients)
+    fprintf(file, "LAYER_ERRORS\n");
+    for (size_t n = 0; n < layer->neuron_count; n++) {
+        fprintf(file, "error_%zu: %.8f\n", n, layer->layer_error[n]);
+    }
+    
+    fprintf(file, "END_LAYER_DUMP\n\n");
+    fclose(file);
+    return true;
+}
+
+// Propagation avant (modèle flat arrays) avec traçage complet
 bool neural_layer_forward_pass(neural_layer_t* layer, double* inputs) {
     if (!layer || !inputs || layer->magic_number != NEURAL_MAGIC_NUMBER) {
         return false;
     }
     
-    // Calcul pour chaque neurone
+    struct timespec start_ts, end_ts;
+    clock_gettime(CLOCK_MONOTONIC, &start_ts);
+    
+    // Calcul pour chaque neurone avec traçage détaillé
     for (size_t n = 0; n < layer->neuron_count; n++) {
         double sum = layer->biases[n];
         
         // Produit scalaire weights[n*input_size : (n+1)*input_size] · inputs
         for (size_t i = 0; i < layer->input_size; i++) {
-            sum += layer->weights[n * layer->input_size + i] * inputs[i];
+            double weight_contribution = layer->weights[n * layer->input_size + i] * inputs[i];
+            sum += weight_contribution;
+            
+            // Traçage des contributions individuelles (debug mode)
+            #ifdef NEURAL_DEBUG_TRACE
+            printf("Layer %zu, Neuron %zu, Input %zu: weight=%.6f, input=%.6f, contrib=%.6f\n",
+                   layer->layer_id, n, i, layer->weights[n * layer->input_size + i], 
+                   inputs[i], weight_contribution);
+            #endif
         }
         
-        // Application fonction d'activation
+        // Application fonction d'activation avec traçage
+        double pre_activation = sum;
         switch (layer->activation) {
             case ACTIVATION_SIGMOID:
                 layer->outputs[n] = activation_sigmoid(sum);
@@ -290,6 +408,35 @@ bool neural_layer_forward_pass(neural_layer_t* layer, double* inputs) {
             default:
                 layer->outputs[n] = sum;
                 break;
+        }
+        
+        #ifdef NEURAL_DEBUG_TRACE
+        printf("Layer %zu, Neuron %zu: pre_activation=%.6f, post_activation=%.6f\n",
+               layer->layer_id, n, pre_activation, layer->outputs[n]);
+        #endif
+    }
+    
+    clock_gettime(CLOCK_MONOTONIC, &end_ts);
+    uint64_t forward_time_ns = (end_ts.tv_sec - start_ts.tv_sec) * 1000000000ULL + 
+                               (end_ts.tv_nsec - start_ts.tv_nsec);
+    
+    // Traçage automatique des activations
+    static bool auto_trace_enabled = true;
+    if (auto_trace_enabled) {
+        neural_activation_trace_t* trace = neural_layer_trace_activations(layer);
+        if (trace) {
+            trace->forward_pass_timestamp = forward_time_ns;
+            
+            // Sauvegarde trace si nécessaire
+            char trace_filename[256];
+            snprintf(trace_filename, sizeof(trace_filename), 
+                     "neural_trace_layer_%zu.txt", layer->layer_id);
+            neural_layer_save_gradients(layer, trace_filename);
+            
+            // Libération trace (ou conservation selon configuration)
+            if (trace->hidden_activations) TRACKED_FREE(trace->hidden_activations);
+            if (trace->gradients_trace) TRACKED_FREE(trace->gradients_trace);
+            TRACKED_FREE(trace);
         }
     }
     

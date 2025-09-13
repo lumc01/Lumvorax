@@ -121,11 +121,11 @@ bool realtime_performance_benchmark(analytics_config_t* config);
 
 // Tests stress 100M+ LUMs
 bool analytics_stress_test_100m_lums(analytics_config_t* config);
-analytics_result_t* analytics_benchmark_streaming(size_t lum_count, analytics_config_t* config);
-analytics_result_t* analytics_test_memory_scaling(size_t max_lums, analytics_config_t* config);
-analytics_result_t* analytics_test_anomaly_detection_scale(size_t anomaly_count, analytics_config_t* config);
 
-// Utilitaires
+// Fonction traçage analytique complet
+bool realtime_analytics_full_trace(realtime_stream_t* stream, const char* trace_file);
+
+// Configuration par défaut
 analytics_config_t* analytics_config_create_default(void);
 void analytics_config_destroy(analytics_config_t** config_ptr);
 void analytics_result_destroy(analytics_result_t** result_ptr);

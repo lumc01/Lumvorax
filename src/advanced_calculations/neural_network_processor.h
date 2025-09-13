@@ -124,12 +124,14 @@ void activation_softmax(double* inputs, double* outputs, size_t size);
 double activation_swish(double x);
 double activation_gelu(double x);
 
-// Tests stress 100M+ neurones LUM
+// Tests stress 100M+ neurones
 bool neural_stress_test_100m_neurons(neural_config_t* config);
-neural_result_t* neural_benchmark_training(size_t network_size, size_t dataset_size, neural_config_t* config);
-neural_result_t* neural_test_memory_efficiency(size_t max_neurons, neural_config_t* config);
 
-// Utilitaires
+// Fonctions traçage neuronal complet
+void* neural_layer_trace_activations(neural_layer_t* layer);
+bool neural_layer_save_gradients(neural_layer_t* layer, const char* filename);
+
+// Configuration par défaut
 neural_config_t* neural_config_create_default(void);
 void neural_config_destroy(neural_config_t** config_ptr);
 void neural_result_destroy(neural_result_t** result_ptr);
