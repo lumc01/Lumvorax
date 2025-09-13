@@ -369,7 +369,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "./bin/lum_vorax --stress-test-million"
+args = "./bin/lum_vorax --stress"
 
 [[workflows.workflow]]
 name = "VALIDATION_FORENSIQUE_COMPLETE"
@@ -759,12 +759,12 @@ args = "echo \"=== VALIDATION TERMINÉE ===\""
 name = "LUM/VORAX Demo"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "./bin/lum_vorax --sizeof-checks"
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow]]
 name = "VALIDATION_TRACAGE_IA_COMPLET"
@@ -1250,5 +1250,5 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "vm"
-run = ["./bin/lum_vorax", "--stress-test-million"]
-build = ["make", "clean", "&&", "make", "all"]
+run = ["./bin/lum_vorax", "--stress"]
+build = ["make", "all"]
