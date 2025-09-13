@@ -409,8 +409,17 @@ bool zero_copy_defragment_pool(zero_copy_pool_t* pool) {
         current = current->next;
     }
     
-    double fragmentation_ratio = (double)(pool->free_blocks_count * smallest_block) / total_free_size;
-    lum_log(LUM_LOG_INFO, "Analyse fragmentation: ratio=%.2f, plus gros bloc=%zu, plus petit=%zu", 
+    // CORRECTION CRITIQUE: Protection contre division par zéro 
+    double fragmentation_ratio = 0.0;
+    if (total_free_size > 0 && smallest_block != SIZE_MAX) {
+        fragmentation_ratio = (double)(pool->free_blocks_count * smallest_block) / total_free_size;
+    } else {
+        // Cas limite : aucune fragmentation si pas de blocs libres ou erreur
+        fragmentation_ratio = 0.0;
+        lum_log(LUM_LOG_WARN, "Fragmentation impossible à calculer - total_free=%zu, smallest=%zu", 
+                total_free_size, smallest_block);
+    }
+    lum_log(LUM_LOG_INFO, "Analyse fragmentation: ratio=%.3f, plus gros bloc=%zu, plus petit=%zu", 
             fragmentation_ratio, largest_block, smallest_block);
 
     // Phase 2: Compaction intelligente basée sur le niveau de fragmentation
