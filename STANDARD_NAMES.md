@@ -129,6 +129,27 @@
 2025-01-15 14:31 - NEURAL_TRACE_MAGIC + Constante magique protection traçage neuronal
 2025-01-15 14:31 - reasoning_persistence_file + Fichier persistance base connaissances agent
 2025-01-15 14:31 - trace_granularity_level + Niveau granularité traçage (BASIC/DETAILED/EXHAUSTIVE)
+2025-01-17 10:00 - stress_100m_extension_result_t + Résultat extension test stress 100M+ LUMs
+2025-01-17 10:01 - transaction_wal_extended_t + Extension transaction WAL robuste avec CRC32
+2025-01-17 10:02 - wal_extension_context_t + Contexte extension WAL avec atomics et mutex
+2025-01-17 10:03 - wal_extension_result_t + Résultat opération extension WAL
+2025-01-17 10:04 - recovery_manager_extension_t + Manager recovery automatique post-crash
+2025-01-17 10:05 - recovery_info_extension_t + Information état recovery avec timestamps
+2025-01-17 10:06 - recovery_state_extension_e + États recovery (NORMAL/CRASHED/RECOVERING/SUCCESS/FAILED)
+2025-01-17 10:07 - wal_extension_calculate_crc32 + Calcul CRC32 pour intégrité WAL
+2025-01-17 10:08 - wal_extension_verify_crc32 + Vérification CRC32 données WAL
+2025-01-17 10:09 - wal_extension_begin_transaction + Début transaction avec log WAL
+2025-01-17 10:10 - wal_extension_commit_transaction + Commit transaction avec durabilité
+2025-01-17 10:11 - wal_extension_rollback_transaction + Rollback transaction WAL
+2025-01-17 10:12 - wal_extension_log_lum_operation + Log opération LUM dans WAL
+2025-01-17 10:13 - wal_extension_replay_from_existing_persistence + Replay WAL depuis persistance
+2025-01-17 10:14 - recovery_manager_extension_detect_previous_crash + Détection crash précédent
+2025-01-17 10:15 - recovery_manager_extension_mark_clean_shutdown + Marquage arrêt propre
+2025-01-17 10:16 - recovery_manager_extension_auto_recover_complete + Recovery automatique complète
+2025-01-17 10:17 - initialize_lum_system_with_auto_recovery_extension + Init système avec auto-recovery
+2025-01-17 10:18 - CRASH_DETECTION_EXTENSION_FILE + Fichier détection crash (.lum_crash_detection_ext)
+2025-01-17 10:19 - RECOVERY_STATE_EXTENSION_FILE + Fichier état recovery (.lum_recovery_state_ext)
+2025-01-17 10:20 - execute_100m_lums_stress_extension + Exécution test stress 100M LUMs extension
 
 ## STRUCTURES DE DONNÉES
 

@@ -1,4 +1,4 @@
-.PHONY: all clean debug debug_asan release test test-stress test-complete
+.PHONY: all clean debug debug_asan release test test-stress test-complete test_persistance_100m_extension libwal_extension librecovery_extension test_integration_complete_extension
 all: $(TARGET)
 
 CC = clang
@@ -291,7 +291,7 @@ obj/file_formats/lum_native_universal_format.o: src/file_formats/lum_native_univ
 	mkdir -p obj/file_formats
 	$(CC) $(CFLAGS) $(INCLUDES) -c src/file_formats/lum_native_universal_format.c -o obj/file_formats/lum_native_universal_format.o
 
-.PHONY: all clean debug test forensic-validation benchmark-baselines crypto-validation memory-analysis
+.PHONY: clean all test debug install uninstall
 
 all: $(EXECUTABLE) | $(LOG_DIR)
 
@@ -318,3 +318,44 @@ crypto-validation:
 memory-analysis:
 	$(MAKE) debug_asan
 	ASAN_OPTIONS=detect_leaks=1 ./bin/lum_vorax --stress-test-million &> asan_report.txt
+
+# Advanced modules tests
+test_advanced_modules: $(OBJ_DIR)/test_advanced_modules.o $(CORE_OBJS)
+	$(CC) -o bin/$@ $^ $(LDFLAGS) -lpthread
+
+# NOUVELLES cibles pour extensions (pas de duplication)
+STRESS_100M_EXT_OBJS = $(OBJ_DIR)/test_stress_persistance_100m_extension.o
+WAL_EXT_OBJS = $(OBJ_DIR)/transaction_wal_extension.o
+RECOVERY_EXT_OBJS = $(OBJ_DIR)/recovery_manager_extension.o
+PERSISTENCE_OBJS = $(OBJ_DIR)/data_persistence.o
+
+# Tests stress persistance 100M+ (extension)
+test_persistance_100m_extension: $(STRESS_100M_EXT_OBJS) $(CORE_OBJS) $(PERSISTENCE_OBJS)
+	$(CC) -o bin/$@ $^ $(LDFLAGS) -lpthread
+
+# Module WAL extension
+libwal_extension: $(WAL_EXT_OBJS) $(PERSISTENCE_OBJS)
+	@mkdir -p lib
+	ar rcs lib/libwal_extension.a $^
+
+# Module recovery extension
+librecovery_extension: $(RECOVERY_EXT_OBJS) $(WAL_EXT_OBJS) $(PERSISTENCE_OBJS)
+	@mkdir -p lib
+	ar rcs lib/librecovery_extension.a $^
+
+# Test intégration complète extension
+test_integration_complete_extension: $(WAL_EXT_OBJS) $(RECOVERY_EXT_OBJS) $(STRESS_100M_EXT_OBJS) $(CORE_OBJS) $(PERSISTENCE_OBJS)
+	$(CC) -o bin/$@ $^ $(LDFLAGS) -lpthread
+
+# Compilation modules extensions
+$(OBJ_DIR)/test_stress_persistance_100m_extension.o: src/tests/test_stress_persistance_100m_extension.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/transaction_wal_extension.o: src/persistence/transaction_wal_extension.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJ_DIR)/recovery_manager_extension.o: src/persistence/recovery_manager_extension.c
+	@mkdir -p $(OBJ_DIR)
+	$(CC) $(CFLAGS) -c $< -o $@
