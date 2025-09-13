@@ -5,6 +5,20 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+// Structure traçage activations neuronales
+typedef struct {
+    size_t layer_id;
+    size_t neuron_count;
+    double* hidden_activations;
+    double* gradients_trace;
+    uint64_t forward_pass_timestamp;
+    uint64_t backward_pass_timestamp;
+    char activation_function_name[64];
+    double layer_loss;
+    void* memory_address;
+    uint32_t trace_magic;
+} neural_activation_trace_t;
+
 // Module Processeur Réseau de Neurones pour LUM/VORAX
 // Conforme prompt.txt - nouveau module calculs avancés
 
@@ -128,7 +142,7 @@ double activation_gelu(double x);
 bool neural_stress_test_100m_neurons(neural_config_t* config);
 
 // Fonctions traçage neuronal complet
-void* neural_layer_trace_activations(neural_layer_t* layer);
+neural_activation_trace_t* neural_layer_trace_activations(neural_layer_t* layer);
 bool neural_layer_save_gradients(neural_layer_t* layer, const char* filename);
 
 // Configuration par défaut
@@ -143,6 +157,8 @@ bool neural_validate_network_architecture(size_t* layer_sizes, size_t layer_coun
 #define NEURAL_MAX_NEURONS_PER_LAYER 10000
 #define NEURAL_MIN_LEARNING_RATE 1e-6
 #define NEURAL_MAX_LEARNING_RATE 1.0
+#define NEURAL_TRACE_MAGIC 0x4E455537
+#define MAX_TRACE_LAYERS 32
 #ifndef NEURAL_MAGIC_NUMBER
 #define NEURAL_MAGIC_NUMBER 0x4E455552  // "NEUR" en ASCII
 #define NEURAL_DESTROYED_MAGIC 0xDEADDEAD

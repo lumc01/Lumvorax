@@ -20,22 +20,10 @@ typedef struct {
     uint32_t trace_magic;
 } ai_reasoning_trace_t;
 
-// Structure traçage étape de décision
-typedef struct {
-    uint64_t step_number;
-    char operation_name[128];
-    double input_values[32];
-    size_t input_count;
-    double intermediate_result;
-    double final_output;
-    char calculation_formula[256];
-    uint64_t computation_time_ns;
-    void* memory_address;
-    uint32_t step_magic;
-} decision_step_trace_t;
+// decision_step_trace_t moved to header file
 
-#define AI_TRACE_MAGIC 0xAI12ACE9
-#define NEURAL_TRACE_MAGIC 0xNE45RAL7
+#define AI_TRACE_MAGIC 0xA1124CE9
+// NEURAL_TRACE_MAGIC already defined in header
 #define MAX_REASONING_STEPS 1000
 #define MAX_DECISION_STEPS 500
 

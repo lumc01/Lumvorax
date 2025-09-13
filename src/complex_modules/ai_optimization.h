@@ -140,8 +140,22 @@ bool ai_load_learned_model(ai_agent_t* agent, const char* filename);
 // Tests stress 100M+ LUMs
 bool ai_stress_test_100m_lums(ai_optimization_config_t* config);
 
+// Structure traçage étape de décision
+typedef struct {
+    uint64_t step_number;
+    char operation_name[128];
+    double input_values[32];
+    size_t input_count;
+    double intermediate_result;
+    double final_output;
+    char calculation_formula[256];
+    uint64_t computation_time_ns;
+    void* memory_address;
+    uint32_t step_magic;
+} decision_step_trace_t;
+
 // Fonctions traçage IA complet
-bool ai_agent_trace_decision_step(ai_agent_t* agent, void* step_trace);
+bool ai_agent_trace_decision_step(ai_agent_t* agent, decision_step_trace_t* step_trace);
 bool ai_agent_save_reasoning_state(ai_agent_t* agent, const char* filename);
 bool ai_agent_load_reasoning_state(ai_agent_t* agent, const char* filename);
 
