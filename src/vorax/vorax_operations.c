@@ -140,14 +140,17 @@ vorax_result_t* vorax_move(lum_zone_t* from_zone, lum_zone_t* to_zone, size_t lu
     // Move LUMs from first available group in source zone
     for (size_t g = 0; g < from_zone->group_count && moved < lum_count; g++) {
         lum_group_t* source_group = from_zone->groups[g];
+        size_t moved_from_this_group = 0;  // Track per-group moved count
+        
         for (size_t i = 0; i < source_group->count && moved < lum_count; i++) {
             lum_group_add(move_group, &source_group->lums[i]);
             moved++;
+            moved_from_this_group++;
         }
 
-        // Remove moved LUMs from source group
-        if (moved <= source_group->count) {
-            source_group->count -= moved;
+        // Remove moved LUMs from source group using per-group count
+        if (moved_from_this_group <= source_group->count) {
+            source_group->count -= moved_from_this_group;
         } else {
             source_group->count = 0;
         }

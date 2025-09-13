@@ -772,5 +772,5 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "vm"
-run = ["./bin/lum_vorax", "--sizeof-checks"]
-build = ["make", "clean"]
+run = ["./bin/lum_vorax", "--stress-test-million"]
+build = ["make", "clean", "&&", "make", "all"]

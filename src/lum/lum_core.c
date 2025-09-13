@@ -44,10 +44,38 @@ void lum_destroy(lum_t* lum) {
 
 // Fonction sécurisée pour destruction avec invalidation
 void lum_safe_destroy(lum_t** lum_ptr) {
-    if (lum_ptr && *lum_ptr) {
-        TRACKED_FREE(*lum_ptr);
-        *lum_ptr = NULL; // Invalidation du pointeur
+    if (!lum_ptr || !*lum_ptr) return;
+
+    lum_t* lum = *lum_ptr;
+    
+    // PROTECTION DOUBLE FREE: Vérifier si déjà détruit
+    static const uint32_t DESTROYED_MAGIC = 0xDEADBEEF;
+    if (lum->id == DESTROYED_MAGIC) {
+        // Déjà détruit, juste invalider le pointeur
+        *lum_ptr = NULL;
+        return;
     }
+
+    // PROTECTION CORRUPTION: Vérifier cohérence des données
+    if (lum->memory_address != lum && lum->memory_address != NULL) {
+        // Cette LUM peut être une copie dans un groupe
+        // Ne pas la libérer directement si elle fait partie d'un groupe
+        printf("[WARNING] LUM %u ownership check: memory_address=%p, lum=%p\n", 
+               lum->id, lum->memory_address, lum);
+        
+        // Marquer comme détruit mais ne pas libérer la mémoire
+        lum->id = DESTROYED_MAGIC;
+        lum->is_destroyed = 1;
+        *lum_ptr = NULL;
+        return;
+    }
+
+    // Destruction normale avec marquage sécurisé
+    lum->id = DESTROYED_MAGIC;
+    lum->is_destroyed = 1;
+    
+    TRACKED_FREE(*lum_ptr);
+    *lum_ptr = NULL;
 }
 
 // LUM Group functions
@@ -91,22 +119,75 @@ void lum_group_destroy(lum_group_t* group) {
     // Protection contre double destruction
     static const uint32_t MAGIC_DESTROYED = 0xDEADBEEF;
     if (group->capacity == MAGIC_DESTROYED) {
+        printf("[DEBUG] lum_group_destroy: group already destroyed\n");
         return; // Déjà détruit
     }
 
-    // PROTECTION CRITIQUE : Vérifier corruption pointeur
-    if (group->lums && group->lums != (lum_t*)group) {
-        TRACKED_FREE(group->lums);
-        group->lums = NULL;
-    } else if (group->lums == (lum_t*)group) {
-        // CORRECTION DÉTECTÉE: group->lums pointe vers group lui-même !
-        group->lums = NULL; // Ne pas libérer - éviter double free
+    // VALIDATION CRITIQUE: Vérifier intégrité complète du groupe
+    bool is_corrupted = false;
+    
+    // Vérifier intégrité de base du groupe
+    if (group->count > group->capacity) {
+        printf("[ERROR] lum_group_destroy: corrupted group count=%zu > capacity=%zu\n", 
+               group->count, group->capacity);
+        is_corrupted = true;
+    }
+    
+    // Vérifier limites raisonnables (plus de 100M elements est suspect)
+    if (group->count > 100000000) {
+        printf("[ERROR] lum_group_destroy: suspicious large count=%zu (corruption detected)\n", 
+               group->count);
+        is_corrupted = true;
+    }
+    
+    // Vérifier limites raisonnables pour capacity
+    if (group->capacity > 100000000) {
+        printf("[ERROR] lum_group_destroy: suspicious large capacity=%zu (corruption detected)\n", 
+               group->capacity);
+        is_corrupted = true;
     }
 
-    // Marquer comme détruit
+    // Si corruption détectée, protéger contre l'accès mémoire
+    if (is_corrupted) {
+        printf("[CRITICAL] lum_group_destroy: Memory corruption detected - zeroing structure\n");
+        group->lums = NULL;
+        group->count = 0;
+        group->capacity = 0;
+    }
+
+    // PROTECTION CRITIQUE : Vérifier corruption pointeur
+    if (group->lums && group->lums != (lum_t*)group && !is_corrupted) {
+        // VALIDATION SUPPLÉMENTAIRE: Vérifier que le pointeur n'est pas manifestement corrompu
+        if ((void*)group->lums < (void*)0x1000 || (uintptr_t)group->lums == 0xDEADBEEF) {
+            printf("[ERROR] lum_group_destroy: corrupted lums pointer %p\n", group->lums);
+            group->lums = NULL;
+        } else {
+            printf("[DEBUG] lum_group_destroy: freeing lums array at %p (%zu elements)\n", 
+                   group->lums, group->count);
+            TRACKED_FREE(group->lums);
+            group->lums = NULL;
+        }
+    } else if (group->lums == (lum_t*)group) {
+        // CORRECTION DÉTECTÉE: group->lums pointe vers group lui-même !
+        printf("[WARNING] lum_group_destroy: self-reference detected, avoiding double-free\n");
+        group->lums = NULL; // Ne pas libérer - éviter double free
+    } else if (is_corrupted && group->lums) {
+        printf("[WARNING] lum_group_destroy: corruption detected, not freeing potentially invalid pointer %p\n", group->lums);
+        group->lums = NULL;
+    }
+
+    // Marquer comme détruit avec validation
     group->capacity = MAGIC_DESTROYED;
     group->count = 0;
+    group->group_id = 0;
 
+    // PROTECTION FINALE: Vérifier que le pointeur groupe lui-même n'est pas corrompu
+    if ((void*)group < (void*)0x1000 || is_corrupted) {
+        printf("[CRITICAL] lum_group_destroy: corrupted group pointer %p detected - not freeing\n", group);
+        return; // Ne pas libérer un pointeur corrompu
+    }
+
+    printf("[DEBUG] lum_group_destroy: freeing group structure at %p\n", group);
     TRACKED_FREE(group);
 }
 
