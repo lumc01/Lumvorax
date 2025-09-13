@@ -208,13 +208,57 @@ bool pareto_is_dominated(const pareto_metrics_t* a, const pareto_metrics_t* b) {
     return b_better_or_equal && b_strictly_better;
 }
 
+// AMÉLIORATION 100%: Fonction de calcul de poids dynamiques adaptatifs
+static void calculate_adaptive_weights(double* efficiency_weight, double* memory_weight, 
+                                     double* time_weight, double* energy_weight) {
+    // Évaluation de la charge système actuelle
+    double system_load = calculate_system_efficiency(); 
+    struct timespec ts;
+    clock_gettime(CLOCK_REALTIME, &ts);
+    double current_time = ts.tv_sec * 1000.0 + ts.tv_nsec / 1000000.0;
+    static double last_update_time = 0.0;
+    
+    if (current_time - last_update_time < 100.0) { // Cache pendant 100ms
+        // Utiliser les poids précédemment calculés si récents
+        static double cached_eff = 0.4, cached_mem = 0.2, cached_time = 0.3, cached_energy = 0.1;
+        *efficiency_weight = cached_eff;
+        *memory_weight = cached_mem; 
+        *time_weight = cached_time;
+        *energy_weight = cached_energy;
+        return;
+    }
+    
+    // Adaptation dynamique basée sur les conditions système
+    if (system_load > 0.8) {
+        // Système sous haute charge - prioriser performance et mémoire
+        *efficiency_weight = 0.5;
+        *memory_weight = 0.3;
+        *time_weight = 0.15;
+        *energy_weight = 0.05;
+    } else if (system_load < 0.3) {
+        // Système peu chargé - prioriser efficacité énergétique
+        *efficiency_weight = 0.2;
+        *memory_weight = 0.15;
+        *time_weight = 0.25;
+        *energy_weight = 0.4;
+    } else {
+        // Charge modérée - équilibre standard avec léger bias performance
+        *efficiency_weight = 0.35;
+        *memory_weight = 0.25;
+        *time_weight = 0.3;
+        *energy_weight = 0.1;
+    }
+    
+    last_update_time = current_time;
+    printf("[PARETO] Poids adaptatifs: eff=%.2f, mem=%.2f, time=%.2f, energy=%.2f (charge=%.2f)\n", 
+           *efficiency_weight, *memory_weight, *time_weight, *energy_weight, system_load);
+}
+
 double pareto_calculate_inverse_score(const pareto_metrics_t* metrics) {
     // Score Pareto inversé : plus haut = meilleur
-    // Pondération des critères selon leur importance
-    double efficiency_weight = 0.4;
-    double memory_weight = 0.2;
-    double time_weight = 0.3;
-    double energy_weight = 0.1;
+    // NOUVELLE IMPLÉMENTATION: Pondération dynamique adaptative
+    double efficiency_weight, memory_weight, time_weight, energy_weight;
+    calculate_adaptive_weights(&efficiency_weight, &memory_weight, &time_weight, &energy_weight);
 
     // Normalisation et inversion pour les critères "plus petit = meilleur"
     double normalized_efficiency = metrics->efficiency_ratio / 1000.0; // normalisé

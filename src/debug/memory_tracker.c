@@ -175,8 +175,8 @@ void* tracked_malloc(size_t size, const char* file, int line, const char* func) 
 void tracked_free(void* ptr, const char* file, int line, const char* func) {
     if (!ptr) return;
     if (!g_tracker_initialized) {
-        printf("[MEMORY_TRACKER] ERROR: Free called before init at %s:%d\n", file, line);
-        return;
+        printf("[MEMORY_TRACKER] WARNING: Auto-initializing tracker at %s:%d\n", file, line);
+        memory_tracker_init();
     }
     if (!memory_tracker_is_enabled()) {
         free(ptr);

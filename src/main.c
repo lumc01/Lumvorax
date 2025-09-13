@@ -333,11 +333,11 @@ int main(int argc, char* argv[]) {
     printf("=== LUM/VORAX System Demo ===\n");
     printf("Implementation complete du concept LUM/VORAX en C\n\n");
 
-    // Initialize memory tracking
+    // Initialize memory tracking FIRST
     memory_tracker_init();
     printf("[MAIN] Memory tracking initialized\n");
 
-    // Initialize logger
+    // Initialize logger AFTER memory tracking
     lum_logger_t* logger = lum_logger_create("logs/lum_vorax.log", true, true);
     if (!logger) {
         printf("Erreur: Impossible de créer le logger\n");
@@ -398,13 +398,16 @@ int main(int argc, char* argv[]) {
     printf("\nDémo terminée avec succès!\n");
     printf("Consultez le fichier lum_vorax.log pour les détails.\n");
 
-    // Rapport final mémoire avant fermeture
+    // Clear global logger before destroying to avoid dangling pointer
+    lum_set_global_logger(NULL);
+    lum_logger_destroy(logger);
+
+    // Rapport final mémoire après cleanup du logger
     printf("\n=== MEMORY CLEANUP REPORT ===\n");
     memory_tracker_report();
     memory_tracker_check_leaks();
     memory_tracker_destroy();
-
-    lum_logger_destroy(logger);
+    
     return 0;
 }
 
@@ -1395,7 +1398,7 @@ void demo_knapsack_optimizer_module() {
     for (size_t i = 0; i < item_count; i++) {
         knapsack_item_destroy(&items[i]);
     }
-    free(items);
+    TRACKED_FREE(items);
     knapsack_config_destroy(&config);
 
     printf("  ✅ Démonstration Module Knapsack Optimizer terminée\n");
@@ -1616,7 +1619,7 @@ void demo_homomorphic_encryption_module() {
     he_plaintext_destroy(&plaintext_a);
     he_plaintext_destroy(&plaintext_b);
     he_context_destroy(&context);
-    // Note: params est libéré automatiquement par he_context_destroy
+    he_security_params_destroy(&params);
     
     printf("  ✅ Module Homomorphic Encryption testé avec succès!\n");
     printf("  🔐 Encryption homomorphe 100%% FONCTIONNELLE ET RÉELLE\n\n");
