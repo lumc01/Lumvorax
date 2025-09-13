@@ -64,6 +64,8 @@ SOURCES = $(SRC_DIR)/main.c \
 	  $(SRC_DIR)/crypto/homomorphic_encryption.c \
 	  $(SRC_DIR)/persistence/data_persistence.c \
 	  $(SRC_DIR)/debug/memory_tracker.c \
+	  $(SRC_DIR)/file_formats/lum_native_file_handler.c \
+	  $(SRC_DIR)/file_formats/lum_secure_serialization.c \
       $(ADVANCED_CALC_SOURCES) \
       $(COMPLEX_MODULES_SOURCES)
 
@@ -75,6 +77,8 @@ OBJECTS = obj/main.o obj/lum/lum_core.o obj/vorax/vorax_operations.o obj/parser/
 	  obj/parallel/parallel_processor.o obj/metrics/performance_metrics.o \
 	  obj/crypto/crypto_validator.o obj/crypto/homomorphic_encryption.o obj/persistence/data_persistence.o \
 	  obj/debug/memory_tracker.o \
+	  obj/file_formats/lum_native_file_handler.o \
+	  obj/file_formats/lum_secure_serialization.o \
 	  obj/advanced_calculations/matrix_calculator.o \
 	  obj/advanced_calculations/quantum_simulator.o \
 	  obj/advanced_calculations/neural_network_processor.o \
@@ -98,7 +102,7 @@ LDFLAGS = -lpthread -lm -lrt -lm
 SANITIZER_FLAGS = -fsanitize=address
 
 # Create object directories
-OBJ_DIRS = obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug obj/advanced_calculations obj/complex_modules
+OBJ_DIRS = obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug obj/advanced_calculations obj/complex_modules obj/file_formats
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIRS)
