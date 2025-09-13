@@ -303,6 +303,11 @@ collatz_result_t* collatz_analyze_basic(uint64_t number, collatz_config_t* confi
     strcpy(result->analysis_type_used, "Basic Analysis");
     result->analysis_success = false;
     
+    // Initialisation explicite des pointeurs à NULL
+    result->statistics = NULL;
+    result->sequences = NULL;
+    result->sequence_count = 0;
+    
     // Création cache si activé
     collatz_cache_t* cache = NULL;
     if (config->use_caching) {

@@ -783,7 +783,7 @@ void demo_pareto_optimization(void) {
 
     char* generated_script = pareto_generate_optimization_script(&target_metrics);
     printf("  📄 Script généré dynamiquement:\n%s\n", generated_script);
-    TRACKED_FREE(generated_script);
+    // Note: generated_script pointe vers une variable statique, pas besoin de free
 
     // Benchmark contre baseline
     printf("  📊 Benchmark contre opérations standard\n");
