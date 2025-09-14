@@ -354,10 +354,6 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX Stress Test"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "LUM/VORAX Demo"
 
 [[workflows.workflow.tasks]]
@@ -368,16 +364,9 @@ args = "LUM/VORAX Console"
 task = "workflow.run"
 args = "LUM/VORAX System"
 
-[[workflows.workflow]]
-name = "LUM/VORAX Stress Test"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
 [[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax --stress"
+task = "workflow.run"
+args = "LUM/VORAX Stress Test"
 
 [[workflows.workflow]]
 name = "VALIDATION_FORENSIQUE_COMPLETE"
@@ -1270,6 +1259,17 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "./bin/lum_vorax"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "LUM/VORAX Stress Test"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax --stress-test-million"
 
 [workflows.workflow.metadata]
 outputType = "console"
