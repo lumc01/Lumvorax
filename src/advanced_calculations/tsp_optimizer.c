@@ -246,11 +246,22 @@ tsp_result_t* tsp_optimize_nearest_neighbor(tsp_city_t** cities, size_t city_cou
         size_t next_city = 0;
         
         // Trouver la ville la plus proche non visitée
+        bool found_unvisited = false;
         for (size_t i = 0; i < city_count; i++) {
             if (!visited[i] && matrix->distance_matrix[current_city][i] < min_distance) {
                 min_distance = matrix->distance_matrix[current_city][i];
                 next_city = i;
+                found_unvisited = true;
             }
+        }
+        
+        // Validation critique: s'assurer qu'une ville non visitée a été trouvée
+        if (!found_unvisited) {
+            // Toutes les villes sont visitées - ceci ne devrait pas arriver dans l'algorithme correct
+            strcpy(result->error_message, "TSP algorithm error: no unvisited city found");
+            TRACKED_FREE(visited);
+            tsp_distance_matrix_destroy(&matrix);
+            return result;
         }
         
         visited[next_city] = true;

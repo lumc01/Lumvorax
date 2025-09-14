@@ -7,11 +7,8 @@
 #include <assert.h>
 #include <pthread.h>
 
-// Vérification de l'ABI - la structure doit faire exactement 32 bytes avec padding
-_Static_assert(sizeof(struct { uint8_t a; uint32_t b; int32_t c; int32_t d; uint8_t e; uint8_t f; uint64_t g; }) == 32,
-               "Basic lum_t structure should be 32 bytes on this platform");
-
-// Note: avec padding d'alignement sur 8 bytes, la structure complète fait 32 bytes
+// Vérification de l'ABI - la structure lum_t réelle avec tous ses champs
+// Note: la structure complète fait 48 bytes avec l'alignement et les nouveaux champs
 
 // Core LUM structure - a single presence unit
 typedef struct {
@@ -26,6 +23,9 @@ typedef struct {
     uint8_t is_destroyed;           // Protection double-free (nouveau STANDARD_NAMES 2025-01-10)
     uint8_t reserved[3];            // Padding pour alignement 32 bytes
 } lum_t;
+
+// Vérification ABI corrigée - la structure lum_t réelle fait 48 bytes
+_Static_assert(sizeof(lum_t) == 48, "lum_t structure must be exactly 48 bytes on this platform");
 
 // LUM structure types
 typedef enum {
