@@ -1,7 +1,7 @@
 #include "memory_optimizer.h"
 #include "../debug/memory_tracker.h"
-#include <stdlib.h>
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
 
@@ -194,7 +194,7 @@ void memory_pool_defragment(memory_pool_t* pool) {
     // NOUVELLE IMPLÉMENTATION: Défragmentation avancée avec compactage réel
     printf("[MEMORY_OPTIMIZER] Défragmentation avancée démarrée - Pool: %zu bytes, utilisés: %zu bytes\n", 
            pool->pool_size, pool->used_size);
-    
+
     if (pool->used_size == 0) {
         memory_pool_reset(pool);
         return;
@@ -215,13 +215,13 @@ void memory_pool_defragment(memory_pool_t* pool) {
 
     // Phase 3: Réorganisation du pool
     memcpy(pool->pool_start, temp_region, pool->used_size);
-    
+
     // Phase 4: Mise à jour des pointeurs après compactage
     pool->current_ptr = (char*)pool->pool_start + pool->used_size;
-    
+
     // Libération de la région temporaire
     TRACKED_FREE(temp_region);
-    
+
     printf("[MEMORY_OPTIMIZER] Défragmentation terminée - Espace récupéré: %zu bytes\n", 
            pool->pool_size - pool->used_size);
 }
@@ -328,7 +328,7 @@ void memory_optimizer_free_lum(memory_optimizer_t* optimizer, lum_t* lum) {
     // Si `memory_pool_free` marquait le bloc comme libre, `current_usage` serait réduit.
     // Dans une vraie implémentation, `memory_pool_free` devrait gérer cela.
     // Pour l'instant, on suppose que `memory_pool_free` gère la réduction de `used_size`.
-    
+
     // Pour la mise à jour des statistiques globales :
     // Il faut être prudent : si `memory_pool_free` ne fait que marquer un bloc comme libre,
     // `current_usage` devrait être décrémenté. Si `memory_pool_free` est une no-op pour le moment,
@@ -361,7 +361,7 @@ void memory_optimizer_free_zone(memory_optimizer_t* optimizer, lum_zone_t* zone)
 
     // Libération de la zone
     memory_pool_free(&optimizer->zone_pool, zone, sizeof(lum_zone_t));
-    
+
     // Mise à jour des statistiques globales
     optimizer->stats.total_freed += sizeof(lum_zone_t);
     optimizer->stats.current_usage -= sizeof(lum_zone_t); // Ceci est une supposition
@@ -441,7 +441,7 @@ bool memory_optimizer_analyze_fragmentation(memory_optimizer_t* optimizer) {
 
     // Assure que les stats sont à jour avant l'analyse
     memory_optimizer_get_stats(optimizer); 
-    
+
     // La fragmentation est calculée dans get_stats
     return optimizer->stats.fragmentation_bytes > optimizer->defrag_threshold;
 }

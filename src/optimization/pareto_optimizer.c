@@ -14,48 +14,48 @@ static double calculate_system_efficiency(void) {
     double memory_efficiency = 0.85;  // Baseline par défaut
     double cpu_efficiency = 0.90;     // Baseline par défaut
     double throughput_ratio = 0.75;   // Baseline par défaut
-    
+
     // VRAIES MÉTRIQUES SYSTÈME intégrées
-    
+
     // 1. Efficacité mémoire basée sur métriques système réelles
     // Utilise une mesure simple mais efficace de la charge mémoire
     static double previous_memory_efficiency = 0.85;
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     double current_time_ms = ts.tv_sec * 1000.0 + ts.tv_nsec / 1000000.0;
-    
+
     // Variance basée sur les cycles temporels pour simuler charge variable
     double time_factor = sin(current_time_ms / 10000.0) * 0.1; // ±10% variation
     memory_efficiency = 0.85 + time_factor;
     memory_efficiency = fmax(0.3, fmin(0.95, memory_efficiency)); // Clamp [0.3, 0.95]
-    
+
     // 2. Efficacité CPU basée sur charge système adaptative
     static double last_cpu_measurement = 0.0;
     static double cpu_trend = 0.0;
-    
+
     // Calcul d'efficacité CPU basé sur patterns temporels et variations
     double cpu_load_factor = cos(current_time_ms / 8000.0) * 0.15; // ±15% variation
     cpu_efficiency = 0.75 + cpu_load_factor + cpu_trend;
-    
+
     // Ajuster trend selon la charge récente
     if (cpu_efficiency > last_cpu_measurement) {
         cpu_trend = fmax(-0.1, cpu_trend - 0.01); // Ralentir si charge monte
     } else {
         cpu_trend = fmin(0.1, cpu_trend + 0.01);  // Accélérer si charge baisse
     }
-    
+
     last_cpu_measurement = cpu_efficiency;
     cpu_efficiency = fmax(0.2, fmin(0.95, cpu_efficiency)); // Clamp [0.2, 0.95]
-    
+
     // 3. Ratio de débit basé sur équilibrage système intelligent
     // Calcul hybride basé sur efficacité mémoire et CPU pour débit optimal
     double throughput_base = (memory_efficiency + cpu_efficiency) / 2.0;
     double throughput_variance = sin(current_time_ms / 12000.0) * 0.1; // ±10%
     throughput_ratio = throughput_base + throughput_variance;
     throughput_ratio = fmax(0.25, fmin(0.9, throughput_ratio)); // Clamp [0.25, 0.9]
-    
+
     double system_efficiency = (memory_efficiency + cpu_efficiency + throughput_ratio) / 3.0;
-    
+
     // Debug logging pour validation
     static double last_logged_efficiency = -1.0;
     if (fabs(system_efficiency - last_logged_efficiency) > 0.05) { // Log si changement >5%
@@ -63,7 +63,7 @@ static double calculate_system_efficiency(void) {
                system_efficiency, memory_efficiency, cpu_efficiency, throughput_ratio);
         last_logged_efficiency = system_efficiency;
     }
-    
+
     return system_efficiency;
 }
 
@@ -165,7 +165,7 @@ pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
            "  cycle omega_ultra % 2;\n"
            "};\n");
 
-    lum_log(LUM_LOG_INFO, "Pareto optimizer created with inverse mode enabled");
+    lum_logf(LUM_LOG_INFO, "Pareto optimizer created with inverse mode enabled");
     return optimizer;
 }
 
@@ -184,6 +184,7 @@ void pareto_optimizer_destroy(pareto_optimizer_t* optimizer) {
     optimizer->point_capacity = 0;
 
     TRACKED_FREE(optimizer);
+    lum_logf(LUM_LOG_INFO, "Pareto optimizer destroyed");
 }
 
 pareto_metrics_t pareto_evaluate_metrics(lum_group_t* group, const char* operation_sequence) {
@@ -227,7 +228,7 @@ pareto_metrics_t pareto_evaluate_metrics(lum_group_t* group, const char* operati
     // Nombre d'opérations LUM
     metrics.lum_operations_count = group_size;
 
-    lum_log(LUM_LOG_DEBUG, "Metrics evaluated: efficiency=%.3f, memory=%zu bytes, time=%.3f μs", 
+    lum_logf(LUM_LOG_DEBUG, "Metrics evaluated: efficiency=%.3f, memory=%zu bytes, time=%.3f μs", 
             metrics.efficiency_ratio, (size_t)metrics.memory_usage, metrics.execution_time);
 
     return metrics;
@@ -261,7 +262,7 @@ static void calculate_adaptive_weights(double* efficiency_weight, double* memory
     clock_gettime(CLOCK_REALTIME, &ts);
     double current_time = ts.tv_sec * 1000.0 + ts.tv_nsec / 1000000.0;
     static double last_update_time = 0.0;
-    
+
     if (current_time - last_update_time < 100.0) { // Cache pendant 100ms
         // Utiliser les poids précédemment calculés si récents
         static double cached_eff = 0.4, cached_mem = 0.2, cached_time = 0.3, cached_energy = 0.1;
@@ -271,7 +272,7 @@ static void calculate_adaptive_weights(double* efficiency_weight, double* memory
         *energy_weight = cached_energy;
         return;
     }
-    
+
     // Adaptation dynamique basée sur les conditions système
     if (system_load > 0.8) {
         // Système sous haute charge - prioriser performance et mémoire
@@ -292,7 +293,7 @@ static void calculate_adaptive_weights(double* efficiency_weight, double* memory
         *time_weight = 0.3;
         *energy_weight = 0.1;
     }
-    
+
     last_update_time = current_time;
     printf("[PARETO] Poids adaptatifs: eff=%.2f, mem=%.2f, time=%.2f, energy=%.2f (charge=%.2f)\n", 
            *efficiency_weight, *memory_weight, *time_weight, *energy_weight, system_load);
@@ -319,7 +320,7 @@ double pareto_calculate_inverse_score(const pareto_metrics_t* metrics) {
 }
 
 vorax_result_t* pareto_optimize_fuse_operation(lum_group_t* group1, lum_group_t* group2) {
-    lum_log(LUM_LOG_INFO, "Optimizing FUSE operation with Pareto analysis");
+    lum_logf(LUM_LOG_INFO, "Optimizing FUSE operation with Pareto analysis");
 
     // Évaluation des métriques avant optimisation
     pareto_metrics_t baseline_metrics = pareto_evaluate_metrics(group1, "baseline_fuse");
@@ -346,7 +347,7 @@ vorax_result_t* pareto_optimize_fuse_operation(lum_group_t* group1, lum_group_t*
 }
 
 vorax_result_t* pareto_optimize_split_operation(lum_group_t* group, size_t parts) {
-    lum_log(LUM_LOG_INFO, "Optimizing SPLIT operation with Pareto analysis");
+    lum_logf(LUM_LOG_INFO, "Optimizing SPLIT operation with Pareto analysis");
 
     pareto_metrics_t baseline_metrics = pareto_evaluate_metrics(group, "baseline_split");
 
@@ -379,7 +380,7 @@ vorax_result_t* pareto_optimize_split_operation(lum_group_t* group, size_t parts
 }
 
 vorax_result_t* pareto_optimize_cycle_operation(lum_group_t* group, size_t modulo) {
-    lum_log(LUM_LOG_INFO, "Optimizing CYCLE operation with Pareto analysis");
+    lum_logf(LUM_LOG_INFO, "Optimizing CYCLE operation with Pareto analysis");
 
     // Analyse Pareto pour optimiser le modulo
     size_t optimal_modulo = modulo;
@@ -411,12 +412,12 @@ vorax_result_t* pareto_optimize_cycle_operation(lum_group_t* group, size_t modul
 bool pareto_execute_vorax_optimization(pareto_optimizer_t* optimizer, const char* vorax_script) {
     if (!optimizer || !vorax_script) return false;
 
-    lum_log(LUM_LOG_INFO, "Executing VORAX optimization script");
+    lum_logf(LUM_LOG_INFO, "Executing VORAX optimization script");
 
     // Parse du script VORAX
     vorax_ast_node_t* ast = vorax_parse(vorax_script);
     if (!ast) {
-        lum_log(LUM_LOG_ERROR, "Failed to parse VORAX optimization script");
+        lum_logf(LUM_LOG_ERROR, "Failed to parse VORAX optimization script");
         return false;
     }
 
@@ -440,10 +441,10 @@ bool pareto_execute_vorax_optimization(pareto_optimizer_t* optimizer, const char
         size_t memory_usage_bytes = memory_tracker_get_current_usage();
         uint64_t measure_end = get_microseconds();
         double measure_time = ((double)(measure_end - measure_start)) / 1000000.0; // Conversion µs vers secondes
-        
+
         // Comptage authentique des opérations LUM/VORAX
         size_t total_operations = ctx->zone_count + ctx->memory_count;
-        
+
         pareto_metrics_t optimized_metrics = {
             .efficiency_ratio = total_operations > 0 ? (double)total_operations / (measure_time + 0.001) : 0.0,
             .memory_usage = (double)memory_usage_bytes / 1024.0, // KB
@@ -453,7 +454,7 @@ bool pareto_execute_vorax_optimization(pareto_optimizer_t* optimizer, const char
         };
 
         pareto_add_point(optimizer, &optimized_metrics, optimization_path);
-        lum_log(LUM_LOG_INFO, "VORAX optimization completed successfully");
+        lum_logf(LUM_LOG_INFO, "VORAX optimization completed successfully");
     }
 
     vorax_execution_context_destroy(ctx);
@@ -511,7 +512,7 @@ void pareto_add_point(pareto_optimizer_t* optimizer, const pareto_metrics_t* met
     // Mise à jour de la dominance et du meilleur point
     pareto_update_dominance(optimizer);
 
-    lum_log(LUM_LOG_DEBUG, "Added Pareto point: score=%.3f, path=%s", 
+    lum_logf(LUM_LOG_DEBUG, "Added Pareto point: score=%.3f, path=%s", 
             point->pareto_score, point->optimization_path);
 }
 
@@ -557,7 +558,7 @@ void pareto_update_dominance(pareto_optimizer_t* optimizer) {
 void pareto_benchmark_against_baseline(pareto_optimizer_t* optimizer, const char* baseline_operation) {
     if (!optimizer || !baseline_operation) return;
 
-    lum_log(LUM_LOG_INFO, "Benchmarking Pareto optimization against baseline: %s", baseline_operation);
+    lum_logf(LUM_LOG_INFO, "Benchmarking Pareto optimization against baseline: %s", baseline_operation);
 
     // Métriques baseline authentiques mesurées
     lum_group_t* baseline_group = lum_group_create(1000);
@@ -586,7 +587,7 @@ void pareto_benchmark_against_baseline(pareto_optimizer_t* optimizer, const char
         double improvement = (best->pareto_score - pareto_calculate_inverse_score(&baseline)) / 
                            pareto_calculate_inverse_score(&baseline) * 100.0;
 
-        lum_log(LUM_LOG_INFO, "Pareto optimization improvement: %.2f%% over baseline", improvement);
+        lum_logf(LUM_LOG_INFO, "Pareto optimization improvement: %.2f%% over baseline", improvement);
     }
 }
 
@@ -595,7 +596,7 @@ void pareto_generate_performance_report(pareto_optimizer_t* optimizer, const cha
 
     FILE* f = fopen(output_file, "w");
     if (!f) {
-        lum_log(LUM_LOG_ERROR, "Failed to create Pareto performance report file");
+        lum_logf(LUM_LOG_ERROR, "Failed to create Pareto performance report file");
         return;
     }
 
@@ -630,5 +631,5 @@ void pareto_generate_performance_report(pareto_optimizer_t* optimizer, const cha
     }
 
     fclose(f);
-    lum_log(LUM_LOG_INFO, "Pareto performance report generated: %s", output_file);
+    lum_logf(LUM_LOG_INFO, "Pareto performance report generated: %s", output_file);
 }

@@ -14,6 +14,7 @@
 // Système de désactivation des logs pour benchmark performance
 #ifdef DISABLE_LOGGING
 #define lum_log(level, format, ...) do { } while(0)
+#define lum_logf(level, format, ...) do { } while(0)
 #define lum_log_init(filename) (true)
 #define lum_log_destroy() do { } while(0)
 #define lum_log_flush() do { } while(0)

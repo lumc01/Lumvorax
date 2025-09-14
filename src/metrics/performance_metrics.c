@@ -1,13 +1,12 @@
 // _GNU_SOURCE is already defined in Makefile
 #include "performance_metrics.h"
 #include "../debug/memory_tracker.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <stdio.h>
 #include <time.h>
 #include <sys/time.h>
 #include <sys/resource.h>
-#include <unistd.h>
 #include <math.h>
 #include <stdint.h>
 
