@@ -202,37 +202,37 @@ binary_lum_result_t* convert_int64_to_lum(int64_t value) {
 int8_t convert_lum_to_int8(const lum_group_t* lum_group) {
     if (!lum_group || lum_group->count < 8) return 0;
     
-    int8_t result = 0;
+    uint8_t result = 0;
     for (int i = 0; i < 8 && i < (int)lum_group->count; i++) {
         if (lum_group->lums[i].presence) {
-            result |= (1 << (7 - i));
+            result |= (1u << (7 - i));
         }
     }
-    return result;
+    return (int8_t)result;
 }
 
 int16_t convert_lum_to_int16(const lum_group_t* lum_group) {
     if (!lum_group || lum_group->count < 16) return 0;
     
-    int16_t result = 0;
+    uint16_t result = 0;
     for (int i = 0; i < 16 && i < (int)lum_group->count; i++) {
         if (lum_group->lums[i].presence) {
-            result |= (1 << (15 - i));
+            result |= (1u << (15 - i));
         }
     }
-    return result;
+    return (int16_t)result;
 }
 
 int32_t convert_lum_to_int32(const lum_group_t* lum_group) {
     if (!lum_group || lum_group->count < 32) return 0;
     
-    int32_t result = 0;
+    uint32_t result = 0;
     for (int i = 0; i < 32 && i < (int)lum_group->count; i++) {
         if (lum_group->lums[i].presence) {
-            result |= (1 << (31 - i));
+            result |= (1u << (31 - i));
         }
     }
-    return result;
+    return (int32_t)result;
 }
 
 int64_t convert_lum_to_int64(const lum_group_t* lum_group) {
@@ -249,23 +249,29 @@ int64_t convert_lum_to_int64(const lum_group_t* lum_group) {
 
 // Float conversion functions
 binary_lum_result_t* convert_float_to_lum(float value) {
-    uint32_t int_val = *(uint32_t*)&value;  // Reinterpret as int
+    uint32_t int_val;
+    memcpy(&int_val, &value, sizeof(uint32_t));  // Safe reinterpretation
     return convert_int32_to_lum((int32_t)int_val);
 }
 
 binary_lum_result_t* convert_double_to_lum(double value) {
-    uint64_t int_val = *(uint64_t*)&value;  // Reinterpret as int
+    uint64_t int_val;
+    memcpy(&int_val, &value, sizeof(uint64_t));  // Safe reinterpretation
     return convert_int64_to_lum((int64_t)int_val);
 }
 
 float convert_lum_to_float(const lum_group_t* lum_group) {
     int32_t int_val = convert_lum_to_int32(lum_group);
-    return *(float*)&int_val;  // Reinterpret as float
+    float result;
+    memcpy(&result, &int_val, sizeof(float));  // Safe reinterpretation
+    return result;
 }
 
 double convert_lum_to_double(const lum_group_t* lum_group) {
     int64_t int_val = convert_lum_to_int64(lum_group);
-    return *(double*)&int_val;  // Reinterpret as double
+    double result;
+    memcpy(&result, &int_val, sizeof(double));  // Safe reinterpretation
+    return result;
 }
 
 // Utility functions
