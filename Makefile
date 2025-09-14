@@ -47,6 +47,9 @@ TSP_OBJ = $(OBJ_DIR)/advanced_calculations/tsp_optimizer.o
 KNAPSACK_OBJ = $(OBJ_DIR)/advanced_calculations/knapsack_optimizer.o
 COLLATZ_OBJ = $(OBJ_DIR)/advanced_calculations/collatz_analyzer.o
 
+# LUM Instant Displacement Module
+LUM_INSTANT_DISPLACEMENT_OBJ = $(OBJ_DIR)/spatial/lum_instant_displacement.o
+
 SOURCES = $(SRC_DIR)/main.c \
 	  $(SRC_DIR)/lum/lum_core.c \
 	  $(SRC_DIR)/vorax/vorax_operations.c \
@@ -71,6 +74,9 @@ SOURCES = $(SRC_DIR)/main.c \
       $(ADVANCED_CALC_SOURCES) \
       $(COMPLEX_MODULES_SOURCES)
 
+# Add LUM Instant Displacement Source
+SOURCES += $(SRC_DIR)/spatial/lum_instant_displacement.c
+
 OBJECTS = obj/main.o obj/lum/lum_core.o obj/vorax/vorax_operations.o obj/parser/vorax_parser.o \
 	  obj/binary/binary_lum_converter.o obj/logger/lum_logger.o \
 	  obj/optimization/memory_optimizer.o obj/optimization/pareto_optimizer.o \
@@ -93,7 +99,7 @@ OBJECTS = obj/main.o obj/lum/lum_core.o obj/vorax/vorax_operations.o obj/parser/
 	  obj/complex_modules/ai_optimization.o
 
 # Add new objects to the list of all objects
-OBJECTS += $(TSP_OBJ) $(KNAPSACK_OBJ) $(COLLATZ_OBJ)
+OBJECTS += $(TSP_OBJ) $(KNAPSACK_OBJ) $(COLLATZ_OBJ) $(LUM_INSTANT_DISPLACEMENT_OBJ)
 
 # Optimization objects
 OPTIMIZATION_OBJS = $(OBJ_DIR)/optimization/memory_optimizer.o \
@@ -106,7 +112,7 @@ LDFLAGS = -lpthread -lm -lrt -lm
 SANITIZER_FLAGS = -fsanitize=address
 
 # Create object directories
-OBJ_DIRS = obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug obj/advanced_calculations obj/complex_modules obj/file_formats
+OBJ_DIRS = obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug obj/advanced_calculations obj/complex_modules obj/file_formats obj/spatial
 
 $(OBJ_DIR):
 	mkdir -p $(OBJ_DIRS)
@@ -291,6 +297,11 @@ obj/file_formats/lum_native_universal_format.o: src/file_formats/lum_native_univ
 	mkdir -p obj/file_formats
 	$(CC) $(CFLAGS) $(INCLUDES) -c src/file_formats/lum_native_universal_format.c -o obj/file_formats/lum_native_universal_format.o
 
+# LUM Instant Displacement Module Compilation
+$(LUM_INSTANT_DISPLACEMENT_OBJ): $(SRC_DIR)/spatial/lum_instant_displacement.c $(SRC_DIR)/spatial/lum_instant_displacement.h $(SRC_DIR)/lum/lum_core.h
+	mkdir -p $(OBJ_DIR)/spatial
+	$(CC) $(CFLAGS) -c $< -o $@
+
 .PHONY: clean all test debug install uninstall
 
 all: $(EXECUTABLE) | $(LOG_DIR)
@@ -390,3 +401,16 @@ validate-forensic-complete: test-extensions-complete
 	@echo "🔬 Validation forensique extensions..."
 	chmod +x validate_forensic_complete.sh
 	./validate_forensic_complete.sh
+
+# Test targets
+test-unit: $(BINDIR)/test_unit_lum_core_complete
+	./$(BINDIR)/test_unit_lum_core_complete
+
+test-stress: $(BINDIR)/test_stress_authenticated
+	./$(BINDIR)/test_stress_authenticated
+
+test-displacement: $(BINDIR)/test_instant_displacement
+	./$(BINDIR)/test_instant_displacement
+
+$(BINDIR)/test_instant_displacement: $(SRCDIR)/tests/test_instant_displacement.c $(SRCDIR)/spatial/lum_instant_displacement.c $(SRCDIR)/lum/lum_core.c $(SRCDIR)/debug/memory_tracker.c $(SRCDIR)/logger/lum_logger.c
+	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
