@@ -312,10 +312,7 @@ clean:
 run: $(EXECUTABLE)
 	./$(EXECUTABLE)
 
-test: $(EXECUTABLE)
-	@echo "Running tests..."
-	@cd src/tests && $(CC) $(CFLAGS) -I../lum -I../vorax -I../parser -I../binary -I../logger test_lum_core.c ../lum/lum_core.c ../logger/lum_logger.c -o test_lum_core -lm
-	@cd src/tests && ./test_lum_core
+# Legacy test target (replaced by comprehensive test target above)
 
 forensic-validation:
 	./ci/run_full_validation.sh
@@ -410,8 +407,7 @@ BINDIR = $(BIN_DIR)
 test-unit: $(BIN_DIR)/test_unit_lum_core_complete
 	./$(BIN_DIR)/test_unit_lum_core_complete
 
-test-stress: $(BIN_DIR)/test_stress_authenticated
-	./$(BIN_DIR)/test_stress_authenticated
+# Legacy test-stress target (replaced by comprehensive test-stress target above)
 
 test-displacement: $(BIN_DIR)/test_instant_displacement
 	./$(BIN_DIR)/test_instant_displacement
