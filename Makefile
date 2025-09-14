@@ -402,15 +402,19 @@ validate-forensic-complete: test-extensions-complete
 	chmod +x validate_forensic_complete.sh
 	./validate_forensic_complete.sh
 
+# Variables pour compatibilité
+SRCDIR = $(SRC_DIR)
+BINDIR = $(BIN_DIR)
+
 # Test targets
-test-unit: $(BINDIR)/test_unit_lum_core_complete
-	./$(BINDIR)/test_unit_lum_core_complete
+test-unit: $(BIN_DIR)/test_unit_lum_core_complete
+	./$(BIN_DIR)/test_unit_lum_core_complete
 
-test-stress: $(BINDIR)/test_stress_authenticated
-	./$(BINDIR)/test_stress_authenticated
+test-stress: $(BIN_DIR)/test_stress_authenticated
+	./$(BIN_DIR)/test_stress_authenticated
 
-test-displacement: $(BINDIR)/test_instant_displacement
-	./$(BINDIR)/test_instant_displacement
+test-displacement: $(BIN_DIR)/test_instant_displacement
+	./$(BIN_DIR)/test_instant_displacement
 
-$(BINDIR)/test_instant_displacement: $(SRCDIR)/tests/test_instant_displacement.c $(SRCDIR)/spatial/lum_instant_displacement.c $(SRCDIR)/lum/lum_core.c $(SRCDIR)/debug/memory_tracker.c $(SRCDIR)/logger/lum_logger.c
+$(BIN_DIR)/test_instant_displacement: $(SRC_DIR)/tests/test_instant_displacement.c $(SRC_DIR)/spatial/lum_instant_displacement.c $(SRC_DIR)/lum/lum_core.c $(SRC_DIR)/debug/memory_tracker.c $(SRC_DIR)/logger/lum_logger.c | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
