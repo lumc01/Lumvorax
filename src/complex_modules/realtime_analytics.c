@@ -237,7 +237,7 @@ bool realtime_analytics_full_trace(realtime_stream_t* stream, const char* trace_
     while (current_index != stream->write_index && trace_count < 1000) {
         lum_t* lum = stream->data_buffer[current_index];
         if (lum) {
-            fprintf(file, "LUM[%zu]: id=%lu, presence=%u, pos=(%d,%d), type=%u, timestamp=%lu\n",
+            fprintf(file, "LUM[%zu]: id=%u, presence=%u, pos=(%d,%d), type=%u, timestamp=%lu\n",
                    trace_count, lum->id, lum->presence, lum->position_x, lum->position_y,
                    lum->structure_type, lum->timestamp);
             

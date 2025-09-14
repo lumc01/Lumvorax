@@ -415,7 +415,7 @@ bool neural_layer_forward_pass(neural_layer_t* layer, double* inputs) {
             // Sauvegarde trace si nécessaire
             char trace_filename[256];
             snprintf(trace_filename, sizeof(trace_filename), 
-                     "neural_trace_layer_%zu.txt", layer->layer_id);
+                     "neural_trace_layer_%u.txt", layer->layer_id);
             neural_layer_save_gradients(layer, trace_filename);
             
             // Libération trace (ou conservation selon configuration)

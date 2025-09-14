@@ -19,7 +19,6 @@ static double calculate_system_efficiency(void) {
 
     // 1. Efficacité mémoire basée sur métriques système réelles
     // Utilise une mesure simple mais efficace de la charge mémoire
-    static double previous_memory_efficiency = 0.85;
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     double current_time_ms = ts.tv_sec * 1000.0 + ts.tv_nsec / 1000000.0;
