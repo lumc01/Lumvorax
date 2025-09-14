@@ -539,3 +539,69 @@ evidence_optimized_YYYYMMDD_HHMMSS/
 - **Memory safety** : 0 leak, 0 corruption
 - **Performance** : Objectifs débit atteints
 - **Conformité** : 100% protocoles respectés
+
+
+## NOUVELLES RÈGLES FORENSIQUES DÉTECTÉES LORS INSPECTION COMPLÈTE
+
+### RÈGLE F1: TESTS AUTHENTIQUES OBLIGATOIRES
+- INTERDICTION FORMELLE de projections/extrapolations comme "tests réels"
+- OBLIGATION de tests avec allocation mémoire complète
+- DÉCLARATION EXPLICITE si test basé sur échantillon
+- VALIDATION mémoire disponible avant test stress
+
+### RÈGLE F2: SÉCURITÉ MÉMOIRE ABSOLUE  
+- PROTECTION DOUBLE-FREE obligatoire dans toutes structures
+- BUFFER OVERFLOW checking systématique dans parsers
+- MEMORY POISONING sur libérations pour détection use-after-free
+- FORENSIC DUMPS automatiques sur corruption détectée
+
+### RÈGLE F3: THREAD SAFETY RIGOUREUSE
+- ATOMIC OPERATIONS pour toutes variables partagées
+- DEADLOCK DETECTION avec timeouts sur mutex
+- RACE CONDITION testing obligatoire sur code concurrent
+- WORKER THREAD identification sécurisée (pas de recherche)
+
+### RÈGLE F4: VALIDATION CRYPTOGRAPHIQUE STRICTE
+- TESTS VECTEURS OFFICIELS (RFC, NIST) obligatoires
+- KEY DERIVATION avec PBKDF2, jamais hash simple
+- ENDIANNESS CONVERSION explicite pour portabilité
+- SIDE-CHANNEL protection dans implémentations sensibles
+
+### RÈGLE F5: PERFORMANCE RÉALISME ABSOLU
+- MESURES uniquement sur ALLOCATIONS RÉELLES
+- COMPARAISONS industrielles avec mêmes conditions
+- ENERGY MONITORING via RAPL si disponible
+- PMU VALIDATION pour précision métriques
+
+### RÈGLE F6: CRASH SIMULATION AUTHENTIQUE
+- FORK+KILL pour vraie simulation crash système
+- CORRUPTION INTENTIONNELLE pour tests robustesse  
+- RECOVERY VALIDATION depuis états incohérents
+- FILE INTEGRITY checking post-crash
+
+### RÈGLE F7: LOGGING FORENSIQUE INTÈGRE
+- SIGNATURES CRYPTOGRAPHIQUES sur entrées log
+- TIMESTAMPS NANOSECONDE obligatoires
+- INTEGRITY VERIFICATION des logs
+- FORENSIC DUMPS automatiques sur anomalies
+
+### RÈGLE F8: TERMINOLOGIE TECHNIQUE PRÉCISE
+- INTERDICTION termes marketing trompeurs ("zero-copy" incorrect)
+- DÉFINITIONS techniques conformes standards
+- DISCLAIMERS sur limitations/hypothèses
+- TRANSPARENCE totale sur méthodes de mesure
+
+### RÈGLE F9: TESTS STANDARDS FORENSIQUES
+- TOUS les 6 types tests forensiques obligatoires
+- COVERAGE 100% des modules sans exception  
+- CROSS-PLATFORM validation systématique
+- REGRESSION testing automatisé
+
+### RÈGLE F10: INSPECTION LIGNE-PAR-LIGNE
+- CONFORMITÉ STANDARD_NAMES.md vérifiée
+- ANALYSE CRITIQUE de chaque anomalie détectée  
+- SOLUTIONS techniques détaillées avec explications
+- VALIDATION multiple si nécessaire pour confirmer
+
+Ces règles sont définitives et s'appliquent à TOUS développements futurs du système LUM/VORAX pour maintenir l'intégrité forensique et éviter répétition des anomalies détectées.
+
