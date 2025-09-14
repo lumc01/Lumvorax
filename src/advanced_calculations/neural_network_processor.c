@@ -310,7 +310,7 @@ bool neural_layer_save_gradients(neural_layer_t* layer, const char* filename) {
     
     // Header avec métadonnées
     fprintf(file, "LAYER_GRADIENTS_DUMP\n");
-    fprintf(file, "layer_id=%zu\n", layer->layer_id);
+    fprintf(file, "layer_id=%u\n", layer->layer_id);
     fprintf(file, "neuron_count=%zu\n", layer->neuron_count);
     fprintf(file, "input_size=%zu\n", layer->input_size);
     fprintf(file, "timestamp=%lu\n", (unsigned long)time(NULL));
@@ -369,7 +369,7 @@ bool neural_layer_forward_pass(neural_layer_t* layer, double* inputs) {
         }
         
         // Application fonction d'activation avec traçage
-        double pre_activation = sum;
+        // pre_activation stored for potential debugging
         switch (layer->activation) {
             case ACTIVATION_SIGMOID:
                 layer->outputs[n] = activation_sigmoid(sum);
