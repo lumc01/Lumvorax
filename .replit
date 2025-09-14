@@ -364,6 +364,10 @@ args = "LUM/VORAX Demo"
 task = "workflow.run"
 args = "LUM/VORAX Console"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "LUM/VORAX System"
+
 [[workflows.workflow]]
 name = "LUM/VORAX Stress Test"
 author = "agent"
@@ -1250,6 +1254,17 @@ args = "echo \"Fin validation: $(date -u)\""
 
 [[workflows.workflow]]
 name = "LUM/VORAX Console"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "LUM/VORAX System"
 author = "agent"
 
 [[workflows.workflow.tasks]]
