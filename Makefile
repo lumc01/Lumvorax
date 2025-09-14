@@ -1,4 +1,4 @@
-.PHONY: all clean debug debug_asan release test test-stress test-complete test_persistance_100m_extension libwal_extension librecovery_extension test_integration_complete_extension
+.PHONY: all clean debug debug_asan release test test-stress test-complete test_persistance_100m_extension libwal_extension librecovery_extension test_integration_complete_extension test-extensions-with-logs prepare-logs-extensions validate-forensic-extensions-complete
 all: $(TARGET)
 
 CC = clang
@@ -336,12 +336,12 @@ test_persistance_100m_extension: $(STRESS_100M_EXT_OBJS) $(CORE_OBJS) $(PERSISTE
 # Module WAL extension
 libwal_extension: $(WAL_EXT_OBJS) $(PERSISTENCE_OBJS)
 	@mkdir -p lib
-	ar rcs lib/libwal_extension.a $^
+	ar rcs lib/wal_extension.a $^
 
 # Module recovery extension
 librecovery_extension: $(RECOVERY_EXT_OBJS) $(WAL_EXT_OBJS) $(PERSISTENCE_OBJS)
 	@mkdir -p lib
-	ar rcs lib/librecovery_extension.a $^
+	ar rcs lib/recovery_extension.a $^
 
 # Test intégration complète extension
 test_integration_complete_extension: $(WAL_EXT_OBJS) $(RECOVERY_EXT_OBJS) $(STRESS_100M_EXT_OBJS) $(CORE_OBJS) $(PERSISTENCE_OBJS)
@@ -359,3 +359,34 @@ $(OBJ_DIR)/transaction_wal_extension.o: src/persistence/transaction_wal_extensio
 $(OBJ_DIR)/recovery_manager_extension.o: src/persistence/recovery_manager_extension.c
 	@mkdir -p $(OBJ_DIR)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# Tests extensions avec logs structurés
+TEST_PERSISTANCE_EXT_COMPLETE = bin/test_persistance_100m_extension
+TEST_WAL_EXT_COMPLETE = bin/test_wal_extension
+TEST_RECOVERY_EXT_COMPLETE = bin/test_recovery_extension
+TEST_INTEGRATION_EXT_COMPLETE = bin/test_integration_complete_extension
+
+test-extensions-with-logs: prepare-logs-extensions $(TEST_PERSISTANCE_EXT_COMPLETE) $(TEST_WAL_EXT_COMPLETE) $(TEST_RECOVERY_EXT_COMPLETE) $(TEST_INTEGRATION_EXT_COMPLETE)
+	@echo "🔬 Tests extensions avec logging forensique complet..."
+	SESSION=$$(cat logs/current_session.txt); \
+	./$(TEST_PERSISTANCE_EXT_COMPLETE) 2>&1 | tee logs/extensions/persistance/test_$${SESSION}.log; \
+	./$(TEST_WAL_EXT_COMPLETE) 2>&1 | tee logs/extensions/wal/test_$${SESSION}.log; \
+	./$(TEST_RECOVERY_EXT_COMPLETE) 2>&1 | tee logs/extensions/recovery/test_$${SESSION}.log; \
+	./$(TEST_INTEGRATION_EXT_COMPLETE) 2>&1 | tee logs/extensions/integration/test_$${SESSION}.log
+
+prepare-logs-extensions:
+	@echo "🗂️ Préparation structure logs..."
+	chmod +x prepare_logs_structure_extensions.sh
+	./prepare_logs_structure_extensions.sh
+
+# Validation forensique avec parsing automatique
+validate-forensic-extensions-complete: test-extensions-with-logs
+	@echo "🔍 Validation forensique avec parsing logs..."
+	python3 tools/parse_extension_logs.py logs/extensions/ > logs/forensic/analysis_$$(cat logs/current_session.txt).json
+	echo "📊 Résultats: logs/forensic/analysis_$$(cat logs/current_session.txt).json"
+
+# Validation forensique complète (conservé)
+validate-forensic-complete: test-extensions-complete
+	@echo "🔬 Validation forensique extensions..."
+	chmod +x validate_forensic_complete.sh
+	./validate_forensic_complete.sh
