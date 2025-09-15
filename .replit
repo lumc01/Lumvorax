@@ -3,7 +3,7 @@ modules = ["c-clang14", "bash", "cpp-clang14", "python-3.12"]
 expertMode = true
 
 [workflows]
-runButton = "CORRECTIONS_APPLIQUEES_EXECUTION_IMMEDIATE"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "LUM_VORAX_FORENSIC_COMPLETE"
@@ -354,23 +354,19 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX Demo"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "LUM/VORAX Console"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX System"
+args = "LUM/VORAX Main Demo"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX Stress Test"
+args = "Build System"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX Scientific Computing"
+args = "Stress Test"
 
 [[workflows.workflow]]
 name = "VALIDATION_FORENSIQUE_COMPLETE"
@@ -755,17 +751,6 @@ args = "./run_validation_complete.sh"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"=== VALIDATION TERMINÉE ===\""
-
-[[workflows.workflow]]
-name = "LUM/VORAX Demo"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax --sizeof-checks"
 
 [[workflows.workflow]]
 name = "VALIDATION_TRACAGE_IA_COMPLET"
@@ -1257,28 +1242,6 @@ args = "./bin/lum_vorax"
 outputType = "console"
 
 [[workflows.workflow]]
-name = "LUM/VORAX System"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow]]
-name = "LUM/VORAX Stress Test"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax --stress-test-million"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow]]
 name = "Mathematical Research LUM/VORAX"
 author = 47599206
 mode = "sequential"
@@ -1302,17 +1265,6 @@ args = "find logs/mathematical_research -name \"*.log\" | head -5"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"✅ Recherche mathématique terminée - Logs forensiques disponibles\""
-
-[[workflows.workflow]]
-name = "LUM/VORAX Scientific Computing"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax --crypto-validation && ./bin/lum_vorax --sizeof-checks"
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow]]
 name = "CORRECTIONS_APPLIQUEES_EXECUTION_IMMEDIATE"
@@ -1478,6 +1430,39 @@ args = "echo \"✅ SYSTÈME STABILISÉ - PRÊT POUR UTILISATION\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"Fin validation: $(date -u)\""
+
+[[workflows.workflow]]
+name = "LUM/VORAX Main Demo"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Build System"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make clean && make all"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Stress Test"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax --stress-test-million"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
