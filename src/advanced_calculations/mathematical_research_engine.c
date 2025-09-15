@@ -107,18 +107,18 @@ uint64_t collatz_step_optimized(uint64_t n, mathematical_research_engine_t* engi
 // Analyse d'une séquence de Collatz avec représentation LUM
 collatz_sequence_t* analyze_single_collatz_sequence(
     mathematical_research_engine_t* engine,
-    uint64_t initial_value
+    uint64_t starting_number
 ) {
-    collatz_sequence_t* sequence = collatz_sequence_create(initial_value);
+    collatz_sequence_t* sequence = collatz_sequence_create(starting_number);
     if (!sequence) return NULL;
     
     // Les champs sont déjà initialisés par collatz_sequence_create
-    // sequence->starting_number contient initial_value
+    // sequence->starting_number contient starting_number
     // sequence->sequence_length est initialisé à 0
     // sequence->max_value est initialisé à starting_number
     
     // Calculer la séquence complète
-    uint64_t current = initial_value;
+    uint64_t current = starting_number;
     uint64_t step_count = 0;
     
     // Limitation de sécurité
@@ -138,38 +138,27 @@ collatz_sequence_t* analyze_single_collatz_sequence(
         // Logging périodique pour grandes séquences
         if (step_count % 100000 == 0) {
             lum_log(LUM_LOG_DEBUG, "Séquence %lu: %lu étapes, max=%lu, current=%lu",
-                    initial_value, step_count, sequence->max_value, current);
+                    starting_number, step_count, sequence->max_value, current);
         }
     }
     
     sequence->steps_count = step_count;
     sequence->sequence_length = step_count;
-    sequence->compression_ratio = (double)sequence->max_value / (double)initial_value;
+    sequence->compression_ratio = (double)sequence->max_value / (double)starting_number;
     
-    // Créer des LUMs pour représenter cette séquence
+    // Stocker la séquence des nombres
     if (step_count < 100000) { // Limite raisonnable pour éviter l'explosion mémoire
-        sequence->sequence_lums = TRACKED_MALLOC(sizeof(lum_t) * step_count);
-        if (sequence->sequence_lums) {
-            // Régénérer la séquence pour créer les LUMs
-            current = initial_value;
+        sequence->sequence = TRACKED_MALLOC(sizeof(uint64_t) * step_count);
+        if (sequence->sequence) {
+            // Régénérer la séquence pour stocker les valeurs
+            current = starting_number;
             for (uint64_t i = 0; i < step_count && current != 1; i++) {
-                lum_t sequence_lum = {
-                    .presence = 1,
-                    .id = lum_generate_id(),
-                    .position_x = (int32_t)(current % 1000000),
-                    .position_y = (int32_t)(i % 1000000),
-                    .structure_type = (current % 2 == 0) ? LUM_STRUCTURE_LINEAR : LUM_STRUCTURE_CIRCULAR,
-                    .timestamp = lum_get_timestamp(),
-                    .memory_address = &sequence->sequence_lums[i],
-                    .checksum = (uint32_t)(current & 0xFFFFFFFF),
-                    .is_destroyed = 0
-                };
-                sequence->sequence_lums[i] = sequence_lum;
+                sequence->sequence[i] = current;
                 current = collatz_step_optimized(current, engine);
             }
         }
     } else {
-        sequence->sequence_lums = NULL;
+        sequence->sequence = NULL;
     }
     
     return sequence;
@@ -213,11 +202,11 @@ math_research_result_t* analyze_collatz_dynamic_range(
         if (sequence) {
             results->sequences[results->sequence_count] = *sequence;
             results->sequence_count++;
-            results->total_calculations += sequence->steps_to_one;
+            results->total_calculations += sequence->steps_count;
             
             // Mettre à jour les statistiques
-            if (sequence->convergence_ratio > results->max_length_ratio) {
-                results->max_length_ratio = sequence->convergence_ratio;
+            if (sequence->compression_ratio > results->max_length_ratio) {
+                results->max_length_ratio = sequence->compression_ratio;
             }
             
             TRACKED_FREE(sequence);
@@ -262,7 +251,7 @@ bool generate_mathematical_conjectures(
     uint64_t min_length = UINT64_MAX;
     
     for (size_t i = 0; i < results->sequence_count; i++) {
-        uint64_t length = results->sequences[i].steps_to_one;
+        uint64_t length = results->sequences[i].steps_count;
         total_length += length;
         if (length > max_length) max_length = length;
         if (length < min_length) min_length = length;
@@ -272,7 +261,7 @@ bool generate_mathematical_conjectures(
     double length_variance = 0.0;
     
     for (size_t i = 0; i < results->sequence_count; i++) {
-        double diff = (double)results->sequences[i].steps_to_one - avg_length;
+        double diff = (double)results->sequences[i].steps_count - avg_length;
         length_variance += diff * diff;
     }
     length_variance /= (double)results->sequence_count;
@@ -294,8 +283,8 @@ bool generate_mathematical_conjectures(
     // Conjecture 2: Relation longueur/valeur initiale
     double correlation_sum = 0.0;
     for (size_t i = 0; i < results->sequence_count; i++) {
-        double normalized_initial = log((double)results->sequences[i].initial_value);
-        double normalized_length = log((double)results->sequences[i].steps_to_one);
+        double normalized_initial = log((double)results->sequences[i].starting_number);
+        double normalized_length = log((double)results->sequences[i].steps_count);
         correlation_sum += normalized_initial * normalized_length;
     }
     
@@ -309,7 +298,7 @@ bool generate_mathematical_conjectures(
     // Conjecture 3: Ratios de convergence
     double avg_ratio = 0.0;
     for (size_t i = 0; i < results->sequence_count; i++) {
-        avg_ratio += results->sequences[i].convergence_ratio;
+        avg_ratio += results->sequences[i].compression_ratio;
     }
     avg_ratio /= (double)results->sequence_count;
     

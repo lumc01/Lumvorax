@@ -66,6 +66,7 @@ SOURCES = $(SRC_DIR)/main.c \
 	  $(SRC_DIR)/crypto/homomorphic_encryption.c \
 	  $(SRC_DIR)/persistence/data_persistence.c \
 	  $(SRC_DIR)/debug/memory_tracker.c \
+	  $(SRC_DIR)/debug/forensic_logger.c \
 	  $(SRC_DIR)/file_formats/lum_native_file_handler.c \
 	  $(SRC_DIR)/file_formats/lum_secure_serialization.c \
 	  $(SRC_DIR)/complex_modules/ai_dynamic_config_manager.c \
@@ -94,9 +95,11 @@ OBJECTS = obj/main.o obj/lum/lum_core.o obj/vorax/vorax_operations.o obj/parser/
 	  obj/advanced_calculations/neural_network_processor.o \
 	  obj/advanced_calculations/image_processor.o \
 	  obj/advanced_calculations/audio_processor.o \
+	  obj/advanced_calculations/mathematical_research_engine.o \
 	  obj/complex_modules/realtime_analytics.o \
 	  obj/complex_modules/distributed_computing.o \
-	  obj/complex_modules/ai_optimization.o
+	  obj/complex_modules/ai_optimization.o \
+	  obj/debug/forensic_logger.o
 
 # Add new objects to the list of all objects
 OBJECTS += $(TSP_OBJ) $(KNAPSACK_OBJ) $(COLLATZ_OBJ) $(LUM_INSTANT_DISPLACEMENT_OBJ)
