@@ -257,98 +257,105 @@ int main(int argc, char* argv[]) {
 
                 return 0;
             }
-        } else if (strcmp(argv[i], "--threading-tests") == 0) {
-            printf("=== Tests threading POSIX ===\n");
-            // Tests de threading seront implémentés
-            return 0;
-        } else if (strcmp(argv[i], "--binary-conversion-tests") == 0) {
-            printf("=== Tests conversion binaire ===\n");
-            // Tests de conversion binaire étendus
-            return 0;
-        } else if (strcmp(argv[i], "--parser-tests") == 0) {
-            printf("=== Tests parser VORAX ===\n");
-            // Tests de parser étendus
-            return 0;
-        } else if (strcmp(argv[i], "--memory-stress-tests") == 0) {
-            printf("=== Tests de stress mémoire ===\n");
-            // Tests de stress mémoire
-            return 0;
-        } else if (strcmp(argv[i], "--optimization-modules-stress-test") == 0) {
-            printf("\n=== LANCEMENT TESTS STRESS MODULES OPTIMISATION ===\n");
-
-            // Test stress IA Optimization
-            ai_optimization_config_t* ai_config = ai_optimization_config_create_default();
-            if (ai_config) {
-                printf("Testing AI optimization with 100M+ LUMs...\n");
-                if (ai_stress_test_100m_lums(ai_config)) {
-                    printf("✅ AI optimization stress test completed\n");
-                } else {
-                    printf("❌ AI optimization stress test failed\n");
-                }
-                ai_optimization_config_destroy(&ai_config);
-            } else {
-                printf("❌ Failed to create AI optimization config for stress test\n");
-            }
-
-            // Tests stress nouveaux modules
-            printf("\n=== NOUVEAUX MODULES - TESTS STRESS 100M+ ===\n");
-
-            // TSP Stress Test
-            tsp_config_t* tsp_config = tsp_config_create_default();
-            if (tsp_config) {
-                printf("Testing TSP with 100M+ cities...\n");
-                if (tsp_stress_test_100m_cities(tsp_config)) {
-                    printf("✅ TSP stress test completed\n");
-                } else {
-                    printf("❌ TSP stress test failed\n");
-                }
-                tsp_config_destroy(&tsp_config);
-            } else {
-                 printf("❌ Failed to create TSP config for stress test\n");
-            }
-
-
-            // Knapsack Stress Test
-            knapsack_config_t* knapsack_config = knapsack_config_create_default();
-            if (knapsack_config) {
-                printf("Testing Knapsack with 100M+ items...\n");
-                if (knapsack_stress_test_100m_items(knapsack_config)) {
-                    printf("✅ Knapsack stress test completed\n");
-                } else {
-                    printf("❌ Knapsack stress test failed\n");
-                }
-                knapsack_config_destroy(&knapsack_config);
-            } else {
-                 printf("❌ Failed to create Knapsack config for stress test\n");
-            }
-
-
-            // Collatz Stress Test
-            collatz_config_t* collatz_config = collatz_config_create_default();
-            if (collatz_config) {
-                printf("Testing Collatz with 100M+ numbers...\n");
-                if (collatz_stress_test_100m_numbers(collatz_config)) {
-                    printf("✅ Collatz stress test completed\n");
-                } else {
-                    printf("❌ Collatz stress test failed\n");
-                }
-                collatz_config_destroy(&collatz_config);
-            } else {
-                printf("❌ Failed to create Collatz config for stress test\n");
-            }
-
-            // Homomorphic Encryption Stress Test
-            printf("Testing Homomorphic Encryption with 100M+ operations...\n");
-            if (he_stress_test_100m_operations_wrapper()) {
-                printf("✅ Homomorphic Encryption stress test completed\n");
-            } else {
-                printf("❌ Homomorphic Encryption stress test failed\n");
-            }
-
-            return 0;
         }
+    }
 
-    } // End of argument parsing loop
+    // Correctly placed checks for arguments
+    if (argc > 1) { // Re-check argc to ensure we don't miss arguments if the loop exited early
+        for (int i = 1; i < argc; ++i) {
+             if (strcmp(argv[i], "--threading-tests") == 0) {
+                printf("=== Tests threading POSIX ===\n");
+                // Tests de threading seront implémentés
+                return 0;
+            } else if (strcmp(argv[i], "--binary-conversion-tests") == 0) {
+                printf("=== Tests conversion binaire ===\n");
+                // Tests de conversion binaire étendus
+                return 0;
+            } else if (strcmp(argv[i], "--parser-tests") == 0) {
+                printf("=== Tests parser VORAX ===\n");
+                // Tests de parser étendus
+                return 0;
+            } else if (strcmp(argv[i], "--memory-stress-tests") == 0) {
+                printf("=== Tests de stress mémoire ===\n");
+                // Tests de stress mémoire
+                return 0;
+            } else if (strcmp(argv[i], "--optimization-modules-stress-test") == 0) {
+                printf("\n=== LANCEMENT TESTS STRESS MODULES OPTIMISATION ===\n");
+
+                // Test stress IA Optimization
+                ai_optimization_config_t* ai_config = ai_optimization_config_create_default();
+                if (ai_config) {
+                    printf("Testing AI optimization with 100M+ LUMs...\n");
+                    if (ai_stress_test_100m_lums(ai_config)) {
+                        printf("✅ AI optimization stress test completed\n");
+                    } else {
+                        printf("❌ AI optimization stress test failed\n");
+                    }
+                    ai_optimization_config_destroy(&ai_config);
+                } else {
+                    printf("❌ Failed to create AI optimization config for stress test\n");
+                }
+
+                // Tests stress nouveaux modules
+                printf("\n=== NOUVEAUX MODULES - TESTS STRESS 100M+ ===\n");
+
+                // TSP Stress Test
+                tsp_config_t* tsp_config = tsp_config_create_default();
+                if (tsp_config) {
+                    printf("Testing TSP with 100M+ cities...\n");
+                    if (tsp_stress_test_100m_cities(tsp_config)) {
+                        printf("✅ TSP stress test completed\n");
+                    } else {
+                        printf("❌ TSP stress test failed\n");
+                    }
+                    tsp_config_destroy(&tsp_config);
+                } else {
+                     printf("❌ Failed to create TSP config for stress test\n");
+                }
+
+
+                // Knapsack Stress Test
+                knapsack_config_t* knapsack_config = knapsack_config_create_default();
+                if (knapsack_config) {
+                    printf("Testing Knapsack with 100M+ items...\n");
+                    if (knapsack_stress_test_100m_items(knapsack_config)) {
+                        printf("✅ Knapsack stress test completed\n");
+                    } else {
+                        printf("❌ Knapsack stress test failed\n");
+                    }
+                    knapsack_config_destroy(&knapsack_config);
+                } else {
+                     printf("❌ Failed to create Knapsack config for stress test\n");
+                }
+
+
+                // Collatz Stress Test
+                collatz_config_t* collatz_config = collatz_config_create_default();
+                if (collatz_config) {
+                    printf("Testing Collatz with 100M+ numbers...\n");
+                    if (collatz_stress_test_100m_numbers(collatz_config)) {
+                        printf("✅ Collatz stress test completed\n");
+                    } else {
+                        printf("❌ Collatz stress test failed\n");
+                    }
+                    collatz_config_destroy(&collatz_config);
+                } else {
+                    printf("❌ Failed to create Collatz config for stress test\n");
+                }
+
+                // Homomorphic Encryption Stress Test
+                printf("Testing Homomorphic Encryption with 100M+ operations...\n");
+                if (he_stress_test_100m_operations_wrapper()) {
+                    printf("✅ Homomorphic Encryption stress test completed\n");
+                } else {
+                    printf("❌ Homomorphic Encryption stress test failed\n");
+                }
+
+                return 0;
+            }
+        }
+    }
+
 
     // If no specific argument was provided, run the default demo
     printf("=== LUM/VORAX System Demo ===\n");
@@ -401,12 +408,12 @@ int main(int argc, char* argv[]) {
     printf("\n9. Test Collatz Minimal (sécurisé)...\n");
     // Utiliser le test minimal au lieu de la démo complète
     printf("Test avec seulement 3 nombres pour éviter crash...\n");
-    
+
     // Configuration minimale
     collatz_config_t* config = collatz_config_create_default();
     if (config) {
         config->store_sequences = false; // Désactiver stockage pour éviter fuites
-        
+
         // Test sur nombres simples
         for (uint64_t n = 7; n <= 9; n++) {
             collatz_result_t* result = collatz_analyze_basic(n, config);
@@ -415,7 +422,7 @@ int main(int argc, char* argv[]) {
                 collatz_result_destroy(&result);
             }
         }
-        
+
         collatz_config_destroy(&config);
         printf("  ✅ Test Collatz minimal terminé sans fuite\n");
     }
@@ -752,7 +759,7 @@ void demo_pareto_optimization(void) {
     // Test des opérations optimisées
     printf("  📊 Test d'optimisations VORAX avec analyse Pareto\n");
 
-    // Création de groupes de test
+    // Création groupes de test
     lum_group_t* group1 = lum_group_create(1000);
     lum_group_t* group2 = lum_group_create(800);
 
