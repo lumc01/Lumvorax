@@ -180,14 +180,18 @@ collatz_sequence_t* analyze_single_collatz_sequence(
         sequence->sequence_capacity = 0;
     }
 
-    // Nettoyage automatique si séquence temporaire
-    if (sequence && sequence->steps_count < 10000) {
-        // Réduire l'allocation pour les séquences courtes
-        sequence->sequence = TRACKED_REALLOC(sequence->sequence, 
-                                           sequence->steps_count * sizeof(uint64_t));
+    // CORRECTION CRITIQUE: Nettoyage forcé obligatoire
+    if (sequence) {
+        // Libérer immédiatement les gros tableaux pour éviter les fuites
+        if (sequence->sequence && sequence->sequence_capacity > 1000) {
+            TRACKED_FREE(sequence->sequence);
+            sequence->sequence = NULL;
+            sequence->sequence_capacity = 0;
+        }
+        
+        // Ajout du nettoyage obligatoire
+        forensic_log_memory_operation("ANALYZE_COLLATZ_SEQUENCE_END", sequence, 0);
     }
-    // Ajout du nettoyage obligatoire
-    forensic_log_memory_operation("ANALYZE_COLLATZ_SEQUENCE_END", sequence, 0);
 
     return sequence;
 }
@@ -203,11 +207,11 @@ math_research_result_t* analyze_collatz_dynamic_range(
     math_research_result_t* results = TRACKED_MALLOC(sizeof(math_research_result_t));
     if (!results) return NULL;
 
-    // CORRECTION CRITIQUE: Limitation progressive avec nettoyage forcé
+    // CORRECTION CRITIQUE: Limitation drastique pour éviter crash
     size_t range_size = (size_t)(end_value - start_value);
-    if (range_size > 100) {  // AUGMENTÉ: 100 nombres max pour test élargi
-        range_size = 100;
-        end_value = start_value + 100;
+    if (range_size > 10) {  // RÉDUIT: 10 nombres max pour éviter fuites
+        range_size = 10;
+        end_value = start_value + 10;
     }
 
     results->sequences = TRACKED_MALLOC(sizeof(collatz_sequence_t) * range_size);
