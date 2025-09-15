@@ -1732,14 +1732,14 @@ void demo_mathematical_research_engine() {
         collatz_sequence_t* seq = analyze_single_collatz_sequence(engine, demo_values[i]);
         if (seq) {
             printf("  • n=%lu: %lu étapes, max=%lu, ratio=%.3f\n",
-                   seq->initial_value, seq->sequence_length,
-                   seq->max_value, seq->convergence_ratio);
+                   seq->starting_number, seq->sequence_length,
+                   seq->max_value, seq->compression_ratio);
 
-            if (seq->sequence_lums) {
+            if (seq->sequence) {
                 printf("    Représentation LUM: %zu unités créées\n", seq->sequence_length);
-                TRACKED_FREE(seq->sequence_lums);
+                // La structure sera libérée par collatz_sequence_destroy
             }
-            TRACKED_FREE(seq);
+            collatz_sequence_destroy(&seq);
         }
     }
 
@@ -1771,8 +1771,9 @@ void demo_mathematical_research_engine() {
 
         // Nettoyage des séquences
         for (size_t i = 0; i < results->sequence_count; i++) {
-            if (results->sequences[i].sequence_lums) {
-                TRACKED_FREE(results->sequences[i].sequence_lums);
+            if (results->sequences[i].sequence) {
+                // Les séquences seront nettoyées automatiquement
+                // car elles sont des copies de valeurs, pas des pointeurs
             }
         }
         TRACKED_FREE(results->sequences);

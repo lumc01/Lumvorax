@@ -109,13 +109,13 @@ collatz_sequence_t* analyze_single_collatz_sequence(
     mathematical_research_engine_t* engine,
     uint64_t initial_value
 ) {
-    collatz_sequence_t* sequence = TRACKED_MALLOC(sizeof(collatz_sequence_t));
+    collatz_sequence_t* sequence = collatz_sequence_create(initial_value);
     if (!sequence) return NULL;
     
-    sequence->initial_value = initial_value;
-    sequence->sequence_length = 0;
-    sequence->max_value = initial_value;
-    sequence->steps_to_one = 0;
+    // Les champs sont déjà initialisés par collatz_sequence_create
+    // sequence->starting_number contient initial_value
+    // sequence->sequence_length est initialisé à 0
+    // sequence->max_value est initialisé à starting_number
     
     // Calculer la séquence complète
     uint64_t current = initial_value;
@@ -142,9 +142,9 @@ collatz_sequence_t* analyze_single_collatz_sequence(
         }
     }
     
-    sequence->steps_to_one = step_count;
+    sequence->steps_count = step_count;
     sequence->sequence_length = step_count;
-    sequence->convergence_ratio = (double)sequence->max_value / (double)initial_value;
+    sequence->compression_ratio = (double)sequence->max_value / (double)initial_value;
     
     // Créer des LUMs pour représenter cette séquence
     if (step_count < 100000) { // Limite raisonnable pour éviter l'explosion mémoire

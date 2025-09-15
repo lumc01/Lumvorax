@@ -17,15 +17,8 @@ typedef struct {
     uint32_t parallel_threads;
 } math_research_config_t;
 
-// Structure pour stocker les séquences de Collatz
-typedef struct {
-    uint64_t initial_value;
-    uint64_t sequence_length;
-    uint64_t max_value;
-    uint64_t steps_to_one;
-    double convergence_ratio;
-    lum_t* sequence_lums;  // Représentation LUM de la séquence
-} collatz_sequence_t;
+// Utiliser la définition de collatz_sequence_t depuis collatz_analyzer.h
+#include "collatz_analyzer.h"
 
 // Résultats de recherche dynamique
 typedef struct {
@@ -73,6 +66,12 @@ typedef struct {
 // Fonctions principales du moteur
 mathematical_research_engine_t* math_research_engine_create(math_research_config_t* config);
 void math_research_engine_destroy(mathematical_research_engine_t* engine);
+
+// Analyse de séquence individuelle Collatz avec LUM
+collatz_sequence_t* analyze_single_collatz_sequence(
+    mathematical_research_engine_t* engine,
+    uint64_t initial_value
+);
 
 // Analyse dynamique de Collatz
 math_research_result_t* analyze_collatz_dynamic_range(
