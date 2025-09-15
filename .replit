@@ -1471,7 +1471,7 @@ mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "echo \"=== VALIDATION MODULE BOÎTE NOIRE UNIVERSEL ===\""
+args = "echo \"=== VALIDATION COMPLÈTE MODULE BLACKBOX_UNIVERSEL ===\""
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
@@ -1491,7 +1491,7 @@ args = "make clean"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "make all 2>&1 | tee logs/compilation_blackbox_$(date +%Y%m%d_%H%M%S).log"
+args = "make all 2>&1 | tee logs/blackbox_compilation_$(date +%Y%m%d_%H%M%S).log"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"

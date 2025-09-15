@@ -24,6 +24,9 @@
 #include "advanced_calculations/knapsack_optimizer.h"
 #include "advanced_calculations/collatz_analyzer.h"
 #include "complex_modules/ai_optimization.h"
+#include "complex_modules/distributed_computing.h"
+#include "complex_modules/realtime_analytics.h"
+#include "advanced_calculations/blackbox_universal_module.h"
 #include "advanced_calculations/mathematical_research_engine.h" // Inclure le nouveau module
 
 // Demo functions
@@ -41,6 +44,7 @@ void demo_knapsack_optimizer_module();
 void demo_collatz_analyzer_module();
 void demo_homomorphic_encryption_module();
 void demo_mathematical_research_engine(); // Déclaration de la nouvelle démo
+void run_parsing_test_only(); // Declaration for parsing test only
 
 // Stress test functions prototypes for new modules
 bool tsp_stress_test_100m_cities(tsp_config_t* config);
@@ -352,6 +356,20 @@ int main(int argc, char* argv[]) {
                 }
 
                 return 0;
+            } else if (strcmp(argv[i], "--blackbox-universal-test") == 0) {
+                printf("=== BLACKBOX UNIVERSAL MODULE TEST ===\n");
+                // Test module boîte noire universel
+                blackbox_config_t* config = blackbox_config_create_default();
+                bool test_success = blackbox_stress_test_universal(config);
+                blackbox_config_destroy(&config);
+
+                if (test_success) {
+                    printf("✅ BLACKBOX UNIVERSAL TEST: SUCCESS\n");
+                    printf("Module ready for LUM/VORAX integration\n");
+                } else {
+                    printf("❌ BLACKBOX UNIVERSAL TEST: FAILED\n");
+                }
+                return test_success ? 0 : 1;
             }
         }
     }
@@ -1016,7 +1034,7 @@ void demo_simd_optimization(void) {
 
     if (caps->avx512_available) {
         printf("  🚀 Test optimisations AVX-512 spécialisées\n");
-        printf("    ✓ Capacité AVX-512 détectée (largeur: %d éléments)\n", caps->vector_width);
+        printf("    ✅ Capacité AVX-512 détectée (largeur: %d éléments)\n", caps->vector_width);
 #ifdef __AVX512F__
         printf("    ✅ Support AVX-512 compilé\n");
 #else
@@ -1839,29 +1857,11 @@ void demo_mathematical_research_engine() {
     TRACKED_FREE(config);
     math_research_engine_destroy(engine);
 }
-// Ajout à la fin de la fonction main(), avant le return 0;
 
-    } else if (argc > 1 && strcmp(argv[1], "--blackbox-universal-test") == 0) {
-        printf("=== BLACKBOX UNIVERSAL MODULE TEST ===\n");
-        
-        // Test module boîte noire universel
-        blackbox_config_t* config = blackbox_config_create_default();
-        if (!config) {
-            printf("❌ Failed to create blackbox config\n");
-            return 1;
-        }
-        
-        bool test_success = blackbox_stress_test_universal(config);
-        
-        printf("\n=== BLACKBOX DEMONSTRATION ===\n");
-        printf("This module can mask ANY function execution:\n");
-        printf("• Hide source code without encryption\n");
-        printf("• Simulate AI behavior to confuse analysis\n");
-        printf("• Apply computational folding & semantic shuffling\n");
-        printf("• Generate fake neural network metrics\n");
-        printf("• Create algorithmic morphing in real-time\n");
-        
-        blackbox_config_destroy(&config);
-        
-        return test_success ? 0 : 1;
-#include "advanced_calculations/blackbox_universal_module.h"
+void run_parsing_test_only() {
+    printf("=== Running Parsing Test Only ===\n");
+    // Placeholder for a dedicated parsing test function
+    // This would involve loading and parsing various VORAX scripts
+    // and reporting success or failure for each.
+    printf("Parsing tests not fully implemented in this demo.\n");
+}
