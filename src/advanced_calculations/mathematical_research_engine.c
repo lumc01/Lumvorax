@@ -161,6 +161,13 @@ collatz_sequence_t* analyze_single_collatz_sequence(
         sequence->sequence = NULL;
     }
     
+    // Nettoyage automatique si séquence temporaire
+    if (sequence && sequence->steps_count < 10000) {
+        // Réduire l'allocation pour les séquences courtes
+        sequence->sequence = TRACKED_REALLOC(sequence->sequence, 
+                                           sequence->steps_count * sizeof(uint64_t));
+    }
+    
     return sequence;
 }
 

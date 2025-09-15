@@ -82,7 +82,9 @@ collatz_sequence_t* collatz_sequence_create(uint64_t starting_number) {
     if (!sequence) return NULL;
     
     sequence->sequence_length = 0;
-    sequence->sequence = TRACKED_MALLOC(COLLATZ_MAX_ITERATIONS * sizeof(uint64_t));
+    // Allocation dynamique initiale plus raisonnable (1000 étapes)
+    sequence->sequence_capacity = 1000;
+    sequence->sequence = TRACKED_MALLOC(sequence->sequence_capacity * sizeof(uint64_t));
     
     if (!sequence->sequence) {
         TRACKED_FREE(sequence);

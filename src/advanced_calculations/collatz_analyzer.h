@@ -44,6 +44,7 @@ typedef struct {
 // Séquence Collatz
 typedef struct {
     size_t sequence_length;
+    size_t sequence_capacity;  // Nouvelle capacité allouée
     uint64_t* sequence;
     uint64_t starting_number;
     uint64_t steps_count;
