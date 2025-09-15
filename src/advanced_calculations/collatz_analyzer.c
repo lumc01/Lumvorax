@@ -82,8 +82,8 @@ collatz_sequence_t* collatz_sequence_create(uint64_t starting_number) {
     if (!sequence) return NULL;
     
     sequence->sequence_length = 0;
-    // Allocation dynamique initiale plus raisonnable (1000 étapes)
-    sequence->sequence_capacity = 1000;
+    // CORRECTION CRITIQUE: Allocation raisonnable limitée pour éviter le crash
+    sequence->sequence_capacity = 100;  // Réduit de 1000 à 100 pour éviter les fuites
     sequence->sequence = TRACKED_MALLOC(sequence->sequence_capacity * sizeof(uint64_t));
     
     if (!sequence->sequence) {

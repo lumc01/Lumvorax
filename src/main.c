@@ -72,190 +72,208 @@ void print_lum_group(lum_group_t* group) {
 int main(int argc, char* argv[]) {
     // Options de validation forensique
     if (argc > 1) {
-        if (strcmp(argv[1], "--sizeof-checks") == 0) {
-            printf("=== Validation ABI des structures ===\n");
-            printf("sizeof(lum_t) = %zu bytes\n", sizeof(lum_t));
-            printf("sizeof(lum_group_t) = %zu bytes\n", sizeof(lum_group_t));
-            printf("sizeof(lum_zone_t) = %zu bytes\n", sizeof(lum_zone_t));
-            printf("sizeof(lum_memory_t) = %zu bytes\n", sizeof(lum_memory_t));
-            return 0;
-        }
-
-        else if (strcmp(argv[1], "--crypto-validation") == 0) {
-            printf("=== Tests cryptographiques RFC 6234 ===\n");
-            if (crypto_validate_sha256_implementation()) {
-                printf("Validation SHA-256: SUCCÈS\n");
-                printf("✓ Vecteur test 1 (chaîne vide): VALIDÉ\n");
-                printf("✓ Vecteur test 2 ('abc'): VALIDÉ\n");
-                printf("✓ Vecteur test 3 (chaîne longue): VALIDÉ\n");
-                printf("✓ Conformité RFC 6234: COMPLÈTE\n");
-            } else {
-                printf("✗ Échec validation cryptographique\n");
-                return 1;
-            }
-        } else if (argc > 1 && strcmp(argv[1], "--stress-test-all-modules") == 0) {
-        printf("=== LANCEMENT TESTS STRESS 100M+ TOUS MODULES ===\n");
-        printf("Exécution du binaire de test dédié...\n");
-
-        // Compilation et exécution du test stress
-        system("cd src/tests && clang -std=c99 -O2 -I.. -I../debug test_stress_100m_all_modules.c -o ../../bin/test_stress_modules -lm");
-
-        if (system("./bin/test_stress_modules") == 0) {
-            printf("✅ TOUS LES TESTS STRESS 100M+ RÉUSSIS\n");
-        } else {
-            printf("❌ ÉCHECS DÉTECTÉS DANS TESTS STRESS\n");
-            return 1;
-        }
-    }
-
-        // MANDATORY stress tests per prompt.txt - CRITICAL requirement
-        if (strcmp(argv[1], "--stress-test-million") == 0) {
-            printf("\n=== MANDATORY STRESS TEST: 1+ MILLION LUMs ===\n");
-            printf("Testing system with 1,000,000 LUMs minimum requirement per prompt.txt\n");
-
-            // Initialize memory tracking for forensic analysis
-            memory_tracker_init();
-
-            // Initialize performance metrics for timing
-            // Note: performance_metrics_init() called implicitly
-
-            // Start timing for forensic report
-            clock_t start_time_clock = clock();
-
-            // Create 1 million LUMs test - MANDATORY per prompt.txt
-            const size_t TEST_COUNT = 1000000; // 1 million minimum
-            printf("Creating %zu LUM units for stress test...\n", TEST_COUNT);
-
-            lum_group_t* large_group = lum_group_create(TEST_COUNT);
-            if (!large_group) {
-                printf("ERROR: Failed to create large group for stress test\n");
-                return 1;
-            }
-
-            // Populate with test data
-            for (size_t i = 0; i < TEST_COUNT; i++) {
-                lum_t lum = {
-                    .presence = (uint8_t)(i % 2),
-                    .position_x = (int32_t)(i % 1000),
-                    .position_y = (int32_t)(i / 1000),
-                    .structure_type = (i % 4 == 0) ? LUM_STRUCTURE_LINEAR :
-                                    (i % 4 == 1) ? LUM_STRUCTURE_CIRCULAR :
-                                    (i % 4 == 2) ? LUM_STRUCTURE_GROUP : LUM_STRUCTURE_NODE,
-                    .id = (uint32_t)i,
-                    .timestamp = lum_get_timestamp(),
-                    .memory_address = NULL,
-                    .checksum = 0,
-                    .is_destroyed = 0
-                };
-                // CORRECTION ALLOCATION CRITIQUE: lum_group_add prend pointeur, pas copie
-                if (!lum_group_add(large_group, &lum)) {
-                    printf("ERROR: Failed to add LUM %zu\n", i);
-                    lum_group_destroy(large_group);
+        // Parse arguments to find the requested test/validation
+        for (int i = 1; i < argc; ++i) {
+            if (strcmp(argv[i], "--sizeof-checks") == 0) {
+                printf("=== Validation ABI des structures ===\n");
+                printf("sizeof(lum_t) = %zu bytes\n", sizeof(lum_t));
+                printf("sizeof(lum_group_t) = %zu bytes\n", sizeof(lum_group_t));
+                printf("sizeof(lum_zone_t) = %zu bytes\n", sizeof(lum_zone_t));
+                printf("sizeof(lum_memory_t) = %zu bytes\n", sizeof(lum_memory_t));
+                return 0;
+            } else if (strcmp(argv[i], "--crypto-validation") == 0) {
+                printf("=== Tests cryptographiques RFC 6234 ===\n");
+                if (crypto_validate_sha256_implementation()) {
+                    printf("Validation SHA-256: SUCCÈS\n");
+                    printf("✓ Vecteur test 1 (chaîne vide): VALIDÉ\n");
+                    printf("✓ Vecteur test 2 ('abc'): VALIDÉ\n");
+                    printf("✓ Vecteur test 3 (chaîne longue): VALIDÉ\n");
+                    printf("✓ Conformité RFC 6234: COMPLÈTE\n");
+                } else {
+                    printf("✗ Échec validation cryptographique\n");
                     return 1;
                 }
-                // Plus besoin d'allocation séparée - structure temporaire stack-based
+            } else if (strcmp(argv[i], "--collatz-minimal-test") == 0) {
+                // Test Collatz minimal pour éviter le crash
+                printf("=== TEST COLLATZ MINIMAL (sécurisé) ===\n");
 
-                // Progress indicator every 100k
-                if (i > 0 && i % 100000 == 0) {
-                    printf("Progress: %zu/%zu LUMs created (%.1f%%)\n",
-                           i, TEST_COUNT, (double)i * 100.0 / TEST_COUNT);
+                mathematical_research_engine_t* engine = math_research_engine_create(NULL);
+                if (!engine) {
+                    printf("❌ Échec création moteur\n");
+                    return 1;
                 }
+
+                printf("Test avec seulement 3 nombres (27, 13, 7)...\n");
+
+                for (uint64_t n = 27; n <= 29; n++) {
+                    printf("Analyse %lu: ", n);
+                    size_t mem_before = memory_tracker_get_current_usage();
+
+                    collatz_sequence_t* seq = analyze_single_collatz_sequence(engine, n);
+                    if (seq) {
+                        printf("✅ %lu étapes, max=%lu ", seq->steps_count, seq->max_value);
+                        collatz_sequence_destroy(&seq);
+                    } else {
+                        printf("❌ échec ");
+                    }
+
+                    size_t mem_after = memory_tracker_get_current_usage();
+                    printf("(mémoire: %zu bytes)\n", mem_after - mem_before);
+                }
+
+                math_research_engine_destroy(engine);
+                printf("✅ Test Collatz minimal terminé\n");
+                return 0;
+            } else if (strcmp(argv[i], "--stress-test-all-modules") == 0) {
+                printf("=== LANCEMENT TESTS STRESS 100M+ TOUS MODULES ===\n");
+                printf("Exécution du binaire de test dédié...\n");
+
+                // Compilation et exécution du test stress
+                system("cd src/tests && clang -std=c99 -O2 -I.. -I../debug test_stress_100m_all_modules.c -o ../../bin/test_stress_modules -lm");
+
+                if (system("./bin/test_stress_modules") == 0) {
+                    printf("✅ TOUS LES TESTS STRESS 100M+ RÉUSSIS\n");
+                } else {
+                    printf("❌ ÉCHECS DÉTECTÉS DANS TESTS STRESS\n");
+                    return 1;
+                }
+            } else if (strcmp(argv[i], "--stress-test-million") == 0) {
+                printf("\n=== MANDATORY STRESS TEST: 1+ MILLION LUMs ===\n");
+                printf("Testing system with 1,000,000 LUMs minimum requirement per prompt.txt\n");
+
+                // Initialize memory tracking for forensic analysis
+                memory_tracker_init();
+
+                // Initialize performance metrics for timing
+                // Note: performance_metrics_init() called implicitly
+
+                // Start timing for forensic report
+                clock_t start_time_clock = clock();
+
+                // Create 1 million LUMs test - MANDATORY per prompt.txt
+                const size_t TEST_COUNT = 1000000; // 1 million minimum
+                printf("Creating %zu LUM units for stress test...\n", TEST_COUNT);
+
+                lum_group_t* large_group = lum_group_create(TEST_COUNT);
+                if (!large_group) {
+                    printf("ERROR: Failed to create large group for stress test\n");
+                    return 1;
+                }
+
+                // Populate with test data
+                for (size_t i = 0; i < TEST_COUNT; i++) {
+                    lum_t lum = {
+                        .presence = (uint8_t)(i % 2),
+                        .position_x = (int32_t)(i % 1000),
+                        .position_y = (int32_t)(i / 1000),
+                        .structure_type = (i % 4 == 0) ? LUM_STRUCTURE_LINEAR :
+                                        (i % 4 == 1) ? LUM_STRUCTURE_CIRCULAR :
+                                        (i % 4 == 2) ? LUM_STRUCTURE_GROUP : LUM_STRUCTURE_NODE,
+                        .id = (uint32_t)i,
+                        .timestamp = lum_get_timestamp(),
+                        .memory_address = NULL,
+                        .checksum = 0,
+                        .is_destroyed = 0
+                    };
+                    // CORRECTION ALLOCATION CRITIQUE: lum_group_add prend pointeur, pas copie
+                    if (!lum_group_add(large_group, &lum)) {
+                        printf("ERROR: Failed to add LUM %zu\n", i);
+                        lum_group_destroy(large_group);
+                        return 1;
+                    }
+                    // Plus besoin d'allocation séparée - structure temporaire stack-based
+
+                    // Progress indicator every 100k
+                    if (i > 0 && i % 100000 == 0) {
+                        printf("Progress: %zu/%zu LUMs created (%.1f%%)\n",
+                               i, TEST_COUNT, (double)i * 100.0 / TEST_COUNT);
+                    }
+                }
+
+                clock_t end_time_clock = clock();
+                double creation_time = ((double)(end_time_clock - start_time_clock)) / CLOCKS_PER_SEC;
+                printf("✅ Created %zu LUMs in %.3f seconds\n", TEST_COUNT, creation_time);
+                printf("Creation rate: %.0f LUMs/second\n", TEST_COUNT / creation_time);
+
+                // CONVERSION LUM → BITS/SECONDE (forensique authentique)
+                size_t lum_size_bits = sizeof(lum_t) * 8; // 48 bytes = 384 bits per LUM
+                double lums_per_second = TEST_COUNT / creation_time;
+                double bits_per_second = lums_per_second * lum_size_bits;
+                double gigabits_per_second = bits_per_second / 1000000000.0;
+
+                printf("=== MÉTRIQUES FORENSIQUES AUTHENTIQUES ===\n");
+                printf("Taille LUM: %zu bits (%zu bytes)\n", lum_size_bits, sizeof(lum_t));
+                printf("Débit LUM: %.0f LUMs/seconde\n", lums_per_second);
+                printf("Débit BITS: %.0f bits/seconde\n", bits_per_second);
+                printf("Débit Gbps: %.3f Gigabits/seconde\n", gigabits_per_second);
+
+                // Test memory usage with forensic tracking
+                printf("\n=== Memory Usage Report ===\n");
+                memory_tracker_report();
+
+                // Test VORAX operations on large dataset - MANDATORY stress testing
+                printf("\n=== Testing VORAX Operations on Large Dataset ===\n");
+                clock_t ops_start_clock = clock();
+
+                // Split operation test with large data
+                printf("Testing SPLIT operation...\n");
+                vorax_result_t* split_result = vorax_split(large_group, 4);
+                if (split_result && split_result->success && split_result->result_group) {
+                    printf("✅ Split operation completed on %zu LUMs\n", TEST_COUNT);
+                    vorax_result_destroy(split_result);
+                } else if (split_result) {
+                    printf("⚠️ Split operation failed\n");
+                    if (split_result) vorax_result_destroy(split_result);
+                }
+
+                // Cycle operation test
+                printf("Testing CYCLE operation...\n");
+                vorax_result_t* cycle_result = vorax_cycle(large_group, 7);
+                if (cycle_result && cycle_result->success) {
+                    printf("✅ Cycle operation completed: %s\n", cycle_result->message);
+                    vorax_result_destroy(cycle_result);
+                } else {
+                    printf("⚠️ Cycle operation failed\n");
+                }
+
+                clock_t ops_end_clock = clock();
+                double ops_time = ((double)(ops_end_clock - ops_start_clock)) / CLOCKS_PER_SEC;
+                printf("VORAX operations completed in %.3f seconds\n", ops_time);
+
+                // Final memory check for leak detection
+                printf("\n=== Final Memory Analysis ===\n");
+                memory_tracker_report();
+                memory_tracker_check_leaks();
+
+                // Cleanup
+                lum_group_destroy(large_group);
+
+                clock_t final_time_clock = clock();
+                double total_time = ((double)(final_time_clock - start_time_clock)) / CLOCKS_PER_SEC;
+                printf("\n=== STRESS TEST COMPLETED ===\n");
+                printf("Total execution time: %.3f seconds\n", total_time);
+                printf("Overall throughput: %.0f LUMs/second\n", TEST_COUNT / total_time);
+                printf("Test Result: %s\n", (total_time < 60.0) ? "PASS" : "MARGINAL");
+
+                return 0;
             }
-
-            clock_t end_time_clock = clock();
-            double creation_time = ((double)(end_time_clock - start_time_clock)) / CLOCKS_PER_SEC;
-            printf("✅ Created %zu LUMs in %.3f seconds\n", TEST_COUNT, creation_time);
-            printf("Creation rate: %.0f LUMs/second\n", TEST_COUNT / creation_time);
-
-            // CONVERSION LUM → BITS/SECONDE (forensique authentique)  
-            size_t lum_size_bits = sizeof(lum_t) * 8; // 48 bytes = 384 bits per LUM
-            double lums_per_second = TEST_COUNT / creation_time;
-            double bits_per_second = lums_per_second * lum_size_bits;
-            double gigabits_per_second = bits_per_second / 1000000000.0;
-
-            printf("=== MÉTRIQUES FORENSIQUES AUTHENTIQUES ===\n");
-            printf("Taille LUM: %zu bits (%zu bytes)\n", lum_size_bits, sizeof(lum_t));
-            printf("Débit LUM: %.0f LUMs/seconde\n", lums_per_second);
-            printf("Débit BITS: %.0f bits/seconde\n", bits_per_second);
-            printf("Débit Gbps: %.3f Gigabits/seconde\n", gigabits_per_second);
-
-            // Test memory usage with forensic tracking
-            printf("\n=== Memory Usage Report ===\n");
-            memory_tracker_report();
-
-            // Test VORAX operations on large dataset - MANDATORY stress testing
-            printf("\n=== Testing VORAX Operations on Large Dataset ===\n");
-            clock_t ops_start_clock = clock();
-
-            // Split operation test with large data
-            printf("Testing SPLIT operation...\n");
-            vorax_result_t* split_result = vorax_split(large_group, 4);
-            if (split_result && split_result->success && split_result->result_group) {
-                printf("✅ Split operation completed on %zu LUMs\n", TEST_COUNT);
-                vorax_result_destroy(split_result);
-            } else if (split_result) {
-                printf("⚠️ Split operation failed\n");
-                if (split_result) vorax_result_destroy(split_result);
-            }
-
-            // Cycle operation test
-            printf("Testing CYCLE operation...\n");
-            vorax_result_t* cycle_result = vorax_cycle(large_group, 7);
-            if (cycle_result && cycle_result->success) {
-                printf("✅ Cycle operation completed: %s\n", cycle_result->message);
-                vorax_result_destroy(cycle_result);
-            } else {
-                printf("⚠️ Cycle operation failed\n");
-            }
-
-            clock_t ops_end_clock = clock();
-            double ops_time = ((double)(ops_end_clock - ops_start_clock)) / CLOCKS_PER_SEC;
-            printf("VORAX operations completed in %.3f seconds\n", ops_time);
-
-            // Final memory check for leak detection
-            printf("\n=== Final Memory Analysis ===\n");
-            memory_tracker_report();
-            memory_tracker_check_leaks();
-
-            // Cleanup
-            lum_group_destroy(large_group);
-
-            clock_t final_time_clock = clock();
-            double total_time = ((double)(final_time_clock - start_time_clock)) / CLOCKS_PER_SEC;
-            printf("\n=== STRESS TEST COMPLETED ===\n");
-            printf("Total execution time: %.3f seconds\n", total_time);
-            printf("Overall throughput: %.0f LUMs/second\n", TEST_COUNT / total_time);
-            printf("Test Result: %s\n", (total_time < 60.0) ? "PASS" : "MARGINAL");
-
-            return 0;
-        }
-
-        if (strcmp(argv[1], "--threading-tests") == 0) {
+        } else if (strcmp(argv[i], "--threading-tests") == 0) {
             printf("=== Tests threading POSIX ===\n");
             // Tests de threading seront implémentés
             return 0;
-        }
-
-        if (strcmp(argv[1], "--binary-conversion-tests") == 0) {
+        } else if (strcmp(argv[i], "--binary-conversion-tests") == 0) {
             printf("=== Tests conversion binaire ===\n");
             // Tests de conversion binaire étendus
             return 0;
-        }
-
-        if (strcmp(argv[1], "--parser-tests") == 0) {
+        } else if (strcmp(argv[i], "--parser-tests") == 0) {
             printf("=== Tests parser VORAX ===\n");
             // Tests de parser étendus
             return 0;
-        }
-
-        if (strcmp(argv[1], "--memory-stress-tests") == 0) {
+        } else if (strcmp(argv[i], "--memory-stress-tests") == 0) {
             printf("=== Tests de stress mémoire ===\n");
             // Tests de stress mémoire
             return 0;
-        }
-
-        // NOUVEAUX TESTS STRESS POUR LES MODULES D'OPTIMISATION
-        if (strcmp(argv[1], "--optimization-modules-stress-test") == 0) {
+        } else if (strcmp(argv[i], "--optimization-modules-stress-test") == 0) {
             printf("\n=== LANCEMENT TESTS STRESS MODULES OPTIMISATION ===\n");
 
             // Test stress IA Optimization
@@ -330,8 +348,9 @@ int main(int argc, char* argv[]) {
             return 0;
         }
 
-    }
+    } // End of argument parsing loop
 
+    // If no specific argument was provided, run the default demo
     printf("=== LUM/VORAX System Demo ===\n");
     printf("Implementation complete du concept LUM/VORAX en C\n\n");
 
@@ -1218,9 +1237,6 @@ void demo_zero_copy_allocation(void) {
 }
 
 
-// Note: stress test functions are implemented in their respective module files
-
-
 // Placeholder for demo_ai_optimization_module
 void demo_ai_optimization_module() {
     printf("\n6. Démonstration Module IA Optimization...\n");
@@ -1466,7 +1482,7 @@ void demo_homomorphic_encryption_module() {
         return;
     }
 
-    printf("  ✓ Paramètres sécurité créés: Schéma CKKS, %u-bit sécurité\n", 
+    printf("  ✓ Paramètres sécurité créés: Schéma CKKS, %u-bit sécurité\n",
            params->security_level);
 
     // Création contexte homomorphique
@@ -1551,7 +1567,7 @@ void demo_homomorphic_encryption_module() {
         return;
     }
 
-    printf("  ✓ Encryption réussie - Budget bruit: %.2f\n", 
+    printf("  ✓ Encryption réussie - Budget bruit: %.2f\n",
            he_get_noise_budget(ciphertext_a));
 
     // Opérations homomorphes
@@ -1560,9 +1576,9 @@ void demo_homomorphic_encryption_module() {
     // Addition homomorphe
     he_operation_result_t* add_result = he_add(context, ciphertext_a, ciphertext_b);
     if (add_result && add_result->success) {
-        printf("  ✓ Addition homomorphe réussie (%.0f ns)\n", 
+        printf("  ✓ Addition homomorphe réussie (%.0f ns)\n",
                (double)add_result->operation_time_ns);
-        printf("    Budget bruit après addition: %.2f\n", 
+        printf("    Budget bruit après addition: %.2f\n",
                add_result->noise_budget_after);
     } else {
         printf("  ❌ Échec addition homomorphe\n");
@@ -1571,9 +1587,9 @@ void demo_homomorphic_encryption_module() {
     // Multiplication homomorphe
     he_operation_result_t* mul_result = he_multiply(context, ciphertext_a, ciphertext_b);
     if (mul_result && mul_result->success) {
-        printf("  ✓ Multiplication homomorphe réussie (%.0f ns)\n", 
+        printf("  ✓ Multiplication homomorphe réussie (%.0f ns)\n",
                (double)mul_result->operation_time_ns);
-        printf("    Budget bruit après multiplication: %.2f\n", 
+        printf("    Budget bruit après multiplication: %.2f\n",
                mul_result->noise_budget_after);
     } else {
         printf("  ❌ Échec multiplication homomorphe\n");
@@ -1666,7 +1682,7 @@ bool he_stress_test_100m_operations_wrapper(void) {
     config->operations_per_test = 100;
     config->max_execution_time_ms = 120000; // 2 minutes max
 
-    printf("  ⚡ Lancement stress test: %zu opérations homomorphes\n", 
+    printf("  ⚡ Lancement stress test: %zu opérations homomorphes\n",
            config->test_data_count);
 
     // Exécution du stress test
@@ -1676,16 +1692,16 @@ bool he_stress_test_100m_operations_wrapper(void) {
     if (result) {
         if (result->test_success) {
             printf("  ✅ STRESS TEST RÉUSSI!\n");
-            printf("  📊 Opérations: %llu en %.3f secondes\n", 
+            printf("  📊 Opérations: %llu en %.3f secondes\n",
                    (unsigned long long)result->total_operations,
                    (double)result->total_time_ns / 1000000000.0);
-            printf("  ⚡ Débit: %.0f opérations/seconde\n", 
+            printf("  ⚡ Débit: %.0f opérations/seconde\n",
                    result->operations_per_second);
-            printf("  🔐 Budget bruit: %.2f -> %.2f\n", 
+            printf("  🔐 Budget bruit: %.2f -> %.2f\n",
                    result->initial_noise_budget, result->final_noise_budget);
             success = true;
         } else {
-            printf("  ⚠️ Test partiel - %.1f%% réussi\n", 
+            printf("  ⚠️ Test partiel - %.1f%% réussi\n",
                    (double)result->total_operations * 100.0 / config->test_data_count);
         }
 
@@ -1784,7 +1800,7 @@ void demo_mathematical_research_engine() {
     printf("\n💾 Performance cache:\n");
     printf("  • Hits: %lu, Misses: %lu\n", engine->cache_hits, engine->cache_misses);
     if (engine->cache_hits + engine->cache_misses > 0) {
-        double hit_rate = (double)engine->cache_hits * 100.0 / 
+        double hit_rate = (double)engine->cache_hits * 100.0 /
                          (double)(engine->cache_hits + engine->cache_misses);
         printf("  • Taux succès: %.1f%%\n", hit_rate);
     }

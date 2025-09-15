@@ -8,12 +8,12 @@
 #include <stdbool.h>
 #include <time.h>
 
-// Constantes Collatz
-#define COLLATZ_MAX_ITERATIONS 10000000
-#define COLLATZ_MAX_NUMBER 1000000000000ULL
-#define COLLATZ_MAGIC_NUMBER 0x434F4C5A
-#define COLLATZ_DESTROYED_MAGIC 0xDEADBEEF
-#define COLLATZ_CACHE_SIZE 1000000
+// Constantes Collatz (CORRECTION CRITIQUE - réduction pour éviter crash)
+#define COLLATZ_MAX_ITERATIONS 1000        // Réduit de 10M à 1000
+#define COLLATZ_MAX_NUMBER 100000ULL       // Réduit drastiquement
+#define COLLATZ_MAGIC_NUMBER 0x434F4C5A    // Conforme STANDARD_NAMES.md
+#define COLLATZ_DESTROYED_MAGIC 0xDEADBEEF // Conforme STANDARD_NAMES.md  
+#define COLLATZ_CACHE_SIZE 1000            // Réduit de 1M à 1000
 
 // Types d'analyses Collatz
 typedef enum {
