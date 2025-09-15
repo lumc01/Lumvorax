@@ -24,6 +24,7 @@
 #include "advanced_calculations/knapsack_optimizer.h"
 #include "advanced_calculations/collatz_analyzer.h"
 #include "complex_modules/ai_optimization.h"
+#include "advanced_calculations/mathematical_research_engine.h" // Inclure le nouveau module
 
 // Demo functions
 void demo_basic_lum_operations(void);
@@ -39,6 +40,7 @@ void demo_tsp_optimizer_module();
 void demo_knapsack_optimizer_module();
 void demo_collatz_analyzer_module();
 void demo_homomorphic_encryption_module();
+void demo_mathematical_research_engine(); // Déclaration de la nouvelle démo
 
 // Stress test functions prototypes for new modules
 bool tsp_stress_test_100m_cities(tsp_config_t* config);
@@ -188,10 +190,10 @@ int main(int argc, char* argv[]) {
             // Split operation test with large data
             printf("Testing SPLIT operation...\n");
             vorax_result_t* split_result = vorax_split(large_group, 4);
-            if (split_result && split_result->success) {
+            if (split_result && split_result->success && split_result->result_group) {
                 printf("✅ Split operation completed on %zu LUMs\n", TEST_COUNT);
                 vorax_result_destroy(split_result);
-            } else {
+            } else if (split_result) {
                 printf("⚠️ Split operation failed\n");
                 if (split_result) vorax_result_destroy(split_result);
             }
@@ -383,6 +385,8 @@ int main(int argc, char* argv[]) {
     printf("\n10. Démonstration Module Homomorphic Encryption...\n");
     demo_homomorphic_encryption_module();
 
+    printf("\n11. Démonstration Moteur de Recherche Mathématique...\n");
+    demo_mathematical_research_engine(); // Appel de la nouvelle démo
 
     printf("\n🔧 === DÉMONSTRATION OPTIMISATION PARETO === 🔧\n");
     demo_pareto_optimization();
@@ -407,7 +411,7 @@ int main(int argc, char* argv[]) {
     memory_tracker_report();
     memory_tracker_check_leaks();
     memory_tracker_destroy();
-    
+
     return 0;
 }
 
@@ -448,11 +452,11 @@ void demo_basic_lum_operations(void) {
 
 void demo_vorax_operations(void) {
     printf("=== Démonstration des opérations VORAX ===\n");
-    
+
     // Créer des groupes pour la démonstration
     lum_group_t* group1 = lum_group_create(2);
     lum_group_t* group2 = lum_group_create(3);
-    
+
     if (!group1 || !group2) {
         printf("  ✗ Échec de création des groupes\n");
         if (group1) lum_group_destroy(group1);
@@ -475,7 +479,7 @@ void demo_vorax_operations(void) {
         };
         lum_group_add(group1, &temp_lum);
     }
-    
+
     for (int i = 0; i < 3; i++) {
         lum_t temp_lum = {
             .presence = 1,
@@ -538,7 +542,7 @@ void demo_vorax_operations(void) {
         // Test split en 3 parties
         vorax_result_t* split_result = vorax_split(test_group, 3);
         if (split_result && split_result->success && split_result->result_groups) {
-            printf("  ✓ Split VORAX réussi: %zu groupes créés\n", split_result->result_count);
+            printf("  ✓ Split VORAX réussie: %zu groupes créés\n", split_result->result_count);
             for (size_t i = 0; i < split_result->result_count; i++) {
                 printf("    Groupe %zu: %zu LUMs\n", i, split_result->result_groups[i]->count);
             }
@@ -1454,17 +1458,17 @@ void demo_collatz_analyzer_module() {
 void demo_homomorphic_encryption_module() {
     printf("  🔐 === MODULE HOMOMORPHIC ENCRYPTION COMPLET === 🔐\n");
     printf("  Démonstration encryption homomorphe 100%% RÉELLE ET VRAIE\n\n");
-    
+
     // Création paramètres sécurité pour CKKS (nombres complexes)
     he_security_params_t* params = he_security_params_create_default(HE_SCHEME_CKKS);
     if (!params) {
         printf("  ❌ Échec création paramètres sécurité\n");
         return;
     }
-    
+
     printf("  ✓ Paramètres sécurité créés: Schéma CKKS, %u-bit sécurité\n", 
            params->security_level);
-    
+
     // Création contexte homomorphique
     he_context_t* context = he_context_create(HE_SCHEME_CKKS, params);
     if (!context) {
@@ -1472,9 +1476,9 @@ void demo_homomorphic_encryption_module() {
         he_security_params_destroy(&params);
         return;
     }
-    
+
     printf("  ✓ Contexte homomorphique créé\n");
-    
+
     // Génération des clés
     printf("  🔑 Génération clés encryption homomorphe...\n");
     if (!he_generate_keys(context)) {
@@ -1482,36 +1486,36 @@ void demo_homomorphic_encryption_module() {
         he_context_destroy(&context);
         return;
     }
-    
+
     if (!he_generate_evaluation_keys(context)) {
         printf("  ❌ Échec génération clés d'évaluation\n");
         he_context_destroy(&context);
         return;
     }
-    
+
     uint32_t rotation_steps[] = {1, 2, 4, 8};
     if (!he_generate_galois_keys(context, rotation_steps, 4)) {
         printf("  ❌ Échec génération clés de Galois\n");
         he_context_destroy(&context);
         return;
     }
-    
+
     printf("  ✓ Toutes les clés générées avec succès\n");
-    
+
     // Préparation données test
     printf("  📊 Préparation données test pour encryption...\n");
     double test_values_a[] = {3.14159, 2.71828, 1.41421, 0.57721, 1.61803};
     double test_values_b[] = {2.0, 3.0, 5.0, 7.0, 11.0};
-    
+
     he_plaintext_t* plaintext_a = he_plaintext_create(HE_SCHEME_CKKS);
     he_plaintext_t* plaintext_b = he_plaintext_create(HE_SCHEME_CKKS);
-    
+
     if (!plaintext_a || !plaintext_b) {
         printf("  ❌ Échec création plaintexts\n");
         he_context_destroy(&context);
         return;
     }
-    
+
     if (!he_plaintext_encode_doubles(plaintext_a, test_values_a, 5, HE_DEFAULT_SCALE) ||
         !he_plaintext_encode_doubles(plaintext_b, test_values_b, 5, HE_DEFAULT_SCALE)) {
         printf("  ❌ Échec encodage données\n");
@@ -1520,14 +1524,14 @@ void demo_homomorphic_encryption_module() {
         he_context_destroy(&context);
         return;
     }
-    
+
     printf("  ✓ Données encodées: 5 valeurs complexes par plaintext\n");
-    
+
     // Encryption
     printf("  🔒 Encryption homomorphe...\n");
     he_ciphertext_t* ciphertext_a = he_ciphertext_create(context);
     he_ciphertext_t* ciphertext_b = he_ciphertext_create(context);
-    
+
     if (!ciphertext_a || !ciphertext_b) {
         printf("  ❌ Échec création ciphertexts\n");
         he_plaintext_destroy(&plaintext_a);
@@ -1535,7 +1539,7 @@ void demo_homomorphic_encryption_module() {
         he_context_destroy(&context);
         return;
     }
-    
+
     if (!he_encrypt(context, plaintext_a, ciphertext_a) ||
         !he_encrypt(context, plaintext_b, ciphertext_b)) {
         printf("  ❌ Échec encryption\n");
@@ -1546,13 +1550,13 @@ void demo_homomorphic_encryption_module() {
         he_context_destroy(&context);
         return;
     }
-    
+
     printf("  ✓ Encryption réussie - Budget bruit: %.2f\n", 
            he_get_noise_budget(ciphertext_a));
-    
+
     // Opérations homomorphes
     printf("  ⚡ Opérations sur données chiffrées...\n");
-    
+
     // Addition homomorphe
     he_operation_result_t* add_result = he_add(context, ciphertext_a, ciphertext_b);
     if (add_result && add_result->success) {
@@ -1563,7 +1567,7 @@ void demo_homomorphic_encryption_module() {
     } else {
         printf("  ❌ Échec addition homomorphe\n");
     }
-    
+
     // Multiplication homomorphe
     he_operation_result_t* mul_result = he_multiply(context, ciphertext_a, ciphertext_b);
     if (mul_result && mul_result->success) {
@@ -1574,7 +1578,7 @@ void demo_homomorphic_encryption_module() {
     } else {
         printf("  ❌ Échec multiplication homomorphe\n");
     }
-    
+
     // Test décryption pour vérification
     if (add_result && add_result->success && add_result->result_ciphertext) {
         printf("  🔓 Décryption pour vérification...\n");
@@ -1586,18 +1590,18 @@ void demo_homomorphic_encryption_module() {
         }
         he_plaintext_destroy(&decrypted);
     }
-    
+
     // Interface avec LUM/VORAX
     printf("  🔗 Interface avec système LUM/VORAX...\n");
     he_ciphertext_t* lum_encrypted = he_ciphertext_create(context);
     if (lum_encrypted && he_encrypt_lum_group(context, NULL, lum_encrypted)) {
         printf("  ✓ Groupe LUM chiffré avec succès\n");
-        
+
         // Opération VORAX sur données chiffrées
         he_ciphertext_t input_groups[] = {*lum_encrypted};
         he_operation_result_t* vorax_result = he_vorax_operation_encrypted(
             context, input_groups, 1, "CYCLE");
-        
+
         if (vorax_result && vorax_result->success) {
             printf("  ✓ Opération VORAX CYCLE sur données chiffrées réussie\n");
         } else {
@@ -1606,11 +1610,11 @@ void demo_homomorphic_encryption_module() {
         he_operation_result_destroy(&vorax_result);
     }
     he_ciphertext_destroy(&lum_encrypted);
-    
+
     // Affichage métriques performance
     printf("\n  📈 Métriques performance homomorphique:\n");
     he_print_context_info(context);
-    
+
     // Cleanup complet
     he_operation_result_destroy(&add_result);
     he_operation_result_destroy(&mul_result);
@@ -1620,35 +1624,35 @@ void demo_homomorphic_encryption_module() {
     he_plaintext_destroy(&plaintext_b);
     he_context_destroy(&context);
     he_security_params_destroy(&params);
-    
+
     printf("  ✅ Module Homomorphic Encryption testé avec succès!\n");
     printf("  🔐 Encryption homomorphe 100%% FONCTIONNELLE ET RÉELLE\n\n");
 }
 
 bool he_stress_test_100m_operations_wrapper(void) {
     printf("  🚀 === STRESS TEST HOMOMORPHIQUE 100M+ OPÉRATIONS ===\n");
-    
+
     // Création contexte pour stress test
     he_security_params_t* params = he_security_params_create_default(HE_SCHEME_BFV);
     if (!params) {
         printf("  ❌ Échec création paramètres pour stress test\n");
         return false;
     }
-    
+
     he_context_t* context = he_context_create(HE_SCHEME_BFV, params);
     if (!context) {
         printf("  ❌ Échec création contexte pour stress test\n");
         he_security_params_destroy(&params);
         return false;
     }
-    
+
     // Génération clés optimisées pour performance
     if (!he_generate_keys(context) || !he_generate_evaluation_keys(context)) {
         printf("  ❌ Échec génération clés stress test\n");
         he_context_destroy(&context);
         return false;
     }
-    
+
     // Configuration stress test
     he_stress_config_t* config = he_stress_config_create_default();
     if (!config) {
@@ -1656,18 +1660,18 @@ bool he_stress_test_100m_operations_wrapper(void) {
         he_context_destroy(&context);
         return false;
     }
-    
+
     // Ajustement pour test réel mais gérable
     config->test_data_count = 10000000; // 10M pour démonstration (100M+ en production)
     config->operations_per_test = 100;
     config->max_execution_time_ms = 120000; // 2 minutes max
-    
+
     printf("  ⚡ Lancement stress test: %zu opérations homomorphes\n", 
            config->test_data_count);
-    
+
     // Exécution du stress test
     he_stress_result_t* result = he_stress_test_100m_operations(context, config);
-    
+
     bool success = false;
     if (result) {
         if (result->test_success) {
@@ -1684,16 +1688,109 @@ bool he_stress_test_100m_operations_wrapper(void) {
             printf("  ⚠️ Test partiel - %.1f%% réussi\n", 
                    (double)result->total_operations * 100.0 / config->test_data_count);
         }
-        
+
         printf("\n%s\n", result->detailed_report);
         he_stress_result_destroy(&result);
     } else {
         printf("  ❌ Échec complet stress test\n");
     }
-    
+
     // Cleanup
     he_stress_config_destroy(&config);
     he_context_destroy(&context);
-    
+
     return success;
+}
+
+void demo_mathematical_research_engine() {
+    printf("=== Démonstration Moteur de Recherche Mathématique ===\n");
+
+    // Configuration pour démonstration
+    math_research_config_t* config = create_default_research_config();
+    if (!config) {
+        printf("❌ Erreur création configuration\n");
+        return;
+    }
+
+    config->cache_size = 10000;  // Cache adapté pour démo
+    config->enable_conjecture_generation = true;
+
+    mathematical_research_engine_t* engine = math_research_engine_create(config);
+    if (!engine) {
+        printf("❌ Erreur création moteur de recherche\n");
+        TRACKED_FREE(config);
+        return;
+    }
+
+    printf("✅ Moteur initialisé - Session: %u\n", engine->research_session_id);
+
+    // Démonstration 1: Analyse de séquences remarquables
+    printf("\n🎯 Analyse de séquences Collatz remarquables:\n");
+    uint64_t demo_values[] = {27, 31, 47, 127};
+
+    for (size_t i = 0; i < 4; i++) {
+        collatz_sequence_t* seq = analyze_single_collatz_sequence(engine, demo_values[i]);
+        if (seq) {
+            printf("  • n=%lu: %lu étapes, max=%lu, ratio=%.3f\n",
+                   seq->initial_value, seq->sequence_length,
+                   seq->max_value, seq->convergence_ratio);
+
+            if (seq->sequence_lums) {
+                printf("    Représentation LUM: %zu unités créées\n", seq->sequence_length);
+                TRACKED_FREE(seq->sequence_lums);
+            }
+            TRACKED_FREE(seq);
+        }
+    }
+
+    // Démonstration 2: Analyse de plage
+    printf("\n📊 Analyse dynamique plage 1-100:\n");
+    math_research_result_t* results = analyze_collatz_dynamic_range(engine, 1, 100);
+    if (results) {
+        printf("  • Séquences: %zu\n", results->sequence_count);
+        printf("  • Longueur moyenne: %.2f\n", results->average_length);
+        printf("  • Temps calcul: %.3f s\n", results->calculation_time);
+
+        // Génération de conjectures
+        if (generate_mathematical_conjectures(engine, results)) {
+            printf("  • Conjectures émergentes: %zu\n", results->pattern_count);
+            for (size_t i = 0; i < results->pattern_count; i++) {
+                printf("    - %s\n", results->emergent_patterns[i]);
+            }
+        }
+
+        // Nettoyage des conjectures
+        for (size_t i = 0; i < results->pattern_count; i++) {
+            if (results->emergent_patterns[i]) {
+                TRACKED_FREE(results->emergent_patterns[i]);
+            }
+        }
+        if (results->emergent_patterns) {
+            TRACKED_FREE(results->emergent_patterns);
+        }
+
+        // Nettoyage des séquences
+        for (size_t i = 0; i < results->sequence_count; i++) {
+            if (results->sequences[i].sequence_lums) {
+                TRACKED_FREE(results->sequences[i].sequence_lums);
+            }
+        }
+        TRACKED_FREE(results->sequences);
+        TRACKED_FREE(results);
+    }
+
+    // Statistiques du cache
+    printf("\n💾 Performance cache:\n");
+    printf("  • Hits: %lu, Misses: %lu\n", engine->cache_hits, engine->cache_misses);
+    if (engine->cache_hits + engine->cache_misses > 0) {
+        double hit_rate = (double)engine->cache_hits * 100.0 / 
+                         (double)(engine->cache_hits + engine->cache_misses);
+        printf("  • Taux succès: %.1f%%\n", hit_rate);
+    }
+
+    printf("✅ Démonstration terminée\n");
+
+    // Nettoyage
+    TRACKED_FREE(config);
+    math_research_engine_destroy(engine);
 }

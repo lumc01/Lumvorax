@@ -1274,6 +1274,31 @@ args = "./bin/lum_vorax --stress-test-million"
 [workflows.workflow.metadata]
 outputType = "console"
 
+[[workflows.workflow]]
+name = "Mathematical Research LUM/VORAX"
+author = 47599206
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"🧮 Lancement recherche mathématique complète...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./execute_mathematical_research.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"📊 Analyse des logs générés...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "find logs/mathematical_research -name \"*.log\" | head -5"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"✅ Recherche mathématique terminée - Logs forensiques disponibles\""
+
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
 channel = "stable-25_05"

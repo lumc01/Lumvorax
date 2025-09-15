@@ -9,9 +9,8 @@ BIN_DIR = bin
 LOG_DIR = logs
 
 # Advanced calculations
-ADVANCED_CALC_SOURCES = src/advanced_calculations/matrix_calculator.c \
-	               src/advanced_calculations/quantum_simulator.c \
-	               src/advanced_calculations/neural_network_processor.c
+ADVANCED_CALC_SOURCES = $(wildcard src/advanced_calculations/*.c)
+MATH_RESEARCH_SOURCES = src/advanced_calculations/mathematical_research_engine.c
 
 # Complex modules
 COMPLEX_MODULES_SOURCES = src/complex_modules/realtime_analytics.c \
@@ -72,6 +71,7 @@ SOURCES = $(SRC_DIR)/main.c \
 	  $(SRC_DIR)/complex_modules/ai_dynamic_config_manager.c \
 	  $(SRC_DIR)/file_formats/lum_native_universal_format.c \
       $(ADVANCED_CALC_SOURCES) \
+      $(MATH_RESEARCH_SOURCES) \
       $(COMPLEX_MODULES_SOURCES)
 
 # Add LUM Instant Displacement Source
