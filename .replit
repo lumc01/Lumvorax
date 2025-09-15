@@ -368,6 +368,10 @@ args = "LUM/VORAX System"
 task = "workflow.run"
 args = "LUM/VORAX Stress Test"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "LUM/VORAX Scientific Computing"
+
 [[workflows.workflow]]
 name = "VALIDATION_FORENSIQUE_COMPLETE"
 author = 47457509
@@ -1298,6 +1302,17 @@ args = "find logs/mathematical_research -name \"*.log\" | head -5"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"✅ Recherche mathématique terminée - Logs forensiques disponibles\""
+
+[[workflows.workflow]]
+name = "LUM/VORAX Scientific Computing"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax --crypto-validation && ./bin/lum_vorax --sizeof-checks"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
