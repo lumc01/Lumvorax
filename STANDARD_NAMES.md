@@ -159,12 +159,15 @@
 2025-01-15 20:06 - lum_displacement_metrics_create + Création structure métriques déplacement
 2025-01-15 20:07 - lum_displacement_metrics_record + Enregistrement métrique déplacement individuel
 2025-01-15 20:08 - lum_test_displacement_performance + Test stress performance déplacement instantané
-2025-01-15 20:09 - lum_test_displacement_vs_traditional_move + Comparaison vs méthode traditionnelle
+2025-01-15 20:09 - lum_test_displacement_vs_traditional_move + Comparaison performance vs méthode traditionnelle
 2025-01-15 20:10 - LUM_DISPLACEMENT_MAGIC + Constante magique protection déplacement 0xDEADC0DE
 2025-01-15 20:11 - MAX_DISPLACEMENT_DISTANCE + Distance maximale déplacement validé 10000 unités
 2025-01-15 20:12 - displacement_time_ns + Temps déplacement en nanosecondes haute précision
 2025-01-15 20:13 - successful_displacements + Compteur déplacements réussis métriques
 2025-01-15 20:14 - average_time_ns + Temps moyen déplacement calculé dynamiquement
+2025-01-17 14:30 - validate_system_with_forensic_logs.sh + Script validation système avec logs forensiques conformes
+2025-01-17 14:30 - forensic_session_timestamp + Timestamp session forensique format YYYYMMDD_HHMMSS
+2025-01-17 14:30 - logs/forensic/rapport_*.md + Rapports forensiques horodatés par session
 
 ## STRUCTURES DE DONNÉES
 
