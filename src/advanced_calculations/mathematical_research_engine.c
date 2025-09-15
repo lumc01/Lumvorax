@@ -120,8 +120,8 @@ collatz_sequence_t* analyze_single_collatz_sequence(
     uint64_t current = starting_number;
     uint64_t step_count = 0;
 
-    // Limitation de sécurité
-    const uint64_t MAX_STEPS = 10000000;
+    // CORRECTION: Utiliser constantes cohérentes du header
+    const uint64_t MAX_STEPS = COLLATZ_MAX_ITERATIONS;
 
     while (current != 1 && step_count < MAX_STEPS) {
         uint64_t next = collatz_step_optimized(current, engine);
@@ -145,11 +145,26 @@ collatz_sequence_t* analyze_single_collatz_sequence(
     sequence->sequence_length = step_count;
     sequence->compression_ratio = (double)sequence->max_value / (double)starting_number;
 
-    // Stocker la séquence des nombres
-    if (step_count < 100000) { // Limite raisonnable pour éviter l'explosion mémoire
-        sequence->sequence = TRACKED_MALLOC(sizeof(uint64_t) * step_count);
+    // CORRECTION CRITIQUE: Réallouer proprement au lieu de double allocation
+    if (step_count < sequence->sequence_capacity && step_count > 0) {
+        // Utiliser l'allocation existante si suffisante
+        current = starting_number;
+        for (uint64_t i = 0; i < step_count && current != 1 && i < sequence->sequence_capacity; i++) {
+            sequence->sequence[i] = current;
+            current = collatz_step_optimized(current, engine);
+        }
+    } else if (step_count >= sequence->sequence_capacity && step_count < 100000) {
+        // LIBÉRER l'ancienne allocation avant la nouvelle
         if (sequence->sequence) {
-            // Régénérer la séquence pour stocker les valeurs
+            TRACKED_FREE(sequence->sequence);
+            sequence->sequence = NULL;
+        }
+        
+        // Nouvelle allocation avec taille correcte
+        sequence->sequence = TRACKED_MALLOC(sizeof(uint64_t) * step_count);
+        sequence->sequence_capacity = step_count;
+        
+        if (sequence->sequence) {
             current = starting_number;
             for (uint64_t i = 0; i < step_count && current != 1; i++) {
                 sequence->sequence[i] = current;
@@ -157,7 +172,12 @@ collatz_sequence_t* analyze_single_collatz_sequence(
             }
         }
     } else {
-        sequence->sequence = NULL;
+        // Séquence trop grande - garder seulement les métadonnées
+        if (sequence->sequence) {
+            TRACKED_FREE(sequence->sequence);
+            sequence->sequence = NULL;
+        }
+        sequence->sequence_capacity = 0;
     }
 
     // Nettoyage automatique si séquence temporaire
@@ -183,11 +203,11 @@ math_research_result_t* analyze_collatz_dynamic_range(
     math_research_result_t* results = TRACKED_MALLOC(sizeof(math_research_result_t));
     if (!results) return NULL;
 
-    // CORRECTION CRITIQUE: Limitation drastique de la taille pour éviter le crash
+    // CORRECTION CRITIQUE: Limitation progressive avec nettoyage forcé
     size_t range_size = (size_t)(end_value - start_value);
-    if (range_size > 10) {  // LIMITATION MAXIMALE: seulement 10 nombres
-        range_size = 10;
-        end_value = start_value + 10;
+    if (range_size > 100) {  // AUGMENTÉ: 100 nombres max pour test élargi
+        range_size = 100;
+        end_value = start_value + 100;
     }
 
     results->sequences = TRACKED_MALLOC(sizeof(collatz_sequence_t) * range_size);
