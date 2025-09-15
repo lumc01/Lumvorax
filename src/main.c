@@ -1839,3 +1839,29 @@ void demo_mathematical_research_engine() {
     TRACKED_FREE(config);
     math_research_engine_destroy(engine);
 }
+// Ajout à la fin de la fonction main(), avant le return 0;
+
+    } else if (argc > 1 && strcmp(argv[1], "--blackbox-universal-test") == 0) {
+        printf("=== BLACKBOX UNIVERSAL MODULE TEST ===\n");
+        
+        // Test module boîte noire universel
+        blackbox_config_t* config = blackbox_config_create_default();
+        if (!config) {
+            printf("❌ Failed to create blackbox config\n");
+            return 1;
+        }
+        
+        bool test_success = blackbox_stress_test_universal(config);
+        
+        printf("\n=== BLACKBOX DEMONSTRATION ===\n");
+        printf("This module can mask ANY function execution:\n");
+        printf("• Hide source code without encryption\n");
+        printf("• Simulate AI behavior to confuse analysis\n");
+        printf("• Apply computational folding & semantic shuffling\n");
+        printf("• Generate fake neural network metrics\n");
+        printf("• Create algorithmic morphing in real-time\n");
+        
+        blackbox_config_destroy(&config);
+        
+        return test_success ? 0 : 1;
+#include "advanced_calculations/blackbox_universal_module.h"

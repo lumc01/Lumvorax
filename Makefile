@@ -417,3 +417,6 @@ test-displacement: $(BIN_DIR)/test_instant_displacement
 
 $(BIN_DIR)/test_instant_displacement: $(SRC_DIR)/tests/test_instant_displacement.c $(SRC_DIR)/spatial/lum_instant_displacement.c $(SRC_DIR)/lum/lum_core.c $(SRC_DIR)/debug/memory_tracker.c $(SRC_DIR)/logger/lum_logger.c | $(BIN_DIR)
 	$(CC) $(CFLAGS) -o $@ $^ $(LDFLAGS)
+mkdir -p obj/advanced_calculations
+clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug  -c src/advanced_calculations/blackbox_universal_module.c -o obj/advanced_calculations/blackbox_universal_module.o
+# Ajout de obj/advanced_calculations/blackbox_universal_module.o à la liste des objets dans la règle de linkage du binaire

@@ -115,6 +115,19 @@
 2025-09-10 23:59 - TRACKED_MALLOC + Allocation mémoire trackée pour prévention corruptions
 2025-09-10 23:59 - TRACKED_FREE + Libération mémoire trackée pour prévention double-free
 2025-09-10 23:59 - TRACKED_CALLOC + Allocation initialisée trackée pour safety mémoire
+2025-01-17 21:30 - computational_opacity_t + Structure masquage computationnel universel
+2025-01-17 21:30 - blackbox_create_universal + Création module boîte noire universel
+2025-01-17 21:30 - blackbox_execute_hidden + Exécution fonction masquée
+2025-01-17 21:30 - blackbox_apply_computational_folding + Repliement computationnel avancé
+2025-01-17 21:30 - blackbox_apply_semantic_shuffling + Mélange sémantique algorithmes
+2025-01-17 21:30 - blackbox_apply_algorithmic_morphing + Morphing algorithmique dynamique
+2025-01-17 21:30 - blackbox_simulate_neural_behavior + Simulation comportement réseau neuronal
+2025-01-17 21:30 - blackbox_generate_fake_ai_metrics + Génération métriques IA fictives
+2025-01-17 21:30 - OPACITY_COMPUTATIONAL_FOLDING + Mécanisme repliement computationnel
+2025-01-17 21:30 - OPACITY_SEMANTIC_SHUFFLING + Mécanisme mélange sémantique
+2025-01-17 21:30 - OPACITY_ALGORITHMIC_MORPHING + Mécanisme morphing algorithmique
+2025-01-17 21:30 - BLACKBOX_MAGIC_NUMBER + Constante magique protection blackbox
+2025-01-17 21:30 - internal_transformation_state_t + État transformation interne masquage
 2025-09-10 23:59 - TRACKED_REALLOC + Réallocation mémoire trackée pour continuité tracking
 2025-01-15 14:31 - ai_agent_trace_decision_step + Fonction traçage granulaire étapes de décision IA
 2025-01-15 14:31 - ai_agent_save_reasoning_state + Sauvegarde état de raisonnement complet agent IA
