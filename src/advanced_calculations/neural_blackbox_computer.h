@@ -279,3 +279,7 @@ bool neural_blackbox_apply_optimizer(
 #define NEURAL_MIN_CONVERGENCE_THRESHOLD 1e-8
 
 #endif // NEURAL_BLACKBOX_COMPUTER_H
+// Fonction de conversion entre types de configuration
+neural_architecture_config_t* convert_precision_to_architecture_config(
+    const neural_ultra_precision_config_t* precision_config
+);

@@ -1254,3 +1254,24 @@ bool neural_blackbox_apply_optimizer(
                 "Optimiseur inconnu: %s", optimizer_type);
     return false;
 }
+// Fonction de conversion entre types de configuration neural
+neural_architecture_config_t* convert_precision_to_architecture_config(
+    const neural_ultra_precision_config_t* precision_config
+) {
+    if (!precision_config) return NULL;
+    
+    neural_architecture_config_t* arch_config = TRACKED_MALLOC(
+        sizeof(neural_architecture_config_t));
+    if (!arch_config) return NULL;
+    
+    // Conversion logique des paramètres
+    arch_config->complexity_target = NEURAL_COMPLEXITY_EXTREME; // Pour ultra-précision
+    arch_config->memory_capacity = precision_config->precision_target_digits * 1048576; // 1MB par digit
+    arch_config->learning_rate = precision_config->precision_target / 1000.0; // LR adaptatif
+    arch_config->plasticity_rules = PLASTICITY_HOMEOSTATIC; // Stabilité pour précision
+    arch_config->enable_continuous_learning = false; // Pas d'adaptation pendant précision
+    arch_config->enable_metaplasticity = true; // Meta-adaptation OK
+    
+    return arch_config;
+}
+

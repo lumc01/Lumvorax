@@ -53,15 +53,7 @@ typedef struct {
     double golden_ratio_achievement;
 } golden_comparison_t;
 
-// Métriques pour calcul Golden Score
-typedef struct {
-    double performance_score;
-    double memory_efficiency;
-    double energy_consumption;
-    double scalability_factor;
-    double reliability_index;
-    uint64_t collection_time_ns;
-} golden_metrics_t;
+// golden_metrics_t déjà défini plus haut dans le fichier
 
 typedef struct {
     double performance_lums_per_second;
@@ -73,6 +65,16 @@ typedef struct {
     double test_coverage_percent;
     double security_vulnerability_count;
 } system_metrics_t;
+
+// Métriques pour calcul Golden Score (défini en premier pour éviter erreurs de type)
+typedef struct {
+    double performance_score;
+    double memory_efficiency;
+    double energy_consumption;
+    double scalability_factor;
+    double reliability_index;
+    uint64_t collection_time_ns;
+} golden_metrics_t;
 
 // Configuration Golden Score
 typedef struct {
@@ -120,7 +122,6 @@ struct golden_score_optimizer_t {
 golden_score_optimizer_t* golden_score_optimizer_create(void);
 void golden_score_optimizer_destroy(golden_score_optimizer_t** optimizer_ptr);
 bool golden_score_optimizer_init(golden_score_config_t* config);
-double calculate_golden_score(const golden_metrics_t* metrics, double target_ratio);
 bool auto_tune_system_to_golden_ratio(golden_score_config_t* config);
 
 // Comparaisons vs standards industriels
