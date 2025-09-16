@@ -5,9 +5,8 @@
 #include <stdint.h>
 #include "neural_blackbox_computer.h"
 
-// Configuration ultra-précision compatible
-typedef neural_architecture_config_t neural_ultra_precision_config_t;
 #include "neural_ultra_precision_architecture.h"
+// Configuration ultra-précision compatible - utiliser directement le type défini dans neural_ultra_precision_architecture.h
 #include "neural_advanced_optimizers.h"
 
 // ============================================================================

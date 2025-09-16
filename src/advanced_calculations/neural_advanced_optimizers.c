@@ -8,6 +8,7 @@
 #include <string.h>
 #include <float.h>
 #include <stdio.h>
+#include <inttypes.h>  // CORRECTION: Ajout pour PRIu64 et formats portables
 
 // Temporary logging macros until forensic_log is properly implemented
 #define FORENSIC_LEVEL_ERROR 0
@@ -87,7 +88,7 @@ void neural_adam_destroy_ultra_precise(neural_adam_ultra_precise_t** optimizer) 
     }
     
     forensic_log(FORENSIC_LEVEL_DEBUG, "neural_adam_destroy_ultra_precise",
-                "Destruction optimiseur Adam - Steps: %llu, LR final: %.2e",
+                "Destruction optimiseur Adam - Steps: %" PRIu64 ", LR final: %.2e",
                 adam->step_count, adam->learning_rate);
     
     // Libération mémoire moments
@@ -177,7 +178,7 @@ void neural_adam_ultra_precise_update(
     
     if (optimizer->step_count % 1000 == 0) {
         forensic_log(FORENSIC_LEVEL_INFO, "neural_adam_ultra_precise_update",
-                    "Adam step %llu - LR: %.2e, Loss: %.15f", 
+                    "Adam step %" PRIu64 " - LR: %.2e, Loss: %.15f", 
                     optimizer->step_count, optimizer->learning_rate, current_loss);
     }
 }
@@ -280,7 +281,7 @@ void neural_lbfgs_destroy(neural_lbfgs_optimizer_t** optimizer) {
     }
     
     forensic_log(FORENSIC_LEVEL_DEBUG, "neural_lbfgs_destroy",
-                "Destruction optimiseur L-BFGS - Itérations: %llu",
+                "Destruction optimiseur L-BFGS - Itérations: %" PRIu64,
                 lbfgs->iterations);
     
     // Libération vecteurs
