@@ -368,10 +368,6 @@ args = "Build System"
 task = "workflow.run"
 args = "Stress Test"
 
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "LUM/VORAX Demo"
-
 [[workflows.workflow]]
 name = "VALIDATION_FORENSIQUE_COMPLETE"
 author = 47457509
@@ -1785,17 +1781,6 @@ args = "echo \"🎯 MODULE NEURAL BLACKBOX 100% NATIF VALIDÉ\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"Fin validation: $(date -u)\""
-
-[[workflows.workflow]]
-name = "LUM/VORAX Demo"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax"
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow]]
 name = "CORRECTIONS_APPLIQUEES_VALIDATION"
