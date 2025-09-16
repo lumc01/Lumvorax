@@ -12,6 +12,10 @@ typedef struct {
     size_t precision_layers;          // Couches supplémentaires pour précision
     size_t neurons_per_precision_digit; // Neurones par digit de précision
     double memory_scaling_factor;     // Facteur échelle mémoire
+    // Champs ajoutés pour compatibilité avec les tests
+    double precision_target;          // Cible de précision (ex: 1e-15)
+    size_t input_dimensions;          // Dimensions d'entrée
+    size_t output_dimensions;         // Dimensions de sortie
 } neural_ultra_precision_config_t;
 
 // EXPLICATION TECHNIQUE :

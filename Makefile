@@ -96,6 +96,13 @@ OBJECTS = obj/main.o obj/lum/lum_core.o obj/vorax/vorax_operations.o obj/parser/
 	  obj/advanced_calculations/image_processor.o \
 	  obj/advanced_calculations/audio_processor.o \
 	  obj/advanced_calculations/mathematical_research_engine.o \
+	  obj/advanced_calculations/neural_blackbox_computer.o \
+	  obj/advanced_calculations/neural_advanced_optimizers.o \
+	  obj/advanced_calculations/neural_ultra_precision_architecture.o \
+	  obj/advanced_calculations/neural_blackbox_ultra_precision_tests.o \
+	  obj/advanced_calculations/blackbox_universal_module.o \
+	  obj/advanced_calculations/golden_score_optimizer.o \
+	  obj/advanced_calculations/video_processor.o \
 	  obj/complex_modules/realtime_analytics.o \
 	  obj/complex_modules/distributed_computing.o \
 	  obj/complex_modules/ai_optimization.o \

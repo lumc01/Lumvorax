@@ -7,6 +7,15 @@
 #include <stdlib.h>
 #include <string.h>
 #include <float.h>
+#include <stdio.h>
+
+// Temporary logging macros until forensic_log is properly implemented
+#define FORENSIC_LEVEL_ERROR 0
+#define FORENSIC_LEVEL_INFO 1
+#define FORENSIC_LEVEL_WARNING 2
+#define FORENSIC_LEVEL_SUCCESS 3
+#define FORENSIC_LEVEL_DEBUG 4
+#define forensic_log(level, func, fmt, ...) printf("[%s] " fmt "\n", func, ##__VA_ARGS__)
 
 // Magic numbers pour validation intégrité
 #define ADAM_MAGIC_NUMBER    0x4D414441  // "ADAM"

@@ -41,6 +41,15 @@ typedef struct {
     neural_domain_t input_domain;   // Domaine d'entrée
     neural_domain_t output_domain;  // Domaine de sortie
     size_t complexity_hint;         // Indice de complexité
+    // Champs ajoutés pour compatibilité avec les tests
+    size_t input_size;              // Taille entrée pour tests
+    size_t output_size;             // Taille sortie pour tests
+    double** test_inputs;           // Données d'entrée de test
+    double** test_outputs;          // Données de sortie attendues
+    size_t test_sample_count;       // Nombre échantillons test
+    double** validation_inputs;     // Données validation
+    double** validation_outputs;    // Sorties validation attendues
+    size_t validation_sample_count; // Nombre échantillons validation
 } neural_function_spec_t;
 
 // Protocole d'entraînement
@@ -52,6 +61,9 @@ typedef struct {
     size_t batch_size;              // Taille des batchs
     bool enable_early_stopping;    // Arrêt précoce
     double validation_split;        // Proportion validation
+    // Champs ajoutés pour compatibilité ultra-précision
+    double precision_target;        // Cible de précision (ex: 1e-15)
+    double tolerance;               // Tolérance d'erreur
 } neural_training_protocol_t;
 
 // Configuration architecture neuronale
@@ -123,6 +135,9 @@ neural_blackbox_computer_t* neural_blackbox_create(
     neural_architecture_config_t* config
 );
 
+// Alias pour compatibilité avec les tests
+#define neural_blackbox_computer_create neural_blackbox_create
+
 void neural_blackbox_destroy(neural_blackbox_computer_t** system_ptr);
 
 // Encodage de fonction en réseau neuronal
@@ -192,6 +207,55 @@ void neural_blackbox_simple_backprop(
 bool neural_blackbox_test_simple_function(void);
 bool neural_blackbox_test_opacity_analysis(void);
 bool neural_blackbox_stress_test_encoding(neural_architecture_config_t* config);
+
+// === NOUVELLES FONCTIONS ULTRA-PRÉCISION ===
+
+// Entraînement multi-phases pour précision 100%
+bool neural_blackbox_ultra_precise_training(
+    neural_blackbox_computer_t* system,
+    neural_function_spec_t* function_spec,
+    neural_training_protocol_t* training
+);
+
+// Validation croisée ultra-précise
+bool neural_blackbox_ultra_precise_validation(
+    neural_blackbox_computer_t* system,
+    neural_function_spec_t* function_spec
+);
+
+// Calcul gradients haute précision
+double* neural_blackbox_compute_gradients(
+    neural_blackbox_computer_t* system,
+    neural_function_spec_t* function_spec
+);
+
+// Calcul Hessienne pour Newton-Raphson
+double* neural_blackbox_compute_hessian(
+    neural_blackbox_computer_t* system,
+    neural_function_spec_t* function_spec
+);
+
+// Calcul loss avec précision extended
+double neural_blackbox_compute_loss(
+    neural_blackbox_computer_t* system,
+    neural_function_spec_t* function_spec
+);
+
+// Entraînement progressif 4 phases (grossier → ultra-fin)
+bool neural_blackbox_multi_phase_training(
+    neural_blackbox_computer_t* system,
+    neural_function_spec_t* function_spec,
+    neural_training_protocol_t* training
+);
+
+// Application optimiseur spécifique selon phase
+bool neural_blackbox_apply_optimizer(
+    neural_blackbox_computer_t* system,
+    void* optimizer,
+    const char* optimizer_type,
+    double* gradients,
+    double current_loss
+);
 
 // === CONSTANTES ===
 #define NEURAL_BLACKBOX_MAGIC 0x4E424243     // "NBBC" en ASCII

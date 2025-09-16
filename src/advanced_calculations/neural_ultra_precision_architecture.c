@@ -5,6 +5,15 @@
 #include "../debug/memory_tracker.h"
 #include <math.h>
 #include <stdlib.h>
+#include <stdio.h>
+
+// Temporary logging macros until forensic_log is properly implemented
+#define FORENSIC_LEVEL_ERROR 0
+#define FORENSIC_LEVEL_INFO 1
+#define FORENSIC_LEVEL_WARNING 2
+#define FORENSIC_LEVEL_SUCCESS 3
+#define FORENSIC_LEVEL_DEBUG 4
+#define forensic_log(level, func, fmt, ...) printf("[%s] " fmt "\n", func, ##__VA_ARGS__)
 
 // IMPLÉMENTATION : Calcul profondeur optimale selon complexité
 size_t neural_calculate_optimal_depth(
