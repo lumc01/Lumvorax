@@ -16,7 +16,7 @@ void demo_binary_conversion(void);
 void demo_parser(void);
 void demo_complete_scenario(void);
 
-int main(int argc, char* argv[]) {
+int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused))) {
     printf("=== LUM/VORAX System Demo ===\n");
     printf("Implementation complete du concept LUM/VORAX en C\n\n");
     
