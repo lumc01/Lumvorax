@@ -34,6 +34,8 @@ lum_logger_t* lum_logger_create(const char* log_filename, bool console_output, b
     logger->sequence_counter = 0;
     logger->trace_all_lums = false;
     logger->conservation_check = true;
+    logger->level = LUM_LOG_INFO;       // Initialisation niveau par défaut
+    logger->enabled = true;             // Initialisation activé par défaut
 
     if (log_filename) {
         strncpy(logger->log_filename, log_filename, sizeof(logger->log_filename) - 1);
