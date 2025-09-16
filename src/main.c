@@ -29,3 +29,8 @@
                     printf("❌ BLACKBOX STEALTH TEST: FAILED\n");
                 }
                 return stealth_success ? 0 : 1;
+        } else if (strcmp(argv[1], "--neural-blackbox-test") == 0) {
+            printf("🧠 Test Neural Blackbox Computer 100%% Natif\n");
+            extern bool run_all_neural_blackbox_tests(void);
+            bool success = run_all_neural_blackbox_tests();
+            return success ? 0 : 1;
