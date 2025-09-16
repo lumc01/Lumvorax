@@ -3,14 +3,23 @@
 #ifndef NEURAL_ULTRA_PRECISION_ARCHITECTURE_H
 #define NEURAL_ULTRA_PRECISION_ARCHITECTURE_H
 
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+
 // Forward declarations pour éviter inclusion circulaire
+#ifndef NEURAL_COMPLEXITY_TARGET_E_DEFINED
+#define NEURAL_COMPLEXITY_TARGET_E_DEFINED
 typedef enum {
     NEURAL_COMPLEXITY_LOW = 0,
     NEURAL_COMPLEXITY_MEDIUM = 1,
     NEURAL_COMPLEXITY_HIGH = 2,
     NEURAL_COMPLEXITY_EXTREME = 3
 } neural_complexity_target_e;
+#endif
 
+#ifndef NEURAL_ARCHITECTURE_CONFIG_T_DEFINED
+#define NEURAL_ARCHITECTURE_CONFIG_T_DEFINED
 typedef struct {
     neural_complexity_target_e complexity_target;
     size_t memory_capacity;
@@ -19,9 +28,10 @@ typedef struct {
     bool enable_continuous_learning;
     bool enable_metaplasticity;
 } neural_architecture_config_t;
+#endif
 
 // Configuration architecture ultra-précise
-typedef struct {
+typedef struct neural_ultra_precision_config_t {
     size_t precision_target_digits;    // Nombre de digits précision requis (ex: 15)
     size_t base_depth;                // Profondeur de base du réseau
     size_t precision_layers;          // Couches supplémentaires pour précision

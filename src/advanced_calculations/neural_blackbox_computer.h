@@ -11,12 +11,15 @@
 // pour créer une opacité naturelle sans simulation artificielle
 
 // Types de complexité pour architecture adaptative
+#ifndef NEURAL_COMPLEXITY_TARGET_E_DEFINED
+#define NEURAL_COMPLEXITY_TARGET_E_DEFINED
 typedef enum {
     NEURAL_COMPLEXITY_LOW = 0,      // Architecture minimale
     NEURAL_COMPLEXITY_MEDIUM = 1,   // Architecture équilibrée
     NEURAL_COMPLEXITY_HIGH = 2,     // Architecture complexe
     NEURAL_COMPLEXITY_EXTREME = 3   // Architecture maximum
 } neural_complexity_target_e;
+#endif
 
 // Règles de plasticité neuronale
 typedef enum {
@@ -67,6 +70,8 @@ typedef struct {
 } neural_training_protocol_t;
 
 // Configuration architecture neuronale
+#ifndef NEURAL_ARCHITECTURE_CONFIG_T_DEFINED
+#define NEURAL_ARCHITECTURE_CONFIG_T_DEFINED
 typedef struct {
     neural_complexity_target_e complexity_target;  // Cible de complexité
     size_t memory_capacity;                        // Capacité mémoire neuronale
@@ -75,6 +80,7 @@ typedef struct {
     bool enable_continuous_learning;              // Apprentissage continu
     bool enable_metaplasticity;                   // Métaplasticité
 } neural_architecture_config_t;
+#endif
 
 // Banque de mémoire neuronale persistante
 typedef struct {

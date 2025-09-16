@@ -1,4 +1,5 @@
 #include "neural_blackbox_computer.h"
+#include "neural_ultra_precision_architecture.h"
 #include "../debug/memory_tracker.h"
 #include "../debug/forensic_logger.h"
 #include <stdlib.h>

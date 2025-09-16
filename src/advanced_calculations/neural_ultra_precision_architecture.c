@@ -1,6 +1,7 @@
 // NOUVEAU FICHIER : src/advanced_calculations/neural_ultra_precision_architecture.c
 
 #include "neural_ultra_precision_architecture.h"
+#include "neural_blackbox_computer.h"
 #include "../debug/forensic_logger.h"
 #include "../debug/memory_tracker.h"
 #include <math.h>
