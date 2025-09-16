@@ -3,6 +3,7 @@
 #define NEURAL_BLACKBOX_COMPUTER_H
 
 #include "neural_network_processor.h"
+#include "neural_ultra_precision_architecture.h"
 #include <stdint.h>
 #include <stdbool.h>
 

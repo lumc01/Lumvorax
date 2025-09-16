@@ -317,11 +317,11 @@ bool neural_blackbox_encode_function(
 
     double initial_loss = INFINITY;
     double current_loss = INFINITY;
-    
+
     // Génération massive d'échantillons d'entraînement
     for (size_t epoch = 0; epoch < training->max_epochs; epoch++) {
         current_loss = 0.0;
-        size_t batch_count = training->sample_count / training->batch_size;
+        size_t batch_count = training->sample_size / training->batch_size;
 
         for (size_t batch = 0; batch < batch_count; batch++) {
             // Génération batch d'entraînement
@@ -450,7 +450,7 @@ double* neural_blackbox_execute(
     // === PROPAGATION NEURONALE PURE ===
 
     double* current_layer_output = input_data;
-    
+
     // Forward pass à travers toutes les couches cachées
     for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
         neural_layer_t* current_layer = system->hidden_layers[layer_idx];
@@ -812,6 +812,9 @@ bool neural_blackbox_multi_phase_training(
     for (size_t epoch = 0; epoch < phase1_epochs; epoch++) {
         double* gradients = neural_blackbox_compute_gradients(system, function_spec);
         double current_loss = neural_blackbox_compute_loss(system, function_spec);
+
+    forensic_log(FORENSIC_LEVEL_DEBUG, "neural_blackbox_multi_phase_training",
+                "Loss initial calculé: %.12e", current_loss);
 
         if (!neural_blackbox_apply_optimizer(system, adam, "adam_ultra_precise", gradients, current_loss)) {
             TRACKED_FREE(gradients);
@@ -1259,11 +1262,11 @@ neural_architecture_config_t* convert_precision_to_architecture_config(
     const neural_ultra_precision_config_t* precision_config
 ) {
     if (!precision_config) return NULL;
-    
+
     neural_architecture_config_t* arch_config = TRACKED_MALLOC(
         sizeof(neural_architecture_config_t));
     if (!arch_config) return NULL;
-    
+
     // Conversion logique des paramètres
     arch_config->complexity_target = NEURAL_COMPLEXITY_EXTREME; // Pour ultra-précision
     arch_config->memory_capacity = precision_config->precision_target_digits * 1048576; // 1MB par digit
@@ -1271,7 +1274,7 @@ neural_architecture_config_t* convert_precision_to_architecture_config(
     arch_config->plasticity_rules = PLASTICITY_HOMEOSTATIC; // Stabilité pour précision
     arch_config->enable_continuous_learning = false; // Pas d'adaptation pendant précision
     arch_config->enable_metaplasticity = true; // Meta-adaptation OK
-    
+
     return arch_config;
 }
 
@@ -1282,18 +1285,17 @@ neural_blackbox_computer_t* neural_blackbox_create_ultra_precision_system(
     const neural_ultra_precision_config_t* precision_config
 ) {
     if (!precision_config) return NULL;
-    
+
     // Conversion vers architecture config standard
     neural_architecture_config_t* arch_config = convert_precision_to_architecture_config(precision_config);
     if (!arch_config) return NULL;
-    
+
     // Création système neural blackbox
     neural_blackbox_computer_t* system = neural_blackbox_create(
         input_dimensions, output_dimensions, arch_config);
-    
+
     // Nettoyage config temporaire
     TRACKED_FREE(arch_config);
-    
+
     return system;
 }
-
