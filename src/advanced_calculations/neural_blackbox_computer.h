@@ -140,6 +140,9 @@ neural_blackbox_computer_t* neural_blackbox_create(
 
 void neural_blackbox_destroy(neural_blackbox_computer_t** system_ptr);
 
+// Alias pour compatibilité avec les tests
+#define neural_blackbox_computer_destroy(ptr) neural_blackbox_destroy(ptr)
+
 // Encodage de fonction en réseau neuronal
 bool neural_blackbox_encode_function(
     neural_blackbox_computer_t* system,

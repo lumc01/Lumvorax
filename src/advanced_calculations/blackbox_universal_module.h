@@ -8,34 +8,7 @@
 // MODULE BOÎTE NOIRE UNIVERSEL - VERSION STEALTH OPTIMISÉE
 // OBJECTIF: SECRET ABSOLU + VITESSE MAXIMALE
 
-// === NOUVELLES FONCTIONS STEALTH MODE ===
-
-// Création blackbox mode furtivité avancé
-computational_opacity_t* blackbox_create_universal_advanced(void* original_function,
-                                                           blackbox_config_t* config);
-
-// Exécution stéganographique perfectionnée (signal caché dans 99.99% de bruit)
-blackbox_execution_result_t* blackbox_execute_steganographic_advanced(computational_opacity_t* blackbox,
-                                                                     void* input_data,
-                                                                     size_t input_size,
-                                                                     blackbox_config_t* config);
-
-// Détection environnement d'analyse (anti-reverse engineering)
-bool blackbox_detect_analysis_environment(void);
-
-// Adaptation dynamique selon niveau de menace
-void blackbox_adapt_to_threat_level(computational_opacity_t* blackbox);
-
-// Destruction sécurisée avancée (écrasement triple-pass)
-void blackbox_destroy_universal_advanced(computational_opacity_t** blackbox_ptr);
-
-// Configuration mode furtivité maximale
-blackbox_config_t* blackbox_config_create_stealth_mode(void);
-
-// Test stress mode furtivité
-bool blackbox_stress_test_stealth_mode(blackbox_config_t* config);
-
-// === FONCTIONS ORIGINALES (rétrocompatibilité) ===
+// === TYPE DEFINITIONS ===
 
 typedef struct {
     void* original_function_ptr;
@@ -75,7 +48,34 @@ typedef struct {
     void* memory_address;
 } blackbox_config_t;
 
-// Fonctions originales
+// === NOUVELLES FONCTIONS STEALTH MODE ===
+
+// Création blackbox mode furtivité avancé
+computational_opacity_t* blackbox_create_universal_advanced(void* original_function,
+                                                           blackbox_config_t* config);
+
+// Exécution stéganographique perfectionnée (signal caché dans 99.99% de bruit)
+blackbox_execution_result_t* blackbox_execute_steganographic_advanced(computational_opacity_t* blackbox,
+                                                                     void* input_data,
+                                                                     size_t input_size,
+                                                                     blackbox_config_t* config);
+
+// Détection environnement d'analyse (anti-reverse engineering)
+bool blackbox_detect_analysis_environment(void);
+
+// Adaptation dynamique selon niveau de menace
+void blackbox_adapt_to_threat_level(computational_opacity_t* blackbox);
+
+// Destruction sécurisée avancée (écrasement triple-pass)
+void blackbox_destroy_universal_advanced(computational_opacity_t** blackbox_ptr);
+
+// Configuration mode furtivité maximale
+blackbox_config_t* blackbox_config_create_stealth_mode(void);
+
+// Test stress mode furtivité
+bool blackbox_stress_test_stealth_mode(blackbox_config_t* config);
+
+// === FONCTIONS ORIGINALES (rétrocompatibilité) ===
 computational_opacity_t* blackbox_create_universal(void* original_function,
                                                   blackbox_config_t* config);
 

@@ -6,6 +6,10 @@
 #include <stdint.h>
 
 #define GOLDEN_RATIO 1.6180339887498948482045868343656
+#define GOLDEN_SCORE_MAGIC 0x60010950
+
+// Forward declarations
+typedef struct golden_score_optimizer_t golden_score_optimizer_t;
 
 // Métriques pour calcul Golden Score
 typedef struct {
@@ -39,7 +43,31 @@ typedef struct {
     uint64_t calculation_timestamp_ns;
 } golden_score_result_t;
 
+// Golden Score Optimizer structure
+struct golden_score_optimizer_t {
+    uint32_t magic_number;
+    void* memory_address;
+    int is_destroyed;
+    
+    // Core configuration
+    double target_golden_ratio;
+    uint32_t optimization_iterations;
+    double convergence_threshold;
+    uint64_t creation_time;
+    
+    // System metrics
+    struct {
+        double performance_score;
+        double memory_efficiency;
+        double energy_consumption;
+        double scalability_factor;
+        double reliability_index;
+    } system_metrics;
+};
+
 // Fonctions principales
+golden_score_optimizer_t* golden_score_optimizer_create(void);
+void golden_score_optimizer_destroy(golden_score_optimizer_t* optimizer);
 bool golden_score_optimizer_init(golden_score_config_t* config);
 golden_score_result_t calculate_golden_score(system_metrics_t* metrics);
 bool auto_tune_system_to_golden_ratio(golden_score_config_t* config);

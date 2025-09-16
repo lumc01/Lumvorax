@@ -1,4 +1,4 @@
-modules = ["c-clang14", "bash", "cpp-clang14", "python-3.12"]
+modules = ["c-clang14", "bash", "cpp-clang14", "python-3.12", "c-clang"]
 [agent]
 expertMode = true
 
@@ -1238,12 +1238,12 @@ args = "echo \"Fin validation: $(date -u)\""
 name = "LUM/VORAX Console"
 author = "agent"
 
+[workflows.workflow.metadata]
+outputType = "console"
+
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "./bin/lum_vorax"
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow]]
 name = "Mathematical Research LUM/VORAX"
