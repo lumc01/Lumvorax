@@ -321,7 +321,7 @@ bool neural_blackbox_encode_function(
     // Génération massive d'échantillons d'entraînement
     for (size_t epoch = 0; epoch < training->max_epochs; epoch++) {
         current_loss = 0.0;
-        size_t batch_count = training->sample_size / training->batch_size;
+        size_t batch_count = training->sample_count / training->batch_size;
 
         for (size_t batch = 0; batch < batch_count; batch++) {
             // Génération batch d'entraînement

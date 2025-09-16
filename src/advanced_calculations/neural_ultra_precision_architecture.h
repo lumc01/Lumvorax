@@ -3,7 +3,22 @@
 #ifndef NEURAL_ULTRA_PRECISION_ARCHITECTURE_H
 #define NEURAL_ULTRA_PRECISION_ARCHITECTURE_H
 
-#include "neural_blackbox_computer.h"
+// Forward declarations pour éviter inclusion circulaire
+typedef enum {
+    NEURAL_COMPLEXITY_LOW = 0,
+    NEURAL_COMPLEXITY_MEDIUM = 1,
+    NEURAL_COMPLEXITY_HIGH = 2,
+    NEURAL_COMPLEXITY_EXTREME = 3
+} neural_complexity_target_e;
+
+typedef struct {
+    neural_complexity_target_e complexity_target;
+    size_t memory_capacity;
+    double learning_rate;
+    void* plasticity_rules; // neural_plasticity_rules_e
+    bool enable_continuous_learning;
+    bool enable_metaplasticity;
+} neural_architecture_config_t;
 
 // Configuration architecture ultra-précise
 typedef struct {

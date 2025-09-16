@@ -3,7 +3,6 @@
 #define NEURAL_BLACKBOX_COMPUTER_H
 
 #include "neural_network_processor.h"
-#include "neural_ultra_precision_architecture.h"
 #include <stdint.h>
 #include <stdbool.h>
 
@@ -279,8 +278,11 @@ bool neural_blackbox_apply_optimizer(
 #define NEURAL_DEFAULT_LEARNING_RATE 0.001
 #define NEURAL_MIN_CONVERGENCE_THRESHOLD 1e-8
 
-#endif // NEURAL_BLACKBOX_COMPUTER_H
-// Fonction de conversion entre types de configuration
+// Fonctions de conversion entre types de configuration
+// (Forward declarations pour éviter inclusion circulaire)
+typedef struct neural_ultra_precision_config_t neural_ultra_precision_config_t;
 neural_architecture_config_t* convert_precision_to_architecture_config(
     const neural_ultra_precision_config_t* precision_config
 );
+
+#endif // NEURAL_BLACKBOX_COMPUTER_H
