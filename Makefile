@@ -312,6 +312,24 @@ $(LUM_INSTANT_DISPLACEMENT_OBJ): $(SRC_DIR)/spatial/lum_instant_displacement.c $
 	mkdir -p $(OBJ_DIR)/spatial
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Neural Blackbox Ultra-Precision modules
+obj/advanced_calculations/neural_blackbox_computer.o: src/advanced_calculations/neural_blackbox_computer.c src/advanced_calculations/neural_blackbox_computer.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/neural_blackbox_computer.c -o obj/advanced_calculations/neural_blackbox_computer.o
+
+obj/advanced_calculations/neural_advanced_optimizers.o: src/advanced_calculations/neural_advanced_optimizers.c src/advanced_calculations/neural_advanced_optimizers.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/neural_advanced_optimizers.c -o obj/advanced_calculations/neural_advanced_optimizers.o
+
+obj/advanced_calculations/neural_ultra_precision_architecture.o: src/advanced_calculations/neural_ultra_precision_architecture.c src/advanced_calculations/neural_ultra_precision_architecture.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/neural_ultra_precision_architecture.c -o obj/advanced_calculations/neural_ultra_precision_architecture.o
+
+obj/advanced_calculations/neural_blackbox_ultra_precision_tests.o: src/advanced_calculations/neural_blackbox_ultra_precision_tests.c src/advanced_calculations/neural_blackbox_ultra_precision_tests.h
+	mkdir -p obj/advanced_calculations
+	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/neural_blackbox_ultra_precision_tests.c -o obj/advanced_calculations/neural_blackbox_ultra_precision_tests.o
+
+
 .PHONY: clean all test debug install uninstall
 
 all: $(EXECUTABLE) | $(LOG_DIR)

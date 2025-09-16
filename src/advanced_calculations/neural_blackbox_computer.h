@@ -223,6 +223,12 @@ bool neural_blackbox_ultra_precise_validation(
     neural_function_spec_t* function_spec
 );
 
+// Validation croisée ultra-précise
+bool neural_blackbox_ultra_precise_validation(
+    neural_blackbox_computer_t* system,
+    neural_function_spec_t* function_spec
+);
+
 // Calcul gradients haute précision
 double* neural_blackbox_compute_gradients(
     neural_blackbox_computer_t* system,

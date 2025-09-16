@@ -1,4 +1,3 @@
-
 #include "neural_blackbox_computer.h"
 #include "../debug/memory_tracker.h"
 #include "../debug/forensic_logger.h"
@@ -136,31 +135,31 @@ neural_blackbox_computer_t* neural_blackbox_create(
                     input_dimensions, output_dimensions);
         return NULL;
     }
-    
+
     neural_blackbox_computer_t* system = TRACKED_MALLOC(sizeof(neural_blackbox_computer_t));
     if (!system) {
         forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_create", 
                     "Échec allocation mémoire pour système neural");
         return NULL;
     }
-    
+
     // Architecture adaptative basée sur complexité requise
     size_t optimal_depth = neural_calculate_optimal_depth(
         input_dimensions, 
         output_dimensions,
         config->complexity_target
     );
-    
+
     size_t neurons_per_layer = neural_calculate_optimal_width(
         input_dimensions,
         output_dimensions, 
         optimal_depth
     );
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_create",
                 "Création système neural blackbox - Profondeur: %zu, Largeur: %zu, Paramètres: %zu",
                 optimal_depth, neurons_per_layer, optimal_depth * neurons_per_layer * neurons_per_layer);
-    
+
     // Initialisation structure
     system->input_dimensions = input_dimensions;
     system->output_dimensions = output_dimensions;
@@ -169,11 +168,11 @@ neural_blackbox_computer_t* neural_blackbox_create(
     system->total_parameters = optimal_depth * neurons_per_layer * neurons_per_layer;
     system->blackbox_magic = NEURAL_BLACKBOX_MAGIC;
     system->memory_address = (void*)system;
-    
+
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     system->creation_timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-    
+
     // Allocation couches cachées
     system->hidden_layers = TRACKED_MALLOC(optimal_depth * sizeof(neural_layer_t*));
     if (!system->hidden_layers) {
@@ -182,7 +181,7 @@ neural_blackbox_computer_t* neural_blackbox_create(
         TRACKED_FREE(system);
         return NULL;
     }
-    
+
     // Création couches avec fonctions d'activation complexes
     for (size_t i = 0; i < optimal_depth; i++) {
         activation_function_e activation = (i % 2 == 0) ? ACTIVATION_GELU : ACTIVATION_SWISH;
@@ -191,7 +190,7 @@ neural_blackbox_computer_t* neural_blackbox_create(
             (i == 0) ? input_dimensions : neurons_per_layer,
             activation
         );
-        
+
         if (!system->hidden_layers[i]) {
             forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_create", 
                         "Échec création couche %zu", i);
@@ -203,10 +202,10 @@ neural_blackbox_computer_t* neural_blackbox_create(
             TRACKED_FREE(system);
             return NULL;
         }
-        
+
         system->hidden_layers[i]->layer_id = (uint32_t)i;
     }
-    
+
     // Mémoire persistante neuronale
     system->persistent_memory = neural_memory_bank_create(config->memory_capacity);
     if (!system->persistent_memory) {
@@ -214,18 +213,18 @@ neural_blackbox_computer_t* neural_blackbox_create(
                     "Échec création mémoire persistante - continuant sans");
         system->persistent_memory = NULL;
     }
-    
+
     // Moteur d'apprentissage continu
     system->learning_engine = neural_learning_engine_create(
         config->learning_rate,
         config->plasticity_rules
     );
-    
+
     // États internes pour opacité maximale
     system->internal_activations = TRACKED_MALLOC(
         optimal_depth * neurons_per_layer * sizeof(double)
     );
-    
+
     if (system->internal_activations) {
         // Initialisation avec valeurs pseudo-aléatoires basées sur timestamp
         srand((unsigned int)(system->creation_timestamp % UINT32_MAX));
@@ -233,35 +232,35 @@ neural_blackbox_computer_t* neural_blackbox_create(
             system->internal_activations[i] = ((double)rand() / RAND_MAX - 0.5) * 0.1;
         }
     }
-    
+
     system->synaptic_changes_count = 0;
     system->total_forward_passes = 0;
     system->adaptation_cycles = 0;
-    
+
     forensic_log(FORENSIC_LEVEL_SUCCESS, "neural_blackbox_create",
                 "Système neural blackbox créé avec succès - ID: %p, Paramètres: %zu",
                 (void*)system, system->total_parameters);
-    
+
     return system;
 }
 
 // Destruction sécurisée du système
 void neural_blackbox_destroy(neural_blackbox_computer_t** system_ptr) {
     if (!system_ptr || !*system_ptr) return;
-    
+
     neural_blackbox_computer_t* system = *system_ptr;
-    
+
     if (system->blackbox_magic != NEURAL_BLACKBOX_MAGIC || 
         system->memory_address != (void*)system) {
         forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_destroy", 
                     "Tentative destruction système corrompu ou invalide");
         return;
     }
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_destroy",
                 "Destruction système neural - Forward passes: %zu, Adaptations: %zu",
                 system->total_forward_passes, system->adaptation_cycles);
-    
+
     // Destruction couches
     if (system->hidden_layers) {
         for (size_t i = 0; i < system->network_depth; i++) {
@@ -271,26 +270,26 @@ void neural_blackbox_destroy(neural_blackbox_computer_t** system_ptr) {
         }
         TRACKED_FREE(system->hidden_layers);
     }
-    
+
     // Destruction mémoire persistante
     if (system->persistent_memory) {
         neural_memory_bank_destroy(&system->persistent_memory);
     }
-    
+
     // Destruction moteur d'apprentissage
     if (system->learning_engine) {
         neural_learning_engine_destroy(&system->learning_engine);
     }
-    
+
     // Destruction états internes
     if (system->internal_activations) {
         TRACKED_FREE(system->internal_activations);
     }
-    
+
     // Effacement sécurisé
     system->blackbox_magic = NEURAL_DESTROYED_MAGIC;
     system->memory_address = NULL;
-    
+
     TRACKED_FREE(system);
     *system_ptr = NULL;
 }
@@ -302,54 +301,54 @@ bool neural_blackbox_encode_function(
     neural_training_protocol_t* training
 ) {
     if (!system || !function_spec || !training) return false;
-    
+
     if (system->blackbox_magic != NEURAL_BLACKBOX_MAGIC) {
         forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_encode_function", 
                     "Système neural corrompu");
         return false;
     }
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_encode_function",
                 "Début encodage fonction '%s' - Échantillons: %zu, Époques max: %zu",
                 function_spec->name, training->sample_count, training->max_epochs);
-    
+
     struct timespec start_time, current_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
-    
+
     double initial_loss = INFINITY;
     double current_loss = INFINITY;
     size_t successful_epochs = 0;
-    
+
     // Génération massive d'échantillons d'entraînement
     for (size_t epoch = 0; epoch < training->max_epochs; epoch++) {
         current_loss = 0.0;
         size_t batch_count = training->sample_count / training->batch_size;
-        
+
         for (size_t batch = 0; batch < batch_count; batch++) {
             // Génération batch d'entraînement
             double batch_loss = 0.0;
-            
+
             for (size_t sample = 0; sample < training->batch_size; sample++) {
                 // Génération entrée aléatoire dans le domaine spécifié
                 double* random_input = generate_random_input_in_domain(
                     system->input_dimensions,
                     &(function_spec->input_domain)
                 );
-                
+
                 if (!random_input) continue;
-                
+
                 // Calcul sortie attendue (fonction originale)
                 double* expected_output = TRACKED_MALLOC(
                     system->output_dimensions * sizeof(double)
                 );
-                
+
                 if (expected_output && function_spec->original_function) {
                     // Appel fonction originale pour obtenir résultat attendu
                     function_spec->original_function(random_input, expected_output);
-                    
+
                     // Forward pass neural
                     double* neural_output = neural_blackbox_execute(system, random_input);
-                    
+
                     if (neural_output) {
                         // Calcul erreur (MSE)
                         double sample_error = 0.0;
@@ -359,38 +358,38 @@ bool neural_blackbox_encode_function(
                         }
                         sample_error /= system->output_dimensions;
                         batch_loss += sample_error;
-                        
+
                         // Backpropagation simplifiée (gradient descent)
                         neural_blackbox_simple_backprop(system, expected_output, neural_output, training->learning_rate);
-                        
+
                         TRACKED_FREE(neural_output);
                     }
-                    
+
                     TRACKED_FREE(expected_output);
                 }
-                
+
                 TRACKED_FREE(random_input);
             }
-            
+
             current_loss += (batch_loss / training->batch_size);
         }
-        
+
         current_loss /= batch_count;
-        
+
         // Adaptation continue du réseau
         neural_blackbox_continuous_adaptation(system);
-        
+
         // Log progression
         if (epoch % 100 == 0 || current_loss < training->convergence_threshold) {
             clock_gettime(CLOCK_MONOTONIC, &current_time);
             double elapsed = (current_time.tv_sec - start_time.tv_sec) + 
                            (current_time.tv_nsec - start_time.tv_nsec) / 1e9;
-            
+
             forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_encode_function",
                         "Époque %zu/%zu - Loss: %.8f, Temps: %.2fs, Adaptations: %zu",
                         epoch, training->max_epochs, current_loss, elapsed, system->adaptation_cycles);
         }
-        
+
         // Convergence check
         if (current_loss < training->convergence_threshold) {
             successful_epochs = epoch;
@@ -399,7 +398,7 @@ bool neural_blackbox_encode_function(
                         epoch, current_loss);
             break;
         }
-        
+
         // Early stopping si pas d'amélioration
         if (epoch > 1000 && current_loss > initial_loss * 0.99) {
             forensic_log(FORENSIC_LEVEL_WARNING, "neural_blackbox_encode_function",
@@ -407,24 +406,24 @@ bool neural_blackbox_encode_function(
                         epoch);
             break;
         }
-        
+
         if (epoch == 0) initial_loss = current_loss;
     }
-    
+
     // Post-training optimisation
     neural_blackbox_post_training_optimization(system);
-    
+
     clock_gettime(CLOCK_MONOTONIC, &current_time);
     double total_time = (current_time.tv_sec - start_time.tv_sec) + 
                        (current_time.tv_nsec - start_time.tv_nsec) / 1e9;
-    
+
     bool success = (current_loss < training->convergence_threshold * 10);
-    
+
     forensic_log(success ? FORENSIC_LEVEL_SUCCESS : FORENSIC_LEVEL_WARNING, 
                 "neural_blackbox_encode_function",
                 "Encodage terminé - Succès: %s, Loss finale: %.8f, Temps total: %.2fs, Paramètres ajustés: %zu",
                 success ? "OUI" : "NON", current_loss, total_time, system->synaptic_changes_count);
-    
+
     return success;
 }
 
@@ -434,46 +433,46 @@ double* neural_blackbox_execute(
     double* input_data
 ) {
     if (!system || !input_data) return NULL;
-    
+
     if (system->blackbox_magic != NEURAL_BLACKBOX_MAGIC) {
         forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_execute", 
                     "Système neural corrompu");
         return NULL;
     }
-    
+
     system->total_forward_passes++;
-    
+
     struct timespec start_time, end_time;
     clock_gettime(CLOCK_MONOTONIC, &start_time);
-    
+
     // Allocation sortie finale
     double* final_output = TRACKED_MALLOC(system->output_dimensions * sizeof(double));
     if (!final_output) return NULL;
-    
+
     // === PROPAGATION NEURONALE PURE ===
-    
+
     double* current_layer_output = input_data;
     double* next_layer_input = NULL;
-    
+
     // Forward pass à travers toutes les couches cachées
     for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
         neural_layer_t* current_layer = system->hidden_layers[layer_idx];
-        
+
         if (!current_layer) {
             TRACKED_FREE(final_output);
             return NULL;
         }
-        
+
         // Forward pass de la couche
         bool forward_success = neural_layer_forward_pass(current_layer, current_layer_output);
-        
+
         if (!forward_success) {
             forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_execute",
                         "Échec forward pass couche %zu", layer_idx);
             TRACKED_FREE(final_output);
             return NULL;
         }
-        
+
         // Mise à jour mémoire persistante (effet de bord neuronal)
         if (system->persistent_memory) {
             neural_memory_bank_update(
@@ -483,7 +482,7 @@ double* neural_blackbox_execute(
                 current_layer->output_size
             );
         }
-        
+
         // Sauvegarde états internes pour opacité
         if (system->internal_activations) {
             size_t offset = layer_idx * system->neurons_per_layer;
@@ -492,7 +491,7 @@ double* neural_blackbox_execute(
                 system->internal_activations[offset + n] = current_layer->outputs[n];
             }
         }
-        
+
         // Préparation entrée pour couche suivante
         if (layer_idx < system->network_depth - 1) {
             current_layer_output = current_layer->outputs;
@@ -500,34 +499,34 @@ double* neural_blackbox_execute(
             // Dernière couche - adaptation à la sortie demandée
             size_t copy_size = (current_layer->output_size < system->output_dimensions) ? 
                               current_layer->output_size : system->output_dimensions;
-            
+
             for (size_t i = 0; i < copy_size; i++) {
                 final_output[i] = current_layer->outputs[i];
             }
-            
+
             // Complétion avec zéros si nécessaire
             for (size_t i = copy_size; i < system->output_dimensions; i++) {
                 final_output[i] = 0.0;
             }
         }
     }
-    
+
     // Apprentissage continu (métaplasticité)
     if (system->learning_engine) {
         neural_blackbox_continuous_learning(system);
     }
-    
+
     clock_gettime(CLOCK_MONOTONIC, &end_time);
     uint64_t execution_time = (end_time.tv_sec - start_time.tv_sec) * 1000000000ULL + 
                              (end_time.tv_nsec - start_time.tv_nsec);
-    
+
     // Traçage pour forensique (optionnel)
     if (system->total_forward_passes % 1000 == 0) {
         forensic_log(FORENSIC_LEVEL_DEBUG, "neural_blackbox_execute",
                     "Forward pass #%zu terminé en %zu ns - Adaptations: %zu",
                     system->total_forward_passes, execution_time, system->adaptation_cycles);
     }
-    
+
     return final_output;
 }
 
@@ -556,14 +555,14 @@ size_t neural_calculate_optimal_width(size_t input_dim, size_t output_dim, size_
 
 void neural_blackbox_continuous_adaptation(neural_blackbox_computer_t* system) {
     if (!system || system->blackbox_magic != NEURAL_BLACKBOX_MAGIC) return;
-    
+
     system->adaptation_cycles++;
-    
+
     // Micro-ajustements aléatoires (simulation métaplasticité)
     for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
         neural_layer_t* layer = system->hidden_layers[layer_idx];
         if (!layer) continue;
-        
+
         for (size_t i = 0; i < layer->neuron_count * layer->input_size; i++) {
             // Changement infime basé sur activité récente
             double adaptation_factor = (system->total_forward_passes % 1000) / 1000000.0;
@@ -571,7 +570,7 @@ void neural_blackbox_continuous_adaptation(neural_blackbox_computer_t* system) {
             layer->weights[i] += random_change;
             system->synaptic_changes_count++;
         }
-        
+
         // Adaptation biases
         for (size_t i = 0; i < layer->neuron_count; i++) {
             double bias_change = ((double)rand() / RAND_MAX - 0.5) * 1e-8;
@@ -582,12 +581,12 @@ void neural_blackbox_continuous_adaptation(neural_blackbox_computer_t* system) {
 
 void neural_blackbox_continuous_learning(neural_blackbox_computer_t* system) {
     if (!system || !system->learning_engine) return;
-    
+
     // Simulation apprentissage Hebbien simplifié
     for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
         neural_layer_t* layer = system->hidden_layers[layer_idx];
         if (!layer) continue;
-        
+
         // Renforcement connexions actives
         for (size_t n = 0; n < layer->neuron_count; n++) {
             if (layer->outputs[n] > 0.5) { // Neurone actif
@@ -603,43 +602,43 @@ void neural_blackbox_continuous_learning(neural_blackbox_computer_t* system) {
 // Fonctions de création des sous-composants
 neural_memory_bank_t* neural_memory_bank_create(size_t capacity) {
     if (capacity == 0) return NULL;
-    
+
     neural_memory_bank_t* bank = TRACKED_MALLOC(sizeof(neural_memory_bank_t));
     if (!bank) return NULL;
-    
+
     bank->memory_slots = TRACKED_MALLOC(capacity * sizeof(double));
     if (!bank->memory_slots) {
         TRACKED_FREE(bank);
         return NULL;
     }
-    
+
     bank->capacity = capacity;
     bank->current_size = 0;
     bank->access_count = 0;
     bank->memory_address = (void*)bank;
     bank->magic_number = NEURAL_MEMORY_MAGIC;
-    
+
     // Initialisation avec valeurs nulles
     memset(bank->memory_slots, 0, capacity * sizeof(double));
-    
+
     return bank;
 }
 
 void neural_memory_bank_destroy(neural_memory_bank_t** bank_ptr) {
     if (!bank_ptr || !*bank_ptr) return;
-    
+
     neural_memory_bank_t* bank = *bank_ptr;
-    
+
     if (bank->magic_number == NEURAL_MEMORY_MAGIC && 
         bank->memory_address == (void*)bank) {
-        
+
         if (bank->memory_slots) {
             TRACKED_FREE(bank->memory_slots);
         }
-        
+
         bank->magic_number = NEURAL_DESTROYED_MAGIC;
         bank->memory_address = NULL;
-        
+
         TRACKED_FREE(bank);
         *bank_ptr = NULL;
     }
@@ -651,31 +650,31 @@ neural_learning_engine_t* neural_learning_engine_create(
 ) {
     neural_learning_engine_t* engine = TRACKED_MALLOC(sizeof(neural_learning_engine_t));
     if (!engine) return NULL;
-    
+
     engine->learning_rate = learning_rate;
     engine->plasticity_rules = rules;
     engine->adaptation_count = 0;
     engine->memory_address = (void*)engine;
     engine->magic_number = NEURAL_ENGINE_MAGIC;
-    
+
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     engine->creation_time = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-    
+
     return engine;
 }
 
 void neural_learning_engine_destroy(neural_learning_engine_t** engine_ptr) {
     if (!engine_ptr || !*engine_ptr) return;
-    
+
     neural_learning_engine_t* engine = *engine_ptr;
-    
+
     if (engine->magic_number == NEURAL_ENGINE_MAGIC && 
         engine->memory_address == (void*)engine) {
-        
+
         engine->magic_number = NEURAL_DESTROYED_MAGIC;
         engine->memory_address = NULL;
-        
+
         TRACKED_FREE(engine);
         *engine_ptr = NULL;
     }
@@ -688,7 +687,7 @@ double* generate_random_input_in_domain(
 ) {
     double* input = TRACKED_MALLOC(input_dimensions * sizeof(double));
     if (!input) return NULL;
-    
+
     for (size_t i = 0; i < input_dimensions; i++) {
         if (domain && domain->has_bounds) {
             double range = domain->max_value - domain->min_value;
@@ -697,7 +696,7 @@ double* generate_random_input_in_domain(
             input[i] = ((double)rand() / RAND_MAX - 0.5) * 2.0; // [-1, 1]
         }
     }
-    
+
     return input;
 }
 
@@ -709,59 +708,59 @@ void neural_blackbox_simple_backprop(
     double learning_rate
 ) {
     if (!system || !expected_output || !actual_output) return;
-    
+
     // Calcul gradient sortie
     double* output_gradient = TRACKED_MALLOC(system->output_dimensions * sizeof(double));
     if (!output_gradient) return;
-    
+
     for (size_t i = 0; i < system->output_dimensions; i++) {
         output_gradient[i] = 2.0 * (actual_output[i] - expected_output[i]);
     }
-    
+
     // Propagation arrière simplifiée (seulement dernière couche)
     if (system->network_depth > 0) {
         neural_layer_t* last_layer = system->hidden_layers[system->network_depth - 1];
-        
+
         if (last_layer && last_layer->layer_error) {
             size_t update_size = (last_layer->neuron_count < system->output_dimensions) ?
                                last_layer->neuron_count : system->output_dimensions;
-            
+
             for (size_t i = 0; i < update_size; i++) {
                 last_layer->layer_error[i] = output_gradient[i];
-                
+
                 // Mise à jour poids (gradient descent)
                 for (size_t j = 0; j < last_layer->input_size; j++) {
                     size_t weight_idx = i * last_layer->input_size + j;
                     last_layer->weights[weight_idx] -= learning_rate * output_gradient[i];
                     system->synaptic_changes_count++;
                 }
-                
+
                 // Mise à jour biais
                 last_layer->biases[i] -= learning_rate * output_gradient[i];
             }
         }
     }
-    
+
     TRACKED_FREE(output_gradient);
 }
 
 void neural_blackbox_post_training_optimization(neural_blackbox_computer_t* system) {
     if (!system) return;
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_post_training_optimization",
                 "Optimisation post-entraînement - Normalisation poids et ajustements finaux");
-    
+
     // Normalisation des poids pour stabilité
     for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
         neural_layer_t* layer = system->hidden_layers[layer_idx];
         if (!layer) continue;
-        
+
         // Calcul norme des poids
         double weight_sum = 0.0;
         for (size_t i = 0; i < layer->neuron_count * layer->input_size; i++) {
             weight_sum += layer->weights[i] * layer->weights[i];
         }
-        
+
         double norm = sqrt(weight_sum);
         if (norm > 10.0) { // Normalisation si poids trop grands
             for (size_t i = 0; i < layer->neuron_count * layer->input_size; i++) {
@@ -779,11 +778,11 @@ void neural_memory_bank_update(
     size_t activation_count
 ) {
     if (!bank || !activations || activation_count == 0) return;
-    
+
     if (bank->magic_number != NEURAL_MEMORY_MAGIC) return;
-    
+
     bank->access_count++;
-    
+
     // Sauvegarde cyclique des activations
     for (size_t i = 0; i < activation_count && bank->current_size < bank->capacity; i++) {
         size_t index = (bank->current_size + layer_id * 100 + i) % bank->capacity;
@@ -796,44 +795,214 @@ void neural_memory_bank_update(
 // NOUVELLES FONCTIONS ULTRA-PRÉCISION (Erreur < 1e-15)
 // ============================================================================
 
+// Entraînement multi-phases ultra-précis
+bool neural_blackbox_ultra_precise_training(
+    neural_blackbox_computer_t* system,
+    neural_function_spec_t* function_spec,
+    neural_training_protocol_t* training
+) {
+    if (!system || !function_spec || !training) return false;
+
+    forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_training",
+                "Début entraînement ultra-précis - Target: %.2e", training->precision_target);
+
+    // Phase 1 : Entraînement grossier avec gradient descent standard
+    neural_training_protocol_t phase1 = *training;
+    phase1.convergence_threshold = 1e-2;
+    phase1.max_epochs = training->max_epochs / 4;
+
+    bool phase1_success = neural_blackbox_encode_function(system, function_spec, &phase1);
+    if (!phase1_success) {
+        forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_ultra_precise_training",
+                    "Phase 1 échouée - arrêt");
+        return false;
+    }
+
+    // Phase 2 : Précision intermédiaire avec Adam
+    // TODO: Intégration optimiseur Adam ultra-précis
+    forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_training",
+                "Phase 2: Adam Ultra-Précis en cours (TODO)");
+    adam_ultra_precise_optimizer_t* adam_phase2 = adam_ultra_precise_create(0.001, 0.9, 0.999, 1e-12);
+    if (!adam_phase2) return false;
+    phase1.convergence_threshold = 1e-4;
+    phase1.max_epochs = training->max_epochs / 4;
+    bool phase2_success = neural_blackbox_multi_phase_training(system, function_spec, &phase1); // Re-using for structure, needs proper optimizer integration
+    adam_ultra_precise_destroy(&adam_phase2);
+    if (!phase2_success) {
+        forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_ultra_precise_training",
+                    "Phase 2 échouée - arrêt");
+        return false;
+    }
+
+
+    // Phase 3 : Précision fine avec L-BFGS  
+    // TODO: Intégration optimiseur L-BFGS
+    forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_training",
+                "Phase 3: L-BFGS en cours (TODO)");
+    lbfgs_optimizer_t* lbfgs_phase3 = lbfgs_create(20, 1e-14);
+    if (!lbfgs_phase3) return false;
+    phase1.convergence_threshold = 1e-7;
+    phase1.max_epochs = training->max_epochs / 4;
+    bool phase3_success = neural_blackbox_multi_phase_training(system, function_spec, &phase1); // Re-using for structure, needs proper optimizer integration
+    lbfgs_destroy(&lbfgs_phase3);
+    if (!phase3_success) {
+        forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_ultra_precise_training",
+                    "Phase 3 échouée - arrêt");
+        return false;
+    }
+
+    // Phase 4 : Précision ultra-fine avec Newton-Raphson
+    // TODO: Intégration optimiseur Newton-Raphson
+    forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_training",
+                "Phase 4: Newton-Raphson en cours (TODO)");
+    newton_raphson_optimizer_t* newton_phase4 = newton_raphson_create(1e-16);
+    if (!newton_phase4) return false;
+    phase1.convergence_threshold = 1e-10;
+    phase1.max_epochs = training->max_epochs / 4;
+    bool phase4_success = neural_blackbox_multi_phase_training(system, function_spec, &phase1); // Re-using for structure, needs proper optimizer integration
+    newton_raphson_destroy(&newton_phase4);
+    if (!phase4_success) {
+        forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_ultra_precise_training",
+                    "Phase 4 échouée - arrêt");
+        return false;
+    }
+
+    forensic_log(FORENSIC_LEVEL_SUCCESS, "neural_blackbox_ultra_precise_training",
+                "Entraînement ultra-précis complété");
+
+    return true;
+}
+
+// Validation croisée ultra-précise
+bool neural_blackbox_ultra_precise_validation(
+    neural_blackbox_computer_t* system,
+    neural_function_spec_t* function_spec
+) {
+    if (!system || !function_spec) return false;
+
+    const size_t validation_points = 10000;
+    const double precision_threshold = 1e-15;
+
+    size_t perfect_predictions = 0;
+    double max_error = 0.0;
+
+    for (size_t test = 0; test < validation_points; test++) {
+        // Génération point test aléatoire
+        double* test_input = generate_random_input_in_domain(
+            system->input_dimensions, &function_spec->input_domain);
+
+        if (!test_input) continue;
+
+        // Calcul référence avec fonction originale
+        double* expected = TRACKED_MALLOC(system->output_dimensions * sizeof(double));
+        if (expected && function_spec->original_function) {
+            function_spec->original_function(test_input, expected);
+
+            // Calcul neural
+            double* neural = neural_blackbox_execute(system, test_input);
+
+            if (neural) {
+                // Validation erreur ultra-précise
+                for (size_t o = 0; o < system->output_dimensions; o++) {
+                    double error = fabs(expected[o] - neural[o]);
+                    if (error < precision_threshold) {
+                        perfect_predictions++;
+                    }
+                    if (error > max_error) {
+                        max_error = error;
+                    }
+                }
+                TRACKED_FREE(neural);
+            }
+
+            TRACKED_FREE(expected);
+        }
+
+        TRACKED_FREE(test_input);
+    }
+
+    double accuracy = (double)perfect_predictions / (validation_points * system->output_dimensions) * 100.0;
+
+    forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_validation",
+                "Validation: %.2f%% précision (erreur max: %.2e)", accuracy, max_error);
+
+    return (accuracy >= 99.9 && max_error < 1e-12);
+}
+
 // Calcul loss avec précision extended
 double neural_blackbox_compute_loss(
     neural_blackbox_computer_t* system,
     neural_function_spec_t* function_spec
 ) {
     if (!system || !function_spec) return INFINITY;
-    
-    long double total_loss = 0.0L;
-    size_t sample_count = function_spec->test_sample_count;
-    
-    forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_compute_loss",
-                "Calcul loss ultra-précis sur %zu échantillons", sample_count);
-    
-    for (size_t i = 0; i < sample_count; i++) {
-        double* input = function_spec->test_inputs[i];
-        double* expected = function_spec->test_outputs[i];
-        
-        // Forward pass avec calculs extended precision
-        double* actual = neural_blackbox_compute_precise(system, input, function_spec->input_size);
-        if (!actual) continue;
-        
-        // Calcul erreur quadratique en précision extended
-        for (size_t j = 0; j < function_spec->output_size; j++) {
-            long double diff = (long double)expected[j] - (long double)actual[j];
-            total_loss += diff * diff;
+
+    if (!function_spec->test_inputs || !function_spec->test_outputs) {
+        // Fallback : génération échantillon unique pour loss
+        double* test_input = generate_random_input_in_domain(
+            system->input_dimensions, &function_spec->input_domain);
+
+        if (!test_input) return INFINITY;
+
+        double* expected = TRACKED_MALLOC(system->output_dimensions * sizeof(double));
+        if (!expected) {
+            TRACKED_FREE(test_input);
+            return INFINITY;
         }
-        
-        TRACKED_FREE(actual);
+
+        if (function_spec->original_function) {
+            function_spec->original_function(test_input, expected);
+
+            double* neural = neural_blackbox_execute(system, test_input);
+            if (neural) {
+                long double loss_precise = 0.0L;
+                for (size_t o = 0; o < system->output_dimensions; o++) {
+                    long double diff = (long double)(expected[o] - neural[o]);
+                    loss_precise += diff * diff;
+                }
+
+                TRACKED_FREE(neural);
+                TRACKED_FREE(expected);
+                TRACKED_FREE(test_input);
+
+                return (double)(loss_precise / system->output_dimensions);
+            }
+        }
+
+        TRACKED_FREE(expected);
+        TRACKED_FREE(test_input);
+        return INFINITY;
     }
-    
-    // Moyenne avec précision extended puis conversion
-    long double mean_loss = total_loss / (long double)(sample_count * function_spec->output_size);
-    
-    forensic_log(FORENSIC_LEVEL_DEBUG, "neural_blackbox_compute_loss",
-                "Loss calculé: %.17Le (extended) -> %.15e (double)", mean_loss, (double)mean_loss);
-    
-    return (double)mean_loss;
+
+    // Calcul loss sur ensemble test
+    long double total_loss = 0.0L;
+    size_t valid_samples = 0;
+
+    for (size_t sample = 0; sample < function_spec->test_sample_count; sample++) {
+        double* neural_output = neural_blackbox_execute(system, function_spec->test_inputs[sample]);
+
+        if (neural_output) {
+            long double sample_loss = 0.0L;
+            for (size_t o = 0; o < system->output_dimensions; o++) {
+                long double expected = (long double)function_spec->test_outputs[sample][o];
+                long double actual = (long double)neural_output[o];
+                long double diff = expected - actual;
+                sample_loss += diff * diff;
+            }
+
+            total_loss += sample_loss / system->output_dimensions;
+            valid_samples++;
+
+            TRACKED_FREE(neural_output);
+        }
+    }
+
+    if (valid_samples > 0) {
+        return (double)(total_loss / valid_samples);
+    }
+
+    return INFINITY;
 }
+
 
 // Calcul gradients haute précision  
 double* neural_blackbox_compute_gradients(
@@ -841,64 +1010,64 @@ double* neural_blackbox_compute_gradients(
     neural_function_spec_t* function_spec
 ) {
     if (!system || !function_spec) return NULL;
-    
+
     size_t total_params = neural_ultra_precision_count_parameters(system);
     double* gradients = TRACKED_CALLOC(total_params, sizeof(double));
     if (!gradients) return NULL;
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_compute_gradients",
                 "Calcul gradients haute précision (%zu paramètres)", total_params);
-    
+
     const double h = 1e-8; // Step ultra-petit pour différences finies
     double current_loss = neural_blackbox_compute_loss(system, function_spec);
-    
+
     size_t param_idx = 0;
-    
+
     // Gradients pour chaque couche
     for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
         neural_layer_t* layer = system->hidden_layers[layer_idx];
         if (!layer) continue;
-        
+
         // Gradients weights
         for (size_t i = 0; i < layer->neuron_count * layer->input_size; i++) {
             double original = layer->weights[i];
-            
+
             // Forward perturbation
             layer->weights[i] = original + h;
             double loss_plus = neural_blackbox_compute_loss(system, function_spec);
-            
+
             // Backward perturbation  
             layer->weights[i] = original - h;
             double loss_minus = neural_blackbox_compute_loss(system, function_spec);
-            
+
             // Gradient central difference haute précision
             gradients[param_idx] = (loss_plus - loss_minus) / (2.0 * h);
-            
+
             // Restauration
             layer->weights[i] = original;
             param_idx++;
         }
-        
+
         // Gradients biases
         for (size_t i = 0; i < layer->neuron_count; i++) {
             double original = layer->biases[i];
-            
+
             layer->biases[i] = original + h;
             double loss_plus = neural_blackbox_compute_loss(system, function_spec);
-            
+
             layer->biases[i] = original - h;
             double loss_minus = neural_blackbox_compute_loss(system, function_spec);
-            
+
             gradients[param_idx] = (loss_plus - loss_minus) / (2.0 * h);
-            
+
             layer->biases[i] = original;
             param_idx++;
         }
     }
-    
+
     forensic_log(FORENSIC_LEVEL_DEBUG, "neural_blackbox_compute_gradients",
                 "Gradients calculés: norme L2 = %.12e", neural_compute_vector_norm(gradients, total_params));
-    
+
     return gradients;
 }
 
@@ -908,53 +1077,53 @@ double* neural_blackbox_compute_hessian(
     neural_function_spec_t* function_spec
 ) {
     if (!system || !function_spec) return NULL;
-    
+
     size_t n_params = neural_ultra_precision_count_parameters(system);
     double* hessian = TRACKED_CALLOC(n_params * n_params, sizeof(double));
     if (!hessian) return NULL;
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_compute_hessian", 
                 "Calcul Hessienne %zux%zu pour Newton-Raphson", n_params, n_params);
-    
+
     const double h = 1e-6; // Step pour approximation Hessienne
-    
+
     // Calcul par différences finies mixtes
     for (size_t i = 0; i < n_params; i++) {
         for (size_t j = i; j < n_params; j++) { // Symétrie
-            
+
             // f(x+hi+hj)
             neural_blackbox_perturb_parameter(system, i, h);
             neural_blackbox_perturb_parameter(system, j, h);
             double fpp = neural_blackbox_compute_loss(system, function_spec);
-            
+
             // f(x+hi-hj)  
             neural_blackbox_perturb_parameter(system, j, -2.0*h);
             double fpm = neural_blackbox_compute_loss(system, function_spec);
-            
+
             // f(x-hi+hj)
             neural_blackbox_perturb_parameter(system, i, -2.0*h);
             double fmp = neural_blackbox_compute_loss(system, function_spec);
-            
+
             // f(x-hi-hj)
             neural_blackbox_perturb_parameter(system, j, -2.0*h);
             double fmm = neural_blackbox_compute_loss(system, function_spec);
-            
+
             // Restauration
             neural_blackbox_perturb_parameter(system, i, h);
             neural_blackbox_perturb_parameter(system, j, h);
-            
+
             // Hessienne mixte: ∂²f/∂xi∂xj
             double hessian_ij = (fpp - fpm - fmp + fmm) / (4.0 * h * h);
-            
+
             hessian[i * n_params + j] = hessian_ij;
             hessian[j * n_params + i] = hessian_ij; // Symétrie
         }
     }
-    
+
     forensic_log(FORENSIC_LEVEL_DEBUG, "neural_blackbox_compute_hessian",
                 "Hessienne calculée: condition estimée = %.6e", 
                 neural_estimate_condition_number(hessian, n_params));
-    
+
     return hessian;
 }
 
@@ -967,23 +1136,23 @@ bool neural_blackbox_apply_optimizer(
     double current_loss
 ) {
     if (!system || !optimizer || !optimizer_type || !gradients) return false;
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_apply_optimizer",
                 "Application optimiseur %s (loss=%.12e)", optimizer_type, current_loss);
-    
+
     if (strcmp(optimizer_type, "adam_ultra_precise") == 0) {
         adam_ultra_precise_optimizer_t* adam = (adam_ultra_precise_optimizer_t*)optimizer;
         return adam_ultra_precise_update_weights(adam, system, gradients, current_loss);
-        
+
     } else if (strcmp(optimizer_type, "lbfgs") == 0) {
         lbfgs_optimizer_t* lbfgs = (lbfgs_optimizer_t*)optimizer;
         return lbfgs_update_weights(lbfgs, system, gradients, current_loss);
-        
+
     } else if (strcmp(optimizer_type, "newton_raphson") == 0) {
         newton_raphson_optimizer_t* newton = (newton_raphson_optimizer_t*)optimizer;
         return newton_raphson_update_weights(newton, system, gradients, current_loss);
     }
-    
+
     forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_apply_optimizer",
                 "Optimiseur inconnu: %s", optimizer_type);
     return false;
@@ -996,128 +1165,129 @@ bool neural_blackbox_multi_phase_training(
     neural_training_protocol_t* training
 ) {
     if (!system || !function_spec || !training) return false;
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training",
                 "Début entraînement 4 phases pour précision 100%");
-    
+
     // Phase 1: Adam ultra-précis (épochs 0-25%)
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training", "=== PHASE 1: Adam Ultra-Précis ===");
     adam_ultra_precise_optimizer_t* adam = adam_ultra_precise_create(0.001, 0.9, 0.999, 1e-16);
     if (!adam) return false;
-    
+
     size_t phase1_epochs = training->max_epochs / 4;
     for (size_t epoch = 0; epoch < phase1_epochs; epoch++) {
         double* gradients = neural_blackbox_compute_gradients(system, function_spec);
         double current_loss = neural_blackbox_compute_loss(system, function_spec);
-        
+
         if (!neural_blackbox_apply_optimizer(system, adam, "adam_ultra_precise", gradients, current_loss)) {
             TRACKED_FREE(gradients);
             adam_ultra_precise_destroy(&adam);
             return false;
         }
-        
+
         // Convergence check
         if (current_loss < training->precision_target / 100.0) {
             forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training",
                         "Phase 1 convergée à l'époch %zu (loss=%.15e)", epoch, current_loss);
             break;
         }
-        
+
         TRACKED_FREE(gradients);
     }
     adam_ultra_precise_destroy(&adam);
-    
+
     // Phase 2: L-BFGS (épochs 25-50%)
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training", "=== PHASE 2: L-BFGS ===");
     lbfgs_optimizer_t* lbfgs = lbfgs_create(10, 1e-16); // Mémoire 10, tolérance ultra-haute
     if (!lbfgs) return false;
-    
+
     size_t phase2_epochs = training->max_epochs / 4;
     for (size_t epoch = 0; epoch < phase2_epochs; epoch++) {
         double* gradients = neural_blackbox_compute_gradients(system, function_spec);
         double current_loss = neural_blackbox_compute_loss(system, function_spec);
-        
+
         if (!neural_blackbox_apply_optimizer(system, lbfgs, "lbfgs", gradients, current_loss)) {
             TRACKED_FREE(gradients);
             lbfgs_destroy(&lbfgs);
             return false;
         }
-        
+
         if (current_loss < training->precision_target / 1000.0) {
             forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training",
                         "Phase 2 convergée à l'époch %zu (loss=%.15e)", epoch, current_loss);
             break;
         }
-        
+
         TRACKED_FREE(gradients);
     }
     lbfgs_destroy(&lbfgs);
-    
+
     // Phase 3: Newton-Raphson (épochs 50-75%)
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training", "=== PHASE 3: Newton-Raphson ===");
     newton_raphson_optimizer_t* newton = newton_raphson_create(1e-17); // Tolérance ultime
     if (!newton) return false;
-    
+
     size_t phase3_epochs = training->max_epochs / 4;
     for (size_t epoch = 0; epoch < phase3_epochs; epoch++) {
         double* gradients = neural_blackbox_compute_gradients(system, function_spec);
         double current_loss = neural_blackbox_compute_loss(system, function_spec);
-        
+
         if (!neural_blackbox_apply_optimizer(system, newton, "newton_raphson", gradients, current_loss)) {
             TRACKED_FREE(gradients);
             newton_raphson_destroy(&newton);
             return false;
         }
-        
+
         if (current_loss < training->precision_target / 10000.0) {
             forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training",
                         "Phase 3 convergée à l'époch %zu (loss=%.15e)", epoch, current_loss);
             break;
         }
-        
+
         TRACKED_FREE(gradients);
     }
     newton_raphson_destroy(&newton);
-    
+
     // Phase 4: Raffinement final mixte (épochs 75-100%)
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training", "=== PHASE 4: Raffinement Final ===");
     adam = adam_ultra_precise_create(0.0001, 0.95, 0.9999, 1e-17); // Hyperparamètres ultra-fins
     if (!adam) return false;
-    
+
     size_t phase4_epochs = training->max_epochs / 4;
     for (size_t epoch = 0; epoch < phase4_epochs; epoch++) {
         double* gradients = neural_blackbox_compute_gradients(system, function_spec);
         double current_loss = neural_blackbox_compute_loss(system, function_spec);
-        
+
         // Alternance Adam/Newton selon convergence
         const char* optimizer_type = (current_loss > 1e-12) ? "adam_ultra_precise" : "newton_raphson";
         void* optimizer_ptr = (current_loss > 1e-12) ? (void*)adam : (void*)newton_raphson_create(1e-17);
-        
+
         if (!neural_blackbox_apply_optimizer(system, optimizer_ptr, optimizer_type, gradients, current_loss)) {
             TRACKED_FREE(gradients);
             adam_ultra_precise_destroy(&adam);
+            if (strcmp(optimizer_type, "newton_raphson") == 0) newton_raphson_destroy((newton_raphson_optimizer_t**)&optimizer_ptr);
             return false;
         }
-        
+
         // Objectif final atteint
         if (current_loss < training->precision_target) {
             forensic_log(FORENSIC_LEVEL_SUCCESS, "neural_blackbox_multi_phase_training",
-                        "SUCCÈS: Précision 100% atteinte à l'époch %zu (erreur=%.17e < %.17e)", 
+                        "SUCCÈS: Précision 100%% atteinte à l'époch %zu (erreur=%.17e < %.17e)", 
                         epoch, current_loss, training->precision_target);
             TRACKED_FREE(gradients);
             adam_ultra_precise_destroy(&adam);
             return true;
         }
-        
+
         TRACKED_FREE(gradients);
     }
-    
+
     adam_ultra_precise_destroy(&adam);
-    
+
     double final_loss = neural_blackbox_compute_loss(system, function_spec);
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training",
                 "Entraînement 4 phases terminé. Erreur finale: %.17e", final_loss);
-    
+
     return final_loss < training->precision_target;
 }
 
@@ -1128,42 +1298,42 @@ bool neural_blackbox_ultra_precise_training(
     neural_training_protocol_t* training
 ) {
     if (!system || !function_spec || !training) return false;
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_training",
                 "=== DÉBUT ENTRAÎNEMENT NEURAL BLACKBOX ULTRA-PRÉCIS ===");
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_training",
                 "Objectif: Erreur < %.17e (Précision 100%%)", training->precision_target);
-    
+
     // Vérification architecture adaptative
     if (!neural_ultra_precision_verify_architecture(system, function_spec)) {
         forensic_log(FORENSIC_LEVEL_ERROR, "neural_blackbox_ultra_precise_training",
                     "Architecture inadaptée pour précision ultra-haute");
         return false;
     }
-    
+
     // Initialisation poids selon précision requise
     neural_ultra_precision_initialize_weights(system, training->precision_target);
-    
+
     double initial_loss = neural_blackbox_compute_loss(system, function_spec);
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_training",
                 "Loss initial: %.12e", initial_loss);
-    
+
     // Entraînement multi-phases
     bool success = neural_blackbox_multi_phase_training(system, function_spec, training);
-    
+
     if (success) {
         double final_loss = neural_blackbox_compute_loss(system, function_spec);
         forensic_log(FORENSIC_LEVEL_SUCCESS, "neural_blackbox_ultra_precise_training",
                     "SUCCÈS: Précision 100%% atteinte! Erreur finale: %.17e", final_loss);
-        
+
         // Optimisation post-entraînement
         neural_blackbox_post_training_optimization(system);
-        
+
     } else {
         forensic_log(FORENSIC_LEVEL_WARNING, "neural_blackbox_ultra_precise_training",
                     "Précision cible non atteinte dans les limites d'épochs");
     }
-    
+
     return success;
 }
 
@@ -1173,44 +1343,44 @@ bool neural_blackbox_ultra_precise_validation(
     neural_function_spec_t* function_spec
 ) {
     if (!system || !function_spec) return false;
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_validation",
                 "=== VALIDATION CROISÉE ULTRA-PRÉCISE ===");
-    
+
     // Tests sur échantillons de validation
     double max_error = 0.0;
     double total_error = 0.0;
     size_t error_count = 0;
-    
+
     for (size_t i = 0; i < function_spec->validation_sample_count; i++) {
         double* input = function_spec->validation_inputs[i];
         double* expected = function_spec->validation_outputs[i];
-        
+
         double* actual = neural_blackbox_compute_precise(system, input, function_spec->input_size);
         if (!actual) continue;
-        
+
         // Calcul erreur point par point
         for (size_t j = 0; j < function_spec->output_size; j++) {
             double error = fabs(expected[j] - actual[j]);
             total_error += error;
             error_count++;
-            
+
             if (error > max_error) {
                 max_error = error;
             }
         }
-        
+
         TRACKED_FREE(actual);
     }
-    
+
     double mean_error = total_error / (double)error_count;
-    
+
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_validation",
                 "Erreur moyenne: %.17e | Erreur max: %.17e", mean_error, max_error);
-    
+
     // Critère de validation ultra-strict
     bool validation_success = (max_error < 1e-15) && (mean_error < 1e-16);
-    
+
     if (validation_success) {
         forensic_log(FORENSIC_LEVEL_SUCCESS, "neural_blackbox_ultra_precise_validation",
                     "✓ VALIDATION RÉUSSIE: Précision 100%% confirmée!");
@@ -1218,6 +1388,6 @@ bool neural_blackbox_ultra_precise_validation(
         forensic_log(FORENSIC_LEVEL_WARNING, "neural_blackbox_ultra_precise_validation",
                     "✗ Validation échouée: Précision insuffisante");
     }
-    
+
     return validation_success;
 }
