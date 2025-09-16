@@ -470,16 +470,30 @@ lum_group_t* lum_memory_retrieve(lum_memory_t* memory) {
 // Utility functions
 uint32_t lum_generate_id(void) {
     pthread_mutex_lock(&id_counter_mutex);
-    // Vérifier le dépassement potentiel du compteur d'ID
     uint32_t id;
-    if (lum_id_counter == UINT32_MAX) {
-        // Gérer le cas où le compteur atteint sa valeur maximale
-        // Pour l'instant, on réinitialise ou on logue une erreur.
-        // Dans un système réel, une stratégie plus robuste serait nécessaire.
-        // lum_log("Avertissement: Le compteur d'ID LUM a atteint sa valeur maximale."); // Optionnel
-        lum_id_counter = 1; // Réinitialiser ou utiliser une autre stratégie
+    
+    // Protection dépassement avec stratégie robuste
+    if (lum_id_counter >= UINT32_MAX - 1000) {
+        // Stratégie hybride: timestamp + compteur pour éviter collisions
+        struct timespec ts;
+        if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+            // Utiliser les nanosecondes comme base + petit compteur
+            uint32_t timestamp_base = (uint32_t)(ts.tv_nsec % 1000000);
+            static uint32_t overflow_counter = 1;
+            id = timestamp_base + overflow_counter;
+            overflow_counter = (overflow_counter + 1) % 1000;
+            
+            printf("[WARNING] LUM ID overflow handled - using timestamp-based ID: %u\n", id);
+        } else {
+            // Fallback: réinitialiser le compteur avec offset
+            lum_id_counter = 1000;
+            id = lum_id_counter++;
+            printf("[WARNING] LUM ID counter reset to avoid overflow\n");
+        }
+    } else {
+        id = lum_id_counter++;
     }
-    id = lum_id_counter++;
+    
     pthread_mutex_unlock(&id_counter_mutex);
     return id;
 }

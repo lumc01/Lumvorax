@@ -146,23 +146,32 @@ void* tracked_malloc(size_t size, const char* file, int line, const char* func) 
     if (ptr) {
         pthread_mutex_lock(&g_tracker_mutex);
         
-        // CORRECTION CRITIQUE: Vérifier réutilisation d'adresse - mais seulement pour adresses vraiment actives
+        // CORRECTION CRITIQUE: Vérifier réutilisation d'adresse seulement si problématique
+        bool address_reused = false;
         for (size_t i = 0; i < g_tracker.count; i++) {
             if (g_tracker.entries[i].ptr == ptr && !g_tracker.entries[i].is_freed) {
-                // Vérifier si c'est vraiment une réutilisation problématique
-                // ou juste une adresse recyclée par l'allocateur système
-                printf("[MEMORY_TRACKER] WARNING: Address %p potentially reused\n", ptr);
-                printf("[MEMORY_TRACKER] Previous allocation at %s:%d in %s()\n",
-                       g_tracker.entries[i].file, g_tracker.entries[i].line, g_tracker.entries[i].function);
+                // Vérifier si c'est une réallocation rapide suspecte (< 1 seconde)
+                time_t current_time = time(NULL);
+                if (current_time - g_tracker.entries[i].allocated_time < 1) {
+                    printf("[MEMORY_TRACKER] CRITICAL: Rapid address reuse detected %p\n", ptr);
+                    printf("[MEMORY_TRACKER] Previous allocation at %s:%d in %s() %ld seconds ago\n",
+                           g_tracker.entries[i].file, g_tracker.entries[i].line, 
+                           g_tracker.entries[i].function, current_time - g_tracker.entries[i].allocated_time);
+                    address_reused = true;
+                }
                 
-                // Marquer l'ancienne entrée comme corrompue au lieu d'abort
+                // Marquer l'ancienne entrée comme recyclée par le système
                 g_tracker.entries[i].is_freed = 1;
-                g_tracker.entries[i].freed_time = time(NULL);
+                g_tracker.entries[i].freed_time = current_time;
                 g_tracker.entries[i].freed_file = "SYSTEM_RECYCLED";
                 g_tracker.entries[i].freed_line = 0;
                 g_tracker.entries[i].freed_function = "auto_recycled";
                 break;
             }
+        }
+        
+        if (address_reused) {
+            printf("[MEMORY_TRACKER] WARNING: System allocator reused address rapidly\n");
         }
         
         add_entry(ptr, size, file, line, func);

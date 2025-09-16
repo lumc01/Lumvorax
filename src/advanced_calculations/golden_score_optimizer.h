@@ -7,11 +7,62 @@
 
 #define GOLDEN_RATIO 1.6180339887498948482045868343656
 #define GOLDEN_SCORE_MAGIC 0x60010950
+#define GOLDEN_RESULT_MAGIC 0x47520950
+#define GOLDEN_COMPARISON_MAGIC 0x47430950
 
 // Forward declarations
 typedef struct golden_score_optimizer_t golden_score_optimizer_t;
 
+// Classification performance selon score Golden
+typedef enum {
+    PERFORMANCE_BASELINE = 0,
+    PERFORMANCE_COMPETITIVE = 1,
+    PERFORMANCE_SUPERIOR = 2,
+    PERFORMANCE_EXCEPTIONAL = 3
+} performance_class_e;
+
+// Résultat optimisation Golden Score système
+typedef struct {
+    uint32_t magic_number;
+    void* memory_address;
+    
+    double initial_score;
+    double final_score;
+    double best_score;
+    double previous_score;
+    uint32_t best_iteration;
+    uint32_t convergence_iteration;
+    uint32_t iterations_completed;
+    uint64_t optimization_time_ns;
+    double improvement_percentage;
+    bool success;
+    bool converged;
+    performance_class_e performance_class;
+    golden_metrics_t optimal_metrics;
+} golden_optimization_result_t;
+
+// Comparaison performance vs standards industriels
+typedef struct {
+    uint32_t magic_number;
+    void* memory_address;
+    
+    double standard_ratios[5];
+    performance_class_e performance_vs_standards[5];
+    char detailed_analysis[5][256];
+    double market_position_ratio;
+    double golden_ratio_achievement;
+} golden_comparison_t;
+
 // Métriques pour calcul Golden Score
+typedef struct {
+    double performance_score;
+    double memory_efficiency;
+    double energy_consumption;
+    double scalability_factor;
+    double reliability_index;
+    uint64_t collection_time_ns;
+} golden_metrics_t;
+
 typedef struct {
     double performance_lums_per_second;
     double memory_efficiency_ratio;
@@ -67,9 +118,9 @@ struct golden_score_optimizer_t {
 
 // Fonctions principales
 golden_score_optimizer_t* golden_score_optimizer_create(void);
-void golden_score_optimizer_destroy(golden_score_optimizer_t* optimizer);
+void golden_score_optimizer_destroy(golden_score_optimizer_t** optimizer_ptr);
 bool golden_score_optimizer_init(golden_score_config_t* config);
-golden_score_result_t calculate_golden_score(system_metrics_t* metrics);
+double calculate_golden_score(const golden_metrics_t* metrics, double target_ratio);
 bool auto_tune_system_to_golden_ratio(golden_score_config_t* config);
 
 // Comparaisons vs standards industriels
@@ -103,5 +154,14 @@ golden_score_performance_metrics_t golden_score_get_performance_metrics(void);
 // Validation mathématique ratio doré
 bool validate_golden_ratio_properties(double score);
 double apply_golden_ratio_transformation(double input_value);
+
+// Fonctions optimisation système
+golden_optimization_result_t* golden_score_optimize_system(golden_score_optimizer_t* optimizer);
+golden_comparison_t* golden_score_compare_industrial_standards(const golden_optimization_result_t* result);
+bool golden_score_stress_test(golden_score_optimizer_t* optimizer);
+
+// Fonctions destruction sécurisée
+void golden_optimization_result_destroy(golden_optimization_result_t** result_ptr);
+void golden_comparison_destroy(golden_comparison_t** comparison_ptr);
 
 #endif // GOLDEN_SCORE_OPTIMIZER_H
