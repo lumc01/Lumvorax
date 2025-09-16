@@ -12,10 +12,14 @@ typedef struct {
     size_t precision_layers;          // Couches supplémentaires pour précision
     size_t neurons_per_precision_digit; // Neurones par digit de précision
     double memory_scaling_factor;     // Facteur échelle mémoire
-    // Champs ajoutés pour compatibilité avec les tests
+    // Champs ajoutés pour compatibilité complète avec tests
     double precision_target;          // Cible de précision (ex: 1e-15)
     size_t input_dimensions;          // Dimensions d'entrée
     size_t output_dimensions;         // Dimensions de sortie
+    double computation_scaling_factor; // Facteur échelle computation
+    bool enable_adaptive_precision;   // Précision adaptative
+    bool enable_error_correction;     // Correction d'erreur
+    uint32_t magic_number;           // Protection double-free
 } neural_ultra_precision_config_t;
 
 // EXPLICATION TECHNIQUE :
@@ -48,12 +52,28 @@ double activation_ultra_precise_tanh(double x);
 double activation_ultra_precise_sigmoid(double x);  
 double activation_ultra_precise_piecewise(double x);
 
+// Constantes associées
+#define NEURAL_ULTRA_PRECISION_MAGIC 0xFEEDFACE
+#define MAX_PRECISION_DIGITS 50
+#define DEFAULT_PRECISION_LAYERS 10
+#define DEFAULT_NEURONS_PER_DIGIT 100
+
 // Configuration architecture adaptative ultra-précise
 neural_ultra_precision_config_t* neural_create_ultra_precision_config(
     size_t precision_digits
 );
 
+neural_ultra_precision_config_t* neural_ultra_precision_config_create(
+    size_t precision_digits, 
+    size_t input_dims, 
+    size_t output_dims
+);
+
 void neural_destroy_ultra_precision_config(neural_ultra_precision_config_t** config);
+
+void neural_ultra_precision_config_destroy(neural_ultra_precision_config_t* config);
+
+bool neural_ultra_precision_config_validate(const neural_ultra_precision_config_t* config);
 
 // Validation architecture ultra-précise
 bool neural_validate_ultra_precision_architecture(

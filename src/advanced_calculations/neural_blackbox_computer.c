@@ -801,7 +801,7 @@ bool neural_blackbox_multi_phase_training(
     if (!system || !function_spec || !training) return false;
 
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training",
-                "Début entraînement 4 phases pour précision 100%");
+                "Debut entrainement 4 phases pour precision 100 pourcent");
 
     // Phase 1: Adam ultra-précis (épochs 0-25%)
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_multi_phase_training", "=== PHASE 1: Adam Ultra-Précis ===");
@@ -1273,5 +1273,27 @@ neural_architecture_config_t* convert_precision_to_architecture_config(
     arch_config->enable_metaplasticity = true; // Meta-adaptation OK
     
     return arch_config;
+}
+
+// Fonction alternative utilisant neural_ultra_precision_config_t directement
+neural_blackbox_computer_t* neural_blackbox_create_ultra_precision_system(
+    size_t input_dimensions,
+    size_t output_dimensions,
+    const neural_ultra_precision_config_t* precision_config
+) {
+    if (!precision_config) return NULL;
+    
+    // Conversion vers architecture config standard
+    neural_architecture_config_t* arch_config = convert_precision_to_architecture_config(precision_config);
+    if (!arch_config) return NULL;
+    
+    // Création système neural blackbox
+    neural_blackbox_computer_t* system = neural_blackbox_create(
+        input_dimensions, output_dimensions, arch_config);
+    
+    // Nettoyage config temporaire
+    TRACKED_FREE(arch_config);
+    
+    return system;
 }
 
