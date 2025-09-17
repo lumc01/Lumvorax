@@ -5,6 +5,11 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 
 
 #define RECOVERY_MANAGER_MAGIC 0x52454356  // "RECV"
@@ -14,6 +19,7 @@ static recovery_manager_extension_t* global_recovery_manager = NULL;
 
 // Handler pour signaux de crash
 void crash_signal_handler(int sig) {
+    (void)sig; // Supprime warning unused parameter
     if (global_recovery_manager) {
         recovery_manager_extension_mark_clean_shutdown(global_recovery_manager);
     }
