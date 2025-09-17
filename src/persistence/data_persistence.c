@@ -14,9 +14,6 @@
 #include <fcntl.h>
 #include <stdarg.h>
 
-// Forward declaration of forensic_log function
-void forensic_log(int level, const char* function, const char* format, ...);
-
 static uint64_t next_transaction_id = 1;
 
 // Context management
@@ -636,6 +633,7 @@ bool persistence_verify_file_integrity(persistence_context_t* ctx, const char* f
 bool wal_extension_replay_from_existing_persistence(persistence_context_t* ctx, const char* wal_filepath) {
     // Implementation would go here.
     // For now, just a placeholder to satisfy the linker.
+    (void)ctx; // Suppress unused parameter warning
     forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_replay_from_existing_persistence", "Called with %s", wal_filepath);
     return true; // Placeholder return
 }
@@ -644,6 +642,7 @@ bool wal_extension_replay_from_existing_persistence(persistence_context_t* ctx, 
 bool wal_extension_create_checkpoint_with_existing(persistence_context_t* ctx, const char* checkpoint_filepath) {
     // Implementation would go here.
     // For now, just a placeholder to satisfy the linker.
+    (void)ctx; // Suppress unused parameter warning
     forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_create_checkpoint_with_existing", "Called with %s", checkpoint_filepath);
     return true; // Placeholder return
 }
@@ -657,12 +656,3 @@ bool recovery_manager_verify_file_integrity(persistence_context_t* ctx, const ch
     return persistence_verify_file_integrity(ctx, filepath);
 }
 
-// Implementation of forensic_log if not available from header
-void forensic_log(int level, const char* function, const char* format, ...) {
-    va_list args;
-    va_start(args, format);
-    fprintf(stderr, "[FORENSIC] [%d] %s: ", level, function);
-    vfprintf(stderr, format, args);
-    fprintf(stderr, "\n");
-    va_end(args);
-}
