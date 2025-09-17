@@ -36,6 +36,17 @@ lum_logger_t* lum_logger_create(const char* log_filename, bool console_output, b
     logger->conservation_check = true;
     logger->level = LUM_LOG_INFO;       // Initialisation niveau par défaut
     logger->enabled = true;             // Initialisation activé par défaut
+    
+    // Initialisation module et session
+    strncpy(logger->module_name, "system", sizeof(logger->module_name) - 1);
+    logger->module_name[sizeof(logger->module_name) - 1] = '\0';
+    
+    // Génération ID session automatique
+    time_t now = time(NULL);
+    struct tm* tm_info = localtime(&now);
+    snprintf(logger->session_id, sizeof(logger->session_id), "%04d%02d%02d_%02d%02d%02d",
+             tm_info->tm_year + 1900, tm_info->tm_mon + 1, tm_info->tm_mday,
+             tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
 
     if (log_filename) {
         strncpy(logger->log_filename, log_filename, sizeof(logger->log_filename) - 1);

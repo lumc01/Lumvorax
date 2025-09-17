@@ -8,6 +8,7 @@
 #include "parser/vorax_parser.h"
 #include "binary/binary_lum_converter.h"
 #include "logger/lum_logger.h"
+#include "logger/log_manager.h"
 
 // Demo functions
 void demo_basic_lum_operations(void);
@@ -20,7 +21,17 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
     printf("=== LUM/VORAX System Demo ===\n");
     printf("Implementation complete du concept LUM/VORAX en C\n\n");
     
-    // Initialize logging
+    // Initialize automatic log management system
+    log_manager_t* log_manager = log_manager_create();
+    if (!log_manager) {
+        printf("Erreur: Impossible de créer le gestionnaire de logs\n");
+        return 1;
+    }
+    
+    LOG_MODULE("system", "INFO", "LUM/VORAX System Demo Started");
+    LOG_MODULE("system", "INFO", "Log Manager Session: %s", log_manager->session_id);
+    
+    // Initialize main logger
     lum_logger_t* logger = lum_logger_create("logs/lum_vorax.log", true, true);
     if (!logger) {
         printf("Erreur: Impossible de créer le logger\n");
@@ -59,10 +70,14 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
 }
 
 void demo_basic_lum_operations(void) {
+    LOG_LUM_CORE("INFO", "Starting basic LUM operations demo");
+    
     // Créer des LUMs individuelles
     lum_t* lum1 = lum_create(1, 0, 0, LUM_STRUCTURE_LINEAR);
     lum_t* lum2 = lum_create(1, 1, 0, LUM_STRUCTURE_LINEAR);
     lum_t* lum3 = lum_create(0, 2, 0, LUM_STRUCTURE_LINEAR);
+    
+    LOG_LUM_CORE("INFO", "Created 3 LUMs: lum1=%p, lum2=%p, lum3=%p", lum1, lum2, lum3);
     
     if (lum1 && lum2 && lum3) {
         printf("  ✓ Création de 3 LUMs: ");

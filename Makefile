@@ -10,6 +10,7 @@ CORE_OBJECTS = \
 	obj/parser/vorax_parser.o \
 	obj/binary/binary_lum_converter.o \
 	obj/logger/lum_logger.o \
+	obj/logger/log_manager.o \
 	obj/optimization/memory_optimizer.o \
 	obj/optimization/pareto_optimizer.o \
 	obj/optimization/simd_optimizer.o \

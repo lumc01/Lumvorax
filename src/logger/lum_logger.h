@@ -70,8 +70,10 @@ typedef struct {
     uint32_t sequence_counter;
     bool trace_all_lums;
     bool conservation_check;
-    lum_log_level_e level;              // Ajout pour compatibilité avec .c
-    bool enabled;                       // Ajout pour compatibilité avec .c
+    lum_log_level_e level;              // Niveau de log
+    bool enabled;                       // État activé/désactivé
+    char module_name[64];               // Nom du module
+    char session_id[32];                // ID de session
 } lum_logger_t;
 
 // Logger initialization and cleanup
