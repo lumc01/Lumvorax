@@ -1,4 +1,3 @@
-
 #ifndef TRANSACTION_WAL_EXTENSION_H
 #define TRANSACTION_WAL_EXTENSION_H
 
@@ -50,20 +49,13 @@ wal_extension_result_t* wal_extension_commit_transaction(wal_extension_context_t
 wal_extension_result_t* wal_extension_rollback_transaction(wal_extension_context_t* ctx, uint64_t transaction_id);
 
 wal_extension_result_t* wal_extension_log_lum_operation(wal_extension_context_t* ctx, 
-                                                       uint64_t transaction_id,
-                                                       const lum_t* lum);
+                                                       vorax_operation_e operation, 
+                                                       uint32_t lum_count);
 
-// Recovery Extension (utilise les fonctions persistence existantes)
-bool wal_extension_replay_from_existing_persistence(wal_extension_context_t* ctx, 
-                                                   persistence_context_t* existing_ctx);
-bool wal_extension_create_checkpoint_with_existing(wal_extension_context_t* ctx, 
-                                                   persistence_context_t* existing_ctx);
-bool wal_extension_verify_integrity_complete(wal_extension_context_t* ctx);
-
-void wal_extension_result_destroy(wal_extension_result_t* result);
-
-// Utilitaires CRC32 pour intégrité
-uint32_t wal_extension_calculate_crc32(const void* data, size_t length);
-bool wal_extension_verify_crc32(const void* data, size_t length, uint32_t expected_crc);
+// Fonctions support recovery manager
+bool wal_extension_replay_from_existing_persistence(wal_extension_context_t* wal_ctx, 
+                                                   void* persistence_ctx);
+bool wal_extension_create_checkpoint_with_existing(wal_extension_context_t* wal_ctx,
+                                                   void* persistence_ctx);
 
 #endif // TRANSACTION_WAL_EXTENSION_H

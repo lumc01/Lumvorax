@@ -1,6 +1,3 @@
-#define _GNU_SOURCE
-#define _POSIX_C_SOURCE 199309L
-
 #include "recovery_manager_extension.h"
 #include "../debug/memory_tracker.h"
 #include <signal.h>
