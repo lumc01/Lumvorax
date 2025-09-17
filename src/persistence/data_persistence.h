@@ -9,6 +9,9 @@
 #define MAX_STORAGE_PATH_LENGTH 512
 #define STORAGE_FORMAT_VERSION 1
 #define STORAGE_MAGIC_NUMBER 0x4C554D58 // "LUMX"
+#define PERSISTENCE_CONTEXT_MAGIC 0xDEADBEEF
+#define LUM_MAGIC_NUMBER 0x4C554D00
+#define LUM_GROUP_MAGIC 0x47525000
 
 // Storage format types
 typedef enum {
@@ -30,6 +33,7 @@ typedef struct {
 
 // Persistence context
 typedef struct {
+    uint32_t magic_number;
     char storage_directory[MAX_STORAGE_PATH_LENGTH];
     storage_format_e default_format;
     bool auto_backup_enabled;
@@ -179,13 +183,18 @@ void storage_result_set_error(storage_result_t* result, const char* error_messag
 void storage_result_set_success(storage_result_t* result, const char* filename,
                                size_t bytes_processed, uint32_t checksum);
 
+// Forward declaration
+typedef struct storage_backend_s storage_backend_t;
+
 // Simple storage backend for testing
-typedef struct {
+struct storage_backend_s {
     uint32_t magic_number;          // Membre ajouté pour validation
-    storage_backend_t* backend;
+    char database_path[MAX_STORAGE_PATH_LENGTH];
+    persistence_context_t* ctx;
+    bool is_initialized;
     char current_file[256];
     bool transaction_active;
-} storage_backend_t;
+};
 
 typedef struct {
     uint8_t* data;

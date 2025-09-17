@@ -20,6 +20,7 @@ persistence_context_t* persistence_context_create(const char* storage_directory)
     persistence_context_t* ctx = TRACKED_MALLOC(sizeof(persistence_context_t));
     if (!ctx) return NULL;
 
+    ctx->magic_number = PERSISTENCE_CONTEXT_MAGIC;
     strncpy(ctx->storage_directory, storage_directory, MAX_STORAGE_PATH_LENGTH - 1);
     ctx->storage_directory[MAX_STORAGE_PATH_LENGTH - 1] = '\0';
 
@@ -110,8 +111,11 @@ storage_backend_t* storage_backend_create(const char* database_path) {
     storage_backend_t* backend = TRACKED_MALLOC(sizeof(storage_backend_t));
     if (!backend) return NULL;
 
+    backend->magic_number = STORAGE_MAGIC_NUMBER;
     strncpy(backend->database_path, database_path, MAX_STORAGE_PATH_LENGTH - 1);
     backend->database_path[MAX_STORAGE_PATH_LENGTH - 1] = '\0';
+    backend->current_file[0] = '\0';
+    backend->transaction_active = false;
 
     backend->ctx = persistence_context_create(database_path);
     backend->is_initialized = (backend->ctx != NULL);
