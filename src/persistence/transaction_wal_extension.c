@@ -98,20 +98,20 @@ bool wal_extension_replay_from_existing_persistence(wal_extension_context_t* wal
 
             if (txn->magic_number != TRANSACTION_WAL_MAGIC) {
                 forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_replay_from_existing_persistence",
-                            "Transaction corrompue detectee, index: %zu", i);
+                            "Transaction corrompue detectee");
                 return false;
             }
 
             // Vérifier CRC32 de l'en-tête WAL étendu
             if (!wal_extension_verify_crc32(&txn->base_record, sizeof(transaction_record_t), txn->data_integrity_crc32)) {
                 forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_replay_from_existing_persistence",
-                            "Echec verification CRC32 pour transaction %zu", i);
+                            "Echec verification CRC32 pour transaction");
                 return false;
             }
              // Vérifier CRC32 de l'enregistrement de base seulement
             if (!wal_extension_verify_crc32(&txn->base_record, sizeof(transaction_record_t), txn->data_integrity_crc32)) {
                 forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_replay_from_existing_persistence",
-                            "Echec verification CRC32 pour transaction %zu", i);
+                            "Echec verification CRC32 pour transaction");
                 return false;
             }
 
@@ -219,7 +219,7 @@ void wal_extension_context_destroy(wal_extension_context_t* ctx) {
         persistence_context_destroy(ctx->base_context);
         ctx->base_context = NULL;
     }
-    
+
     // Libérer la mémoire allouée pour les transactions si elle est utilisée
     if (ctx->transactions) {
         TRACKED_FREE(ctx->transactions);
@@ -486,7 +486,7 @@ bool wal_extension_verify_integrity_complete(wal_extension_context_t* ctx) {
             integrity_errors++;
             continue; 
         }
-        
+
         // Vérifier magic number de la transaction
         if (wal_record.magic_number != TRANSACTION_WAL_MAGIC) {
              forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_verify_integrity_complete",
@@ -532,7 +532,7 @@ bool wal_extension_verify_integrity_complete(wal_extension_context_t* ctx) {
             }
         }
     }
-    
+
     // Vérifier si la fin du fichier a été atteinte normalement
     if (!feof(ctx->wal_extension_file)) {
         forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_verify_integrity_complete",

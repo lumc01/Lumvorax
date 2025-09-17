@@ -15,6 +15,8 @@ typedef struct {
     uint32_t data_integrity_crc32;    // Extension: CRC32 données
     uint32_t header_integrity_crc32;  // Extension: CRC32 header
     uint8_t reserved_expansion[16];   // Extension: padding futur
+    uint32_t magic_number;            // Magic number pour validation
+    size_t lum_count;                 // Nombre de LUMs dans la transaction
 } transaction_wal_extended_t;
 
 // EXTENSION du contexte persistance existant
@@ -28,6 +30,10 @@ typedef struct {
     pthread_mutex_t wal_extension_mutex;
     bool recovery_mode_active;
     uint32_t magic_number;
+    transaction_wal_extended_t* transactions;
+    size_t transaction_count;
+    size_t checkpoint_count;
+    size_t last_checkpoint_transaction;
 } wal_extension_context_t;
 
 // EXTENSION des résultats existants
@@ -49,8 +55,8 @@ wal_extension_result_t* wal_extension_commit_transaction(wal_extension_context_t
 wal_extension_result_t* wal_extension_rollback_transaction(wal_extension_context_t* ctx, uint64_t transaction_id);
 
 wal_extension_result_t* wal_extension_log_lum_operation(wal_extension_context_t* ctx, 
-                                                       vorax_operation_e operation, 
-                                                       uint32_t lum_count);
+                                                       uint64_t transaction_id,
+                                                       const lum_t* lum);
 
 // Fonctions support recovery manager
 bool wal_extension_replay_from_existing_persistence(wal_extension_context_t* wal_ctx, 
