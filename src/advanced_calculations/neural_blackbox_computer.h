@@ -5,6 +5,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
+// Forward declarations pour éviter inclusion circulaire
+typedef struct adam_ultra_precise_optimizer_t adam_ultra_precise_optimizer_t;
+typedef struct lbfgs_optimizer_t lbfgs_optimizer_t;
+typedef struct newton_raphson_optimizer_t newton_raphson_optimizer_t;
+
 // Définition complète de neural_layer_t
 typedef struct neural_layer_t {
     size_t neuron_count;        // Nombre de neurones

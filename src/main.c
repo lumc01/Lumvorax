@@ -19,6 +19,10 @@ void demo_parser(void);
 void demo_complete_scenario(void);
 void test_persistence_integration(void); // Added declaration for persistence test
 
+// Timestamp nanoseconde authentique
+// Fonction définie dans lum_core.c - déclaration externe
+extern uint64_t get_current_timestamp_ns(void);
+
 int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused))) {
     printf("=== LUM/VORAX System Demo ===\n");
     printf("Implementation complete du concept LUM/VORAX en C\n\n");
