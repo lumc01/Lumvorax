@@ -22,7 +22,7 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
     lum->is_destroyed = 0;  // CORRECTION: Initialiser le flag protection double-free
     lum->timestamp = lum_get_timestamp();
     lum->memory_address = (void*)lum;  // Adresse mémoire pour traçabilité
-    
+
     // Calcul checksum pour intégrité
     lum->checksum = (uint32_t)(lum->id ^ lum->presence ^ lum->position_x ^ 
                               lum->position_y ^ lum->structure_type ^ 
@@ -52,7 +52,7 @@ void lum_safe_destroy(lum_t** lum_ptr) {
     if (!lum_ptr || !*lum_ptr) return;
 
     lum_t* lum = *lum_ptr;
-    
+
     // PROTECTION DOUBLE FREE: Vérifier si déjà détruit
     static const uint32_t DESTROYED_MAGIC = 0xDEADBEEF;
     if (lum->id == DESTROYED_MAGIC) {
@@ -67,7 +67,7 @@ void lum_safe_destroy(lum_t** lum_ptr) {
         // Ne pas la libérer directement si elle fait partie d'un groupe
         printf("[WARNING] LUM %u ownership check: memory_address=%p, lum=%p\n", 
                lum->id, lum->memory_address, lum);
-        
+
         // Marquer comme détruit mais ne pas libérer la mémoire
         lum->id = DESTROYED_MAGIC;
         lum->is_destroyed = 1;
@@ -78,7 +78,7 @@ void lum_safe_destroy(lum_t** lum_ptr) {
     // Destruction normale avec marquage sécurisé
     lum->id = DESTROYED_MAGIC;
     lum->is_destroyed = 1;
-    
+
     TRACKED_FREE(*lum_ptr);
     *lum_ptr = NULL;
 }
@@ -127,7 +127,7 @@ void lum_group_destroy(lum_group_t* group) {
         printf("[DEBUG] lum_group_destroy: group already destroyed\n");
         return; // Déjà détruit
     }
-    
+
     // Validate magic number - if corrupted, don't trust other fields
     if (group->magic_number != LUM_VALIDATION_PATTERN) {
         printf("[ERROR] lum_group_destroy: invalid magic number 0x%X, treating as corruption\n", 
@@ -135,27 +135,27 @@ void lum_group_destroy(lum_group_t* group) {
         group->magic_number = LUM_MAGIC_DESTROYED; // Mark as destroyed
         return; // Don't trust corrupted structure
     }
-    
+
     // Mark as destroyed FIRST before accessing other fields
     group->magic_number = LUM_MAGIC_DESTROYED;
 
     // VALIDATION CRITIQUE: Vérifier intégrité complète du groupe
     bool is_corrupted = false;
-    
+
     // Vérifier intégrité de base du groupe
     if (group->count > group->capacity) {
         printf("[ERROR] lum_group_destroy: corrupted group count=%zu > capacity=%zu\n", 
                group->count, group->capacity);
         is_corrupted = true;
     }
-    
+
     // Vérifier limites raisonnables (plus de 100M elements est suspect)
     if (group->count > 100000000) {
         printf("[ERROR] lum_group_destroy: suspicious large count=%zu (corruption detected)\n", 
                group->count);
         is_corrupted = true;
     }
-    
+
     // Vérifier limites raisonnables pour capacity
     if (group->capacity > 100000000) {
         printf("[ERROR] lum_group_destroy: suspicious large capacity=%zu (corruption detected)\n", 
@@ -222,12 +222,12 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
     if (group->magic_number == LUM_MAGIC_DESTROYED) {
         return false;
     }
-    
+
     // Validate magic number before using group
     if (group->magic_number != LUM_VALIDATION_PATTERN) {
         return false; // Corrupted group
     }
-    
+
     // Safety check: ensure count doesn't exceed capacity
     if (group->count >= group->capacity) {
         if (group->capacity > 100000000) { // Corruption check
@@ -261,11 +261,11 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
 
     // CORRECTION CRITIQUE: Copie des valeurs SEULEMENT, pas des pointeurs de gestion mémoire
     group->lums[group->count] = *lum;
-    
+
     // IMPORTANT: Réinitialiser les métadonnées de gestion mémoire pour cette copie
     group->lums[group->count].memory_address = &group->lums[group->count];
     group->lums[group->count].is_destroyed = 0;
-    
+
     group->count++;
 
     return true;
@@ -278,7 +278,7 @@ lum_t* lum_group_get(lum_group_t* group, size_t index) {
     if (group->magic_number == LUM_MAGIC_DESTROYED) {
         return NULL;
     }
-    
+
     // Validate magic number
     if (group->magic_number != LUM_VALIDATION_PATTERN) {
         return NULL; // Corrupted group
@@ -293,7 +293,7 @@ size_t lum_group_size(lum_group_t* group) {
     if (group->magic_number == LUM_MAGIC_DESTROYED) {
         return 0;
     }
-    
+
     // Validate magic number
     if (group->magic_number != LUM_VALIDATION_PATTERN) {
         return 0; // Corrupted group
@@ -476,7 +476,7 @@ lum_group_t* lum_memory_retrieve(lum_memory_t* memory) {
 uint32_t lum_generate_id(void) {
     pthread_mutex_lock(&id_counter_mutex);
     uint32_t id;
-    
+
     // Protection dépassement avec stratégie robuste
     if (lum_id_counter >= UINT32_MAX - 1000) {
         // Stratégie hybride: timestamp + compteur pour éviter collisions
@@ -487,7 +487,7 @@ uint32_t lum_generate_id(void) {
             static uint32_t overflow_counter = 1;
             id = timestamp_base + overflow_counter;
             overflow_counter = (overflow_counter + 1) % 1000;
-            
+
             printf("[WARNING] LUM ID overflow handled - using timestamp-based ID: %u\n", id);
         } else {
             // Fallback: réinitialiser le compteur avec offset
@@ -498,7 +498,7 @@ uint32_t lum_generate_id(void) {
     } else {
         id = lum_id_counter++;
     }
-    
+
     pthread_mutex_unlock(&id_counter_mutex);
     return id;
 }
@@ -543,7 +543,7 @@ void lum_group_print(const lum_group_t* group) {
             printf("Group (destroyed): previously destroyed\n");
             return;
         }
-        
+
         // Validate magic number
         if (group->magic_number != LUM_VALIDATION_PATTERN) {
             printf("Group (corrupted): invalid magic number 0x%X\n", group->magic_number);

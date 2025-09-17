@@ -30,22 +30,8 @@ typedef struct {
 } neural_architecture_config_t;
 #endif
 
-// Configuration architecture ultra-précise
-typedef struct neural_ultra_precision_config_t {
-    size_t precision_target_digits;    // Nombre de digits précision requis (ex: 15)
-    size_t base_depth;                // Profondeur de base du réseau
-    size_t precision_layers;          // Couches supplémentaires pour précision
-    size_t neurons_per_precision_digit; // Neurones par digit de précision
-    double memory_scaling_factor;     // Facteur échelle mémoire
-    // Champs ajoutés pour compatibilité complète avec tests
-    double precision_target;          // Cible de précision (ex: 1e-15)
-    size_t input_dimensions;          // Dimensions d'entrée
-    size_t output_dimensions;         // Dimensions de sortie
-    double computation_scaling_factor; // Facteur échelle computation
-    bool enable_adaptive_precision;   // Précision adaptative
-    bool enable_error_correction;     // Correction d'erreur
-    uint32_t magic_number;           // Protection double-free
-} neural_ultra_precision_config_t;
+// Forward declaration - type défini dans neural_blackbox_computer.h
+typedef struct neural_ultra_precision_config_t neural_ultra_precision_config_t;
 
 // EXPLICATION TECHNIQUE :
 // Cette structure définit comment adapter l'architecture neuronale selon

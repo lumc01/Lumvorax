@@ -953,10 +953,11 @@ bool neural_blackbox_ultra_precise_training(
     // Initialisation poids selon précision requise
     neural_ultra_precision_initialize_weights(system, training->precision_target);
 
-    double initial_loss = neural_blackbox_compute_loss(system, function_spec);
-    (void)initial_loss; // Suppress unused variable warning
+    double current_loss = neural_blackbox_compute_loss(system, function_spec);
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_training",
-                "Loss initial: %.12e", initial_loss);
+                "Perte initiale: %.17e", current_loss);
+    forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_training",
+                "Entraînement multi-phases...");
 
     // Entraînement multi-phases
     bool success = neural_blackbox_multi_phase_training(system, function_spec, training);

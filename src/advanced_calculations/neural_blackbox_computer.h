@@ -2,9 +2,11 @@
 #ifndef NEURAL_BLACKBOX_COMPUTER_H
 #define NEURAL_BLACKBOX_COMPUTER_H
 
-#include "neural_network_processor.h"
 #include <stdint.h>
 #include <stdbool.h>
+
+// Forward declarations pour éviter inclusion circulaire
+typedef struct neural_layer_t neural_layer_t;
 
 // === MODULE NEURAL BLACKBOX COMPUTER 100% NATIF ===
 // Concept révolutionnaire : Utilisation authentique des réseaux neuronaux
@@ -21,12 +23,12 @@ typedef enum {
 } neural_complexity_target_e;
 #endif
 
-// Règles de plasticité neuronale
+// Forward declaration - utilise le type défini dans neural_network_processor.h
 typedef enum {
-    PLASTICITY_HEBBIAN = 0,         // Apprentissage Hebbien
-    PLASTICITY_ANTI_HEBBIAN = 1,    // Anti-Hebbien
-    PLASTICITY_STDP = 2,            // Spike-Timing Dependent Plasticity
-    PLASTICITY_HOMEOSTATIC = 3      // Plasticité homéostatique
+    PLASTICITY_HEBBIAN = 0,
+    PLASTICITY_ANTI_HEBBIAN = 1,
+    PLASTICITY_STDP = 2,
+    PLASTICITY_HOMEOSTATIC = 3
 } neural_plasticity_rules_e;
 
 // Domaine d'entrée pour génération d'échantillons
@@ -284,9 +286,23 @@ bool neural_blackbox_apply_optimizer(
 #define NEURAL_DEFAULT_LEARNING_RATE 0.001
 #define NEURAL_MIN_CONVERGENCE_THRESHOLD 1e-8
 
+// Configuration ultra-précise (définie ici pour éviter inclusion circulaire)
+typedef struct {
+    size_t precision_target_digits;    // Nombre de digits précision requis
+    size_t base_depth;                // Profondeur de base du réseau
+    size_t precision_layers;          // Couches supplémentaires pour précision
+    size_t neurons_per_precision_digit; // Neurones par digit de précision
+    double memory_scaling_factor;     // Facteur échelle mémoire
+    double precision_target;          // Cible de précision (ex: 1e-15)
+    size_t input_dimensions;          // Dimensions d'entrée
+    size_t output_dimensions;         // Dimensions de sortie
+    double computation_scaling_factor; // Facteur échelle computation
+    bool enable_adaptive_precision;   // Précision adaptative
+    bool enable_error_correction;     // Correction d'erreur
+    uint32_t magic_number;           // Protection double-free
+} neural_ultra_precision_config_t;
+
 // Fonctions de conversion entre types de configuration
-// (Forward declarations pour éviter inclusion circulaire)
-// Note: neural_ultra_precision_config_t is defined in neural_ultra_precision_architecture.h
 neural_architecture_config_t* convert_precision_to_architecture_config(
     const neural_ultra_precision_config_t* precision_config
 );
