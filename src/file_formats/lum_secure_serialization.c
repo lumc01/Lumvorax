@@ -5,31 +5,28 @@
 #include <arpa/inet.h> // Pour htonl/ntohl (endianness)
 #include <time.h> // Pour clock_gettime
 
-// Définitions pour la sérialisation sécurisée (à placer dans un header dédié idéalement)
-#define LUM_SECURE_MAGIC 0x53454355 // 'SECU'
-#define LUM_SECURE_VERSION 1
-#define LUM_SECURE_HEADER_SIZE 64 // Taille fixe pour l'en-tête sécurisé
-
-typedef struct __attribute__((packed)) {
-    uint32_t magic_number;          // 4 bytes - Magic number pour identification
-    uint16_t version;               // 2 bytes - Version du format sécurisé
-    uint32_t lum_count;             // 4 bytes - Nombre de LUMs dans le groupe
-    uint32_t data_size;             // 4 bytes - Taille des données LUMs (sans l'en-tête)
-    bool is_encrypted;              // 1 byte  - Indicateur de chiffrement
-    uint32_t checksum_crc32;        // 4 bytes - Checksum CRC32 des données LUMs
-    uint64_t timestamp;             // 8 bytes - Timestamp pour le chiffrement et l'identification
-    void* memory_address;           // 8 bytes (ou 4) - Adresse de l'en-tête lui-même
-    uint8_t reserved[32];           // 32 bytes - Padding pour atteindre 64 bytes
-} lum_secure_header_t;
-
+// Types métadonnées pour sérialisation (définis dans le header)
 typedef struct {
-    uint8_t* serialized_data;       // Buffer contenant les données sérialisées/chiffrées
-    size_t data_size;               // Taille totale du buffer sérialisé
-    uint32_t checksum;              // Checksum calculé
-    bool success;                   // Indicateur de succès de l'opération
-    char error_message[128];        // Message d'erreur éventuel
-    void* memory_address;           // Adresse de la structure de résultat
-} lum_secure_result_t;
+    uint32_t magic_number;
+    uint16_t version_major;
+    uint16_t version_minor;
+    uint32_t format_type;
+    uint64_t creation_timestamp;
+    uint64_t modification_timestamp;
+    uint32_t total_lums;
+    uint32_t total_groups;
+    uint64_t total_size_bytes;
+    uint32_t checksum_crc32;
+    char creator_info[64];
+    char file_description[128];
+    void* memory_address;
+} lum_file_metadata_t;
+
+// Constantes manquantes
+#define LUM_FILE_MAGIC_NUMBER 0x4C554D46
+#define LUM_FILE_VERSION_MAJOR 1
+#define LUM_FILE_VERSION_MINOR 0
+#define LUM_FORMAT_NATIVE_BINARY 1
 
 
 // ================== SÉRIALISATION SÉCURISÉE LUM ==================

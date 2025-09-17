@@ -239,6 +239,13 @@
 2025-01-18 19:15 - prompt_txt_creation + Fichier prompt.txt avec règles anti-récurrence strictes
 2025-01-18 19:15 - compilation_warnings_zero_tolerance + Politique zéro warning appliquée
 2025-01-18 19:15 - dependency_hierarchy_enforcement + Hiérarchie d'inclusion strictement appliquée
+2025-01-18 22:00 - lum_file_metadata_t + Structure métadonnées fichier LUM native complète
+2025-01-18 22:00 - LUM_FILE_MAGIC_NUMBER + Magic number fichier natif LUM (0x4C554D46)
+2025-01-18 22:00 - LUM_FILE_VERSION_MAJOR + Version majeure format fichier LUM
+2025-01-18 22:00 - LUM_FILE_VERSION_MINOR + Version mineure format fichier LUM
+2025-01-18 22:00 - LUM_FORMAT_NATIVE_BINARY + Type format binaire natif LUM
+2025-01-18 22:00 - typedef_unique_definition_rule + Règle typedef unique par header
+2025-01-18 22:00 - no_redefinition_c_and_h + Interdiction redéfinition .c/.h simultanée
 
 ## RÈGLES ANTI-RÉCURRENCE APPLIQUÉES
 

@@ -1,4 +1,3 @@
-
 # PROMPT SYSTÈME LUM/VORAX - RÈGLES ABSOLUES v2.1
 ## MISE À JOUR CRITIQUE 2025-01-18 - CORRECTION MODULES BLOQUÉS
 
@@ -15,7 +14,15 @@
 - Secure Serialization : Erreurs compilation → Module fonctionnel
 - Instant Displacement : Headers-only → Validation complète
 
-### SECTION 3: RÈGLES ANTI-RÉCURRENCE ABSOLUES
+### SECTION 3: RÈGLES ANTI-RÉCURRENCE APPLIQUÉES
+
+### 2025-01-18 22:00 - NOUVELLES RÈGLES TYPEDEF ET INCLUDES
+- **RÈGLE TYPEDEF UNIQUE** : Un typedef ne peut être défini que dans UN SEUL fichier (.h)
+- **INTERDICTION REDÉFINITION** : Jamais de typedef identique dans .c ET .h
+- **TYPES MANQUANTS** : Toujours déclarer dans header approprié AVANT usage
+- **INCLUDES METADATA** : Ajouter types métadonnées si utilisés dans .c
+
+### 2025-01-18 19:15 - CORRECTIONS SYSTÉMIQUES FINALES
 
 #### 3.1 INTERDICTIONS STRICTES
 **JAMAIS** :
@@ -46,7 +53,7 @@
 
 ### SECTION 4: CONVENTIONS NOMMAGE UNIFIÉES
 **TYPES** : `nom_t` (ex: neural_blackbox_computer_t)
-**ENUMS** : `nom_e` (ex: neural_complexity_target_e)  
+**ENUMS** : `nom_e` (ex: neural_complexity_target_e)
 **FONCTIONS** : `module_action()` (ex: neural_blackbox_create())
 **CONSTANTES** : `MODULE_CONSTANT` (ex: NEURAL_BLACKBOX_MAGIC)
 **VARIABLES** : `snake_case` (ex: current_loss)
@@ -68,7 +75,7 @@
 ### SECTION 6: TESTS OBLIGATOIRES MINIMUM
 **AVANT VALIDATION** :
 1. Compilation clean (0 erreur, 0 warning)
-2. Test 1M LUMs réussi
+2. Test 1M+ LUMs réussi
 3. Test stress 100M préparé
 4. Validation mémoire sans fuite
 5. Tests unitaires 100% pass
@@ -103,7 +110,7 @@
 ### SECTION 8: PERFORMANCE TARGETS AUTHENTIQUES
 **MINIMUMS REQUIS** :
 - Throughput : 10M+ LUMs/seconde
-- Mémoire : <100MB pour 1M LUMs  
+- Mémoire : <100MB pour 1M LUMs
 - Latence : <100ms création 1M LUMs
 - Precision : Erreur <1e-15 calculs critiques
 - Scalabilité : Support 100M+ éléments
@@ -142,7 +149,7 @@
 **NOMMAGE RAPPORTS** : `0XX_RAPPORT_[SUJET]_DETAILLE_YYYYMMDD_HHMMSS.md`
 **CONTENU OBLIGATOIRE** :
 - Inspection ligne par ligne
-- Comparaisons standards industriels  
+- Comparaisons standards industriels
 - Métriques authentiques vérifiables
 - Auto-critique et amélioration
 - Conformité STANDARD_NAMES.md
