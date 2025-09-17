@@ -7,8 +7,8 @@
 
 // Architecture neuronale selon précision requise
 neural_architecture_config_t* neural_calculate_ultra_precision_architecture(
-    size_t input_dim, 
-    size_t output_dim, 
+    size_t input_dim __attribute__((unused)), 
+    size_t output_dim __attribute__((unused)), 
     size_t precision_digits
 ) {
     if (precision_digits == 0 || precision_digits > MAX_PRECISION_DIGITS) {

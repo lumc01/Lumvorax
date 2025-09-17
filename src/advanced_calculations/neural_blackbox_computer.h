@@ -9,6 +9,15 @@
 // Forward declarations pour éviter inclusion circulaire
 typedef struct neural_layer_t neural_layer_t;
 
+// Types d'activation neuronale (définition déplacée avant les forward declarations)
+typedef enum {
+    ACTIVATION_TANH = 0,
+    ACTIVATION_SIGMOID = 1,
+    ACTIVATION_RELU = 2,
+    ACTIVATION_GELU = 3,
+    ACTIVATION_SWISH = 4
+} activation_function_e;
+
 // Forward declarations des fonctions neural_layer
 neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_function_e activation);
 void neural_layer_destroy(neural_layer_t** layer_ptr);
@@ -38,14 +47,7 @@ typedef enum {
     PLASTICITY_HOMEOSTATIC = 3      // Plasticité homéostatique
 } neural_plasticity_rules_e;
 
-// Types d'activation neuronale
-typedef enum {
-    ACTIVATION_TANH = 0,
-    ACTIVATION_SIGMOID = 1,
-    ACTIVATION_RELU = 2,
-    ACTIVATION_GELU = 3,
-    ACTIVATION_SWISH = 4
-} activation_function_e;
+// Types d'activation neuronale (suppression duplication)
 
 // Domaine d'entrée pour génération d'échantillons
 typedef struct {

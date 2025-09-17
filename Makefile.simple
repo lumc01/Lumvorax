@@ -1,0 +1,45 @@
+CC = clang
+CFLAGS = -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug
+LDFLAGS = -lpthread -lm -lrt
+
+# Core object files
+CORE_OBJECTS = \
+	obj/main.o \
+	obj/lum/lum_core.o \
+	obj/vorax/vorax_operations.o \
+	obj/parser/vorax_parser.o \
+	obj/binary/binary_lum_converter.o \
+	obj/logger/lum_logger.o \
+	obj/optimization/memory_optimizer.o \
+	obj/optimization/pareto_optimizer.o \
+	obj/optimization/simd_optimizer.o \
+	obj/parallel/parallel_processor.o \
+	obj/metrics/performance_metrics.o \
+	obj/crypto/crypto_validator.o \
+	obj/persistence/data_persistence.o \
+	obj/debug/memory_tracker.o \
+	obj/debug/forensic_logger.o
+
+TARGET = bin/lum_vorax
+
+all: $(TARGET)
+
+# Create directories
+obj bin:
+	mkdir -p obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug bin
+
+$(TARGET): $(CORE_OBJECTS) | bin
+	$(CC) $^ -o $@ $(LDFLAGS)
+
+# Generic object file rule
+obj/%.o: src/%.c | obj
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Special rule for parallel processor (needs pthread)
+obj/parallel/parallel_processor.o: src/parallel/parallel_processor.c | obj
+	$(CC) $(CFLAGS) -pthread -c $< -o $@
+
+clean:
+	rm -rf obj bin
+
+.PHONY: all clean

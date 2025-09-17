@@ -70,21 +70,21 @@ double activation_ultra_precise_piecewise(double x);
 #define DEFAULT_NEURONS_PER_DIGIT 100
 
 // Configuration architecture adaptative ultra-précise
-neural_ultra_precision_config_t* neural_create_ultra_precision_config(
+struct neural_ultra_precision_config_t* neural_create_ultra_precision_config(
     size_t precision_digits
 );
 
-neural_ultra_precision_config_t* neural_ultra_precision_config_create(
+struct neural_ultra_precision_config_t* neural_ultra_precision_config_create(
     size_t precision_digits, 
     size_t input_dims, 
     size_t output_dims
 );
 
-void neural_destroy_ultra_precision_config(neural_ultra_precision_config_t** config);
+void neural_destroy_ultra_precision_config(struct neural_ultra_precision_config_t** config);
 
-void neural_ultra_precision_config_destroy(neural_ultra_precision_config_t* config);
+void neural_ultra_precision_config_destroy(struct neural_ultra_precision_config_t* config);
 
-bool neural_ultra_precision_config_validate(const neural_ultra_precision_config_t* config);
+bool neural_ultra_precision_config_validate(const struct neural_ultra_precision_config_t* config);
 
 // Validation architecture ultra-précise
 bool neural_validate_ultra_precision_architecture(

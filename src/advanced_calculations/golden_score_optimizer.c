@@ -5,7 +5,9 @@
  * Ratio doré φ = 1.618 comme référence optimale
  */
 
+#ifndef _GNU_SOURCE
 #define _GNU_SOURCE
+#endif
 #include "golden_score_optimizer.h"
 #include "../debug/memory_tracker.h"
 #include <string.h>
@@ -16,8 +18,7 @@
 #define M_PI 3.14159265358979323846
 #endif
 
-// Constante ratio doré φ = 1.618...
-#define GOLDEN_RATIO 1.6180339887498948482045868343656
+// Constante définie dans header
 
 // Timing nanoseconde précis obligatoire prompt.txt
 static uint64_t get_monotonic_nanoseconds(void) {
@@ -41,11 +42,7 @@ golden_score_optimizer_t* golden_score_optimizer_create(void) {
     optimizer->is_destroyed = 0;
     
     // Initialisation métriques système
-    optimizer->system_metrics.performance_score = 0.0;
-    optimizer->system_metrics.memory_efficiency = 0.0;
-    optimizer->system_metrics.energy_consumption = 0.0;
-    optimizer->system_metrics.scalability_factor = 0.0;
-    optimizer->system_metrics.reliability_index = 0.0;
+    memset(&optimizer->system_metrics, 0, sizeof(golden_metrics_t));
     
     // Configuration par défaut
     optimizer->target_golden_ratio = GOLDEN_RATIO;

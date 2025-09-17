@@ -1226,6 +1226,7 @@ double* neural_blackbox_compute_gradients(
 
     const double h = 1e-8; // Step ultra-petit pour différences finies
     double current_loss = neural_blackbox_compute_loss(system, function_spec);
+    (void)current_loss; // Éviter warning unused variable
 
     size_t param_idx = 0;
 

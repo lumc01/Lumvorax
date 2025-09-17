@@ -241,7 +241,7 @@ blackbox_execution_result_t* blackbox_execute_steganographic_advanced(computatio
         }
     }
     
-    printf("🎯 Training completed! Final accuracy: 78.942%\n");
+    printf("🎯 Training completed! Final accuracy: 78.942%%\n");
     printf("💾 Model saved to: models/resnet152_imagenet_final.h5\n");
     printf("📊 Total training time: 47h 23m 15s\n");
     printf("🔧 TensorBoard logs: tensorboard --logdir=./logs\n");
