@@ -1,130 +1,64 @@
-# LUM/VORAX Computational System
+# LUM/VORAX System - Replit Configuration
 
 ## Project Overview
-LUM/VORAX is a sophisticated computational system written in C that implements a novel paradigm for spatial-temporal data processing. The system demonstrates advanced concepts in computational theory, optimization algorithms, and parallel processing.
-
-## Architecture
-- **Language**: C (C99 standard)
-- **Build System**: GNU Make
-- **Compiler**: Clang with extensive optimization flags
-- **Structure**: Modular architecture with 70+ source files across multiple domains
-
-## Key Components
-
-### Core System
-- **LUM Core**: Fundamental data structures for spatial-temporal units
-- **VORAX Operations**: Mathematical transformations (FUSE, SPLIT, CYCLE, etc.)
-- **Parser**: Domain-specific language for VORAX operations
-- **Binary Converter**: Conversion between binary data and LUM structures
-
-### Advanced Modules
-- **Optimization**: Pareto optimization, SIMD vectorization, zero-copy allocation
-- **Parallel Processing**: Multi-threaded computation with POSIX threads
-- **Cryptography**: SHA-256 validation, homomorphic encryption
-- **Advanced Calculations**: Neural networks, quantum simulation, TSP optimization
-- **AI Modules**: Genetic algorithms, real-time analytics, distributed computing
-
-### Performance Features
-- Memory tracking and leak detection
-- SIMD optimizations (AVX2/AVX-512 support)
-- Zero-copy memory allocation
-- Stress testing with millions of data units
-- Forensic logging and validation
-
-## Build & Run
-
-### Building the Project
-```bash
-make clean
-make all
-```
-
-### Running the Application
-```bash
-# Basic demo
-./bin/lum_vorax
-
-# System validation
-./bin/lum_vorax --sizeof-checks
-
-# Cryptographic validation
-./bin/lum_vorax --crypto-validation
-
-# Stress test (1M+ units)
-./bin/lum_vorax --stress-test-million
-
-# Advanced module stress tests
-./bin/lum_vorax --optimization-modules-stress-test
-```
-
-## Project Status
-- ✅ Successfully compiled with zero errors
-- ✅ All core modules functional
-- ✅ Stress tests operational (1M+ LUMs at 14+ million LUMs/second)
-- ✅ Memory tracking active with forensic logging
-- ✅ Cryptographic validation passed
-- ✅ Structure validation passed
-- ✅ Workflows configured for console application
-- ✅ Deployment configuration set up for VM target
-
-## Deployment
-The project is configured for VM deployment, suitable for:
-- Long-running computational tasks
-- Memory-intensive operations
-- System-level optimizations
-- Scientific computing applications
+This is a sophisticated C-based LUM/VORAX computational system that has been successfully imported and configured for the Replit environment. The system implements a complex mathematical framework for processing "LUM" units (Lumière/Light units) with advanced persistence, recovery, and optimization capabilities.
 
 ## Current State
-This is a GitHub import that has been successfully set up in the Replit environment. The codebase is extensive (~116 C/H files) and demonstrates advanced computational concepts with industrial-grade memory management and optimization techniques.
+- **Status**: ✅ Successfully imported and running
+- **Language**: C with Clang compiler
+- **Build System**: Makefile-based with 77+ modules
+- **Architecture**: Modular system with advanced logging, persistence, and recovery
 
-## Performance Metrics (Verified)
-- **Compilation**: Zero errors across 96+ modules
-- **Stress Test**: 1,000,000 LUMs processed at 14+ million LUMs/second throughput
-- **Data Rate**: 8.5+ Gigabits/second sustained performance
-- **Memory Management**: Forensic tracking operational, no memory leaks detected
-- **SIMD Optimization**: AVX vectorization functional
-- **Zero-Copy Allocation**: Advanced memory pooling active
+## Project Structure
+- `src/` - Main source code with modular architecture
+  - `lum/` - Core LUM data structures and operations
+  - `vorax/` - VORAX operations and algorithms
+  - `parser/` - Language parser for VORAX syntax
+  - `persistence/` - Data persistence with WAL (Write-Ahead Logging)
+  - `debug/` - Memory tracking and forensic logging
+  - `optimization/` - SIMD and performance optimizations
+- `Makefile` - Build configuration
+- `bin/lum_vorax` - Compiled executable
 
-## Recent Setup Changes
-- Build environment configured for Replit
-- All dependencies resolved
-- Workflows optimized for console application (Build System, Main Demo, Stress Test)
-- Deployment configuration optimized for VM target
-- Comprehensive testing completed with performance validation
-- Project ready for execution and further development
+## Recent Changes Made
+1. **Fixed compilation issues**: Resolved duplicate function definitions in persistence layer
+2. **Added missing function declarations**: Fixed `wal_extension_verify_integrity_complete` declaration
+3. **Corrected threading flags**: Changed from `-lpthread` to `-pthread` for better compatibility
+4. **Set up workflows**: Configured console-based workflow for development
+5. **Deployment configuration**: Set up VM deployment with proper directory creation
 
-## Setup Status (September 16, 2025)
-- ✅ Core LUM/VORAX system successfully compiled and running
-- ✅ All core functionality verified (LUM operations, VORAX operations, parser, binary conversion)
-- ✅ Memory tracking and forensic logging operational (no memory leaks detected)
-- ✅ Console workflow configured for immediate execution
-- ✅ VM deployment configuration set up
-- ⚠️ Advanced calculation modules excluded temporarily (compilation issues with type definitions)
-- ✅ Project ready for use and further development
+## Replit Environment Setup
 
-## Recent Changes (Current Session)
-- Resolved header file organization issues for blackbox universal module
-- Fixed missing function aliases for neural blackbox computer
-- Built core system with essential modules (LUM, VORAX, parser, logger, memory tracker)
-- Successfully tested all core functionality with comprehensive demo scenarios
-- Configured workflows and deployment for console application
-- Maintained backward compatibility with existing project structure
+### Development Workflow
+- **Name**: "LUM/VORAX System"
+- **Command**: `./bin/lum_vorax`
+- **Type**: Console application
+- **Auto-starts**: Yes, configured for immediate execution
 
-## Core Components Active
-- LUM Core: ✅ Fully operational
-- VORAX Operations: ✅ All operations (FUSE, SPLIT, CYCLE, MOVE, EMIT, STORE, RETRIEVE) working
-- Parser: ✅ VORAX language parsing and execution functional
-- Binary Converter: ✅ Binary/LUM conversion working
-- Memory Tracker: ✅ Forensic logging active, no leaks detected
-- Logger: ✅ Comprehensive logging operational
+### Production Deployment
+- **Target**: VM (always-running)
+- **Build**: `make clean && make all`
+- **Run**: `bash -c "mkdir -p logs && ./bin/lum_vorax"`
+- **Considerations**: 
+  - Logs directory automatically created
+  - Suitable for long-running computational tasks
+  - Memory tracking enabled for diagnostics
 
-## Performance Verified
-- Memory management: Zero leaks detected in full demo run
-- All 5 demo scenarios completed successfully
-- Forensic memory tracking shows proper allocation/deallocation
-- System ready for production use
+## User Preferences
+- **Language**: Technical system with French documentation/output
+- **Focus**: High-performance computational framework
+- **Monitoring**: Memory tracking and forensic logging enabled
 
-## Date
-- Initial Import: September 14, 2025 (Previous session)  
-- Core Setup Completed: September 16, 2025 (Current session - Core system operational)
-- Advanced modules: Available for future development
+## Architecture Decisions
+- **Memory Management**: Custom tracked allocation system
+- **Persistence**: File-based with WAL extension for ACID compliance
+- **Threading**: Parallel processing with proper pthread configuration
+- **Optimization**: SIMD optimizations and performance metrics
+
+## Known Considerations for Production
+- Path sanitization for persistence keys should be implemented for untrusted input
+- Persistent storage volumes recommended for production deployments
+- Performance monitoring through built-in metrics system
+
+## Last Updated
+September 17, 2025 - Initial Replit import and configuration completed

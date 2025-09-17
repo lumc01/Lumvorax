@@ -1,6 +1,6 @@
 CC = clang
 CFLAGS = -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug
-LDFLAGS = -lpthread -lm -lrt
+LDFLAGS = -pthread -lm -lrt
 
 # Core object files
 CORE_OBJECTS = \

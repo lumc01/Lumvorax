@@ -1920,5 +1920,5 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "vm"
-run = ["./bin/lum_vorax"]
-build = ["make", "-f", "Makefile.simple", "clean", "&&", "make", "-f", "Makefile.simple", "all"]
+run = ["bash", "-c", "mkdir -p logs && ./bin/lum_vorax"]
+build = ["make", "clean", "&&", "make", "all"]
