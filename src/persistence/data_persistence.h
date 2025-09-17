@@ -181,9 +181,10 @@ void storage_result_set_success(storage_result_t* result, const char* filename,
 
 // Simple storage backend for testing
 typedef struct {
-    char database_path[MAX_STORAGE_PATH_LENGTH];
-    persistence_context_t* ctx;
-    bool is_initialized;
+    uint32_t magic_number;          // Membre ajouté pour validation
+    storage_backend_t* backend;
+    char current_file[256];
+    bool transaction_active;
 } storage_backend_t;
 
 typedef struct {

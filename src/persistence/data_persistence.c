@@ -1,5 +1,7 @@
 #include "data_persistence.h"
-#include "../debug/memory_tracker.h"
+#include "storage_backend.h"
+#include "../lum/lum_core.h"
+#include "../debug/forensic_logger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -649,6 +651,7 @@ bool recovery_manager_verify_file_integrity(persistence_context_t* ctx, const ch
 #ifndef FORENSIC_LOG_IMPLEMENTED
 #define FORENSIC_LOG_IMPLEMENTED
 #include <stdio.h>
+#include <stdarg.h> // Required for va_list, va_start, va_end
 void forensic_log(int level, const char* function, const char* format, ...) {
     // Mock implementation: print to stderr
     va_list args;
