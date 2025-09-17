@@ -77,7 +77,7 @@ void neural_layer_destroy(neural_layer_t** layer_ptr) {
         if (layer->biases) TRACKED_FREE(layer->biases);
         if (layer->outputs) TRACKED_FREE(layer->outputs);
         if (layer->layer_error) TRACKED_FREE(layer->layer_error);
-        
+
         layer->magic_number = 0xDEADDEAD;
         TRACKED_FREE(layer);
         *layer_ptr = NULL;
@@ -106,12 +106,12 @@ bool neural_layer_forward_pass(neural_layer_t* layer, double* input) {
 
     for (size_t n = 0; n < layer->neuron_count; n++) {
         double sum = layer->biases[n];
-        
+
         // Calcul produit scalaire poids * entrées
         for (size_t i = 0; i < layer->input_size; i++) {
             sum += layer->weights[n * layer->input_size + i] * input[i];
         }
-        
+
         // Application fonction d'activation
         layer->outputs[n] = neural_activation_function(sum, layer->activation_type);
     }
@@ -916,6 +916,7 @@ bool neural_blackbox_multi_phase_training(
     for (size_t epoch = 0; epoch < phase1_epochs; epoch++) {
         double* gradients = neural_blackbox_compute_gradients(system, function_spec);
         double current_loss = neural_blackbox_compute_loss(system, function_spec);
+    (void)current_loss; // Suppression warning unused
 
     forensic_log(FORENSIC_LEVEL_DEBUG, "neural_blackbox_multi_phase_training",
                 "Loss initial calculé: %.12e", current_loss);
