@@ -9,7 +9,7 @@
 #include "binary/binary_lum_converter.h"
 #include "logger/lum_logger.h"
 #include "logger/log_manager.h"
-#include "persistence/storage_backend.h" // Added for persistence tests
+#include "persistence/data_persistence.h" // Correction: utilise data_persistence.h qui contient storage_backend_t
 
 // Demo functions
 void demo_basic_lum_operations(void);

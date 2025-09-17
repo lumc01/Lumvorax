@@ -18,6 +18,8 @@ CORE_OBJECTS = \
 	obj/metrics/performance_metrics.o \
 	obj/crypto/crypto_validator.o \
 	obj/persistence/data_persistence.o \
+	obj/persistence/transaction_wal_extension.o \
+	obj/persistence/recovery_manager_extension.o \
 	obj/debug/memory_tracker.o \
 	obj/debug/forensic_logger.o
 
@@ -27,7 +29,7 @@ all: $(TARGET)
 
 # Create directories
 obj bin:
-	mkdir -p obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug bin
+	mkdir -p obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug obj/spatial obj/complex_modules obj/advanced_calculations obj/file_formats bin
 
 $(TARGET): $(CORE_OBJECTS) | bin
 	$(CC) $^ -o $@ $(LDFLAGS)
