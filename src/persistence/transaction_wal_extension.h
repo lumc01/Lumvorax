@@ -63,5 +63,6 @@ bool wal_extension_replay_from_existing_persistence(wal_extension_context_t* wal
                                                    void* persistence_ctx);
 bool wal_extension_create_checkpoint_with_existing(wal_extension_context_t* wal_ctx,
                                                    void* persistence_ctx);
+bool wal_extension_verify_integrity_complete(wal_extension_context_t* ctx);
 
 #endif // TRANSACTION_WAL_EXTENSION_H

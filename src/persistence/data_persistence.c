@@ -626,26 +626,8 @@ bool persistence_verify_file_integrity(persistence_context_t* ctx, const char* f
     return true;
 }
 
-// Placeholder for recovery functions that are called by recovery_manager_extension.c
-// These functions are not defined in the provided original code but are assumed to exist based on the user's request.
-
-// Function to replay WAL from existing persistence
-bool wal_extension_replay_from_existing_persistence(persistence_context_t* ctx, const char* wal_filepath) {
-    // Implementation would go here.
-    // For now, just a placeholder to satisfy the linker.
-    (void)ctx; // Suppress unused parameter warning
-    forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_replay_from_existing_persistence", "Called with %s", wal_filepath);
-    return true; // Placeholder return
-}
-
-// Function to create a checkpoint with existing persistence
-bool wal_extension_create_checkpoint_with_existing(persistence_context_t* ctx, const char* checkpoint_filepath) {
-    // Implementation would go here.
-    // For now, just a placeholder to satisfy the linker.
-    (void)ctx; // Suppress unused parameter warning
-    forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_create_checkpoint_with_existing", "Called with %s", checkpoint_filepath);
-    return true; // Placeholder return
-}
+// Note: wal_extension_replay_from_existing_persistence and wal_extension_create_checkpoint_with_existing
+// are now implemented in transaction_wal_extension.c
 
 // Function to verify file integrity for recovery manager
 bool recovery_manager_verify_file_integrity(persistence_context_t* ctx, const char* filepath) {

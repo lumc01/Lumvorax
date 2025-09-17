@@ -368,6 +368,10 @@ args = "Build System"
 task = "workflow.run"
 args = "Stress Test"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "LUM/VORAX System"
+
 [[workflows.workflow]]
 name = "VALIDATION_FORENSIQUE_COMPLETE"
 author = 47457509
@@ -1898,6 +1902,17 @@ args = "echo \"=== CORRECTIONS VALIDÉES ET APPLIQUÉES ===\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"Fin validation: $(date -u)\""
+
+[[workflows.workflow]]
+name = "LUM/VORAX System"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
