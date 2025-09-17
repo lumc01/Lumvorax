@@ -104,7 +104,7 @@ void demo_vorax_operations(void) {
         lum_t* lum = lum_create(1, i, 0, LUM_STRUCTURE_LINEAR);
         if (lum) {
             lum_group_add(group1, lum);
-            free(lum);
+            lum_destroy(lum);
         }
     }
     
@@ -112,7 +112,7 @@ void demo_vorax_operations(void) {
         lum_t* lum = lum_create(1, i, 1, LUM_STRUCTURE_LINEAR);
         if (lum) {
             lum_group_add(group2, lum);
-            free(lum);
+            lum_destroy(lum);
         }
     }
     
