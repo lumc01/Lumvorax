@@ -1,5 +1,6 @@
 #include "transaction_wal_extension.h"
 #include "../debug/memory_tracker.h"
+#include "../debug/forensic_logger.h"
 #include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -16,7 +17,6 @@
 #define WAL_EXTENSION_MAGIC 0x57455854  // "WEXT"
 #define TRANSACTION_WAL_MAGIC 0x54584E57  // "TXNW"
 
-
 // Table CRC32 standard IEEE 802.3
 static const uint32_t crc32_table[256] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -27,41 +27,9 @@ static const uint32_t crc32_table[256] = {
     0xfc02f02c, 0x8b05c0ba, 0x1f6f1345, 0x686823d3, 0xf1613269, 0x866602ff,
     0x1809575c, 0x6f0c67ca, 0xf6053670, 0x810206e6, 0x1e67595f, 0x696069c9,
     0xf0693873, 0x876e08e5, 0x1011f474, 0x6716c4e2, 0xfe1f9558, 0x8918a5ce,
-    0x1773f42d, 0x6074c4bb, 0xf97dd501, 0x8e7ae597, 0x10000000, 0x67073096,
-    0xfe0e612c, 0x890951ba, 0x176dc419, 0x606af48f, 0xe963a535, 0x9e6495a3,
-    0x1edb8832, 0x69dcb8a4, 0xe0d5e91e, 0x97d2d988, 0x076dc419, 0x706af48f,
-    0xe963a535, 0x9e6495a3, 0x0edb8832, 0x79dcb8a4, 0xe0d5e91e, 0x97d2d988,
-    0x09b64c2b, 0x7eb17cbd, 0xe7b82d07, 0x90bf1d91, 0x1db71064, 0x6ab020f2,
-    0xf3b93148, 0x84be01de, 0x1adad47d, 0x6ddde4eb, 0xf4d4b551, 0x83d385c7,
-    0x136c9856, 0x646ba8c0, 0xfd62f97a, 0x8a65c9ec, 0x140c9c6f, 0x630ba,
-    0xfc02f02c, 0x8b05c0ba, 0x1f6f1345, 0x686823d3, 0xf1613269, 0x866602ff,
-    0x1809575c, 0x6f0c67ca, 0xf6053670, 0x810206e6, 0x1e67595f, 0x696069c9,
-    0xf0693873, 0x876e08e5, 0x1011f474, 0x6716c4e2, 0xfe1f9558, 0x8918a5ce,
     0x1773f42d, 0x6074c4bb, 0xf97dd501, 0x8e7ae597, 0xb40bbe37, 0xc30c8ea1,
     0x5a05df1b, 0x2d02ef8d
 };
-
-// Placeholder pour les fonctions de persistence et de logging
-typedef struct {
-    bool success;
-    void* transaction_ref;
-} storage_result_t;
-
-typedef enum {
-    FORENSIC_LEVEL_DEBUG,
-    FORENSIC_LEVEL_INFO,
-    FORENSIC_LEVEL_WARN,
-    FORENSIC_LEVEL_ERROR
-} forensic_level_t;
-
-void forensic_log(forensic_level_t level, const char* func, const char* message) {
-    // Implémentation simplifiée pour l'exemple
-    printf("[%s] %s: %s\n", func, level == FORENSIC_LEVEL_ERROR ? "ERROR" : (level == FORENSIC_LEVEL_INFO ? "INFO" : "DEBUG"), message);
-}
-
-void* persistence_context_create(const char* name) { return TRACKED_MALLOC(1); } // Placeholder
-void persistence_context_destroy(void* ctx) { TRACKED_FREE(ctx); } // Placeholder
-// Fin placeholders
 
 uint32_t wal_extension_calculate_crc32(const void* data, size_t length) {
     const uint8_t* bytes = (const uint8_t*)data;
@@ -115,9 +83,10 @@ bool wal_extension_replay_from_existing_persistence(wal_extension_context_t* wal
                 return false;
             }
 
-            forensic_log(FORENSIC_LEVEL_DEBUG, "wal_extension_replay_from_existing_persistence",
-                        "Replay transaction %zu: operation=%u, lum_count=%zu", 
-                        i, txn->base_record.operation_type, txn->lum_count);
+            char msg[256];
+            snprintf(msg, sizeof(msg), "Replay transaction %zu: operation=%u, lum_count=%zu", 
+                    i, txn->base_record.operation_type, txn->lum_count);
+            forensic_log(FORENSIC_LEVEL_DEBUG, "wal_extension_replay_from_existing_persistence", msg);
         }
     } else {
         // Si pas de transactions stockées en mémoire, on ne peut rien vérifier.
@@ -126,8 +95,9 @@ bool wal_extension_replay_from_existing_persistence(wal_extension_context_t* wal
                     "Aucune transaction WAL trouvee en memoire pour verification.");
     }
 
-    forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_replay_from_existing_persistence",
-                "Replay WAL termine (simulation): %zu transactions", wal_ctx->transaction_count);
+    char msg[256];
+    snprintf(msg, sizeof(msg), "Replay WAL termine (simulation): %zu transactions", wal_ctx->transaction_count);
+    forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_replay_from_existing_persistence", msg);
     return true;
 }
 
@@ -146,9 +116,10 @@ bool wal_extension_create_checkpoint_with_existing(wal_extension_context_t* wal_
     wal_ctx->last_checkpoint_transaction = wal_ctx->transaction_count; // Simule la dernière transaction traitée
     wal_ctx->checkpoint_count++;
 
-    forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_create_checkpoint_with_existing",
-                "Checkpoint cree: transaction=%zu, total_checkpoints=%u", 
-                wal_ctx->last_checkpoint_transaction, wal_ctx->checkpoint_count);
+    char msg[256];
+    snprintf(msg, sizeof(msg), "Checkpoint cree: transaction=%zu, total_checkpoints=%u", 
+            wal_ctx->last_checkpoint_transaction, wal_ctx->checkpoint_count);
+    forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_create_checkpoint_with_existing", msg);
 
     return true;
 }
