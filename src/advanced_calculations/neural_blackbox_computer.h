@@ -24,8 +24,22 @@ typedef enum {
 } neural_complexity_target_e;
 #endif
 
-// Forward declaration - utilise le type défini dans neural_network_processor.h
-typedef enum neural_plasticity_rules_e neural_plasticity_rules_e;
+// Définition complète des règles de plasticité neuronale
+typedef enum {
+    PLASTICITY_HEBBIAN = 0,         // Règle de Hebb classique
+    PLASTICITY_ANTI_HEBBIAN = 1,    // Anti-Hebb pour stabilité
+    PLASTICITY_STDP = 2,            // Spike-timing dependent plasticity
+    PLASTICITY_HOMEOSTATIC = 3      // Plasticité homéostatique
+} neural_plasticity_rules_e;
+
+// Types d'activation neuronale
+typedef enum {
+    ACTIVATION_TANH = 0,
+    ACTIVATION_SIGMOID = 1,
+    ACTIVATION_RELU = 2,
+    ACTIVATION_GELU = 3,
+    ACTIVATION_SWISH = 4
+} activation_function_e;
 
 // Domaine d'entrée pour génération d'échantillons
 typedef struct {

@@ -13,9 +13,111 @@
 #define FORENSIC_LEVEL_INFO 1
 #define FORENSIC_LEVEL_WARNING 2
 #define FORENSIC_LEVEL_SUCCESS 3
+#define FORENSIC_LEVEL_DEBUG 4
 #define forensic_log(level, func, fmt, ...) printf("[%s] " fmt "\n", func, ##__VA_ARGS__)
 
-// Magic numbers for validation (removed duplicate - defined in header)
+// Structure neural_layer_t complète
+typedef struct neural_layer_t {
+    size_t neuron_count;
+    size_t input_size;
+    size_t output_size;
+    double* weights;
+    double* biases;
+    double* outputs;
+    double* layer_error;
+    activation_function_e activation_type;
+    uint32_t layer_id;
+    uint32_t magic_number;
+} neural_layer_t;
+
+// === IMPLÉMENTATIONS NEURAL_LAYER MANQUANTES ===
+
+neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_function_e activation) {
+    neural_layer_t* layer = TRACKED_MALLOC(sizeof(neural_layer_t));
+    if (!layer) return NULL;
+
+    layer->neuron_count = neuron_count;
+    layer->input_size = input_size;
+    layer->output_size = neuron_count;
+    layer->activation_type = activation;
+    layer->layer_id = 0;
+    layer->magic_number = 0xABCDEF01;
+
+    // Allocation poids
+    layer->weights = TRACKED_MALLOC(neuron_count * input_size * sizeof(double));
+    layer->biases = TRACKED_MALLOC(neuron_count * sizeof(double));
+    layer->outputs = TRACKED_MALLOC(neuron_count * sizeof(double));
+    layer->layer_error = TRACKED_MALLOC(neuron_count * sizeof(double));
+
+    if (!layer->weights || !layer->biases || !layer->outputs || !layer->layer_error) {
+        neural_layer_destroy(&layer);
+        return NULL;
+    }
+
+    // Initialisation Xavier
+    double xavier_std = sqrt(2.0 / (double)(input_size + neuron_count));
+    for (size_t i = 0; i < neuron_count * input_size; i++) {
+        layer->weights[i] = ((double)rand() / RAND_MAX - 0.5) * 2.0 * xavier_std;
+    }
+
+    // Initialisation biases à zéro
+    memset(layer->biases, 0, neuron_count * sizeof(double));
+    memset(layer->outputs, 0, neuron_count * sizeof(double));
+    memset(layer->layer_error, 0, neuron_count * sizeof(double));
+
+    return layer;
+}
+
+void neural_layer_destroy(neural_layer_t** layer_ptr) {
+    if (!layer_ptr || !*layer_ptr) return;
+
+    neural_layer_t* layer = *layer_ptr;
+    if (layer->magic_number == 0xABCDEF01) {
+        if (layer->weights) TRACKED_FREE(layer->weights);
+        if (layer->biases) TRACKED_FREE(layer->biases);
+        if (layer->outputs) TRACKED_FREE(layer->outputs);
+        if (layer->layer_error) TRACKED_FREE(layer->layer_error);
+        
+        layer->magic_number = 0xDEADDEAD;
+        TRACKED_FREE(layer);
+        *layer_ptr = NULL;
+    }
+}
+
+double neural_activation_function(double x, activation_function_e type) {
+    switch (type) {
+        case ACTIVATION_TANH:
+            return tanh(x);
+        case ACTIVATION_SIGMOID:
+            return 1.0 / (1.0 + exp(-x));
+        case ACTIVATION_RELU:
+            return (x > 0.0) ? x : 0.0;
+        case ACTIVATION_GELU:
+            return 0.5 * x * (1.0 + tanh(sqrt(2.0/M_PI) * (x + 0.044715 * x * x * x)));
+        case ACTIVATION_SWISH:
+            return x / (1.0 + exp(-x));
+        default:
+            return x;
+    }
+}
+
+bool neural_layer_forward_pass(neural_layer_t* layer, double* input) {
+    if (!layer || !input) return false;
+
+    for (size_t n = 0; n < layer->neuron_count; n++) {
+        double sum = layer->biases[n];
+        
+        // Calcul produit scalaire poids * entrées
+        for (size_t i = 0; i < layer->input_size; i++) {
+            sum += layer->weights[n * layer->input_size + i] * input[i];
+        }
+        
+        // Application fonction d'activation
+        layer->outputs[n] = neural_activation_function(sum, layer->activation_type);
+    }
+
+    return true;
+}
 
 // === STUB IMPLEMENTATIONS FOR MISSING FUNCTIONS ===
 

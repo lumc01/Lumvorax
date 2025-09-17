@@ -31,7 +31,7 @@ typedef struct {
 #endif
 
 // Forward declaration - type défini dans neural_blackbox_computer.h
-typedef struct neural_ultra_precision_config_t neural_ultra_precision_config_t;
+struct neural_ultra_precision_config_t;
 
 // EXPLICATION TECHNIQUE :
 // Cette structure définit comment adapter l'architecture neuronale selon
