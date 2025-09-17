@@ -2,8 +2,198 @@
 #include "../debug/memory_tracker.h"
 #include <string.h>
 #include <arpa/inet.h> // Pour htonl/ntohl (endianness)
+#include <time.h> // Pour clock_gettime
 
-// ================== SÉRIALISATION SÉCURISÉE ==================
+// Définitions pour la sérialisation sécurisée (à placer dans un header dédié idéalement)
+#define LUM_SECURE_MAGIC 0x53454355 // 'SECU'
+#define LUM_SECURE_VERSION 1
+#define LUM_SECURE_HEADER_SIZE 64 // Taille fixe pour l'en-tête sécurisé
+
+typedef struct __attribute__((packed)) {
+    uint32_t magic_number;          // 4 bytes - Magic number pour identification
+    uint16_t version;               // 2 bytes - Version du format sécurisé
+    uint32_t lum_count;             // 4 bytes - Nombre de LUMs dans le groupe
+    uint32_t data_size;             // 4 bytes - Taille des données LUMs (sans l'en-tête)
+    bool is_encrypted;              // 1 byte  - Indicateur de chiffrement
+    uint32_t checksum_crc32;        // 4 bytes - Checksum CRC32 des données LUMs
+    uint64_t timestamp;             // 8 bytes - Timestamp pour le chiffrement et l'identification
+    void* memory_address;           // 8 bytes (ou 4) - Adresse de l'en-tête lui-même
+    uint8_t reserved[32];           // 32 bytes - Padding pour atteindre 64 bytes
+} lum_secure_header_t;
+
+typedef struct {
+    uint8_t* serialized_data;       // Buffer contenant les données sérialisées/chiffrées
+    size_t data_size;               // Taille totale du buffer sérialisé
+    uint32_t checksum;              // Checksum calculé
+    bool success;                   // Indicateur de succès de l'opération
+    char error_message[128];        // Message d'erreur éventuel
+    void* memory_address;           // Adresse de la structure de résultat
+} lum_secure_result_t;
+
+
+// ================== SÉRIALISATION SÉCURISÉE LUM ==================
+
+// Sérialisation sécurisée d'un groupe LUM
+lum_secure_result_t* lum_secure_serialize_group(lum_group_t* group, bool encrypt) {
+    if (!group) return NULL;
+
+    lum_secure_result_t* result = TRACKED_MALLOC(sizeof(lum_secure_result_t));
+    if (!result) return NULL;
+
+    result->memory_address = (void*)result;
+    result->success = false;
+    strcpy(result->error_message, "");
+
+    // Calcul taille nécessaire
+    size_t header_size = sizeof(lum_secure_header_t);
+    size_t data_size = group->count * sizeof(lum_t);
+    size_t total_size = header_size + data_size;
+
+    // Allocation buffer sérialisation
+    result->serialized_data = TRACKED_MALLOC(total_size);
+    if (!result->serialized_data) {
+        strcpy(result->error_message, "Allocation buffer failed");
+        return result;
+    }
+
+    // Création header
+    lum_secure_header_t* header = (lum_secure_header_t*)result->serialized_data;
+    header->magic_number = htonl(LUM_SECURE_MAGIC); // Mettre en network byte order
+    header->version = htons(LUM_SECURE_VERSION);     // Mettre en network byte order
+    header->lum_count = htonl((uint32_t)group->count); // Mettre en network byte order
+    header->data_size = htonl((uint32_t)data_size);   // Mettre en network byte order
+    header->is_encrypted = encrypt;
+    header->memory_address = (void*)header;
+
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    header->timestamp = htobe64(ts.tv_sec * 1000000000ULL + ts.tv_nsec); // Mettre en network byte order 64-bit
+
+    // Copie données
+    uint8_t* data_ptr = result->serialized_data + header_size;
+    memcpy(data_ptr, group->lums, data_size);
+
+    // Calcul checksum
+    header->checksum_crc32 = htonl(lum_secure_calculate_checksum(data_ptr, data_size)); // Mettre en network byte order
+    result->checksum = ntohl(header->checksum_crc32); // Stocker le checksum non converti
+
+    // Chiffrement simple (XOR) si demandé
+    if (encrypt) {
+        uint8_t key = (uint8_t)(be64toh(header->timestamp) & 0xFF);
+        for (size_t i = 0; i < data_size; i++) {
+            data_ptr[i] ^= key;
+        }
+    }
+
+    result->data_size = total_size;
+    result->success = true;
+    strcpy(result->error_message, "Serialization completed successfully");
+
+    return result;
+}
+
+// Désérialisation sécurisée vers groupe LUM
+lum_group_t* lum_secure_deserialize_group(const uint8_t* data, size_t data_size, bool decrypt) {
+    if (!data || data_size < sizeof(lum_secure_header_t)) return NULL;
+
+    // Lecture header et conversion
+    lum_secure_header_t temp_header;
+    memcpy(&temp_header, data, sizeof(lum_secure_header_t));
+
+    uint32_t magic_number = ntohl(temp_header.magic_number);
+    uint16_t version = ntohs(temp_header.version);
+    uint32_t lum_count = ntohl(temp_header.lum_count);
+    uint32_t data_size_net = temp_header.data_size; // Déjà en network byte order
+    uint32_t data_size = ntohl(data_size_net);
+    bool is_encrypted = temp_header.is_encrypted;
+    uint32_t stored_checksum = ntohl(temp_header.checksum_crc32);
+    uint64_t timestamp = be64toh(temp_header.timestamp);
+
+    // Validation magic number
+    if (magic_number != LUM_SECURE_MAGIC) return NULL;
+
+    // Validation version (simpliste pour l'instant)
+    if (version != LUM_SECURE_VERSION) return NULL;
+
+    // Validation taille
+    if (data_size > data_size_net || sizeof(lum_secure_header_t) + data_size > data_size) return NULL; // Protection contre tailles invalides
+
+    // Création groupe destination
+    lum_group_t* group = lum_group_create(lum_count);
+    if (!group) return NULL;
+
+    // Copie données
+    const uint8_t* data_ptr = data + sizeof(lum_secure_header_t);
+    uint8_t* temp_data = TRACKED_MALLOC(data_size);
+    if (!temp_data) {
+        lum_group_destroy(group);
+        return NULL;
+    }
+
+    memcpy(temp_data, data_ptr, data_size);
+
+    // Déchiffrement si nécessaire
+    if (decrypt && is_encrypted) {
+        uint8_t key = (uint8_t)(timestamp & 0xFF);
+        for (size_t i = 0; i < data_size; i++) {
+            temp_data[i] ^= key;
+        }
+    }
+
+    // Vérification checksum
+    uint32_t calculated_checksum = lum_secure_calculate_checksum(temp_data, data_size);
+    if (calculated_checksum != stored_checksum) {
+        TRACKED_FREE(temp_data);
+        lum_group_destroy(group);
+        return NULL;
+    }
+
+    // Reconstruction LUMs
+    lum_t* lum_data = (lum_t*)temp_data;
+    for (uint32_t i = 0; i < lum_count; i++) {
+        // Assurer que l'adresse est valide et que les données LUM sont copiées correctement
+        if (lum_group_add(group, &lum_data[i]) != LUM_GROUP_SUCCESS) {
+            // Gérer l'erreur si l'ajout échoue (e.g., groupe plein)
+             TRACKED_FREE(temp_data);
+             lum_group_destroy(group);
+             return NULL;
+        }
+    }
+
+    TRACKED_FREE(temp_data);
+    return group;
+}
+
+// Calcul checksum CRC32 simple
+uint32_t lum_secure_calculate_checksum(const uint8_t* data, size_t size) {
+    if (!data || size == 0) return 0;
+
+    uint32_t crc = 0xFFFFFFFF;
+    for (size_t i = 0; i < size; i++) {
+        crc ^= data[i];
+        for (int bit = 0; bit < 8; bit++) {
+            crc = (crc >> 1) ^ (0xEDB88320 & (-(crc & 1)));
+        }
+    }
+    return crc ^ 0xFFFFFFFF;
+}
+
+// Destruction résultat sérialisation
+void lum_secure_result_destroy(lum_secure_result_t** result_ptr) {
+    if (!result_ptr || !*result_ptr) return;
+
+    lum_secure_result_t* result = *result_ptr;
+    if (result->memory_address == (void*)result) {
+        if (result->serialized_data) {
+            TRACKED_FREE(result->serialized_data);
+        }
+        TRACKED_FREE(result);
+        *result_ptr = NULL;
+    }
+}
+
+
+// ================== SÉRIALISATION MÉTADONNÉES (reste inchangé) ==================
 
 // Structure LUM sérialisée sans pointeurs (32 bytes fixes)
 typedef struct __attribute__((packed)) {
@@ -35,7 +225,7 @@ typedef struct __attribute__((packed)) {
     uint8_t reserved[16];           // 16 bytes padding
 } lum_metadata_serialized_t;
 
-// ================== CALCUL CHECKSUM CRC32 ==================
+// ================== CALCUL CHECKSUM CRC32 (reste inchangé) ==================
 
 static const uint32_t crc32_table[256] = {
     0x00000000, 0x77073096, 0xee0e612c, 0x990951ba, 0x076dc419, 0x706af48f,
@@ -85,7 +275,7 @@ static const uint32_t crc32_table[256] = {
 
 uint32_t lum_calculate_crc32(const uint8_t* data, size_t length) {
     if (!data || length == 0) return 0;
-    
+
     uint32_t crc = 0xFFFFFFFF;
     for (size_t i = 0; i < length; i++) {
         crc = crc32_table[(crc ^ data[i]) & 0xFF] ^ (crc >> 8);
@@ -93,55 +283,55 @@ uint32_t lum_calculate_crc32(const uint8_t* data, size_t length) {
     return crc ^ 0xFFFFFFFF;
 }
 
-// ================== SÉRIALISATION LUM ==================
+// ================== SÉRIALISATION LUM (reste inchangé) ==================
 
 bool lum_write_serialized(FILE* file, const lum_t* lum) {
     if (!file || !lum) return false;
-    
+
     lum_serialized_t serialized = {0};
-    
+
     // Conversion vers network byte order (big endian) pour portabilité
     serialized.id = htonl(lum->id);
     serialized.presence = lum->presence;
     serialized.position_x = htonl((uint32_t)lum->position_x);
     serialized.position_y = htonl((uint32_t)lum->position_y);
     serialized.structure_type = lum->structure_type;
-    
+
     // Conversion 64-bit vers network byte order
     uint64_t timestamp_be = htobe64(lum->timestamp);
     serialized.timestamp = timestamp_be;
-    
+
     serialized.checksum = htonl(lum->checksum);
     serialized.is_destroyed = lum->is_destroyed;
-    
+
     // Pas de pointeurs/padding dans la version sérialisée
     memset(serialized.reserved, 0, sizeof(serialized.reserved));
-    
+
     // Calculer CRC32 des données sérialisées (exclure le champ checksum lui-même)
     serialized.checksum = 0; // Zéro pendant calcul CRC
     uint32_t crc = lum_calculate_crc32((uint8_t*)&serialized, sizeof(serialized));
     serialized.checksum = htonl(crc);
-    
+
     return fwrite(&serialized, sizeof(serialized), 1, file) == 1;
 }
 
 bool lum_read_serialized(FILE* file, lum_t* lum) {
     if (!file || !lum) return false;
-    
+
     lum_serialized_t serialized;
     if (fread(&serialized, sizeof(serialized), 1, file) != 1) {
         return false;
     }
-    
+
     // Vérifier CRC32 (même méthode que l'écriture)
     uint32_t stored_checksum = ntohl(serialized.checksum);
     serialized.checksum = 0; // Zéro pendant calcul CRC
     uint32_t calculated_crc = lum_calculate_crc32((uint8_t*)&serialized, sizeof(serialized));
-    
+
     if (stored_checksum != calculated_crc) {
         return false; // Corruption détectée
     }
-    
+
     // Conversion depuis network byte order
     lum->id = ntohl(serialized.id);
     lum->presence = serialized.presence;
@@ -151,20 +341,20 @@ bool lum_read_serialized(FILE* file, lum_t* lum) {
     lum->timestamp = be64toh(serialized.timestamp);
     lum->checksum = stored_checksum;
     lum->is_destroyed = serialized.is_destroyed;
-    
+
     // Reconstituer les champs runtime (pas sauvegardés)
     lum->memory_address = (void*)lum; // Self-pointer pour validation
-    
+
     return true;
 }
 
-// ================== SÉRIALISATION MÉTADONNÉES ==================
+// ================== SÉRIALISATION MÉTADONNÉES (reste inchangé) ==================
 
 bool lum_write_metadata_serialized(FILE* file, const lum_file_metadata_t* metadata) {
     if (!file || !metadata) return false;
-    
+
     lum_metadata_serialized_t serialized = {0};
-    
+
     serialized.magic_number = htonl(metadata->magic_number);
     serialized.version_major = htons(metadata->version_major);
     serialized.version_minor = htons(metadata->version_minor);
@@ -175,21 +365,21 @@ bool lum_write_metadata_serialized(FILE* file, const lum_file_metadata_t* metada
     serialized.total_groups = htonl(metadata->total_groups);
     serialized.total_size_bytes = htobe64(metadata->total_size_bytes);
     serialized.checksum_crc32 = htonl(metadata->checksum_crc32);
-    
+
     strncpy(serialized.creator_info, metadata->creator_info, sizeof(serialized.creator_info) - 1);
     strncpy(serialized.file_description, metadata->file_description, sizeof(serialized.file_description) - 1);
-    
+
     return fwrite(&serialized, sizeof(serialized), 1, file) == 1;
 }
 
 bool lum_read_metadata_serialized(FILE* file, lum_file_metadata_t* metadata) {
     if (!file || !metadata) return false;
-    
+
     lum_metadata_serialized_t serialized;
     if (fread(&serialized, sizeof(serialized), 1, file) != 1) {
         return false;
     }
-    
+
     metadata->magic_number = ntohl(serialized.magic_number);
     metadata->version_major = ntohs(serialized.version_major);
     metadata->version_minor = ntohs(serialized.version_minor);
@@ -200,38 +390,38 @@ bool lum_read_metadata_serialized(FILE* file, lum_file_metadata_t* metadata) {
     metadata->total_groups = ntohl(serialized.total_groups);
     metadata->total_size_bytes = be64toh(serialized.total_size_bytes);
     metadata->checksum_crc32 = ntohl(serialized.checksum_crc32);
-    
+
     strncpy(metadata->creator_info, serialized.creator_info, sizeof(metadata->creator_info) - 1);
     metadata->creator_info[sizeof(metadata->creator_info) - 1] = '\0';
-    
+
     strncpy(metadata->file_description, serialized.file_description, sizeof(metadata->file_description) - 1);
     metadata->file_description[sizeof(metadata->file_description) - 1] = '\0';
-    
+
     metadata->memory_address = (void*)metadata;
-    
+
     return true;
 }
 
-// ================== VALIDATION INTÉGRITÉ ==================
+// ================== VALIDATION INTÉGRITÉ (reste inchangé) ==================
 
 bool lum_file_verify_integrity_file(const char* filename) {
     if (!filename) return false;
-    
+
     FILE* file = fopen(filename, "rb");
     if (!file) return false;
-    
+
     lum_file_metadata_t metadata = {0};
     if (!lum_read_metadata_serialized(file, &metadata)) {
         fclose(file);
         return false;
     }
-    
+
     // Vérifier magic number
     if (metadata.magic_number != LUM_FILE_MAGIC_NUMBER) {
         fclose(file);
         return false;
     }
-    
+
     // Vérifier chaque LUM
     for (uint32_t i = 0; i < metadata.total_lums; i++) {
         lum_t lum = {0};
@@ -240,29 +430,29 @@ bool lum_file_verify_integrity_file(const char* filename) {
             return false;
         }
     }
-    
+
     fclose(file);
     return true;
 }
 
-// ================== STRESS TEST 100M+ ==================
+// ================== STRESS TEST 100M+ (reste inchangé) ==================
 
 bool lum_file_stress_test_100m_write_read(void) {
     printf("=== STRESS TEST FILE I/O 100M+ LUMs ===\n");
-    
+
     const size_t test_count = 1000000; // 1M pour test rapide, extrapolation vers 100M
     const char* test_filename = "stress_test_100m.lum";
-    
+
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
-    
+
     // Phase écriture
     FILE* file = fopen(test_filename, "wb");
     if (!file) {
         printf("❌ Failed to create test file\n");
         return false;
     }
-    
+
     // Écrire métadonnées
     lum_file_metadata_t metadata = {0};
     metadata.magic_number = LUM_FILE_MAGIC_NUMBER;
@@ -272,21 +462,21 @@ bool lum_file_stress_test_100m_write_read(void) {
     metadata.total_lums = test_count;
     metadata.total_groups = 1;
     metadata.total_size_bytes = test_count * 32; // 32 bytes par LUM sérialisé
-    
+
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
     metadata.creation_timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
     metadata.modification_timestamp = metadata.creation_timestamp;
-    
+
     strncpy(metadata.creator_info, "LUM/VORAX Stress Test v1.0", sizeof(metadata.creator_info) - 1);
     strncpy(metadata.file_description, "100M+ LUM Stress Test File", sizeof(metadata.file_description) - 1);
-    
+
     if (!lum_write_metadata_serialized(file, &metadata)) {
         fclose(file);
         printf("❌ Failed to write metadata\n");
         return false;
     }
-    
+
     // Écrire LUMs
     size_t write_errors = 0;
     for (size_t i = 0; i < test_count; i++) {
@@ -301,92 +491,117 @@ bool lum_file_stress_test_100m_write_read(void) {
             .checksum = 0,
             .is_destroyed = 0
         };
-        
+
         if (!lum_write_serialized(file, &lum)) {
             write_errors++;
         }
-        
+
         if (i % 100000 == 0) {
             printf("Progress: %zu/%zu LUMs written\n", i, test_count);
         }
     }
-    
+
     fclose(file);
-    
+
     clock_gettime(CLOCK_REALTIME, &end);
     double write_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
-    
+
     printf("✅ Write phase completed in %.3f seconds\n", write_time);
     printf("Write rate: %.0f LUMs/second\n", test_count / write_time);
     printf("Write errors: %zu\n", write_errors);
-    
+
     // Phase lecture et vérification
     clock_gettime(CLOCK_REALTIME, &start);
-    
+
     file = fopen(test_filename, "rb");
     if (!file) {
         printf("❌ Failed to open test file for reading\n");
         return false;
     }
-    
+
     lum_file_metadata_t read_metadata = {0};
     if (!lum_read_metadata_serialized(file, &read_metadata)) {
         fclose(file);
         printf("❌ Failed to read metadata\n");
         return false;
     }
-    
+
     printf("Metadata validation: magic=0x%X, version=%d.%d, lums=%u\n",
-           read_metadata.magic_number, read_metadata.version_major, 
+           read_metadata.magic_number, read_metadata.version_major,
            read_metadata.version_minor, read_metadata.total_lums);
-    
+
     size_t read_errors = 0;
     size_t checksum_errors = 0;
-    
+
     for (size_t i = 0; i < test_count; i++) {
         lum_t lum = {0};
         if (!lum_read_serialized(file, &lum)) {
             read_errors++;
             continue;
         }
-        
+
         // Vérifier données
-        if (lum.id != (uint32_t)i || 
+        if (lum.id != (uint32_t)i ||
             lum.presence != (i % 2) ||
             lum.position_x != (int32_t)(i % 10000)) {
             checksum_errors++;
         }
-        
+
         if (i % 100000 == 0) {
             printf("Progress: %zu/%zu LUMs verified\n", i, test_count);
         }
     }
-    
+
     fclose(file);
-    
+
     clock_gettime(CLOCK_REALTIME, &end);
     double read_time = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
-    
+
     printf("✅ Read phase completed in %.3f seconds\n", read_time);
     printf("Read rate: %.0f LUMs/second\n", test_count / read_time);
     printf("Read errors: %zu\n", read_errors);
     printf("Checksum errors: %zu\n", checksum_errors);
-    
+
     // Projection vers 100M
     double total_time = write_time + read_time;
     double projected_100m_time = total_time * 100;
     size_t file_size = test_count * 32 + sizeof(lum_metadata_serialized_t);
-    
+
     printf("\n=== PROJECTION VERS 100M LUMs ===\n");
     printf("Projected total time for 100M LUMs: %.1f seconds\n", projected_100m_time);
     printf("Projected file size for 100M: %.2f GB\n", (file_size * 100.0) / (1024*1024*1024));
     printf("Throughput: %.2f MB/s\n", (file_size / (1024*1024)) / total_time);
-    
+
     // Nettoyage
     remove(test_filename);
-    
+
     bool success = (write_errors == 0 && read_errors == 0 && checksum_errors == 0);
     printf("%s File I/O stress test 100M+ completed\n", success ? "✅" : "❌");
-    
+
     return success;
+}
+
+// Fonctions de création des sous-composants neuraux
+neural_memory_bank_t* neural_memory_bank_create(size_t capacity) {
+    if (capacity == 0) return NULL;
+
+    neural_memory_bank_t* bank = TRACKED_MALLOC(sizeof(neural_memory_bank_t));
+    if (!bank) return NULL;
+
+    bank->memory_slots = TRACKED_MALLOC(capacity * sizeof(double));
+    if (!bank->memory_slots) {
+        TRACKED_FREE(bank);
+        return NULL;
+    }
+
+    bank->capacity = capacity;
+    bank->current_size = 0;
+    bank->access_count = 0;
+    bank->memory_address = (void*)bank;
+    bank->magic_number = NEURAL_MEMORY_MAGIC;
+
+    // Initialisation avec valeurs nulles
+    memset(bank->memory_slots, 0, capacity * sizeof(double));
+
+    return bank;
 }

@@ -6,29 +6,29 @@
 #include <stddef.h>
 #include "../lum/lum_core.h"
 
-// Structure calculateur matriciel
+// Structure calculateur matriciel principal
 typedef struct matrix_calculator_t {
-    uint32_t magic_number;
-    size_t rows;
-    size_t cols;
-    double* data;
-    bool is_initialized;
-    void* memory_address;
+    uint32_t magic_number;        // Protection intégrité (0x4D415452)
+    size_t rows;                  // Nombre de lignes
+    size_t cols;                  // Nombre de colonnes  
+    double* data;                 // Données matricielles
+    bool is_initialized;          // État d'initialisation
+    void* memory_address;         // Protection double-free
 } matrix_calculator_t;
 
-// Structure résultat calculateur matriciel simple
-typedef struct matrix_calculator_result_t {
-    uint32_t magic_number;
-    double* result_data;
-    size_t rows;
+// Structure résultat opérations matricielles
+typedef struct matrix_result_t {
+    uint32_t magic_number;        // Protection intégrité
+    double* result_data;          // Données résultat
+    size_t rows;                  // Dimensions résultat
     size_t cols;
-    bool operation_success;
-    uint64_t execution_time_ns;
-    void* memory_address;
-} matrix_calculator_result_t;
+    bool operation_success;       // Succès opération
+    uint64_t execution_time_ns;   // Temps exécution
+    void* memory_address;         // Protection mémoire
+} matrix_result_t;
 
-// Alias pour compatibilité
-typedef matrix_calculator_result_t matrix_result_t;
+// Alias pour compatibilité (évite conflit typedef)
+#define matrix_calculator_result_t matrix_result_t
 
 // Module de Calcul Matriciel Avancé pour LUM/VORAX
 // Conforme prompt.txt - nouveau module calculs avancés

@@ -21,7 +21,9 @@ CORE_OBJECTS = \
 	obj/persistence/transaction_wal_extension.o \
 	obj/persistence/recovery_manager_extension.o \
 	obj/debug/memory_tracker.o \
-	obj/debug/forensic_logger.o
+	obj/debug/forensic_logger.o \
+	obj/file_formats/lum_secure_serialization.o \
+	obj/spatial/lum_instant_displacement.o
 
 TARGET = bin/lum_vorax
 
@@ -41,6 +43,14 @@ obj/%.o: src/%.c | obj
 # Special rule for parallel processor (needs pthread)
 obj/parallel/parallel_processor.o: src/parallel/parallel_processor.c | obj
 	$(CC) $(CFLAGS) -pthread -c $< -o $@
+
+# Rules for new modules
+obj/file_formats/lum_secure_serialization.o: src/file_formats/lum_secure_serialization.c | obj
+	$(CC) $(CFLAGS) -c $< -o $@
+
+obj/spatial/lum_instant_displacement.o: src/spatial/lum_instant_displacement.c | obj
+	$(CC) $(CFLAGS) -c $< -o $@
+
 
 test_persistence_extensions: test_persistence_complete_extensions.c $(CORE_OBJECTS) | bin
 	$(CC) $(CFLAGS) test_persistence_complete_extensions.c $(CORE_OBJECTS) -o bin/test_persistence_extensions $(LDFLAGS)

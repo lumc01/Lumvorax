@@ -5,10 +5,36 @@
 #include <stddef.h>
 #include <stdint.h>
 
-// Forward declarations pour éviter inclusion circulaire
-typedef struct adam_ultra_precise_optimizer_t adam_ultra_precise_optimizer_t;
-typedef struct lbfgs_optimizer_t lbfgs_optimizer_t;
-typedef struct newton_raphson_optimizer_t newton_raphson_optimizer_t;
+// Structures complètes pour optimiseurs ultra-précis
+typedef struct adam_ultra_precise_optimizer_t {
+    double learning_rate;         // Taux d'apprentissage
+    double beta1, beta2;          // Paramètres momentum
+    double epsilon;               // Stabilité numérique
+    size_t iteration;             // Numéro itération courante
+    size_t param_count;           // Nombre paramètres
+    double* momentum;             // Momentum accumulé
+    double* velocity;             // Velocity accumulée
+    uint32_t magic_number;        // Protection intégrité
+    void* memory_address;         // Protection double-free
+} adam_ultra_precise_optimizer_t;
+
+typedef struct lbfgs_optimizer_t {
+    int memory_size;              // Taille mémoire L-BFGS
+    double tolerance;             // Tolérance convergence
+    double* history_s;            // Historique gradients
+    double* history_y;            // Historique positions
+    size_t history_count;         // Nombre éléments historique
+    uint32_t magic_number;        // Protection intégrité
+    void* memory_address;         // Protection double-free
+} lbfgs_optimizer_t;
+
+typedef struct newton_raphson_optimizer_t {
+    double tolerance;             // Tolérance convergence
+    double* hessian_inv;          // Inverse Hessienne approximée
+    size_t param_count;           // Nombre paramètres
+    uint32_t magic_number;        // Protection intégrité
+    void* memory_address;         // Protection double-free
+} newton_raphson_optimizer_t;
 
 // Définition complète de neural_layer_t
 typedef struct neural_layer_t {

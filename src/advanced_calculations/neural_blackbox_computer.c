@@ -126,17 +126,54 @@ typedef struct { double* data; size_t size; } adam_ultra_precise_optimizer_t;
 typedef struct { double* data; size_t size; } lbfgs_optimizer_t;
 typedef struct { double* data; size_t size; } newton_raphson_optimizer_t;
 
-// Stub for neural_blackbox_perturb_parameter
+// Implémentation complète perturbation paramètres pour gradients numériques
 void neural_blackbox_perturb_parameter(neural_blackbox_computer_t* system, size_t param_idx, double perturbation) {
-    (void)system; (void)param_idx; (void)perturbation;
-    // Simple stub - no operation
+    if (!system || param_idx >= system->total_parameters) return;
+    
+    size_t current_idx = 0;
+    
+    // Parcours des couches pour trouver le bon paramètre
+    for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
+        neural_layer_t* layer = system->hidden_layers[layer_idx];
+        if (!layer) continue;
+        
+        // Paramètres des poids
+        size_t weight_count = layer->neuron_count * layer->input_size;
+        if (param_idx >= current_idx && param_idx < current_idx + weight_count) {
+            size_t local_idx = param_idx - current_idx;
+            layer->weights[local_idx] += perturbation;
+            return;
+        }
+        current_idx += weight_count;
+        
+        // Paramètres des biais
+        if (param_idx >= current_idx && param_idx < current_idx + layer->neuron_count) {
+            size_t local_idx = param_idx - current_idx;
+            layer->biases[local_idx] += perturbation;
+            return;
+        }
+        current_idx += layer->neuron_count;
+    }
 }
 
-// Stub for adam_ultra_precise_create
+// Implémentation complète optimiseur Adam ultra-précis
 adam_ultra_precise_optimizer_t* adam_ultra_precise_create(double lr, double beta1, double beta2, double epsilon) {
-    (void)lr; (void)beta1; (void)beta2; (void)epsilon;
-    adam_ultra_precise_optimizer_t* adam = malloc(sizeof(adam_ultra_precise_optimizer_t));
-    if (adam) { adam->data = NULL; adam->size = 0; }
+    adam_ultra_precise_optimizer_t* adam = TRACKED_MALLOC(sizeof(adam_ultra_precise_optimizer_t));
+    if (!adam) return NULL;
+    
+    adam->learning_rate = lr;
+    adam->beta1 = beta1;
+    adam->beta2 = beta2;
+    adam->epsilon = epsilon;
+    adam->iteration = 0;
+    adam->magic_number = 0xADAMULTRA;
+    adam->memory_address = (void*)adam;
+    
+    // Allocation mémoire pour momentum et velocity (sera dimensionnée lors du premier usage)
+    adam->momentum = NULL;
+    adam->velocity = NULL;
+    adam->param_count = 0;
+    
     return adam;
 }
 
@@ -213,10 +250,69 @@ double neural_estimate_condition_number(double* matrix, size_t size) {
     return 1.0; // Simple stub - return well-conditioned
 }
 
-// Stub for adam_ultra_precise_update_weights
-bool adam_ultra_precise_update_weights(void* adam, neural_blackbox_computer_t* system, double* gradients, double loss) {
-    (void)adam; (void)system; (void)gradients; (void)loss;
-    return true; // Simple stub
+// Implémentation complète mise à jour poids Adam ultra-précis
+bool adam_ultra_precise_update_weights(void* adam_ptr, neural_blackbox_computer_t* system, double* gradients, double loss) {
+    if (!adam_ptr || !system || !gradients) return false;
+    
+    adam_ultra_precise_optimizer_t* adam = (adam_ultra_precise_optimizer_t*)adam_ptr;
+    if (adam->magic_number != 0xADAMULTRA) return false;
+    
+    // Initialisation lors du premier usage
+    if (!adam->momentum) {
+        adam->param_count = system->total_parameters;
+        adam->momentum = TRACKED_CALLOC(adam->param_count, sizeof(double));
+        adam->velocity = TRACKED_CALLOC(adam->param_count, sizeof(double));
+        if (!adam->momentum || !adam->velocity) return false;
+    }
+    
+    adam->iteration++;
+    
+    // Correction biais
+    double lr_corrected = adam->learning_rate * sqrt(1.0 - pow(adam->beta2, adam->iteration)) / 
+                          (1.0 - pow(adam->beta1, adam->iteration));
+    
+    size_t param_idx = 0;
+    
+    // Mise à jour couche par couche
+    for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
+        neural_layer_t* layer = system->hidden_layers[layer_idx];
+        if (!layer) continue;
+        
+        // Mise à jour poids
+        for (size_t i = 0; i < layer->neuron_count * layer->input_size; i++, param_idx++) {
+            if (param_idx >= adam->param_count) return false;
+            
+            double gradient = gradients[param_idx];
+            
+            // Adam update formulas
+            adam->momentum[param_idx] = adam->beta1 * adam->momentum[param_idx] + 
+                                        (1.0 - adam->beta1) * gradient;
+            adam->velocity[param_idx] = adam->beta2 * adam->velocity[param_idx] + 
+                                        (1.0 - adam->beta2) * gradient * gradient;
+            
+            // Mise à jour paramètre
+            layer->weights[i] -= lr_corrected * adam->momentum[param_idx] / 
+                                 (sqrt(adam->velocity[param_idx]) + adam->epsilon);
+        }
+        
+        // Mise à jour biais
+        for (size_t i = 0; i < layer->neuron_count; i++, param_idx++) {
+            if (param_idx >= adam->param_count) return false;
+            
+            double gradient = gradients[param_idx];
+            
+            adam->momentum[param_idx] = adam->beta1 * adam->momentum[param_idx] + 
+                                        (1.0 - adam->beta1) * gradient;
+            adam->velocity[param_idx] = adam->beta2 * adam->velocity[param_idx] + 
+                                        (1.0 - adam->beta2) * gradient * gradient;
+            
+            layer->biases[i] -= lr_corrected * adam->momentum[param_idx] / 
+                                (sqrt(adam->velocity[param_idx]) + adam->epsilon);
+        }
+    }
+    
+    (void)loss; // Loss peut être utilisé pour des adaptations futures
+    return true;
 }
 
 // Stub for lbfgs_update_weights

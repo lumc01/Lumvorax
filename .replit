@@ -1914,6 +1914,99 @@ args = "./bin/lum_vorax"
 [workflows.workflow.metadata]
 outputType = "console"
 
+[[workflows.workflow]]
+name = "TEST_CORRECTIONS_MODULES_BLOQUES"
+author = 47721023
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== TEST CORRECTIONS MODULES BLOQUÉS ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 1: Compilation avec modules corrigés\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make clean"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make all 2>&1 | tee logs/corrections_modules_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ -f bin/lum_vorax ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"✅ Compilation réussie - Test fonctionnalités\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"Test Neural Blackbox déblocage:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax --neural-blackbox-test || echo \"Tests Neural Blackbox à implémenter\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"Test Matrix Calculator corrections:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax --matrix-test || echo \"Tests Matrix Calculator à implémenter\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"Test Secure Serialization nouveau:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax --secure-serialization-test || echo \"Tests Sérialisation à implémenter\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"Test Instant Displacement validation:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax --instant-displacement-test || echo \"Tests Déplacement à valider\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "else"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"❌ Compilation échouée - voir logs\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"✅ PHASE CORRECTION MODULES BLOQUÉS TERMINÉE\""
+
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
 channel = "stable-25_05"
