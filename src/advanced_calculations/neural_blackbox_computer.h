@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 // Forward declarations pour éviter inclusion circulaire
 typedef struct neural_layer_t neural_layer_t;
@@ -24,12 +25,7 @@ typedef enum {
 #endif
 
 // Forward declaration - utilise le type défini dans neural_network_processor.h
-typedef enum {
-    PLASTICITY_HEBBIAN = 0,
-    PLASTICITY_ANTI_HEBBIAN = 1,
-    PLASTICITY_STDP = 2,
-    PLASTICITY_HOMEOSTATIC = 3
-} neural_plasticity_rules_e;
+typedef enum neural_plasticity_rules_e neural_plasticity_rules_e;
 
 // Domaine d'entrée pour génération d'échantillons
 typedef struct {
@@ -287,7 +283,7 @@ bool neural_blackbox_apply_optimizer(
 #define NEURAL_MIN_CONVERGENCE_THRESHOLD 1e-8
 
 // Configuration ultra-précise (définie ici pour éviter inclusion circulaire)
-typedef struct {
+typedef struct neural_ultra_precision_config_t {
     size_t precision_target_digits;    // Nombre de digits précision requis
     size_t base_depth;                // Profondeur de base du réseau
     size_t precision_layers;          // Couches supplémentaires pour précision
