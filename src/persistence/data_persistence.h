@@ -48,16 +48,28 @@ typedef struct {
     size_t bytes_read;
     uint32_t checksum;
     char error_message[256];
+    void* transaction_ref;
 } storage_result_t;
+
+// Transaction operation types
+typedef enum {
+    TRANSACTION_BEGIN,
+    TRANSACTION_COMMIT,
+    TRANSACTION_ROLLBACK,
+    TRANSACTION_WRITE,
+    TRANSACTION_READ
+} transaction_operation_type_e;
 
 // Transaction record
 typedef struct {
     uint64_t transaction_id;
+    transaction_operation_type_e operation_type;
     char operation[64];
     char filename[MAX_STORAGE_PATH_LENGTH];
     uint64_t timestamp;
     bool success;
     size_t data_size;
+    uint64_t lum_id;
 } transaction_record_t;
 
 // Function declarations
@@ -182,6 +194,7 @@ typedef struct {
 
 typedef struct {
     uint64_t id;
+    uint64_t transaction_id;
     char operation[64];
     uint64_t timestamp;
     bool committed;
