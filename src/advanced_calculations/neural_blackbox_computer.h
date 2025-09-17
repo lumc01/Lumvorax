@@ -286,7 +286,7 @@ bool neural_blackbox_apply_optimizer(
 
 // Fonctions de conversion entre types de configuration
 // (Forward declarations pour éviter inclusion circulaire)
-typedef struct neural_ultra_precision_config_t neural_ultra_precision_config_t;
+// Note: neural_ultra_precision_config_t is defined in neural_ultra_precision_architecture.h
 neural_architecture_config_t* convert_precision_to_architecture_config(
     const neural_ultra_precision_config_t* precision_config
 );

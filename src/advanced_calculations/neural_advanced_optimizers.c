@@ -359,10 +359,12 @@ double neural_wolfe_line_search_ultra_precise(
     if (!system || !search_direction || !gradient) return 0.0;
     
     const double c1 = 1e-4;  // Condition Armijo
-    const double c2 = 0.9;   // Condition courbure
+    (void)c1; // Suppress unused variable warning
     double alpha = 1.0;      // Pas initial
     const double reduction_factor = 0.5;
     const int max_iterations = 50;
+    
+    (void)current_loss; // Suppress unused parameter warning
     
     // Calcul pente initiale
     double initial_slope = neural_dot_product_ultra_precise(

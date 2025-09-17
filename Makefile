@@ -329,10 +329,7 @@ obj/advanced_calculations/neural_blackbox_ultra_precision_tests.o: src/advanced_
 	mkdir -p obj/advanced_calculations
 	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/neural_blackbox_ultra_precision_tests.c -o obj/advanced_calculations/neural_blackbox_ultra_precision_tests.o
 
-# Nouvelle règle pour neural ultra precision architecture
-obj/advanced_calculations/neural_ultra_precision_architecture.o: src/advanced_calculations/neural_ultra_precision_architecture.c src/advanced_calculations/neural_ultra_precision_architecture.h
-	mkdir -p obj/advanced_calculations
-	$(CC) $(CFLAGS) -I./src/debug -c src/advanced_calculations/neural_ultra_precision_architecture.c -o obj/advanced_calculations/neural_ultra_precision_architecture.o
+# Note: règle neural_ultra_precision_architecture.o définie plus haut - suppression duplication
 
 
 .PHONY: clean all test debug install uninstall

@@ -1,9 +1,17 @@
 #ifndef NEURAL_NETWORK_PROCESSOR_H
 #define NEURAL_NETWORK_PROCESSOR_H
 
-#include "../lum/lum_core.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
+
+// Forward declaration pour éviter inclusion circulaire
+typedef enum {
+    PLASTICITY_HEBBIAN = 0,         // Apprentissage Hebbien
+    PLASTICITY_ANTI_HEBBIAN = 1,    // Anti-Hebbien
+    PLASTICITY_STDP = 2,            // Spike-Timing Dependent Plasticity
+    PLASTICITY_HOMEOSTATIC = 3      // Plasticité homéostatique
+} neural_plasticity_rules_e;
 
 // Structure traçage activations neuronales
 typedef struct {

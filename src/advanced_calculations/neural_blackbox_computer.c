@@ -83,6 +83,7 @@ void neural_ultra_precision_initialize_weights(neural_blackbox_computer_t* syste
 
 // Stub for neural_blackbox_compute_precise
 double* neural_blackbox_compute_precise(neural_blackbox_computer_t* system, double* input, size_t input_size) {
+    (void)input_size; // Suppress unused parameter warning
     if (!system || !input) return NULL;
     // Redirect to main execution function
     return neural_blackbox_execute(system, input);
@@ -953,6 +954,7 @@ bool neural_blackbox_ultra_precise_training(
     neural_ultra_precision_initialize_weights(system, training->precision_target);
 
     double initial_loss = neural_blackbox_compute_loss(system, function_spec);
+    (void)initial_loss; // Suppress unused variable warning
     forensic_log(FORENSIC_LEVEL_INFO, "neural_blackbox_ultra_precise_training",
                 "Loss initial: %.12e", initial_loss);
 
