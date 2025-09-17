@@ -40,6 +40,9 @@ obj/%.o: src/%.c | obj
 obj/parallel/parallel_processor.o: src/parallel/parallel_processor.c | obj
 	$(CC) $(CFLAGS) -pthread -c $< -o $@
 
+test_persistence_extensions: test_persistence_complete_extensions.c $(CORE_OBJECTS) | bin
+	$(CC) $(CFLAGS) test_persistence_complete_extensions.c $(CORE_OBJECTS) -o bin/test_persistence_extensions $(LDFLAGS)
+
 clean:
 	rm -rf obj bin
 
