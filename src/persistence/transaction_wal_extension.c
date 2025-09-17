@@ -119,18 +119,16 @@ wal_extension_result_t* wal_extension_begin_transaction(wal_extension_context_t*
     wal_record.nanosecond_timestamp = time(NULL) * 1000000000UL;
     
     // Créer transaction de base simulée
-    static uint64_t global_transaction_id = 1;
     uint64_t current_transaction_id = atomic_fetch_add(&ctx->transaction_counter_atomic, 1);
     
     wal_record.base_record.transaction_id = current_transaction_id;
-        wal_record.base_record.operation_type = TRANSACTION_BEGIN;
-        wal_record.base_record.timestamp = time(NULL);
-        
-        result->base_result = TRACKED_MALLOC(sizeof(storage_result_t));
-        if (result->base_result) {
-            result->base_result->success = true;
-            result->base_result->transaction_ref = NULL; // Simplifié pour éviter les erreurs
-        }
+    wal_record.base_record.operation_type = TRANSACTION_BEGIN;
+    wal_record.base_record.timestamp = time(NULL);
+    
+    result->base_result = TRACKED_MALLOC(sizeof(storage_result_t));
+    if (result->base_result) {
+        result->base_result->success = true;
+        result->base_result->transaction_ref = NULL; // Simplifié pour éviter les erreurs
     }
     
     // Calculer checksums
