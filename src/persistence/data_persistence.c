@@ -12,6 +12,10 @@
 #include <stddef.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <stdarg.h>
+
+// Forward declaration of forensic_log function
+void forensic_log(int level, const char* function, const char* format, ...);
 
 static uint64_t next_transaction_id = 1;
 
@@ -653,13 +657,8 @@ bool recovery_manager_verify_file_integrity(persistence_context_t* ctx, const ch
     return persistence_verify_file_integrity(ctx, filepath);
 }
 
-// Mock forensic_log for compilation
-#ifndef FORENSIC_LOG_IMPLEMENTED
-#define FORENSIC_LOG_IMPLEMENTED
-#include <stdio.h>
-#include <stdarg.h> // Required for va_list, va_start, va_end
+// Implementation of forensic_log if not available from header
 void forensic_log(int level, const char* function, const char* format, ...) {
-    // Mock implementation: print to stderr
     va_list args;
     va_start(args, format);
     fprintf(stderr, "[FORENSIC] [%d] %s: ", level, function);
@@ -667,15 +666,3 @@ void forensic_log(int level, const char* function, const char* format, ...) {
     fprintf(stderr, "\n");
     va_end(args);
 }
-#endif
-
-// Mock constants
-#ifndef MOCK_CONSTANTS_IMPLEMENTED
-#define MOCK_CONSTANTS_IMPLEMENTED
-#define PERSISTENCE_CONTEXT_MAGIC 0xABCD1234
-#define LUM_MAGIC_NUMBER 0x1234ABCD
-#define LUM_GROUP_MAGIC 0x5678EFGH
-#define FORENSIC_LEVEL_DEBUG 0
-#define FORENSIC_LEVEL_INFO 1
-#define FORENSIC_LEVEL_ERROR 2
-#endif

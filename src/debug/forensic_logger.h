@@ -22,4 +22,7 @@ void forensic_log_memory_operation(const char* operation, void* ptr, size_t size
 void forensic_log_lum_operation(const char* operation, uint64_t lum_count, double duration_ns);
 void forensic_logger_destroy(void);
 
+// General forensic logging function
+void forensic_log(forensic_level_e level, const char* function, const char* format, ...);
+
 #endif // FORENSIC_LOGGER_H
