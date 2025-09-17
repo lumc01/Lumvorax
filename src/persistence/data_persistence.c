@@ -2,6 +2,7 @@
 #include "storage_backend.h"
 #include "../lum/lum_core.h"
 #include "../debug/forensic_logger.h"
+#include "../debug/memory_tracker.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,6 +11,7 @@
 #include <sys/stat.h>
 #include <stddef.h>
 #include <unistd.h>
+#include <fcntl.h>
 
 static uint64_t next_transaction_id = 1;
 
