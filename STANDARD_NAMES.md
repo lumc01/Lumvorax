@@ -234,6 +234,21 @@
 2025-01-17 22:30 - struct_neural_layer_t + Structure sans typedef pour éviter redéfinition
 2025-01-17 22:30 - current_loss_usage_corrected + Variable current_loss utilisée dans logging forensique
 2025-01-17 22:30 - neural_blackbox_erreurs_recurrentes_eliminees + Cycle erreurs compilation brisé définitivement
+2025-01-18 19:15 - FORENSIC_LEVEL_WARNING + Correction niveau log standardisé (remplace FORENSIC_LEVEL_WARN)
+2025-01-18 19:15 - format_specifier_corrections + Corrections %zu pour size_t et cast appropriés
+2025-01-18 19:15 - prompt_txt_creation + Fichier prompt.txt avec règles anti-récurrence strictes
+2025-01-18 19:15 - compilation_warnings_zero_tolerance + Politique zéro warning appliquée
+2025-01-18 19:15 - dependency_hierarchy_enforcement + Hiérarchie d'inclusion strictement appliquée
+
+## RÈGLES ANTI-RÉCURRENCE APPLIQUÉES
+
+### 2025-01-18 19:15 - CORRECTIONS SYSTÉMIQUES FINALES
+- **FORENSIC_LEVEL_WARNING**: Niveau standardisé pour tous les avertissements
+- **Format Specifiers**: %zu pour size_t, %u pour uint32_t, cast explicites requis
+- **Includes Hiérarchiques**: Ordre strict common_types.h → lum_core.h → forensic_logger.h
+- **Validation Continue**: Compilation testée après chaque modification
+- **Prompt.txt**: Règles strictes pour éviter répétition erreurs
+- **Zero Tolerance**: Aucun warning de compilation accepté
 
 ## DERNIÈRES MODIFICATIONS
 

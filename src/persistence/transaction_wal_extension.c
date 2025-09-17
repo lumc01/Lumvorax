@@ -91,7 +91,7 @@ bool wal_extension_replay_from_existing_persistence(wal_extension_context_t* wal
     } else {
         // Si pas de transactions stockées en mémoire, on ne peut rien vérifier.
         // Dans un vrai scénario, on lirait le fichier WAL ici.
-        forensic_log(FORENSIC_LEVEL_WARN, "wal_extension_replay_from_existing_persistence",
+        forensic_log(FORENSIC_LEVEL_WARNING, "wal_extension_replay_from_existing_persistence",
                     "Aucune transaction WAL trouvee en memoire pour verification.");
     }
 
@@ -117,8 +117,8 @@ bool wal_extension_create_checkpoint_with_existing(wal_extension_context_t* wal_
     wal_ctx->checkpoint_count++;
 
     char msg[256];
-    snprintf(msg, sizeof(msg), "Checkpoint cree: transaction=%zu, total_checkpoints=%u", 
-            wal_ctx->last_checkpoint_transaction, wal_ctx->checkpoint_count);
+    snprintf(msg, sizeof(msg), "Checkpoint cree: transaction=%zu, total_checkpoints=%zu", 
+            wal_ctx->last_checkpoint_transaction, (size_t)wal_ctx->checkpoint_count);
     forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_create_checkpoint_with_existing", msg);
 
     return true;

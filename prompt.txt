@@ -605,3 +605,86 @@ evidence_optimized_YYYYMMDD_HHMMSS/
 
 Ces règles sont définitives et s'appliquent à TOUS développements futurs du système LUM/VORAX pour maintenir l'intégrité forensique et éviter répétition des anomalies détectées.
 
+# PROMPT SYSTÈME LUM/VORAX - RÈGLES ANTI-RÉCURRENCE
+
+## RÈGLES ABSOLUES DE DÉVELOPPEMENT
+
+### 1. COHÉRENCE DES TYPES ET CONSTANTES
+- Utiliser UNIQUEMENT les types définis dans common_types.h
+- Vérifier l'existence de toute constante avant utilisation
+- INTERDICTION des redéfinitions de types dans plusieurs fichiers
+- Toujours inclure common_types.h en premier
+
+### 2. STANDARDS DE NOMMAGE FORENSIQUES
+- Tous les niveaux de log doivent utiliser forensic_level_e
+- Utiliser FORENSIC_LEVEL_WARNING (pas FORENSIC_LEVEL_WARN)
+- Utiliser FORENSIC_LEVEL_ERROR (pas FORENSIC_LEVEL_ERR)
+- Format specifiers: %zu pour size_t, %u pour uint32_t
+
+### 3. VALIDATION AVANT COMPILATION
+- Tester CHAQUE modification individuellement
+- Vérifier les includes et dépendances
+- Valider les signatures de fonctions
+- Contrôler les format specifiers printf/scanf
+
+### 4. PROTECTION MÉMOIRE OBLIGATOIRE
+- Toujours utiliser TRACKED_MALLOC/TRACKED_FREE
+- Implémenter magic_number dans toutes les structures
+- Vérifier les pointeurs avant utilisation
+- Protection double-free systématique
+
+### 5. ARCHITECTURE HIÉRARCHIQUE STRICTE
+Ordre d'inclusion obligatoire:
+1. common_types.h (types de base)
+2. lum_core.h (structures principales) 
+3. forensic_logger.h (logging)
+4. memory_tracker.h (tracking)
+5. Modules spécifiques
+
+### 6. TESTS SYSTÈME CONTINUS
+- Compilation sans warnings obligatoire
+- Tests stress 1M+ LUMs requis
+- Validation crypto systématique
+- Métriques performance authentiques
+
+### 7. INTERDICTIONS ABSOLUES
+- Aucun placeholder "return NULL;" sans implémentation
+- Aucune fonction déclarée mais non définie
+- Aucune constante utilisée mais non définie
+- Aucune redéfinition de structure ou enum
+
+### 8. DOCUMENTATION OBLIGATOIRE
+- Mise à jour STANDARD_NAMES.md pour chaque ajout
+- Documentation des dépendances inter-modules
+- Traçabilité des modifications appliquées
+- Validation conformité forensique
+
+### 9. VALIDATION FORENSIQUE CONTINUE
+- Logs détaillés pour toutes les opérations
+- Hash SHA-256 des résultats critiques
+- Métriques performance reproductibles
+- Traçabilité complète des allocations mémoire
+
+### 10. CRITÈRES DE SUCCÈS OBLIGATOIRES
+- Compilation sans erreurs ni warnings
+- Exécution stable 1M+ opérations
+- Métriques authentiques vérifiables
+- Conformité STANDARD_NAMES.md
+- Tests stress réussis sans fuites mémoire
+
+## MODULES PRIORITAIRES REQUIS
+1. LUM Core (✅ Implémenté)
+2. VORAX Operations (✅ Implémenté) 
+3. Persistence WAL (✅ Implémenté)
+4. Memory Tracking (✅ Implémenté)
+5. Crypto Validation (✅ Implémenté)
+6. Performance Metrics (✅ Implémenté)
+
+## OBJECTIFS PERFORMANCE MINIMUM
+- 1M+ LUMs/seconde traitement
+- <1% overhead memory tracking  
+- 0 fuites mémoire détectées
+- 99.9%+ validation crypto réussie
+- <10ms latence opérations critiques
+
+Ces règles sont OBLIGATOIRES et NON-NÉGOCIABLES pour toute modification future.
