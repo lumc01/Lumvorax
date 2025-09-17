@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include "../lum/lum_core.h"
 
 // Forward declaration pour éviter inclusion circulaire
 typedef enum {

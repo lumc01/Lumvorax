@@ -22,6 +22,11 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
     lum->is_destroyed = 0;  // CORRECTION: Initialiser le flag protection double-free
     lum->timestamp = lum_get_timestamp();
     lum->memory_address = (void*)lum;  // Adresse mémoire pour traçabilité
+    
+    // Calcul checksum pour intégrité
+    lum->checksum = (uint32_t)(lum->id ^ lum->presence ^ lum->position_x ^ 
+                              lum->position_y ^ lum->structure_type ^ 
+                              (uint32_t)(lum->timestamp & 0xFFFFFFFF));
 
     return lum;
 }

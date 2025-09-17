@@ -1,4 +1,3 @@
-
 #ifndef GOLDEN_SCORE_OPTIMIZER_H
 #define GOLDEN_SCORE_OPTIMIZER_H
 
@@ -11,6 +10,10 @@
 #define GOLDEN_COMPARISON_MAGIC 0x47430950
 
 // Forward declarations
+typedef struct golden_metrics_t golden_metrics_t;
+typedef struct golden_comparison_t golden_comparison_t;
+
+// Golden Score Optimizer - Optimisation système basée sur le ratio doré
 typedef struct golden_score_optimizer_t golden_score_optimizer_t;
 
 // Classification performance selon score Golden
@@ -25,7 +28,7 @@ typedef enum {
 typedef struct {
     uint32_t magic_number;
     void* memory_address;
-    
+
     double initial_score;
     double final_score;
     double best_score;
@@ -45,7 +48,7 @@ typedef struct {
 typedef struct {
     uint32_t magic_number;
     void* memory_address;
-    
+
     double standard_ratios[5];
     performance_class_e performance_vs_standards[5];
     char detailed_analysis[5][256];
@@ -101,13 +104,13 @@ struct golden_score_optimizer_t {
     uint32_t magic_number;
     void* memory_address;
     int is_destroyed;
-    
+
     // Core configuration
     double target_golden_ratio;
     uint32_t optimization_iterations;
     double convergence_threshold;
     uint64_t creation_time;
-    
+
     // System metrics
     struct {
         double performance_score;

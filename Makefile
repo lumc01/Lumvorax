@@ -329,7 +329,7 @@ obj/advanced_calculations/neural_blackbox_ultra_precision_tests.o: src/advanced_
 	mkdir -p obj/advanced_calculations
 	$(CC) $(CFLAGS) $(INCLUDES) -c src/advanced_calculations/neural_blackbox_ultra_precision_tests.c -o obj/advanced_calculations/neural_blackbox_ultra_precision_tests.o
 
-# Note: règle neural_ultra_precision_architecture.o définie plus haut - suppression duplication
+# Règles de compilation nettoyées
 
 
 .PHONY: clean all test debug install uninstall
