@@ -1,5 +1,6 @@
-#include "lum_native_file_handler.h"
+#include "lum_secure_serialization.h"
 #include "../debug/memory_tracker.h"
+#include "../lum/lum_core.h"
 #include <string.h>
 #include <arpa/inet.h> // Pour htonl/ntohl (endianness)
 #include <time.h> // Pour clock_gettime
@@ -93,8 +94,8 @@ lum_secure_result_t* lum_secure_serialize_group(lum_group_t* group, bool encrypt
 }
 
 // Désérialisation sécurisée vers groupe LUM
-lum_group_t* lum_secure_deserialize_group(const uint8_t* data, size_t data_size, bool decrypt) {
-    if (!data || data_size < sizeof(lum_secure_header_t)) return NULL;
+lum_group_t* lum_secure_deserialize_group(const uint8_t* data, size_t data_size_param, bool decrypt) {
+    if (!data || data_size_param < sizeof(lum_secure_header_t)) return NULL;
 
     // Lecture header et conversion
     lum_secure_header_t temp_header;
@@ -116,7 +117,7 @@ lum_group_t* lum_secure_deserialize_group(const uint8_t* data, size_t data_size,
     if (version != LUM_SECURE_VERSION) return NULL;
 
     // Validation taille
-    if (data_size > data_size_net || sizeof(lum_secure_header_t) + data_size > data_size) return NULL; // Protection contre tailles invalides
+    if (data_size > data_size_net || sizeof(lum_secure_header_t) + data_size > data_size_param) return NULL; // Protection contre tailles invalides
 
     // Création groupe destination
     lum_group_t* group = lum_group_create(lum_count);
@@ -152,7 +153,7 @@ lum_group_t* lum_secure_deserialize_group(const uint8_t* data, size_t data_size,
     lum_t* lum_data = (lum_t*)temp_data;
     for (uint32_t i = 0; i < lum_count; i++) {
         // Assurer que l'adresse est valide et que les données LUM sont copiées correctement
-        if (lum_group_add(group, &lum_data[i]) != LUM_GROUP_SUCCESS) {
+        if (!lum_group_add(group, &lum_data[i])) {
             // Gérer l'erreur si l'ajout échoue (e.g., groupe plein)
              TRACKED_FREE(temp_data);
              lum_group_destroy(group);
@@ -581,27 +582,4 @@ bool lum_file_stress_test_100m_write_read(void) {
     return success;
 }
 
-// Fonctions de création des sous-composants neuraux
-neural_memory_bank_t* neural_memory_bank_create(size_t capacity) {
-    if (capacity == 0) return NULL;
-
-    neural_memory_bank_t* bank = TRACKED_MALLOC(sizeof(neural_memory_bank_t));
-    if (!bank) return NULL;
-
-    bank->memory_slots = TRACKED_MALLOC(capacity * sizeof(double));
-    if (!bank->memory_slots) {
-        TRACKED_FREE(bank);
-        return NULL;
-    }
-
-    bank->capacity = capacity;
-    bank->current_size = 0;
-    bank->access_count = 0;
-    bank->memory_address = (void*)bank;
-    bank->magic_number = NEURAL_MEMORY_MAGIC;
-
-    // Initialisation avec valeurs nulles
-    memset(bank->memory_slots, 0, capacity * sizeof(double));
-
-    return bank;
-}
+// Fonctions neural déplacées vers neural_blackbox_computer.c

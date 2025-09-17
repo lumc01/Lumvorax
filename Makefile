@@ -48,6 +48,13 @@ obj/parallel/parallel_processor.o: src/parallel/parallel_processor.c | obj
 obj/file_formats/lum_secure_serialization.o: src/file_formats/lum_secure_serialization.c | obj
 	$(CC) $(CFLAGS) -c $< -o $@
 
+# Rules for advanced calculations modules
+obj/advanced_calculations/neural_blackbox_computer.o: src/advanced_calculations/neural_blackbox_computer.c | obj
+	$(CC) $(CFLAGS) -c $< -o $@
+
+obj/advanced_calculations/matrix_calculator.o: src/advanced_calculations/matrix_calculator.c | obj
+	$(CC) $(CFLAGS) -c $< -o $@
+
 obj/spatial/lum_instant_displacement.o: src/spatial/lum_instant_displacement.c | obj
 	$(CC) $(CFLAGS) -c $< -o $@
 

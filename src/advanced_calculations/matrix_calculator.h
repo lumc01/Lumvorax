@@ -27,8 +27,7 @@ typedef struct matrix_result_t {
     void* memory_address;         // Protection mémoire
 } matrix_result_t;
 
-// Alias pour compatibilité (évite conflit typedef)
-#define matrix_calculator_result_t matrix_result_t
+// Types unifiés pour éviter conflits
 
 // Module de Calcul Matriciel Avancé pour LUM/VORAX
 // Conforme prompt.txt - nouveau module calculs avancés
