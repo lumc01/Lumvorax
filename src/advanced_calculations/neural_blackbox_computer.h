@@ -2,6 +2,19 @@
 #ifndef NEURAL_BLACKBOX_COMPUTER_H
 #define NEURAL_BLACKBOX_COMPUTER_H
 
+#include <stddef.h>
+#include <stdint.h>
+
+// Définition complète de neural_layer_t
+typedef struct neural_layer_t {
+    size_t neuron_count;        // Nombre de neurones
+    double* weights;            // Poids synaptiques  
+    double* biases;             // Biais
+    int activation_type;        // Type d'activation
+    uint32_t magic_number;      // Protection intégrité (0xDEADBEEF)
+    void* memory_address;       // Adresse mémoire pour tracking
+} neural_layer_t;
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>

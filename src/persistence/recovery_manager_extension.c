@@ -1,8 +1,18 @@
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 199309L
+
 #include "recovery_manager_extension.h"
 #include "../debug/memory_tracker.h"
 #include <signal.h>
 #include <setjmp.h>
 #include <dirent.h>
+#include <sys/stat.h>
+#include <errno.h>
+#include <unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
 #include <sys/stat.h>
 #include <errno.h>
 #include <unistd.h>
@@ -19,6 +29,7 @@ static recovery_manager_extension_t* global_recovery_manager = NULL;
 
 // Handler pour signaux de crash
 void crash_signal_handler(int sig) {
+    (void)sig; // Supprime warning unused parameter
     (void)sig; // Supprime warning unused parameter
     if (global_recovery_manager) {
         recovery_manager_extension_mark_clean_shutdown(global_recovery_manager);
