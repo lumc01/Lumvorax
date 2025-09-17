@@ -228,6 +228,12 @@
 2025-01-17 22:15 - neural_layer_destroy + Fonction destruction sécurisée couche neuronale
 2025-01-17 22:15 - neural_layer_forward_declaration + Déclaration forward évitant erreurs compilation
 2025-01-17 22:15 - neural_blackbox_compilation_fixed + Erreurs compilation neural blackbox corrigées
+2025-01-17 22:30 - neural_layer_create + Déclaration forward fonction création couche neuronale
+2025-01-17 22:30 - neural_layer_forward_pass + Déclaration forward propagation avant
+2025-01-17 22:30 - neural_activation_function + Déclaration forward fonction activation universelle
+2025-01-17 22:30 - struct_neural_layer_t + Structure sans typedef pour éviter redéfinition
+2025-01-17 22:30 - current_loss_usage_corrected + Variable current_loss utilisée dans logging forensique
+2025-01-17 22:30 - neural_blackbox_erreurs_recurrentes_eliminees + Cycle erreurs compilation brisé définitivement
 
 ## STRUCTURES DE DONNÉES
 

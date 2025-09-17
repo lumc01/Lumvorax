@@ -9,6 +9,12 @@
 // Forward declarations pour éviter inclusion circulaire
 typedef struct neural_layer_t neural_layer_t;
 
+// Forward declarations des fonctions neural_layer
+neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_function_e activation);
+void neural_layer_destroy(neural_layer_t** layer_ptr);
+bool neural_layer_forward_pass(neural_layer_t* layer, double* input);
+double neural_activation_function(double x, activation_function_e type);
+
 // === MODULE NEURAL BLACKBOX COMPUTER 100% NATIF ===
 // Concept révolutionnaire : Utilisation authentique des réseaux neuronaux
 // pour créer une opacité naturelle sans simulation artificielle

@@ -16,8 +16,8 @@
 #define FORENSIC_LEVEL_DEBUG 4
 #define forensic_log(level, func, fmt, ...) printf("[%s] " fmt "\n", func, ##__VA_ARGS__)
 
-// Structure neural_layer_t complète
-typedef struct neural_layer_t {
+// Structure neural_layer_t complète (sans typedef pour éviter redéfinition)
+struct neural_layer_t {
     size_t neuron_count;
     size_t input_size;
     size_t output_size;
@@ -28,7 +28,7 @@ typedef struct neural_layer_t {
     activation_function_e activation_type;
     uint32_t layer_id;
     uint32_t magic_number;
-} neural_layer_t;
+};
 
 // === IMPLÉMENTATIONS NEURAL_LAYER MANQUANTES ===
 
@@ -916,9 +916,8 @@ bool neural_blackbox_multi_phase_training(
     for (size_t epoch = 0; epoch < phase1_epochs; epoch++) {
         double* gradients = neural_blackbox_compute_gradients(system, function_spec);
         double current_loss = neural_blackbox_compute_loss(system, function_spec);
-    (void)current_loss; // Suppression warning unused
 
-    forensic_log(FORENSIC_LEVEL_DEBUG, "neural_blackbox_multi_phase_training",
+        forensic_log(FORENSIC_LEVEL_DEBUG, "neural_blackbox_multi_phase_training",
                 "Loss initial calculé: %.12e", current_loss);
 
         if (!neural_blackbox_apply_optimizer(system, adam, "adam_ultra_precise", gradients, current_loss)) {
