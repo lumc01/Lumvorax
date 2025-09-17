@@ -2007,6 +2007,119 @@ args = "fi"
 task = "shell.exec"
 args = "echo \"✅ PHASE CORRECTION MODULES BLOQUÉS TERMINÉE\""
 
+[[workflows.workflow]]
+name = "EXECUTION_FORENSIQUE_COMPLETE_IMMEDIATE"
+author = 47721023
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== EXÉCUTION FORENSIQUE COMPLÈTE IMMÉDIATE ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Conformément au rapport 060 et prompt.txt\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "chmod +x prepare_forensic_logs.sh compile_with_forensic_logging.sh execute_critical_tests_forensic.sh generate_final_forensic_report.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 1: Préparation logs forensiques...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./prepare_forensic_logs.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 2: Compilation avec logging forensique...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./compile_with_forensic_logging.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 3: Tests critiques avec logs préservés...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./execute_critical_tests_forensic.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 4: Génération rapport final...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./generate_final_forensic_report.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 5: Validation finale logs préservés...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"📊 STATISTIQUES FINALES:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Logs compilation: $(find logs/forensic/compilation -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Logs exécution: $(find logs/forensic/execution -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Logs stress: $(find logs/forensic/stress_tests -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Métadonnées: $(find logs/forensic -name \"*.json\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Session ID: $(cat logs/current_session_forensic.txt)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"✅ EXÉCUTION FORENSIQUE COMPLÈTE TERMINÉE\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"📋 Rapport final: 061_RAPPORT_FORENSIQUE_FINAL_EXECUTION_COMPLETE_*.md\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"🔒 Tous logs préservés avec métadonnées forensiques\""
+
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
 channel = "stable-25_05"
