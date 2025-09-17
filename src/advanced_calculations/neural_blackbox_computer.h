@@ -9,6 +9,20 @@
 // Forward declarations pour éviter inclusion circulaire
 typedef struct neural_layer_t neural_layer_t;
 
+// Définition complète structure neural_layer_t
+struct neural_layer_t {
+    size_t neuron_count;        // Nombre de neurones dans cette couche
+    size_t input_size;          // Nombre d'entrées par neurone
+    size_t output_size;         // Nombre de sorties (= neuron_count)
+    double* weights;            // Poids synaptiques [neuron_count * input_size]
+    double* biases;             // Biais pour chaque neurone [neuron_count]
+    double* outputs;            // Sorties calculées [neuron_count]
+    double* layer_error;        // Erreurs pour backpropagation [neuron_count]
+    activation_function_e activation_type; // Type de fonction d'activation
+    uint32_t layer_id;          // Identifiant unique de couche
+    uint32_t magic_number;      // Protection intégrité (0xABCDEF01)
+};
+
 // Types d'activation neuronale (définition déplacée avant les forward declarations)
 typedef enum {
     ACTIVATION_TANH = 0,
