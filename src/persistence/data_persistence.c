@@ -24,8 +24,32 @@ persistence_context_t* persistence_context_create(const char* storage_directory)
     if (!ctx) return NULL;
 
     ctx->magic_number = PERSISTENCE_CONTEXT_MAGIC;
-    strncpy(ctx->storage_directory, storage_directory, MAX_STORAGE_PATH_LENGTH - 1);
+    
+    // PRODUCTION: Utilisation paths absolus avec /data/ si disponible
+    char absolute_path[MAX_STORAGE_PATH_LENGTH];
+    if (strncmp(storage_directory, "/", 1) == 0) {
+        // Déjà un path absolu
+        strncpy(absolute_path, storage_directory, MAX_STORAGE_PATH_LENGTH - 1);
+    } else {
+        // Convertir en path absolu pour production
+        if (access("/data", F_OK) == 0) {
+            snprintf(absolute_path, MAX_STORAGE_PATH_LENGTH, "/data/%s", storage_directory);
+        } else {
+            // Fallback pour développement - utiliser répertoire courant absolu
+            char* cwd = getcwd(NULL, 0);
+            if (cwd) {
+                snprintf(absolute_path, MAX_STORAGE_PATH_LENGTH, "%s/%s", cwd, storage_directory);
+                free(cwd);
+            } else {
+                strncpy(absolute_path, storage_directory, MAX_STORAGE_PATH_LENGTH - 1);
+            }
+        }
+    }
+    
+    strncpy(ctx->storage_directory, absolute_path, MAX_STORAGE_PATH_LENGTH - 1);
     ctx->storage_directory[MAX_STORAGE_PATH_LENGTH - 1] = '\0';
+    
+    fprintf(stderr, "[PERSISTENCE] Répertoire configuré: %s\n", ctx->storage_directory);
 
     ctx->default_format = STORAGE_FORMAT_BINARY;
     ctx->auto_backup_enabled = true;
@@ -34,8 +58,20 @@ persistence_context_t* persistence_context_create(const char* storage_directory)
     ctx->integrity_checking_enabled = true;
     ctx->transaction_log = NULL;
 
-    // Ensure storage directory exists
-    persistence_ensure_directory_exists(storage_directory);
+    // CORRECTION CRITIQUE: Ensure storage directory exists - utiliser le path absolu résolu
+    persistence_ensure_directory_exists(ctx->storage_directory);
+    
+    // VÉRIFICATION: Test d'écriture pour détecter problèmes déploiement
+    char test_file[MAX_STORAGE_PATH_LENGTH + 20];
+    snprintf(test_file, sizeof(test_file), "%s/.write_test", ctx->storage_directory);
+    FILE* test_fp = fopen(test_file, "w");
+    if (!test_fp) {
+        fprintf(stderr, "[PERSISTENCE] ERREUR: Répertoire non accessible en écriture: %s\n", ctx->storage_directory);
+        TRACKED_FREE(ctx);
+        return NULL;
+    }
+    fclose(test_fp);
+    unlink(test_file); // Nettoyer le fichier test
 
     return ctx;
 }
@@ -251,6 +287,12 @@ storage_result_t* persistence_save_lum(persistence_context_t* ctx,
         return result;
     }
 
+    // SÉCURITÉ: Sanitization du nom de fichier pour éviter path traversal
+    if (strstr(filename, "..") || strchr(filename, '/') || strchr(filename, '\\')) {
+        storage_result_set_error(result, "Nom fichier non sécurisé rejeté");
+        return result;
+    }
+
     char full_path[MAX_STORAGE_PATH_LENGTH];
     snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
 
@@ -310,6 +352,12 @@ storage_result_t* persistence_load_lum(persistence_context_t* ctx,
 
     if (!ctx || !filename || !lum) {
         storage_result_set_error(result, "Invalid input parameters");
+        return result;
+    }
+
+    // SÉCURITÉ: Sanitization du nom de fichier pour éviter path traversal  
+    if (strstr(filename, "..") || strchr(filename, '/') || strchr(filename, '\\')) {
+        storage_result_set_error(result, "Nom fichier non sécurisé rejeté");
         return result;
     }
 
@@ -393,6 +441,12 @@ storage_result_t* persistence_save_group(persistence_context_t* ctx,
         return result;
     }
 
+    // SÉCURITÉ: Sanitization du nom de fichier pour éviter path traversal
+    if (strstr(filename, "..") || strchr(filename, '/') || strchr(filename, '\\')) {
+        storage_result_set_error(result, "Nom fichier non sécurisé rejeté");
+        return result;
+    }
+
     char full_path[MAX_STORAGE_PATH_LENGTH];
     snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
 
@@ -460,6 +514,118 @@ storage_result_t* persistence_save_group(persistence_context_t* ctx,
 
     // Log transaction
     persistence_log_transaction(ctx, "SAVE_GROUP", filename, true, total_data_size);
+
+    return result;
+}
+
+storage_result_t* persistence_load_group(persistence_context_t* ctx,
+                                        const char* filename,
+                                        lum_group_t** group) {
+    storage_result_t* result = storage_result_create();
+    if (!result) return NULL;
+
+    if (!ctx || !filename || !group) {
+        storage_result_set_error(result, "Invalid input parameters");
+        return result;
+    }
+
+    // SÉCURITÉ: Sanitization du nom de fichier pour éviter path traversal
+    if (strstr(filename, "..") || strchr(filename, '/') || strchr(filename, '\\')) {
+        storage_result_set_error(result, "Nom fichier non sécurisé rejeté");
+        return result;
+    }
+
+    char full_path[MAX_STORAGE_PATH_LENGTH];
+    snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+
+    FILE* file = fopen(full_path, "rb");
+    if (!file) {
+        storage_result_set_error(result, "Failed to open file for reading");
+        return result;
+    }
+
+    // Read and validate header
+    storage_header_t header;
+    if (fread(&header, sizeof(header), 1, file) != 1) {
+        fclose(file);
+        storage_result_set_error(result, "Failed to read header");
+        return result;
+    }
+
+    if (header.magic_number != STORAGE_MAGIC_NUMBER) {
+        fclose(file);
+        storage_result_set_error(result, "Invalid file format");
+        return result;
+    }
+
+    if (header.version != STORAGE_FORMAT_VERSION) {
+        fclose(file);
+        storage_result_set_error(result, "Unsupported file version");
+        return result;
+    }
+
+    // Read group metadata
+    uint32_t group_id, count, capacity;
+    if (fread(&group_id, sizeof(group_id), 1, file) != 1 ||
+        fread(&count, sizeof(count), 1, file) != 1 ||
+        fread(&capacity, sizeof(capacity), 1, file) != 1) {
+        fclose(file);
+        storage_result_set_error(result, "Failed to read group metadata");
+        return result;
+    }
+
+    // Create group
+    *group = lum_group_create(capacity);
+    if (!*group) {
+        fclose(file);
+        storage_result_set_error(result, "Failed to create group");
+        return result;
+    }
+
+    (*group)->group_id = group_id;
+    (*group)->count = 0; // Will be incremented as we add LUMs
+
+    // Read LUMs data
+    for (uint32_t i = 0; i < count; i++) {
+        lum_t temp_lum;
+        if (fread(&temp_lum, sizeof(lum_t), 1, file) != 1) {
+            fclose(file);
+            lum_group_destroy(*group);
+            *group = NULL;
+            storage_result_set_error(result, "Failed to read LUM data");
+            return result;
+        }
+
+        // Add LUM to group (this will increment count)
+        if (!lum_group_add(*group, &temp_lum)) {
+            fclose(file);
+            lum_group_destroy(*group);
+            *group = NULL;
+            storage_result_set_error(result, "Failed to add LUM to group");
+            return result;
+        }
+    }
+
+    fclose(file);
+
+    // Verify integrity if enabled
+    if (ctx->integrity_checking_enabled) {
+        uint32_t calculated_checksum = persistence_calculate_checksum(&(*group)->group_id, sizeof((*group)->group_id));
+        if ((*group)->lums && (*group)->count > 0) {
+            calculated_checksum ^= persistence_calculate_checksum((*group)->lums, (*group)->count * sizeof(lum_t));
+        }
+        if (calculated_checksum != header.checksum) {
+            lum_group_destroy(*group);
+            *group = NULL;
+            storage_result_set_error(result, "Data integrity check failed");
+            return result;
+        }
+    }
+
+    storage_result_set_success(result, full_path, header.data_size, header.checksum);
+
+    // Log transaction
+    persistence_log_transaction(ctx, "LOAD_GROUP", filename, true, header.data_size);
 
     return result;
 }

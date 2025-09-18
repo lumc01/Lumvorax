@@ -39,11 +39,25 @@ log_manager_t* log_manager_create(void) {
 bool log_manager_create_structure(log_manager_t* manager) {
     if (!manager) return false;
     
-    // Création dossiers principaux
-    mkdir("logs", 0755);
-    mkdir("logs/current", 0755);
-    mkdir("logs/archive", 0755);
-    mkdir("logs/modules", 0755);
+    // PRODUCTION: Utiliser /data/logs si disponible, sinon ./logs
+    char logs_base[256];
+    if (access("/data", F_OK) == 0) {
+        strcpy(logs_base, "/data/logs");
+        printf("[LOG_MANAGER] Mode production: logs dans /data/logs\n");
+    } else {
+        strcpy(logs_base, "logs");
+        printf("[LOG_MANAGER] Mode développement: logs dans ./logs\n");
+    }
+    
+    // Création dossiers principaux avec path configurable
+    mkdir(logs_base, 0755);
+    char path[300];
+    snprintf(path, sizeof(path), "%s/current", logs_base);
+    mkdir(path, 0755);
+    snprintf(path, sizeof(path), "%s/archive", logs_base);
+    mkdir(path, 0755);
+    snprintf(path, sizeof(path), "%s/modules", logs_base);
+    mkdir(path, 0755);
     
     // Dossiers par module
     const char* modules[] = {
@@ -54,7 +68,7 @@ bool log_manager_create_structure(log_manager_t* manager) {
     
     for (size_t i = 0; i < sizeof(modules) / sizeof(modules[0]); i++) {
         char path[256];
-        snprintf(path, sizeof(path), "logs/modules/%s", modules[i]);
+        snprintf(path, sizeof(path), "%s/modules/%s", logs_base, modules[i]);
         mkdir(path, 0755);
     }
     
@@ -65,22 +79,46 @@ bool log_manager_create_structure(log_manager_t* manager) {
 bool log_manager_archive_session(log_manager_t* manager, const char* session_id) {
     if (!manager || !session_id) return false;
     
+    // ARCHIVAGE AUTOMATIQUE AVEC HORODATAGE COMPLET
+    time_t now = time(NULL);
+    struct tm* tm_info = localtime(&now);
+    char timestamp[32];
+    snprintf(timestamp, sizeof(timestamp), "%04d%02d%02d_%02d%02d%02d",
+             tm_info->tm_year + 1900, tm_info->tm_mon + 1, tm_info->tm_mday,
+             tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
+    
+    // Utiliser logs_base configurable
+    char logs_base[256];
+    if (access("/data", F_OK) == 0) {
+        strcpy(logs_base, "/data/logs");
+    } else {
+        strcpy(logs_base, "logs");
+    }
+    
     char archive_dir[256];
-    snprintf(archive_dir, sizeof(archive_dir), "logs/archive/session_%s", session_id);
+    snprintf(archive_dir, sizeof(archive_dir), "%s/archive/session_%s_%s", logs_base, session_id, timestamp);
     mkdir(archive_dir, 0755);
     
-    // Archivage logs de la session
+    // Archivage logs de la session courante
     char command[512];
     snprintf(command, sizeof(command), 
-             "find logs/current -name '*%s*' -exec mv {} %s/ \\; 2>/dev/null || true", 
-             session_id, archive_dir);
+             "find %s/current -name '*%s*' -exec mv {} %s/ \\; 2>/dev/null || true", 
+             logs_base, session_id, archive_dir);
     system(command);
     
+    // Copie des logs modules (garder originaux pour session active)
     snprintf(command, sizeof(command), 
-             "find logs/modules -name '*%s*' -exec cp {} %s/ \\; 2>/dev/null || true", 
-             session_id, archive_dir);
+             "find %s/modules -name '*%s*' -exec cp {} %s/ \\; 2>/dev/null || true", 
+             logs_base, session_id, archive_dir);
     system(command);
     
+    // Archivage du log principal si existant
+    snprintf(command, sizeof(command), 
+             "if [ -f %s/lum_vorax.log ]; then cp %s/lum_vorax.log %s/lum_vorax_%s.log; fi", 
+             logs_base, logs_base, archive_dir, timestamp);
+    system(command);
+    
+    printf("[LOG_MANAGER] Session archivée: %s\n", archive_dir);
     return true;
 }
 
@@ -101,9 +139,17 @@ module_logger_t* log_manager_get_module_logger(log_manager_t* manager, const cha
     strncpy(logger->module_name, module_name, sizeof(logger->module_name) - 1);
     logger->module_name[sizeof(logger->module_name) - 1] = '\0';
     
+    // Utiliser logs_base configurable au lieu de path hardcodé
+    char logs_base[256];
+    if (access("/data", F_OK) == 0) {
+        strcpy(logs_base, "/data/logs");
+    } else {
+        strcpy(logs_base, "logs");
+    }
+    
     // Création fichier log
     snprintf(logger->log_filename, sizeof(logger->log_filename),
-             "logs/modules/%s/%s_%s.log", module_name, module_name, manager->session_id);
+             "%s/modules/%s/%s_%s.log", logs_base, module_name, module_name, manager->session_id);
     
     logger->log_file = fopen(logger->log_filename, "a");
     if (!logger->log_file) return NULL;

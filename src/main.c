@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include <unistd.h>  // Pour access() et F_OK
 
 #include "lum/lum_core.h"
 #include "vorax/vorax_operations.h"
@@ -34,11 +35,27 @@ int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused)))
         return 1;
     }
 
+    // ARCHIVAGE AUTOMATIQUE: Archive session précédente si existante
+    printf("[INIT] Archivage automatique session précédente...\n");
+    time_t now = time(NULL);
+    struct tm* tm_info = localtime(&now);
+    char prev_session[64];
+    snprintf(prev_session, sizeof(prev_session), "previous_%04d%02d%02d",
+             tm_info->tm_year + 1900, tm_info->tm_mon + 1, tm_info->tm_mday);
+    log_manager_archive_session(log_manager, prev_session);
+
     LOG_MODULE("system", "INFO", "LUM/VORAX System Demo Started");
     LOG_MODULE("system", "INFO", "Log Manager Session: %s", log_manager->session_id);
+    LOG_MODULE("system", "INFO", "Auto-archivage activé pour préservation logs");
 
-    // Initialize main logger
-    lum_logger_t* logger = lum_logger_create("logs/lum_vorax.log", true, true);
+    // Initialize main logger avec path configurable
+    char main_log_path[300];
+    if (access("/data", F_OK) == 0) {
+        strcpy(main_log_path, "/data/logs/lum_vorax.log");
+    } else {
+        strcpy(main_log_path, "logs/lum_vorax.log");
+    }
+    lum_logger_t* logger = lum_logger_create(main_log_path, true, true);
     if (!logger) {
         printf("Erreur: Impossible de créer le logger\n");
         return 1;
