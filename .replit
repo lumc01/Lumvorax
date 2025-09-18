@@ -1907,12 +1907,12 @@ args = "echo \"Fin validation: $(date -u)\""
 name = "LUM/VORAX System"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax"
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mkdir -p logs && ./bin/lum_vorax"
 
 [[workflows.workflow]]
 name = "TEST_CORRECTIONS_MODULES_BLOQUES"
