@@ -354,22 +354,6 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX Console"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "LUM/VORAX Main Demo"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Build System"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "Stress Test"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
 args = "LUM/VORAX System"
 
 [[workflows.workflow]]
@@ -1235,17 +1219,6 @@ task = "shell.exec"
 args = "echo \"Fin validation: $(date -u)\""
 
 [[workflows.workflow]]
-name = "LUM/VORAX Console"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax"
-
-[[workflows.workflow]]
 name = "Mathematical Research LUM/VORAX"
 author = 47599206
 mode = "sequential"
@@ -1434,39 +1407,6 @@ args = "echo \"✅ SYSTÈME STABILISÉ - PRÊT POUR UTILISATION\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"Fin validation: $(date -u)\""
-
-[[workflows.workflow]]
-name = "LUM/VORAX Main Demo"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow]]
-name = "Build System"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "make clean && make all"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow]]
-name = "Stress Test"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax --stress-test-million"
-
-[workflows.workflow.metadata]
-outputType = "console"
 
 [[workflows.workflow]]
 name = "VALIDATION_BLACKBOX_UNIVERSEL"
