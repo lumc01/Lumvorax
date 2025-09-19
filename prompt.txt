@@ -173,15 +173,26 @@
 6. Valider compilation + tests
 7. Créer rapport forensique
 
-### SECTION 12: RAPPORT GÉNÉRATION
-**NOMMAGE RAPPORTS** : `0XX_RAPPORT_[SUJET]_DETAILLE_YYYYMMDD_HHMMSS.md`
-**CONTENU OBLIGATOIRE** :
-- Inspection ligne par ligne
-- Comparaisons standards industriels
-- Métriques authentiques vérifiables
-- Auto-critique et amélioration
-- Conformité STANDARD_NAMES.md
-- Plan correction détaillé
+### SECTION 12: TESTS OBLIGATOIRES
+- Tests stress 1M+ LUMs OBLIGATOIRES avant toute validation
+- Tests unitaires complets pour chaque module
+- Validation AddressSanitizer pour détection fuites mémoire
+- Tests intégration entre modules critiques
+
+### 13. RÈGLES DÉPENDANCES ET INCLUDES CRITIQUES
+- OBLIGATION : Vérifier TOUS les includes avant compilation
+- Modules interdépendants DOIVENT inclure headers appropriés
+- Types externes (matrix_calculator_t, etc.) EXIGENT include explicite
+- Compilation DOIT être testée après chaque ajout d'include
+- Erreurs "unknown type name" = ÉCHEC validation immédiat
+
+### 14. CONTRAINTES SERVEUR HOSTINGER (VPS 72.60.185.90)
+- RAM MAX : 8GB - Tests limités à 1M LUMs (pas 100M)
+- CPU : 4 cores max - Parallélisation limitée
+- Timeout réseau : 30s max pour API calls
+- Storage : SSD limité - Logs rotatifs obligatoires
+- API Rate limit : 1000 req/h max Hostinger API
+- Tests stress : Timeout 60s OBLIGATOIRE pour éviter crash serveur
 
 ### SECTION 13: VALIDATION FINALE
 **CHECKLIST ABSOLUE** :
@@ -245,7 +256,7 @@
 - Tous les malloc/free DOIVENT utiliser TRACKED_MALLOC/TRACKED_FREE sans exception
 
 ### Standards Temporels Forensiques  
-- INTERDICTION time(NULL) - UNIQUEMENT clock_gettime(CLOCK_MONOTONIC) nanoseconde
+- INTERDICTION time(NULL) - UNIQUEMENT clock_gettime(CLOCK_MONOTONIC, &ts) nanoseconde
 - Timestamps 64-bit nanosecondes OBLIGATOIRES pour traçabilité forensique
 - Timeouts sécurisés OBLIGATOIRES pour TOUS les tests (max 60s par test)
 - Mesures performance AUTHENTIQUES - interdiction métriques fictives

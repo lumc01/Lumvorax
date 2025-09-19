@@ -1,4 +1,5 @@
 #include "simd_optimizer.h"
+#include "../advanced_calculations/matrix_calculator.h"
 #include "../debug/memory_tracker.h"
 #include <stdlib.h>
 #include <string.h>
@@ -409,7 +410,7 @@ matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_ca
     simd_capabilities_t* caps = simd_detect_capabilities();
     if (!caps) return NULL;
 
-    printf("[SIMD] Utilisation: %s (largeur vectorielle: %zu)\n", 
+    printf("[SIMD] Utilisation: %s (largeur vectorielle: %u)\n", 
            caps->cpu_features, caps->vector_width);
 
     // Placeholder for actual SIMD matrix multiplication logic
