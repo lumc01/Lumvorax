@@ -2476,5 +2476,5 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "vm"
-run = ["bash", "-c", "mkdir -p logs && ./bin/lum_vorax"]
-build = ["make", "clean", "&&", "make", "all"]
+run = ["./bin/lum_vorax"]
+build = ["make", "clean", "all"]
