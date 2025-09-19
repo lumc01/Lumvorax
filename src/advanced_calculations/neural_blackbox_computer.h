@@ -36,24 +36,24 @@ typedef struct newton_raphson_optimizer_t {
     void* memory_address;         // Protection double-free
 } newton_raphson_optimizer_t;
 
-// Définition complète de neural_layer_t
-typedef struct neural_layer_t {
-    size_t neuron_count;        // Nombre de neurones
-    double* weights;            // Poids synaptiques  
-    double* biases;             // Biais
-    int activation_type;        // Type d'activation
-    uint32_t magic_number;      // Protection intégrité (0xDEADBEEF)
-    void* memory_address;       // Adresse mémoire pour tracking
-} neural_layer_t;
 
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
 
+// Types d'activation neuronale (OBLIGATOIRE avant utilisation)
+typedef enum {
+    ACTIVATION_TANH = 0,
+    ACTIVATION_SIGMOID = 1,
+    ACTIVATION_RELU = 2,
+    ACTIVATION_GELU = 3,
+    ACTIVATION_SWISH = 4
+} activation_function_e;
+
 // Forward declarations pour éviter inclusion circulaire
 typedef struct neural_layer_t neural_layer_t;
 
-// Définition complète structure neural_layer_t
+// Définition complète structure neural_layer_t UNIQUE
 struct neural_layer_t {
     size_t neuron_count;        // Nombre de neurones dans cette couche
     size_t input_size;          // Nombre d'entrées par neurone
@@ -66,15 +66,6 @@ struct neural_layer_t {
     uint32_t layer_id;          // Identifiant unique de couche
     uint32_t magic_number;      // Protection intégrité (0xABCDEF01)
 };
-
-// Types d'activation neuronale (définition déplacée avant les forward declarations)
-typedef enum {
-    ACTIVATION_TANH = 0,
-    ACTIVATION_SIGMOID = 1,
-    ACTIVATION_RELU = 2,
-    ACTIVATION_GELU = 3,
-    ACTIVATION_SWISH = 4
-} activation_function_e;
 
 // Forward declarations des fonctions neural_layer
 neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_function_e activation);
@@ -302,12 +293,6 @@ bool neural_blackbox_ultra_precise_training(
     neural_blackbox_computer_t* system,
     neural_function_spec_t* function_spec,
     neural_training_protocol_t* training
-);
-
-// Validation croisée ultra-précise
-bool neural_blackbox_ultra_precise_validation(
-    neural_blackbox_computer_t* system,
-    neural_function_spec_t* function_spec
 );
 
 // Validation croisée ultra-précise
