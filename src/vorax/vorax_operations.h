@@ -1,5 +1,5 @@
-#ifndef VORAX_OPERATIONS_H
-#define VORAX_OPERATIONS_H
+#ifndef VORAX_OPERATIONS_H_INCLUDED
+#define VORAX_OPERATIONS_H_INCLUDED
 
 #include "../lum/lum_core.h"
 
@@ -53,4 +53,4 @@ size_t vorax_count_total_lums(lum_group_t** groups, size_t group_count);
 vorax_result_t* vorax_create_node(lum_group_t* group1, lum_group_t* group2);
 vorax_result_t* vorax_emit_lums(lum_zone_t* zone, size_t count);
 
-#endif // VORAX_OPERATIONS_H
+#endif /* VORAX_OPERATIONS_H_INCLUDED */ // VORAX_OPERATIONS_H

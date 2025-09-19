@@ -1,5 +1,5 @@
-#ifndef PERFORMANCE_METRICS_H
-#define PERFORMANCE_METRICS_H
+#ifndef PERFORMANCE_METRICS_H_INCLUDED
+#define PERFORMANCE_METRICS_H_INCLUDED
 
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
@@ -189,4 +189,4 @@ uint64_t convert_lums_per_second_to_bits_per_second(uint64_t lums_per_second);
 double convert_lums_per_second_to_gigabits_per_second(uint64_t lums_per_second);
 uint64_t calculate_authentic_lum_throughput(uint64_t lum_count, uint64_t microseconds_elapsed);
 
-#endif // PERFORMANCE_METRICS_H
+#endif /* PERFORMANCE_METRICS_H_INCLUDED */

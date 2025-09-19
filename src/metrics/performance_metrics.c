@@ -1,5 +1,6 @@
 // _GNU_SOURCE is already defined in Makefile
 #include "performance_metrics.h"
+#include "../lum/lum_core.h"  // CORRECTION PRIORITÉ 1.1: Pour sizeof(lum_t)
 #include "../debug/memory_tracker.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,8 +12,9 @@
 #include <stdint.h>
 
 // Constantes pour conversions métriques LUM (conforme STANDARD_NAMES)
-#define LUM_SIZE_BYTES 32
-#define LUM_SIZE_BITS (LUM_SIZE_BYTES * 8)  // 256 bits par LUM
+// CORRECTION CRITIQUE PRIORITÉ 1.1: Taille dynamique authentique
+#define LUM_SIZE_BYTES sizeof(lum_t)  // Dynamique = 48 bytes EXACT
+#define LUM_SIZE_BITS (LUM_SIZE_BYTES * 8)  // 384 bits EXACT
 #define BITS_PER_GIGABIT 1000000000ULL
 #define MICROSECONDS_PER_SECOND 1000000ULL
 

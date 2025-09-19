@@ -1,5 +1,5 @@
-#ifndef LUM_CORE_H
-#define LUM_CORE_H
+#ifndef LUM_CORE_H_INCLUDED
+#define LUM_CORE_H_INCLUDED
 
 #include <stdint.h>
 #include <stdbool.h>
@@ -20,12 +20,13 @@ typedef struct {
     uint64_t timestamp;             // Timestamp de création nanoseconde
     void* memory_address;           // Adresse mémoire pour traçabilité
     uint32_t checksum;              // Vérification intégrité
+    uint32_t magic_number;          // PRIORITÉ 1.2: Magic number pour validation ultra-sécurisée
     uint8_t is_destroyed;           // Protection double-free (nouveau STANDARD_NAMES 2025-01-10)
-    uint8_t reserved[3];            // Padding pour alignement 32 bytes
+    uint8_t reserved[3];            // Padding pour alignement
 } lum_t;
 
-// Vérification ABI corrigée - la structure lum_t réelle fait 48 bytes
-_Static_assert(sizeof(lum_t) == 48, "lum_t structure must be exactly 48 bytes on this platform");
+// Vérification ABI corrigée - la structure lum_t réelle fait 56 bytes avec magic_number (alignement 8 bytes)
+_Static_assert(sizeof(lum_t) == 56, "lum_t structure must be exactly 56 bytes on this platform");
 
 // LUM structure types
 typedef enum {
@@ -94,9 +95,65 @@ void lum_group_print(const lum_group_t* group);
 // Fonction de destruction sécurisée
 void lum_safe_destroy(lum_t** lum_ptr);
 
+// PRIORITÉ 1.2: Fonction destruction groupe ultra-sécurisée selon roadmap
+void lum_group_destroy_ultra_secure(lum_group_t** group_ptr);
+
 // Constantes de validation mémoire
 #define LUM_MAGIC_DESTROYED 0xDEADBEEF
 #define LUM_VALIDATION_PATTERN 0xCAFEBABE
+
+// PRIORITÉ 1.3: TIMING FORENSIQUE DIFFÉRENCIÉ selon roadmap exact
+// LOGS GRANULAIRES: CLOCK_MONOTONIC pour mesures précises
+#define FORENSIC_TIMING_START(timer_var) \
+    struct timespec timer_var##_start, timer_var##_end; \
+    clock_gettime(CLOCK_MONOTONIC, &timer_var##_start)
+
+#define FORENSIC_TIMING_END(timer_var) \
+    clock_gettime(CLOCK_MONOTONIC, &timer_var##_end)
+
+#define FORENSIC_TIMING_CALC_NS(timer_var) \
+    ((timer_var##_end.tv_sec - timer_var##_start.tv_sec) * 1000000000ULL + \
+     (timer_var##_end.tv_nsec - timer_var##_start.tv_nsec))
+
+// FICHIERS/MÉTADONNÉES: CLOCK_REALTIME pour horodatage
+#define FILE_TIMESTAMP_GET() \
+    ({ \
+        struct timespec ts; \
+        clock_gettime(CLOCK_REALTIME, &ts); \
+        ts.tv_sec * 1000000000ULL + ts.tv_nsec; \
+    })
+
+// PRIORITÉ 2.2: GESTION ERREURS ZERO-TOLERANCE selon roadmap exact
+typedef struct {
+    bool success;
+    char error_message[256];
+    void* data;
+    uint32_t error_code;
+} result_t;
+
+#define FORENSIC_ERROR 1
+#define FORENSIC_CRITICAL 2
+
+// Pattern obligatoire zero-tolerance
+#define CHECK_RESULT_OR_FAIL(result, cleanup_call, error_msg) \
+    do { \
+        if (!(result).success) { \
+            printf("[FORENSIC_ERROR] %s failed: %s\n", #result, (result).error_message); \
+            cleanup_call; \
+            printf("[FORENSIC_ERROR] Chain failure: %s\n", error_msg); \
+            return (result_t){false, error_msg, NULL, 1}; \
+        } \
+    } while(0)
+
+// PRIORITÉ 2.3: VALIDATION RANGES SYSTÉMATIQUE selon roadmap exact
+#define VALIDATE_ARRAY_ACCESS(array, index, size, context) \
+    do { \
+        if ((index) >= (size)) { \
+            printf("[FORENSIC_CRITICAL] Array access out of bounds in %s: index=%zu size=%zu\n", \
+                (context), (size_t)(index), (size_t)(size)); \
+            abort(); \
+        } \
+    } while(0)
 
 // Macros de validation
 #define VALIDATE_LUM_PTR(ptr) \
@@ -123,4 +180,4 @@ void lum_safe_destroy(lum_t** lum_ptr);
         } \
     } while(0)
 
-#endif // LUM_CORE_H
+#endif /* LUM_CORE_H_INCLUDED */ // LUM_CORE_H

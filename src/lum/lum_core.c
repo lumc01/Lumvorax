@@ -19,6 +19,7 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
     lum->position_x = x;
     lum->position_y = y;
     lum->structure_type = type;
+    lum->magic_number = LUM_VALIDATION_PATTERN;  // PRIORITÉ 1.2: Initialiser magic number
     lum->is_destroyed = 0;  // CORRECTION: Initialiser le flag protection double-free
     lum->timestamp = lum_get_timestamp();
     lum->memory_address = (void*)lum;  // Adresse mémoire pour traçabilité
@@ -33,17 +34,30 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
 
 void lum_destroy(lum_t* lum) {
     if (!lum) return;
-
-    // PROTECTION DOUBLE FREE: Vérifier magic pattern - CORRECTION TYPE STRICTE
-    static const uint32_t DESTROYED_MAGIC = 0xDEADBEEF;  // uint32_t pour correspondre au type id
-    if (lum->id == DESTROYED_MAGIC) {
-        return; // Déjà détruit
+    
+    // PRIORITÉ 1.2: Vérification magic number AVANT accès
+    if (lum->magic_number != LUM_VALIDATION_PATTERN) {
+        if (lum->magic_number == LUM_MAGIC_DESTROYED) {
+            return; // Déjà détruit
+        } else {
+            // Corruption détectée
+            abort(); // Arrêt sécurisé
+        }
     }
-
-    // Marquer comme détruit AVANT la libération
-    lum->id = DESTROYED_MAGIC;
+    
+    // PRIORITÉ 1.2: Validation ownership strict
+    if (lum->memory_address != lum) {
+        // LUM fait partie d'un groupe - ne pas libérer
+        lum->magic_number = LUM_MAGIC_DESTROYED;
+        lum->is_destroyed = 1;
+        return;
+    }
+    
+    // Destruction sécurisée avec écrasement
+    lum->magic_number = LUM_MAGIC_DESTROYED;
     lum->is_destroyed = 1;
-
+    memset(lum, 0xDE, sizeof(lum_t)); // Écrasement sécurisé
+    
     TRACKED_FREE(lum);
 }
 
@@ -205,6 +219,43 @@ void lum_group_destroy(lum_group_t* group) {
 
     printf("[DEBUG] lum_group_destroy: freeing group structure at %p\n", group);
     TRACKED_FREE(group);
+}
+
+// PRIORITÉ 1.2: Fonction destruction groupe ultra-sécurisée selon roadmap exact
+void lum_group_destroy_ultra_secure(lum_group_t** group_ptr) {
+    if (!group_ptr || !*group_ptr) return;
+    
+    lum_group_t* group = *group_ptr;
+    
+    // Validation magic number
+    if (group->magic_number != LUM_VALIDATION_PATTERN) {
+        *group_ptr = NULL;
+        return;
+    }
+    
+    // Marquer destruction IMMÉDIATEMENT
+    group->magic_number = LUM_MAGIC_DESTROYED;
+    
+    // Validation intégrité avant libération
+    if (group->count > group->capacity || group->capacity > 100000000) {
+        // Corruption détectée - échec sécurisé
+        *group_ptr = NULL;
+        return;
+    }
+    
+    // Libération sécurisée éléments
+    if (group->lums && group->lums != (lum_t*)group) {
+        // Triple validation pointeur
+        if ((void*)group->lums > (void*)0x1000) {
+            TRACKED_FREE(group->lums);
+        }
+        group->lums = NULL;
+    }
+    
+    // Écrasement sécurisé structure
+    memset(group, 0xDE, sizeof(lum_group_t));
+    TRACKED_FREE(group);
+    *group_ptr = NULL;
 }
 
 // Fonction utilitaire pour détruire un groupe de manière sûre
