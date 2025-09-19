@@ -301,3 +301,29 @@
 **VERSION** : v2.1 - 2025-01-18 20:00:00
 **MODULES COUVERTS** : 118+ confirmés
 **MISE À JOUR SUIVANTE** : Après correction 4 modules bloqués
+# RÈGLES DÉVELOPPEMENT LUM/VORAX - REPLIT ASSISTANT
+
+## RÈGLES OPÉRATIONNELLES REPLIT
+1. **Plateforme unique**: Développement et déploiement exclusivement sur Replit
+2. **Ports autorisés**: Utiliser 0.0.0.0 au lieu de localhost, port 5000 recommandé
+3. **Pas de conteneurisation**: Interdiction Docker/VM/conteneurs
+4. **Code complet**: Toujours écrire le code complet, jamais d'ellipses (...)
+5. **Fichiers protégés**: Ne pas modifier .replit, replit.nix sans demande explicite
+
+## RÈGLES SPÉCIFIQUES LUM/VORAX
+1. **Standards forensiques**: Logs SHA-256, horodatage nanoseconde
+2. **Protection mémoire**: TRACKED_MALLOC/FREE obligatoire
+3. **Tests stress**: Minimum 1M LUMs pour validation
+4. **Documentation**: Mise à jour STANDARD_NAMES.md pour chaque ajout
+5. **Compilation**: Zéro warning, zéro erreur toléré
+
+## HIÉRARCHIE MODIFICATIONS
+1. **Analyse impact**: Vérifier compatibilité modules existants
+2. **Tests validation**: Compilation + exécution avant livraison
+3. **Synchronisation**: Mise à jour dépendances après modifications
+4. **Forensique**: Logs préservés pour audit
+
+## COMMUNICATION SERVEUR (FUTUR)
+- Module hostinger_client.c pour communication
+- Tests connexion depuis Replit uniquement
+- Pas de développement direct sur serveur externe
