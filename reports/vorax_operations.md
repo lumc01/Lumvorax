@@ -2,14 +2,14 @@
 002. **Scope**: Core implementation of VORAX operations: fusion (⧉), split (⇅), cycle (⟲), flow (→)
 003. **Responsibilities**: Spatial LUM transformations, conservation verification, result packaging
 004. **Files**: src/vorax/vorax_operations.h, src/vorax/vorax_operations.c
-005. **Report Generated**: 2025-09-04T20:53:30.154769Z
+005. **Report Generated**: 2025-09-19T01:57:51.932428Z
 006. **Evidence Status**: VERIFIED
-007. **Code Metrics**: 328 executable lines of C code
+007. **Code Metrics**: 354 executable lines of C code
 008. **Build Status**: COMPILED
 009. **Definitions**: Standard C implementation patterns
 010. **Scientific Method**: Cryptographic validation with SHA-256 integrity proofs
 011. ## Public Interfaces and Function Signatures
-012. **Header Declaration**: src/vorax/vorax_operations.h (52 lines)
+012. **Header Declaration**: src/vorax/vorax_operations.h (56 lines)
 013. **Interface Count**: 5 primary function groups identified
 014. **Function Types**: vorax_fuse, vorax_split, vorax_cycle
 015. **Memory Management**: Explicit malloc/free patterns with null checking
@@ -21,7 +21,7 @@
 021. ## Execution Process Documentation
 022. **Build Command**: `make clean && make all`
 023. **Compilation Target**: bin/lum_vorax executable binary
-024. **Binary Hash**: 8b6ca8d521765ac6b56ec7f483e744f88eeb56e1e426617eee7e3e5e840e9ae3
+024. **Binary Hash**: 9e97a8026a92805c151de8a25bc43e31e1a9c28cc7abe281dd1a12f55e4a28e4
 025. **Execution Command**: `./bin/lum_vorax`
 026. **Log Output**: logs/lum_vorax.log (structured events)
 027. **Console Output**: Real-time execution trace with timestamps
@@ -35,7 +35,7 @@
 035. **Exit Status**: 0 for success, non-zero for failure conditions
 036. ## Real Results and Evidence References
 037. **Execution Status**: SUCCESS
-038. **Log File**: logs/lum_vorax.log (63 bytes)
+038. **Log File**: logs/lum_vorax.log (126 bytes)
 039. **Evidence Directory**: evidence/ with checksums and metrics
 040. **Result Count**: 3 documented outcomes
 041. **Primary Results**: Fusion: 5 LUMs → 5 LUMs
@@ -71,8 +71,8 @@
 071. ## Logs Location and Cryptographic Hashes
 072. **Log Directory**: logs/ (structured NDJSON event logs)
 073. **Primary Log**: logs/lum_vorax.log
-074. **Log Hash**: 10a909457372e9eca3a036b75215fda8776e6aeec5cd9477f7d27ca752147833
-075. **Evidence Hash**: 0cae2bb66933617f2a23b1fabc337eb52ab3056b2894cb154abae3b3558bd5aa
+074. **Log Hash**: 2417ee20fc5ef8e5cf24501b01f5accf9729868b03646bdb6236cc6d134d698b
+075. **Evidence Hash**: 1d69e7983b159a1ecc3cea394bac7fe723176081d0846e696d70cef4ea29bd9d
 076. **Schema Format**: NDJSON with timestamp, sequence, operation fields
 077. **Hash Algorithm**: SHA-256 (256-bit cryptographic digest)
 078. **Checksum File**: evidence/checksums.txt (all file hashes)
@@ -96,5 +96,5 @@
 096. **Conservation**: Mathematical law ensuring LUM count preservation
 097. **AST**: Abstract Syntax Tree - parsed representation of VORAX code
 098. **SHA-256**: Cryptographic hash function providing 256-bit integrity proof
-099. **Reproduction**: `make clean && make all && ./bin/lum_vorax > evidence/run_1757019210.log`
+099. **Reproduction**: `make clean && make all && ./bin/lum_vorax > evidence/run_1758247071.log`
 100. **Status**: COMPLETE | **Next**: Peer review and validation

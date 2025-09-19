@@ -58,7 +58,13 @@ def generate_forensic_report():
     report = {
         'metadata': {
             'timestamp': datetime.utcnow().isoformat() + 'Z',
-            'system': os.uname()._asdict(),
+            'system': {
+                'sysname': os.uname().sysname,
+                'nodename': os.uname().nodename,
+                'release': os.uname().release,
+                'version': os.uname().version,
+                'machine': os.uname().machine
+            },
             'python_version': sys.version,
             'working_directory': os.getcwd()
         },
