@@ -67,12 +67,17 @@ void lum_safe_destroy(lum_t** lum_ptr) {
 
     lum_t* lum = *lum_ptr;
 
-    // PROTECTION DOUBLE FREE: Vérifier si déjà détruit
-    static const uint32_t DESTROYED_MAGIC = 0xDEADBEEF;
-    if (lum->id == DESTROYED_MAGIC) {
-        // Déjà détruit, juste invalider le pointeur
-        *lum_ptr = NULL;
-        return;
+    // CORRECTION CRITIQUE: Utiliser magic_number uniforme (PRIORITÉ 1.2 - Fix architecture)
+    if (lum->magic_number != LUM_VALIDATION_PATTERN) {
+        if (lum->magic_number == LUM_MAGIC_DESTROYED) {
+            // Déjà détruit, juste invalider le pointeur
+            *lum_ptr = NULL;
+            return;
+        } else {
+            // Corruption détectée - échec sécurisé
+            *lum_ptr = NULL;
+            return;
+        }
     }
 
     // PROTECTION CORRUPTION: Vérifier cohérence des données
@@ -83,14 +88,14 @@ void lum_safe_destroy(lum_t** lum_ptr) {
                lum->id, lum->memory_address, lum);
 
         // Marquer comme détruit mais ne pas libérer la mémoire
-        lum->id = DESTROYED_MAGIC;
+        lum->magic_number = LUM_MAGIC_DESTROYED;
         lum->is_destroyed = 1;
         *lum_ptr = NULL;
         return;
     }
 
-    // Destruction normale avec marquage sécurisé
-    lum->id = DESTROYED_MAGIC;
+    // Destruction normale avec magic_number uniforme
+    lum->magic_number = LUM_MAGIC_DESTROYED;
     lum->is_destroyed = 1;
 
     TRACKED_FREE(*lum_ptr);
