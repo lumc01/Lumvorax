@@ -185,6 +185,13 @@
 - Types externes (matrix_calculator_t, etc.) EXIGENT include explicite
 - Compilation DOIT être testée après chaque ajout d'include
 - Erreurs "unknown type name" = ÉCHEC validation immédiat
+- - Utilisation obligatoire de TRACKED_MALLOC/TRACKED_FREE
+- - Protection double-free avec memory_address
+- - Magic numbers pour validation intégrité
+- - Tests stress 1M+ LUMs obligatoires
+- - RÈGLE CRITIQUE: Tous les types utilisés dans les signatures de fonctions doivent être définis AVANT leur utilisation
+- - VALIDATION: Chaque typedef doit être déclaré une seule fois et avant toute référence
+- - COMPILATION: Aucune erreur de type "unknown type name" ne doit subsister
 
 ### 14. CONTRAINTES SERVEUR HOSTINGER (VPS 72.60.185.90)
 - RAM MAX : 8GB - Tests limités à 1M LUMs (pas 100M)

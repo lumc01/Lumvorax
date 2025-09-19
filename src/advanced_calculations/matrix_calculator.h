@@ -28,6 +28,7 @@ typedef struct matrix_result_t {
 } matrix_result_t;
 
 // Types unifiés pour éviter conflits
+typedef struct matrix_result_t matrix_calculator_result_t; // Alias pour compatibilité
 
 // Module de Calcul Matriciel Avancé pour LUM/VORAX
 // Conforme prompt.txt - nouveau module calculs avancés
@@ -104,7 +105,7 @@ matrix_lum_result_t* matrix_solve_linear_system(lum_matrix_t* coefficient_matrix
 
 // Tests stress pour 100M+ LUMs
 bool matrix_stress_test_100m_lums(matrix_config_t* config);
-matrix_calculator_result_t* matrix_benchmark_operations(size_t matrix_size, matrix_config_t* config);
+matrix_result_t* matrix_benchmark_operations(size_t matrix_size, matrix_config_t* config);
 
 // Utilitaires
 matrix_config_t* matrix_config_create_default(void);

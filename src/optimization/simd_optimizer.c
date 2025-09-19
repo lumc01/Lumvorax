@@ -345,6 +345,11 @@ bool simd_fma_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_result_
     return true;
 }
 
+void simd_optimize_lum_batch(lum_t* lums, size_t count, optimization_config_t* config) {
+    (void)config; // Suppress unused parameter warning
+    if (!lums || count == 0) return;
+}
+
 bool simd_optimize_lum_operations(simd_optimizer_t* optimizer, 
                                    lum_group_t* group, 
                                    simd_operation_e operation,
