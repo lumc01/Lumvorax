@@ -228,6 +228,70 @@
 - Métriques standardisées
 - Overhead documenté
 
+# Règles de développement et de validation
+
+## Tests et validation
+- Tous les tests doivent passer sans exception
+- Les métriques de performance doivent être mesurées et documentées  
+- La gestion mémoire doit être irréprochable (aucune fuite)
+
+## NOUVELLES RÈGLES FORENSIQUES ULTRA-STRICTES
+
+### Protection Mémoire Absolue
+- INTERDICTION TOTALE des sizeof() incohérents : LUM_SIZE_BYTES doit TOUJOURS égaler sizeof(lum_t)
+- Magic numbers OBLIGATOIRES pour TOUS les modules avec vérification avant CHAQUE accès
+- Protection double-free ABSOLUTE avec magic patterns DEADBEEF/DESTROYED
+- Validation ownership pointeurs avant CHAQUE libération mémoire
+- Tous les malloc/free DOIVENT utiliser TRACKED_MALLOC/TRACKED_FREE sans exception
+
+### Standards Temporels Forensiques  
+- INTERDICTION time(NULL) - UNIQUEMENT clock_gettime(CLOCK_MONOTONIC) nanoseconde
+- Timestamps 64-bit nanosecondes OBLIGATOIRES pour traçabilité forensique
+- Timeouts sécurisés OBLIGATOIRES pour TOUS les tests (max 60s par test)
+- Mesures performance AUTHENTIQUES - interdiction métriques fictives
+
+### Cohérence Architecturale Stricte
+- Headers guards OBLIGATOIRES format #ifndef MODULE_NAME_H_INCLUDED
+- Includes TOUJOURS dans l'ordre: system, project, local
+- Tous paramètres unused DOIVENT être marqués (void)param
+- Variables unused INTERDITES - compilation -Werror -Wunused OBLIGATOIRE
+
+### Tests Forensiques Obligatoires
+- Test intégrité CHAQUE structure avant utilisation
+- Validation ranges TOUS les tableaux et indices
+- Protection contre integer overflow dans TOUS les calculs
+- Vérification cohérence état AVANT/APRÈS chaque opération
+
+### Logging Forensique Ultra-Strict
+- TOUS les malloc/free DOIVENT être loggés avec file:line
+- Traçabilité complète allocation → libération OBLIGATOIRE  
+- Checksums validation données AVANT écriture disque
+- Metadata forensiques timestamps+hash TOUS les fichiers
+
+### Gestion Erreurs Zero-Tolerance
+- TOUS les return codes DOIVENT être vérifiés (pas d'exceptions)
+- Propagation erreurs OBLIGATOIRE jusqu'au main()
+- États partiels INTERDITS - rollback complet en cas d'échec
+- Messages erreurs DESCRIPTIFS avec context forensique complet
+
+### Standards Nommage Renforcés  
+- Fonctions destruction OBLIGATOIREMENT suffixe _destroy() ou _safe_destroy()
+- Constantes magic PREFIXE MODULE_NAME_MAGIC/DESTROYED_MAGIC
+- Variables globales statiques PREFIXE g_ + module_name
+- Tous noms CONFORMES STANDARD_NAMES.md STRICTEMENT
+
+### Validation Cross-Platform
+- Code PORTABLE - éviter spécificités Linux uniquement
+- Gestion endianness pour persistance données
+- Chemins fichiers CROSS-PLATFORM avec validation
+- Tests compatibilité différents compilateurs (gcc/clang)
+
+### Sécurité Forensique
+- Sanitisation OBLIGATOIRE tous inputs utilisateur
+- Validation paths fichiers contre directory traversal  
+- Écrasement sécurisé données sensibles (triple pass)
+- Audit trail complet TOUTES modifications données
+
 **VERSION** : v2.1 - 2025-01-18 20:00:00
 **MODULES COUVERTS** : 118+ confirmés
 **MISE À JOUR SUIVANTE** : Après correction 4 modules bloqués
