@@ -162,18 +162,18 @@ void simd_avx512_mass_lum_operations(lum_t* lums, size_t count) {
     if (!lums || count < 16) return;
 
     size_t simd_count = (count / 16) * 16;
-    
+
     printf("[SIMD_AVX512] Opérations vectorisées avancées sur %zu LUMs (groupes de 16)\n", simd_count);
 
     for (size_t i = 0; i < simd_count; i += 16) {
         // AMÉLIORATION 100%: Opérations vectorisées étendues et sophistiquées
-        
+
         // Phase 1: Chargement vectorisé optimisé des données LUM complètes
         uint32_t presence_batch[16];
         uint32_t position_x_batch[16];  
         uint32_t position_y_batch[16];
         uint32_t lum_id_batch[16];
-        
+
         for (int j = 0; j < 16; j++) {
             presence_batch[j] = lums[i + j].presence;
             position_x_batch[j] = lums[i + j].position_x;
@@ -198,17 +198,17 @@ void simd_avx512_mass_lum_operations(lum_t* lums, size_t count) {
         __m512i center_y = _mm512_set1_epi32(128);
         __m512i delta_x = _mm512_sub_epi32(pos_x_data, center_x);
         __m512i delta_y = _mm512_sub_epi32(pos_y_data, center_y);
-        
+
         // Calcul vectorisé de la distance au centre (approximation Manhattan)
         __m512i abs_delta_x = _mm512_abs_epi32(delta_x);
         __m512i abs_delta_y = _mm512_abs_epi32(delta_y);
         __m512i manhattan_dist = _mm512_add_epi32(abs_delta_x, abs_delta_y);
-        
+
         // Optimisation présence basée sur proximité (LUMs centraux = présence renforcée)
         __mmask16 central_mask = _mm512_cmplt_epi32_mask(manhattan_dist, _mm512_set1_epi32(50));
         __m512i proximity_boost = _mm512_mask_blend_epi32(central_mask, zeros, ones);
         __m512i enhanced_presence = _mm512_add_epi32(normalized_presence, proximity_boost);
-        
+
         // Capping à 1 pour maintenir contrainte binaire
         __mmask16 overflow_mask = _mm512_cmpgt_epi32_mask(enhanced_presence, ones);
         __m512i final_presence = _mm512_mask_blend_epi32(overflow_mask, enhanced_presence, ones);
@@ -234,7 +234,7 @@ void simd_avx512_mass_lum_operations(lum_t* lums, size_t count) {
             lums[i + j].timestamp = operation_timestamp; // Traçabilité forensique
         }
     }
-    
+
     printf("[SIMD_AVX512] Terminé: %zu LUMs optimisés avec opérations vectorisées avancées\n", simd_count);
 }
 
@@ -300,7 +300,7 @@ void simd_print_performance_comparison(simd_result_t* scalar, simd_result_t* vec
 // Implementation of missing SIMD functions
 bool simd_vector_add_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_result_t* result) {
     if (!optimizer || !group || !result) return false;
-    
+
     // Implémentation vectorisée addition
     for (size_t i = 0; i < group->count; i++) {
         group->lums[i].position_x += 1.0f;  // Exemple d'opération
@@ -311,7 +311,7 @@ bool simd_vector_add_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_
 
 bool simd_vector_multiply_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_result_t* result) {
     if (!optimizer || !group || !result) return false;
-    
+
     // Implémentation vectorisée multiplication
     for (size_t i = 0; i < group->count; i++) {
         group->lums[i].position_x *= 2.0f;  // Exemple d'opération
@@ -322,7 +322,7 @@ bool simd_vector_multiply_lums(simd_optimizer_t* optimizer, lum_group_t* group, 
 
 bool simd_parallel_transform_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_result_t* result) {
     if (!optimizer || !group || !result) return false;
-    
+
     // Implémentation transformation parallèle
     for (size_t i = 0; i < group->count; i++) {
         float temp = group->lums[i].position_x;
@@ -335,7 +335,7 @@ bool simd_parallel_transform_lums(simd_optimizer_t* optimizer, lum_group_t* grou
 
 bool simd_fma_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_result_t* result) {
     if (!optimizer || !group || !result) return false;
-    
+
     // Implémentation Fused Multiply-Add
     for (size_t i = 0; i < group->count; i++) {
         group->lums[i].position_x = group->lums[i].position_x * 2.0f + 1.0f;
@@ -400,4 +400,28 @@ bool simd_optimize_lum_operations(simd_optimizer_t* optimizer,
                                (end.tv_nsec - start.tv_nsec);
 
     return success;
+}
+
+// OPTIMISATION: Multiplication matricielle SIMD universelle
+matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_calculator_t* b, void* config) {
+
+    // Détection automatique des capacités SIMD
+    simd_capabilities_t* caps = simd_detect_capabilities();
+    if (!caps) return NULL;
+
+    printf("[SIMD] Utilisation: %s (largeur vectorielle: %zu)\n", 
+           caps->cpu_features, caps->vector_width);
+
+    // Placeholder for actual SIMD matrix multiplication logic
+    // This would involve selecting the appropriate SIMD implementation based on 'caps'
+    // and then performing the matrix multiplication.
+
+    // For demonstration, we'll just call a hypothetical scalar version
+    // and free the detected capabilities.
+    // matrix_result_t* result = matrix_multiply_scalar(a, b, config); // Hypothetical scalar multiply
+
+    simd_capabilities_destroy(caps); // Clean up detected capabilities
+
+    // Returning NULL as a placeholder for actual result
+    return NULL; 
 }
