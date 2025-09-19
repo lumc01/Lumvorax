@@ -231,7 +231,7 @@ lum_file_result_t* lum_export_single_binary(const lum_t* lum, const char* filena
     }
 
     struct timespec start, end;
-    clock_gettime(CLOCK_MONOTONIC, &start);
+    clock_gettime(CLOCK_MONOTONIC, &start); // MONOTONIC pour mesures performance
 
     lum_file_context_t* context = lum_file_context_create(filename, config, true);
     if (!context) {
@@ -310,17 +310,17 @@ lum_file_result_t* lum_export_single_text(const lum_t* lum, const char* filename
     fprintf(file, "Position Y: %d\n", lum->position_y);
     // Position Z n'existe pas dans lum_t structure
     fprintf(file, "Structure Type: %u\n", (unsigned int)lum->structure_type);
-    
+
     if (config->include_timestamps) {
         fprintf(file, "Timestamp: %llu\n", (unsigned long long)lum->timestamp);
     }
-    
+
     fprintf(file, "Memory Address: %p\n", lum->memory_address);
-    
+
     if (config->include_checksums) {
         fprintf(file, "Checksum: %u\n", lum->checksum);
     }
-    
+
     fprintf(file, "Is Destroyed: %u\n", lum->is_destroyed);
 
     size_t bytes_written = ftell(file);
@@ -357,11 +357,11 @@ lum_file_result_t* lum_export_single_json(const lum_t* lum, const char* filename
     fprintf(file, "{\n");
     fprintf(file, "  \"format\": \"LUM/VORAX Native JSON\",\n");
     fprintf(file, "  \"version\": \"%d.%d\",\n", LUM_FILE_VERSION_MAJOR, LUM_FILE_VERSION_MINOR);
-    
+
     if (config->include_timestamps) {
         fprintf(file, "  \"export_timestamp\": %llu,\n", (unsigned long long)time(NULL));
     }
-    
+
     fprintf(file, "  \"lum\": {\n");
     fprintf(file, "    \"id\": %u,\n", lum->id);
     fprintf(file, "    \"presence\": %u,\n", lum->presence);
@@ -371,25 +371,25 @@ lum_file_result_t* lum_export_single_json(const lum_t* lum, const char* filename
       // Position Z n'existe pas dans lum_t structure
     fprintf(file, "    },\n");
     fprintf(file, "    \"structure_type\": %u", (unsigned int)lum->structure_type);
-    
+
     if (config->include_timestamps) {
         fprintf(file, ",\n    \"timestamp\": %llu", (unsigned long long)lum->timestamp);
     }
-    
+
     if (config->include_checksums) {
         fprintf(file, ",\n    \"checksum\": %u", lum->checksum);
     }
-    
+
     fprintf(file, ",\n    \"is_destroyed\": %s", lum->is_destroyed ? "true" : "false");
     fprintf(file, "\n  }");
-    
+
     if (config->include_metadata) {
         fprintf(file, ",\n  \"metadata\": {\n");
         fprintf(file, "    \"total_lums\": 1,\n");
         fprintf(file, "    \"file_size_bytes\": %zu\n", sizeof(lum_t));
         fprintf(file, "  }");
     }
-    
+
     fprintf(file, "\n}\n");
 
     size_t bytes_written = ftell(file);
@@ -435,19 +435,19 @@ lum_file_result_t* lum_export_group_csv(const lum_group_t* group, const char* fi
     // Données LUMs
     for (size_t i = 0; i < group->count; i++) {
         const lum_t* lum = &group->lums[i];
-        
+
         fprintf(file, "%u,%u,%d,%d,%u", 
                 lum->id, lum->presence, lum->position_x, lum->position_y, 
                 (unsigned int)lum->structure_type);
-        
+
         if (config->include_timestamps) {
             fprintf(file, ",%llu", (unsigned long long)lum->timestamp);
         }
-        
+
         if (config->include_checksums) {
             fprintf(file, ",%u", lum->checksum);
         }
-        
+
         fprintf(file, ",%s\n", lum->is_destroyed ? "true" : "false");
     }
 
@@ -474,13 +474,13 @@ lum_file_result_t* lum_export_single(const lum_t* lum, const char* filename, lum
         case LUM_FORMAT_NATIVE_BINARY:
         case LUM_FORMAT_BINARY_OPTIMIZED:
             return lum_export_single_binary(lum, filename, config);
-        
+
         case LUM_FORMAT_TEXT_READABLE:
             return lum_export_single_text(lum, filename, config);
-        
+
         case LUM_FORMAT_JSON_STRUCTURED:
             return lum_export_single_json(lum, filename, config);
-        
+
         default: {
             lum_file_result_t* result = lum_file_result_create();
             if (result) {

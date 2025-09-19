@@ -292,6 +292,12 @@
 - Écrasement sécurisé données sensibles (triple pass)
 - Audit trail complet TOUTES modifications données
 
+### TIMING ET HORODATAGE FORENSIQUE
+- **Logs granulaires** : Utiliser `clock_gettime(CLOCK_MONOTONIC, &ts)` pour mesures précises et séquencement
+- **Fichiers/métadonnées** : Utiliser `clock_gettime(CLOCK_REALTIME, &ts)` pour horodatage création/modification
+- **Fallback robuste** : `time()` en dernier recours si clock_gettime échoue
+- **Format standard** : uint64_t en nanosecondes pour logs, time_t pour métadonnées fichiers
+
 **VERSION** : v2.1 - 2025-01-18 20:00:00
 **MODULES COUVERTS** : 118+ confirmés
 **MISE À JOUR SUIVANTE** : Après correction 4 modules bloqués

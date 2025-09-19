@@ -106,13 +106,13 @@ void lum_group_destroy_ultra_secure(lum_group_t** group_ptr) {
 }
 ```
 
-### 1.3 CORRECTION TIMING FORENSIQUE
-**Problème**: Rapport 065 ligne 156 - clock() au lieu de CLOCK_MONOTONIC
-**Impact**: Mesures temporelles imprécises, vulnérabilité falsification
+### 1.3 CORRECTION TIMING FORENSIQUE DIFFÉRENCIÉ
+**Problème**: Rapport 065 ligne 156 - Usage incorrect des types de timestamps
+**Impact**: Confusion entre mesures performance et horodatage fichiers
 
-**Correction globale required**:
+**Correction différenciée requise**:
 ```c
-// NOUVEAU: Macro timing forensique ultra-précise
+// LOGS GRANULAIRES: CLOCK_MONOTONIC pour mesures précises
 #define FORENSIC_TIMING_START(timer_var) \
     struct timespec timer_var##_start, timer_var##_end; \
     clock_gettime(CLOCK_MONOTONIC, &timer_var##_start)
@@ -123,13 +123,20 @@ void lum_group_destroy_ultra_secure(lum_group_t** group_ptr) {
 #define FORENSIC_TIMING_CALC_NS(timer_var) \
     ((timer_var##_end.tv_sec - timer_var##_start.tv_sec) * 1000000000ULL + \
      (timer_var##_end.tv_nsec - timer_var##_start.tv_nsec))
+
+// FICHIERS/MÉTADONNÉES: CLOCK_REALTIME pour horodatage
+#define FILE_TIMESTAMP_GET() \
+    ({ \
+        struct timespec ts; \
+        clock_gettime(CLOCK_REALTIME, &ts); \
+        ts.tv_sec * 1000000000ULL + ts.tv_nsec; \
+    })
 ```
 
-**Remplacement dans tous les modules**:
-- `src/tests/test_stress_million_lums.c` - remplacer clock()
-- `src/metrics/performance_metrics.c` - standardiser timing
-- `src/advanced_calculations/matrix_calculator.c` - timing précis
-- Tous modules avec mesures temporelles
+**Remplacement spécialisé**:
+- **MONOTONIC**: `src/tests/test_stress_million_lums.c`, `src/metrics/performance_metrics.c`
+- **REALTIME**: `src/file_formats/lum_native_file_handler.c`, métadonnées persistence
+- **clock()**: Supprimer complètement de tous les modules
 
 ---
 
