@@ -327,3 +327,19 @@
 - Module hostinger_client.c pour communication
 - Tests connexion depuis Replit uniquement
 - Pas de développement direct sur serveur externe
+
+## CONFIGURATION SERVEUR HOSTINGER EXACTE
+- IP: 72.60.185.90
+- CPU: 2x AMD EPYC 9354P (2 cores max)
+- RAM: 7.8GB total (6.8GB disponible max)
+- Stockage: 100GB (95.82GB disponible)
+- OS: Ubuntu 24.04.3 LTS
+- API Key: D5H7HbnwEaTTzoRGmg6qsBETcFMVYkt8OFP2zoTq37405d69
+
+## RÈGLES LIMITATION RESSOURCES SERVEUR
+1. **CPU**: Maximum 2 threads simultanés, pas de surcharge
+2. **RAM**: Limite absolue 6GB pour éviter swap (6.8GB disponible)
+3. **Stockage**: Ne pas dépasser 90GB d'utilisation
+4. **Réseau**: Connexions limitées pour éviter surcharge
+5. **Tests**: Jamais plus de 1M LUMs sur serveur distant
+6. **Processus**: Un seul processus LUM/VORAX à la fois sur serveur
