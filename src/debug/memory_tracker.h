@@ -10,7 +10,7 @@
 
 // Configuration du debugging mémoire
 #define MEMORY_DEBUG_ENABLED 1
-#define MAX_MEMORY_ENTRIES 10000
+#define MAX_MEMORY_ENTRIES 50000
 
 typedef struct {
     void* ptr;

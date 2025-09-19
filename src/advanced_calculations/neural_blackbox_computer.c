@@ -174,7 +174,7 @@ bool newton_raphson_update_weights(newton_raphson_optimizer_t* newton, neural_bl
     if (!newton || !system || !gradients) return false;
     
     // Validation magic number
-    if (newton->magic_number != 0xNEWT0001) return false;
+    if (newton->magic_number != 0xDEAD0001) return false;
     if (system->blackbox_magic != NEURAL_BLACKBOX_MAGIC) return false;
     
     // Newton-Raphson nécessite calcul Hessienne (approximation BFGS pour performance)
