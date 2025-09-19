@@ -6,7 +6,43 @@
 **Source**: Analyse des 10 derniers rapports + identification des problèmes persistants  
 **Conformité**: prompt.txt + STANDARD_NAMES.md + Standards forensiques ultra-stricts  
 
+avant quoi que ce soit , LECTURE DU prompt.txt pour ce rapeler des regles strick avant de procedr a quoi que ce soit ! 
+
+cle api *
+D5H7HbnwEaTTzoRGmg6qsBETcFMVYkt8OFP2zoTq37405d69
+
+curl -X GET "https://developers.hostinger.com/api/vps/v1/virtual-machines" \
+-H "Authorization: Bearer D5H7HbnwEaTTzoRGmg6qsBETcFMVYkt8OFP2zoTq37405d69" \
+-H "Content-Type: application/json"
+
 ---
+
+rm -rf obj bin
+mkdir -p obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug obj/spatial obj/complex_modules obj/advanced_calculations obj/file_formats bin
+clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -c src/lum/lum_core.c -o obj/lum/lum_core.o
+clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -c src/vorax/vorax_operations.c -o obj/vorax/vorax_operations.o
+clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -c src/parser/vorax_parser.c -o obj/parser/vorax_parser.o
+clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -c src/binary/binary_lum_converter.c -o obj/binary/binary_lum_converter.o
+clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -c src/logger/lum_logger.c -o obj/logger/lum_logger.o
+clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -c src/logger/log_manager.c -o obj/logger/log_manager.o
+clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -c src/optimization/memory_optimizer.c -o obj/optimization/memory_optimizer.o
+clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -c src/optimization/pareto_optimizer.c -o obj/optimization/pareto_optimizer.o
+clang -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -c src/optimization/simd_optimizer.c -o obj/optimization/simd_optimizer.o
+src/optimization/simd_optimizer.c:348:57: error: unknown type name 'optimization_config_t'
+  348 | void simd_optimize_lum_batch(lum_t* lums, size_t count, optimization_config_t* config) {
+      |                                                         ^
+src/optimization/simd_optimizer.c:412:69: warning: unused parameter 'a' [-Wunused-parameter]
+  412 | matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_calculator_t* b, void* config) {
+      |                                                                     ^
+src/optimization/simd_optimizer.c:412:93: warning: unused parameter 'b' [-Wunused-parameter]
+  412 | matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_calculator_t* b, void* config) {
+      |                                                                                             ^
+src/optimization/simd_optimizer.c:412:102: warning: unused parameter 'config' [-Wunused-parameter]
+  412 | matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_calculator_t* b, void* config) {
+      |                                                                                                      ^
+3 warnings and 1 error generated.
+make: *** [Makefile:41: obj/optimization/simd_optimizer.o] Error 1
+
 
 ## 🎯 RÉSUMÉ EXÉCUTIF ROADMAP
 
