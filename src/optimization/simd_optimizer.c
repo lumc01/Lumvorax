@@ -1,5 +1,6 @@
 #include "simd_optimizer.h"
 #include "../advanced_calculations/matrix_calculator.h"
+#include "../complex_modules/ai_optimization.h"
 #include "../debug/memory_tracker.h"
 #include <stdlib.h>
 #include <string.h>
@@ -345,7 +346,7 @@ bool simd_fma_lums(simd_optimizer_t* optimizer, lum_group_t* group, simd_result_
     return true;
 }
 
-void simd_optimize_lum_batch(lum_t* lums, size_t count, optimization_config_t* config) {
+void simd_optimize_lum_batch(lum_t* lums, size_t count, ai_optimization_config_t* config) {
     (void)config; // Suppress unused parameter warning
     if (!lums || count == 0) return;
 }
@@ -410,6 +411,9 @@ bool simd_optimize_lum_operations(simd_optimizer_t* optimizer,
 
 // OPTIMISATION: Multiplication matricielle SIMD universelle
 matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_calculator_t* b, void* config) {
+    (void)a; // Suppress unused parameter warning
+    (void)b; // Suppress unused parameter warning
+    (void)config; // Suppress unused parameter warning
 
     // Détection automatique des capacités SIMD
     simd_capabilities_t* caps = simd_detect_capabilities();
