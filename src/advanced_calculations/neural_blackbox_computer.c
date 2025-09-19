@@ -16,19 +16,7 @@
 #define FORENSIC_LEVEL_DEBUG 4
 #define forensic_log(level, func, fmt, ...) printf("[%s] " fmt "\n", func, ##__VA_ARGS__)
 
-// Structure neural_layer_t complète (sans typedef pour éviter redéfinition)
-struct neural_layer_t {
-    size_t neuron_count;
-    size_t input_size;
-    size_t output_size;
-    double* weights;
-    double* biases;
-    double* outputs;
-    double* layer_error;
-    activation_function_e activation_type;
-    uint32_t layer_id;
-    uint32_t magic_number;
-};
+// Structure neural_layer_t déjà définie dans neural_blackbox_computer.h - pas de redéfinition nécessaire
 
 // === IMPLÉMENTATIONS NEURAL_LAYER MANQUANTES ===
 
@@ -121,10 +109,8 @@ bool neural_layer_forward_pass(neural_layer_t* layer, double* input) {
 
 // === STUB IMPLEMENTATIONS FOR MISSING FUNCTIONS ===
 
-// Missing type definitions (basic stubs)
-typedef struct { double* data; size_t size; } adam_ultra_precise_optimizer_t;
-typedef struct { double* data; size_t size; } lbfgs_optimizer_t;
-typedef struct { double* data; size_t size; } newton_raphson_optimizer_t;
+// Types adam_ultra_precise_optimizer_t, lbfgs_optimizer_t, newton_raphson_optimizer_t 
+// déjà définis dans neural_blackbox_computer.h - pas de redéfinition nécessaire
 
 // Implémentation complète perturbation paramètres pour gradients numériques
 void neural_blackbox_perturb_parameter(neural_blackbox_computer_t* system, size_t param_idx, double perturbation) {
@@ -172,7 +158,7 @@ adam_ultra_precise_optimizer_t* adam_ultra_precise_create(double lr, double beta
     adam->beta2 = beta2;
     adam->epsilon = epsilon;
     adam->iteration = 0;
-    adam->magic_number = 0xADAMULTRA;
+    adam->magic_number = 0xADAC0001;
     adam->memory_address = (void*)adam;
     
     // Allocation mémoire pour momentum et velocity (sera dimensionnée lors du premier usage)
@@ -188,7 +174,7 @@ bool newton_raphson_update_weights(newton_raphson_optimizer_t* newton, neural_bl
     if (!newton || !system || !gradients) return false;
     
     // Validation magic number
-    if (newton->magic_number != 0xNEWTONRH) return false;
+    if (newton->magic_number != 0xNEWT0001) return false;
     if (system->blackbox_magic != NEURAL_BLACKBOX_MAGIC) return false;
     
     // Newton-Raphson nécessite calcul Hessienne (approximation BFGS pour performance)
@@ -254,7 +240,7 @@ void adam_ultra_precise_destroy(adam_ultra_precise_optimizer_t** adam) {
 lbfgs_optimizer_t* lbfgs_create(int memory_size, double tolerance) {
     (void)memory_size; (void)tolerance;
     lbfgs_optimizer_t* lbfgs = malloc(sizeof(lbfgs_optimizer_t));
-    if (lbfgs) { lbfgs->data = NULL; lbfgs->size = 0; }
+    if (lbfgs) { lbfgs->history_s = NULL; lbfgs->history_y = NULL; lbfgs->history_count = 0; }
     return lbfgs;
 }
 
@@ -265,7 +251,7 @@ void lbfgs_destroy(lbfgs_optimizer_t** lbfgs) {
 newton_raphson_optimizer_t* newton_raphson_create(double tolerance) {
     (void)tolerance;
     newton_raphson_optimizer_t* newton = malloc(sizeof(newton_raphson_optimizer_t));
-    if (newton) { newton->data = NULL; newton->size = 0; }
+    if (newton) { newton->hessian_inv = NULL; newton->param_count = 0; }
     return newton;
 }
 
@@ -318,7 +304,7 @@ bool adam_ultra_precise_update_weights(void* adam_ptr, neural_blackbox_computer_
     if (!adam_ptr || !system || !gradients) return false;
     
     adam_ultra_precise_optimizer_t* adam = (adam_ultra_precise_optimizer_t*)adam_ptr;
-    if (adam->magic_number != 0xADAMULTRA) return false;
+    if (adam->magic_number != 0xADAC0001) return false;
     
     // Initialisation lors du premier usage
     if (!adam->momentum) {
