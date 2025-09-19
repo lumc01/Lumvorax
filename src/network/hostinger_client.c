@@ -8,8 +8,8 @@
 #include <unistd.h>
 #include <sys/socket.h>
 #include <netdb.h>
-#include <openssl/ssl.h>
-#include <openssl/err.h>
+// #include <openssl/ssl.h>  // Disabled - not available in environment
+// #include <openssl/err.h>  // Disabled - not available in environment
 
 #define HOSTINGER_MAGIC_NUMBER 0x484F5354  // "HOST"
 

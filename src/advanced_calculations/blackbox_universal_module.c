@@ -470,7 +470,10 @@ bool blackbox_stress_test_stealth_mode(blackbox_config_t* config) {
     }
     
     // Nettoyage sécurisé
-    if(result) blackbox_execution_result_destroy(&result);
+    if(result) {
+        TRACKED_FREE(result);
+        result = NULL;
+    }
     blackbox_destroy_universal_advanced(&stealth_blackbox);
     
     printf("🔐 Stealth test completed - all traces erased\n");

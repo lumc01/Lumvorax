@@ -158,8 +158,8 @@ double activation_gelu(double x) {
     return 0.5 * x * (1.0 + tanh(sqrt(2.0/M_PI) * (x + 0.044715 * x * x * x)));
 }
 
-// Création couche neuronale (modèle flat arrays canonique)
-neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_function_e activation) {
+// Création couche neuronale (version neural_network_processor - renommée pour éviter conflit)
+static neural_layer_t* neural_layer_create_processor(size_t neuron_count, size_t input_size, activation_function_e activation) {
     if (neuron_count == 0 || neuron_count > NEURAL_MAX_NEURONS_PER_LAYER || input_size == 0) {
         return NULL;
     }
@@ -225,7 +225,7 @@ neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, acti
 }
 
 // Destruction couche (modèle flat arrays)
-void neural_layer_destroy(neural_layer_t** layer_ptr) {
+static void neural_layer_destroy_processor(neural_layer_t** layer_ptr) {
     if (!layer_ptr || !*layer_ptr) return;
     
     neural_layer_t* layer = *layer_ptr;
@@ -343,7 +343,7 @@ bool neural_layer_save_gradients(neural_layer_t* layer, const char* filename) {
 }
 
 // Propagation avant (modèle flat arrays) avec traçage complet
-bool neural_layer_forward_pass(neural_layer_t* layer, double* inputs) {
+static bool neural_layer_forward_pass_processor(neural_layer_t* layer, double* inputs) {
     if (!layer || !inputs || layer->magic_number != NEURAL_MAGIC_NUMBER) {
         return false;
     }

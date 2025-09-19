@@ -42,8 +42,8 @@ void matrix_set_element(matrix_calculator_t* calc, size_t row, size_t col, doubl
     calc->data[row * calc->cols + col] = value;
 }
 
-// Multiplication matricielle optimisée LUM
-matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_calculator_t* b, void* config) {
+// Multiplication matricielle optimisée LUM (version matrix_calculator)
+static matrix_result_t* matrix_multiply_lum_optimized_calculator(matrix_calculator_t* a, matrix_calculator_t* b, void* config) {
     (void)config; // Suppress unused parameter warning
     if (!a || !b || a->magic_number != MATRIX_CALCULATOR_MAGIC || b->magic_number != MATRIX_CALCULATOR_MAGIC) {
         return NULL;

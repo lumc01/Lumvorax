@@ -11,15 +11,7 @@
 #define HOSTINGER_MAX_STORAGE_GB 90
 #define HOSTINGER_MAX_CONCURRENT_LUMS 1000000  // 1M max sur serveur
 
-typedef struct {
-    size_t current_ram_usage_mb;
-    size_t current_storage_usage_gb;
-    size_t active_threads;
-    size_t active_lums;
-    bool resource_check_enabled;
-    void* memory_address;
-    uint32_t magic_number;
-} hostinger_resource_monitor_t;
+// Structure hostinger_resource_monitor_t déjà définie dans hostinger_resource_limiter.h
 
 static hostinger_resource_monitor_t* global_monitor = NULL;
 

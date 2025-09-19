@@ -4,6 +4,7 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include <stddef.h>
 
 // Configuration pour connexion serveur Hostinger
 typedef struct {
