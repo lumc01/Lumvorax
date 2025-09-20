@@ -41,6 +41,7 @@ typedef struct newton_raphson_optimizer_t {
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include "neural_ultra_precision_architecture.h"
 
 // Types d'activation neuronale (définis dans common_types.h)
 

@@ -30,12 +30,30 @@ typedef struct {
 } neural_architecture_config_t;
 #endif
 
-// Forward declaration - type défini dans neural_blackbox_computer.h
-struct neural_ultra_precision_config_t;
+// **TYPE MANQUANT - DÉFINITION COMPLÈTE**
+typedef struct {
+    // Configuration précision
+    size_t precision_target_digits;      // Nombre de chiffres de précision cible
+    double precision_target;             // Précision numérique cible (ex: 1e-15)
 
-// EXPLICATION TECHNIQUE :
-// Cette structure définit comment adapter l'architecture neuronale selon
-// la précision requise. Plus de digits = plus de couches + plus de neurones.
+    // Architecture réseau
+    size_t base_depth;                   // Profondeur de base du réseau
+    size_t precision_layers;             // Couches dédiées à la précision
+    size_t neurons_per_precision_digit;  // Neurones par chiffre de précision
+
+    // Dimensions entrée/sortie
+    size_t input_dimensions;             // Dimensions d'entrée
+    size_t output_dimensions;            // Dimensions de sortie
+
+    // Facteurs d'échelle
+    double memory_scaling_factor;        // Facteur d'échelle mémoire
+    double computation_scaling_factor;   // Facteur d'échelle computation
+
+    // Options avancées
+    bool enable_adaptive_precision;      // Précision adaptative
+    bool enable_error_correction;        // Correction d'erreur
+    uint32_t magic_number;              // Protection double-free
+} neural_ultra_precision_config_t;
 
 // Calcul architecture selon précision requise
 neural_architecture_config_t* neural_calculate_ultra_precision_architecture(
@@ -69,22 +87,16 @@ double activation_ultra_precise_piecewise(double x);
 #define DEFAULT_PRECISION_LAYERS 10
 #define DEFAULT_NEURONS_PER_DIGIT 100
 
-// Configuration architecture adaptative ultra-précise
-struct neural_ultra_precision_config_t* neural_create_ultra_precision_config(
-    size_t precision_digits
-);
-
-struct neural_ultra_precision_config_t* neural_ultra_precision_config_create(
+// Fonctions de gestion
+neural_ultra_precision_config_t* neural_ultra_precision_config_create(
     size_t precision_digits, 
     size_t input_dims, 
     size_t output_dims
 );
 
-void neural_destroy_ultra_precision_config(struct neural_ultra_precision_config_t** config);
+void neural_ultra_precision_config_destroy(neural_ultra_precision_config_t* config);
 
-void neural_ultra_precision_config_destroy(struct neural_ultra_precision_config_t* config);
-
-bool neural_ultra_precision_config_validate(const struct neural_ultra_precision_config_t* config);
+bool neural_ultra_precision_config_validate(const neural_ultra_precision_config_t* config);
 
 // Validation architecture ultra-précise
 bool neural_validate_ultra_precision_architecture(

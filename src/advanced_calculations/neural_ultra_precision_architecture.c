@@ -1,14 +1,15 @@
-
 #include "neural_ultra_precision_architecture.h"
 #include "neural_blackbox_computer.h"
 #include "../debug/memory_tracker.h"
 #include <stdlib.h>
+#include <string.h>
 #include <math.h>
+#include <stdio.h> // Include for printf
 
 // Architecture neuronale selon précision requise
 neural_architecture_config_t* neural_calculate_ultra_precision_architecture(
-    size_t input_dim __attribute__((unused)), 
-    size_t output_dim __attribute__((unused)), 
+    size_t input_dim __attribute__((unused)),
+    size_t output_dim __attribute__((unused)),
     size_t precision_digits
 ) {
     if (precision_digits == 0 || precision_digits > MAX_PRECISION_DIGITS) {
@@ -67,7 +68,7 @@ static size_t neural_calculate_optimal_width_ultra(
 double activation_ultra_precise_tanh(double x) {
     if (x > 20.0) return 1.0;
     if (x < -20.0) return -1.0;
-    
+
     double exp_2x = exp(2.0 * x);
     return (exp_2x - 1.0) / (exp_2x + 1.0);
 }
@@ -75,7 +76,7 @@ double activation_ultra_precise_tanh(double x) {
 double activation_ultra_precise_sigmoid(double x) {
     if (x > 20.0) return 1.0;
     if (x < -20.0) return 0.0;
-    
+
     return 1.0 / (1.0 + exp(-x));
 }
 
@@ -86,25 +87,29 @@ double activation_ultra_precise_piecewise(double x) {
 }
 
 // Configuration ultra-précise
-neural_ultra_precision_config_t* neural_create_ultra_precision_config(
-    size_t precision_digits
+neural_ultra_precision_config_t* neural_ultra_precision_config_create(
+    size_t precision_digits,
+    size_t input_dims,
+    size_t output_dims
 ) {
     if (precision_digits == 0 || precision_digits > MAX_PRECISION_DIGITS) {
         return NULL;
     }
 
-    neural_ultra_precision_config_t* config = TRACKED_MALLOC(sizeof(neural_ultra_precision_config_t));
+    neural_ultra_precision_config_t* config = TRACKED_MALLOC(
+        sizeof(neural_ultra_precision_config_t));
     if (!config) return NULL;
 
+    // Initialisation avec valeurs par défaut
     config->precision_target_digits = precision_digits;
-    config->base_depth = DEFAULT_PRECISION_LAYERS;
-    config->precision_layers = precision_digits / 5; // 1 couche par 5 digits
+    config->precision_target = 1.0 / pow(10.0, (double)precision_digits);
+    config->base_depth = precision_digits / 5 + 5;  // Profondeur adaptative
+    config->precision_layers = DEFAULT_PRECISION_LAYERS;
     config->neurons_per_precision_digit = DEFAULT_NEURONS_PER_DIGIT;
-    config->memory_scaling_factor = precision_digits * 2.0;
-    config->precision_target = pow(10.0, -(double)precision_digits);
-    config->input_dimensions = 1; // Par défaut
-    config->output_dimensions = 1;
-    config->computation_scaling_factor = precision_digits * 1.5;
+    config->input_dimensions = input_dims;
+    config->output_dimensions = output_dims;
+    config->memory_scaling_factor = 1.0 + (double)precision_digits * 0.1;
+    config->computation_scaling_factor = 1.0 + (double)precision_digits * 0.05;
     config->enable_adaptive_precision = true;
     config->enable_error_correction = true;
     config->magic_number = NEURAL_ULTRA_PRECISION_MAGIC;
@@ -112,39 +117,27 @@ neural_ultra_precision_config_t* neural_create_ultra_precision_config(
     return config;
 }
 
-neural_ultra_precision_config_t* neural_ultra_precision_config_create(
-    size_t precision_digits, 
-    size_t input_dims, 
-    size_t output_dims
-) {
-    neural_ultra_precision_config_t* config = neural_create_ultra_precision_config(precision_digits);
-    if (config) {
-        config->input_dimensions = input_dims;
-        config->output_dimensions = output_dims;
-    }
-    return config;
-}
-
-void neural_destroy_ultra_precision_config(neural_ultra_precision_config_t** config) {
-    if (config && *config) {
-        (*config)->magic_number = 0xDEADDEAD;
-        TRACKED_FREE(*config);
-        *config = NULL;
-    }
-}
-
 void neural_ultra_precision_config_destroy(neural_ultra_precision_config_t* config) {
-    if (config) {
-        config->magic_number = 0xDEADDEAD;
-        TRACKED_FREE(config);
+    if (!config) return;
+
+    // Vérification magic number
+    if (config->magic_number != NEURAL_ULTRA_PRECISION_MAGIC) {
+        printf("[MEMORY_TRACKER] WARNING: Invalid magic number in ultra precision config\n");
+        return;
     }
+
+    config->magic_number = 0;  // Invalidation
+    TRACKED_FREE(config);
 }
 
 bool neural_ultra_precision_config_validate(const neural_ultra_precision_config_t* config) {
     if (!config) return false;
     if (config->magic_number != NEURAL_ULTRA_PRECISION_MAGIC) return false;
-    if (config->precision_target_digits == 0 || config->precision_target_digits > MAX_PRECISION_DIGITS) return false;
-    if (config->input_dimensions == 0 || config->output_dimensions == 0) return false;
+    if (config->precision_target_digits == 0) return false;
+    if (config->precision_target_digits > MAX_PRECISION_DIGITS) return false;
+    if (config->input_dimensions == 0) return false;
+    if (config->output_dimensions == 0) return false;
+
     return true;
 }
 
@@ -154,17 +147,17 @@ bool neural_validate_ultra_precision_architecture(
     size_t precision_target_digits
 ) {
     if (!config || precision_target_digits == 0) return false;
-    
+
     // Vérifier que la complexité est suffisante pour la précision demandée
     if (precision_target_digits > 10 && config->complexity_target < NEURAL_COMPLEXITY_HIGH) {
         return false;
     }
-    
+
     // Vérifier capacité mémoire suffisante
     size_t min_memory = precision_target_digits * 512 * 1024; // 512KB par digit minimum
     if (config->memory_capacity < min_memory) {
         return false;
     }
-    
+
     return true;
 }
