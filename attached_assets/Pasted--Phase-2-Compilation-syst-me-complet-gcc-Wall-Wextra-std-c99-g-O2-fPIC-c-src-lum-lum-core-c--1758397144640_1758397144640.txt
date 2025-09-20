@@ -1,0 +1,183 @@
+
+Phase 2: Compilation système complet
+gcc -Wall -Wextra -std=c99 -g -O2 -fPIC -c src/lum/lum_core.c -o obj/lum/lum_core.o
+gcc -Wall -Wextra -std=c99 -g -O2 -fPIC -c src/vorax/vorax_operations.c -o obj/vorax/vorax_operations.o
+gcc -Wall -Wextra -std=c99 -g -O2 -fPIC -c src/binary/binary_lum_converter.c -o obj/binary/binary_lum_converter.o
+gcc -Wall -Wextra -std=c99 -g -O2 -fPIC -c src/parser/vorax_parser.c -o obj/parser/vorax_parser.o
+gcc -Wall -Wextra -std=c99 -g -O2 -fPIC -c src/logger/lum_logger.c -o obj/logger/lum_logger.o
+gcc -Wall -Wextra -std=c99 -g -O2 -fPIC -c src/logger/log_manager.c -o obj/logger/log_manager.o
+src/logger/log_manager.c: In function ‘log_manager_get_module_logger’:
+src/logger/log_manager.c:151:5: warning: ‘snprintf’ argument 7 may overlap destination object ‘manager’ [-Wrestrict]
+  151 |     snprintf(logger->log_filename, sizeof(logger->log_filename),
+      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+  152 |              "%s/modules/%s/%s_%s.log", logs_base, module_name, module_name, manager->session_id);
+      |              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/logger/log_manager.c:125:63: note: destination object referenced by ‘restrict’-qualified argument 1 was declared here
+  125 | module_logger_t* log_manager_get_module_logger(log_manager_t* manager, const char* module_name) {
+      |                                                ~~~~~~~~~~~~~~~^~~~~~~
+gcc -Wall -Wextra -std=c99 -g -O2 -fPIC -c src/debug/memory_tracker.c -o obj/debug/memory_tracker.o
+gcc -Wall -Wextra -std=c99 -g -O2 -fPIC -c src/debug/forensic_logger.c -o obj/debug/forensic_logger.o
+gcc -Wall -Wextra -std=c99 -g -O2 -fPIC -c src/debug/ultra_forensic_logger.c -o obj/debug/ultra_forensic_logger.o
+src/debug/memory_tracker.c: In function ‘tracked_strdup’:
+src/debug/memory_tracker.c:347:46: error: implicit declaration of function ‘strdup’; did you mean ‘strcmp’? [-Wimplicit-function-declaration]
+  347 |     if (!memory_tracker_is_enabled()) return strdup(str);
+      |                                              ^~~~~~
+      |                                              strcmp
+src/debug/memory_tracker.c:347:46: error: returning ‘int’ from a function with return type ‘char *’ makes pointer from integer without a cast [-Wint-conversion]
+  347 |     if (!memory_tracker_is_enabled()) return strdup(str);
+      |                                              ^~~~~~~~~~~
+src/debug/memory_tracker.c: In function ‘tracked_strndup’:
+src/debug/memory_tracker.c:359:46: error: implicit declaration of function ‘strndup’; did you mean ‘strncmp’? [-Wimplicit-function-declaration]
+  359 |     if (!memory_tracker_is_enabled()) return strndup(str, n);
+      |                                              ^~~~~~~
+      |                                              strncmp
+src/debug/memory_tracker.c:359:46: error: returning ‘int’ from a function with return type ‘char *’ makes pointer from integer without a cast [-Wint-conversion]
+  359 |     if (!memory_tracker_is_enabled()) return strndup(str, n);
+      |                                              ^~~~~~~~~~~~~~~
+src/debug/memory_tracker.c:361:18: error: implicit declaration of function ‘strnlen’; did you mean ‘strlen’? [-Wimplicit-function-declaration]
+  361 |     size_t len = strnlen(str, n);
+      |                  ^~~~~~~
+      |                  strlen
+make: *** [Makefile:132: obj/debug/memory_tracker.o] Error 1
+make: *** Waiting for unfinished jobs....
+In file included from src/debug/ultra_forensic_logger.c:2:
+src/debug/ultra_forensic_logger.h:47:1: error: unknown type name ‘bool’
+   47 | bool ultra_forensic_logger_init(void);
+      | ^~~~
+src/debug/ultra_forensic_logger.h:9:1: note: ‘bool’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+    8 | #include <pthread.h>
+  +++ |+#include <stdbool.h>
+    9 | 
+src/debug/ultra_forensic_logger.h:53:72: error: unknown type name ‘bool’
+   53 |                                  const char* module, const char* test, bool success);
+      |                                                                        ^~~~
+src/debug/ultra_forensic_logger.h:53:72: note: ‘bool’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.h:60:1: error: unknown type name ‘bool’
+   60 | bool ultra_forensic_validate_all_logs_exist(void);
+      | ^~~~
+src/debug/ultra_forensic_logger.h:60:1: note: ‘bool’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.c:15:8: error: unknown type name ‘bool’
+   15 | static bool g_forensic_initialized = false;
+      |        ^~~~
+src/debug/ultra_forensic_logger.c:8:1: note: ‘bool’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+    7 | #include <unistd.h>
+  +++ |+#include <stdbool.h>
+    8 | 
+src/debug/ultra_forensic_logger.c:15:38: error: ‘false’ undeclared here (not in a function)
+   15 | static bool g_forensic_initialized = false;
+      |                                      ^~~~~
+src/debug/ultra_forensic_logger.c:15:38: note: ‘false’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.c: In function ‘get_precise_timestamp_ns’:
+src/debug/ultra_forensic_logger.c:20:9: error: implicit declaration of function ‘clock_gettime’ [-Wimplicit-function-declaration]
+   20 |     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+      |         ^~~~~~~~~~~~~
+src/debug/ultra_forensic_logger.c:20:23: error: ‘CLOCK_MONOTONIC’ undeclared (first use in this function)
+   20 |     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+      |                       ^~~~~~~~~~~~~~~
+src/debug/ultra_forensic_logger.c:20:23: note: each undeclared identifier is reported only once for each function it appears in
+src/debug/ultra_forensic_logger.c: At top level:
+src/debug/ultra_forensic_logger.c:27:8: error: unknown type name ‘bool’
+   27 | static bool create_forensic_directories(void) {
+      |        ^~~~
+src/debug/ultra_forensic_logger.c:27:8: note: ‘bool’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.c: In function ‘create_forensic_directories’:
+src/debug/ultra_forensic_logger.c:44:12: error: ‘true’ undeclared (first use in this function)
+   44 |     return true;
+      |            ^~~~
+src/debug/ultra_forensic_logger.c:44:12: note: ‘true’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.c: At top level:
+src/debug/ultra_forensic_logger.c:47:1: error: unknown type name ‘bool’
+   47 | bool ultra_forensic_logger_init(void) {
+      | ^~~~
+src/debug/ultra_forensic_logger.c:47:1: note: ‘bool’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.c: In function ‘ultra_forensic_logger_init’:
+src/debug/ultra_forensic_logger.c:52:16: error: ‘true’ undeclared (first use in this function)
+   52 |         return true;
+      |                ^~~~
+src/debug/ultra_forensic_logger.c:52:16: note: ‘true’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.c: At top level:
+src/debug/ultra_forensic_logger.c:168:72: error: unknown type name ‘bool’
+  168 |                                  const char* module, const char* test, bool success) {
+      |                                                                        ^~~~
+src/debug/ultra_forensic_logger.c:168:72: note: ‘bool’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.c:247:1: error: unknown type name ‘bool’
+  247 | bool ultra_forensic_validate_all_logs_exist(void) {
+      | ^~~~
+src/debug/ultra_forensic_logger.c:247:1: note: ‘bool’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.c: In function ‘ultra_forensic_validate_all_logs_exist’:
+src/debug/ultra_forensic_logger.c:260:5: error: unknown type name ‘bool’
+  260 |     bool all_valid = true;
+      |     ^~~~
+src/debug/ultra_forensic_logger.c:260:5: note: ‘bool’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.c:260:22: error: ‘true’ undeclared (first use in this function)
+  260 |     bool all_valid = true;
+      |                      ^~~~
+src/debug/ultra_forensic_logger.c:260:22: note: ‘true’ is defined in header ‘<stdbool.h>’; this is probably fixable by adding ‘#include <stdbool.h>’
+src/debug/ultra_forensic_logger.c: In function ‘ultra_forensic_logger_init’:
+src/debug/ultra_forensic_logger.c:70:1: warning: control reaches end of non-void function [-Wreturn-type]
+   70 | }
+      | ^
+src/debug/ultra_forensic_logger.c: In function ‘create_forensic_directories’:
+src/debug/ultra_forensic_logger.c:45:1: warning: control reaches end of non-void function [-Wreturn-type]
+   45 | }
+      | ^
+make: *** [Makefile:132: obj/debug/ultra_forensic_logger.o] Error 1
+src/lum/lum_core.c: In function ‘lum_group_create’:
+src/lum/lum_core.c:124:40: error: implicit declaration of function ‘aligned_alloc’ [-Wimplicit-function-declaration]
+  124 |     lum_group_t* group = (lum_group_t*)aligned_alloc(64, sizeof(lum_group_t));
+      |                                        ^~~~~~~~~~~~~
+src/lum/lum_core.c:124:26: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  124 |     lum_group_t* group = (lum_group_t*)aligned_alloc(64, sizeof(lum_group_t));
+      |                          ^
+src/lum/lum_core.c:144:23: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  144 |         group->lums = (lum_t*)aligned_alloc(64, lums_size);
+      |                       ^
+src/lum/lum_core.c: In function ‘lum_generate_id’:
+src/lum/lum_core.c:571:13: error: implicit declaration of function ‘clock_gettime’ [-Wimplicit-function-declaration]
+  571 |         if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+      |             ^~~~~~~~~~~~~
+src/vorax/vorax_operations.c: In function ‘vorax_fuse’:
+src/vorax/vorax_operations.c:37:5: error: implicit declaration of function ‘clock_gettime’ [-Wimplicit-function-declaration]
+   37 |     clock_gettime(CLOCK_MONOTONIC, &start);
+      |     ^~~~~~~~~~~~~
+src/lum/lum_core.c:571:27: error: ‘CLOCK_MONOTONIC’ undeclared (first use in this function)
+  571 |         if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+      |                           ^~~~~~~~~~~~~~~
+src/lum/lum_core.c:571:27: note: each undeclared identifier is reported only once for each function it appears in
+src/vorax/vorax_operations.c:37:19: error: ‘CLOCK_MONOTONIC’ undeclared (first use in this function)
+   37 |     clock_gettime(CLOCK_MONOTONIC, &start);
+      |                   ^~~~~~~~~~~~~~~
+src/vorax/vorax_operations.c:37:19: note: each undeclared identifier is reported only once for each function it appears in
+src/lum/lum_core.c: In function ‘lum_get_timestamp’:
+src/lum/lum_core.c:598:23: error: ‘CLOCK_MONOTONIC’ undeclared (first use in this function)
+  598 |     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
+      |                       ^~~~~~~~~~~~~~~
+src/vorax/vorax_operations.c: In function ‘vorax_split’:
+src/vorax/vorax_operations.c:98:19: error: ‘CLOCK_MONOTONIC’ undeclared (first use in this function)
+   98 |     clock_gettime(CLOCK_MONOTONIC, &start);
+      |                   ^~~~~~~~~~~~~~~
+src/lum/lum_core.c:604:23: error: ‘CLOCK_REALTIME’ undeclared (first use in this function)
+  604 |     if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+      |                       ^~~~~~~~~~~~~~
+src/vorax/vorax_operations.c:104:44: error: implicit declaration of function ‘aligned_alloc’ [-Wimplicit-function-declaration]
+  104 |     result->result_groups = (lum_group_t**)aligned_alloc(64, sizeof(lum_group_t*) * parts);
+      |                                            ^~~~~~~~~~~~~
+src/vorax/vorax_operations.c:104:29: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  104 |     result->result_groups = (lum_group_t**)aligned_alloc(64, sizeof(lum_group_t*) * parts);
+      |                             ^
+src/lum/lum_core.c: In function ‘lum_group_process_batch_50m_optimized’:
+src/lum/lum_core.c:701:27: error: ‘CLOCK_MONOTONIC’ undeclared (first use in this function)
+  701 |             clock_gettime(CLOCK_MONOTONIC, &ts);
+      |                           ^~~~~~~~~~~~~~~
+src/lum/lum_core.c:665:5: warning: enumeration value ‘LUM_BATCH_SORT_BY_ID’ not handled in switch [-Wswitch]
+  665 |     switch (operation) {
+      |     ^~~~~~
+src/lum/lum_core.c:665:5: warning: enumeration value ‘LUM_BATCH_DEFRAGMENT’ not handled in switch [-Wswitch]
+src/lum/lum_core.c: In function ‘lum_group_sort_ultra_fast’:
+src/lum/lum_core.c:754:19: warning: cast to pointer from integer of different size [-Wint-to-pointer-cast]
+  754 |     lum_t* temp = (lum_t*)aligned_alloc(64, group->count * sizeof(lum_t));
+      |                   ^
+make: *** [Makefile:120: obj/vorax/vorax_operations.o] Error 1
+make: *** [Makefile:117: obj/lum/lum_core.o] Error 1
+❌ Échec compilation - arrêt du processus
+~/workspace$ 
