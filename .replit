@@ -3,7 +3,7 @@ modules = ["c-clang14", "bash", "cpp-clang14", "python-3.12", "c-clang"]
 expertMode = true
 
 [workflows]
-runButton = "VALIDATION_CORRECTIONS_FINALES_COMPLETE"
+runButton = "VALIDATION_COMPLETE_TOUS_MODULES"
 
 [[workflows.workflow]]
 name = "LUM_VORAX_FORENSIC_COMPLETE"
@@ -3406,6 +3406,163 @@ args = "echo \"✅ DIAGNOSTIC ULTRA-GRANULAIRE TERMINÉ\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"Tous les logs sont disponibles pour analyse détaillée\""
+
+[[workflows.workflow]]
+name = "VALIDATION_COMPLETE_TOUS_MODULES"
+author = 47803122
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== VALIDATION COMPLÈTE SYSTÈME LUM/VORAX AVEC TOUS MODULES ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Date: $(date -u)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 1: Nettoyage et compilation complète\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make clean"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make all 2>&1 | tee logs/compilation/build_complete_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 2: Vérification binaire\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ -f bin/lum_vorax_complete ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"✅ Binaire compilé avec succès\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"Taille: $(ls -lh bin/lum_vorax_complete | awk '{print $5}')\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = '    echo "Modules inclus: $(nm bin/lum_vorax_complete | grep -c "_create\|_init\|_process")"'
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "else"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"❌ Compilation échouée - voir logs\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    cat logs/compilation/build_complete_*.log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    exit 1"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 3: Tests modules core\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax_complete --test-lum-core 2>&1 | tee logs/modules_tests/lum_core_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 4: Tests modules avancés\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax_complete --test-advanced 2>&1 | tee logs/modules_tests/advanced_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 5: Test stress 1M LUMs\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax_complete --stress-test-million 2>&1 | tee logs/stress_tests/stress_1m_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 6: Tests tous modules\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax_complete --test-all-modules 2>&1 | tee logs/execution/all_modules_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 7: Génération rapport complet\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"📊 STATISTIQUES FINALES:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Logs compilation: $(find logs/compilation -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Logs modules: $(find logs/modules_tests -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Logs stress: $(find logs/stress_tests -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Logs exécution: $(find logs/execution -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"✅ VALIDATION COMPLÈTE TERMINÉE - TOUS MODULES TESTÉS\""
 
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
