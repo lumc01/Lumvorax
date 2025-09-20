@@ -3972,5 +3972,5 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "vm"
-run = ["make", "-f", "Makefile.simple.new"]
+run = ["./bin/lum_vorax_simple"]
 build = ["make", "-f", "Makefile.simple.new", "all"]
