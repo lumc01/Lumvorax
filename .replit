@@ -3,7 +3,7 @@ modules = ["c-clang14", "bash", "cpp-clang14", "python-3.12", "c-clang"]
 expertMode = true
 
 [workflows]
-runButton = "Project"
+runButton = "EXECUTION_COMPLETE_TOUS_MODULES_SANS_HOMOMORPHIQUE"
 
 [[workflows.workflow]]
 name = "LUM_VORAX_FORENSIC_COMPLETE"
@@ -2666,6 +2666,123 @@ args = "echo \"📄 Rapport complet: 082_RAPPORT_FORENSIQUE_COMPLET_TOUS_MODULES
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"Fin exécution: $(date -u)\""
+
+[[workflows.workflow]]
+name = "EXECUTION_COMPLETE_TOUS_MODULES_SANS_HOMOMORPHIQUE"
+author = 47801447
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"🔥 === EXÉCUTION COMPLÈTE TOUS MODULES SAUF HOMOMORPHIQUE ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Date: $(date -u)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mkdir -p logs/{compilation,execution,stress_tests,modules_tests}/{core,advanced,complex,optimization}"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make -f Makefile.complete clean"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make -f Makefile.complete all 2>&1 | tee logs/compilation/build_complete_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ -f bin/lum_vorax_complete ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"✅ Compilation réussie - Lancement tests complets\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"🔥 Tests modules core:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax_complete --test-core 2>&1 | tee logs/modules_tests/core/core_tests_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"🧮 Tests calculs avancés:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax_complete --test-advanced 2>&1 | tee logs/modules_tests/advanced/advanced_tests_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"⚡ Tests modules complexes:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax_complete --test-complex 2>&1 | tee logs/modules_tests/complex/complex_tests_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"🚀 Tests optimisation:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax_complete --test-optimization 2>&1 | tee logs/modules_tests/optimization/optimization_tests_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"💥 Test stress 1M+ LUMs:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax_complete --test-stress 2>&1 | tee logs/stress_tests/stress_1m_lums_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"🎯 TOUS LES TESTS:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax_complete --test-all-modules 2>&1 | tee logs/execution/all_modules_complete_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "else"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"❌ Compilation échouée - voir logs\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    cat logs/compilation/build_complete_*.log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"📊 STATISTIQUES FINALES:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Logs compilation: $(find logs/compilation -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Logs modules: $(find logs/modules_tests -name \"*.log\" | wc -l)\"  "
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Logs stress: $(find logs/stress_tests -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"✅ EXÉCUTION COMPLÈTE TERMINÉE - Tous logs générés\""
 
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]

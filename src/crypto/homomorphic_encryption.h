@@ -1,12 +1,13 @@
 /**
- * MODULE HOMOMORPHIC ENCRYPTION - LUM/VORAX 2025
- * Conformité prompt.txt - Encryption homomorphe COMPLÈTE ET 100% RÉELLE
- * Permet calculs sur données chiffrées sans déchiffrement
- * Protection memory_address intégrée, tests stress 100M+ opérations
+ * MODULE HOMOMORPHIC ENCRYPTION - DÉSACTIVÉ PAR DEMANDE UTILISATEUR
+ * Remplacé par focus sur autres modules
  */
 
 #ifndef HOMOMORPHIC_ENCRYPTION_H
 #define HOMOMORPHIC_ENCRYPTION_H
+
+// MODULE DÉSACTIVÉ - Fonctions remplacées par stubs
+#define HE_MODULE_DISABLED 1
 
 // _GNU_SOURCE already defined by compiler flags
 #include <stdint.h>
