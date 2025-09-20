@@ -104,18 +104,7 @@ typedef struct {
     double tolerance;               // Tolérance d'erreur
 } neural_training_protocol_t;
 
-// Configuration architecture neuronale
-#ifndef NEURAL_ARCHITECTURE_CONFIG_T_DEFINED
-#define NEURAL_ARCHITECTURE_CONFIG_T_DEFINED
-typedef struct {
-    neural_complexity_target_e complexity_target;  // Cible de complexité
-    size_t memory_capacity;                        // Capacité mémoire neuronale
-    double learning_rate;                          // Taux d'apprentissage global
-    neural_plasticity_rules_e plasticity_rules;   // Règles plasticité
-    bool enable_continuous_learning;              // Apprentissage continu
-    bool enable_metaplasticity;                   // Métaplasticité
-} neural_architecture_config_t;
-#endif
+// Using definition from neural_ultra_precision_architecture.h
 
 // Banque de mémoire neuronale persistante
 typedef struct {
@@ -313,21 +302,7 @@ bool neural_blackbox_apply_optimizer(
 #define NEURAL_DEFAULT_LEARNING_RATE 0.001
 #define NEURAL_MIN_CONVERGENCE_THRESHOLD 1e-8
 
-// Configuration ultra-précise (définie ici pour éviter inclusion circulaire)
-typedef struct neural_ultra_precision_config_t {
-    size_t precision_target_digits;    // Nombre de digits précision requis
-    size_t base_depth;                // Profondeur de base du réseau
-    size_t precision_layers;          // Couches supplémentaires pour précision
-    size_t neurons_per_precision_digit; // Neurones par digit de précision
-    double memory_scaling_factor;     // Facteur échelle mémoire
-    double precision_target;          // Cible de précision (ex: 1e-15)
-    size_t input_dimensions;          // Dimensions d'entrée
-    size_t output_dimensions;         // Dimensions de sortie
-    double computation_scaling_factor; // Facteur échelle computation
-    bool enable_adaptive_precision;   // Précision adaptative
-    bool enable_error_correction;     // Correction d'erreur
-    uint32_t magic_number;           // Protection double-free
-} neural_ultra_precision_config_t;
+// Using definition from neural_ultra_precision_architecture.h
 
 // Fonctions de conversion entre types de configuration
 neural_architecture_config_t* convert_precision_to_architecture_config(

@@ -308,10 +308,10 @@ static void test_all_advanced_calculations_modules(void) {
         for (uint64_t test_num = 1; test_num <= 3; test_num++) {
             collatz_result_t* result = collatz_analyze_basic(test_num, collatz_config);
             if (result) {
-                printf("✅ Collatz Analyzer: Nombre %llu analysé, %zu séquences\n", test_num, result->sequence_count);
+                printf("✅ Collatz Analyzer: Nombre %lu analysé, %zu séquences\n", (unsigned long)test_num, result->sequence_count);
                 collatz_result_destroy(&result);
             } else {
-                printf("❌ Collatz Analyzer: Échec analyse pour %llu\n", test_num);
+                printf("❌ Collatz Analyzer: Échec analyse pour %lu\n", (unsigned long)test_num);
             }
         }
         collatz_config_destroy(&collatz_config);

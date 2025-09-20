@@ -56,7 +56,7 @@ TARGET = bin/lum_vorax_complete
 all: $(TARGET)
 
 obj bin logs:
-	mkdir -p obj/{lum,vorax,parser,binary,logger,debug,persistence,crypto,optimization,parallel,metrics,advanced_calculations,complex_modules,file_formats,spatial,network} bin logs/{compilation,execution,tests,stress_tests,modules_tests,performance,diagnostics}
+	mkdir -p obj/lum obj/vorax obj/parser obj/binary obj/logger obj/debug obj/persistence obj/crypto obj/optimization obj/parallel obj/metrics obj/advanced_calculations obj/complex_modules obj/file_formats obj/spatial obj/network bin logs/compilation logs/execution logs/tests logs/stress_tests logs/modules_tests logs/performance logs/diagnostics
 
 $(TARGET): $(COMPLETE_OBJECTS) | bin logs
 	$(CC) $^ -o $@ $(LDFLAGS)
