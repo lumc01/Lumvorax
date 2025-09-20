@@ -1,15 +1,18 @@
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L  // Version unifiée pour compatibilité POSIX complète
+#endif
 #include "zero_copy_allocator.h"
 #include "../logger/lum_logger.h"
 #include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
-#include <sys/mman.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <time.h>
-#include <stdio.h>
+#include <sys/mman.h>   // Pour mmap, munmap, madvise, MADV_SEQUENTIAL
+#include <sys/stat.h>   // Pour S_IRUSR, S_IWUSR
+#include <fcntl.h>      // Pour open, O_CREAT, O_RDWR, O_TRUNC
+#include <unistd.h>     // Pour getpagesize, ftruncate, close, getpid
+#include <stdlib.h>     // Pour malloc, free, size_t
+#include <string.h>     // Pour strlen, strcpy, memset, memcpy
+#include <errno.h>      // Pour errno, strerror
+#include <time.h>       // Pour clock_gettime, CLOCK_MONOTONIC, struct timespec
+#include <stdio.h>      // Pour printf, snprintf, FILE
 
 // Configuration et constantes
 #define DEFAULT_ALIGNMENT 64

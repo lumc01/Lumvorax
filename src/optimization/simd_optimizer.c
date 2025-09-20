@@ -1,4 +1,6 @@
-#define _POSIX_C_SOURCE 199309L  // Enable POSIX.1b functions including clock_gettime
+#ifndef _POSIX_C_SOURCE
+#define _POSIX_C_SOURCE 200809L  // Version unifiée conforme aux standards
+#endif
 #include "simd_optimizer.h"
 #include "../advanced_calculations/matrix_calculator.h"
 #include "../complex_modules/ai_optimization.h"
@@ -9,6 +11,7 @@
 #include <time.h>       // Pour clock_gettime et CLOCK_MONOTONIC
 #include <stdio.h>
 #include <unistd.h>     // Pour getpagesize
+#include <sys/mman.h>   // Pour madvise et MADV_SEQUENTIAL
 
 
 #ifdef __x86_64__
