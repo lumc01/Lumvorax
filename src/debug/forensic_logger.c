@@ -57,3 +57,19 @@ void forensic_log(forensic_level_e level, const char* function, const char* form
     
     va_end(args);
 }
+
+// Implementation of unified_forensic_log for compatibility
+void unified_forensic_log(unified_forensic_level_e level, const char* function, const char* format, ...) {
+    if (!forensic_log_file) return;
+    
+    uint64_t timestamp = lum_get_timestamp();
+    va_list args;
+    va_start(args, format);
+    
+    fprintf(forensic_log_file, "[%lu] [UNIFIED_%d] %s: ", timestamp, level, function);
+    vfprintf(forensic_log_file, format, args);
+    fprintf(forensic_log_file, "\n");
+    fflush(forensic_log_file);
+    
+    va_end(args);
+}
