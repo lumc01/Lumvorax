@@ -57,6 +57,77 @@ typedef enum {
 } activation_function_e;
 #endif
 
+// === ADDITIONAL MODULE TYPES IDENTIFIED ===
+
+// Audio processing types
+#ifndef AUDIO_FILTER_TYPE_E_DEFINED
+#define AUDIO_FILTER_TYPE_E_DEFINED
+typedef enum {
+    AUDIO_FILTER_LOWPASS = 0,
+    AUDIO_FILTER_HIGHPASS,
+    AUDIO_FILTER_BANDPASS,
+    AUDIO_FILTER_NOTCH,
+    AUDIO_FILTER_FFT
+} audio_filter_type_e;
+#endif
+
+// Image processing types
+#ifndef IMAGE_FILTER_TYPE_E_DEFINED
+#define IMAGE_FILTER_TYPE_E_DEFINED
+typedef enum {
+    IMAGE_FILTER_BLUR = 0,
+    IMAGE_FILTER_SHARPEN,
+    IMAGE_FILTER_EDGE_DETECTION,
+    IMAGE_FILTER_GRAYSCALE
+} image_filter_type_e;
+#endif
+
+// Video codec types
+#ifndef VIDEO_CODEC_TYPE_E_DEFINED
+#define VIDEO_CODEC_TYPE_E_DEFINED
+typedef enum {
+    VIDEO_CODEC_LUM_VORAX = 0,
+    VIDEO_CODEC_STANDARD
+} video_codec_type_e;
+#endif
+
+// Performance classification
+#ifndef PERFORMANCE_CLASS_E_DEFINED
+#define PERFORMANCE_CLASS_E_DEFINED
+typedef enum {
+    PERFORMANCE_EXCEPTIONAL = 0,
+    PERFORMANCE_SUPERIOR,
+    PERFORMANCE_COMPETITIVE,
+    PERFORMANCE_STANDARD
+} performance_class_e;
+#endif
+
+// Optimization mechanisms
+#ifndef OPACITY_MECHANISM_E_DEFINED
+#define OPACITY_MECHANISM_E_DEFINED
+typedef enum {
+    OPACITY_COMPUTATIONAL_FOLDING = 0,
+    OPACITY_SEMANTIC_SHUFFLING = 1,
+    OPACITY_LOGIC_FRAGMENTATION = 2,
+    OPACITY_DYNAMIC_REDIRECTION = 3,
+    OPACITY_ALGORITHMIC_MORPHING = 4,
+    OPACITY_CONTROL_FLOW_OBFUSCATION = 5
+} opacity_mechanism_e;
+#endif
+
+// Collatz analysis types
+#ifndef COLLATZ_ANALYSIS_E_DEFINED
+#define COLLATZ_ANALYSIS_E_DEFINED
+typedef enum {
+    COLLATZ_ANALYSIS_BASIC,
+    COLLATZ_ANALYSIS_STATISTICAL,
+    COLLATZ_ANALYSIS_PATTERN_DETECTION,
+    COLLATZ_ANALYSIS_PARALLEL_BATCH,
+    COLLATZ_ANALYSIS_CONVERGENCE_STUDY,
+    COLLATZ_ANALYSIS_RECORD_BREAKING
+} collatz_analysis_e;
+#endif
+
 // Neural plasticity rules (shared)
 #ifndef NEURAL_PLASTICITY_RULES_E_DEFINED
 #define NEURAL_PLASTICITY_RULES_E_DEFINED
@@ -84,6 +155,76 @@ typedef struct neural_layer_t {
     uint32_t magic_number;      // Protection intégrité (0xABCDEF01)
     void* memory_address;       // Protection double-free OBLIGATOIRE
 } neural_layer_t;
+#endif
+
+// === ADDITIONAL COMMON STRUCTURES ===
+
+// Matrix types (shared across matrix_calculator and neural modules)
+#ifndef MATRIX_T_DEFINED
+#define MATRIX_T_DEFINED
+typedef struct matrix_t {
+    double* data;
+    size_t rows;
+    size_t cols;
+    uint32_t magic_number;
+    void* memory_address;
+} matrix_t;
+#endif
+
+// Golden metrics structure (shared)
+#ifndef GOLDEN_METRICS_T_DEFINED
+#define GOLDEN_METRICS_T_DEFINED
+typedef struct golden_metrics_t {
+    double performance_score;
+    double memory_efficiency;
+    double energy_consumption;
+    double throughput_ratio;
+    uint64_t timestamp;
+    void* memory_address;
+    uint32_t magic_number;
+} golden_metrics_t;
+#endif
+
+// Golden comparison structure (shared)
+#ifndef GOLDEN_COMPARISON_T_DEFINED
+#define GOLDEN_COMPARISON_T_DEFINED
+typedef struct golden_comparison_t {
+    golden_metrics_t* current_metrics;
+    golden_metrics_t* industry_benchmark;
+    double improvement_ratio;
+    performance_class_e performance_class;
+    char comparison_summary[256];
+    void* memory_address;
+    uint32_t magic_number;
+} golden_comparison_t;
+#endif
+
+// Computational opacity structure (shared)
+#ifndef COMPUTATIONAL_OPACITY_T_DEFINED
+#define COMPUTATIONAL_OPACITY_T_DEFINED
+typedef struct computational_opacity_t {
+    void* original_function_ptr;
+    void* obfuscated_layer;
+    size_t complexity_depth;
+    uint64_t transformation_seed;
+    bool is_active;
+    void* memory_address;
+    uint32_t blackbox_magic;
+} computational_opacity_t;
+#endif
+
+// Blackbox configuration (shared)
+#ifndef BLACKBOX_CONFIG_T_DEFINED
+#define BLACKBOX_CONFIG_T_DEFINED
+typedef struct blackbox_config_t {
+    opacity_mechanism_e primary_mechanism;
+    opacity_mechanism_e secondary_mechanism;
+    double opacity_strength;
+    bool enable_dynamic_morphing;
+    size_t max_recursion_depth;
+    uint64_t entropy_source;
+    void* memory_address;
+} blackbox_config_t;
 #endif
 
 #endif // COMMON_TYPES_H
