@@ -7,7 +7,7 @@
 #include <stdio.h>
 
 // Constantes communes
-#define MAX_STORAGE_PATH_LENGTH 512
+#define MAX_STORAGE_PATH_LENGTH 1024
 #define MAX_ERROR_MESSAGE_LENGTH 256
 
 // Type unifié pour tous les résultats de stockage

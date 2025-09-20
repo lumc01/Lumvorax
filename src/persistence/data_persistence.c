@@ -62,7 +62,7 @@ persistence_context_t* persistence_context_create(const char* storage_directory)
     persistence_ensure_directory_exists(ctx->storage_directory);
 
     // VÉRIFICATION: Test d'écriture pour détecter problèmes déploiement
-    char test_file[MAX_STORAGE_PATH_LENGTH + 20];
+    char test_file[MAX_STORAGE_PATH_LENGTH];
     snprintf(test_file, sizeof(test_file), "%s/.write_test", ctx->storage_directory);
     FILE* test_fp = fopen(test_file, "w");
     if (!test_fp) {

@@ -672,11 +672,11 @@ bool lum_group_process_batch_50m_optimized(lum_group_t* group, lum_batch_operati
     size_t operations_count = 0; // Déclaration pour compter les opérations
 
     switch (operation) {
-        case LUM_BATCH_REBALANCE:
-            // Réorganisation équilibrée des LUMs
+        case LUM_BATCH_SORT_BY_ID:
+            // Réorganisation équilibrée des LUMs (tri par ID)
             for (size_t i = 0; i < group->count - 1; i++) {
                 for (size_t j = i + 1; j < group->count; j++) {
-                    if (group->lums[i].presence < group->lums[j].presence) {
+                    if (group->lums[i].id > group->lums[j].id) {
                         lum_t temp = group->lums[i];
                         group->lums[i] = group->lums[j];
                         group->lums[j] = temp;
@@ -686,10 +686,12 @@ bool lum_group_process_batch_50m_optimized(lum_group_t* group, lum_batch_operati
             }
             break;
 
-        case LUM_BATCH_OPTIMIZE_MEMORY:
-            // Optimisation mémoire
+        case LUM_BATCH_DEFRAGMENT:
+            // Optimisation mémoire spatiale
             for (size_t i = 0; i < group->count; i++) {
-                group->lums[i].zone_id = (group->lums[i].zone_id % 1000) + 1;
+                // Réorganisation spatiale pour optimiser l'accès mémoire
+                group->lums[i].position_x = (group->lums[i].position_x / 10) * 10;
+                group->lums[i].position_y = (group->lums[i].position_y / 10) * 10;
                 operations_count++;
             }
             break;

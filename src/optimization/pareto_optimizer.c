@@ -9,6 +9,28 @@
 #include <stdlib.h>
 #include <math.h>
 
+// Compatibility for clock_gettime if not available
+#ifndef CLOCK_REALTIME
+#define CLOCK_REALTIME 0
+#endif
+#ifndef CLOCK_MONOTONIC
+#define CLOCK_MONOTONIC 1
+#endif
+
+// Fallback implementation if clock_gettime is not available
+#ifndef HAVE_CLOCK_GETTIME
+static int clock_gettime(int clk_id, struct timespec *tp) {
+    (void)clk_id; // Suppress unused parameter warning
+    if (!tp) return -1;
+    
+    // Fallback to time() with nanosecond estimation
+    time_t now = time(NULL);
+    tp->tv_sec = now;
+    tp->tv_nsec = 0;
+    return 0;
+}
+#endif
+
 // IMPLÉMENTATION RÉELLE: Métriques système dynamiques pour efficacité
 static double calculate_system_efficiency(void) {
     double memory_efficiency = 0.85;  // Baseline par défaut

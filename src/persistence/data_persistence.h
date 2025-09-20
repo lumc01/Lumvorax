@@ -2,11 +2,11 @@
 #define DATA_PERSISTENCE_H
 
 #include "../lum/lum_core.h"
+#include "../common/common_types.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
 
-#define MAX_STORAGE_PATH_LENGTH 1024
 #define MAX_FILENAME_LENGTH 256
 #define STORAGE_FORMAT_VERSION 1
 #define STORAGE_MAGIC_NUMBER 0x4C554D58 // "LUMX"
