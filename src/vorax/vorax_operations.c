@@ -4,6 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include <time.h>
+#include <stdatomic.h>
+#include <immintrin.h>
 
 // lum_log est définie dans le module logger
 
@@ -58,8 +61,8 @@ vorax_result_t* vorax_fuse(lum_group_t* group1, lum_group_t* group2) {
     }
     #endif
     
-    // OPTIMISATION 4: Mise à jour count atomique
-    atomic_store(&fused->count, total_count);
+    // OPTIMISATION 4: Mise à jour count normale (remove atomic for regular size_t)
+    fused->count = total_count;
     
     clock_gettime(CLOCK_MONOTONIC, &end);
     uint64_t fusion_time_ns = (end.tv_sec - start.tv_sec) * 1000000000ULL + 
@@ -159,7 +162,7 @@ vorax_result_t* vorax_split(lum_group_t* group, size_t parts) {
         #endif
         
         // Mise à jour count atomique
-        atomic_store(&target_group->count, group_size);
+        target_group->count = group_size;
         source_index += group_size;
     }
 

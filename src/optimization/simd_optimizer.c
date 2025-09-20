@@ -2,6 +2,7 @@
 #include "../advanced_calculations/matrix_calculator.h"
 #include "../complex_modules/ai_optimization.h"
 #include "../debug/memory_tracker.h"
+#include "../lum/lum_core.h"  // For lum_get_timestamp function
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -228,12 +229,12 @@ void simd_avx512_mass_lum_operations(lum_t* lums, size_t count) {
         _mm512_storeu_si512((__m512i*)position_y_batch, optimized_y);
 
         // Écriture atomique des résultats optimisés avec timestamp forensique
-        uint64_t operation_timestamp = get_timestamp_ns();
+        uint64_t operation_timestamp = lum_get_timestamp(); // Use existing function
         
-        // FMA (Fused Multiply-Add) pour performance optimale
+        // FMA (Fused Multiply-Add) pour performance optimale - removed invalid intrinsic
 #ifdef __AVX512F__
-        __m512i fma_result = _mm512_fmadd_epi32(pos_x_data, dispersion_factor, optimized_x);
-        _mm512_storeu_si512((__m512i*)position_x_batch, fma_result);
+        // Use already computed optimized_x instead of invalid FMA intrinsic
+        _mm512_storeu_si512((__m512i*)position_x_batch, optimized_x);
 #endif
         for (int j = 0; j < 16; j++) {
             lums[i + j].presence = presence_batch[j];

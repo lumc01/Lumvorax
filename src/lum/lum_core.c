@@ -14,10 +14,11 @@
 #define LUM_BATCH_UPDATE_TIMESTAMPS 1
 #define LUM_BATCH_RECALC_CHECKSUMS 2
 
-typedef int lum_batch_operation_e; // Pour la compatibilité
+// Remove typedef redefinition - using the enum from header file
 
-// Déclaration atomique pour le compteur d'ID
-static atomic_uint_fast64_t lum_id_counter_atomic = ATOMIC_VAR_INIT(1);
+// Static variables for ID generation
+static pthread_mutex_t id_counter_mutex = PTHREAD_MUTEX_INITIALIZER;
+static uint32_t lum_id_counter = 1;
 
 // Core LUM functions
 lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e type) {
@@ -160,7 +161,7 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
     // OPTIMISATION 5: Assignation optimisée des métadonnées
     group->count = 0;
     group->capacity = aligned_capacity;
-    group->group_id = atomic_fetch_add(&lum_id_counter_atomic, 1);
+    group->group_id = lum_generate_id(); // Use existing thread-safe ID generator
     group->type = LUM_STRUCTURE_GROUP;
     group->magic_number = LUM_VALIDATION_PATTERN;
 
@@ -833,8 +834,8 @@ bool lum_group_defragment_zero_copy(lum_group_t* group) {
         }
     }
 
-    // Mise à jour count atomic
-    atomic_store(&group->count, write_index);
+    // Mise à jour count normale (remove atomic for regular size_t)
+    group->count = write_index;
 
     // Zéro des slots libérés vectorisé
     if (write_index < group->capacity) {
