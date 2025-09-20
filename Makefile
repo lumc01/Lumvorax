@@ -57,18 +57,18 @@ all: $(TARGET)
 
 # Create directories
 obj bin:
-        mkdir -p obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug obj/spatial obj/complex_modules obj/advanced_calculations obj/file_formats obj/network bin
+	mkdir -p obj/lum obj/vorax obj/parser obj/binary obj/logger obj/optimization obj/parallel obj/metrics obj/crypto obj/persistence obj/debug obj/spatial obj/complex_modules obj/advanced_calculations obj/file_formats obj/network bin
 
 $(TARGET): $(CORE_OBJECTS) | bin
-        $(CC) $^ -o $@ $(LDFLAGS)
+	$(CC) $^ -o $@ $(LDFLAGS)
 
 # Generic object file rule
 obj/%.o: src/%.c | obj
-        $(CC) $(CFLAGS) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Special rule for parallel processor (needs pthread)
 obj/parallel/parallel_processor.o: src/parallel/parallel_processor.c | obj
-        $(CC) $(CFLAGS) -pthread -c $< -o $@
+	$(CC) $(CFLAGS) -pthread -c $< -o $@
 
 # Simple test target for basic functionality
 SIMPLE_CORE_OBJECTS = \
@@ -81,22 +81,22 @@ SIMPLE_CORE_OBJECTS = \
         obj/debug/forensic_logger.o
 
 simple: bin/lum_vorax_simple
-        ./bin/lum_vorax_simple
+	./bin/lum_vorax_simple
 
 bin/lum_vorax_simple: src/main_simple.c $(SIMPLE_CORE_OBJECTS) | bin
-        $(CC) $(CFLAGS) src/main_simple.c $(SIMPLE_CORE_OBJECTS) -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) src/main_simple.c $(SIMPLE_CORE_OBJECTS) -o $@ $(LDFLAGS)
 
 # Test rules for 100M+ LUMs stress testing
 test_100m_lums: bin/test_stress_100m_all_modules
-        ./bin/test_stress_100m_all_modules
+	./bin/test_stress_100m_all_modules
 
 bin/test_stress_100m_all_modules: src/tests/test_stress_100m_all_modules.c $(CORE_OBJECTS) | bin
-        $(CC) $(CFLAGS) src/tests/test_stress_100m_all_modules.c $(CORE_OBJECTS) -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) src/tests/test_stress_100m_all_modules.c $(CORE_OBJECTS) -o $@ $(LDFLAGS)
 
 bin/test_stress_100m_universal: src/tests/test_stress_100m_universal.c $(CORE_OBJECTS) | bin
-        $(CC) $(CFLAGS) src/tests/test_stress_100m_universal.c $(CORE_OBJECTS) -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) src/tests/test_stress_100m_universal.c $(CORE_OBJECTS) -o $@ $(LDFLAGS)
 
 clean:
-        rm -rf obj bin
+	rm -rf obj bin
 
 .PHONY: all clean simple test_100m_lums
