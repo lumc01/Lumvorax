@@ -3966,6 +3966,143 @@ args = "echo \"=== VALIDATION MODIFICATIONS TERMINÉE ===\""
 task = "shell.exec"
 args = "echo \"📊 Logs disponibles dans logs/\""
 
+[[workflows.workflow]]
+name = "TEST_FORENSIQUE_ULTRA_STRICT"
+author = 47824281
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== TESTS FORENSIQUES ULTRA-STRICTS - GÉNÉRATION LOGS RÉELS ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Conformément au prompt.txt - Standards forensiques ISO/IEC 27037\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 1: Compilation système forensique\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make -f Makefile.forensic clean"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make -f Makefile.forensic all"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 2: Exécution tests avec génération logs temps réel\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ -f bin/test_forensic_all_modules ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"✅ Lancement tests forensiques pour 44 modules...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    make -f Makefile.forensic test-forensic"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "else"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"❌ Compilation échouée\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    exit 1"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 3: Validation logs générés\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make -f Makefile.forensic validate-logs"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 4: Vérification preuves réelles\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"📊 PREUVES GÉNÉRÉES EN TEMPS RÉEL:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Total fichiers logs: $(find logs/forensic -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Taille totale logs: $(du -sh logs/forensic/ | cut -f1)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"📋 ÉCHANTILLON LOGS RÉELS:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "find logs/forensic/modules -name \"*.log\" | head -5 | while read file; do"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"📄 $file ($(wc -l < \"$file\") lignes)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    head -10 \"$file\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"---\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "done"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"✅ TESTS FORENSIQUES ULTRA-STRICTS TERMINÉS\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"🔒 Tous les logs sont générés et validés selon standards\""
+
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
 channel = "stable-25_05"
