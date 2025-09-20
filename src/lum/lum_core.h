@@ -100,7 +100,7 @@ void lum_group_destroy_ultra_secure(lum_group_t** group_ptr);
 
 // Constantes de validation mémoire
 #define LUM_MAGIC_DESTROYED 0xDEADBEEF
-#define LUM_VALIDATION_PATTERN 0xCAFEBABE
+#define LUM_VALIDATION_PATTERN 0xABCDEF12
 
 // PRIORITÉ 1.3: TIMING FORENSIQUE DIFFÉRENCIÉ selon roadmap exact
 // LOGS GRANULAIRES: CLOCK_MONOTONIC pour mesures précises

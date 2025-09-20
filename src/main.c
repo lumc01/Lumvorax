@@ -656,6 +656,11 @@ void demo_parser(void);
 void demo_complete_scenario(void);
 void test_persistence_integration(void);
 
+// Implementation des fonctions de test manquantes
+extern uint64_t get_current_timestamp_ns(void) {
+    return lum_get_timestamp();
+}
+
 extern uint64_t get_current_timestamp_ns(void);
 
 int main(int argc __attribute__((unused)), char* argv[] __attribute__((unused))) {
