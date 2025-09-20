@@ -97,11 +97,10 @@ static void test_all_core_modules(void) {
     // Test Binary Converter
     printf("📊 Test Binary Converter...\n");
     int32_t test_value = 12345;
-    lum_t* binary_lums = NULL;
-    size_t lum_count = 0;
-    if (convert_int32_to_lum(test_value, &binary_lums, &lum_count)) {
-        printf("✅ Binary Converter: %d converti en %zu LUMs\n", test_value, lum_count);
-        free(binary_lums);
+    binary_lum_result_t* binary_result = convert_int32_to_lum(test_value);
+    if (binary_result && binary_result->success) {
+        printf("✅ Binary Converter: %d converti en %zu LUMs\n", test_value, binary_result->bits_processed);
+        binary_lum_result_destroy(binary_result);
     }
     
     lum_group_destroy(group);
@@ -125,10 +124,14 @@ static void test_all_advanced_calculations_modules(void) {
     
     // Test Quantum Simulator
     printf("📊 Test Quantum Simulator...\n");
-    quantum_simulator_t* quantum = quantum_simulator_create(10);
-    if (quantum) {
-        printf("✅ Quantum Simulator: 10 qubits initialisés\n");
-        quantum_simulator_destroy(&quantum);
+    quantum_config_t* quantum_config = quantum_config_create_default();
+    if (quantum_config) {
+        quantum_simulator_t* quantum = quantum_simulator_create(10, quantum_config);
+        if (quantum) {
+            printf("✅ Quantum Simulator: 10 qubits initialisés\n");
+            quantum_simulator_destroy(&quantum);
+        }
+        quantum_config_destroy(&quantum_config);
     }
     
     // Test Neural Network
@@ -159,10 +162,10 @@ static void test_all_advanced_calculations_modules(void) {
     printf("📊 Test Collatz Analyzer...\n");
     collatz_config_t* collatz_config = collatz_config_create_default();
     if (collatz_config) {
-        collatz_result_t* result = collatz_analyze_sequence(collatz_config, 27);
+        collatz_result_t* result = collatz_analyze_basic(27, collatz_config);
         if (result) {
-            printf("✅ Collatz Analyzer: Séquence 27 analysée, longueur %zu\n", result->sequence_length);
-            collatz_result_destroy(result);
+            printf("✅ Collatz Analyzer: Nombre 27 analysé, %zu séquences\n", result->sequence_count);
+            collatz_result_destroy(&result);
         }
         collatz_config_destroy(&collatz_config);
     }
@@ -193,38 +196,39 @@ static void test_all_complex_modules(void) {
     
     // Test Realtime Analytics
     printf("📊 Test Realtime Analytics...\n");
-    realtime_config_t* rt_config = realtime_config_create_default();
-    if (rt_config) {
-        realtime_analytics_t* analytics = realtime_analytics_create(rt_config);
-        if (analytics) {
-            printf("✅ Realtime Analytics: Système initialisé\n");
-            realtime_analytics_destroy(analytics);
+    analytics_config_t* analytics_config = analytics_config_create_default();
+    if (analytics_config) {
+        realtime_stream_t* stream = realtime_stream_create(1000);
+        if (stream) {
+            printf("✅ Realtime Analytics: Stream créé avec buffer 1000\n");
+            realtime_stream_destroy(&stream);
         }
-        realtime_config_destroy(rt_config);
+        analytics_config_destroy(&analytics_config);
     }
     
     // Test Distributed Computing
     printf("📊 Test Distributed Computing...\n");
     distributed_config_t* dist_config = distributed_config_create_default();
     if (dist_config) {
-        distributed_computing_t* dist_comp = distributed_computing_create(dist_config);
-        if (dist_comp) {
-            printf("✅ Distributed Computing: Cluster initialisé\n");
-            distributed_computing_destroy(dist_comp);
+        compute_cluster_t* cluster = compute_cluster_create(10);
+        if (cluster) {
+            printf("✅ Distributed Computing: Cluster de 10 nœuds initialisé\n");
+            compute_cluster_destroy(&cluster);
         }
-        distributed_config_destroy(dist_config);
+        distributed_config_destroy(&dist_config);
     }
     
     // Test AI Optimization
     printf("📊 Test AI Optimization...\n");
-    ai_config_t* ai_config = ai_config_create_default();
+    ai_optimization_config_t* ai_config = ai_optimization_config_create_default();
     if (ai_config) {
-        ai_optimizer_t* ai_opt = ai_optimizer_create(ai_config);
-        if (ai_opt) {
-            printf("✅ AI Optimization: Agent IA créé\n");
-            ai_optimizer_destroy(ai_opt);
+        size_t brain_layers[] = {100, 50, 25, 10};
+        ai_agent_t* ai_agent = ai_agent_create(brain_layers, 4);
+        if (ai_agent) {
+            printf("✅ AI Optimization: Agent IA créé avec réseau neuronal\n");
+            ai_agent_destroy(&ai_agent);
         }
-        ai_config_destroy(ai_config);
+        ai_optimization_config_destroy(&ai_config);
     }
 }
 
@@ -233,10 +237,10 @@ static void test_all_optimization_modules(void) {
     
     // Test Memory Optimizer
     printf("📊 Test Memory Optimizer...\n");
-    memory_optimizer_t* mem_opt = memory_optimizer_create(1024*1024);
-    if (mem_opt) {
-        printf("✅ Memory Optimizer: 1MB pool créé\n");
-        memory_optimizer_destroy(mem_opt);
+    memory_pool_t* mem_pool = memory_pool_create(1024*1024, 64);
+    if (mem_pool) {
+        printf("✅ Memory Optimizer: Pool 1MB créé avec alignement 64\n");
+        memory_pool_destroy(mem_pool);
     }
     
     // Test Pareto Optimizer
@@ -245,7 +249,8 @@ static void test_all_optimization_modules(void) {
         .enable_simd_optimization = true,
         .enable_memory_pooling = true,
         .enable_parallel_processing = true,
-        .target_efficiency_threshold = 500.0
+        .max_optimization_layers = 5,
+        .max_points = 1000
     };
     pareto_optimizer_t* pareto_opt = pareto_optimizer_create(&pareto_config);
     if (pareto_opt) {
@@ -255,10 +260,11 @@ static void test_all_optimization_modules(void) {
     
     // Test SIMD Optimizer
     printf("📊 Test SIMD Optimizer...\n");
-    simd_config_t* simd_config = simd_config_create_default();
-    if (simd_config) {
-        printf("✅ SIMD Optimizer: Configuration vectorielle créée\n");
-        simd_config_destroy(simd_config);
+    simd_capabilities_t* simd_caps = simd_detect_capabilities();
+    if (simd_caps) {
+        printf("✅ SIMD Optimizer: Capacités détectées - AVX2: %s, vector_width: %d\n", 
+               simd_caps->avx2_available ? "Oui" : "Non", simd_caps->vector_width);
+        simd_capabilities_destroy(simd_caps);
     }
 }
 
