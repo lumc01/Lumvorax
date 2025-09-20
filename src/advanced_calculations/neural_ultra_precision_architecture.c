@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
-#include <stdio.h> // Include for printf
+#include <stdio.h>
 
 // Architecture neuronale selon précision requise
 neural_architecture_config_t* neural_calculate_ultra_precision_architecture(

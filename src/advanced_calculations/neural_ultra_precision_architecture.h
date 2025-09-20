@@ -30,8 +30,8 @@ typedef struct {
 } neural_architecture_config_t;
 #endif
 
-// **TYPE MANQUANT - DÉFINITION COMPLÈTE**
-typedef struct {
+// Configuration ultra-précision neuronale complète
+typedef struct neural_ultra_precision_config_t {
     // Configuration précision
     size_t precision_target_digits;      // Nombre de chiffres de précision cible
     double precision_target;             // Précision numérique cible (ex: 1e-15)

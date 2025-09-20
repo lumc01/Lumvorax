@@ -42,6 +42,7 @@ typedef struct newton_raphson_optimizer_t {
 #include <stdbool.h>
 #include <stddef.h>
 #include "neural_ultra_precision_architecture.h"
+#include "../common/common_types.h"
 
 // Types d'activation neuronale (définis dans common_types.h)
 
@@ -57,16 +58,7 @@ double neural_activation_function(double x, activation_function_e type);
 // Concept révolutionnaire : Utilisation authentique des réseaux neuronaux
 // pour créer une opacité naturelle sans simulation artificielle
 
-// Types de complexité pour architecture adaptative
-#ifndef NEURAL_COMPLEXITY_TARGET_E_DEFINED
-#define NEURAL_COMPLEXITY_TARGET_E_DEFINED
-typedef enum {
-    NEURAL_COMPLEXITY_LOW = 0,      // Architecture minimale
-    NEURAL_COMPLEXITY_MEDIUM = 1,   // Architecture équilibrée
-    NEURAL_COMPLEXITY_HIGH = 2,     // Architecture complexe
-    NEURAL_COMPLEXITY_EXTREME = 3   // Architecture maximum
-} neural_complexity_target_e;
-#endif
+// Utilisation enum défini dans neural_ultra_precision_architecture.h
 
 // Règles de plasticité neuronale (définies dans common_types.h)
 

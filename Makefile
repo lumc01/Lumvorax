@@ -40,7 +40,6 @@ COMPLETE_OBJECTS = \
 	obj/advanced_calculations/neural_advanced_optimizers.o \
 	obj/advanced_calculations/neural_ultra_precision_architecture.o \
 	obj/advanced_calculations/neural_blackbox_ultra_precision_tests.o \
-	obj/advanced_calculations/neural_ultra_precision_architecture.o \
 	obj/complex_modules/realtime_analytics.o \
 	obj/complex_modules/distributed_computing.o \
 	obj/complex_modules/ai_optimization.o \

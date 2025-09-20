@@ -228,3 +228,64 @@ int main(void) {
         return 1;
     }
 }
+#include "src/lum/lum_core.h"
+#include "src/vorax/vorax_operations.h"
+#include "src/advanced_calculations/matrix_calculator.h"
+#include "src/advanced_calculations/quantum_simulator.h"
+#include "src/advanced_calculations/neural_network_processor.h"
+#include "src/complex_modules/realtime_analytics.h"
+#include "src/optimization/zero_copy_allocator.h"
+#include "src/optimization/simd_optimizer.h"
+#include "src/optimization/pareto_optimizer.h"
+#include <stdio.h>
+#include <assert.h>
+
+int main() {
+    printf("=== TEST INTEROPÉRABILITÉ COMPLÈTE LUM/VORAX ===\n");
+    
+    // Test 1: LUM Core + VORAX
+    printf("Test 1: LUM Core + VORAX Operations\n");
+    lum_group_t* group1 = lum_group_create(10);
+    lum_group_t* group2 = lum_group_create(10);
+    assert(group1 && group2);
+    
+    vorax_result_t* result = vorax_fuse(group1, group2);
+    assert(result);
+    printf("✅ VORAX fusion réussie\n");
+    
+    // Test 2: Matrix Calculator integration
+    printf("Test 2: Matrix Calculator\n");
+    matrix_calculator_config_t* matrix_config = matrix_calculator_config_create(4, 4);
+    assert(matrix_config);
+    printf("✅ Matrix Calculator configuré\n");
+    
+    // Test 3: Quantum Simulator
+    printf("Test 3: Quantum Simulator\n");
+    quantum_system_t* quantum = quantum_system_create(8);
+    assert(quantum);
+    printf("✅ Quantum Simulator initialisé\n");
+    
+    // Test 4: Neural Network
+    printf("Test 4: Neural Network Processor\n");
+    neural_network_t* network = neural_network_create(10, 5, 3);
+    assert(network);
+    printf("✅ Neural Network créé\n");
+    
+    // Test 5: Zero Copy Allocator
+    printf("Test 5: Zero Copy Allocator\n");
+    zero_copy_allocator_t* allocator = zero_copy_allocator_create(1024);
+    assert(allocator);
+    printf("✅ Zero Copy Allocator opérationnel\n");
+    
+    // Nettoyage
+    vorax_result_destroy(result);
+    lum_group_destroy(group1);
+    lum_group_destroy(group2);
+    matrix_calculator_config_destroy(matrix_config);
+    quantum_system_destroy(quantum);
+    neural_network_destroy(network);
+    zero_copy_allocator_destroy(allocator);
+    
+    printf("=== TOUS LES TESTS D'INTEROPÉRABILITÉ PASSÉS ===\n");
+    return 0;
+}
