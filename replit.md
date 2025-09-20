@@ -15,7 +15,7 @@ This is the LUM/VORAX computational framework - a sophisticated C-based system f
 - **VORAX Operations**: Advanced operations (fuse, split, cycle) 
 - **Neural Networks**: AI optimization and neural processing
 - **Matrix Calculator**: Advanced matrix operations with SIMD optimization
-- **Cryptography**: SHA-256 validation and homomorphic encryption
+- **Cryptography**: SHA-256 validation and crypto operations
 - **Persistence**: Data storage with WAL and recovery extensions
 - **Spatial Processing**: Instant displacement calculations
 - **Performance Metrics**: Comprehensive benchmarking and optimization

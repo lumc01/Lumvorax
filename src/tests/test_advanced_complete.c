@@ -20,7 +20,7 @@
 #include "../complex_modules/realtime_analytics.h"
 #include "../complex_modules/distributed_computing.h"
 #include "../complex_modules/ai_optimization.h"
-#include "../crypto/homomorphic_encryption.h"
+// #include "../crypto/homomorphic_encryption.h" // REMOVED - No homomorphic functionality
 #include "../debug/memory_tracker.h"
 #include <stddef.h>  // Pour offsetof
 
@@ -327,7 +327,7 @@ int main(void) {
     test_matrix_calculator_advanced();
     test_quantum_simulator_advanced();
     test_neural_network_advanced();
-    test_homomorphic_encryption_advanced();
+    // test_homomorphic_encryption_advanced(); // REMOVED - No homomorphic functionality
     test_realtime_analytics_advanced();
     
     // Résultats finaux

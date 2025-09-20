@@ -15,7 +15,7 @@ static const char* MODULE_NAMES[MODULE_COUNT] = {
     "parallel_processor",
     "neural_network",
     "quantum_simulator",
-    "homomorphic_encryption",
+    // "homomorphic_encryption", // REMOVED - No homomorphic functionality
     "matrix_calculator",
     "realtime_analytics",
     "distributed_computing",

@@ -8,7 +8,7 @@
 #include "../parallel/parallel_processor.h"
 #include "../advanced_calculations/neural_network_processor.h"
 #include "../advanced_calculations/quantum_simulator.h"
-#include "../crypto/homomorphic_encryption.h"
+// #include "../crypto/homomorphic_encryption.h" // REMOVED - No homomorphic functionality
 #include "../advanced_calculations/matrix_calculator.h"
 #include "../complex_modules/realtime_analytics.h"
 #include "../complex_modules/distributed_computing.h"
@@ -28,7 +28,7 @@ typedef enum {
     MODULE_PARALLEL_PROCESSOR,
     MODULE_NEURAL_NETWORK,
     MODULE_QUANTUM_SIMULATOR,
-    MODULE_HOMOMORPHIC_ENCRYPTION,
+    // MODULE_HOMOMORPHIC_ENCRYPTION, // REMOVED - No homomorphic functionality
     MODULE_MATRIX_CALCULATOR,
     MODULE_REALTIME_ANALYTICS,
     MODULE_DISTRIBUTED_COMPUTING,
@@ -137,12 +137,8 @@ bool ai_configure_quantum_simulator(ai_dynamic_config_manager_t* manager,
                                    double gate_error_rate,
                                    bool enable_error_correction);
 
-// Configuration dynamique Homomorphic Encryption
-bool ai_configure_homomorphic_encryption(ai_dynamic_config_manager_t* manager,
-                                        he_scheme_type_e scheme_type,
-                                        uint32_t polynomial_degree,
-                                        uint32_t security_level,
-                                        double noise_standard_deviation);
+// Configuration dynamique Homomorphic Encryption - REMOVED
+// bool ai_configure_homomorphic_encryption(...); // No homomorphic functionality
 
 // Configuration dynamique Parallel Processor
 bool ai_configure_parallel_processor(ai_dynamic_config_manager_t* manager,
