@@ -74,11 +74,28 @@ typedef struct {
     void* memory_address;         // Protection double-free OBLIGATOIRE
 } quantum_config_t;
 
+// Simulateur quantique complet
+typedef struct {
+    size_t qubit_count;           // Nombre de qubits
+    size_t max_gates;             // Nombre maximum de portes
+    size_t state_vector_size;     // Taille du vecteur d'état
+    quantum_circuit_t* circuit;  // Circuit quantique associé
+    quantum_config_t* config;    // Configuration du simulateur
+    double* state_probabilities;  // Probabilités des états
+    bool is_initialized;          // État d'initialisation
+    void* memory_address;         // Protection double-free OBLIGATOIRE
+    uint32_t magic_number;        // Protection intégrité
+} quantum_simulator_t;
+
 // Fonctions principales
 quantum_lum_t* quantum_lum_create(int32_t x, int32_t y, size_t initial_states);
 void quantum_lum_destroy(quantum_lum_t** qlum_ptr);
 quantum_circuit_t* quantum_circuit_create(size_t qubit_count, size_t max_gates);
 void quantum_circuit_destroy(quantum_circuit_t** circuit_ptr);
+
+// Fonctions simulateur quantique
+quantum_simulator_t* quantum_simulator_create(size_t qubit_count, quantum_config_t* config);
+void quantum_simulator_destroy(quantum_simulator_t** simulator_ptr);
 
 // Opérations quantiques de base
 bool quantum_apply_gate(quantum_lum_t* qlum, quantum_gate_e gate, quantum_config_t* config);

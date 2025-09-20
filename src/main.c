@@ -229,52 +229,57 @@ void test_all_complex_modules_mandatory(void) {
     // Test AI Optimization - OBLIGATOIRE
     clock_gettime(CLOCK_MONOTONIC, &start);
     ai_optimization_config_t ai_config = {
-        .algorithm_type = AI_GENETIC_ALGORITHM,
-        .population_size = 100,
-        .mutation_rate = 0.1,
-        .crossover_rate = 0.8,
-        .max_generations = 50,
-        .enable_ai_tracing = true
+        .algorithm = META_GENETIC_ALGORITHM,
+        .max_iterations = 50,
+        .convergence_threshold = 0.001,
+        .use_parallel_processing = true,
+        .thread_count = 4,
+        .enable_adaptive_params = true,
+        .memory_limit_gb = 1.0
     };
 
-    ai_agent_t* agent = ai_agent_create(&ai_config);
+    // Create agent with proper brain layers
+    size_t brain_layers[] = {10, 8, 6, 4};
+    ai_agent_t* agent = ai_agent_create(brain_layers, 4);
     size_t ai_ops = 0;
     if(agent) {
-        ai_ops = ai_config.population_size * ai_config.max_generations;
+        ai_ops = ai_config.max_iterations * 100; // Estimate operations
     }
     clock_gettime(CLOCK_MONOTONIC, &end);
     double ai_time = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_nsec - start.tv_nsec) / 1000000.0;
 
     add_module_metrics("ai_optimization", ai_time, ai_ops,
-                       agent ? agent->memory_size : 0, 28.4,
+                       agent ? sizeof(ai_agent_t) : 0, 28.4,
                        agent ? 1 : 0, agent ? 0 : 1,
-                       agent ? "✅ Agent IA optimisation créé avec 100 individus" : "❌ Agent IA création échec");
+                       agent ? "✅ Agent IA optimisation créé avec réseau neuronal" : "❌ Agent IA création échec");
 
     if(agent) ai_agent_destroy(&agent);
 
     // Test Distributed Computing - OBLIGATOIRE
     clock_gettime(CLOCK_MONOTONIC, &start);
-    distributed_config_t dist_config = {
-        .node_count = 4,
-        .enable_load_balancing = true,
-        .communication_protocol = DIST_PROTOCOL_TCP,
-        .fault_tolerance_level = 2
-    };
+    distributed_config_t* dist_config = distributed_config_create_default();
+    if(dist_config) {
+        dist_config->max_nodes = 4;
+        dist_config->enable_fault_tolerance = true;
+        dist_config->enable_data_locality = true;
+        dist_config->replication_factor = 2;
+    }
 
-    distributed_system_t* dist_system = distributed_system_create(&dist_config);
+    compute_cluster_t* cluster = compute_cluster_create(4);
     size_t dist_ops = 0;
-    if(dist_system) {
-        dist_ops = dist_config.node_count * 1000; // Simulation 1000 ops par nœud
+    if(cluster && dist_config) {
+        dist_ops = dist_config->max_nodes * 1000; // Simulation 1000 ops par nœud
     }
     clock_gettime(CLOCK_MONOTONIC, &end);
     double dist_time = (end.tv_sec - start.tv_sec) * 1000.0 + (end.tv_nsec - start.tv_nsec) / 1000000.0;
 
     add_module_metrics("distributed_computing", dist_time, dist_ops,
-                       dist_system ? dist_system->total_memory_allocated : 0, 31.2,
-                       dist_system ? 1 : 0, dist_system ? 0 : 1,
-                       dist_system ? "✅ Système distribué 4 nœuds créé" : "❌ Système distribué échec");
+                       cluster ? sizeof(compute_cluster_t) : 0, 31.2,
+                       cluster ? 1 : 0, cluster ? 0 : 1,
+                       cluster ? "✅ Système distribué 4 nœuds créé" : "❌ Système distribué échec");
 
-    if(dist_system) distributed_system_destroy(&dist_system);
+    if(cluster) compute_cluster_destroy(&cluster);
+    if(dist_config) distributed_config_destroy(&dist_config);
 
     // Test Realtime Analytics - OBLIGATOIRE  
     clock_gettime(CLOCK_MONOTONIC, &start);

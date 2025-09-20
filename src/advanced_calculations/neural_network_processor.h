@@ -5,14 +5,9 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "../lum/lum_core.h"
+#include "../common/common_types.h"
 
-// Forward declaration pour éviter inclusion circulaire
-typedef enum {
-    PLASTICITY_HEBBIAN = 0,         // Apprentissage Hebbien
-    PLASTICITY_ANTI_HEBBIAN = 1,    // Anti-Hebbien
-    PLASTICITY_STDP = 2,            // Spike-Timing Dependent Plasticity
-    PLASTICITY_HOMEOSTATIC = 3      // Plasticité homéostatique
-} neural_plasticity_rules_e;
+// Neural plasticity rules defined in common_types.h
 
 // Structure traçage activations neuronales
 typedef struct {
@@ -46,32 +41,9 @@ typedef struct {
     bool is_active;               // État d'activation actuel
 } neural_lum_t;
 
-// Types d'activation
-typedef enum {
-    ACTIVATION_SIGMOID = 0,       // Fonction sigmoïde
-    ACTIVATION_TANH = 1,          // Tangente hyperbolique
-    ACTIVATION_RELU = 2,          // ReLU (Rectified Linear Unit)
-    ACTIVATION_LEAKY_RELU = 3,    // Leaky ReLU
-    ACTIVATION_SOFTMAX = 4,       // Softmax (pour couche sortie)
-    ACTIVATION_LINEAR = 5,        // Activation linéaire
-    ACTIVATION_SWISH = 6,         // Swish (x * sigmoid(x))
-    ACTIVATION_GELU = 7           // GELU (Gaussian Error Linear Unit)
-} activation_function_e;
+// Activation function types defined in common_types.h
 
-// Couche de réseau de neurones (modèle flat arrays canonique)
-typedef struct {
-    size_t neuron_count;          // Nombre de neurones
-    size_t input_size;            // Taille d'entrée
-    size_t output_size;           // Taille de sortie
-    activation_function_e activation; // Fonction d'activation
-    double* weights;              // Poids (neuron_count * input_size)
-    double* biases;               // Biais (neuron_count)
-    double* outputs;              // Sorties (neuron_count)
-    double* layer_error;          // Erreur de la couche (neuron_count)
-    uint32_t layer_id;            // Identifiant unique couche
-    uint32_t magic_number;        // Magic number pour validation
-    void* memory_address;         // Protection double-free OBLIGATOIRE
-} neural_layer_t;
+// neural_layer_t structure is defined in common_types.h
 
 // Réseau de neurones complet
 typedef struct {

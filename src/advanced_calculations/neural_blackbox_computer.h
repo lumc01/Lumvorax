@@ -4,6 +4,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include "../common/common_types.h"
 
 // Structures complètes pour optimiseurs ultra-précis
 typedef struct adam_ultra_precise_optimizer_t {
@@ -41,31 +42,9 @@ typedef struct newton_raphson_optimizer_t {
 #include <stdbool.h>
 #include <stddef.h>
 
-// Types d'activation neuronale (OBLIGATOIRE avant utilisation)
-typedef enum {
-    ACTIVATION_TANH = 0,
-    ACTIVATION_SIGMOID = 1,
-    ACTIVATION_RELU = 2,
-    ACTIVATION_GELU = 3,
-    ACTIVATION_SWISH = 4
-} activation_function_e;
+// Types d'activation neuronale (définis dans common_types.h)
 
-// Forward declarations pour éviter inclusion circulaire
-typedef struct neural_layer_t neural_layer_t;
-
-// Définition complète structure neural_layer_t UNIQUE
-struct neural_layer_t {
-    size_t neuron_count;        // Nombre de neurones dans cette couche
-    size_t input_size;          // Nombre d'entrées par neurone
-    size_t output_size;         // Nombre de sorties (= neuron_count)
-    double* weights;            // Poids synaptiques [neuron_count * input_size]
-    double* biases;             // Biais pour chaque neurone [neuron_count]
-    double* outputs;            // Sorties calculées [neuron_count]
-    double* layer_error;        // Erreurs pour backpropagation [neuron_count]
-    activation_function_e activation_type; // Type de fonction d'activation
-    uint32_t layer_id;          // Identifiant unique de couche
-    uint32_t magic_number;      // Protection intégrité (0xABCDEF01)
-};
+// neural_layer_t structure is defined in common_types.h
 
 // Forward declarations des fonctions neural_layer
 neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_function_e activation);
@@ -88,13 +67,7 @@ typedef enum {
 } neural_complexity_target_e;
 #endif
 
-// Définition complète des règles de plasticité neuronale
-typedef enum {
-    PLASTICITY_HEBBIAN = 0,         // Règle de Hebb classique
-    PLASTICITY_ANTI_HEBBIAN = 1,    // Anti-Hebb pour stabilité
-    PLASTICITY_STDP = 2,            // Spike-timing dependent plasticity
-    PLASTICITY_HOMEOSTATIC = 3      // Plasticité homéostatique
-} neural_plasticity_rules_e;
+// Règles de plasticité neuronale (définies dans common_types.h)
 
 // Types d'activation neuronale (suppression duplication)
 

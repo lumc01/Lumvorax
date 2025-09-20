@@ -5,15 +5,10 @@
 #include <stdint.h>
 #include <time.h>
 #include <stdarg.h>
+#include "../common/common_types.h"
 
-// Énumération des niveaux de log forensique
-typedef enum {
-    FORENSIC_LEVEL_DEBUG = 0,      // Informations de débogage détaillées
-    FORENSIC_LEVEL_INFO = 1,       // Informations générales
-    FORENSIC_LEVEL_WARNING = 2,    // Avertissements non critiques
-    FORENSIC_LEVEL_ERROR = 3,      // Erreurs récupérables
-    FORENSIC_LEVEL_CRITICAL = 4    // Erreurs critiques fatales
-} forensic_level_e;
+// Using unified forensic levels from common_types.h
+typedef unified_forensic_level_e forensic_level_e;
 
 #include "../lum/lum_core.h"
 
