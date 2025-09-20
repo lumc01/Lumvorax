@@ -1,0 +1,47 @@
+gcc -Wall -Wextra -std=c99-g-02-fPIC -c src/optimization/pareto_optimizer.c -o obj/optim ization/pareto_optimizer.o
+
+src/optimization/pareto_optimizer.c: In function 'pareto_optimize_fuse_operation':
+
+src/optimization/pareto_optimizer.c:375:9: warning: 'strncat' output may be truncated copyi ng between 0 and 255 bytes from a string of length 255 [-Wstringop-truncation]
+
+375 | strncat(result->message, improvement_msg, sizeof(result->message) - strlen(
+
+result->message) - 1);
+
+22222 22222222
+
+src/optimization/pareto_optimizer.c: In function 'pareto_optimize_split_operation':
+
+src/optimization/pareto_optimizer.c:408:9: warning: 'strncat' output may be truncated copyi ng between 0 and 255 bytes from a string of length 255 [-Wstringop-truncation]
+
+408 | strncat(result->message, optimization_msg, sizeof(result->message) strlen
+
+(result->message) - 1);
+
+src/optimization/pareto_optimizer.c: In function 'pareto_optimize_cycle_operation':
+
+src/optimization/pareto_optimizer.c:438:9: warning: 'strncat' output may be truncated copyi ng between 0 and 255 bytes from a string of length 255 [-Wstringop-truncation]
+
+438 | strncat(result->message, optimization_msg, sizeof(result->message) strlen
+
+(result->message) - 1);
+
+gcc -Wall -Wextra -std=c99-g-02-fPIC -c src/optimization/pareto_inverse_optimizer.c-00 bj/optimization/pareto_inverse_optimizer.o gcc -Wall -Wextra-std=c99-g-02-fPIC -c src/optimization/simd_optimizer.c -o obj/optimiz ation/simd_optimizer.o
+
+src/optimization/simd_optimizer.c: In function 'simd_optimize_lum_operations':
+
+src/optimization/simd_optimizer.c:375:5: error: implicit declaration of function 'clock_get
+
+time' [-Wimplicit-function-declaration]
+
+375 | clock_gettime (CLOCK_MONOTONIC, &start);
+
+src/optimization/simd_optimizer.c:375:19: error: 'CLOCK_MONOTONIC' undeclared (first use in this function)
+
+375 |
+
+clock_gettime (CLOCK_MONOTONIC, &start);
+
+src/optimization/simd_optimizer.c:375:19: note: each undeclared identifier is reported only once for each function it appears in make: *** [Makefile: 141: obj/optimization/simd_optimizer.o] Error 1
+
+~/workspace$
