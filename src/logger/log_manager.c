@@ -148,8 +148,12 @@ module_logger_t* log_manager_get_module_logger(log_manager_t* manager, const cha
     }
     
     // Création fichier log
+    char temp_session_id[32];
+    strncpy(temp_session_id, manager->session_id, sizeof(temp_session_id) - 1);
+    temp_session_id[sizeof(temp_session_id) - 1] = '\0';
+    
     snprintf(logger->log_filename, sizeof(logger->log_filename),
-             "%s/modules/%s/%s_%s.log", logs_base, module_name, module_name, manager->session_id);
+             "%s/modules/%s/%s_%s.log", logs_base, module_name, module_name, temp_session_id);
     
     logger->log_file = fopen(logger->log_filename, "a");
     if (!logger->log_file) return NULL;

@@ -1,8 +1,15 @@
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
 #include "lum_core.h"
+#include "../debug/memory_tracker.h"
+#include "../debug/forensic_logger.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
-#include "../debug/memory_tracker.h"
+#include <assert.h>
+#include <math.h>
 #include <pthread.h> // Nécessaire pour pthread_mutex_t et les fonctions associées
 #include <sys/time.h> // Nécessaire pour gettimeofday
 #include <immintrin.h> // Pour AVX intrinsics

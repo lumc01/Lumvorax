@@ -1,11 +1,11 @@
-
 #ifndef ULTRA_FORENSIC_LOGGER_H
 #define ULTRA_FORENSIC_LOGGER_H
 
 #include <stdio.h>
-#include <time.h>
 #include <stdint.h>
+#include <time.h>
 #include <pthread.h>
+#include <stdbool.h>
 
 // Niveaux de logging forensique ultra-stricts
 typedef enum {

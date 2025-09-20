@@ -1,9 +1,13 @@
 #ifndef MEMORY_TRACKER_H
 #define MEMORY_TRACKER_H
 
-#include <stdio.h>
-#include <stdlib.h>
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
+#include <stddef.h>
+#include <stdint.h>
 #include <string.h>
+#include <stdlib.h>
 #include <time.h>
 #include <stdbool.h> // Include for bool type
 #include <stdint.h>  // CORRECTION: Include pour uint64_t

@@ -1,3 +1,6 @@
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
 #include "vorax_operations.h"
 #include "../logger/lum_logger.h"
 #include "../debug/memory_tracker.h"  // CORRECTION: Include pour TRACKED_MALLOC/FREE
@@ -7,6 +10,7 @@
 #include <time.h>
 #include <stdatomic.h>
 #include <immintrin.h>
+#include <stdbool.h> // CORRECTION: Include pour le type bool
 
 // lum_log est définie dans le module logger
 
@@ -24,7 +28,7 @@ vorax_result_t* vorax_fuse(lum_group_t* group1, lum_group_t* group2) {
         vorax_result_set_error(result, "Size overflow in fusion");
         return result;
     }
-    
+
     // OPTIMISATION 2: Création groupe aligné optimal
     lum_group_t* fused = lum_group_create(total_count + 64); // +64 padding performance
     if (!fused) {
@@ -35,14 +39,14 @@ vorax_result_t* vorax_fuse(lum_group_t* group1, lum_group_t* group2) {
     // OPTIMISATION 3: Copy vectorisée ultra-rapide des deux groupes
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    
+
     #ifdef __AVX512F__
     // Copy group1 avec AVX-512 (64 bytes = 1 LUM exactement)
     for (size_t i = 0; i < group1->count; i++) {
         __m512i lum_data = _mm512_loadu_si512((__m512i*)&group1->lums[i]);
         _mm512_storeu_si512((__m512i*)&fused->lums[i], lum_data);
     }
-    
+
     // Copy group2 avec AVX-512 
     for (size_t i = 0; i < group2->count; i++) {
         __m512i lum_data = _mm512_loadu_si512((__m512i*)&group2->lums[i]);
@@ -54,30 +58,30 @@ vorax_result_t* vorax_fuse(lum_group_t* group1, lum_group_t* group2) {
         if ((i + 8) < group1->count) __builtin_prefetch(&group1->lums[i + 8], 0, 3);
         fused->lums[i] = group1->lums[i];
     }
-    
+
     for (size_t i = 0; i < group2->count; i++) {
         if ((i + 8) < group2->count) __builtin_prefetch(&group2->lums[i + 8], 0, 3);
         fused->lums[group1->count + i] = group2->lums[i];
     }
     #endif
-    
+
     // OPTIMISATION 4: Mise à jour count normale (remove atomic for regular size_t)
     fused->count = total_count;
-    
+
     clock_gettime(CLOCK_MONOTONIC, &end);
     uint64_t fusion_time_ns = (end.tv_sec - start.tv_sec) * 1000000000ULL + 
                              (end.tv_nsec - start.tv_nsec);
-    
+
     result->result_group = fused;
     result->execution_time_ns = fusion_time_ns;
-    
+
     char success_msg[256];
     snprintf(success_msg, sizeof(success_msg), 
              "Fusion completed: %zu LUMs in %lu ns (%.2f M LUMs/sec)", 
              total_count, fusion_time_ns, 
              (double)total_count * 1000.0 / fusion_time_ns);
     vorax_result_set_success(result, success_msg);
-    
+
     return result;
 }
 
@@ -100,7 +104,7 @@ vorax_result_t* vorax_split(lum_group_t* group, size_t parts) {
     // OPTIMISATION 1: Allocation groupes alignée avec calcul optimal
     size_t lums_per_group = group->count / parts;
     size_t remainder = group->count % parts;
-    
+
     result->result_groups = (lum_group_t**)aligned_alloc(64, sizeof(lum_group_t*) * parts);
     if (!result->result_groups) {
         vorax_result_set_error(result, "Memory allocation failed for split result");
@@ -113,7 +117,7 @@ vorax_result_t* vorax_split(lum_group_t* group, size_t parts) {
     for (size_t i = 0; i < parts; i++) {
         size_t group_size = lums_per_group + (i < remainder ? 1 : 0);
         result->result_groups[i] = lum_group_create(group_size + 16); // +16 padding
-        
+
         if (!result->result_groups[i]) {
             vorax_result_set_error(result, "Failed to create split group");
             // Cleanup optimisé
@@ -131,22 +135,22 @@ vorax_result_t* vorax_split(lum_group_t* group, size_t parts) {
 
     // OPTIMISATION 3: Distribution vectorisée ultra-rapide
     size_t source_index = 0;
-    
+
     for (size_t part = 0; part < parts; part++) {
         size_t group_size = lums_per_group + (part < remainder ? 1 : 0);
         lum_group_t* target_group = result->result_groups[part];
-        
+
         #ifdef __AVX512F__
         // Copy vectorisée par blocks de 8 LUMs (512 bytes)
         size_t vectorized_count = (group_size / 8) * 8;
-        
+
         for (size_t i = 0; i < vectorized_count; i += 8) {
             for (size_t j = 0; j < 8; j++) {
                 __m512i lum_data = _mm512_loadu_si512((__m512i*)&group->lums[source_index + i + j]);
                 _mm512_storeu_si512((__m512i*)&target_group->lums[i + j], lum_data);
             }
         }
-        
+
         // Copy reste non-vectorisé
         for (size_t i = vectorized_count; i < group_size; i++) {
             target_group->lums[i] = group->lums[source_index + i];
@@ -160,7 +164,7 @@ vorax_result_t* vorax_split(lum_group_t* group, size_t parts) {
             target_group->lums[i] = group->lums[source_index + i];
         }
         #endif
-        
+
         // Mise à jour count atomique
         target_group->count = group_size;
         source_index += group_size;
@@ -169,21 +173,21 @@ vorax_result_t* vorax_split(lum_group_t* group, size_t parts) {
     clock_gettime(CLOCK_MONOTONIC, &end);
     uint64_t split_time_ns = (end.tv_sec - start.tv_sec) * 1000000000ULL + 
                             (end.tv_nsec - start.tv_nsec);
-    
+
     // OPTIMISATION 4: Métriques de performance détaillées
     result->execution_time_ns = split_time_ns;
     result->operations_performed = group->count;
     result->throughput_lums_per_sec = (double)group->count * 1000000000.0 / split_time_ns;
     result->use_zero_copy = false; // Copy nécessaire pour split
     result->use_vectorization = true;
-    
+
     char success_msg[256];
     snprintf(success_msg, sizeof(success_msg), 
              "Split completed: %zu LUMs → %zu parts in %lu ns (%.2f M LUMs/sec)", 
              group->count, parts, split_time_ns, 
              result->throughput_lums_per_sec / 1000000.0);
     vorax_result_set_success(result, success_msg);
-    
+
     return result;
 }
 
@@ -243,7 +247,7 @@ vorax_result_t* vorax_move(lum_zone_t* from_zone, lum_zone_t* to_zone, size_t lu
     for (size_t g = 0; g < from_zone->group_count && moved < lum_count; g++) {
         lum_group_t* source_group = from_zone->groups[g];
         size_t moved_from_this_group = 0;  // Track per-group moved count
-        
+
         for (size_t i = 0; i < source_group->count && moved < lum_count; i++) {
             lum_group_add(move_group, &source_group->lums[i]);
             moved++;
