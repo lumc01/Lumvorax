@@ -6,6 +6,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 
+// FLAGS DE DÉSACTIVATION MODULES
+// Désactivé par défaut - réactivation manuelle uniquement
+// #define MODULES_QUANTIQUES_ACTIFS
+// #define MODULES_BLACKBOX_ACTIFS
+
 // Constantes communes
 #define MAX_STORAGE_PATH_LENGTH 1024
 #define MAX_ERROR_MESSAGE_LENGTH 256

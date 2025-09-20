@@ -321,6 +321,14 @@
 **MISE À JOUR SUIVANTE** : Après correction 4 modules bloqués
 # RÈGLES DÉVELOPPEMENT LUM/VORAX - REPLIT ASSISTANT
 
+## MODULES DÉSACTIVÉS - INTERDICTION RÉACTIVATION
+### Instructions de désactivation des modules
+**MODULES QUANTIQUES ET BLACKBOX DÉSACTIVÉS**
+- Modules quantiques et blackbox désactivés jusqu'à ordre contraire
+- Leur réactivation est INTERDITE sans validation explicite de l'utilisateur
+- Toute tentative de réactivation sera documentée dans le journal des activités
+- Directive de compilation: MODULES_QUANTIQUES_ACTIFS et MODULES_BLACKBOX_ACTIFS désactivées
+
 ## RÈGLES OPÉRATIONNELLES REPLIT
 1. **Plateforme unique**: Développement et déploiement exclusivement sur Replit
 2. **Ports autorisés**: Utiliser 0.0.0.0 au lieu de localhost, port 5000 recommandé

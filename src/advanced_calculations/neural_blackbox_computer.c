@@ -1,3 +1,5 @@
+// MODULES BLACKBOX DÉSACTIVÉS JUSQU'À RÉACTIVATION EXPLICITE
+#ifdef MODULES_BLACKBOX_ACTIFS
 #include "neural_blackbox_computer.h"
 #include "neural_ultra_precision_architecture.h"
 #include "../debug/memory_tracker.h"
@@ -7,6 +9,12 @@
 #include <math.h>
 #include <time.h>
 #include <stdio.h>
+#else
+// Module blackbox désactivé - implémentation stub
+#include "neural_blackbox_computer.h"
+#include "../debug/memory_tracker.h"
+#include <stdio.h>
+#endif
 
 // Temporary logging macros until forensic_log is properly implemented
 #define FORENSIC_LEVEL_ERROR 0

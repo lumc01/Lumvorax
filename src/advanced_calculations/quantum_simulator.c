@@ -1,4 +1,6 @@
 
+// MODULES QUANTIQUES DÉSACTIVÉS JUSQU'À RÉACTIVATION EXPLICITE
+#ifdef MODULES_QUANTIQUES_ACTIFS
 #include "quantum_simulator.h"
 #include "../debug/memory_tracker.h"
 #include <stdlib.h>
@@ -7,10 +9,24 @@
 #include <time.h>
 
 // OPTIMISATION COMPLÈTE: Création LUM quantique ultra-optimisée pour 1M+ qubits
+#else
+// Module quantique désactivé - implémentation stub
+#include "quantum_simulator.h"
+#include "../debug/memory_tracker.h"
+#include <stdio.h>
+
+// Stubs pour maintenir la compatibilité de compilation
+#ifdef MODULES_QUANTIQUES_ACTIFS
 quantum_lum_t* quantum_lum_create(int32_t x, int32_t y, size_t initial_states) {
     if (initial_states == 0 || initial_states > QUANTUM_MAX_QUBITS) {
         return NULL;
     }
+#else
+quantum_lum_t* quantum_lum_create(int32_t x, int32_t y, size_t initial_states) {
+    (void)x; (void)y; (void)initial_states;
+    printf("[QUANTUM] Module désactivé - simulation retournée\n");
+    return NULL;
+#endif
     
     // OPTIMISATION 1: Allocation alignée pour performances SIMD
     quantum_lum_t* qlum = (quantum_lum_t*)aligned_alloc(64, sizeof(quantum_lum_t));
