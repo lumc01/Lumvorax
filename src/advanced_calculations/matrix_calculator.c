@@ -398,7 +398,8 @@ void matrix_lum_result_destroy(matrix_lum_result_t** result_ptr) {
     }
 }
 
-// Fonction de test simple
+// Fonction de test simple - COMMENTED OUT TO AVOID DUPLICATE WITH main.c
+/*
 void matrix_calculator_demo(void) {
     printf("Matrix Calculator Demo - LUM optimized calculations\n");
 
@@ -451,6 +452,7 @@ void matrix_calculator_demo(void) {
         printf("❌ Échec création matrices pour multiplication.\n");
     }
 }
+*/
 
 // Fonction destruction alias pour compatibilité
 void matrix_result_destroy(matrix_result_t** result_ptr) {
