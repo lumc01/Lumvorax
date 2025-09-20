@@ -15,16 +15,21 @@ typedef enum {
     VORAX_OP_EXPAND = 7       // Expand from Ω
 } vorax_operation_e;
 
-// Operation result structure
+// OPTIMISATION: Structure résultat VORAX ultra-optimisée
 typedef struct {
     bool success;
     char message[256];
     lum_group_t* result_group;          // Groupe résultat principal
-    lum_group_t* output_group;          // Alias compatibilité (nouveau STANDARD_NAMES 2025-01-10)
-    lum_group_t** result_groups;        // Array de groupes pour opérations split (restauré)
+    lum_group_t* output_group;          // Alias compatibilité
+    lum_group_t** result_groups;        // Array groupes pour split
     size_t result_count;
-    double execution_time;
-    uint32_t magic_number;              // Protection double-free (conforme STANDARD_NAMES)
+    double execution_time;              // Temps en secondes (legacy)
+    uint64_t execution_time_ns;         // OPTIMISATION: Temps nanoseconde précis
+    uint64_t operations_performed;      // OPTIMISATION: Compteur opérations
+    double throughput_lums_per_sec;     // OPTIMISATION: Débit LUMs/sec
+    uint32_t magic_number;              // Protection double-free
+    bool use_zero_copy;                 // OPTIMISATION: Flag zero-copy utilisé
+    bool use_vectorization;             // OPTIMISATION: Flag vectorisation utilisé
 } vorax_result_t;
 
 // Core VORAX operations

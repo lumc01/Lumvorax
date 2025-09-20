@@ -86,11 +86,25 @@ void lum_memory_destroy(lum_memory_t* memory);
 bool lum_memory_store(lum_memory_t* memory, lum_group_t* group);
 lum_group_t* lum_memory_retrieve(lum_memory_t* memory);
 
+// OPTIMISATIONS AVANCÉES: Types pour opérations batch
+typedef enum {
+    LUM_BATCH_VALIDATE_ALL = 0,
+    LUM_BATCH_UPDATE_TIMESTAMPS = 1,
+    LUM_BATCH_RECALC_CHECKSUMS = 2,
+    LUM_BATCH_SORT_BY_ID = 3,
+    LUM_BATCH_DEFRAGMENT = 4
+} lum_batch_operation_e;
+
 // Utility functions
 uint32_t lum_generate_id(void);
 uint64_t lum_get_timestamp(void);
 void lum_print(const lum_t* lum);
 void lum_group_print(const lum_group_t* group);
+
+// OPTIMISATIONS AVANCÉES: Fonctions batch ultra-optimisées 50M+ LUMs
+bool lum_group_process_batch_50m_optimized(lum_group_t* group, lum_batch_operation_e operation);
+bool lum_group_sort_ultra_fast(lum_group_t* group);
+bool lum_group_defragment_zero_copy(lum_group_t* group);
 
 // Fonction de destruction sécurisée
 void lum_safe_destroy(lum_t** lum_ptr);
