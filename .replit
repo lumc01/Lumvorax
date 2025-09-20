@@ -6,43 +6,6 @@ expertMode = true
 runButton = "Project"
 
 [[workflows.workflow]]
-name = "LUM_VORAX_FORENSIC_COMPLETE"
-author = 47310341
-mode = "sequential"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "make clean"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "make all"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./execute_complete_benchmarks.sh"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./benchmark_logs_impact.sh"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./generate_complete_forensic_report.sh"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"=== VALIDATION FORENSIQUE COMPLETE ===\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "echo \"Rapport final généré avec données authentiques\""
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "ls -la RAPPORT_FORENSIQUE_EXECUTION_REELLE_*.md"
-
-[[workflows.workflow]]
 name = "LUM_VORAX_VALIDATION_COMPLETE"
 author = 47316168
 mode = "sequential"
