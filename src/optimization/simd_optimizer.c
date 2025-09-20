@@ -5,8 +5,10 @@
 #include "../lum/lum_core.h"  // For lum_get_timestamp function
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
+#include <time.h>       // Pour clock_gettime
 #include <stdio.h>
+#include <unistd.h>     // Pour getpagesize
+
 
 #ifdef __x86_64__
 #include <cpuid.h>
@@ -230,7 +232,7 @@ void simd_avx512_mass_lum_operations(lum_t* lums, size_t count) {
 
         // Écriture atomique des résultats optimisés avec timestamp forensique
         uint64_t operation_timestamp = lum_get_timestamp(); // Use existing function
-        
+
         // FMA (Fused Multiply-Add) pour performance optimale - removed invalid intrinsic
 #ifdef __AVX512F__
         // Use already computed optimized_x instead of invalid FMA intrinsic

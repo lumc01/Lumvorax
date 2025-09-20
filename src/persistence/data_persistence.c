@@ -295,8 +295,11 @@ storage_result_t* persistence_save_lum(persistence_context_t* ctx,
 
     char full_path[MAX_STORAGE_PATH_LENGTH];
 
-    // Vérification taille avant concaténation
-    size_t total_len = strlen(ctx->storage_directory) + strlen(filename) + 2; // +2 pour '/' et '\0'
+    // Vérification taille avant concaténation avec marge de sécurité
+    size_t dir_len = strlen(ctx->storage_directory);
+    size_t file_len = strlen(filename);
+    size_t total_len = dir_len + file_len + 2; // +2 pour '/' et '\0'
+
     if (total_len >= MAX_STORAGE_PATH_LENGTH) {
         unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__,
                            "Path too long: %zu chars (max: %d)", total_len, MAX_STORAGE_PATH_LENGTH);
@@ -304,7 +307,13 @@ storage_result_t* persistence_save_lum(persistence_context_t* ctx,
         return result;
     }
 
-    snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+    // Utilisation sécurisée de snprintf avec vérification préalable
+    int written = snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+    if (written >= (int)sizeof(full_path)) {
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__, "Path truncated unexpectedly");
+        storage_result_set_error(result, "Path construction failed");
+        return result;
+    }
 
 
     FILE* file = fopen(full_path, "wb");
@@ -374,8 +383,11 @@ storage_result_t* persistence_load_lum(persistence_context_t* ctx,
 
     char full_path[MAX_STORAGE_PATH_LENGTH];
 
-    // Vérification taille avant concaténation
-    size_t total_len = strlen(ctx->storage_directory) + strlen(filename) + 2; // +2 pour '/' et '\0'
+    // Vérification taille avant concaténation avec marge de sécurité
+    size_t dir_len = strlen(ctx->storage_directory);
+    size_t file_len = strlen(filename);
+    size_t total_len = dir_len + file_len + 2; // +2 pour '/' et '\0'
+
     if (total_len >= MAX_STORAGE_PATH_LENGTH) {
         unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__,
                            "Path too long: %zu chars (max: %d)", total_len, MAX_STORAGE_PATH_LENGTH);
@@ -383,7 +395,13 @@ storage_result_t* persistence_load_lum(persistence_context_t* ctx,
         return result;
     }
 
-    snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+    // Utilisation sécurisée de snprintf avec vérification préalable
+    int written = snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+    if (written >= (int)sizeof(full_path)) {
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__, "Path truncated unexpectedly");
+        storage_result_set_error(result, "Path construction failed");
+        return result;
+    }
 
 
     FILE* file = fopen(full_path, "rb");
@@ -471,8 +489,11 @@ storage_result_t* persistence_save_group(persistence_context_t* ctx,
 
     char full_path[MAX_STORAGE_PATH_LENGTH];
 
-    // Vérification taille avant concaténation
-    size_t total_len = strlen(ctx->storage_directory) + strlen(filename) + 2; // +2 pour '/' et '\0'
+    // Vérification taille avant concaténation avec marge de sécurité
+    size_t dir_len = strlen(ctx->storage_directory);
+    size_t file_len = strlen(filename);
+    size_t total_len = dir_len + file_len + 2; // +2 pour '/' et '\0'
+
     if (total_len >= MAX_STORAGE_PATH_LENGTH) {
         unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__,
                            "Path too long: %zu chars (max: %d)", total_len, MAX_STORAGE_PATH_LENGTH);
@@ -480,7 +501,13 @@ storage_result_t* persistence_save_group(persistence_context_t* ctx,
         return result;
     }
 
-    snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+    // Utilisation sécurisée de snprintf avec vérification préalable
+    int written = snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+    if (written >= (int)sizeof(full_path)) {
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__, "Path truncated unexpectedly");
+        storage_result_set_error(result, "Path construction failed");
+        return result;
+    }
 
 
     FILE* file = fopen(full_path, "wb");
@@ -570,8 +597,11 @@ storage_result_t* persistence_load_group(persistence_context_t* ctx,
 
     char full_path[MAX_STORAGE_PATH_LENGTH];
 
-    // Vérification taille avant concaténation
-    size_t total_len = strlen(ctx->storage_directory) + strlen(filename) + 2; // +2 pour '/' et '\0'
+    // Vérification taille avant concaténation avec marge de sécurité
+    size_t dir_len = strlen(ctx->storage_directory);
+    size_t file_len = strlen(filename);
+    size_t total_len = dir_len + file_len + 2; // +2 pour '/' et '\0'
+
     if (total_len >= MAX_STORAGE_PATH_LENGTH) {
         unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__,
                            "Path too long: %zu chars (max: %d)", total_len, MAX_STORAGE_PATH_LENGTH);
@@ -579,7 +609,13 @@ storage_result_t* persistence_load_group(persistence_context_t* ctx,
         return result;
     }
 
-    snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+    // Utilisation sécurisée de snprintf avec vérification préalable
+    int written = snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+    if (written >= (int)sizeof(full_path)) {
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__, "Path truncated unexpectedly");
+        storage_result_set_error(result, "Path construction failed");
+        return result;
+    }
 
 
     FILE* file = fopen(full_path, "rb");

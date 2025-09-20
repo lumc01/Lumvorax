@@ -103,7 +103,7 @@ zero_copy_allocation_t* zero_copy_alloc(zero_copy_pool_t* pool, size_t size) {
 
     // Aligner la taille sur la granularité du pool avec optimisation < 5ns
     size_t aligned_size = (size + pool->alignment - 1) & ~(pool->alignment - 1);
-    
+
     // Préfetch pour performance cache optimale
     __builtin_prefetch(pool->memory_region, 1, 3);
 
@@ -398,20 +398,20 @@ bool zero_copy_defragment_pool(zero_copy_pool_t* pool) {
             pool->free_blocks_count, pool->total_size);
 
     // NOUVELLE IMPLÉMENTATION: Défragmentation sophistiquée type buddy-allocator
-    
+
     // Phase 1: Analyse des patterns de fragmentation
     size_t total_free_size = 0;
     size_t largest_block = 0;
     size_t smallest_block = SIZE_MAX;
     free_block_t* current = pool->free_list;
-    
+
     while (current) {
         total_free_size += current->size;
         if (current->size > largest_block) largest_block = current->size;
         if (current->size < smallest_block) smallest_block = current->size;
         current = current->next;
     }
-    
+
     // CORRECTION CRITIQUE: Protection contre division par zéro 
     double fragmentation_ratio = 0.0;
     if (total_free_size > 0 && smallest_block != SIZE_MAX) {
@@ -427,7 +427,7 @@ bool zero_copy_defragment_pool(zero_copy_pool_t* pool) {
 
     // Phase 2: Compaction intelligente basée sur le niveau de fragmentation
     bool compaction_success = false;
-    
+
     if (fragmentation_ratio > 0.7) {
         // Fragmentation élevée - défragmentation agressive
         lum_log(LUM_LOG_INFO, "Fragmentation élevée détectée - défragmentation agressive");
@@ -453,24 +453,24 @@ bool zero_copy_defragment_pool(zero_copy_pool_t* pool) {
 // Fonction de défragmentation agressive pour forte fragmentation
 static bool zero_copy_aggressive_defrag(zero_copy_pool_t* pool) {
     if (!pool) return false;
-    
+
     // Implémentation de défragmentation agressive avec reconstruction complète
     // de la free list selon un algorithme buddy-like
-    
+
     size_t block_count = pool->free_blocks_count;
     if (block_count <= 1) return false;
-    
+
     // Collecte et tri de tous les blocs par adresse
     free_block_t** block_array = TRACKED_MALLOC(sizeof(free_block_t*) * block_count);
     if (!block_array) return false;
-    
+
     free_block_t* current = pool->free_list;
     size_t idx = 0;
     while (current && idx < block_count) {
         block_array[idx++] = current;
         current = current->next;
     }
-    
+
     // Tri par adresse (simple bubble sort pour simplicité)
     for (size_t i = 0; i < block_count - 1; i++) {
         for (size_t j = 0; j < block_count - i - 1; j++) {
@@ -481,19 +481,19 @@ static bool zero_copy_aggressive_defrag(zero_copy_pool_t* pool) {
             }
         }
     }
-    
+
     // Reconstruction de la free list avec fusion agressive
     pool->free_list = NULL;
     pool->free_blocks_count = 0;
-    
+
     for (size_t i = 0; i < block_count; i++) {
         free_block_t* block = block_array[i];
-        
+
         // Tentative de fusion avec le dernier bloc ajouté
         if (pool->free_list) {
             free_block_t* last = pool->free_list;
             while (last->next) last = last->next;
-            
+
             if ((uint8_t*)last->ptr + last->size == block->ptr) {
                 // Fusion possible
                 last->size += block->size;
@@ -501,7 +501,7 @@ static bool zero_copy_aggressive_defrag(zero_copy_pool_t* pool) {
                 continue;
             }
         }
-        
+
         // Ajout du bloc à la fin de la liste
         block->next = NULL;
         if (!pool->free_list) {
@@ -513,7 +513,7 @@ static bool zero_copy_aggressive_defrag(zero_copy_pool_t* pool) {
         }
         pool->free_blocks_count++;
     }
-    
+
     TRACKED_FREE(block_array);
     return true;
 }
@@ -527,15 +527,15 @@ static bool zero_copy_enhanced_compact_free_list(zero_copy_pool_t* pool) {
 
     // Algorithme amélioré avec recherche étendue de blocs adjacents
     free_block_t* current = pool->free_list;
-    
+
     while (current) {
         free_block_t* next = current->next;
         bool merged = false;
-        
+
         // Recherche étendue de blocs à fusionner
         free_block_t* scan = pool->free_list;
         free_block_t* scan_prev = NULL;
-        
+
         while (scan) {
             if (scan != current) {
                 // Vérification de contiguïté dans les deux sens
@@ -570,7 +570,7 @@ static bool zero_copy_enhanced_compact_free_list(zero_copy_pool_t* pool) {
             scan_prev = scan;
             scan = scan->next;
         }
-        
+
         if (!merged) {
             current = next;
         } else {
@@ -578,10 +578,10 @@ static bool zero_copy_enhanced_compact_free_list(zero_copy_pool_t* pool) {
             current = pool->free_list;
         }
     }
-    
+
     lum_log(LUM_LOG_INFO, "Compaction améliorée: %zu fusions effectuées (%zu -> %zu blocs)",
             merge_operations, original_count, pool->free_blocks_count);
-    
+
     return merge_operations > 0;
 }
 

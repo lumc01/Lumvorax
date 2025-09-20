@@ -673,7 +673,7 @@ bool lum_group_process_batch_50m_optimized(lum_group_t* group, lum_batch_operati
 
     switch (operation) {
         case LUM_BATCH_SORT_BY_ID:
-            // Réorganisation équilibrée des LUMs (tri par ID)
+            // Tri par ID optimisé
             for (size_t i = 0; i < group->count - 1; i++) {
                 for (size_t j = i + 1; j < group->count; j++) {
                     if (group->lums[i].id > group->lums[j].id) {
@@ -687,31 +687,7 @@ bool lum_group_process_batch_50m_optimized(lum_group_t* group, lum_batch_operati
             break;
 
         case LUM_BATCH_DEFRAGMENT:
-            // Optimisation mémoire spatiale
-            for (size_t i = 0; i < group->count; i++) {
-                // Réorganisation spatiale pour optimiser l'accès mémoire
-                group->lums[i].position_x = (group->lums[i].position_x / 10) * 10;
-                group->lums[i].position_y = (group->lums[i].position_y / 10) * 10;
-                operations_count++;
-            }
-            break;
-
-        case LUM_BATCH_SORT_BY_ID:
-            // Tri par ID
-            for (size_t i = 0; i < group->count - 1; i++) {
-                for (size_t j = i + 1; j < group->count; j++) {
-                    if (group->lums[i].id > group->lums[j].id) {
-                        lum_t temp = group->lums[i];
-                        group->lums[i] = group->lums[j];
-                        group->lums[j] = temp;
-                        operations_count++;
-                    }
-                }
-            }
-            break;
-
-        case LUM_BATCH_DEFRAGMENT:
-            // Défragmentation
+            // Défragmentation mémoire spatiale
             for (size_t i = 0; i < group->count; i++) {
                 // Réorganisation spatiale pour optimiser l'accès mémoire
                 group->lums[i].position_x = (group->lums[i].position_x / 10) * 10;
