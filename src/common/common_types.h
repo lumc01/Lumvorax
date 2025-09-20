@@ -5,15 +5,23 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
+#include <stdarg.h>
+#include <string.h>
+#include <stdlib.h>
 
 // FLAGS DE DÉSACTIVATION MODULES
 // Désactivé par défaut - réactivation manuelle uniquement
 // #define MODULES_QUANTIQUES_ACTIFS
 // #define MODULES_BLACKBOX_ACTIFS
 
-// Constantes communes
-#define MAX_STORAGE_PATH_LENGTH 1024
-#define MAX_ERROR_MESSAGE_LENGTH 256
+// Constantes communes - tailles augmentées pour éviter troncations
+#define MAX_STORAGE_PATH_LENGTH 2048
+#define MAX_ERROR_MESSAGE_LENGTH 512
+
+// SECTION 8: INTERDICTION D'UTILISER DES EMOJI
+// Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 
+// Toute inclusion d'emoji sera considérée comme une violation des standards de codage.
 
 // Type unifié pour tous les résultats de stockage
 typedef struct {

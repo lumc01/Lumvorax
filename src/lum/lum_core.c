@@ -1,7 +1,12 @@
 #define _GNU_SOURCE
 #define _POSIX_C_SOURCE 200809L
 
+// SECTION 8: INTERDICTION D'UTILISER DES EMOJI
+// Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 
+// Toute inclusion d'emoji sera considérée comme une violation des standards de codage.
+
 #include "lum_core.h"
+#include "../common/common_types.h"
 #include "../debug/memory_tracker.h"
 #include "../debug/forensic_logger.h"
 #include <stdio.h>
@@ -15,6 +20,7 @@
 #include <immintrin.h> // Pour AVX intrinsics
 #include <sys/mman.h>  // Pour mmap, munmap
 #include <stdatomic.h> // Pour atomic operations
+#include <inttypes.h>  // Pour PRIu32, PRIu64, etc.
 
 // Définitions pour les optimisations AVX
 #define LUM_BATCH_VALIDATE_ALL 0
@@ -582,7 +588,7 @@ uint32_t lum_generate_id(void) {
             id = timestamp_base + overflow_counter;
             overflow_counter = (overflow_counter + 1) % 1000;
 
-            printf("[WARNING] LUM ID overflow handled - using timestamp-based ID: %u\n", id);
+            printf("[WARNING] LUM ID overflow handled - using timestamp-based ID: %" PRIu32 "\n", id);
         } else {
             // Fallback: réinitialiser le compteur avec offset
             lum_id_counter = 1000;
