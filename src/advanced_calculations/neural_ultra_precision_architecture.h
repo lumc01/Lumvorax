@@ -18,8 +18,8 @@ typedef enum {
 } neural_complexity_target_e;
 #endif
 
-#ifndef NEURAL_ARCHITECTURE_CONFIG_T_DEFINED
-#define NEURAL_ARCHITECTURE_CONFIG_T_DEFINED
+#ifndef NEURAL_ULTRA_PRECISION_CONFIG_T_DEFINED
+#define NEURAL_ULTRA_PRECISION_CONFIG_T_DEFINED
 typedef struct {
     neural_complexity_target_e complexity_target;
     size_t memory_capacity;
@@ -28,32 +28,22 @@ typedef struct {
     bool enable_continuous_learning;
     bool enable_metaplasticity;
 } neural_architecture_config_t;
-#endif
 
-// Configuration ultra-précision neuronale complète
 typedef struct neural_ultra_precision_config_t {
-    // Configuration précision
     size_t precision_target_digits;      // Nombre de chiffres de précision cible
     double precision_target;             // Précision numérique cible (ex: 1e-15)
-
-    // Architecture réseau
     size_t base_depth;                   // Profondeur de base du réseau
     size_t precision_layers;             // Couches dédiées à la précision
     size_t neurons_per_precision_digit;  // Neurones par chiffre de précision
-
-    // Dimensions entrée/sortie
     size_t input_dimensions;             // Dimensions d'entrée
     size_t output_dimensions;            // Dimensions de sortie
-
-    // Facteurs d'échelle
     double memory_scaling_factor;        // Facteur d'échelle mémoire
     double computation_scaling_factor;   // Facteur d'échelle computation
-
-    // Options avancées
     bool enable_adaptive_precision;      // Précision adaptative
     bool enable_error_correction;        // Correction d'erreur
     uint32_t magic_number;              // Protection double-free
 } neural_ultra_precision_config_t;
+#endif
 
 // Calcul architecture selon précision requise
 neural_architecture_config_t* neural_calculate_ultra_precision_architecture(

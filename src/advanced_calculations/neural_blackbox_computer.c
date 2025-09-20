@@ -115,14 +115,14 @@ bool neural_layer_forward_pass(neural_layer_t* layer, double* input) {
 // Implémentation complète perturbation paramètres pour gradients numériques
 void neural_blackbox_perturb_parameter(neural_blackbox_computer_t* system, size_t param_idx, double perturbation) {
     if (!system || param_idx >= system->total_parameters) return;
-    
+
     size_t current_idx = 0;
-    
+
     // Parcours des couches pour trouver le bon paramètre
     for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
         neural_layer_t* layer = system->hidden_layers[layer_idx];
         if (!layer) continue;
-        
+
         // Paramètres des poids
         size_t weight_count = layer->neuron_count * layer->input_size;
         if (param_idx >= current_idx && param_idx < current_idx + weight_count) {
@@ -131,7 +131,7 @@ void neural_blackbox_perturb_parameter(neural_blackbox_computer_t* system, size_
             return;
         }
         current_idx += weight_count;
-        
+
         // Paramètres des biais
         if (param_idx >= current_idx && param_idx < current_idx + layer->neuron_count) {
             size_t local_idx = param_idx - current_idx;
@@ -146,13 +146,13 @@ void neural_blackbox_perturb_parameter(neural_blackbox_computer_t* system, size_
 adam_ultra_precise_optimizer_t* adam_ultra_precise_create(double lr, double beta1, double beta2, double epsilon) {
     adam_ultra_precise_optimizer_t* adam = TRACKED_MALLOC(sizeof(adam_ultra_precise_optimizer_t));
     if (!adam) return NULL;
-    
+
     // Validation paramètres
     if (lr <= 0.0 || lr > 1.0) lr = 0.001;  // Learning rate raisonnable
     if (beta1 <= 0.0 || beta1 >= 1.0) beta1 = 0.9;  // Momentum typique
     if (beta2 <= 0.0 || beta2 >= 1.0) beta2 = 0.999; // RMSprop typique
     if (epsilon <= 0.0) epsilon = 1e-8; // Stabilité numérique
-    
+
     adam->learning_rate = lr;
     adam->beta1 = beta1;
     adam->beta2 = beta2;
@@ -160,81 +160,86 @@ adam_ultra_precise_optimizer_t* adam_ultra_precise_create(double lr, double beta
     adam->iteration = 0;
     adam->magic_number = 0xADAC0001;
     adam->memory_address = (void*)adam;
-    
+
     // Allocation mémoire pour momentum et velocity (sera dimensionnée lors du premier usage)
     adam->momentum = NULL;
     adam->velocity = NULL;
     adam->param_count = 0;
-    
+
     return adam;
 }
 
 // Implémentation complète Newton-Raphson update weights
 bool newton_raphson_update_weights(newton_raphson_optimizer_t* newton, neural_blackbox_computer_t* system, double* gradients, double loss) {
     if (!newton || !system || !gradients) return false;
-    
+
     // Validation magic number
     if (newton->magic_number != 0xDEAD0001) return false;
     if (system->blackbox_magic != NEURAL_BLACKBOX_MAGIC) return false;
-    
+
     // Newton-Raphson nécessite calcul Hessienne (approximation BFGS pour performance)
     if (!newton->hessian_inv) {
         // Initialisation Hessienne identité
         size_t param_count = system->total_parameters;
         newton->hessian_inv = TRACKED_MALLOC(param_count * sizeof(double));
         if (!newton->hessian_inv) return false;
-        
+
         // Initialisation identité diagonale
         for (size_t i = 0; i < param_count; i++) {
             newton->hessian_inv[i] = 1.0; // Hessienne identité approximée
         }
         newton->param_count = param_count;
     }
-    
+
     // Update Newton-Raphson: theta = theta - H^-1 * g
     // Approximation diagonale pour performance
     size_t param_idx = 0;
-    
+
     // Mise à jour couche par couche
     for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
         neural_layer_t* layer = system->hidden_layers[layer_idx];
         if (!layer) continue;
-        
+
         // Mise à jour poids avec Newton-Raphson
         for (size_t i = 0; i < layer->neuron_count * layer->input_size; i++, param_idx++) {
             if (param_idx >= newton->param_count) break;
-            
+
             double gradient = gradients[param_idx];
             double hessian_inv = newton->hessian_inv[param_idx];
-            
+
             // Newton step: param -= hessian_inv * gradient
             layer->weights[i] -= hessian_inv * gradient;
-            
+
             // Mise à jour approximation Hessienne (BFGS-like)
             double gradient_change = fabs(gradient);
             if (gradient_change > newton->tolerance) {
                 newton->hessian_inv[param_idx] *= 0.99; // Adaptation conservatrice
             }
         }
-        
+
         // Mise à jour biais
         for (size_t i = 0; i < layer->neuron_count; i++, param_idx++) {
             if (param_idx >= newton->param_count) break;
-            
+
             double gradient = gradients[param_idx];
             double hessian_inv = newton->hessian_inv[param_idx];
-            
+
             layer->biases[i] -= hessian_inv * gradient;
         }
     }
-    
+
     (void)loss; // Loss utilisé pour convergence check dans versions futures
     return true;
 }
 
 // Additional missing function stubs
 void adam_ultra_precise_destroy(adam_ultra_precise_optimizer_t** adam) {
-    if (adam && *adam) { free(*adam); *adam = NULL; }
+    if (adam && *adam) {
+        if ((*adam)->momentum) TRACKED_FREE((*adam)->momentum);
+        if ((*adam)->velocity) TRACKED_FREE((*adam)->velocity);
+        TRACKED_FREE(*adam);
+        *adam = NULL;
+    }
 }
 
 lbfgs_optimizer_t* lbfgs_create(int memory_size, double tolerance) {
@@ -256,7 +261,11 @@ newton_raphson_optimizer_t* newton_raphson_create(double tolerance) {
 }
 
 void newton_raphson_destroy(newton_raphson_optimizer_t** newton) {
-    if (newton && *newton) { free(*newton); *newton = NULL; }
+    if (newton && *newton) { 
+        if ((*newton)->hessian_inv) TRACKED_FREE((*newton)->hessian_inv);
+        TRACKED_FREE(*newton); 
+        *newton = NULL; 
+    }
 }
 
 bool neural_ultra_precision_verify_architecture(neural_blackbox_computer_t* system, neural_function_spec_t* spec) {
@@ -302,10 +311,10 @@ double neural_estimate_condition_number(double* matrix, size_t size) {
 // Implémentation complète mise à jour poids Adam ultra-précis
 bool adam_ultra_precise_update_weights(void* adam_ptr, neural_blackbox_computer_t* system, double* gradients, double loss) {
     if (!adam_ptr || !system || !gradients) return false;
-    
+
     adam_ultra_precise_optimizer_t* adam = (adam_ultra_precise_optimizer_t*)adam_ptr;
     if (adam->magic_number != 0xADAC0001) return false;
-    
+
     // Initialisation lors du premier usage
     if (!adam->momentum) {
         adam->param_count = system->total_parameters;
@@ -313,53 +322,53 @@ bool adam_ultra_precise_update_weights(void* adam_ptr, neural_blackbox_computer_
         adam->velocity = TRACKED_CALLOC(adam->param_count, sizeof(double));
         if (!adam->momentum || !adam->velocity) return false;
     }
-    
+
     adam->iteration++;
-    
+
     // Correction biais
     double lr_corrected = adam->learning_rate * sqrt(1.0 - pow(adam->beta2, adam->iteration)) / 
                           (1.0 - pow(adam->beta1, adam->iteration));
-    
+
     size_t param_idx = 0;
-    
+
     // Mise à jour couche par couche
     for (size_t layer_idx = 0; layer_idx < system->network_depth; layer_idx++) {
         neural_layer_t* layer = system->hidden_layers[layer_idx];
         if (!layer) continue;
-        
+
         // Mise à jour poids
         for (size_t i = 0; i < layer->neuron_count * layer->input_size; i++, param_idx++) {
             if (param_idx >= adam->param_count) return false;
-            
+
             double gradient = gradients[param_idx];
-            
+
             // Adam update formulas
             adam->momentum[param_idx] = adam->beta1 * adam->momentum[param_idx] + 
                                         (1.0 - adam->beta1) * gradient;
             adam->velocity[param_idx] = adam->beta2 * adam->velocity[param_idx] + 
                                         (1.0 - adam->beta2) * gradient * gradient;
-            
+
             // Mise à jour paramètre
             layer->weights[i] -= lr_corrected * adam->momentum[param_idx] / 
                                  (sqrt(adam->velocity[param_idx]) + adam->epsilon);
         }
-        
+
         // Mise à jour biais
         for (size_t i = 0; i < layer->neuron_count; i++, param_idx++) {
             if (param_idx >= adam->param_count) return false;
-            
+
             double gradient = gradients[param_idx];
-            
+
             adam->momentum[param_idx] = adam->beta1 * adam->momentum[param_idx] + 
                                         (1.0 - adam->beta1) * gradient;
             adam->velocity[param_idx] = adam->beta2 * adam->velocity[param_idx] + 
                                         (1.0 - adam->beta2) * gradient * gradient;
-            
+
             layer->biases[i] -= lr_corrected * adam->momentum[param_idx] / 
                                 (sqrt(adam->velocity[param_idx]) + adam->epsilon);
         }
     }
-    
+
     (void)loss; // Loss peut être utilisé pour des adaptations futures
     return true;
 }
@@ -1146,12 +1155,25 @@ bool neural_blackbox_multi_phase_training(
 
         // Alternance Adam/Newton selon convergence
         const char* optimizer_type = (current_loss > 1e-12) ? "adam_ultra_precise" : "newton_raphson";
-        void* optimizer_ptr = (current_loss > 1e-12) ? (void*)adam : (void*)newton_raphson_create(1e-17);
+        void* optimizer_ptr = NULL;
+        newton_raphson_optimizer_t* current_newton = NULL;
+
+        if (strcmp(optimizer_type, "adam_ultra_precise") == 0) {
+             optimizer_ptr = adam;
+        } else {
+             current_newton = newton_raphson_create(1e-17);
+             if (!current_newton) {
+                 TRACKED_FREE(gradients);
+                 adam_ultra_precise_destroy(&adam);
+                 return false;
+             }
+             optimizer_ptr = current_newton;
+        }
 
         if (!neural_blackbox_apply_optimizer(system, optimizer_ptr, optimizer_type, gradients, current_loss)) {
             TRACKED_FREE(gradients);
             adam_ultra_precise_destroy(&adam);
-            if (strcmp(optimizer_type, "newton_raphson") == 0) newton_raphson_destroy((newton_raphson_optimizer_t**)&optimizer_ptr);
+            if (current_newton) newton_raphson_destroy(&current_newton);
             return false;
         }
 
@@ -1162,10 +1184,12 @@ bool neural_blackbox_multi_phase_training(
                         epoch, current_loss, training->precision_target);
             TRACKED_FREE(gradients);
             adam_ultra_precise_destroy(&adam);
+            if (current_newton) newton_raphson_destroy(&current_newton);
             return true;
         }
 
         TRACKED_FREE(gradients);
+        if (current_newton) newton_raphson_destroy(&current_newton); // Clean up temporary Newton optimizer
     }
 
     adam_ultra_precise_destroy(&adam);
@@ -1509,25 +1533,37 @@ bool neural_blackbox_apply_optimizer(
                 "Optimiseur inconnu: %s", optimizer_type);
     return false;
 }
-// Fonction de conversion entre types de configuration neural
+
+// Fonction de conversion entre types de configuration
 neural_architecture_config_t* convert_precision_to_architecture_config(
     const neural_ultra_precision_config_t* precision_config
 ) {
     if (!precision_config) return NULL;
 
-    neural_architecture_config_t* arch_config = TRACKED_MALLOC(
-        sizeof(neural_architecture_config_t));
+    neural_architecture_config_t* arch_config = TRACKED_MALLOC(sizeof(neural_architecture_config_t));
     if (!arch_config) return NULL;
 
-    // Conversion logique des paramètres
-    arch_config->complexity_target = NEURAL_COMPLEXITY_EXTREME; // Pour ultra-précision
-    arch_config->memory_capacity = precision_config->precision_target_digits * 1048576; // 1MB par digit
-    arch_config->learning_rate = precision_config->precision_target / 1000.0; // LR adaptatif
-    arch_config->plasticity_rules = PLASTICITY_HOMEOSTATIC; // Stabilité pour précision
-    arch_config->enable_continuous_learning = false; // Pas d'adaptation pendant précision
-    arch_config->enable_metaplasticity = true; // Meta-adaptation OK
+    arch_config->complexity_target = NEURAL_COMPLEXITY_EXTREME;
+    arch_config->memory_capacity = precision_config->input_dimensions * precision_config->output_dimensions * 1000;
+    arch_config->learning_rate = precision_config->precision_target / 1000.0;
+    arch_config->plasticity_rules = (void*)PLASTICITY_HOMEOSTATIC;
+    arch_config->enable_continuous_learning = false;
+    arch_config->enable_metaplasticity = true;
 
     return arch_config;
+}
+
+// Alias pour compatibilité
+neural_blackbox_computer_t* neural_blackbox_computer_create(
+    size_t input_size, 
+    size_t output_size, 
+    neural_architecture_config_t* config
+) {
+    return neural_blackbox_create(input_size, output_size, config);
+}
+
+void neural_blackbox_computer_destroy(neural_blackbox_computer_t** system_ptr) {
+    neural_blackbox_destroy(system_ptr);
 }
 
 // Fonction alternative utilisant neural_ultra_precision_config_t directement
