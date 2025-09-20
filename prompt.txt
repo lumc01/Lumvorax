@@ -361,3 +361,48 @@
 4. **Réseau**: Connexions limitées pour éviter surcharge
 5. **Tests**: Jamais plus de 1M LUMs sur serveur distant
 6. **Processus**: Un seul processus LUM/VORAX à la fois sur serveur
+
+# RÈGLES ABSOLUES POUR L'EXÉCUTION COMPLÈTE DES TESTS - LUM/VORAX SYSTEM
+
+## RÈGLE FONDAMENTALE N°1 : EXÉCUTION INTÉGRALE OBLIGATOIRE
+- AUCUN MODULE ne peut être exclu des tests sans demande explicite de l'utilisateur
+- TOUS les tests de TOUS les modules du répertoire src/ doivent être exécutés
+- AUCUNE exception n'est permise sous prétexte de performance ou de complexité
+
+## RÈGLE FONDAMENTALE N°2 : TRAÇABILITÉ COMPLÈTE
+- Chaque test doit générer des logs détaillés avec timestamps nanoseconde
+- Chaque métrique doit être mesurée et enregistrée (ops/sec, latence, RAM, CPU)
+- Chaque résultat doit être traçable vers sa source exacte dans le code
+
+## RÈGLE FONDAMENTALE N°3 : INTERDICTION DE SUPPRESSION
+- AUCUN module ne peut être retiré du système sans demande explicite
+- SEULS des ajouts et mises à jour sont autorisés
+- Tous les modules existants doivent rester fonctionnels et testés
+
+## RÈGLE FONDAMENTALE N°4 : MÉTRIQUES OBLIGATOIRES
+Pour chaque module, mesurer obligatoirement :
+- Temps d'exécution (nanosecondes)
+- Débit (opérations/seconde)
+- Latence moyenne et maximale
+- Usage mémoire (allocation/libération)
+- Usage CPU (pourcentage)
+- Taux de réussite/échec des tests
+- Métriques spécifiques au domaine du module
+
+## RÈGLE FONDAMENTALE N°5 : COUVERTURE EXHAUSTIVE
+- Tests unitaires : 100% des fonctions publiques
+- Tests d'intégration : tous les modules interconnectés
+- Tests de stress : capacités limites de chaque module
+- Tests de régression : validation après modifications
+
+## RÈGLE FONDAMENTALE N°6 : DOCUMENTATION DÉTAILLÉE
+- Chaque test doit expliquer son objectif et sa méthodologie
+- Chaque résultat doit être analysé et commenté
+- Chaque anomalie doit être documentée et expliquée
+- Comparaisons avec standards industriels obligatoires
+
+## RÈGLE FONDAMENTALE N°7 : VALIDATION CONTINUE
+- Tests automatiques à chaque modification
+- Rapport complet généré à chaque exécution
+- Alertes en cas de régression de performance
+- Archivage de tous les résultats historiques
