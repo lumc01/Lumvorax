@@ -561,17 +561,31 @@ uint32_t lum_generate_id(void) {
 
 uint64_t lum_get_timestamp(void) {
     struct timespec ts;
+    // Tentative 1: CLOCK_MONOTONIC (préféré)
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
         return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
     }
-    // Fallback robuste si CLOCK_MONOTONIC échoue
+    
+    // Tentative 2: CLOCK_REALTIME (fallback)
+    if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
+        return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+    }
+    
+    // Tentative 3: gettimeofday (fallback Unix)
     struct timeval tv;
     if (gettimeofday(&tv, NULL) == 0) {
         return tv.tv_sec * 1000000000ULL + tv.tv_usec * 1000ULL;
     }
-    // Fallback final avec time() si tout échoue
+    
+    // Fallback final: time() avec protection
     time_t now = time(NULL);
-    return (uint64_t)now * 1000000000ULL;
+    if (now != (time_t)-1) {
+        return (uint64_t)now * 1000000000ULL;
+    }
+    
+    // Ultime fallback: timestamp statique minimal
+    static uint64_t fallback_counter = 1000000000ULL;
+    return fallback_counter++;
 }
 
 void lum_print(const lum_t* lum) {

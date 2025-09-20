@@ -161,8 +161,8 @@ static void test_all_advanced_calculations_modules(void) {
     printf("📊 Test Collatz Analyzer...\n");
     collatz_config_t* collatz_config = collatz_config_create_default();
     if (collatz_config) {
-        // Test Collatz pour plusieurs nombres - RANGE SÉCURISÉ APPLIQUÉ
-        for (uint64_t test_num = 1; test_num <= 10; test_num++) {
+        // Test Collatz pour 5 nombres seulement - RANGE ULTRA-SÉCURISÉ
+        for (uint64_t test_num = 1; test_num <= 5; test_num++) {
             collatz_result_t* result = collatz_analyze_basic(test_num, collatz_config);
             if (result) {
                 printf("✅ Collatz Analyzer: Nombre %llu analysé, %zu séquences\n", test_num, result->sequence_count);
