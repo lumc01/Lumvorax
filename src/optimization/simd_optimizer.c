@@ -1,3 +1,4 @@
+#define _POSIX_C_SOURCE 199309L  // Enable POSIX.1b functions including clock_gettime
 #include "simd_optimizer.h"
 #include "../advanced_calculations/matrix_calculator.h"
 #include "../complex_modules/ai_optimization.h"
@@ -5,7 +6,7 @@
 #include "../lum/lum_core.h"  // For lum_get_timestamp function
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>       // Pour clock_gettime
+#include <time.h>       // Pour clock_gettime et CLOCK_MONOTONIC
 #include <stdio.h>
 #include <unistd.h>     // Pour getpagesize
 

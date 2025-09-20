@@ -370,9 +370,19 @@ vorax_result_t* pareto_optimize_fuse_operation(lum_group_t* group1, lum_group_t*
         snprintf(improvement_msg, sizeof(improvement_msg), 
                 "Pareto optimization improved score by %.3f", improvement);
 
-        // Mise à jour du message de résultat
-        strncat(result->message, " - ", sizeof(result->message) - strlen(result->message) - 1);
-        strncat(result->message, improvement_msg, sizeof(result->message) - strlen(result->message) - 1);
+        // Mise à jour du message de résultat avec protection contre troncature
+        size_t current_len = strlen(result->message);
+        size_t available = sizeof(result->message) - current_len - 1;
+        
+        if (available > 3) {
+            strncat(result->message, " - ", available);
+            current_len = strlen(result->message);
+            available = sizeof(result->message) - current_len - 1;
+            
+            if (available > strlen(improvement_msg)) {
+                strncat(result->message, improvement_msg, available);
+            }
+        }
     }
 
     return result;
@@ -405,7 +415,12 @@ vorax_result_t* pareto_optimize_split_operation(lum_group_t* group, size_t parts
         char optimization_msg[256];
         snprintf(optimization_msg, sizeof(optimization_msg), 
                 " - Pareto optimized to %zu parts (score: %.3f)", optimal_parts, total_score);
-        strncat(result->message, optimization_msg, sizeof(result->message) - strlen(result->message) - 1);
+        
+        size_t current_len = strlen(result->message);
+        size_t available = sizeof(result->message) - current_len - 1;
+        if (available > strlen(optimization_msg)) {
+            strncat(result->message, optimization_msg, available);
+        }
     }
 
     return result;
@@ -435,7 +450,12 @@ vorax_result_t* pareto_optimize_cycle_operation(lum_group_t* group, size_t modul
         char optimization_msg[256];
         snprintf(optimization_msg, sizeof(optimization_msg), 
                 " - Pareto optimized modulo %zu->%zu (score: %.3f)", modulo, optimal_modulo, score);
-        strncat(result->message, optimization_msg, sizeof(result->message) - strlen(result->message) - 1);
+        
+        size_t current_len = strlen(result->message);
+        size_t available = sizeof(result->message) - current_len - 1;
+        if (available > strlen(optimization_msg)) {
+            strncat(result->message, optimization_msg, available);
+        }
     }
 
     return result;
