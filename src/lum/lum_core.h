@@ -145,12 +145,31 @@ typedef struct {
         } \
     } while(0)
 
-// PRIORITÉ 2.3: VALIDATION RANGES SYSTÉMATIQUE selon roadmap exact
+// PRIORITÉ 2.3: VALIDATION RANGES SYSTÉMATIQUE selon roadmap exact - CORRECTIONS APPLIQUÉES
 #define VALIDATE_ARRAY_ACCESS(array, index, size, context) \
     do { \
         if ((index) >= (size)) { \
             printf("[FORENSIC_CRITICAL] Array access out of bounds in %s: index=%zu size=%zu\n", \
                 (context), (size_t)(index), (size_t)(size)); \
+            abort(); \
+        } \
+    } while(0)
+
+// NOUVELLE: Validation pointeur non-null
+#define VALIDATE_NON_NULL(ptr, context) \
+    do { \
+        if (!(ptr)) { \
+            printf("[FORENSIC_CRITICAL] NULL pointer access in %s\n", (context)); \
+            abort(); \
+        } \
+    } while(0)
+
+// NOUVELLE: Validation magic number
+#define VALIDATE_MAGIC_NUMBER(ptr, expected, context) \
+    do { \
+        if ((ptr)->magic_number != (expected)) { \
+            printf("[FORENSIC_CRITICAL] Invalid magic number in %s: got=0x%X expected=0x%X\n", \
+                (context), (ptr)->magic_number, (expected)); \
             abort(); \
         } \
     } while(0)

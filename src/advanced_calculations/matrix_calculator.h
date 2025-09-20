@@ -116,7 +116,7 @@ bool matrix_validate_dimensions(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, 
 // Constantes
 #define MATRIX_MAX_SIZE 10000
 #define MATRIX_MIN_DETERMINANT_THRESHOLD 1e-12
-#define MATRIX_MAGIC_NUMBER 0xCAFEBABE
+#define MATRIX_CALCULATOR_MAGIC 0x4D415452  // "MATR" en ASCII - UNIFIÉ
 #define MATRIX_DESTROYED_MAGIC 0xDEADBEEF
 
 #endif // MATRIX_CALCULATOR_H

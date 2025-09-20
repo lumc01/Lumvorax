@@ -34,7 +34,7 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
 
 void lum_destroy(lum_t* lum) {
     if (!lum) return;
-    
+
     // PRIORITÉ 1.2: Vérification magic number AVANT accès
     if (lum->magic_number != LUM_VALIDATION_PATTERN) {
         if (lum->magic_number == LUM_MAGIC_DESTROYED) {
@@ -44,7 +44,7 @@ void lum_destroy(lum_t* lum) {
             abort(); // Arrêt sécurisé
         }
     }
-    
+
     // PRIORITÉ 1.2: Validation ownership strict
     if (lum->memory_address != lum) {
         // LUM fait partie d'un groupe - ne pas libérer
@@ -52,12 +52,12 @@ void lum_destroy(lum_t* lum) {
         lum->is_destroyed = 1;
         return;
     }
-    
+
     // Destruction sécurisée avec écrasement
     lum->magic_number = LUM_MAGIC_DESTROYED;
     lum->is_destroyed = 1;
     memset(lum, 0xDE, sizeof(lum_t)); // Écrasement sécurisé
-    
+
     TRACKED_FREE(lum);
 }
 
@@ -229,25 +229,25 @@ void lum_group_destroy(lum_group_t* group) {
 // PRIORITÉ 1.2: Fonction destruction groupe ultra-sécurisée selon roadmap exact
 void lum_group_destroy_ultra_secure(lum_group_t** group_ptr) {
     if (!group_ptr || !*group_ptr) return;
-    
+
     lum_group_t* group = *group_ptr;
-    
+
     // Validation magic number
     if (group->magic_number != LUM_VALIDATION_PATTERN) {
         *group_ptr = NULL;
         return;
     }
-    
+
     // Marquer destruction IMMÉDIATEMENT
     group->magic_number = LUM_MAGIC_DESTROYED;
-    
+
     // Validation intégrité avant libération
     if (group->count > group->capacity || group->capacity > 100000000) {
         // Corruption détectée - échec sécurisé
         *group_ptr = NULL;
         return;
     }
-    
+
     // Libération sécurisée éléments
     if (group->lums && group->lums != (lum_t*)group) {
         // Triple validation pointeur
@@ -256,7 +256,7 @@ void lum_group_destroy_ultra_secure(lum_group_t** group_ptr) {
         }
         group->lums = NULL;
     }
-    
+
     // Écrasement sécurisé structure
     memset(group, 0xDE, sizeof(lum_group_t));
     TRACKED_FREE(group);
@@ -561,27 +561,17 @@ uint32_t lum_generate_id(void) {
 
 uint64_t lum_get_timestamp(void) {
     struct timespec ts;
-
-    // Tentative CLOCK_MONOTONIC (préféré pour mesures temporelles)
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
-        uint64_t timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-        if (timestamp > 0) return timestamp;
+        return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
     }
-
-    // Fallback CLOCK_REALTIME si MONOTONIC échoue
-    if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
-        uint64_t timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-        if (timestamp > 0) return timestamp;
+    // Fallback robuste si CLOCK_MONOTONIC échoue
+    struct timeval tv;
+    if (gettimeofday(&tv, NULL) == 0) {
+        return tv.tv_sec * 1000000000ULL + tv.tv_usec * 1000ULL;
     }
-
-    // Fallback time() en nanosecondes si clock_gettime échoue complètement
-    time_t current_time = time(NULL);
-    if (current_time > 0) {
-        return (uint64_t)current_time * 1000000000ULL;
-    }
-
-    // Dernière option : timestamp fixe identifiable pour débogage
-    return 1736463600000000000ULL; // 2025-01-10 01:00:00 UTC en nanosecondes
+    // Fallback final avec time() si tout échoue
+    time_t now = time(NULL);
+    return (uint64_t)now * 1000000000ULL;
 }
 
 void lum_print(const lum_t* lum) {

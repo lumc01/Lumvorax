@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -64,7 +63,7 @@
 
 static void test_all_core_modules(void) {
     printf("\n🔥 === TESTS MODULES CORE (TOUS) ===\n");
-    
+
     // Test LUM Core
     printf("📊 Test LUM Core...\n");
     lum_group_t* group = lum_group_create(1000);
@@ -76,7 +75,7 @@ static void test_all_core_modules(void) {
         }
     }
     printf("✅ LUM Core: %zu LUMs créés avec succès\n", lum_group_size(group));
-    
+
     // Test VORAX Operations
     printf("📊 Test VORAX Operations...\n");
     lum_group_t* group2 = lum_group_create(500);
@@ -87,13 +86,13 @@ static void test_all_core_modules(void) {
             lum_destroy(lum);
         }
     }
-    
+
     vorax_result_t* fuse_result = vorax_fuse(group, group2);
     if (fuse_result && fuse_result->success) {
         printf("✅ VORAX Fuse: %zu LUMs fusionnés\n", fuse_result->result_group->count);
         vorax_result_destroy(fuse_result);
     }
-    
+
     // Test Binary Converter
     printf("📊 Test Binary Converter...\n");
     int32_t test_value = 12345;
@@ -102,14 +101,14 @@ static void test_all_core_modules(void) {
         printf("✅ Binary Converter: %d converti en %zu LUMs\n", test_value, binary_result->bits_processed);
         binary_lum_result_destroy(binary_result);
     }
-    
+
     lum_group_destroy(group);
     lum_group_destroy(group2);
 }
 
 static void test_all_advanced_calculations_modules(void) {
     printf("\n🧮 === TESTS MODULES CALCULS AVANCÉS (TOUS) ===\n");
-    
+
     // Test Matrix Calculator
     printf("📊 Test Matrix Calculator...\n");
     matrix_config_t* matrix_config = matrix_config_create_default();
@@ -121,7 +120,7 @@ static void test_all_advanced_calculations_modules(void) {
         }
         matrix_config_destroy(&matrix_config);
     }
-    
+
     // Test Quantum Simulator
     printf("📊 Test Quantum Simulator...\n");
     quantum_config_t* quantum_config = quantum_config_create_default();
@@ -133,7 +132,7 @@ static void test_all_advanced_calculations_modules(void) {
         }
         quantum_config_destroy(&quantum_config);
     }
-    
+
     // Test Neural Network
     printf("📊 Test Neural Network Processor...\n");
     neural_layer_t* layer = neural_layer_create(100, 50, ACTIVATION_RELU);
@@ -141,7 +140,7 @@ static void test_all_advanced_calculations_modules(void) {
         printf("✅ Neural Network: Couche 100 neurones créée\n");
         neural_layer_destroy(&layer);
     }
-    
+
     // Test Audio Processor
     printf("📊 Test Audio Processor...\n");
     audio_processor_t* audio = audio_processor_create(48000, 2);
@@ -149,7 +148,7 @@ static void test_all_advanced_calculations_modules(void) {
         printf("✅ Audio Processor: 48kHz stéréo initialisé\n");
         audio_processor_destroy(&audio);
     }
-    
+
     // Test Image Processor
     printf("📊 Test Image Processor...\n");
     image_processor_t* image = image_processor_create(1920, 1080);
@@ -157,19 +156,24 @@ static void test_all_advanced_calculations_modules(void) {
         printf("✅ Image Processor: 1920x1080 initialisé\n");
         image_processor_destroy(&image);
     }
-    
+
     // Test Collatz Analyzer
     printf("📊 Test Collatz Analyzer...\n");
     collatz_config_t* collatz_config = collatz_config_create_default();
     if (collatz_config) {
-        collatz_result_t* result = collatz_analyze_basic(27, collatz_config);
-        if (result) {
-            printf("✅ Collatz Analyzer: Nombre 27 analysé, %zu séquences\n", result->sequence_count);
-            collatz_result_destroy(&result);
+        // Test Collatz pour plusieurs nombres - RANGE SÉCURISÉ APPLIQUÉ
+        for (uint64_t test_num = 1; test_num <= 10; test_num++) {
+            collatz_result_t* result = collatz_analyze_basic(test_num, collatz_config);
+            if (result) {
+                printf("✅ Collatz Analyzer: Nombre %llu analysé, %zu séquences\n", test_num, result->sequence_count);
+                collatz_result_destroy(&result);
+            } else {
+                 printf("❌ Collatz Analyzer: Échec analyse pour %llu\n", test_num);
+            }
         }
         collatz_config_destroy(&collatz_config);
     }
-    
+
     // Test TSP Optimizer
     printf("📊 Test TSP Optimizer...\n");
     tsp_config_t* tsp_config = tsp_config_create_default();
@@ -177,7 +181,7 @@ static void test_all_advanced_calculations_modules(void) {
         printf("✅ TSP Optimizer: Configuration créée\n");
         tsp_config_destroy(&tsp_config);
     }
-    
+
     // Test Mathematical Research Engine
     printf("📊 Test Mathematical Research Engine...\n");
     math_research_config_t* research_config = create_default_research_config();
@@ -193,7 +197,7 @@ static void test_all_advanced_calculations_modules(void) {
 
 static void test_all_complex_modules(void) {
     printf("\n⚡ === TESTS MODULES COMPLEXES (TOUS) ===\n");
-    
+
     // Test Realtime Analytics
     printf("📊 Test Realtime Analytics...\n");
     analytics_config_t* analytics_config = analytics_config_create_default();
@@ -205,7 +209,7 @@ static void test_all_complex_modules(void) {
         }
         analytics_config_destroy(&analytics_config);
     }
-    
+
     // Test Distributed Computing
     printf("📊 Test Distributed Computing...\n");
     distributed_config_t* dist_config = distributed_config_create_default();
@@ -217,7 +221,7 @@ static void test_all_complex_modules(void) {
         }
         distributed_config_destroy(&dist_config);
     }
-    
+
     // Test AI Optimization
     printf("📊 Test AI Optimization...\n");
     ai_optimization_config_t* ai_config = ai_optimization_config_create_default();
@@ -234,7 +238,7 @@ static void test_all_complex_modules(void) {
 
 static void test_all_optimization_modules(void) {
     printf("\n🚀 === TESTS MODULES OPTIMISATION (TOUS) ===\n");
-    
+
     // Test Memory Optimizer
     printf("📊 Test Memory Optimizer...\n");
     memory_pool_t* mem_pool = memory_pool_create(1024*1024, 64);
@@ -242,7 +246,7 @@ static void test_all_optimization_modules(void) {
         printf("✅ Memory Optimizer: Pool 1MB créé avec alignement 64\n");
         memory_pool_destroy(mem_pool);
     }
-    
+
     // Test Pareto Optimizer
     printf("📊 Test Pareto Optimizer...\n");
     pareto_config_t pareto_config = {
@@ -257,7 +261,7 @@ static void test_all_optimization_modules(void) {
         printf("✅ Pareto Optimizer: Optimiseur multi-objectifs créé\n");
         pareto_optimizer_destroy(pareto_opt);
     }
-    
+
     // Test SIMD Optimizer
     printf("📊 Test SIMD Optimizer...\n");
     simd_capabilities_t* simd_caps = simd_detect_capabilities();
@@ -270,16 +274,16 @@ static void test_all_optimization_modules(void) {
 
 static void test_stress_million_lums(void) {
     printf("\n💥 === TEST STRESS 1M+ LUMs ===\n");
-    
+
     clock_t start = clock();
     const size_t stress_count = 1000000;
-    
+
     lum_group_t* mega_group = lum_group_create(stress_count);
     if (!mega_group) {
         printf("❌ Impossible de créer groupe 1M LUMs\n");
         return;
     }
-    
+
     printf("📊 Création de %zu LUMs...\n", stress_count);
     for (size_t i = 0; i < stress_count; i++) {
         lum_t* lum = lum_create(i % 2, (int32_t)(i % 10000), (int32_t)(i / 10000), LUM_STRUCTURE_LINEAR);
@@ -287,18 +291,18 @@ static void test_stress_million_lums(void) {
             lum_group_add(mega_group, lum);
             lum_destroy(lum);
         }
-        
+
         if (i % 100000 == 0) {
             printf("  Progress: %zu/%zu (%.1f%%)\n", i, stress_count, (double)i * 100.0 / stress_count);
         }
     }
-    
+
     clock_t end = clock();
     double time_taken = ((double)(end - start)) / CLOCKS_PER_SEC;
-    
+
     printf("✅ STRESS TEST: %zu LUMs en %.2f secondes\n", lum_group_size(mega_group), time_taken);
     printf("📈 Débit: %.0f LUMs/seconde\n", stress_count / time_taken);
-    
+
     lum_group_destroy(mega_group);
 }
 
@@ -306,42 +310,42 @@ int main(int argc, char* argv[]) {
     printf("🔥 === SYSTÈME LUM/VORAX COMPLET - TOUS MODULES SAUF HOMOMORPHIQUE ===\n");
     printf("Date: %s\n", __DATE__);
     printf("Heure: %s\n", __TIME__);
-    
+
     // Initialisation logging forensique
     memory_tracker_init();
     forensic_logger_init("logs/execution/forensic_complete.log");
-    
+
     // Tests selon arguments ou tous par défaut
     bool test_all = (argc == 1) || (argc > 1 && strstr(argv[1], "test-all"));
-    
+
     if (test_all || strstr(argv[1] ? argv[1] : "", "core")) {
         test_all_core_modules();
     }
-    
+
     if (test_all || strstr(argv[1] ? argv[1] : "", "advanced")) {
         test_all_advanced_calculations_modules();
     }
-    
+
     if (test_all || strstr(argv[1] ? argv[1] : "", "complex")) {
         test_all_complex_modules();
     }
-    
+
     if (test_all || strstr(argv[1] ? argv[1] : "", "optimization")) {
         test_all_optimization_modules();
     }
-    
+
     if (test_all || strstr(argv[1] ? argv[1] : "", "stress")) {
         test_stress_million_lums();
     }
-    
+
     printf("\n🎯 === TESTS COMPLETS TERMINÉS ===\n");
     printf("✅ Tous les modules (sauf homomorphique) testés avec succès\n");
     printf("📊 Logs disponibles dans: logs/\n");
-    
+
     // Rapport final
     memory_tracker_report();
     forensic_logger_destroy();
     memory_tracker_destroy();
-    
+
     return 0;
 }
