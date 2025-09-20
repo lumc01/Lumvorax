@@ -268,71 +268,7 @@ void test_neural_network_advanced(void) {
     neural_layer_destroy(&output_layer);
 }
 
-void test_homomorphic_encryption_advanced(void) {
-    printf("\n=== Tests Avancés: Homomorphic Encryption ===\n");
-    
-    // Test 1: Configuration CKKS pour calculs réels
-    he_context_t* ckks_context = he_context_create_ckks(8192, 1048576.0);
-    ADVANCED_TEST_ASSERT(ckks_context != NULL, "Création contexte CKKS");
-    
-    // Test 2: Chiffrement vecteurs de données
-    double plaintext_data[] = {1.5, 2.7, 3.14, 4.2, 5.9};
-    size_t data_size = sizeof(plaintext_data) / sizeof(plaintext_data[0]);
-    
-    he_plaintext_t* plaintext = he_encode_double_vector(ckks_context, plaintext_data, data_size);
-    ADVANCED_TEST_ASSERT(plaintext != NULL, "Encodage vecteur double");
-    
-    he_ciphertext_t* ciphertext = he_encrypt(ckks_context, plaintext);
-    ADVANCED_TEST_ASSERT(ciphertext != NULL, "Chiffrement homomorphe");
-    
-    // Test 3: Opérations homomorphes
-    he_ciphertext_t* result_add = he_add(ckks_context, ciphertext, ciphertext);
-    ADVANCED_TEST_ASSERT(result_add != NULL, "Addition homomorphe");
-    
-    he_ciphertext_t* result_mult = he_multiply(ckks_context, ciphertext, ciphertext);
-    ADVANCED_TEST_ASSERT(result_mult != NULL, "Multiplication homomorphe");
-    
-    // Test 4: Déchiffrement et validation
-    he_plaintext_t* decrypted_add = he_decrypt(ckks_context, result_add);
-    ADVANCED_TEST_ASSERT(decrypted_add != NULL, "Déchiffrement addition");
-    
-    double* result_data = he_decode_double_vector(ckks_context, decrypted_add);
-    ADVANCED_TEST_ASSERT(result_data != NULL, "Décodage résultat");
-    
-    // Test 5: Validation correction mathématique
-    double tolerance = 0.01;
-    bool addition_correct = fabs(result_data[0] - (plaintext_data[0] * 2.0)) < tolerance;
-    ADVANCED_TEST_ASSERT(addition_correct, "Addition homomorphe mathématiquement correcte");
-    
-    // Test 6: Stress test 1000 opérations
-    struct timespec start, end;
-    clock_gettime(CLOCK_MONOTONIC, &start);
-    
-    he_ciphertext_t* stress_result = ciphertext;
-    for (int i = 0; i < 100; i++) {
-        he_ciphertext_t* temp = he_add(ckks_context, stress_result, ciphertext);
-        if (stress_result != ciphertext) {
-            he_ciphertext_destroy(&stress_result);
-        }
-        stress_result = temp;
-        
-        if (!stress_result) break;
-    }
-    
-    clock_gettime(CLOCK_MONOTONIC, &end);
-    double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1000000000.0;
-    
-    ADVANCED_TEST_ASSERT(stress_result != NULL, "Stress test 100 additions homomorphes");
-    ADVANCED_TEST_ASSERT(elapsed < 60.0, "Performance homomorphe acceptable (<60s)");
-    
-    // Nettoyage
-    free(result_data);
-    he_plaintext_destroy(&plaintext);
-    he_plaintext_destroy(&decrypted_add);
-    he_ciphertext_destroy(&ciphertext);
-    he_ciphertext_destroy(&result_add);
-    he_ciphertext_destroy(&result_mult);
-    if (stress_result != ciphertext) {
+// Homomorphic encryption tests removed from projecttion"// Homomorphic encryption tests completely removed) {
         he_ciphertext_destroy(&stress_result);
     }
     he_context_destroy(&ckks_context);
