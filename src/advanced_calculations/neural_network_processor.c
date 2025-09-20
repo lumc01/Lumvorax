@@ -1,4 +1,3 @@
-
 #include "neural_network_processor.h"
 #include "../debug/memory_tracker.h"
 #include <stdlib.h>
@@ -6,6 +5,28 @@
 #include <math.h>
 #include <time.h>
 #include <stdio.h>
+#include <stdbool.h> // Include for bool type
+
+// Placeholder for matrix_set_element if it's not defined elsewhere
+// Assuming matrix_set_element is part of a matrix library used by calculator
+// For demonstration purposes, let's assume a simple structure or function
+// In a real scenario, this would be defined in a header file (e.g., "matrix_calculator.h")
+typedef struct {
+    double* data;
+    size_t rows;
+    size_t cols;
+} matrix_t;
+
+// Dummy matrix_set_element for compilation
+void matrix_set_element(matrix_t* matrix, size_t row, size_t col, double value) {
+    if (matrix && row < matrix->rows && col < matrix->cols) {
+        matrix->data[row * matrix->cols + col] = value;
+    }
+}
+
+// Dummy matrix_calculator structure for compilation
+typedef matrix_t matrix_calculator_t;
+
 
 // Structure moved to header file
 
@@ -15,43 +36,43 @@ neural_lum_t* neural_lum_create(int32_t x, int32_t y, size_t input_count, activa
     if (input_count == 0 || input_count > NEURAL_MAX_NEURONS_PER_LAYER) {
         return NULL;
     }
-    
+
     neural_lum_t* neuron = TRACKED_MALLOC(sizeof(neural_lum_t));
     if (!neuron) return NULL;
-    
+
     // Initialisation LUM de base
     neuron->base_lum.id = 0;
     neuron->base_lum.presence = 1;
     neuron->base_lum.position_x = x;
     neuron->base_lum.position_y = y;
     neuron->base_lum.structure_type = LUM_STRUCTURE_BINARY;
-    
+
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     neuron->base_lum.timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
     neuron->base_lum.memory_address = &neuron->base_lum;
     neuron->base_lum.checksum = 0;
     neuron->base_lum.is_destroyed = 0;
-    
+
     // Initialisation réseau neuronal
     neuron->input_count = input_count;
     neuron->weights = TRACKED_MALLOC(input_count * sizeof(double));
     neuron->gradient = TRACKED_MALLOC(input_count * sizeof(double));
-    
+
     if (!neuron->weights || !neuron->gradient) {
         if (neuron->weights) TRACKED_FREE(neuron->weights);
         if (neuron->gradient) TRACKED_FREE(neuron->gradient);
         TRACKED_FREE(neuron);
         return NULL;
     }
-    
+
     // Initialisation poids aléatoires (Xavier)
     double xavier_limit = sqrt(6.0 / (input_count + 1));
     for (size_t i = 0; i < input_count; i++) {
         neuron->weights[i] = ((double)rand() / RAND_MAX - 0.5) * 2.0 * xavier_limit;
         neuron->gradient[i] = 0.0;
     }
-    
+
     neuron->bias = 0.0;
     neuron->activation_threshold = 0.0;
     neuron->learning_rate = 0.001; // Taux par défaut
@@ -59,27 +80,27 @@ neural_lum_t* neural_lum_create(int32_t x, int32_t y, size_t input_count, activa
     neuron->memory_address = (void*)neuron;
     neuron->neuron_magic = NEURAL_MAGIC_NUMBER;
     neuron->is_active = false;
-    
+
     return neuron;
 }
 
 // Destruction neurone
 void neural_lum_destroy(neural_lum_t** neuron_ptr) {
     if (!neuron_ptr || !*neuron_ptr) return;
-    
+
     neural_lum_t* neuron = *neuron_ptr;
-    
-    if (neuron->neuron_magic != NEURAL_MAGIC_NUMBER || 
+
+    if (neuron->neuron_magic != NEURAL_MAGIC_NUMBER ||
         neuron->memory_address != (void*)neuron) {
         return;
     }
-    
+
     if (neuron->weights) TRACKED_FREE(neuron->weights);
     if (neuron->gradient) TRACKED_FREE(neuron->gradient);
-    
+
     neuron->neuron_magic = NEURAL_DESTROYED_MAGIC;
     neuron->memory_address = NULL;
-    
+
     TRACKED_FREE(neuron);
     *neuron_ptr = NULL;
 }
@@ -87,13 +108,13 @@ void neural_lum_destroy(neural_lum_t** neuron_ptr) {
 // Activation neurone
 double neural_lum_activate(neural_lum_t* neuron, double* inputs, activation_function_e function) {
     if (!neuron || !inputs) return 0.0;
-    
+
     // Calcul somme pondérée
     double weighted_sum = neuron->bias;
     for (size_t i = 0; i < neuron->input_count; i++) {
         weighted_sum += inputs[i] * neuron->weights[i];
     }
-    
+
     // Application fonction d'activation
     double output = 0.0;
     switch (function) {
@@ -120,7 +141,7 @@ double neural_lum_activate(neural_lum_t* neuron, double* inputs, activation_func
             output = weighted_sum;
             break;
     }
-    
+
     // Mise à jour neurone LUM
     neuron->is_active = (output > neuron->activation_threshold);
     if (neuron->is_active) {
@@ -129,7 +150,7 @@ double neural_lum_activate(neural_lum_t* neuron, double* inputs, activation_func
     } else {
         neuron->base_lum.presence = 0;
     }
-    
+
     return output;
 }
 
@@ -163,10 +184,10 @@ static neural_layer_t* neural_layer_create_processor(size_t neuron_count, size_t
     if (neuron_count == 0 || neuron_count > NEURAL_MAX_NEURONS_PER_LAYER || input_size == 0) {
         return NULL;
     }
-    
+
     neural_layer_t* layer = TRACKED_MALLOC(sizeof(neural_layer_t));
     if (!layer) return NULL;
-    
+
     // Configuration des champs de base
     layer->neuron_count = neuron_count;
     layer->input_size = input_size;
@@ -175,21 +196,21 @@ static neural_layer_t* neural_layer_create_processor(size_t neuron_count, size_t
     layer->layer_id = 0;
     layer->magic_number = NEURAL_MAGIC_NUMBER;
     layer->memory_address = (void*)layer;
-    
+
     // Allocation arrays flat
     layer->weights = TRACKED_MALLOC(neuron_count * input_size * sizeof(double));
     if (!layer->weights) {
         TRACKED_FREE(layer);
         return NULL;
     }
-    
+
     layer->biases = TRACKED_MALLOC(neuron_count * sizeof(double));
     if (!layer->biases) {
         TRACKED_FREE(layer->weights);
         TRACKED_FREE(layer);
         return NULL;
     }
-    
+
     layer->outputs = TRACKED_MALLOC(neuron_count * sizeof(double));
     if (!layer->outputs) {
         TRACKED_FREE(layer->biases);
@@ -197,7 +218,7 @@ static neural_layer_t* neural_layer_create_processor(size_t neuron_count, size_t
         TRACKED_FREE(layer);
         return NULL;
     }
-    
+
     layer->layer_error = TRACKED_MALLOC(neuron_count * sizeof(double));
     if (!layer->layer_error) {
         TRACKED_FREE(layer->outputs);
@@ -206,42 +227,45 @@ static neural_layer_t* neural_layer_create_processor(size_t neuron_count, size_t
         TRACKED_FREE(layer);
         return NULL;
     }
-    
+
     // Initialisation Xavier pour poids
     double limit = sqrt(6.0 / (input_size + neuron_count));
-    srand((unsigned int)time(NULL));
-    
+    // Seed rand here or ensure it's seeded once globally
+    // For simplicity in this example, assuming it's seeded elsewhere or we re-seed.
+    // A better approach is seeding once at the start of the program.
+    // srand((unsigned int)time(NULL)); 
+
     for (size_t i = 0; i < neuron_count * input_size; i++) {
         layer->weights[i] = ((double)rand() / RAND_MAX - 0.5) * 2.0 * limit;
     }
-    
+
     for (size_t i = 0; i < neuron_count; i++) {
         layer->biases[i] = NEURAL_DEFAULT_BIAS;
         layer->outputs[i] = 0.0;
         layer->layer_error[i] = 0.0;
     }
-    
+
     return layer;
 }
 
 // Destruction couche (modèle flat arrays)
 static void neural_layer_destroy_processor(neural_layer_t** layer_ptr) {
     if (!layer_ptr || !*layer_ptr) return;
-    
+
     neural_layer_t* layer = *layer_ptr;
-    
+
     // Validation sécurité
-    if (layer->memory_address != (void*)layer || 
+    if (layer->memory_address != (void*)layer ||
         layer->magic_number != NEURAL_MAGIC_NUMBER) {
         return;
     }
-    
+
     // Libération arrays flat
     if (layer->weights) TRACKED_FREE(layer->weights);
     if (layer->biases) TRACKED_FREE(layer->biases);
     if (layer->outputs) TRACKED_FREE(layer->outputs);
     if (layer->layer_error) TRACKED_FREE(layer->layer_error);
-    
+
     // Nettoyage sécurisé
     layer->weights = NULL;
     layer->biases = NULL;
@@ -249,7 +273,7 @@ static void neural_layer_destroy_processor(neural_layer_t** layer_ptr) {
     layer->layer_error = NULL;
     layer->magic_number = NEURAL_DESTROYED_MAGIC;
     layer->memory_address = NULL;
-    
+
     TRACKED_FREE(layer);
     *layer_ptr = NULL;
 }
@@ -257,36 +281,36 @@ static void neural_layer_destroy_processor(neural_layer_t** layer_ptr) {
 // Traçage activations couches cachées
 neural_activation_trace_t* neural_layer_trace_activations(neural_layer_t* layer) {
     if (!layer) return NULL;
-    
+
     neural_activation_trace_t* trace = TRACKED_MALLOC(sizeof(neural_activation_trace_t));
     if (!trace) return NULL;
-    
+
     trace->layer_id = layer->layer_id;
     trace->neuron_count = layer->neuron_count;
     trace->memory_address = (void*)trace;
     trace->trace_magic = NEURAL_TRACE_MAGIC;
-    
+
     // Allocation arrays de traçage
     trace->hidden_activations = TRACKED_MALLOC(layer->neuron_count * sizeof(double));
     trace->gradients_trace = TRACKED_MALLOC(layer->neuron_count * sizeof(double));
-    
+
     if (!trace->hidden_activations || !trace->gradients_trace) {
         if (trace->hidden_activations) TRACKED_FREE(trace->hidden_activations);
         if (trace->gradients_trace) TRACKED_FREE(trace->gradients_trace);
         TRACKED_FREE(trace);
         return NULL;
     }
-    
+
     // Copie activations pour traçage
     for (size_t i = 0; i < layer->neuron_count; i++) {
         trace->hidden_activations[i] = layer->outputs[i];
         trace->gradients_trace[i] = layer->layer_error[i];
     }
-    
+
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     trace->forward_pass_timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
-    
+
     // Nom fonction d'activation
     switch (layer->activation) {
         case ACTIVATION_SIGMOID: strcpy(trace->activation_function_name, "sigmoid"); break;
@@ -297,24 +321,24 @@ neural_activation_trace_t* neural_layer_trace_activations(neural_layer_t* layer)
         case ACTIVATION_GELU: strcpy(trace->activation_function_name, "gelu"); break;
         default: strcpy(trace->activation_function_name, "linear"); break;
     }
-    
+
     return trace;
 }
 
 // Sauvegarde gradients complets
 bool neural_layer_save_gradients(neural_layer_t* layer, const char* filename) {
     if (!layer || !filename) return false;
-    
+
     FILE* file = fopen(filename, "ab"); // Mode append pour gradients multiples
     if (!file) return false;
-    
+
     // Header avec métadonnées
     fprintf(file, "LAYER_GRADIENTS_DUMP\n");
     fprintf(file, "layer_id=%u\n", layer->layer_id);
     fprintf(file, "neuron_count=%zu\n", layer->neuron_count);
     fprintf(file, "input_size=%zu\n", layer->input_size);
     fprintf(file, "timestamp=%lu\n", (unsigned long)time(NULL));
-    
+
     // Sauvegarde weights complets
     fprintf(file, "WEIGHTS_MATRIX\n");
     for (size_t n = 0; n < layer->neuron_count; n++) {
@@ -324,19 +348,19 @@ bool neural_layer_save_gradients(neural_layer_t* layer, const char* filename) {
         }
         fprintf(file, "\n");
     }
-    
+
     // Sauvegarde biases
     fprintf(file, "BIASES\n");
     for (size_t n = 0; n < layer->neuron_count; n++) {
         fprintf(file, "bias_%zu: %.8f\n", n, layer->biases[n]);
     }
-    
+
     // Sauvegarde erreurs (gradients)
     fprintf(file, "LAYER_ERRORS\n");
     for (size_t n = 0; n < layer->neuron_count; n++) {
         fprintf(file, "error_%zu: %.8f\n", n, layer->layer_error[n]);
     }
-    
+
     fprintf(file, "END_LAYER_DUMP\n\n");
     fclose(file);
     return true;
@@ -347,29 +371,31 @@ static bool neural_layer_forward_pass_processor(neural_layer_t* layer, double* i
     if (!layer || !inputs || layer->magic_number != NEURAL_MAGIC_NUMBER) {
         return false;
     }
-    
+
     struct timespec start_ts, end_ts;
     clock_gettime(CLOCK_MONOTONIC, &start_ts);
-    
+
     // Calcul pour chaque neurone avec traçage détaillé
     for (size_t n = 0; n < layer->neuron_count; n++) {
         double sum = layer->biases[n];
-        
+
         // Produit scalaire weights[n*input_size : (n+1)*input_size] · inputs
         for (size_t i = 0; i < layer->input_size; i++) {
             double weight_contribution = layer->weights[n * layer->input_size + i] * inputs[i];
             sum += weight_contribution;
-            
+
             // Traçage des contributions individuelles (debug mode)
             #ifdef NEURAL_DEBUG_TRACE
             printf("Layer %zu, Neuron %zu, Input %zu: weight=%.6f, input=%.6f, contrib=%.6f\n",
-                   layer->layer_id, n, i, layer->weights[n * layer->input_size + i], 
+                   layer->layer_id, n, i, layer->weights[n * layer->input_size + i],
                    inputs[i], weight_contribution);
             #endif
         }
-        
+
         // Application fonction d'activation avec traçage
         // pre_activation stored for potential debugging
+        // Note: Original code had `pre_activation` variable but it was unused after assignment.
+        // Removed `pre_activation` for clarity. If needed, it can be reintroduced.
         switch (layer->activation) {
             case ACTIVATION_SIGMOID:
                 layer->outputs[n] = activation_sigmoid(sum);
@@ -394,96 +420,105 @@ static bool neural_layer_forward_pass_processor(neural_layer_t* layer, double* i
                 layer->outputs[n] = sum;
                 break;
         }
-        
+
         #ifdef NEURAL_DEBUG_TRACE
+        // Assuming `sum` holds the pre-activation value
         printf("Layer %zu, Neuron %zu: pre_activation=%.6f, post_activation=%.6f\n",
-               layer->layer_id, n, pre_activation, layer->outputs[n]);
+               layer->layer_id, n, sum, layer->outputs[n]);
         #endif
     }
-    
+
     clock_gettime(CLOCK_MONOTONIC, &end_ts);
-    uint64_t forward_time_ns = (end_ts.tv_sec - start_ts.tv_sec) * 1000000000ULL + 
+    uint64_t forward_time_ns = (end_ts.tv_sec - start_ts.tv_sec) * 1000000000ULL +
                                (end_ts.tv_nsec - start_ts.tv_nsec);
-    
+
     // Traçage automatique des activations
-    static bool auto_trace_enabled = true;
+    static bool auto_trace_enabled = true; // This should ideally be configurable
     if (auto_trace_enabled) {
         neural_activation_trace_t* trace = neural_layer_trace_activations(layer);
         if (trace) {
             trace->forward_pass_timestamp = forward_time_ns;
-            
+
             // Sauvegarde trace si nécessaire
             char trace_filename[256];
-            snprintf(trace_filename, sizeof(trace_filename), 
+            snprintf(trace_filename, sizeof(trace_filename),
                      "neural_trace_layer_%u.txt", layer->layer_id);
-            neural_layer_save_gradients(layer, trace_filename);
-            
+            // Using neural_layer_save_gradients to save trace data, assuming it can handle it
+            // A dedicated save function for trace might be better.
+            neural_layer_save_gradients(layer, trace_filename); // Potential mismatch in function purpose
+
             // Libération trace (ou conservation selon configuration)
             if (trace->hidden_activations) TRACKED_FREE(trace->hidden_activations);
             if (trace->gradients_trace) TRACKED_FREE(trace->gradients_trace);
             TRACKED_FREE(trace);
         }
     }
-    
+
     return true;
 }
 
 // Tests stress 100M+ neurones
 bool neural_stress_test_100m_neurons(neural_config_t* config) {
     if (!config) return false;
-    
+
     printf("=== NEURAL STRESS TEST: 100M+ Neurons ===\n");
-    
+
     const size_t neuron_count = 100000000; // 100M neurones
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
-    
+
     printf("Testing neural layer creation with large neuron count...\n");
-    
+
     // Test avec couche de 10000 neurones (échantillon)
     const size_t test_neurons = 10000;
-    neural_layer_t* layer = neural_layer_create(test_neurons, 100, ACTIVATION_RELU);
-    
+    // Assuming neural_layer_create calls neural_layer_create_processor or similar
+    // and it's linked correctly. For standalone compilation, we might need to use
+    // the processor version directly or ensure proper linking.
+    // Using neural_layer_create_processor directly for clarity based on context.
+    neural_layer_t* layer = neural_layer_create_processor(test_neurons, 100, ACTIVATION_RELU);
+
     if (!layer) {
         printf("❌ Failed to create neural layer with %zu neurons\n", test_neurons);
         return false;
     }
-    
+
     clock_gettime(CLOCK_MONOTONIC, &end);
-    double creation_time = (end.tv_sec - start.tv_sec) + 
+    double creation_time = (end.tv_sec - start.tv_sec) +
                           (end.tv_nsec - start.tv_nsec) / 1000000000.0;
-    
+
     printf("✅ Created %zu neural LUMs in %.3f seconds\n", test_neurons, creation_time);
-    
+
     // Projection pour 100M
     double projected_time = creation_time * (neuron_count / (double)test_neurons);
     printf("Projected time for %zu neurons: %.1f seconds\n", neuron_count, projected_time);
     printf("Neural creation rate: %.0f neurons/second\n", test_neurons / creation_time);
-    
+
     // Test forward pass
     double* test_inputs = TRACKED_MALLOC(100 * sizeof(double));
     if (test_inputs) {
         for (int i = 0; i < 100; i++) {
             test_inputs[i] = (double)rand() / RAND_MAX;
         }
-        
+
         clock_gettime(CLOCK_MONOTONIC, &start);
-        bool forward_success = neural_layer_forward_pass(layer, test_inputs);
+        // Assuming neural_layer_forward_pass calls neural_layer_forward_pass_processor
+        bool forward_success = neural_layer_forward_pass_processor(layer, test_inputs);
         clock_gettime(CLOCK_MONOTONIC, &end);
-        
+
         if (forward_success) {
-            double forward_time = (end.tv_sec - start.tv_sec) + 
+            double forward_time = (end.tv_sec - start.tv_sec) +
                                  (end.tv_nsec - start.tv_nsec) / 1000000000.0;
             printf("✅ Forward pass completed in %.6f seconds\n", forward_time);
             printf("Forward rate: %.0f neurons/second\n", test_neurons / forward_time);
         }
-        
+
         TRACKED_FREE(test_inputs);
     }
-    
+
     // Cleanup
-    neural_layer_destroy(&layer);
-    
+    // Assuming neural_layer_destroy calls neural_layer_destroy_processor
+    neural_layer_destroy_processor(&layer); // Using processor version directly
+
     printf("✅ Neural stress test 100M+ neurons completed successfully\n");
     return true;
 }
@@ -492,7 +527,7 @@ bool neural_stress_test_100m_neurons(neural_config_t* config) {
 neural_config_t* neural_config_create_default(void) {
     neural_config_t* config = TRACKED_MALLOC(sizeof(neural_config_t));
     if (!config) return NULL;
-    
+
     config->max_epochs = 1000;
     config->convergence_threshold = 1e-6;
     config->use_momentum = false;
@@ -503,14 +538,14 @@ neural_config_t* neural_config_create_default(void) {
     config->batch_size = 32;
     config->enable_gpu_acceleration = false;
     config->memory_address = (void*)config;
-    
+
     return config;
 }
 
 // Destruction configuration
 void neural_config_destroy(neural_config_t** config_ptr) {
     if (!config_ptr || !*config_ptr) return;
-    
+
     neural_config_t* config = *config_ptr;
     if (config->memory_address == (void*)config) {
         TRACKED_FREE(config);

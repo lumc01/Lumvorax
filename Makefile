@@ -1,6 +1,6 @@
 
 CC = clang
-CFLAGS = -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -I./src
+CFLAGS = -Wall -Wextra -std=c99 -O3 -march=native -ffast-math -funroll-loops -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug -I./src -mavx512f -mfma
 LDFLAGS = -pthread -lm -lrt
 
 # TOUS les modules du système LUM/VORAX

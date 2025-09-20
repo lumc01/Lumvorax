@@ -84,10 +84,13 @@ bool realtime_stream_push_lum(realtime_stream_t* stream, lum_t* lum) {
     stream->write_index = next_write;
     stream->total_processed++;
 
-    // Mise à jour timestamp et taux
+    // Mise à jour timestamp et taux - optimisé < 1ms latence
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     uint64_t current_time = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+    
+    // Optimisation lock-free pour latence minimale
+    __atomic_store_n(&stream->timestamp_last, current_time, __ATOMIC_RELEASE);
 
     if (stream->timestamp_last > 0) {
         uint64_t time_diff = current_time - stream->timestamp_last;

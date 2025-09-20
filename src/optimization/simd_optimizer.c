@@ -229,6 +229,12 @@ void simd_avx512_mass_lum_operations(lum_t* lums, size_t count) {
 
         // Écriture atomique des résultats optimisés avec timestamp forensique
         uint64_t operation_timestamp = get_timestamp_ns();
+        
+        // FMA (Fused Multiply-Add) pour performance optimale
+#ifdef __AVX512F__
+        __m512i fma_result = _mm512_fmadd_epi32(pos_x_data, dispersion_factor, optimized_x);
+        _mm512_storeu_si512((__m512i*)position_x_batch, fma_result);
+#endif
         for (int j = 0; j < 16; j++) {
             lums[i + j].presence = presence_batch[j];
             lums[i + j].position_x = position_x_batch[j];

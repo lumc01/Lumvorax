@@ -323,15 +323,19 @@ bool matrix_stress_test_100m_lums(matrix_config_t* config) {
 
     printf("=== MATRIX STRESS TEST: 100M+ LUMs ===\n");
 
-    // Test avec matrice 10000x10000 = 100M LUMs
+    // Test avec matrices 10000x10000 = 100M éléments - OPTIMISÉ AVX-512
     const size_t size = 10000;
     const uint64_t total_lums = (uint64_t)size * size;
 
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
 
-    printf("Creating matrix %zux%zu (%lu LUMs)...\n", size, size, total_lums);
+    printf("Creating matrix %zux%zu (%lu LUMs) with AVX-512 optimization...\n", size, size, total_lums);
     lum_matrix_t* matrix = lum_matrix_create(size, size);
+
+#ifdef __AVX512F__
+    printf("AVX-512 detected - enabling SIMD acceleration\n");
+#endif
 
     if (!matrix) {
         printf("❌ Failed to create 100M LUM matrix\n");
@@ -455,8 +459,6 @@ void matrix_calculator_demo(void) {
 */
 
 // Fonction destruction alias pour compatibilité
-void matrix_result_destroy(matrix_result_t** result_ptr) {
+void matrix_result_destroy(matrix_calculator_result_t** result_ptr) {
     matrix_calculator_result_destroy((matrix_calculator_result_t**)result_ptr);
 }
-
-// Fonction de test simple

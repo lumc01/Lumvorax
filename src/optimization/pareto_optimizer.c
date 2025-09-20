@@ -53,7 +53,18 @@ static double calculate_system_efficiency(void) {
     throughput_ratio = throughput_base + throughput_variance;
     throughput_ratio = fmax(0.25, fmin(0.9, throughput_ratio)); // Clamp [0.25, 0.9]
 
-    double system_efficiency = (memory_efficiency + cpu_efficiency + throughput_ratio) / 3.0;
+    // Optimisation multi-objectifs avec pondération dynamique
+    double weight_memory = 0.4;
+    double weight_cpu = 0.3; 
+    double weight_throughput = 0.3;
+    
+    // Ajustement dynamique des poids selon contexte
+    if (memory_efficiency < 0.5) weight_memory = 0.6;
+    if (cpu_efficiency > 0.9) weight_cpu = 0.2;
+    
+    double system_efficiency = (memory_efficiency * weight_memory + 
+                               cpu_efficiency * weight_cpu + 
+                               throughput_ratio * weight_throughput);
 
     // Debug logging pour validation
     static double last_logged_efficiency = -1.0;
