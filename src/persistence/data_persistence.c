@@ -24,7 +24,7 @@ persistence_context_t* persistence_context_create(const char* storage_directory)
     if (!ctx) return NULL;
 
     ctx->magic_number = PERSISTENCE_CONTEXT_MAGIC;
-    
+
     // PRODUCTION: Utilisation paths absolus avec /data/ si disponible
     char absolute_path[MAX_STORAGE_PATH_LENGTH];
     if (strncmp(storage_directory, "/", 1) == 0) {
@@ -45,10 +45,10 @@ persistence_context_t* persistence_context_create(const char* storage_directory)
             }
         }
     }
-    
+
     strncpy(ctx->storage_directory, absolute_path, MAX_STORAGE_PATH_LENGTH - 1);
     ctx->storage_directory[MAX_STORAGE_PATH_LENGTH - 1] = '\0';
-    
+
     fprintf(stderr, "[PERSISTENCE] Répertoire configuré: %s\n", ctx->storage_directory);
 
     ctx->default_format = STORAGE_FORMAT_BINARY;
@@ -60,7 +60,7 @@ persistence_context_t* persistence_context_create(const char* storage_directory)
 
     // CORRECTION CRITIQUE: Ensure storage directory exists - utiliser le path absolu résolu
     persistence_ensure_directory_exists(ctx->storage_directory);
-    
+
     // VÉRIFICATION: Test d'écriture pour détecter problèmes déploiement
     char test_file[MAX_STORAGE_PATH_LENGTH + 20];
     snprintf(test_file, sizeof(test_file), "%s/.write_test", ctx->storage_directory);
@@ -294,7 +294,18 @@ storage_result_t* persistence_save_lum(persistence_context_t* ctx,
     }
 
     char full_path[MAX_STORAGE_PATH_LENGTH];
+
+    // Vérification taille avant concaténation
+    size_t total_len = strlen(ctx->storage_directory) + strlen(filename) + 2; // +2 pour '/' et '\0'
+    if (total_len >= MAX_STORAGE_PATH_LENGTH) {
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__,
+                           "Path too long: %zu chars (max: %d)", total_len, MAX_STORAGE_PATH_LENGTH);
+        storage_result_set_error(result, "Path too long");
+        return result;
+    }
+
     snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+
 
     FILE* file = fopen(full_path, "wb");
     if (!file) {
@@ -355,14 +366,25 @@ storage_result_t* persistence_load_lum(persistence_context_t* ctx,
         return result;
     }
 
-    // SÉCURITÉ: Sanitization du nom de fichier pour éviter path traversal  
+    // SÉCURITÉ: Sanitization du nom de fichier pour éviter path traversal
     if (strstr(filename, "..") || strchr(filename, '/') || strchr(filename, '\\')) {
         storage_result_set_error(result, "Nom fichier non sécurisé rejeté");
         return result;
     }
 
     char full_path[MAX_STORAGE_PATH_LENGTH];
+
+    // Vérification taille avant concaténation
+    size_t total_len = strlen(ctx->storage_directory) + strlen(filename) + 2; // +2 pour '/' et '\0'
+    if (total_len >= MAX_STORAGE_PATH_LENGTH) {
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__,
+                           "Path too long: %zu chars (max: %d)", total_len, MAX_STORAGE_PATH_LENGTH);
+        storage_result_set_error(result, "Path too long");
+        return result;
+    }
+
     snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+
 
     FILE* file = fopen(full_path, "rb");
     if (!file) {
@@ -448,7 +470,18 @@ storage_result_t* persistence_save_group(persistence_context_t* ctx,
     }
 
     char full_path[MAX_STORAGE_PATH_LENGTH];
+
+    // Vérification taille avant concaténation
+    size_t total_len = strlen(ctx->storage_directory) + strlen(filename) + 2; // +2 pour '/' et '\0'
+    if (total_len >= MAX_STORAGE_PATH_LENGTH) {
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__,
+                           "Path too long: %zu chars (max: %d)", total_len, MAX_STORAGE_PATH_LENGTH);
+        storage_result_set_error(result, "Path too long");
+        return result;
+    }
+
     snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+
 
     FILE* file = fopen(full_path, "wb");
     if (!file) {
@@ -536,7 +569,18 @@ storage_result_t* persistence_load_group(persistence_context_t* ctx,
     }
 
     char full_path[MAX_STORAGE_PATH_LENGTH];
+
+    // Vérification taille avant concaténation
+    size_t total_len = strlen(ctx->storage_directory) + strlen(filename) + 2; // +2 pour '/' et '\0'
+    if (total_len >= MAX_STORAGE_PATH_LENGTH) {
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, __func__,
+                           "Path too long: %zu chars (max: %d)", total_len, MAX_STORAGE_PATH_LENGTH);
+        storage_result_set_error(result, "Path too long");
+        return result;
+    }
+
     snprintf(full_path, sizeof(full_path), "%s/%s", ctx->storage_directory, filename);
+
 
     FILE* file = fopen(full_path, "rb");
     if (!file) {
@@ -679,7 +723,17 @@ bool persistence_start_transaction_log(persistence_context_t* ctx) {
     if (!ctx) return false;
 
     char log_path[MAX_STORAGE_PATH_LENGTH];
+
+    // Vérification taille avant snprintf pour éviter truncation
+    size_t dir_len = strlen(ctx->storage_directory);
+    if (dir_len + 18 >= MAX_STORAGE_PATH_LENGTH) { // 18 = strlen("/transactions.log") + 1
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, "persistence_start_transaction_log",
+                           "Storage directory path too long: %zu chars", dir_len);
+        return false;
+    }
+
     snprintf(log_path, sizeof(log_path), "%s/transactions.log", ctx->storage_directory);
+
 
     ctx->transaction_log = fopen(log_path, "a");
     return ctx->transaction_log != NULL;
@@ -803,4 +857,3 @@ bool recovery_manager_verify_file_integrity(persistence_context_t* ctx, const ch
     forensic_log(FORENSIC_LEVEL_INFO, "recovery_manager_verify_file_integrity", "Called with %s", filepath);
     return persistence_verify_file_integrity(ctx, filepath);
 }
-

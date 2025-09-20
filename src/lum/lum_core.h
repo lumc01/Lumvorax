@@ -8,7 +8,6 @@
 #include <pthread.h>
 
 // Vérification de l'ABI - la structure lum_t réelle avec tous ses champs
-// Note: la structure complète fait 48 bytes avec l'alignement et les nouveaux champs
 
 // Core LUM structure - a single presence unit
 typedef struct {

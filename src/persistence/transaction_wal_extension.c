@@ -1,5 +1,14 @@
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
 #include "transaction_wal_extension.h"
 #include "../debug/memory_tracker.h"
+#include <unistd.h>     // Pour fileno()
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <errno.h>
 #include "../debug/forensic_logger.h"
 #include <errno.h>
 #include <fcntl.h>
