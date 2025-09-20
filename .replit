@@ -3154,6 +3154,259 @@ args = "echo \"📊 Score système final: 100/100 - SYSTÈME PARFAITEMENT STABIL
 task = "shell.exec"
 args = "echo \"Validation finale terminée: $(date -u)\""
 
+[[workflows.workflow]]
+name = "DIAGNOSTIC_ULTRA_GRANULAIRE_COMPLET"
+author = 47803122
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== DIAGNOSTIC ULTRA-GRANULAIRE SYSTÈME LUM/VORAX ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Date: $(date -u)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Objectif: Inspection complète sans référence aux anciens rapports\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 1: Nettoyage complet et compilation\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make clean"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "rm -f logs/*.log 2>/dev/null || true"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "mkdir -p logs/{compilation,execution,tests,modules,performance,diagnostics}"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 2: Compilation avec logs détaillés\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make all 2>&1 | tee logs/compilation/diagnostic_build_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 3: Vérification binaire et structure\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ -f bin/lum_vorax ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"✅ Binaire compilé - Analyse détaillée\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ls -la bin/lum_vorax"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    file bin/lum_vorax"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"Phase 4: Tests système complets\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    ./bin/lum_vorax 2>&1 | tee logs/execution/diagnostic_execution_$(date +%Y%m%d_%H%M%S).log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "else"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"❌ Compilation échouée - Analyse logs\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    cat logs/compilation/diagnostic_build_*.log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    exit 1"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 5: Tests unitaires individuels\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Test LUM Core...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "timeout 30s ./bin/lum_vorax --test-lum-core 2>&1 | tee logs/tests/lum_core_test_$(date +%Y%m%d_%H%M%S).log || echo \"Test LUM Core terminé\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Test VORAX Operations...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "timeout 30s ./bin/lum_vorax --test-vorax 2>&1 | tee logs/tests/vorax_test_$(date +%Y%m%d_%H%M%S).log || echo \"Test VORAX terminé\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Test modules avancés...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "timeout 60s ./bin/lum_vorax --test-advanced 2>&1 | tee logs/tests/advanced_test_$(date +%Y%m%d_%H%M%S).log || echo \"Tests avancés terminés\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 6: Analyse performance\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Test stress 1M LUMs...\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "timeout 120s ./bin/lum_vorax --stress-test-million 2>&1 | tee logs/performance/stress_1m_$(date +%Y%m%d_%H%M%S).log || echo \"Test stress terminé\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 7: Collecte métadonnées\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"{\" > logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '  \"timestamp\": \"'$(date -u +%Y-%m-%dT%H:%M:%S.%3NZ)'\",' >> logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '  \"system_info\": {' >> logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '    \"os\": \"'$(uname -a)'\",' >> logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '    \"compiler\": \"'$(clang --version | head -1)'\"' >> logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '  },' >> logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '  \"binary_info\": {' >> logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '    \"size\": \"'$(stat -c%s bin/lum_vorax 2>/dev/null || echo \"0\")'\",' >> logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '    \"checksum\": \"'$(sha256sum bin/lum_vorax 2>/dev/null | cut -d' ' -f1 || echo \"N/A\")'\"' >> logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '  }' >> logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo '}' >> logs/diagnostics/metadata_$(date +%Y%m%d_%H%M%S).json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Phase 8: Rapport final logs\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"📊 LOGS GÉNÉRÉS:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = 'find logs/ -name "*.log" -exec echo "📄 {}" \; -exec wc -l {} \;'
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"📊 MÉTADONNÉES:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cat logs/diagnostics/metadata_*.json"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"✅ DIAGNOSTIC ULTRA-GRANULAIRE TERMINÉ\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Tous les logs sont disponibles pour analyse détaillée\""
+
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
 channel = "stable-25_05"
