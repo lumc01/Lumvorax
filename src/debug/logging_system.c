@@ -16,7 +16,8 @@ void create_log(const char* filepath, const char* message) {
     // Créer le répertoire si nécessaire
     char dir_path[MAX_STORAGE_PATH_LENGTH];
     int result = snprintf(dir_path, sizeof(dir_path), "logs");
-    if (result >= (int)sizeof(dir_path)) {
+    if (result >= (int)sizeof(dir_path) || result < 0) {
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, "create_log", "Path trop long pour répertoire logs");
         return; // Path trop long
     }
     

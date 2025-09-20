@@ -4,6 +4,9 @@
 // SECTION 8: INTERDICTION D'UTILISER DES EMOJI
 // Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 
 // Toute inclusion d'emoji sera considérée comme une violation des standards de codage.
+// Cette règle s'applique à TOUS les modules du système LUM/VORAX sans exception.
+// Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 
+// Toute inclusion d'emoji sera considérée comme une violation des standards de codage.
 
 #include "lum_core.h"
 #include "../common/common_types.h"
@@ -21,6 +24,9 @@
 #include <sys/mman.h>  // Pour mmap, munmap
 #include <stdatomic.h> // Pour atomic operations
 #include <inttypes.h>  // Pour PRIu32, PRIu64, etc.
+#include <unistd.h>    // Pour access(), F_OK
+#include <sys/stat.h>  // Pour mkdir()
+#include <errno.h>     // Pour errno
 
 // Définitions pour les optimisations AVX
 #define LUM_BATCH_VALIDATE_ALL 0
@@ -588,7 +594,8 @@ uint32_t lum_generate_id(void) {
             id = timestamp_base + overflow_counter;
             overflow_counter = (overflow_counter + 1) % 1000;
 
-            printf("[WARNING] LUM ID overflow handled - using timestamp-based ID: %" PRIu32 "\n", id);
+            unified_forensic_log(FORENSIC_LEVEL_WARNING, "lum_generate_id", 
+                               "LUM ID overflow handled - using timestamp-based ID: %" PRIu32, id);
         } else {
             // Fallback: réinitialiser le compteur avec offset
             lum_id_counter = 1000;

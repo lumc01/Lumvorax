@@ -16,8 +16,8 @@
 // #define MODULES_BLACKBOX_ACTIFS
 
 // Constantes communes - tailles augmentées pour éviter troncations
-#define MAX_STORAGE_PATH_LENGTH 2048
-#define MAX_ERROR_MESSAGE_LENGTH 512
+#define MAX_STORAGE_PATH_LENGTH 4096
+#define MAX_ERROR_MESSAGE_LENGTH 1024
 
 // SECTION 8: INTERDICTION D'UTILISER DES EMOJI
 // Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 

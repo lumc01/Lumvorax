@@ -1,6 +1,11 @@
 #ifndef LUM_CORE_H_INCLUDED
 #define LUM_CORE_H_INCLUDED
 
+// SECTION 8: INTERDICTION D'UTILISER DES EMOJI
+// Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 
+// Toute inclusion d'emoji sera considérée comme une violation des standards de codage.
+// Cette règle s'applique à TOUS les modules du système LUM/VORAX sans exception.
+
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
