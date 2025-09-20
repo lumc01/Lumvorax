@@ -3,7 +3,7 @@ modules = ["c-clang14", "bash", "cpp-clang14", "python-3.12", "c-clang"]
 expertMode = true
 
 [workflows]
-runButton = "Test Validation Modifications"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "LUM_VORAX_FORENSIC_COMPLETE"
@@ -1852,7 +1852,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "./bin/lum_vorax_complete"
+args = "./bin/lum_vorax_simple"
 
 [[workflows.workflow]]
 name = "TEST_CORRECTIONS_MODULES_BLOQUES"
