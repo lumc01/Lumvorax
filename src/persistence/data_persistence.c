@@ -63,6 +63,16 @@ persistence_context_t* persistence_context_create(const char* storage_directory)
 
     // VÉRIFICATION: Test d'écriture pour détecter problèmes déploiement
     char test_file[MAX_STORAGE_PATH_LENGTH];
+    
+    // Vérification longueur avant snprintf pour éviter troncation
+    size_t dir_len = strlen(ctx->storage_directory);
+    if (dir_len + 12 >= MAX_STORAGE_PATH_LENGTH) { // 12 = strlen("/.write_test") + 1
+        unified_forensic_log(FORENSIC_LEVEL_ERROR, "persistence_context_create",
+                           "Storage directory path too long: %zu chars", dir_len);
+        TRACKED_FREE(ctx);
+        return NULL;
+    }
+    
     snprintf(test_file, sizeof(test_file), "%s/.write_test", ctx->storage_directory);
     FILE* test_fp = fopen(test_file, "w");
     if (!test_fp) {
