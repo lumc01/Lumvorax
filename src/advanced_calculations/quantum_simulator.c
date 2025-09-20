@@ -321,3 +321,128 @@ void quantum_result_destroy(quantum_result_t** result_ptr) {
         *result_ptr = NULL;
     }
 }
+
+// *** FONCTIONS MANQUANTES POUR MAIN.C ***
+
+quantum_simulator_t* quantum_simulator_create(size_t qubit_count, quantum_config_t* config) {
+    if (qubit_count == 0 || qubit_count > QUANTUM_MAX_QUBITS || !config) {
+        return NULL;
+    }
+    
+    quantum_simulator_t* simulator = TRACKED_MALLOC(sizeof(quantum_simulator_t));
+    if (!simulator) return NULL;
+    
+    simulator->qubit_count = qubit_count;
+    simulator->max_gates = 1000;
+    simulator->state_vector_size = 1ULL << qubit_count; // 2^qubit_count
+    simulator->circuit = quantum_circuit_create(qubit_count, 1000);
+    simulator->config = config;
+    
+    simulator->state_probabilities = TRACKED_MALLOC(simulator->state_vector_size * sizeof(double));
+    if (!simulator->state_probabilities) {
+        if (simulator->circuit) quantum_circuit_destroy(&simulator->circuit);
+        TRACKED_FREE(simulator);
+        return NULL;
+    }
+    
+    // Initialisation état |00...0⟩
+    for (size_t i = 0; i < simulator->state_vector_size; i++) {
+        simulator->state_probabilities[i] = (i == 0) ? 1.0 : 0.0;
+    }
+    
+    simulator->is_initialized = true;
+    simulator->memory_address = (void*)simulator;
+    simulator->magic_number = QUANTUM_MAGIC_NUMBER;
+    
+    return simulator;
+}
+
+void quantum_simulator_destroy(quantum_simulator_t** simulator_ptr) {
+    if (!simulator_ptr || !*simulator_ptr) return;
+    
+    quantum_simulator_t* simulator = *simulator_ptr;
+    
+    if (simulator->magic_number != QUANTUM_MAGIC_NUMBER || 
+        simulator->memory_address != (void*)simulator) {
+        return;
+    }
+    
+    if (simulator->circuit) {
+        quantum_circuit_destroy(&simulator->circuit);
+    }
+    if (simulator->state_probabilities) {
+        TRACKED_FREE(simulator->state_probabilities);
+    }
+    
+    simulator->magic_number = QUANTUM_DESTROYED_MAGIC;
+    simulator->memory_address = NULL;
+    
+    TRACKED_FREE(simulator);
+    *simulator_ptr = NULL;
+}
+
+// *** FONCTIONS CIRCUIT QUANTIQUE MANQUANTES ***
+
+quantum_circuit_t* quantum_circuit_create(size_t qubit_count, size_t max_gates) {
+    if (qubit_count == 0 || qubit_count > QUANTUM_MAX_QUBITS || max_gates == 0) {
+        return NULL;
+    }
+    
+    quantum_circuit_t* circuit = TRACKED_MALLOC(sizeof(quantum_circuit_t));
+    if (!circuit) return NULL;
+    
+    circuit->qubits = TRACKED_MALLOC(qubit_count * sizeof(quantum_lum_t*));
+    circuit->gate_sequence = TRACKED_MALLOC(max_gates * sizeof(quantum_gate_e));
+    circuit->gate_targets = TRACKED_MALLOC(max_gates * sizeof(size_t));
+    circuit->gate_controls = TRACKED_MALLOC(max_gates * sizeof(size_t));
+    
+    if (!circuit->qubits || !circuit->gate_sequence || !circuit->gate_targets || !circuit->gate_controls) {
+        if (circuit->qubits) TRACKED_FREE(circuit->qubits);
+        if (circuit->gate_sequence) TRACKED_FREE(circuit->gate_sequence);
+        if (circuit->gate_targets) TRACKED_FREE(circuit->gate_targets);
+        if (circuit->gate_controls) TRACKED_FREE(circuit->gate_controls);
+        TRACKED_FREE(circuit);
+        return NULL;
+    }
+    
+    // Initialiser tous les qubits en état |0⟩
+    for (size_t i = 0; i < qubit_count; i++) {
+        circuit->qubits[i] = quantum_lum_create(0, 0, 2); // 2 états de base |0⟩ et |1⟩
+    }
+    
+    circuit->qubit_count = qubit_count;
+    circuit->gate_count = 0;
+    circuit->total_coherence = 1.0;
+    circuit->memory_address = (void*)circuit;
+    circuit->execution_time_ns = 0;
+    
+    return circuit;
+}
+
+void quantum_circuit_destroy(quantum_circuit_t** circuit_ptr) {
+    if (!circuit_ptr || !*circuit_ptr) return;
+    
+    quantum_circuit_t* circuit = *circuit_ptr;
+    
+    if (circuit->memory_address != (void*)circuit) {
+        return;
+    }
+    
+    // Libérer tous les qubits
+    if (circuit->qubits) {
+        for (size_t i = 0; i < circuit->qubit_count; i++) {
+            if (circuit->qubits[i]) {
+                quantum_lum_destroy(&circuit->qubits[i]);
+            }
+        }
+        TRACKED_FREE(circuit->qubits);
+    }
+    
+    if (circuit->gate_sequence) TRACKED_FREE(circuit->gate_sequence);
+    if (circuit->gate_targets) TRACKED_FREE(circuit->gate_targets);
+    if (circuit->gate_controls) TRACKED_FREE(circuit->gate_controls);
+    
+    circuit->memory_address = NULL;
+    TRACKED_FREE(circuit);
+    *circuit_ptr = NULL;
+}

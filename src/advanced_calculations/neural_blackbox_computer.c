@@ -27,7 +27,7 @@ neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, acti
     layer->neuron_count = neuron_count;
     layer->input_size = input_size;
     layer->output_size = neuron_count;
-    layer->activation_type = activation;
+    layer->activation = activation;
     layer->layer_id = 0;
     layer->magic_number = 0xABCDEF01;
 
@@ -101,7 +101,7 @@ bool neural_layer_forward_pass(neural_layer_t* layer, double* input) {
         }
 
         // Application fonction d'activation
-        layer->outputs[n] = neural_activation_function(sum, layer->activation_type);
+        layer->outputs[n] = neural_activation_function(sum, layer->activation);
     }
 
     return true;
