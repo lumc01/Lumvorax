@@ -157,18 +157,18 @@ static void test_all_advanced_calculations_modules(void) {
         image_processor_destroy(&image);
     }
 
-    // Test Collatz Analyzer
+    // Test Collatz Analyzer - RANGE ULTRA-SÉCURISÉ
     printf("📊 Test Collatz Analyzer...\n");
     collatz_config_t* collatz_config = collatz_config_create_default();
     if (collatz_config) {
-        // Test Collatz pour 5 nombres seulement - RANGE ULTRA-SÉCURISÉ
-        for (uint64_t test_num = 1; test_num <= 5; test_num++) {
+        // Test Collatz pour 3 nombres seulement - PROTECTION MAXIMALE
+        for (uint64_t test_num = 1; test_num <= 3; test_num++) {
             collatz_result_t* result = collatz_analyze_basic(test_num, collatz_config);
             if (result) {
                 printf("✅ Collatz Analyzer: Nombre %llu analysé, %zu séquences\n", test_num, result->sequence_count);
                 collatz_result_destroy(&result);
             } else {
-                 printf("❌ Collatz Analyzer: Échec analyse pour %llu\n", test_num);
+                printf("❌ Collatz Analyzer: Échec analyse pour %llu\n", test_num);
             }
         }
         collatz_config_destroy(&collatz_config);

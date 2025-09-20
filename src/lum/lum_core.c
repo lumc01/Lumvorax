@@ -561,31 +561,35 @@ uint32_t lum_generate_id(void) {
 
 uint64_t lum_get_timestamp(void) {
     struct timespec ts;
+    static uint64_t fallback_counter = 1000000000ULL;
+    
     // Tentative 1: CLOCK_MONOTONIC (préféré)
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
-        return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+        uint64_t timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+        if (timestamp > 0) return timestamp;
     }
     
     // Tentative 2: CLOCK_REALTIME (fallback)
     if (clock_gettime(CLOCK_REALTIME, &ts) == 0) {
-        return ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+        uint64_t timestamp = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+        if (timestamp > 0) return timestamp;
     }
     
     // Tentative 3: gettimeofday (fallback Unix)
     struct timeval tv;
     if (gettimeofday(&tv, NULL) == 0) {
-        return tv.tv_sec * 1000000000ULL + tv.tv_usec * 1000ULL;
+        uint64_t timestamp = tv.tv_sec * 1000000000ULL + tv.tv_usec * 1000ULL;
+        if (timestamp > 0) return timestamp;
     }
     
-    // Fallback final: time() avec protection
+    // Tentative 4: time() avec protection et validation
     time_t now = time(NULL);
-    if (now != (time_t)-1) {
-        return (uint64_t)now * 1000000000ULL;
+    if (now != (time_t)-1 && now > 0) {
+        return (uint64_t)now * 1000000000ULL + (fallback_counter % 1000000000ULL);
     }
     
-    // Ultime fallback: timestamp statique minimal
-    static uint64_t fallback_counter = 1000000000ULL;
-    return fallback_counter++;
+    // Ultime fallback: compteur statique avec horodatage de base
+    return 1640995200000000000ULL + (fallback_counter++); // Base: 2022-01-01
 }
 
 void lum_print(const lum_t* lum) {
