@@ -254,7 +254,7 @@ golden_optimization_result_t* golden_score_optimize_system(golden_score_optimize
     } else if (result->best_score >= GOLDEN_RATIO * 50) {
         result->performance_class = PERFORMANCE_COMPETITIVE;
     } else {
-        result->performance_class = PERFORMANCE_BASELINE;
+        result->performance_class = PERFORMANCE_STANDARD;
     }
     
     result->success = (result->best_score > result->initial_score);
@@ -300,7 +300,7 @@ golden_comparison_t* golden_score_compare_industrial_standards(const golden_opti
         } else if (ratio >= 0.9) {
             comparison->performance_vs_standards[i] = PERFORMANCE_COMPETITIVE;  
         } else {
-            comparison->performance_vs_standards[i] = PERFORMANCE_BASELINE;
+            comparison->performance_vs_standards[i] = PERFORMANCE_STANDARD;
         }
         
         snprintf(comparison->detailed_analysis[i], sizeof(comparison->detailed_analysis[i]),

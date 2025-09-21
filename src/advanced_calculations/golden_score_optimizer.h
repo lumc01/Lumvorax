@@ -1,25 +1,9 @@
 #ifndef GOLDEN_SCORE_OPTIMIZER_H
 #define GOLDEN_SCORE_OPTIMIZER_H
 
-#include "../lum/lum_core.h"
-// Types spécialisés golden - évite conflits common_types.h
-#define GOLDEN_METRICS_LOCAL
-#define GOLDEN_COMPARISON_LOCAL 
+// ORDRE STRICT D'INCLUSION SELON PROMPT.TXT
 #include "../common/common_types.h"
-
-#ifdef GOLDEN_METRICS_LOCAL
-#undef golden_metrics_t
-typedef struct golden_metrics_internal_t {
-    double performance_score;
-    double memory_efficiency; 
-    double energy_consumption;
-    double scalability_factor;
-    double reliability_index;
-    uint64_t collection_time_ns;
-} golden_metrics_internal_t;
-#define golden_metrics_t golden_metrics_internal_t
-#endif
-#include "../common/common_types.h" // Types partagés
+#include "../lum/lum_core.h"
 #include <stdint.h>
 
 #define GOLDEN_RATIO 1.6180339887498948482045868343656
@@ -30,41 +14,10 @@ typedef struct golden_metrics_internal_t {
 // Golden Score Optimizer - Optimisation système basée sur le ratio doré
 typedef struct golden_score_optimizer_t golden_score_optimizer_t;
 
-// Classification performance selon score Golden (définie avant usage)
-    PERFORMANCE_COMPETITIVE = 1,
-    PERFORMANCE_SUPERIOR = 2,
-    PERFORMANCE_EXCEPTIONAL = 3
-} performance_class_e;
-
-// Complete type definitions before usage
-// Métriques pour calcul Golden Score (définition complète)
-typedef struct golden_metrics_t {
-    double performance_score;
-    double memory_efficiency;
-    double energy_consumption;
-    double scalability_factor;
-    double reliability_index;
-    uint64_t collection_time_ns;
-} golden_metrics_t;
-
-// Comparaison performance vs standards industriels (définition complète)
-typedef struct golden_comparison_t {
-    uint32_t magic_number;
-    void* memory_address;
-    double standard_ratios[5];
-    performance_class_e performance_vs_standards[5];
-    char detailed_analysis[5][256];
-    double market_position_ratio;
-    double golden_ratio_achievement;
-} golden_comparison_t;
-
-// Types déjà définis ci-dessus
-
 // Résultat optimisation Golden Score système
 typedef struct {
     uint32_t magic_number;
     void* memory_address;
-
     double initial_score;
     double final_score;
     double best_score;
@@ -80,10 +33,6 @@ typedef struct {
     golden_metrics_t optimal_metrics;
 } golden_optimization_result_t;
 
-// Type déjà défini ci-dessus
-
-// golden_metrics_t déjà défini plus haut dans le fichier
-
 typedef struct {
     double performance_lums_per_second;
     double memory_efficiency_ratio;
@@ -94,8 +43,6 @@ typedef struct {
     double test_coverage_percent;
     double security_vulnerability_count;
 } system_metrics_t;
-
-// Types déjà définis ci-dessus
 
 // Configuration Golden Score
 typedef struct {
@@ -122,13 +69,11 @@ struct golden_score_optimizer_t {
     uint32_t magic_number;
     void* memory_address;
     int is_destroyed;
-
     // Core configuration
     double target_golden_ratio;
     uint32_t optimization_iterations;
     double convergence_threshold;
     uint64_t creation_time;
-
     // System metrics
     golden_metrics_t system_metrics;
 };

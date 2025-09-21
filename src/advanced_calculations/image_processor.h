@@ -2,10 +2,12 @@
 #ifndef IMAGE_PROCESSOR_H
 #define IMAGE_PROCESSOR_H
 
+// ORDRE STRICT D'INCLUSION SELON PROMPT.TXT
+#include "../common/common_types.h"
+#include "../lum/lum_core.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
-#include "../lum/lum_core.h"
 
 // Constantes
 #define IMAGE_MAX_DIMENSION 65536
@@ -14,14 +16,7 @@
 #define IMAGE_DESTROYED_MAGIC 0xDEADBEEF
 #define IMAGE_RESULT_MAGIC 0x494D4752    // "IMGR"
 
-// Types de filtres
-typedef enum {
-    IMAGE_FILTER_BLUR = 0,
-    IMAGE_FILTER_SHARPEN,
-    IMAGE_FILTER_EDGE_DETECTION,
-    IMAGE_FILTER_EMBOSS,
-    IMAGE_FILTER_GAUSSIAN
-} image_filter_type_e;
+// Types de filtres DÉJÀ définis dans common_types.h
 
 // Structure processeur d'images
 typedef struct {

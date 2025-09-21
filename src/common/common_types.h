@@ -191,8 +191,11 @@ typedef struct golden_metrics_t {
     double performance_score;
     double memory_efficiency;
     double energy_consumption;
+    double scalability_factor;
+    double reliability_index;
     double throughput_ratio;
     uint64_t timestamp;
+    uint64_t collection_time_ns;
     void* memory_address;
     uint32_t magic_number;
 } golden_metrics_t;
@@ -207,6 +210,11 @@ typedef struct golden_comparison_t {
     double improvement_ratio;
     performance_class_e performance_class;
     char comparison_summary[256];
+    double standard_ratios[5];
+    performance_class_e performance_vs_standards[5];
+    char detailed_analysis[5][256];
+    double market_position_ratio;
+    double golden_ratio_achievement;
     void* memory_address;
     uint32_t magic_number;
 } golden_comparison_t;
