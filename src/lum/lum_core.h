@@ -126,6 +126,7 @@ void lum_safe_destroy(lum_t** lum_ptr);
 void lum_group_destroy_ultra_secure(lum_group_t** group_ptr);
 
 // Constantes de validation mémoire
+#define LUM_VALIDATION_PATTERN 0x12345678
 #define LUM_MAGIC_DESTROYED 0xDEADBEEF
 #define LUM_DESTROYED_MAGIC 0xDEADDEAD
 
