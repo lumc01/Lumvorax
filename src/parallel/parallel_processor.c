@@ -7,7 +7,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <stdio.h>
-#include <unistd.h>
+#include <unistd.h>  // Pour usleep - CORRECTION APPLIQUÉE
 #include <time.h>
 #include <errno.h>
 
