@@ -2,23 +2,6 @@
 #define GOLDEN_SCORE_OPTIMIZER_H
 
 #include "../lum/lum_core.h"
-// Types spécialisés golden - évite conflits common_types.h
-#define GOLDEN_METRICS_LOCAL
-#define GOLDEN_COMPARISON_LOCAL 
-#include "../common/common_types.h"
-
-#ifdef GOLDEN_METRICS_LOCAL
-#undef golden_metrics_t
-typedef struct golden_metrics_internal_t {
-    double performance_score;
-    double memory_efficiency; 
-    double energy_consumption;
-    double scalability_factor;
-    double reliability_index;
-    uint64_t collection_time_ns;
-} golden_metrics_internal_t;
-#define golden_metrics_t golden_metrics_internal_t
-#endif
 #include "../common/common_types.h" // Types partagés
 #include <stdint.h>
 

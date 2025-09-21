@@ -181,7 +181,7 @@ typedef struct {
 } result_t;
 
 #define LUM_ERROR_CODE_FORENSIC 1 // Renommé pour éviter conflit enum
-#define FORENSIC_CRITICAL 2
+#define LUM_ERROR_CODE_CRITICAL 2 // Renommé pour éviter conflit enum
 
 // Pattern obligatoire zero-tolerance
 #define CHECK_RESULT_OR_FAIL(result, cleanup_call, error_msg) \
