@@ -1,6 +1,11 @@
 # LUM/VORAX Computational System
 
 ## Overview
+toujour repondre en francais!
+L’agent qui li ce texte doit réaliser tout lui-même ! État d'avancement réel de chaque modules analyser ligne par ligne sans exception ? Les erreurs passées on deja été corrigé ? Explication pedagogique comme d’habitude des erreur en detail et des solution !? Procede au correction apres apres avoir lu le promp.txt et le .../common/common_types.h/STANDARD_NAME.md a jour ? Et les 44 modules exécuté !
+Et réaliser un tout nouveau rapport md numéroté final après avoir fourni un projet avancée!sans WARNNING touts corriger et sans erreur tous corriger! prompt final complet pour l’agent réaliser tout ces lecture et verification et inspection fine lui même pour valider l’authenticité des tes corrections et procede a tout cela avec les expertise nécessaires en temps réel 
+
+
 This is a sophisticated C-based computational system implementing the LUM/VORAX framework. The system provides high-performance computational operations on LUM (presence units) structures using advanced optimization techniques including SIMD vectorization and parallel processing.
 
 ## Current State
