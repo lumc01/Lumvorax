@@ -127,7 +127,28 @@ void lum_group_destroy_ultra_secure(lum_group_t** group_ptr);
 
 // Constantes de validation mémoire
 #define LUM_MAGIC_DESTROYED 0xDEADBEEF
-#define LUM_VALIDATION_PATTERN 0xABCDEF12
+#define LUM_DESTROYED_MAGIC 0xDEADDEAD
+
+// Macro de validation magic number
+#define VALIDATE_LUM_MAGIC(lum) \
+    do { \
+        if (!(lum) || (lum)->magic_number != LUM_MAGIC_NUMBER) { \
+            forensic_log(FORENSIC_LEVEL_ERROR, __func__, \
+                        "Invalid LUM magic: %p (magic: 0x%08X)", \
+                        (void*)(lum), (lum) ? (lum)->magic_number : 0); \
+            return false; \
+        } \
+    } while(0)
+
+#define VALIDATE_LUM_MAGIC_PTR(lum) \
+    do { \
+        if (!(lum) || (lum)->magic_number != LUM_MAGIC_NUMBER) { \
+            forensic_log(FORENSIC_LEVEL_ERROR, __func__, \
+                        "Invalid LUM magic: %p (magic: 0x%08X)", \
+                        (void*)(lum), (lum) ? (lum)->magic_number : 0); \
+            return NULL; \
+        } \
+    } while(0)
 
 // PRIORITÉ 1.3: TIMING FORENSIQUE DIFFÉRENCIÉ selon roadmap exact
 // LOGS GRANULAIRES: CLOCK_MONOTONIC pour mesures précises

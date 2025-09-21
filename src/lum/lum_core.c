@@ -1,8 +1,8 @@
 // SECTION 8: INTERDICTION D'UTILISER DES EMOJI
-// Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 
+// Aucune utilisation d'emoji dans le code source ou dans les fichiers de log.
 // Toute inclusion d'emoji sera considérée comme une violation des standards de codage.
 // Cette règle s'applique à TOUS les modules du système LUM/VORAX sans exception.
-// Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 
+// Aucune utilisation d'emoji dans le code source ou dans les fichiers de log.
 // Toute inclusion d'emoji sera considérée comme une violation des standards de codage.
 
 #include "lum_core.h"
@@ -30,6 +30,9 @@
 #define LUM_BATCH_UPDATE_TIMESTAMPS 1
 #define LUM_BATCH_RECALC_CHECKSUMS 2
 
+// Constantes pour validation - taille dynamique
+#define LUM_SIZE_BYTES sizeof(lum_t)
+
 // Remove typedef redefinition - using the enum from header file
 
 // Static variables for ID generation
@@ -52,8 +55,8 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
     lum->memory_address = (void*)lum;  // Adresse mémoire pour traçabilité
 
     // Calcul checksum pour intégrité
-    lum->checksum = (uint32_t)(lum->id ^ lum->presence ^ lum->position_x ^ 
-                              lum->position_y ^ lum->structure_type ^ 
+    lum->checksum = (uint32_t)(lum->id ^ lum->presence ^ lum->position_x ^
+                              lum->position_y ^ lum->structure_type ^
                               (uint32_t)(lum->timestamp & 0xFFFFFFFF));
 
     return lum;
@@ -111,7 +114,7 @@ void lum_safe_destroy(lum_t** lum_ptr) {
     if (lum->memory_address != lum && lum->memory_address != NULL) {
         // Cette LUM peut être une copie dans un groupe
         // Ne pas la libérer directement si elle fait partie d'un groupe
-        printf("[WARNING] LUM %u ownership check: memory_address=%p, lum=%p\n", 
+        printf("[WARNING] LUM %u ownership check: memory_address=%p, lum=%p\n",
                lum->id, lum->memory_address, lum);
 
         // Marquer comme détruit mais ne pas libérer la mémoire
@@ -147,7 +150,7 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
 
     // Tentative allocation huge pages pour > 2MB
     if (lums_size >= 2 * 1024 * 1024) {
-        group->lums = (lum_t*)mmap(NULL, lums_size, 
+        group->lums = (lum_t*)mmap(NULL, lums_size,
                                   PROT_READ | PROT_WRITE,
                                   MAP_PRIVATE | MAP_ANONYMOUS | MAP_HUGETLB,
                                   -1, 0);
@@ -200,7 +203,7 @@ void lum_group_destroy(lum_group_t* group) {
 
     // Validate magic number - if corrupted, don't trust other fields
     if (group->magic_number != LUM_VALIDATION_PATTERN) {
-        printf("[ERROR] lum_group_destroy: invalid magic number 0x%X, treating as corruption\n", 
+        printf("[ERROR] lum_group_destroy: invalid magic number 0x%X, treating as corruption\n",
                group->magic_number);
         group->magic_number = LUM_MAGIC_DESTROYED; // Mark as destroyed
         return; // Don't trust corrupted structure
@@ -214,21 +217,21 @@ void lum_group_destroy(lum_group_t* group) {
 
     // Vérifier intégrité de base du groupe
     if (group->count > group->capacity) {
-        printf("[ERROR] lum_group_destroy: corrupted group count=%zu > capacity=%zu\n", 
+        printf("[ERROR] lum_group_destroy: corrupted group count=%zu > capacity=%zu\n",
                group->count, group->capacity);
         is_corrupted = true;
     }
 
     // Vérifier limites raisonnables (plus de 100M éléments est suspect)
     if (group->count > 100000000) {
-        printf("[ERROR] lum_group_destroy: suspicious large count=%zu (corruption detected)\n", 
+        printf("[ERROR] lum_group_destroy: suspicious large count=%zu (corruption detected)\n",
                group->count);
         is_corrupted = true;
     }
 
     // Vérifier limites raisonnables pour capacity
     if (group->capacity > 100000000) {
-        printf("[ERROR] lum_group_destroy: suspicious large capacity=%zu (corruption detected)\n", 
+        printf("[ERROR] lum_group_destroy: suspicious large capacity=%zu (corruption detected)\n",
                group->capacity);
         is_corrupted = true;
     }
@@ -248,9 +251,9 @@ void lum_group_destroy(lum_group_t* group) {
             printf("[ERROR] lum_group_destroy: corrupted lums pointer %p\n", group->lums);
             group->lums = NULL;
         } else {
-            printf("[DEBUG] lum_group_destroy: freeing lums array at %p (%zu elements) method=%d\n", 
+            printf("[DEBUG] lum_group_destroy: freeing lums array at %p (%zu elements) method=%d\n",
                    group->lums, group->count, group->alloc_method);
-            
+
             // CORRECTION FORENSIQUE: Utiliser la méthode de déallocation appropriée
             switch (group->alloc_method) {
                 case LUM_ALLOC_TRACKED:
@@ -261,7 +264,7 @@ void lum_group_destroy(lum_group_t* group) {
                     break;
                 case LUM_ALLOC_MMAP:
                     if (munmap(group->lums, group->allocated_size) != 0) {
-                        printf("[ERROR] lum_group_destroy: munmap failed for %p size %zu\n", 
+                        printf("[ERROR] lum_group_destroy: munmap failed for %p size %zu\n",
                                group->lums, group->allocated_size);
                     }
                     break;
@@ -359,7 +362,7 @@ void lum_group_safe_destroy(lum_group_t** group_ptr) {
 bool lum_group_add(lum_group_t* group, lum_t* lum) {
     if (!group || !lum) return false;
 
-    // Vérifier si le groupe a été marqué comme détruit  
+    // Vérifier si le groupe a été marqué comme détruit
     if (group->magic_number == LUM_MAGIC_DESTROYED) {
         return false;
     }
@@ -393,7 +396,7 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
         // Copier les données existantes SANS transférer ownership
         if (group->lums && group->count > 0) {
             memcpy(new_lums, group->lums, sizeof(lum_t) * group->count);
-            
+
             // CORRECTION FORENSIQUE: Utiliser la méthode de déallocation appropriée
             switch (group->alloc_method) {
                 case LUM_ALLOC_TRACKED:
@@ -649,7 +652,7 @@ uint32_t lum_generate_id(void) {
             id = timestamp_base + overflow_counter;
             overflow_counter = (overflow_counter + 1) % 1000;
 
-            unified_forensic_log(FORENSIC_LEVEL_WARNING, "lum_generate_id", 
+            unified_forensic_log(FORENSIC_LEVEL_WARNING, "lum_generate_id",
                                "LUM ID overflow handled - using timestamp-based ID: %" PRIu32, id);
         } else {
             // Fallback: réinitialiser le compteur avec offset
@@ -854,7 +857,7 @@ bool lum_group_defragment_zero_copy(lum_group_t* group) {
             __builtin_prefetch(&group->lums[read_index + 8], 0, 3);
         }
 
-        bool is_valid = (current->magic_number == LUM_VALIDATION_PATTERN) && 
+        bool is_valid = (current->magic_number == LUM_VALIDATION_PATTERN) &&
                        (current->is_destroyed == 0);
 
         if (is_valid) {
