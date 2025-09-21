@@ -6,7 +6,7 @@
 #include "debug/forensic_logger.h"
 
 int main(void) {
-    printf("🔥 === LUM/VORAX Core System ===\n");
+    printf("=== LUM/VORAX Core System ===\n");
     
     // Initialize tracking systems
     memory_tracker_init();
@@ -16,7 +16,7 @@ int main(void) {
     printf("Testing basic LUM operations...\n");
     lum_group_t* group = lum_group_create(10);
     if (group) {
-        printf("✅ Group created with capacity 10\n");
+        printf("[OK] Group created with capacity 10\n");
         
         // Add some LUMs
         for (int i = 0; i < 5; i++) {
@@ -26,10 +26,10 @@ int main(void) {
                 lum_destroy(lum);
             }
         }
-        printf("✅ 5 LUMs added to group. Size: %zu\n", lum_group_size(group));
+        printf("[OK] 5 LUMs added to group. Size: %zu\n", lum_group_size(group));
         
         lum_group_destroy(group);
-        printf("✅ Group destroyed successfully\n");
+        printf("[OK] Group destroyed successfully\n");
     }
     
     printf("=== LUM/VORAX Core Test Complete ===\n");

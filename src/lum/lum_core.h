@@ -43,6 +43,13 @@ typedef enum {
     LUM_STRUCTURE_MAX = 6
 } lum_structure_type_e;
 
+// Allocation tracking for forensic memory management
+typedef enum {
+    LUM_ALLOC_TRACKED = 0,    // TRACKED_MALLOC - use TRACKED_FREE
+    LUM_ALLOC_ALIGNED = 1,    // aligned_alloc - use free()
+    LUM_ALLOC_MMAP = 2        // mmap - use munmap()
+} lum_allocation_method_e;
+
 // LUM Group - collection of LUMs
 typedef struct {
     lum_t* lums;              // Array of LUMs (stockage par valeur)
@@ -51,6 +58,8 @@ typedef struct {
     uint32_t group_id;        // Group identifier
     lum_structure_type_e type; // Group structure type
     uint32_t magic_number;    // Protection double-free (nouveau STANDARD_NAMES 2025-01-10)
+    lum_allocation_method_e alloc_method; // Track allocation method for correct deallocation
+    size_t allocated_size;    // Size for munmap() if needed
 } lum_group_t;
 
 // Zone - spatial container for LUMs

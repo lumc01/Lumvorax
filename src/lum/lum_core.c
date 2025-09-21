@@ -1,6 +1,3 @@
-#define _GNU_SOURCE
-#define _POSIX_C_SOURCE 200809L
-
 // SECTION 8: INTERDICTION D'UTILISER DES EMOJI
 // Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 
 // Toute inclusion d'emoji sera considérée comme une violation des standards de codage.
@@ -139,13 +136,14 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
     if (initial_capacity == 0) initial_capacity = 64; // Optimum cache line
     size_t aligned_capacity = (initial_capacity + 63) & ~63; // Alignement 64
 
-    // OPTIMISATION 2: Allocation groupe alignée
-    lum_group_t* group = (lum_group_t*)aligned_alloc(64, sizeof(lum_group_t));
+    // OPTIMISATION 2: Allocation groupe avec TRACKED_MALLOC pour traçabilité forensique
+    lum_group_t* group = TRACKED_MALLOC(sizeof(lum_group_t));
     if (!group) return NULL;
 
     // OPTIMISATION 3: Allocation LUMs avec huge pages si possible
     size_t lums_size = sizeof(lum_t) * aligned_capacity;
     group->lums = NULL;
+    group->allocated_size = lums_size;
 
     // Tentative allocation huge pages pour > 2MB
     if (lums_size >= 2 * 1024 * 1024) {
@@ -155,6 +153,8 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
                                   -1, 0);
         if (group->lums == MAP_FAILED) {
             group->lums = NULL;
+        } else {
+            group->alloc_method = LUM_ALLOC_MMAP;
         }
     }
 
@@ -162,9 +162,10 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
     if (!group->lums) {
         group->lums = (lum_t*)aligned_alloc(64, lums_size);
         if (!group->lums) {
-            free(group);
+            TRACKED_FREE(group);
             return NULL;
         }
+        group->alloc_method = LUM_ALLOC_ALIGNED;
     }
 
     // OPTIMISATION 4: Initialisation vectorisée ultra-rapide
@@ -247,9 +248,27 @@ void lum_group_destroy(lum_group_t* group) {
             printf("[ERROR] lum_group_destroy: corrupted lums pointer %p\n", group->lums);
             group->lums = NULL;
         } else {
-            printf("[DEBUG] lum_group_destroy: freeing lums array at %p (%zu elements)\n", 
-                   group->lums, group->count);
-            TRACKED_FREE(group->lums);
+            printf("[DEBUG] lum_group_destroy: freeing lums array at %p (%zu elements) method=%d\n", 
+                   group->lums, group->count, group->alloc_method);
+            
+            // CORRECTION FORENSIQUE: Utiliser la méthode de déallocation appropriée
+            switch (group->alloc_method) {
+                case LUM_ALLOC_TRACKED:
+                    TRACKED_FREE(group->lums);
+                    break;
+                case LUM_ALLOC_ALIGNED:
+                    free(group->lums);  // aligned_alloc se libère avec free()
+                    break;
+                case LUM_ALLOC_MMAP:
+                    if (munmap(group->lums, group->allocated_size) != 0) {
+                        printf("[ERROR] lum_group_destroy: munmap failed for %p size %zu\n", 
+                               group->lums, group->allocated_size);
+                    }
+                    break;
+                default:
+                    printf("[ERROR] lum_group_destroy: unknown allocation method %d\n", group->alloc_method);
+                    break;
+            }
             group->lums = NULL;
         }
     } else if (group->lums == (lum_t*)group) {
@@ -273,7 +292,7 @@ void lum_group_destroy(lum_group_t* group) {
     }
 
     printf("[DEBUG] lum_group_destroy: freeing group structure at %p\n", group);
-    TRACKED_FREE(group);
+    TRACKED_FREE(group);  // Group toujours alloué avec TRACKED_MALLOC
 }
 
 // PRIORITÉ 1.2: Fonction destruction groupe ultra-sécurisée selon roadmap exact
@@ -302,7 +321,23 @@ void lum_group_destroy_ultra_secure(lum_group_t** group_ptr) {
     if (group->lums && group->lums != (lum_t*)group) {
         // Triple validation pointeur
         if ((void*)group->lums > (void*)0x1000) {
-            TRACKED_FREE(group->lums);
+            // CORRECTION FORENSIQUE: Utiliser la méthode de déallocation appropriée
+            switch (group->alloc_method) {
+                case LUM_ALLOC_TRACKED:
+                    TRACKED_FREE(group->lums);
+                    break;
+                case LUM_ALLOC_ALIGNED:
+                    free(group->lums);
+                    break;
+                case LUM_ALLOC_MMAP:
+                    if (munmap(group->lums, group->allocated_size) != 0) {
+                        printf("[ERROR] lum_group_destroy_ultra_secure: munmap failed\n");
+                    }
+                    break;
+                default:
+                    printf("[ERROR] lum_group_destroy_ultra_secure: unknown allocation method %d\n", group->alloc_method);
+                    break;
+            }
         }
         group->lums = NULL;
     }
@@ -358,11 +393,31 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
         // Copier les données existantes SANS transférer ownership
         if (group->lums && group->count > 0) {
             memcpy(new_lums, group->lums, sizeof(lum_t) * group->count);
-            TRACKED_FREE(group->lums);
+            
+            // CORRECTION FORENSIQUE: Utiliser la méthode de déallocation appropriée
+            switch (group->alloc_method) {
+                case LUM_ALLOC_TRACKED:
+                    TRACKED_FREE(group->lums);
+                    break;
+                case LUM_ALLOC_ALIGNED:
+                    free(group->lums);
+                    break;
+                case LUM_ALLOC_MMAP:
+                    if (munmap(group->lums, group->allocated_size) != 0) {
+                        printf("[ERROR] lum_group_add: munmap failed during reallocation\n");
+                    }
+                    break;
+                default:
+                    printf("[ERROR] lum_group_add: unknown allocation method %d\n", group->alloc_method);
+                    break;
+            }
         }
 
         group->lums = new_lums;
         group->capacity = new_capacity;
+        // MISE À JOUR: Nouvelle allocation utilise TRACKED_MALLOC
+        group->alloc_method = LUM_ALLOC_TRACKED;
+        group->allocated_size = sizeof(lum_t) * new_capacity;
     }
 
     // CORRECTION CRITIQUE: Copie des valeurs SEULEMENT, pas des pointeurs de gestion mémoire
@@ -714,6 +769,12 @@ bool lum_group_process_batch_50m_optimized(lum_group_t* group, lum_batch_operati
             unified_forensic_log(FORENSIC_LEVEL_WARNING, "lum_group_process_batch_50m_optimized",
                                "Operation non reconnue: %d", (int)operation);
             return false;
+    }
+
+    // Log forensique du nombre d'opérations effectuées (conformité prompt.txt)
+    if (operations_count > 0) {
+        unified_forensic_log(FORENSIC_LEVEL_INFO, "lum_group_process_batch_50m_optimized",
+                           "Traitement terminé: %zu opérations effectuées", operations_count);
     }
 
     return true;

@@ -1,5 +1,4 @@
-#define _GNU_SOURCE
-#define _POSIX_C_SOURCE 200809L
+// Macros définies dans Makefile
 
 #include "transaction_wal_extension.h"
 #include "../debug/memory_tracker.h"
