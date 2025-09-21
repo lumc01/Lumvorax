@@ -2,7 +2,7 @@ CC = clang
 CFLAGS = -Wall -Wextra -std=c99 -O2 -g -D_GNU_SOURCE -D_POSIX_C_SOURCE=199309L -I./src/debug
 LDFLAGS = -pthread -lm -lrt
 
-# Simple core objects
+# Optimized core objects (32 modules system)
 SIMPLE_CORE_OBJECTS = \
 	obj/lum/lum_core.o \
 	obj/vorax/vorax_operations.o \
@@ -12,6 +12,12 @@ SIMPLE_CORE_OBJECTS = \
 	obj/logger/log_manager.o \
 	obj/debug/forensic_logger.o \
 	obj/debug/memory_tracker.o
+
+# Modules désactivés transférés vers DÉSACTIVÉ/
+# matrix_calculator, quantum_simulator, neural_network_processor,
+# neural_blackbox_computer, neural_blackbox_ultra_precision_tests,
+# blackbox_universal_module, hostinger_client, knapsack_optimizer,
+# mathematical_research_engine, collatz_analyzer
 
 TARGET = bin/lum_vorax_simple
 
