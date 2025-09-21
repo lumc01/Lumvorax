@@ -1,4 +1,8 @@
 
+// Feature test macros for POSIX functions
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
 // MODULES QUANTIQUES DÉSACTIVÉS JUSQU'À RÉACTIVATION EXPLICITE
 #ifdef MODULES_QUANTIQUES_ACTIFS
 #include "quantum_simulator.h"

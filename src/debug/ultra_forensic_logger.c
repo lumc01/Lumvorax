@@ -1,4 +1,6 @@
-// Macros définies dans Makefile
+// Feature test macros for POSIX functions
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
 
 #include "ultra_forensic_logger.h"
 #include <stdio.h>

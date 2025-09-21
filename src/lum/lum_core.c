@@ -5,6 +5,10 @@
 // Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 
 // Toute inclusion d'emoji sera considérée comme une violation des standards de codage.
 
+// Feature test macros for POSIX functions
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
 #include "lum_core.h"
 #include "../common/common_types.h"
 #include "../debug/memory_tracker.h"

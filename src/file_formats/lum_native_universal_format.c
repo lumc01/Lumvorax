@@ -1,3 +1,7 @@
+// Feature test macros for POSIX functions
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
 #include "lum_native_universal_format.h"
 #include "../debug/memory_tracker.h"
 #include "../logger/lum_logger.h"

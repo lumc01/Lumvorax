@@ -1,3 +1,7 @@
+// Feature test macros for POSIX functions
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
 
 #include "audio_processor.h"
 #include "../debug/memory_tracker.h"

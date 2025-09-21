@@ -1,4 +1,7 @@
-// _GNU_SOURCE défini par les flags de compilation
+// Feature test macros for POSIX functions
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
 #include "memory_tracker.h"
 #include <pthread.h>
 #include <string.h> // Added for strncpy

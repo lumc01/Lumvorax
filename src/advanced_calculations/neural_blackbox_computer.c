@@ -1,3 +1,7 @@
+// Feature test macros for POSIX functions
+#define _GNU_SOURCE
+#define _POSIX_C_SOURCE 200809L
+
 // MODULES BLACKBOX DÉSACTIVÉS JUSQU'À RÉACTIVATION EXPLICITE
 #ifdef MODULES_BLACKBOX_ACTIFS
 #include "neural_blackbox_computer.h"
