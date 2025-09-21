@@ -23,7 +23,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "./bin/lum_vorax_simple"
+args = "make -f Makefile.simple clean && make -f Makefile.simple all && ./bin/lum_vorax_simple"
 
 [[workflows.workflow]]
 name = "TEST_FORENSIQUE_ULTRA_STRICT"
@@ -771,4 +771,4 @@ channel = "stable-25_05"
 [deployment]
 deploymentTarget = "vm"
 run = ["./bin/lum_vorax_simple"]
-build = ["make", "-f", "Makefile.simple"]
+build = ["make", "-f", "Makefile.simple", "clean", "&&", "make", "-f", "Makefile.simple", "all"]
