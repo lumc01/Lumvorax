@@ -1,3 +1,6 @@
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE  // Pour getpagesize et autres extensions GNU/Linux
+#endif
 #ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 200809L  // Version unifiée pour compatibilité POSIX complète
 #endif

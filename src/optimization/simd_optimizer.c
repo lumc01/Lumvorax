@@ -1,17 +1,19 @@
+#ifndef _GNU_SOURCE
+#define _GNU_SOURCE  // Pour les extensions GNU nécessaires
+#endif
 #ifndef _POSIX_C_SOURCE
 #define _POSIX_C_SOURCE 200809L  // Version unifiée conforme aux standards
 #endif
 #include "simd_optimizer.h"
-#include "../advanced_calculations/matrix_calculator.h"
-#include "../complex_modules/ai_optimization.h"
+#include "../logger/lum_logger.h"
 #include "../debug/memory_tracker.h"
 #include "../lum/lum_core.h"  // For lum_get_timestamp function
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>       // Pour clock_gettime et CLOCK_MONOTONIC
 #include <stdio.h>
-#include <unistd.h>     // Pour getpagesize
-#include <sys/mman.h>   // Pour madvise et MADV_SEQUENTIAL
+#include <unistd.h>     // Pour getpagesize si nécessaire
+#include <sys/mman.h>   // Pour madvise si utilisé
 
 
 #ifdef __x86_64__
