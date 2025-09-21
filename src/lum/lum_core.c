@@ -161,14 +161,26 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
         }
     }
 
-    // Fallback allocation normale alignée
+    // Fallback allocation normale alignée avec protection contre boucle infinie
     if (!group->lums) {
+        // BUG FIX: Vérifier et forcer alignement pour éviter boucle infinie
+        if (lums_size % 64 != 0) {
+            lums_size = (lums_size + 63) & ~63; // Forcer alignement 64
+        }
+        
+        // Tentative aligned_alloc avec fallback sécurisé
         group->lums = (lum_t*)aligned_alloc(64, lums_size);
         if (!group->lums) {
-            TRACKED_FREE(group);
-            return NULL;
+            // Fallback: TRACKED_MALLOC normal si aligned_alloc échoue
+            group->lums = (lum_t*)TRACKED_MALLOC(lums_size);
+            if (!group->lums) {
+                TRACKED_FREE(group);
+                return NULL;
+            }
+            group->alloc_method = LUM_ALLOC_TRACKED;
+        } else {
+            group->alloc_method = LUM_ALLOC_ALIGNED;
         }
-        group->alloc_method = LUM_ALLOC_ALIGNED;
     }
 
     // OPTIMISATION 4: Initialisation vectorisée ultra-rapide
