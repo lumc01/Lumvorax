@@ -5,11 +5,10 @@
  * Ratio doré φ = 1.618 comme référence optimale
  */
 
-#ifndef _GNU_SOURCE
-#define _GNU_SOURCE
-#endif
+// _GNU_SOURCE defined in Makefile
 #include "golden_score_optimizer.h"
 #include "../debug/memory_tracker.h"
+#include <stdio.h>
 #include <string.h>
 #include <math.h>
 #include <time.h>

@@ -3,7 +3,14 @@
 #ifndef NEURAL_ADVANCED_OPTIMIZERS_H
 #define NEURAL_ADVANCED_OPTIMIZERS_H
 
-#include "neural_blackbox_computer.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <stdbool.h>
+
+// Types désactivés - placeholders
+typedef struct {} neural_blackbox_computer_t;
+
+// #include "neural_blackbox_computer.h" // DÉSACTIVÉ par prompt.txt
 
 // OPTIMISEUR ADAM ULTRA-PRÉCIS
 typedef struct {
@@ -70,7 +77,7 @@ typedef struct {
 neural_adam_ultra_precise_t* neural_adam_create_ultra_precise(size_t parameter_count);
 void neural_adam_destroy_ultra_precise(neural_adam_ultra_precise_t** optimizer);
 void neural_adam_ultra_precise_update(
-    neural_blackbox_computer_t* system,
+    void* system, // neural_blackbox_computer_t désactivé
     neural_adam_ultra_precise_t* optimizer,
     double* gradients,
     double current_loss
@@ -108,7 +115,7 @@ bool neural_newton_raphson_compute_hessian_inverse(
 
 // === LINE SEARCH AVEC CONDITIONS WOLFE ===
 double neural_wolfe_line_search_ultra_precise(
-    neural_blackbox_computer_t* system,
+    void* system, // neural_blackbox_computer_t désactivé
     double* search_direction,
     double* gradient,
     double current_loss

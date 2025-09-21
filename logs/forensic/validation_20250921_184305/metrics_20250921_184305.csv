@@ -1,5 +1,0 @@
-timestamp,metric_type,value,unit,source_file
-2025-09-21 18:43:06,memory_allocations,328,bytes,stdout_20250921_184305.log
-2025-09-21 18:43:06,memory_peak,104,bytes,stdout_20250921_184305.log
-2025-09-21 18:43:06,memory_allocations,328,bytes,stdout_20250921_184305.log
-2025-09-21 18:43:06,memory_peak,104,bytes,stdout_20250921_184305.log

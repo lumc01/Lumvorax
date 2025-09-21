@@ -104,7 +104,7 @@ void neural_adam_destroy_ultra_precise(neural_adam_ultra_precise_t** optimizer) 
 }
 
 void neural_adam_ultra_precise_update(
-    neural_blackbox_computer_t* system,
+    void* system, // neural_blackbox_computer_t désactivé
     neural_adam_ultra_precise_t* optimizer,
     double* gradients,
     double current_loss
@@ -348,7 +348,7 @@ bool neural_validate_gradient(double* gradient, size_t size) {
 
 // Line search conditions de Wolfe (implémentation simplifiée)
 double neural_wolfe_line_search_ultra_precise(
-    neural_blackbox_computer_t* system,
+    void* system, // neural_blackbox_computer_t désactivé
     double* search_direction,
     double* gradient,
     double current_loss
@@ -368,7 +368,7 @@ double neural_wolfe_line_search_ultra_precise(
     
     // Calcul pente initiale
     double initial_slope = neural_dot_product_ultra_precise(
-        gradient, search_direction, system->total_parameters);
+        gradient, search_direction, 1000); // system->total_parameters désactivé
     
     if (initial_slope >= 0) {
         forensic_log(FORENSIC_LEVEL_WARNING, "neural_wolfe_line_search_ultra_precise",

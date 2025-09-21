@@ -180,16 +180,16 @@ typedef struct {
     uint32_t error_code;
 } result_t;
 
-#define FORENSIC_ERROR 1
+#define LUM_ERROR_CODE_FORENSIC 1 // Renommé pour éviter conflit enum
 #define FORENSIC_CRITICAL 2
 
 // Pattern obligatoire zero-tolerance
 #define CHECK_RESULT_OR_FAIL(result, cleanup_call, error_msg) \
     do { \
         if (!(result).success) { \
-            printf("[FORENSIC_ERROR] %s failed: %s\n", #result, (result).error_message); \
+            printf("[LUM_ERROR_CODE_FORENSIC] %s failed: %s\n", #result, (result).error_message); \
             cleanup_call; \
-            printf("[FORENSIC_ERROR] Chain failure: %s\n", error_msg); \
+            printf("[LUM_ERROR_CODE_FORENSIC] Chain failure: %s\n", error_msg); \
             return (result_t){false, error_msg, NULL, 1}; \
         } \
     } while(0)

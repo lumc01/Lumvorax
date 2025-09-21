@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include "../lum/lum_core.h"
+#include "../common/common_types.h" // Pour audio_filter_type_e
 
 // Constantes
 #define AUDIO_MAX_CHANNELS 8
@@ -14,14 +15,7 @@
 #define AUDIO_DESTROYED_MAGIC 0xDEADBEEF
 #define AUDIO_RESULT_MAGIC 0x41554452    // "AUDR"
 
-// Types de filtres
-typedef enum {
-    AUDIO_FILTER_LOWPASS = 0,
-    AUDIO_FILTER_HIGHPASS,
-    AUDIO_FILTER_BANDPASS,
-    AUDIO_FILTER_NOTCH,
-    AUDIO_FILTER_FFT
-} audio_filter_type_e;
+// audio_filter_type_e défini dans common_types.h
 
 // Structure processeur audio
 typedef struct {

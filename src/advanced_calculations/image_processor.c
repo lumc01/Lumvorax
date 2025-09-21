@@ -1,10 +1,10 @@
 // Feature test macros for POSIX functions
-#define _GNU_SOURCE
+// _GNU_SOURCE defined in Makefile  
 #define _POSIX_C_SOURCE 200809L
-
 
 #include "image_processor.h"
 #include "../debug/memory_tracker.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>

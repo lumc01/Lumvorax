@@ -7,7 +7,7 @@
 #include "../optimization/zero_copy_allocator.h"
 #include "../parallel/parallel_processor.h"
 #include "../advanced_calculations/neural_network_processor.h"
-#include "../advanced_calculations/quantum_simulator.h"
+// #include "../advanced_calculations/quantum_simulator.h" // DÉSACTIVÉ par prompt.txt
 // #include "../crypto/homomorphic_encryption.h" // REMOVED - No homomorphic functionality
 #include "../advanced_calculations/matrix_calculator.h"
 #include "../complex_modules/realtime_analytics.h"

@@ -1,5 +1,5 @@
 // Feature test macros for POSIX functions
-#define _GNU_SOURCE
+// _GNU_SOURCE defined in Makefile
 #define _POSIX_C_SOURCE 200809L
 
 #include "transaction_wal_extension.h"

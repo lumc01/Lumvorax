@@ -1,5 +1,5 @@
 // Feature test macros for POSIX functions
-#define _GNU_SOURCE
+// _GNU_SOURCE defined in Makefile
 #define _POSIX_C_SOURCE 200809L
 
 #include "pareto_optimizer.h"
@@ -23,7 +23,7 @@
 
 // Fallback implementation if clock_gettime is not available
 #ifndef HAVE_CLOCK_GETTIME
-static int clock_gettime(int clk_id, struct timespec *tp) {
+static int fallback_clock_gettime(int clk_id, struct timespec *tp) {
     (void)clk_id; // Suppress unused parameter warning
     if (!tp) return -1;
     

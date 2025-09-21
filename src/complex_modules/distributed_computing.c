@@ -1,5 +1,5 @@
 // Feature test macros for POSIX functions
-#define _GNU_SOURCE
+// _GNU_SOURCE défini dans Makefile
 #define _POSIX_C_SOURCE 200809L
 
 #include "distributed_computing.h"
@@ -10,6 +10,7 @@
 #include <time.h>
 #include <sys/socket.h>
 #include <arpa/inet.h>
+#include <stdio.h>
 #include <unistd.h>
 
 // Création nœud de calcul

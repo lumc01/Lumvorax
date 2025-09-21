@@ -1,5 +1,5 @@
 // Feature test macros for POSIX functions
-#define _GNU_SOURCE
+// _GNU_SOURCE défini dans Makefile
 #define _POSIX_C_SOURCE 200809L
 
 #include "realtime_analytics.h"
@@ -7,6 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <stdio.h>
 #include <time.h>
 
 // Création stream temps réel

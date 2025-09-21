@@ -1,5 +1,5 @@
 #include "neural_ultra_precision_architecture.h"
-#include "neural_blackbox_computer.h"
+// #include "neural_blackbox_computer.h" // DÉSACTIVÉ par prompt.txt
 #include "../debug/memory_tracker.h"
 #include <stdlib.h>
 #include <string.h>

@@ -9,7 +9,7 @@
 #include "../debug/memory_tracker.h"
 #include "../lum/lum_core.h"  // For lum_get_timestamp function
 #include "../complex_modules/ai_optimization.h"  // Pour ai_optimization_config_t - CORRECTION APPLIQUÉE
-#include "../advanced_calculations/matrix_calculator.h"  // Pour matrix_calculator_t et matrix_result_t - CORRECTION APPLIQUÉE
+#include "../advanced_calculations/matrix_calculator.h"
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>       // Pour clock_gettime et CLOCK_MONOTONIC
