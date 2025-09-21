@@ -213,6 +213,10 @@ jour repondre en francais!
 - [ ] Aucune dépendance circulaire
 - [ ] Documentation mise à jour
 - [ ] Rapport forensique généré
+- [ ] **LOGS PRÉSERVÉS** : Vérification aucun log supprimé
+- [ ] **SESSION HORODATÉE** : Nouveau répertoire logs créé
+- [ ] **MÉTADONNÉES LOGS** : Fichiers métadonnées générés
+- [ ] **COMPARAISON HISTORIQUE** : Rapport évolution vs exécutions précédentes
 
 **ÉTAT ACTUEL PROJET** : 118+ modules identifiés
 **MODULES FONCTIONNELS** : ~80 (68%)
@@ -247,6 +251,60 @@ jour repondre en francais!
 - Comparaisons équitables
 - Métriques standardisées
 - Overhead documenté
+
+### SECTION 16: RÈGLES CRITIQUES PRÉSERVATION LOGS RÉELS
+
+#### 16.1 INTERDICTION ABSOLUE SUPPRESSION LOGS
+- **JAMAIS** supprimer les logs d'exécutions précédentes
+- **JAMAIS** écraser les logs existants lors de nouvelles exécutions
+- **INTERDICTION** cleanup automatique des répertoires logs/
+- **OBLIGATION** préservation historique complète pour analyse développement
+
+#### 16.2 STRUCTURE LOGS HORODATÉE OBLIGATOIRE
+- **FORMAT OBLIGATOIRE** : logs/[type]/[session_YYYYMMDD_HHMMSS]/
+- **EXEMPLES REQUIS** :
+  - logs/forensic/execution_20250921_184301/
+  - logs/tests/modules_20250921_185500/
+  - logs/validation/complete_20250921_190000/
+- **GÉNÉRATION AUTOMATIQUE** session ID unique par exécution
+
+#### 16.3 ARCHIVAGE ET COMPARAISONS HISTORIQUES
+- **PRÉSERVATION OBLIGATOIRE** : Tous logs pour analyse évolution projet
+- **COMPARAISONS FUTURES** : Chaque exécution doit permettre comparaison avec précédentes
+- **MÉTRIQUES ÉVOLUTION** : Suivi performance, qualité, stabilité dans le temps
+- **RAPPORTS HISTORIQUES** : Capacité génération rapports évolution développement
+
+#### 16.4 PROTECTION ANTI-ÉCRASEMENT
+- **VÉRIFICATION PRÉ-EXÉCUTION** : Existence répertoire logs avant création nouveau
+- **SUFFIXE UNIQUE** : Si répertoire existe, ajouter suffixe _001, _002, etc.
+- **SAUVEGARDE AUTOMATIQUE** : Archivage logs existants avant nouvelle exécution
+- **ROLLBACK PROTECTION** : Logs critiques dans répertoires protégés en écriture
+
+#### 16.5 NOMMAGE ET MÉTADONNÉES LOGS
+- **MÉTADONNÉES OBLIGATOIRES** : Timestamp, version code, checksums, environnement
+- **NOMMAGE STANDARDISÉ** :
+  - Logs exécution : execution_[timestamp]_[type].log
+  - Logs tests : test_[module]_[timestamp].log
+  - Logs forensiques : forensic_[type]_[timestamp].log
+- **INDEX AUTOMATIQUE** : Génération index.json par répertoire logs
+
+#### 16.6 ANALYSE ET COMPARAISONS AUTOMATIQUES
+- **SCRIPTS COMPARAISON** : Outils automatiques comparaison logs historiques
+- **DÉTECTION RÉGRESSIONS** : Alerte automatique si performance/qualité baisse
+- **RAPPORTS ÉVOLUTION** : Génération automatique rapports progression projet
+- **MÉTRIQUES TENDANCES** : Calcul tendances performance, stabilité, qualité
+
+#### 16.7 RÈGLES MAKEFILE ET SCRIPTS
+- **INTERDICTION** : rm -rf logs/ dans Makefile ou scripts
+- **MAKEFILE CLEAN** : Ne doit JAMAIS supprimer logs/
+- **SCRIPTS PRÉPARATION** : Doivent créer nouveaux répertoires, pas supprimer existants
+- **PROTECTION SYSTÈME** : Logs critiques dans répertoires système protégés
+
+#### 16.8 GESTION ESPACE DISQUE
+- **COMPRESSION AUTOMATIQUE** : Logs > 30 jours compressés automatiquement
+- **ARCHIVAGE INTELLIGENT** : Logs anciens vers répertoires archive/
+- **LIMITE INTELLIGENTE** : Max 1GB logs actifs, archive illimitée
+- **NETTOYAGE SÉLECTIF** : Suppression uniquement logs corrompus ou invalides
 
 # Règles de développement et de validation
 
