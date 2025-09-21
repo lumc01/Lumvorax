@@ -1,6 +1,3 @@
-// Feature test macros for POSIX functions
-// Macros définies via CFLAGS - pas besoin de redéfinir
-
 #include "memory_tracker.h"
 #include <pthread.h>
 #include <string.h> // Added for strncpy

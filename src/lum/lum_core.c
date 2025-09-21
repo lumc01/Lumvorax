@@ -5,9 +5,6 @@
 // Aucune utilisation d'emoji dans le code source ou dans les fichiers de log. 
 // Toute inclusion d'emoji sera considérée comme une violation des standards de codage.
 
-// Feature test macros for POSIX functions
-// Macros définies via CFLAGS - pas besoin de redéfinir
-
 #include "lum_core.h"
 #include "../common/common_types.h"
 #include "../debug/memory_tracker.h"

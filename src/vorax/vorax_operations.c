@@ -1,6 +1,3 @@
-// Feature test macros for POSIX functions
-// Macros définies via CFLAGS - pas besoin de redéfinir
-
 #include "vorax_operations.h"
 #include "../logger/lum_logger.h"
 #include "../debug/memory_tracker.h"  // CORRECTION: Include pour TRACKED_MALLOC/FREE
