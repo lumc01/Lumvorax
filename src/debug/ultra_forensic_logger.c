@@ -222,6 +222,23 @@ void ultra_forensic_log_module_operation(const char* file, int line, const char*
     fprintf(tracker->module_log_file,
             "  Source: %s:%d in %s()\n", file, line, func);
     fflush(tracker->module_log_file);
+    
+    // LOG TEMPS RÉEL AVEC AFFICHAGE CONSOLE
+    char realtime_filename[512];
+    snprintf(realtime_filename, sizeof(realtime_filename), 
+             "logs/temps_reel/execution/%s_operation_%lu.log", module, timestamp);
+    
+    FILE* realtime_file = fopen(realtime_filename, "w");
+    if (realtime_file) {
+        fprintf(realtime_file, "[%lu] %s: %s\n", timestamp, module, operation);
+        fprintf(realtime_file, "Data: %s\n", data);
+        fprintf(realtime_file, "Source: %s:%d\n", file, line);
+        fflush(realtime_file);
+        fclose(realtime_file);
+        
+        printf("[%lu] LOG TEMPS REEL: %s\n", timestamp, realtime_filename);
+        fflush(stdout);
+    }
 
     pthread_mutex_unlock(&tracker->mutex);
 }
