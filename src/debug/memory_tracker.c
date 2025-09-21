@@ -52,6 +52,7 @@ void memory_tracker_export_json(const char* filename) {
 static memory_tracker_t g_tracker = {0};
 static pthread_mutex_t g_tracker_mutex = PTHREAD_MUTEX_INITIALIZER;
 static int g_tracker_initialized = 0;
+static pthread_mutex_t allocation_mutex = PTHREAD_MUTEX_INITIALIZER;
 static uint64_t g_global_generation = 1;  // CORRECTION: Compteur génération global
 
 void memory_tracker_init(void) {
@@ -141,7 +142,7 @@ void* tracked_malloc(size_t size, const char* file, int line, const char* func) 
     if (!g_tracker_initialized) memory_tracker_init();
     if (!memory_tracker_is_enabled()) return malloc(size);
 
-    pthread_mutex_lock(&g_tracker_mutex);
+    pthread_mutex_lock(&allocation_mutex);
 
     void* ptr = malloc(size);
     if (!ptr) {
@@ -196,7 +197,7 @@ void tracked_free(void* ptr, const char* file, int line, const char* func) {
         return;
     }
 
-    pthread_mutex_lock(&g_tracker_mutex);
+    pthread_mutex_lock(&allocation_mutex);
 
     // CORRECTION CRITIQUE: Validation intégrité avant libération
     int found_entry_idx = -1;
