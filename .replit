@@ -663,6 +663,107 @@ args = "echo \"✅ EXÉCUTION COMPLÈTE 44 MODULES TERMINÉE\""
 task = "shell.exec"
 args = "echo \"🔒 Tous les logs sont disponibles dans logs/tests/\""
 
+[[workflows.workflow]]
+name = "Test Forensique Complet"
+author = 47828507
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"=== TESTS FORENSIQUES COMPLETS LUM/VORAX ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Conformément prompt.txt et common_types.h\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make clean"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "make all"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ $? -eq 0 ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"✅ Compilation réussie - Lancement tests\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    if [ -f bin/test_advanced_complete ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "        ./bin/test_advanced_complete | tee logs/tests/modules/advanced_complete.log"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    if [ -f bin/test_integration_complete ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "        ./bin/test_integration_complete | tee logs/tests/integration/complete.log  "
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"📊 RÉSULTATS COMPILATION:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    find obj -name \"*.o\" | wc -l"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"📊 LOGS GÉNÉRÉS:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    find logs -name \"*.log\" | wc -l"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "else"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"❌ Erreurs de compilation détectées\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"Analyse des erreurs:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    make all 2>&1 | grep -E \"(error|Error)\" | head -10"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
 channel = "stable-25_05"
