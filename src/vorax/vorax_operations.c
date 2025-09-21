@@ -1,6 +1,5 @@
 // Feature test macros for POSIX functions
-#define _GNU_SOURCE
-#define _POSIX_C_SOURCE 200809L
+// Macros définies via CFLAGS - pas besoin de redéfinir
 
 #include "vorax_operations.h"
 #include "../logger/lum_logger.h"
