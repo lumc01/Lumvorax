@@ -1,6 +1,8 @@
 #include "binary_lum_converter.h"
 #include "../lum/lum_core.h"
+#include "../debug/memory_tracker.h"
 #include <string.h>
+#include <stdio.h>
 #include <arpa/inet.h>
 
 // Fonction portable pour conversion 64-bit endianness
