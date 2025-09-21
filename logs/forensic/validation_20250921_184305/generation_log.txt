@@ -1,0 +1,4 @@
+Démarrage test génération logs à: Sun Sep 21 06:43:06 PM UTC 2025 UTC
+Exécution binaire principal...
+Code retour: 0
+Fin exécution à: Sun Sep 21 06:43:06 PM UTC 2025 UTC
