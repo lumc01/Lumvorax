@@ -6,26 +6,6 @@ expertMode = true
 runButton = "Project"
 
 [[workflows.workflow]]
-name = "Project"
-mode = "parallel"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "LUM/VORAX System"
-
-[[workflows.workflow]]
-name = "LUM/VORAX System"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax_complete --progressive-stress-all"
-
-[[workflows.workflow]]
 name = "TEST_FORENSIQUE_ULTRA_STRICT"
 author = 47824281
 mode = "sequential"
@@ -1045,6 +1025,26 @@ args = "echo \"Logs disponibles dans: logs/console/current/\""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "ls -la logs/console/current/*.log 2>/dev/null || echo \"Aucun log trouvé\""
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "LUM/VORAX Real Metrics"
+
+[[workflows.workflow]]
+name = "LUM/VORAX Real Metrics"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "timeout 120s ./bin/lum_vorax_complete --progressive-stress-all"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
