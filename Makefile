@@ -66,7 +66,7 @@ TEST_EXECUTABLES = \
 all: directories $(MAIN_EXECUTABLE) $(TEST_EXECUTABLES)
 
 directories:
-	mkdir -p $(BIN_DIR) $(LOG_DIR)/forensic $(LOG_DIR)/execution $(LOG_DIR)/tests
+	mkdir -p $(BIN_DIR) $(LOG_DIR)/forensic $(LOG_DIR)/execution $(LOG_DIR)/tests $(LOG_DIR)/console
 
 # Compilation objets
 %.o: %.c
@@ -80,11 +80,12 @@ $(MAIN_EXECUTABLE): $(OBJECTS)
 $(BIN_DIR)/test_forensic_complete_system: $(OBJECTS)
 	$(CC) $(CFLAGS) src/tests/test_forensic_complete_system.c $(OBJECTS) -o $@ $(LDFLAGS)
 
-# TESTS PROGRESSIFS 1M → 100M AVEC TOUS LES MODULES
+# TESTS PROGRESSIFS 1M → 100M avec TOUS les modules + redirection console
 test-progressive: $(MAIN_EXECUTABLE)
 	@echo "🚀 === TESTS PROGRESSIFS 1M → 100M TOUS MODULES ==="
 	@echo "Optimisations: SIMD +300%, Parallel VORAX +400%, Cache Alignment +15%"
-	$(MAIN_EXECUTABLE) --progressive-stress-all
+	@if [ ! -f logs/console/redirect_console.sh ]; then ./setup_console_redirect.sh; fi
+	@bash -c "source logs/console/redirect_console.sh && $(MAIN_EXECUTABLE) --progressive-stress-all"
 
 # Tests forensiques conformes prompt.txt
 test-forensic: $(BIN_DIR)/test_forensic_complete_system
