@@ -7,6 +7,7 @@
 #include <time.h>
 #include <stdint.h>
 #include <unistd.h>
+#include <math.h>
 
 // INCLUDE COMMON TYPES FIRST
 #include "../common/common_types.h"
@@ -177,7 +178,7 @@ static void test_module_with_forensics(const char* module_name, void* (*test_fun
     printf("🔍 Test %s @ %zu éléments...\\n", module_name, test_scale);
     
     uint64_t start_time = get_precise_timestamp_ns();
-    uint64_t start_memory = 0; // Placeholder - vraie mesure nécessiterait /proc/self/status
+    (void)0; // start_memory placeholder removed to eliminate unused variable warning
     
     // Exécution du test
     void* result = test_func(test_scale);

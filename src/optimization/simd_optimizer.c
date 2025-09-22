@@ -94,7 +94,7 @@ simd_result_t* simd_process_lum_array_bulk(lum_t* lums, size_t count) {
 #elif __AVX2__
     // Process in chunks of 8 for AVX2
     size_t simd_chunks = count / 8;
-    size_t remainder = count % 8;
+    (void)(count % 8); // Suppress unused variable warning
 
     for (size_t i = 0; i < simd_chunks; i++) {
         uint32_t presence_batch[8];

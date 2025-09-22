@@ -331,15 +331,16 @@ analytics_result_t* realtime_analyze_stream(realtime_stream_t* stream, analytics
     if (analyzed_count > 0) {
         result->analysis_success = true;
         
-        // Métriques avancées avec traçage
+        // Métriques avancées avec traçage (format sécurisé)
         double avg_distance = sum_distances / analyzed_count;
-        snprintf(result->error_message, sizeof(result->error_message),
-                 "Stream analysis completed: %zu LUMs, avg_dist=%.3f, "
-                 "Q1=%zu, Q2=%zu, Q3=%zu, Q4=%zu, trace_file=%s",
-                 analyzed_count, avg_distance, 
-                 quadrant_counts[0], quadrant_counts[1], 
-                 quadrant_counts[2], quadrant_counts[3],
-                 trace_filename);
+        int written = snprintf(result->error_message, sizeof(result->error_message),
+                              "Stream analysis: %zu LUMs, dist=%.3f, Q1=%zu,Q2=%zu,Q3=%zu,Q4=%zu",
+                              analyzed_count, avg_distance, 
+                              quadrant_counts[0], quadrant_counts[1], 
+                              quadrant_counts[2], quadrant_counts[3]);
+        if (written >= (int)sizeof(result->error_message)) {
+            result->error_message[sizeof(result->error_message) - 1] = '\0';
+        }
 
         // Calcul variance finale
         if (result->current_metrics->total_lums > 1) {

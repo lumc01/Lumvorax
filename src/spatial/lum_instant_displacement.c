@@ -1,5 +1,4 @@
-// Feature test macros for POSIX functions
-#define _GNU_SOURCE
+// Feature test macros for POSIX functions - _GNU_SOURCE defined in Makefile
 #define _POSIX_C_SOURCE 200809L
 
 

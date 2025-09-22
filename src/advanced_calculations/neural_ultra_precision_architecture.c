@@ -31,7 +31,7 @@ neural_architecture_config_t* neural_calculate_ultra_precision_architecture(
 }
 
 // Calcul profondeur optimale selon complexité (version ultra_precision - renommée pour éviter conflit)
-static size_t neural_calculate_optimal_depth_ultra(
+__attribute__((unused)) static size_t neural_calculate_optimal_depth_ultra(
     size_t input_dim,
     size_t output_dim,
     neural_complexity_target_e complexity
@@ -54,7 +54,7 @@ static size_t neural_calculate_optimal_depth_ultra(
 }
 
 // Calcul largeur optimale selon dimensions (version ultra_precision - renommée pour éviter conflit)
-static size_t neural_calculate_optimal_width_ultra(
+__attribute__((unused)) static size_t neural_calculate_optimal_width_ultra(
     size_t input_dim,
     size_t output_dim,
     size_t depth

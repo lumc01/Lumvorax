@@ -19,13 +19,13 @@ bool hostinger_check_cpu_availability(void) {
     if (!global_monitor) return false;
     
     if (global_monitor->active_threads >= HOSTINGER_MAX_CPU_CORES) {
-        printf("[HOSTINGER_LIMITER] ❌ CPU limité: %zu/%d threads actifs\n",
-               global_monitor->active_threads, HOSTINGER_MAX_CPU_CORES);
+        printf("[HOSTINGER_LIMITER] ❌ CPU limité: %u/%d threads actifs\n",
+               (uint32_t)global_monitor->active_threads, HOSTINGER_MAX_CPU_CORES);
         return false;
     }
     
-    printf("[HOSTINGER_LIMITER] ✅ CPU disponible: %zu/%d threads\n",
-           global_monitor->active_threads, HOSTINGER_MAX_CPU_CORES);
+    printf("[HOSTINGER_LIMITER] ✅ CPU disponible: %u/%d threads\n",
+           (uint32_t)global_monitor->active_threads, HOSTINGER_MAX_CPU_CORES);
     return true;
 }
 

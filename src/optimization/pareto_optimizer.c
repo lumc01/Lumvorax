@@ -23,7 +23,7 @@
 
 // Fallback implementation if clock_gettime is not available
 #ifndef HAVE_CLOCK_GETTIME
-static int fallback_clock_gettime(int clk_id, struct timespec *tp) {
+__attribute__((unused)) static int fallback_clock_gettime(int clk_id, struct timespec *tp) {
     (void)clk_id; // Suppress unused parameter warning
     if (!tp) return -1;
     

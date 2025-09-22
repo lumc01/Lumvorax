@@ -48,7 +48,7 @@ void matrix_set_element(matrix_calculator_t* calc, size_t row, size_t col, doubl
 }
 
 // OPTIMISATION COMPLÈTE: Multiplication matricielle 100+ GFLOPS avec AVX-512 FMA
-static matrix_result_t* matrix_multiply_lum_optimized_calculator(matrix_calculator_t* a, matrix_calculator_t* b, void* config) {
+__attribute__((unused)) static matrix_result_t* matrix_multiply_lum_optimized_calculator(matrix_calculator_t* a, matrix_calculator_t* b, void* config) {
     (void)config;
     if (!a || !b || a->magic_number != MATRIX_CALCULATOR_MAGIC || b->magic_number != MATRIX_CALCULATOR_MAGIC) {
         return NULL;

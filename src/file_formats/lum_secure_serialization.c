@@ -1,5 +1,4 @@
-// Feature test macros for POSIX functions
-#define _GNU_SOURCE
+// Feature test macros for POSIX functions - _GNU_SOURCE defined in Makefile
 #define _POSIX_C_SOURCE 200809L
 
 #include "lum_secure_serialization.h"
@@ -369,7 +368,9 @@ bool lum_write_metadata_serialized(FILE* file, const lum_file_metadata_t* metada
     serialized.checksum_crc32 = htonl(metadata->checksum_crc32);
 
     strncpy(serialized.creator_info, metadata->creator_info, sizeof(serialized.creator_info) - 1);
+    serialized.creator_info[sizeof(serialized.creator_info) - 1] = '\0';
     strncpy(serialized.file_description, metadata->file_description, sizeof(serialized.file_description) - 1);
+    serialized.file_description[sizeof(serialized.file_description) - 1] = '\0';
 
     return fwrite(&serialized, sizeof(serialized), 1, file) == 1;
 }
