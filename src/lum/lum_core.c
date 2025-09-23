@@ -375,17 +375,25 @@ void lum_group_safe_destroy(lum_group_t** group_ptr) {
 }
 
 bool lum_group_add(lum_group_t* group, lum_t* lum) {
-    if (!group || !lum) return false;
+    printf("[DEBUG] lum_group_add: ENTREE group=%p, lum=%p\n", (void*)group, (void*)lum);
+    if (!group || !lum) {
+        printf("[DEBUG] lum_group_add: SORTIE - group ou lum NULL\n");
+        return false;
+    }
 
     // Vérifier si le groupe a été marqué comme détruit
     if (group->magic_number == LUM_MAGIC_DESTROYED) {
+        printf("[DEBUG] lum_group_add: SORTIE - groupe détruit\n");
         return false;
     }
 
     // Validate magic number before using group
     if (group->magic_number != LUM_VALIDATION_PATTERN) {
+        printf("[DEBUG] lum_group_add: SORTIE - magic number invalide\n");
         return false; // Corrupted group
     }
+    
+    printf("[DEBUG] lum_group_add: Validations OK, count=%zu, capacity=%zu\n", group->count, group->capacity);
 
     // Safety check: ensure count doesn't exceed capacity
     if (group->count >= group->capacity) {
@@ -440,6 +448,7 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
     }
 
     // CORRECTION CRITIQUE: Copie des valeurs SEULEMENT, pas des pointeurs de gestion mémoire
+    printf("[DEBUG] lum_group_add: AVANT copie LUM, index=%zu\n", group->count);
     group->lums[group->count] = *lum;
 
     // IMPORTANT: Réinitialiser les métadonnées de gestion mémoire pour cette copie
@@ -447,6 +456,7 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
     group->lums[group->count].is_destroyed = 0;
 
     group->count++;
+    printf("[DEBUG] lum_group_add: SUCCÈS - nouvelle count=%zu\n", group->count);
 
     return true;
 }
