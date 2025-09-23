@@ -161,25 +161,22 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
         }
     }
 
-    // Fallback allocation normale alignée avec protection contre boucle infinie
+    // Fallback allocation normale avec TRACKED_MALLOC pour éviter bug aligned_alloc
     if (!group->lums) {
-        // BUG FIX: Vérifier et forcer alignement pour éviter boucle infinie
-        if (lums_size % 64 != 0) {
-            lums_size = (lums_size + 63) & ~63; // Forcer alignement 64
-        }
-        
-        // Tentative aligned_alloc avec fallback sécurisé
-        group->lums = (lum_t*)aligned_alloc(64, lums_size);
+        // BUG FIX CRITIQUE: aligned_alloc provoque boucle infinie sur certaines tailles
+        // Solution robuste: utiliser TRACKED_MALLOC avec alignement manuel si nécessaire
+        group->lums = (lum_t*)TRACKED_MALLOC(lums_size);
         if (!group->lums) {
-            // Fallback: TRACKED_MALLOC normal si aligned_alloc échoue
-            group->lums = (lum_t*)TRACKED_MALLOC(lums_size);
-            if (!group->lums) {
-                TRACKED_FREE(group);
-                return NULL;
-            }
-            group->alloc_method = LUM_ALLOC_TRACKED;
-        } else {
-            group->alloc_method = LUM_ALLOC_ALIGNED;
+            TRACKED_FREE(group);
+            return NULL;
+        }
+        group->alloc_method = LUM_ALLOC_TRACKED;
+        
+        // Vérification alignement obtenu (informatif)
+        uintptr_t addr = (uintptr_t)group->lums;
+        if (addr % 64 != 0) {
+            printf("[INFO] lum_group_create: TRACKED_MALLOC not 64-byte aligned (%p), using anyway\n", 
+                   group->lums);
         }
     }
 
@@ -803,7 +800,7 @@ bool lum_group_sort_ultra_fast(lum_group_t* group) {
     const size_t RADIX_BITS = 8;
     const size_t RADIX_SIZE = 1 << RADIX_BITS;
     size_t count[RADIX_SIZE];
-    lum_t* temp = (lum_t*)aligned_alloc(64, group->count * sizeof(lum_t));
+    lum_t* temp = (lum_t*)TRACKED_MALLOC(group->count * sizeof(lum_t));
 
     if (!temp) return false;
 
@@ -850,7 +847,7 @@ bool lum_group_sort_ultra_fast(lum_group_t* group) {
         #endif
     }
 
-    free(temp);
+    TRACKED_FREE(temp);
     return true;
 }
 
