@@ -1,14 +1,10 @@
-# Makefile simplifié pour modules fonctionnels 100%
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug
 LDFLAGS = -lm -lpthread -lrt
-
-# Répertoires
 SRC_DIR = src
 BIN_DIR = bin
 LOG_DIR = logs
 
-# MODULES CORE FONCTIONNELS A 100%
 CORE_SOURCES = \
 	$(SRC_DIR)/lum/lum_core.c \
 	$(SRC_DIR)/vorax/vorax_operations.c \
@@ -28,29 +24,22 @@ CORE_SOURCES = \
 	$(SRC_DIR)/advanced_calculations/image_processor.c
 
 CORE_OBJECTS = $(CORE_SOURCES:.c=.o)
-
-# Exécutable principal simplifié 100% fonctionnel
 MAIN_EXECUTABLE = $(BIN_DIR)/lum_vorax_simple_100
 
-.PHONY: all clean test directories run-tests
+.PHONY: all clean run-tests directories
 
 all: directories $(MAIN_EXECUTABLE)
 
 directories:
 	mkdir -p $(BIN_DIR) $(LOG_DIR)/forensic $(LOG_DIR)/execution $(LOG_DIR)/tests $(LOG_DIR)/console
 
-# Compilation objets
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
-# Exécutable principal avec modules core fonctionnels
 $(MAIN_EXECUTABLE): $(CORE_OBJECTS)
-	$(CC) $(CFLAGS) $(SRC_DIR)/main.c $(CORE_OBJECTS) -o $@ $(LDFLAGS)
+	$(CC) $(CFLAGS) $(SRC_DIR)/main_simple.c $(CORE_OBJECTS) -o $@ $(LDFLAGS)
 
-# Tests progressifs 100% fonctionnels
 run-tests: $(MAIN_EXECUTABLE)
-	@echo "🚀 === TESTS PROGRESSIFS MODULES FONCTIONNELS 100% ==="
-	@echo "Modules: LUM Core, VORAX, Audio, Image, SIMD, Memory Optimizer"
 	$(MAIN_EXECUTABLE) --progressive-stress-all
 
 clean:
