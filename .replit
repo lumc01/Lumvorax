@@ -1041,7 +1041,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "timeout 300s ./bin/lum_vorax_complete --progressive-stress-all"
+args = "timeout 600s ./bin/lum_vorax_complete --progressive-stress-checkpoint"
 
 [workflows.workflow.metadata]
 outputType = "console"

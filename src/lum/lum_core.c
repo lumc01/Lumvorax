@@ -165,18 +165,23 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
     if (!group->lums) {
         // BUG FIX CRITIQUE: aligned_alloc provoque boucle infinie sur certaines tailles
         // Solution robuste: utiliser TRACKED_MALLOC avec alignement manuel si nécessaire
-        // Allocation mémoire standard pour éviter les blocages aligned_alloc
-        group->lums = (lum_t*)TRACKED_MALLOC(lums_size);
-        if (!group->lums) {
-            TRACKED_FREE(group);
-            return NULL;
-        }
-        group->alloc_method = LUM_ALLOC_TRACKED;
-
-        // Vérification alignement obtenu (informatif)
-        uintptr_t addr = (uintptr_t)group->lums;
-        if (addr % 64 != 0) {
-            printf("[INFO] lum_group_create: TRACKED_MALLOC not 64-byte aligned (%p), using anyway\n",
+        // Tentative allocation alignée pour performance optimale
+        void* aligned_ptr = NULL;
+        int align_result = posix_memalign(&aligned_ptr, 64, lums_size);
+        if (align_result == 0 && aligned_ptr) {
+            group->lums = (lum_t*)aligned_ptr;
+            group->alloc_method = LUM_ALLOC_ALIGNED;
+            printf("[OPTIMIZATION] lum_group_create: 64-byte aligned allocation successful (%p)\n",
+                   group->lums);
+        } else {
+            // Fallback TRACKED_MALLOC si posix_memalign échoue
+            group->lums = (lum_t*)TRACKED_MALLOC(lums_size);
+            if (!group->lums) {
+                TRACKED_FREE(group);
+                return NULL;
+            }
+            group->alloc_method = LUM_ALLOC_TRACKED;
+            printf("[INFO] lum_group_create: Using TRACKED_MALLOC fallback (%p)\n",
                    group->lums);
         }
     }
