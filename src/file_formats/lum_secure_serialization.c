@@ -367,10 +367,8 @@ bool lum_write_metadata_serialized(FILE* file, const lum_file_metadata_t* metada
     serialized.total_size_bytes = htobe64(metadata->total_size_bytes);
     serialized.checksum_crc32 = htonl(metadata->checksum_crc32);
 
-    strncpy(serialized.creator_info, metadata->creator_info, sizeof(serialized.creator_info) - 1);
-    serialized.creator_info[sizeof(serialized.creator_info) - 1] = '\0';
-    strncpy(serialized.file_description, metadata->file_description, sizeof(serialized.file_description) - 1);
-    serialized.file_description[sizeof(serialized.file_description) - 1] = '\0';
+    snprintf(serialized.creator_info, sizeof(serialized.creator_info), "%s", metadata->creator_info);
+    snprintf(serialized.file_description, sizeof(serialized.file_description), "%s", metadata->file_description);
 
     return fwrite(&serialized, sizeof(serialized), 1, file) == 1;
 }
