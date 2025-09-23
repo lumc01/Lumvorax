@@ -282,7 +282,7 @@ jour repondre en francais!
 
 ### SECTION 17: RÈGLES CRITIQUES PRÉSERVATION LOGS RÉELS
 
-#### 16.1 INTERDICTION ABSOLUE SUPPRESSION LOGS
+#### 17.1 INTERDICTION ABSOLUE SUPPRESSION LOGS
 - **JAMAIS** supprimer les logs d'exécutions précédentes
 - **JAMAIS** écraser les logs existants lors de nouvelles exécutions
 - **INTERDICTION** cleanup automatique des répertoires logs/
@@ -412,9 +412,36 @@ jour repondre en francais!
 - **Fallback robuste** : `time()` en dernier recours si clock_gettime échoue
 - **Format standard** : uint64_t en nanosecondes pour logs, time_t pour métadonnées fichiers
 
-**VERSION** : v2.1 - 2025-01-18 20:00:00
-**MODULES COUVERTS** : 118+ confirmés
-**MISE À JOUR SUIVANTE** : Après correction 4 modules bloqués
+### SECTION 18: RÈGLES ANTI-RÉCURRENCE SEPTEMBRE 2025
+
+#### 18.1 LOGS AUTHENTIQUES OBLIGATOIRES
+- **INTERDICTION ABSOLUE** : Logs de même taille exacte (861 bytes pattern)
+- **OBLIGATION** : Métriques quantitatives dans chaque log
+- **VALIDATION** : Vérification contenu non-vide avant rapport
+- **TIMESTAMPS** : Nanoseconde obligatoire pour traçabilité
+
+#### 18.2 TYPEDEF CONSOLIDATION STRICTE  
+- **RÈGLE UNIQUE** : Un seul typedef par type dans common_types.h
+- **INTERDICTION** : Redéfinition typedef dans fichiers .c
+- **VALIDATION** : Compilation 0 warning avant validation
+- **AUDIT** : Vérification croisée tous includes
+
+#### 18.3 MÉTRIQUES RÉELLES UNIQUEMENT
+- **INTERDICTION ABSOLUE** : Invention métriques non mesurées
+- **OBLIGATION** : Tests stress 1M+ LUMs avec preuves
+- **VALIDATION** : Extraction données depuis logs authentiques
+- **EXPERTISE** : Comparaison standards industriels uniquement
+
+#### 18.4 INSPECTION LIGNE PAR LIGNE SYSTÉMATIQUE
+- **OBLIGATION** : Lecture complète code avant modification
+- **VALIDATION** : Vérification chaque ligne pour anomalies
+- **DOCUMENTATION** : Rapport pédagogique pour chaque erreur
+- **SOLUTIONS** : Corrections appliquées avec validation immédiate
+
+**VERSION** : v2.2 - 2025-09-23 01:00:00
+**MODULES COUVERTS** : 39 sources + 42 headers confirmés
+**INSPECTION RÉALISÉE** : 2025-09-23 - Ligne par ligne complète
+**MISE À JOUR SUIVANTE** : Après tests stress avec métriques réelles
 # RÈGLES DÉVELOPPEMENT LUM/VORAX - REPLIT ASSISTANT
 
 ## MODULES DÉSACTIVÉS - INTERDICTION RÉACTIVATION
