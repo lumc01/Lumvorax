@@ -82,19 +82,27 @@ bool ultra_forensic_logger_init(void) {
 }
 
 void ultra_forensic_logger_destroy(void) {
+    if (!g_forensic_initialized) return;
+
     pthread_mutex_lock(&g_global_mutex);
 
-    // Fermer tous les fichiers de log
+    // Fermeture de tous les fichiers de logs modules
     for (int i = 0; i < g_tracker_count; i++) {
-        if (g_module_trackers[i].module_log_file) {
-            fclose(g_module_trackers[i].module_log_file);
-            g_module_trackers[i].module_log_file = NULL;
+        module_forensic_tracker_t* tracker = &g_module_trackers[i];
+        if (tracker->module_log_file) {
+            fclose(tracker->module_log_file);
+            tracker->module_log_file = NULL;
         }
-        pthread_mutex_destroy(&g_module_trackers[i].mutex);
+        pthread_mutex_destroy(&tracker->mutex);
     }
 
+    g_tracker_count = 0;
     g_forensic_initialized = false;
+
     pthread_mutex_unlock(&g_global_mutex);
+    pthread_mutex_destroy(&g_global_mutex);
+
+    printf("[ULTRA_FORENSIC] Système de logging forensique arrêté proprement\n");
 }
 
 // Trouver ou créer tracker pour module
@@ -118,6 +126,7 @@ static module_forensic_tracker_t* get_or_create_module_tracker(const char* modul
     module_forensic_tracker_t* tracker = &g_module_trackers[g_tracker_count++];
     strncpy(tracker->module_name, module, sizeof(tracker->module_name) - 1);
     tracker->module_name[sizeof(tracker->module_name) - 1] = '\0';
+    tracker->memory_used = 0; // Initialiser memory_used
 
     // Créer fichier de log pour ce module
     char log_filename[256];
@@ -222,12 +231,12 @@ void ultra_forensic_log_module_operation(const char* file, int line, const char*
     fprintf(tracker->module_log_file,
             "  Source: %s:%d in %s()\n", file, line, func);
     fflush(tracker->module_log_file);
-    
+
     // LOG TEMPS RÉEL AVEC AFFICHAGE CONSOLE
     char realtime_filename[512];
     snprintf(realtime_filename, sizeof(realtime_filename), 
              "logs/temps_reel/execution/%s_operation_%lu.log", module, timestamp);
-    
+
     FILE* realtime_file = fopen(realtime_filename, "w");
     if (realtime_file) {
         fprintf(realtime_file, "[%lu] %s: %s\n", timestamp, module, operation);
@@ -235,7 +244,7 @@ void ultra_forensic_log_module_operation(const char* file, int line, const char*
         fprintf(realtime_file, "Source: %s:%d\n", file, line);
         fflush(realtime_file);
         fclose(realtime_file);
-        
+
         printf("[%lu] LOG TEMPS REEL: %s\n", timestamp, realtime_filename);
         fflush(stdout);
     }
@@ -279,71 +288,65 @@ bool ultra_forensic_validate_all_logs_exist(void) {
              "logs/forensic/validation/logs_validation_%lu.txt", get_precise_timestamp_ns());
 
     FILE* validation_file = fopen(validation_report, "w");
-    if (!validation_file) return false;
+    if (!validation_file) {
+        fprintf(stderr, "Erreur: Impossible de créer le rapport de validation\n");
+        return false;
+    }
 
-    fprintf(validation_file, "=== VALIDATION EXISTENCE LOGS FORENSIQUES ===\n");
-    fprintf(validation_file, "Timestamp: %lu ns\n", get_precise_timestamp_ns());
+    fprintf(validation_file, "=== VALIDATION LOGS FORENSIQUES ULTRA-STRICTS ===\n");
+    fprintf(validation_file, "Timestamp: %lu\n", get_precise_timestamp_ns());
+    fprintf(validation_file, "Modules tracés: %d\n", g_tracker_count);
 
-    pthread_mutex_lock(&g_global_mutex);
-
-    bool all_valid = true;
+    bool all_logs_valid = true;
     for (int i = 0; i < g_tracker_count; i++) {
         module_forensic_tracker_t* tracker = &g_module_trackers[i];
 
-        fprintf(validation_file, "\nModule: %s\n", tracker->module_name);
-        fprintf(validation_file, "  Log file actif: %s\n", 
-               tracker->module_log_file ? "OUI" : "NON");
-        fprintf(validation_file, "  Opérations loggées: %lu\n", tracker->operations_count);
+        // Vérifier que le fichier de log existe et contient des données
+        if (tracker->module_log_file) {
+            fseek(tracker->module_log_file, 0, SEEK_END);
+            long file_size = ftell(tracker->module_log_file);
+            fseek(tracker->module_log_file, 0, SEEK_SET);
 
-        if (!tracker->module_log_file) {
-            all_valid = false;
-            fprintf(validation_file, "  ❌ ERREUR: Pas de fichier log actif\n");
+            fprintf(validation_file, "Module %s: ", tracker->module_name);
+            if (file_size > 0) {
+                fprintf(validation_file, "VALIDE (%ld bytes)\n", file_size);
+            } else {
+                fprintf(validation_file, "INVALIDE (fichier vide)\n");
+                all_logs_valid = false;
+            }
         } else {
-            fprintf(validation_file, "  ✅ Log forensique opérationnel\n");
+            fprintf(validation_file, "Module %s: INVALIDE (fichier manquant)\n", tracker->module_name);
+            all_logs_valid = false;
         }
     }
 
-    pthread_mutex_unlock(&g_global_mutex);
-
-    fprintf(validation_file, "\nRésultat global: %s\n", all_valid ? "VALIDÉ" : "ÉCHEC");
+    fprintf(validation_file, "\nRésultat global: %s\n", all_logs_valid ? "TOUS LOGS VALIDES" : "ERREURS DÉTECTÉES");
     fclose(validation_file);
 
-    return all_valid;
+    return all_logs_valid;
 }
 
 void ultra_forensic_generate_summary_report(void) {
-    char summary_filename[256];
-    snprintf(summary_filename, sizeof(summary_filename), 
-             "logs/forensic/summary/forensic_summary_%lu.txt", get_precise_timestamp_ns());
+    char summary_path[512];
+    snprintf(summary_path, sizeof(summary_path), 
+             "logs/forensic/sessions/summary_%lu.txt", get_precise_timestamp_ns());
 
-    FILE* summary_file = fopen(summary_filename, "w");
+    FILE* summary_file = fopen(summary_path, "w");
     if (!summary_file) return;
 
-    fprintf(summary_file, "=== RAPPORT SUMMARY FORENSIQUE ULTRA-STRICT ===\n");
-    fprintf(summary_file, "Généré: %lu ns\n", get_precise_timestamp_ns());
-    fprintf(summary_file, "Modules tracés: %d\n", g_tracker_count);
+    fprintf(summary_file, "=== RAPPORT RÉSUMÉ FORENSIQUE ULTRA-STRICT ===\n");
+    fprintf(summary_file, "Timestamp génération: %lu\n", get_precise_timestamp_ns());
+    fprintf(summary_file, "Modules totaux tracés: %d\n", g_tracker_count);
+    fprintf(summary_file, "\nDétails par module:\n");
 
-    pthread_mutex_lock(&g_global_mutex);
-
-    uint64_t total_operations = 0;
     for (int i = 0; i < g_tracker_count; i++) {
         module_forensic_tracker_t* tracker = &g_module_trackers[i];
-        total_operations += tracker->operations_count;
-
-        fprintf(summary_file, "\nModule: %s\n", tracker->module_name);
-        fprintf(summary_file, "  Dernier test: %s\n", tracker->test_name);
-        fprintf(summary_file, "  Opérations: %lu\n", tracker->operations_count);
-        fprintf(summary_file, "  Durée dernière: %lu ns\n", 
-               tracker->end_timestamp_ns - tracker->start_timestamp_ns);
+        fprintf(summary_file, "- %s: %lu opérations, %zu bytes mémoire\n", 
+                tracker->module_name, tracker->operations_count, tracker->memory_used);
     }
 
-    pthread_mutex_unlock(&g_global_mutex);
-
-    fprintf(summary_file, "\nTotal opérations: %lu\n", total_operations);
-    fprintf(summary_file, "Validation: %s\n", 
-           ultra_forensic_validate_all_logs_exist() ? "SUCCÈS" : "ÉCHEC");
-
+    fprintf(summary_file, "\n=== FIN RAPPORT RÉSUMÉ ===\n");
     fclose(summary_file);
 
-    printf("[ULTRA_FORENSIC] Rapport summary généré: %s\n", summary_filename);
+    printf("📄 Rapport résumé généré: %s\n", summary_path);
 }
