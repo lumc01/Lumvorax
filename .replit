@@ -1043,12 +1043,12 @@ args = "LUM/VORAX Complete Tests"
 name = "LUM/VORAX Real Metrics"
 author = "agent"
 
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "timeout 600s ./bin/lum_vorax_complete --progressive-stress-checkpoint"
-
 [workflows.workflow.metadata]
 outputType = "console"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax_complete --progressive-stress-all"
 
 [[workflows.workflow]]
 name = "LUM/VORAX Complete Tests"
