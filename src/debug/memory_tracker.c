@@ -146,7 +146,7 @@ void* tracked_malloc(size_t size, const char* file, int line, const char* func) 
 
     void* ptr = malloc(size);
     if (!ptr) {
-        pthread_mutex_unlock(&g_tracker_mutex);
+        pthread_mutex_unlock(&allocation_mutex);
         return NULL;
     }
 
@@ -179,7 +179,7 @@ void* tracked_malloc(size_t size, const char* file, int line, const char* func) 
     }
 
     add_entry(ptr, size, file, line, func);
-    pthread_mutex_unlock(&g_tracker_mutex);
+    pthread_mutex_unlock(&allocation_mutex);
     return ptr;
 }
 
@@ -212,7 +212,7 @@ void tracked_free(void* ptr, const char* file, int line, const char* func) {
         printf("[MEMORY_TRACKER] CRITICAL ERROR: Free of untracked pointer %p at %s:%d in %s()\n",
                ptr, file, line, func);
         printf("[MEMORY_TRACKER] This indicates memory corruption or double-free!\n");
-        pthread_mutex_unlock(&g_tracker_mutex);
+        pthread_mutex_unlock(&allocation_mutex);
         abort(); // Arrêt immédiat sur pointeur non suivi
     }
 
