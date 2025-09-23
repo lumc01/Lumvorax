@@ -165,17 +165,18 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
     if (!group->lums) {
         // BUG FIX CRITIQUE: aligned_alloc provoque boucle infinie sur certaines tailles
         // Solution robuste: utiliser TRACKED_MALLOC avec alignement manuel si nécessaire
+        // Allocation mémoire standard pour éviter les blocages aligned_alloc
         group->lums = (lum_t*)TRACKED_MALLOC(lums_size);
         if (!group->lums) {
             TRACKED_FREE(group);
             return NULL;
         }
         group->alloc_method = LUM_ALLOC_TRACKED;
-        
+
         // Vérification alignement obtenu (informatif)
         uintptr_t addr = (uintptr_t)group->lums;
         if (addr % 64 != 0) {
-            printf("[INFO] lum_group_create: TRACKED_MALLOC not 64-byte aligned (%p), using anyway\n", 
+            printf("[INFO] lum_group_create: TRACKED_MALLOC not 64-byte aligned (%p), using anyway\n",
                    group->lums);
         }
     }
@@ -397,6 +398,7 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
     if (group->count >= group->capacity) {
         // CORRECTION: Utiliser TRACKED_MALLOC au lieu de realloc
         size_t new_capacity = (group->capacity == 0) ? 10 : group->capacity * 2;
+        // CORRECTION: Utiliser TRACKED_MALLOC pour la réallocation
         lum_t* new_lums = TRACKED_MALLOC(sizeof(lum_t) * new_capacity);
         if (!new_lums) {
             return false;
@@ -800,6 +802,7 @@ bool lum_group_sort_ultra_fast(lum_group_t* group) {
     const size_t RADIX_BITS = 8;
     const size_t RADIX_SIZE = 1 << RADIX_BITS;
     size_t count[RADIX_SIZE];
+    // Réallocation standard
     lum_t* temp = (lum_t*)TRACKED_MALLOC(group->count * sizeof(lum_t));
 
     if (!temp) return false;

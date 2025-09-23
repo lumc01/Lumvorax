@@ -261,6 +261,13 @@ jour repondre en francais!
 - **SHARED STATE** : Aucun accès concurrent non protégé autorisé
 - **VALIDATION** : Tests multi-thread OBLIGATOIRES avant validation
 
+#### 16.2 RÈGLES ANTI-DEADLOCK CRITIQUES
+- **INTERDICTION ABSOLUE** : Lock mutex A et unlock mutex B différent
+- **RÈGLE STRICTE** : pthread_mutex_lock(&X) DOIT correspondre à pthread_mutex_unlock(&X)
+- **VALIDATION OBLIGATOIRE** : Vérifier tous les couples lock/unlock avant commit
+- **TIMEOUT SÉCURISÉ** : Maximum 30s pour tous les tests pour détecter deadlocks
+- **LOGGING DEADLOCK** : Logger tous les mutex lock/unlock pour debug
+
 #### 16.2 MAGIC NUMBER VALIDATION SYSTÉMATIQUE
 - **RÈGLE ABSOLUE** : Toute structure DOIT avoir magic_number validé avant accès
 - **MACRO OBLIGATOIRE** : VALIDATE_MAGIC(ptr) avant chaque utilisation
@@ -326,6 +333,14 @@ jour repondre en francais!
 - **ARCHIVAGE INTELLIGENT** : Logs anciens vers répertoires archive/
 - **LIMITE INTELLIGENTE** : Max 1GB logs actifs, archive illimitée
 - **NETTOYAGE SÉLECTIF** : Suppression uniquement logs corrompus ou invalides
+
+#### 16.9 VALIDATION LOGS AUTHENTIQUES OBLIGATOIRE
+- **INTERDICTION ABSOLUE** : Rapporter des métriques de logs vides ou inexistants
+- **OBLIGATION VÉRIFICATION** : Tester existence et contenu non-vide de chaque log
+- **MÉTRIQUES RÉELLES UNIQUEMENT** : Aucune invention de résultats si logs manquants
+- **TIMEOUT LOGS** : 60s maximum par test pour éviter blocages
+- **VALIDATION FILE SIZE** : Logs < 100 bytes = probablement vides = échec test
+- **AUTHENTICATION** : Horodatage et checksum pour tous logs critiques
 
 # Règles de développement et de validation
 
