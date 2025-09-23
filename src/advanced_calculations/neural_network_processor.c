@@ -541,14 +541,14 @@ void neural_config_destroy(neural_config_t** config_ptr) {
 
 // FONCTION MANQUANTE IMPLÉMENTÉE - Création réseau neuronal complet
 neural_network_t* neural_network_create(size_t* layer_sizes, size_t layer_count) {
-    if (!layer_sizes || layer_count == 0 || layer_count > NEURAL_MAX_LAYERS) {
+    if (!layer_sizes || layer_count == 0 || layer_count > 10) { // limite raisonnable
         return NULL;
     }
 
     neural_network_t* network = TRACKED_MALLOC(sizeof(neural_network_t));
     if (!network) return NULL;
 
-    // Initialisation structure réseau
+    // Initialisation structure réseau avec les champs corrects du header
     network->layer_count = layer_count;
     network->layers = TRACKED_MALLOC(layer_count * sizeof(neural_layer_t*));
     if (!network->layers) {
@@ -556,15 +556,15 @@ neural_network_t* neural_network_create(size_t* layer_sizes, size_t layer_count)
         return NULL;
     }
 
-    // Création de chaque couche
+    // Création de chaque couche (utiliser function existante neural_layer_create)
     for (size_t i = 0; i < layer_count; i++) {
         size_t input_size = (i == 0) ? layer_sizes[i] : layer_sizes[i-1];
-        network->layers[i] = neural_layer_create_processor(layer_sizes[i], input_size, ACTIVATION_TANH);
+        network->layers[i] = neural_layer_create(layer_sizes[i], input_size, ACTIVATION_TANH);
         
         if (!network->layers[i]) {
             // Nettoyer les couches déjà créées
             for (size_t j = 0; j < i; j++) {
-                neural_layer_destroy_processor(&network->layers[j]);
+                neural_layer_destroy(&network->layers[j]);
             }
             TRACKED_FREE(network->layers);
             TRACKED_FREE(network);
@@ -572,18 +572,21 @@ neural_network_t* neural_network_create(size_t* layer_sizes, size_t layer_count)
         }
     }
 
-    // Initialisation métadonnées
-    network->total_parameters = 0;
-    for (size_t i = 0; i < layer_count; i++) {
-        network->total_parameters += layer_sizes[i] * 
-            ((i == 0) ? layer_sizes[i] : layer_sizes[i-1]) + layer_sizes[i];
-    }
-
-    network->learning_rate = 0.001;
-    network->epochs_trained = 0;
-    network->last_loss = 0.0;
-    network->network_magic = NEURAL_NETWORK_MAGIC;
+    // Initialisation métadonnées selon structure réelle du header
+    network->input_data = NULL;
+    network->output_data = NULL;
+    network->target_data = NULL;
+    network->input_size = (layer_count > 0) ? layer_sizes[0] : 0;
+    network->output_size = (layer_count > 0) ? layer_sizes[layer_count-1] : 0;
+    network->global_learning_rate = 0.001;
+    network->epoch_count = 0;
+    network->total_loss = 0.0;
     network->memory_address = (void*)network;
+    
+    // Timestamp création
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    network->timestamp_created = ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 
     return network;
 }
@@ -594,8 +597,8 @@ void neural_network_destroy(neural_network_t** network_ptr) {
 
     neural_network_t* network = *network_ptr;
     
-    // Validation magic number
-    if (network->network_magic != NEURAL_NETWORK_MAGIC) {
+    // Validation memory_address comme dans autres modules
+    if (network->memory_address != (void*)network) {
         *network_ptr = NULL;
         return;
     }
@@ -604,14 +607,31 @@ void neural_network_destroy(neural_network_t** network_ptr) {
     if (network->layers) {
         for (size_t i = 0; i < network->layer_count; i++) {
             if (network->layers[i]) {
-                neural_layer_destroy_processor(&network->layers[i]);
+                neural_layer_destroy(&network->layers[i]);
             }
         }
         TRACKED_FREE(network->layers);
     }
 
+    // Cleanup autres données si allouées
+    if (network->input_data) TRACKED_FREE(network->input_data);
+    if (network->output_data) TRACKED_FREE(network->output_data);
+    if (network->target_data) TRACKED_FREE(network->target_data);
+
     // Marquer comme détruit
-    network->network_magic = 0xDEADDEAD;
+    network->memory_address = NULL;
     TRACKED_FREE(network);
     *network_ptr = NULL;
+}
+
+// WRAPPER FUNCTIONS MANQUANTES - Pour compatibilité header/implémentation
+
+// Wrapper pour neural_layer_create_processor
+neural_layer_t* neural_layer_create(size_t neuron_count, size_t input_size, activation_function_e activation) {
+    return neural_layer_create_processor(neuron_count, input_size, activation);
+}
+
+// Wrapper pour neural_layer_destroy_processor  
+void neural_layer_destroy(neural_layer_t** layer_ptr) {
+    neural_layer_destroy_processor(layer_ptr);
 }
