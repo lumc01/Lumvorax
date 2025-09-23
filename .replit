@@ -1056,7 +1056,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "./bin/lum_vorax_simple_100 --progressive-stress-all"
+args = "./bin/lum_vorax_complete --progressive-stress-all"
 
 [workflows.workflow.metadata]
 outputType = "console"

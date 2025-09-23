@@ -538,3 +538,80 @@ void neural_config_destroy(neural_config_t** config_ptr) {
         *config_ptr = NULL;
     }
 }
+
+// FONCTION MANQUANTE IMPLÉMENTÉE - Création réseau neuronal complet
+neural_network_t* neural_network_create(size_t* layer_sizes, size_t layer_count) {
+    if (!layer_sizes || layer_count == 0 || layer_count > NEURAL_MAX_LAYERS) {
+        return NULL;
+    }
+
+    neural_network_t* network = TRACKED_MALLOC(sizeof(neural_network_t));
+    if (!network) return NULL;
+
+    // Initialisation structure réseau
+    network->layer_count = layer_count;
+    network->layers = TRACKED_MALLOC(layer_count * sizeof(neural_layer_t*));
+    if (!network->layers) {
+        TRACKED_FREE(network);
+        return NULL;
+    }
+
+    // Création de chaque couche
+    for (size_t i = 0; i < layer_count; i++) {
+        size_t input_size = (i == 0) ? layer_sizes[i] : layer_sizes[i-1];
+        network->layers[i] = neural_layer_create_processor(layer_sizes[i], input_size, ACTIVATION_TANH);
+        
+        if (!network->layers[i]) {
+            // Nettoyer les couches déjà créées
+            for (size_t j = 0; j < i; j++) {
+                neural_layer_destroy_processor(&network->layers[j]);
+            }
+            TRACKED_FREE(network->layers);
+            TRACKED_FREE(network);
+            return NULL;
+        }
+    }
+
+    // Initialisation métadonnées
+    network->total_parameters = 0;
+    for (size_t i = 0; i < layer_count; i++) {
+        network->total_parameters += layer_sizes[i] * 
+            ((i == 0) ? layer_sizes[i] : layer_sizes[i-1]) + layer_sizes[i];
+    }
+
+    network->learning_rate = 0.001;
+    network->epochs_trained = 0;
+    network->last_loss = 0.0;
+    network->network_magic = NEURAL_NETWORK_MAGIC;
+    network->memory_address = (void*)network;
+
+    return network;
+}
+
+// Destruction réseau neuronal
+void neural_network_destroy(neural_network_t** network_ptr) {
+    if (!network_ptr || !*network_ptr) return;
+
+    neural_network_t* network = *network_ptr;
+    
+    // Validation magic number
+    if (network->network_magic != NEURAL_NETWORK_MAGIC) {
+        *network_ptr = NULL;
+        return;
+    }
+
+    // Destruction de toutes les couches
+    if (network->layers) {
+        for (size_t i = 0; i < network->layer_count; i++) {
+            if (network->layers[i]) {
+                neural_layer_destroy_processor(&network->layers[i]);
+            }
+        }
+        TRACKED_FREE(network->layers);
+    }
+
+    // Marquer comme détruit
+    network->network_magic = 0xDEADDEAD;
+    TRACKED_FREE(network);
+    *network_ptr = NULL;
+}
