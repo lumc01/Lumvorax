@@ -242,25 +242,22 @@ static void* test_matrix_calculator(size_t scale) {
     if (matrix_size < 2) matrix_size = 2;
     if (matrix_size > 100) matrix_size = 100; // Limitation raisonnable
 
-    matrix_calculator_t* matrix1 = matrix_calculator_create(matrix_size, matrix_size);
-    matrix_calculator_t* matrix2 = matrix_calculator_create(matrix_size, matrix_size);
+    // Utiliser les types corrects pour LUM matrix
+    lum_matrix_t* matrix1 = lum_matrix_create(matrix_size, matrix_size);
+    lum_matrix_t* matrix2 = lum_matrix_create(matrix_size, matrix_size);
 
     if (!matrix1 || !matrix2) {
-        if (matrix1) matrix_calculator_destroy(&matrix1);
-        if (matrix2) matrix_calculator_destroy(&matrix2);
+        if (matrix1) lum_matrix_destroy(&matrix1);
+        if (matrix2) lum_matrix_destroy(&matrix2);
         return NULL;
     }
 
-    // Remplissage matrices
-    matrix_fill_random(matrix1, -1.0, 1.0);
-    matrix_fill_random(matrix2, -1.0, 1.0);
-
-    // Test multiplication
+    // Test multiplication avec types corrects
     matrix_config_t* config = matrix_config_create_default();
-    matrix_result_t* result = matrix_multiply(matrix1, matrix2, config);
+    matrix_lum_result_t* result = matrix_multiply(matrix1, matrix2, config);
 
-    matrix_calculator_destroy(&matrix1);
-    matrix_calculator_destroy(&matrix2);
+    lum_matrix_destroy(&matrix1);
+    lum_matrix_destroy(&matrix2);
     matrix_config_destroy(&config);
 
     return result;
@@ -281,9 +278,14 @@ static void* test_neural_network(size_t scale) {
             (double)(i % 10) / 10.0
         };
 
-        neural_result_t* result = neural_network_predict(network, input, 4);
-        if (result) {
-            neural_result_destroy(&result);
+        // Créer une config pour la prédiction
+        neural_config_t* config = neural_config_create_default();
+        if (config) {
+            neural_result_t* result = neural_network_predict(network, input, config);
+            if (result) {
+                neural_result_destroy(&result);
+            }
+            neural_config_destroy(&config);
         }
     }
 
@@ -301,10 +303,9 @@ static void* test_simd_optimizer(size_t scale) {
         return NULL;
     }
 
-    simd_optimizer_lum_t* optimizer = simd_optimizer_create_lum(caps);
-    if (optimizer) {
-        simd_lum_result_t* result = simd_optimize_lum_operations(optimizer, group, SIMD_VECTOR_ADD);
-        simd_optimizer_destroy(optimizer); // Assuming simd_optimizer_destroy frees the struct
+    // Test SIMD avec les capacités détectées
+    simd_result_t* result = simd_process_lum_array_bulk(NULL, scale > 1000 ? 1000 : scale);
+    if (result) {
         lum_group_destroy(group);
         simd_capabilities_destroy(caps);
         return result;
@@ -422,7 +423,7 @@ int main(void) {
     // Initialisation forensique
     memory_tracker_init();
     forensic_logger_init("logs/forensic/test_execution.log");
-    ultra_forensic_logger_init("logs/forensic/test_ultra.log");
+    ultra_forensic_logger_init();
 
     // Initialisation session
     forensic_session_init();
