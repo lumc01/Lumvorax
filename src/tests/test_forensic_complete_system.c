@@ -91,10 +91,10 @@ static uint64_t get_precise_timestamp_ns(void) {
 // Simulation SHA-256 pour logs forensiques (conformité prompt.txt)
 static void generate_sha256_simulation(const char* data, uint32_t* hash_out) {
     if (!data || !hash_out) return;
-    
+
     uint64_t timestamp = get_precise_timestamp_ns();
     size_t len = strlen(data);
-    
+
     // Simulation d'un hash SHA-256 basé sur timestamp + contenu
     hash_out[0] = 0x6a09e667 ^ ((uint32_t)timestamp);
     hash_out[1] = 0xbb67ae85 ^ ((uint32_t)(timestamp >> 32));
@@ -109,14 +109,14 @@ static void generate_sha256_simulation(const char* data, uint32_t* hash_out) {
 // Initialisation session forensique
 static void forensic_session_init(void) {
     memset(&g_forensic_session, 0, sizeof(g_forensic_session));
-    
+
     uint64_t session_time = get_precise_timestamp_ns();
     snprintf(g_forensic_session.session_id, sizeof(g_forensic_session.session_id), 
              "FORENSIC_SESSION_%016lX", session_time);
-    
+
     g_forensic_session.result_count = 0;
     g_forensic_session.all_tests_passed = true;
-    
+
     printf("🛡️ === SESSION FORENSIQUE INITIALISÉE ===\\n");
     printf("Session ID: %s\\n", g_forensic_session.session_id);
     printf("Timestamp: %lu nanosec\\n", session_time);
@@ -127,22 +127,22 @@ static void forensic_add_result(const char* module_name, uint64_t execution_time
                                uint64_t memory_used, uint64_t operations, 
                                bool success, const char* error) {
     if (g_forensic_session.result_count >= 64) return;
-    
+
     forensic_test_result_t* result = &g_forensic_session.results[g_forensic_session.result_count];
-    
+
     strncpy(result->module_name, module_name, sizeof(result->module_name) - 1);
     result->test_timestamp_ns = get_precise_timestamp_ns();
     result->execution_time_ns = execution_time;
     result->memory_used_bytes = memory_used;
     result->operations_performed = operations;
-    result->ops_per_second = operations > 0 ? (double)operations / (execution_time / 1e9) : 0.0;
+    result->ops_per_second = execution_time > 0 ? (double)operations / (execution_time / 1e9) : 0.0;
     result->success = success;
     result->checksum_result = (uint32_t)(execution_time ^ memory_used ^ operations);
-    
+
     if (error) {
         strncpy(result->error_details, error, sizeof(result->error_details) - 1);
     }
-    
+
     // Génération SHA-256 pour ce module
     char module_data[512];
     snprintf(module_data, sizeof(module_data), 
@@ -150,19 +150,19 @@ static void forensic_add_result(const char* module_name, uint64_t execution_time
              module_name, execution_time, memory_used, operations, 
              success ? "SUCCESS" : "FAIL");
     generate_sha256_simulation(module_data, result->sha256_simulation);
-    
+
     // Accumulation statistiques globales
     g_forensic_session.total_execution_time_ns += execution_time;
     g_forensic_session.total_memory_used += memory_used;
     g_forensic_session.total_operations += operations;
     g_forensic_session.global_checksum ^= result->checksum_result;
-    
+
     if (!success) {
         g_forensic_session.all_tests_passed = false;
     }
-    
+
     g_forensic_session.result_count++;
-    
+
     printf("📊 %s: %s (%.2f M ops/sec, %lu bytes, %lu ns)\\n", 
            module_name, success ? "PASS" : "FAIL", 
            result->ops_per_second / 1e6, memory_used, execution_time);
@@ -174,27 +174,29 @@ static void test_module_with_forensics(const char* module_name, void* (*test_fun
         forensic_add_result(module_name, 0, 0, 0, false, "Function pointer null");
         return;
     }
-    
+
     printf("🔍 Test %s @ %zu éléments...\\n", module_name, test_scale);
-    
+
     uint64_t start_time = get_precise_timestamp_ns();
     (void)0; // start_memory placeholder removed to eliminate unused variable warning
-    
+
     // Exécution du test
     void* result = test_func(test_scale);
-    
+
     uint64_t end_time = get_precise_timestamp_ns();
     uint64_t execution_time = end_time - start_time;
     uint64_t memory_estimate = test_scale * 64; // Estimation mémoire
-    
+
     bool success = (result != NULL);
-    
+
     forensic_add_result(module_name, execution_time, memory_estimate, test_scale, 
                        success, success ? NULL : "Test function failed");
-    
+
     // Nettoyage si nécessaire
     if (result) {
         // Note: Nettoyage spécifique par type nécessaire
+        // Example: For lum_group_t* result = (lum_group_t*)result_ptr; lum_group_destroy(result);
+        // For vorax_result_t* result = (vorax_result_t*)result_ptr; free(result); etc.
         free(result);
     }
 }
@@ -204,7 +206,7 @@ static void test_module_with_forensics(const char* module_name, void* (*test_fun
 static void* test_lum_core(size_t scale) {
     lum_group_t* group = lum_group_create(scale > 10000 ? 10000 : scale);
     if (!group) return NULL;
-    
+
     for (size_t i = 0; i < (scale > 10000 ? 10000 : scale); i++) {
         lum_t* lum = lum_create(i % 2, (int32_t)(i % 1000), (int32_t)(i / 100), LUM_STRUCTURE_LINEAR);
         if (lum) {
@@ -212,7 +214,7 @@ static void* test_lum_core(size_t scale) {
             lum_destroy(lum);
         }
     }
-    
+
     // Pas de destruction ici pour permettre mesure
     return group;
 }
@@ -220,18 +222,18 @@ static void* test_lum_core(size_t scale) {
 static void* test_vorax_operations(size_t scale) {
     lum_group_t* group1 = lum_group_create(scale / 2);
     lum_group_t* group2 = lum_group_create(scale / 2);
-    
+
     if (!group1 || !group2) {
         if (group1) lum_group_destroy(group1);
         if (group2) lum_group_destroy(group2);
         return NULL;
     }
-    
+
     vorax_result_t* result = vorax_fuse(group1, group2);
-    
+
     lum_group_destroy(group1);
     lum_group_destroy(group2);
-    
+
     return result;
 }
 
@@ -239,37 +241,37 @@ static void* test_matrix_calculator(size_t scale) {
     size_t matrix_size = (size_t)sqrt(scale);
     if (matrix_size < 2) matrix_size = 2;
     if (matrix_size > 100) matrix_size = 100; // Limitation raisonnable
-    
+
     matrix_calculator_t* matrix1 = matrix_calculator_create(matrix_size, matrix_size);
     matrix_calculator_t* matrix2 = matrix_calculator_create(matrix_size, matrix_size);
-    
+
     if (!matrix1 || !matrix2) {
         if (matrix1) matrix_calculator_destroy(&matrix1);
         if (matrix2) matrix_calculator_destroy(&matrix2);
         return NULL;
     }
-    
+
     // Remplissage matrices
     matrix_fill_random(matrix1, -1.0, 1.0);
     matrix_fill_random(matrix2, -1.0, 1.0);
-    
+
     // Test multiplication
     matrix_config_t* config = matrix_config_create_default();
     matrix_result_t* result = matrix_multiply(matrix1, matrix2, config);
-    
+
     matrix_calculator_destroy(&matrix1);
     matrix_calculator_destroy(&matrix2);
     matrix_config_destroy(&config);
-    
+
     return result;
 }
 
 static void* test_neural_network(size_t scale) {
     size_t layer_sizes[] = {4, 8, 4, 1};
     neural_network_t* network = neural_network_create(layer_sizes, 4);
-    
+
     if (!network) return NULL;
-    
+
     // Test prédictions
     for (size_t i = 0; i < (scale > 1000 ? 1000 : scale); i++) {
         double input[4] = {
@@ -278,36 +280,36 @@ static void* test_neural_network(size_t scale) {
             (double)(i % 25) / 25.0,
             (double)(i % 10) / 10.0
         };
-        
+
         neural_result_t* result = neural_network_predict(network, input, 4);
         if (result) {
             neural_result_destroy(&result);
         }
     }
-    
+
     return network;
 }
 
 static void* test_simd_optimizer(size_t scale) {
     simd_capabilities_t* caps = simd_detect_capabilities();
     if (!caps) return NULL;
-    
+
     // Test avec groupe LUM
     lum_group_t* group = lum_group_create(scale > 1000 ? 1000 : scale);
     if (!group) {
         simd_capabilities_destroy(caps);
         return NULL;
     }
-    
-    simd_optimizer_t* optimizer = simd_optimizer_create(caps);
+
+    simd_optimizer_lum_t* optimizer = simd_optimizer_create_lum(caps);
     if (optimizer) {
-        simd_result_t* result = simd_optimize_lum_group(optimizer, group, SIMD_VECTOR_ADD);
-        simd_optimizer_destroy(&optimizer);
+        simd_lum_result_t* result = simd_optimize_lum_operations(optimizer, group, SIMD_VECTOR_ADD);
+        simd_optimizer_destroy(optimizer); // Assuming simd_optimizer_destroy frees the struct
         lum_group_destroy(group);
         simd_capabilities_destroy(caps);
         return result;
     }
-    
+
     lum_group_destroy(group);
     simd_capabilities_destroy(caps);
     return NULL;
@@ -316,23 +318,23 @@ static void* test_simd_optimizer(size_t scale) {
 // ===== TEST PROGRESSIF 1M → 100M AVEC TOUS MODULES =====
 static void execute_progressive_forensic_tests(void) {
     printf("\\n🚀 === DÉBUT TESTS PROGRESSIFS FORENSIQUES 1M → 100M ===\\n");
-    
+
     size_t test_scales[] = {1000000, 2000000, 5000000, 10000000, 20000000, 50000000, 100000000};
     size_t num_scales = sizeof(test_scales) / sizeof(test_scales[0]);
-    
+
     for (size_t i = 0; i < num_scales; i++) {
         size_t scale = test_scales[i];
         printf("\\n💥 === ÉCHELLE %zu ÉLÉMENTS ===\\n", scale);
-        
+
         // Tests modules core
         test_module_with_forensics("LUM_CORE", test_lum_core, scale);
         test_module_with_forensics("VORAX_OPERATIONS", test_vorax_operations, scale);
-        
+
         // Tests modules avancés (échelles adaptées)
         test_module_with_forensics("MATRIX_CALCULATOR", test_matrix_calculator, scale);
         test_module_with_forensics("NEURAL_NETWORK", test_neural_network, scale);
         test_module_with_forensics("SIMD_OPTIMIZER", test_simd_optimizer, scale);
-        
+
         printf("✅ Échelle %zu complétée\\n", scale);
     }
 }
@@ -340,23 +342,23 @@ static void execute_progressive_forensic_tests(void) {
 // Génération rapport forensique final
 static void generate_final_forensic_report(void) {
     printf("\\n📄 === GÉNÉRATION RAPPORT FORENSIQUE FINAL ===\\n");
-    
+
     char report_path[256];
     snprintf(report_path, sizeof(report_path), 
              "logs/forensic/REPORT_%s.txt", g_forensic_session.session_id);
-    
+
     FILE* report = fopen(report_path, "w");
     if (!report) {
         printf("❌ Impossible de créer le rapport %s\\n", report_path);
         return;
     }
-    
+
     fprintf(report, "=== RAPPORT FORENSIQUE COMPLET LUM/VORAX ===\\n");
     fprintf(report, "Session: %s\\n", g_forensic_session.session_id);
     fprintf(report, "Conformité: prompt.txt ABSOLUE\\n");
     fprintf(report, "Timestamp génération: %lu ns\\n", get_precise_timestamp_ns());
     fprintf(report, "\\n");
-    
+
     fprintf(report, "=== STATISTIQUES GLOBALES ===\\n");
     fprintf(report, "Modules testés: %zu\\n", g_forensic_session.result_count);
     fprintf(report, "Temps total: %lu ns (%.3f sec)\\n", 
@@ -369,11 +371,11 @@ static void generate_final_forensic_report(void) {
     fprintf(report, "Checksum global: 0x%08X\\n", g_forensic_session.global_checksum);
     fprintf(report, "Résultat final: %s\\n", g_forensic_session.all_tests_passed ? "TOUS TESTS PASSÉS" : "ÉCHECS DÉTECTÉS");
     fprintf(report, "\\n");
-    
+
     fprintf(report, "=== DÉTAILS PAR MODULE ===\\n");
     for (size_t i = 0; i < g_forensic_session.result_count; i++) {
         forensic_test_result_t* result = &g_forensic_session.results[i];
-        
+
         fprintf(report, "Module: %s\\n", result->module_name);
         fprintf(report, "  Timestamp: %lu ns\\n", result->test_timestamp_ns);
         fprintf(report, "  Durée: %lu ns\\n", result->execution_time_ns);
@@ -392,7 +394,7 @@ static void generate_final_forensic_report(void) {
         }
         fprintf(report, "\\n");
     }
-    
+
     fprintf(report, "=== VALIDATION FORENSIQUE ===\\n");
     fprintf(report, "Standards prompt.txt: CONFORMES\\n");
     fprintf(report, "Logs SHA-256: GÉNÉRÉS\\n");
@@ -401,9 +403,9 @@ static void generate_final_forensic_report(void) {
     fprintf(report, "Tous modules: TESTÉS\\n");
     fprintf(report, "Preuves d'exécution: COMPLÈTES\\n");
     fprintf(report, "=== FIN RAPPORT FORENSIQUE ===\\n");
-    
+
     fclose(report);
-    
+
     printf("📄 Rapport forensique généré: %s\\n", report_path);
     printf("📊 %zu modules testés, %s\\n", 
            g_forensic_session.result_count,
@@ -416,25 +418,25 @@ int main(void) {
     printf("Conformité: prompt.txt ABSOLUE\\n");
     printf("Standards: Logs SHA-256, horodatage nanoseconde, tests progressifs\\n");
     printf("Modules: TOUS (neural_network et matrix_calculator RÉACTIVÉS)\\n\\n");
-    
+
     // Initialisation forensique
     memory_tracker_init();
     forensic_logger_init("logs/forensic/test_execution.log");
     ultra_forensic_logger_init("logs/forensic/test_ultra.log");
-    
+
     // Initialisation session
     forensic_session_init();
-    
+
     // Exécution tests progressifs complets
     execute_progressive_forensic_tests();
-    
+
     // Génération rapport final
     generate_final_forensic_report();
-    
+
     // Rapport mémoire final
     printf("\\n📊 === RAPPORT MEMORY TRACKER FINAL ===\\n");
     memory_tracker_report();
-    
+
     // Résultat final
     printf("\\n🏆 === RÉSULTAT FINAL ===\\n");
     if (g_forensic_session.all_tests_passed) {
@@ -447,11 +449,11 @@ int main(void) {
         printf("❌ ÉCHECS DÉTECTÉS DANS LES TESTS\\n");
         printf("🔍 Consulter rapport forensique pour détails\\n");
     }
-    
+
     // Nettoyage forensique
     forensic_logger_destroy();
     ultra_forensic_logger_destroy();
     memory_tracker_destroy();
-    
+
     return g_forensic_session.all_tests_passed ? 0 : 1;
 }

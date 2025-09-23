@@ -43,7 +43,8 @@ typedef struct {
 #define FORENSIC_LOG_MODULE_METRIC(module, metric_name, value) \
     ultra_forensic_log_module_metric(__FILE__, __LINE__, __func__, module, metric_name, value)
 
-// Fonctions forensiques obligatoires
+// Function declarations
+void ultra_forensic_logger_init_lum(const char* log_file);
 bool ultra_forensic_logger_init(void);
 void ultra_forensic_logger_destroy(void);
 
