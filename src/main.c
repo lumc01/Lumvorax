@@ -67,9 +67,9 @@
 
 // ===== TESTS PROGRESSIFS 1M → 100M POUR TOUS LES 32+ MODULES =====
 static void test_progressive_stress_all_available_modules(void) {
-    printf("🔥 === TESTS PROGRESSIFS 1M → 100M - TOUS LES 32+ MODULES DISPONIBLES ===\\n");
+    printf("🔥 === TESTS PROGRESSIFS 10K → 1M - TOUS LES 32+ MODULES DISPONIBLES ===\\n");
     
-    size_t test_scales[] = {10000, 50000, 100000, 500000, 1000000}; // Échelles réduites pour éviter blocage
+    size_t test_scales[] = {10000, 50000, 100000, 500000, 1000000}; // LIMITE MAX 1M éléments selon exigences utilisateur
     size_t num_scales = sizeof(test_scales) / sizeof(test_scales[0]);
     
     for (size_t i = 0; i < num_scales; i++) {
@@ -194,6 +194,10 @@ static void test_progressive_stress_all_available_modules(void) {
         
         // Métriques finales pour cette échelle
         clock_gettime(CLOCK_MONOTONIC, &end_time);
+        double total_elapsed = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
+        printf("⏱️  ÉCHELLE %zu COMPLÉTÉE: %.3f secondes totales\\n", scale, total_elapsed);
+        printf("📈 PROGRESSION GLOBALE: %zu/%zu échelles testées (%.1f%%)\\n\\n", 
+               i+1, num_scales, ((double)(i+1) / num_scales) * 100.0);
         double total_time = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
         printf("🏆 ÉCHELLE %zu: COMPLÉTÉE en %.3f sec\\n", scale, total_time);
         printf("📊 CHECKSUM: 0x%08X\\n", (uint32_t)(scale ^ (uint32_t)end_time.tv_nsec));
