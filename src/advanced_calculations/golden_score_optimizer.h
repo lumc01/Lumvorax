@@ -81,6 +81,16 @@ struct golden_score_optimizer_t {
 // Fonctions principales
 golden_score_optimizer_t* golden_score_optimizer_create(void);
 void golden_score_optimizer_destroy(golden_score_optimizer_t** optimizer_ptr);
+
+// CORRECTION RAPPORT 116: Configuration pondérations runtime
+bool golden_score_set_metric_weights(
+    double performance_weight,
+    double memory_weight, 
+    double energy_weight,
+    double scalability_weight,
+    double reliability_weight
+);
+
 bool golden_score_optimizer_init(golden_score_config_t* config);
 bool auto_tune_system_to_golden_ratio(golden_score_config_t* config);
 
