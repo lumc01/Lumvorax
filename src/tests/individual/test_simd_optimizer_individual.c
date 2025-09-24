@@ -4,6 +4,8 @@
 #include "../../debug/forensic_logger.h"
 #include <stdio.h>
 #include <time.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>

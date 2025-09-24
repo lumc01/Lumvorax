@@ -4,6 +4,8 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdint.h>
+#include <stdbool.h>
 
 #define TEST_MODULE_NAME "vorax_operations"
 
