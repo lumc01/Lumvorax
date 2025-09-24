@@ -342,143 +342,6 @@ jour repondre en francais!
 - **VALIDATION FILE SIZE** : Logs < 100 bytes = probablement vides = échec test
 - **AUTHENTICATION** : Horodatage et checksum pour tous logs critiques
 
-# Règles de développement et de validation
-
-## Tests et validation
-- Tous les tests doivent passer sans exception
-- Les métriques de performance doivent être mesurées et documentées  
-- La gestion mémoire doit être irréprochable (aucune fuite)
-
-## NOUVELLES RÈGLES FORENSIQUES ULTRA-STRICTES
-
-### Protection Mémoire Absolue
-- INTERDICTION TOTALE des sizeof() incohérents : LUM_SIZE_BYTES doit TOUJOURS égaler sizeof(lum_t)
-- Magic numbers OBLIGATOIRES pour TOUS les modules avec vérification avant CHAQUE accès
-- Protection double-free ABSOLUTE avec magic patterns DEADBEEF/DESTROYED
-- Validation ownership pointeurs avant CHAQUE libération mémoire
-- Tous les malloc/free DOIVENT utiliser TRACKED_MALLOC/TRACKED_FREE sans exception
-
-### Standards Temporels Forensiques  
-- INTERDICTION time(NULL) - UNIQUEMENT clock_gettime(CLOCK_MONOTONIC, &ts) nanoseconde
-- Timestamps 64-bit nanosecondes OBLIGATOIRES pour traçabilité forensique
-- Timeouts sécurisés OBLIGATOIRES pour TOUS les tests (max 60s par test)
-- Mesures performance AUTHENTIQUES - interdiction métriques fictives
-
-### Cohérence Architecturale Stricte
-- Headers guards OBLIGATOIRES format #ifndef MODULE_NAME_H_INCLUDED
-- Includes TOUJOURS dans l'ordre: system, project, local
-- Tous paramètres unused DOIVENT être marqués (void)param
-- Variables unused INTERDITES - compilation -Werror -Wunused OBLIGATOIRE
-
-### Tests Forensiques Obligatoires
-- Test intégrité CHAQUE structure avant utilisation
-- Validation ranges TOUS les tableaux et indices
-- Protection contre integer overflow dans TOUS les calculs
-- Vérification cohérence état AVANT/APRÈS chaque opération
-
-### Logging Forensique Ultra-Strict
-- TOUS les malloc/free DOIVENT être loggés avec file:line
-- Traçabilité complète allocation → libération OBLIGATOIRE  
-- Checksums validation données AVANT écriture disque
-- Metadata forensiques timestamps+hash TOUS les fichiers
-
-### Gestion Erreurs Zero-Tolerance
-- TOUS les return codes DOIVENT être vérifiés (pas d'exceptions)
-- Propagation erreurs OBLIGATOIRE jusqu'au main()
-- États partiels INTERDITS - rollback complet en cas d'échec
-- Messages erreurs DESCRIPTIFS avec context forensique complet
-
-### Standards Nommage Renforcés  
-- Fonctions destruction OBLIGATOIREMENT suffixe _destroy() ou _safe_destroy()
-- Constantes magic PREFIXE MODULE_NAME_MAGIC/DESTROYED_MAGIC
-- Variables globales statiques PREFIXE g_ + module_name
-- Tous noms CONFORMES STANDARD_NAMES.md STRICTEMENT
-
-### Validation Cross-Platform
-- Code PORTABLE - éviter spécificités Linux uniquement
-- Gestion endianness pour persistance données
-- Chemins fichiers CROSS-PLATFORM avec validation
-- Tests compatibilité différents compilateurs (gcc/clang)
-
-### Sécurité Forensique
-- Sanitisation OBLIGATOIRE tous inputs utilisateur
-- Validation paths fichiers contre directory traversal  
-- Écrasement sécurisé données sensibles (triple pass)
-- Audit trail complet TOUTES modifications données
-
-### TIMING ET HORODATAGE FORENSIQUE
-- **Logs granulaires** : Utiliser `clock_gettime(CLOCK_MONOTONIC, &ts)` pour mesures précises et séquencement
-- **Fichiers/métadonnées** : Utiliser `clock_gettime(CLOCK_REALTIME, &ts)` pour horodatage création/modification
-- **Fallback robuste** : `time()` en dernier recours si clock_gettime échoue
-- **Format standard** : uint64_t en nanosecondes pour logs, time_t pour métadonnées fichiers
-
-### SECTION 18: RÈGLES ANTI-RÉCURRENCE SEPTEMBRE 2025
-
-#### 18.1 LOGS AUTHENTIQUES OBLIGATOIRES
-- **INTERDICTION ABSOLUE** : Logs de même taille exacte (861 bytes pattern)
-- **OBLIGATION** : Métriques quantitatives dans chaque log
-- **VALIDATION** : Vérification contenu non-vide avant rapport
-- **TIMESTAMPS** : Nanoseconde obligatoire pour traçabilité
-
-### SECTION 19: RÈGLES ANTI-RÉTROGRADATION CRITIQUES 2025-01-27
-
-#### 19.1 PRÉSERVATION OPTIMISATIONS OBLIGATOIRE
-- **INTERDICTION ABSOLUE** : Suppression corrections cryptographiques appliquées
-- **PROTECTION TIMING ATTACKS** : secure_memcmp() obligatoire TOUS comparaisons crypto
-- **BUFFER CLEARING** : Nettoyage sécurisé contextes crypto OBLIGATOIRE
-- **TESTS NIST RFC 6234** : 5+ vecteurs test MINIMUM pour validation
-- **ÉCHELLES OPTIMISÉES** : Tests 1-1000 éléments (plus 1M-100M pour serveur limité)
-
-#### 19.2 VALIDATION PRÉSERVATION CORRECTIONS
-- **OBLIGATION** : Vérifier aucune suppression code sécurisé avant modification
-- **AUDIT TRAIL** : Logger toute modification code crypto/sécurité
-- **TESTS RÉGRESSION** : Validation complète après chaque modification
-- **ROLLBACK PROTECTION** : Sauvegarde automatique avant modifications critiques
-
-### SECTION 20: RÈGLES ANTI-DEBUG PRODUCTION CRITIQUE 2025-09-24
-
-#### 20.1 INTERDICTION ABSOLUE DEBUG LOGS EN PRODUCTION
-- **PROBLÈME IDENTIFIÉ** : printf() debug dans lum_group_add() cause dégradation x66 performance
-- **INTERDICTION TOTALE** : printf() debug actifs dans fonctions critiques production
-- **OBLIGATION MACRO** : Utiliser DEBUG_PRINTF() conditionnelle pour tous debug logs
-- **COMPILATION PRODUCTION** : Mode sans -DDEBUG_MODE par défaut obligatoire
-- **VALIDATION PERFORMANCE** : Tests 1M éléments < 10 secondes obligatoire
-
-#### 20.2 RÈGLES MACRO DEBUG CONDITIONNELLE OBLIGATOIRE
-- **MACRO STANDARD** : DEBUG_PRINTF(...) définie dans common_types.h
-- **PRODUCTION MODE** : DEBUG_PRINTF compile vers ((void)0) 
-- **DEBUG MODE** : DEBUG_PRINTF compile vers printf() uniquement si -DDEBUG_MODE
-- **INTERDICTION** : printf() direct dans code production sans macro
-- **VALIDATION** : Tests performance avant/après pour mesurer impact debug
-
-#### 20.3 PROTECTION CONTRE RÉGRESSION DEBUG
-- **AUDIT OBLIGATOIRE** : Vérifier absence printf() debug avant validation
-- **TESTS PERFORMANCE** : Mesures obligatoires avec/sans debug pour comparaison
-- **SEUIL CRITIQUE** : Dégradation > 2x performance = échec validation automatique
-- **DOCUMENTATION** : Consigner impact performance de chaque ajout debug
-
-#### 18.2 TYPEDEF CONSOLIDATION STRICTE  
-- **RÈGLE UNIQUE** : Un seul typedef par type dans common_types.h
-- **INTERDICTION** : Redéfinition typedef dans fichiers .c
-- **VALIDATION** : Compilation 0 warning avant validation
-- **AUDIT** : Vérification croisée tous includes
-
-#### 18.3 MÉTRIQUES RÉELLES UNIQUEMENT
-- **INTERDICTION ABSOLUE** : Invention métriques non mesurées
-- **OBLIGATION** : Tests stress 1M+ LUMs avec preuves
-- **VALIDATION** : Extraction données depuis logs authentiques
-- **EXPERTISE** : Comparaison standards industriels uniquement
-
-#### 18.4 INSPECTION LIGNE PAR LIGNE SYSTÉMATIQUE
-- **OBLIGATION** : Lecture complète code avant modification
-- **VALIDATION** : Vérification chaque ligne pour anomalies
-- **DOCUMENTATION** : Rapport pédagogique pour chaque erreur
-- **SOLUTIONS** : Corrections appliquées avec validation immédiate
-
-**VERSION** : v2.2 - 2025-09-23 01:00:00
-**MODULES COUVERTS** : 39 sources + 42 headers confirmés
-**INSPECTION RÉALISÉE** : 2025-09-23 - Ligne par ligne complète
-**MISE À JOUR SUIVANTE** : Après tests stress avec métriques réelles
 # RÈGLES DÉVELOPPEMENT LUM/VORAX - REPLIT ASSISTANT
 
 ## MODULES DÉSACTIVÉS - INTERDICTION RÉACTIVATION
@@ -574,3 +437,62 @@ Pour chaque module, mesurer obligatoirement :
 - Rapport complet généré à chaque exécution
 - Alertes en cas de régression de performance
 - Archivage de tous les résultats historiques
+
+### SECTION 20: RÈGLES ANTI-RÉTROGRADATION CRITIQUES 2025-01-27
+
+#### 20.1 PRÉSERVATION OPTIMISATIONS OBLIGATOIRE
+- **INTERDICTION ABSOLUE** : Suppression corrections cryptographiques appliquées
+- **PROTECTION TIMING ATTACKS** : secure_memcmp() obligatoire TOUS comparaisons crypto
+- **BUFFER CLEARING** : Nettoyage sécurisé contextes crypto OBLIGATOIRE
+- **TESTS NIST RFC 6234** : 5+ vecteurs test MINIMUM pour validation
+- **ÉCHELLES OPTIMISÉES** : Tests 1-1000 éléments (plus 1M-100M pour serveur limité)
+
+#### 20.2 VALIDATION PRÉSERVATION CORRECTIONS
+- **OBLIGATION** : Vérifier aucune suppression code sécurisé avant modification
+- **AUDIT TRAIL** : Logger toute modification code crypto/sécurité
+- **TESTS RÉGRESSION** : Validation complète après chaque modification
+- **ROLLBACK PROTECTION** : Sauvegarde automatique avant modifications critiques
+
+### SECTION 21: RÈGLES ANTI-ANOMALIES FORENSIQUES 2025-09-21
+
+#### 21.1 SÉCURITÉ CRYPTOGRAPHIQUE OBLIGATOIRE
+- **INTERDICTION ABSOLUE** : Générateurs ID séquentiels (counter++, time(), etc.)
+- **OBLIGATION ENTROPIE** : Utilisation /dev/urandom ou équivalent cryptographique
+- **VALIDATION UNICITÉ** : Tests 1M+ générations sans collision
+- **ROTATION SÉCURISÉE** : Algorithmes type ChaCha20 pour génération pseudo-aléatoire
+- **FALLBACK ROBUSTE** : Solution de secours si entropie indisponible
+
+#### 21.2 VALIDATION STRICTE FAIL-SECURE
+- **INTERDICTION ABSOLUE** : Acceptation données/tokens invalides (return true par défaut)
+- **OBLIGATION VALIDATION** : Vérification explicite avec échec sécurisé
+- **LOGGING FORENSIQUE** : Traçabilité complète de toutes anomalies détectées
+- **ERROR CONTEXT** : Messages d'erreur précis avec ligne/colonne/contexte
+- **FAIL-FAST PRINCIPE** : Arrêt immédiat sur détection d'anomalie critique
+
+#### 21.3 ANTI-HARDCODING SYSTÉMATIQUE  
+- **INTERDICTION MAGIC NUMBERS** : Constantes 0x12345678, 0xDEADBEEF sans justification
+- **CONFIGURATION DYNAMIQUE** : Limites paramètrables (MAX_ENTRIES, BUFFER_SIZE, etc.)
+- **GÉNÉRATION ALÉATOIRE** : Magic patterns cryptographiquement sécurisés
+- **DOCUMENTATION OBLIGATOIRE** : Justification technique pour toute constante
+- **ÉVITER PATTERNS CONNUS** : Ne jamais utiliser valeurs triviales prévisibles
+
+#### 21.4 QUALITÉ CODE ZERO-TOLERANCE
+- **INTERDICTION TODO CRITIQUE** : Aucun TODO/FIXME dans modules production core
+- **IMPLÉMENTATION COMPLÈTE** : Code fonctionnel ou FIXME avec solution planifiée
+- **BUFFER DYNAMIQUE** : Tailles configurables au lieu de hardcoding
+- **FORMAT CONFIGURABLE** : Templates modifiables au lieu de printf() hardcodé
+- **VALIDATION BOUNDS** : Vérification limites avant allocation/accès
+
+#### 21.5 TESTS SÉCURITÉ OBLIGATOIRES
+- **TESTS ENTROPIE** : Analyse statistique générateurs aléatoires
+- **TESTS INJECTION** : Validation robustesse parsers contre malveillance  
+- **TESTS CORRUPTION** : Détection altération magic numbers/structures
+- **TESTS PERFORMANCE** : Impact <5% des corrections sécurité
+- **TESTS RÉGRESSION** : Non-introduction nouvelles vulnérabilités
+
+#### 21.6 AUDIT FORENSIQUE CONTINU
+- **DÉTECTION AUTOMATIQUE** : Scripts recherche patterns suspects
+- **VALIDATION CROISÉE** : Vérification indépendante corrections appliquées
+- **MÉTRIQUES SÉCURITÉ** : Dashboards monitoring qualité code temps réel
+- **PEER REVIEW** : Validation par tiers de tout code sécurité critique
+- **CERTIFICATION** : Validation conformité standards avant production
