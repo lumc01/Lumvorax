@@ -4,8 +4,9 @@
 #include "../lum/lum_core.h"
 #include <stdint.h>
 #include <stdbool.h>
+#include <pthread.h>  // Pour thread safety CONFORME RAPPORT 115
 
-// Memory pool structure for efficient allocation
+// Memory pool structure for efficient allocation - THREAD SAFE
 typedef struct {
     void* pool_start;
     void* current_ptr;
@@ -14,6 +15,7 @@ typedef struct {
     size_t used_size;
     size_t alignment;
     bool is_initialized;
+    pthread_mutex_t pool_mutex;  // CORRECTION CRITIQUE RAPPORT 115: Protection thread safety
 } memory_pool_t;
 
 // Memory statistics structure
@@ -30,7 +32,7 @@ typedef struct {
     double fragmentation_ratio;
 } memory_stats_t;
 
-// Memory optimizer context
+// Memory optimizer context - THREAD SAFE
 typedef struct {
     memory_pool_t lum_pool;
     memory_pool_t group_pool;
@@ -38,6 +40,8 @@ typedef struct {
     memory_stats_t stats;
     bool auto_defrag_enabled;
     size_t defrag_threshold;
+    pthread_mutex_t stats_mutex;      // CORRECTION CRITIQUE: Protection statistiques
+    pthread_mutex_t optimizer_mutex;  // CORRECTION CRITIQUE: Protection structure globale
 } memory_optimizer_t;
 
 // Function declarations

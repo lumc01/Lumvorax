@@ -33,6 +33,18 @@ memory_optimizer_t* memory_optimizer_create(size_t initial_pool_size) {
     memset(&optimizer->stats, 0, sizeof(memory_stats_t));
     optimizer->auto_defrag_enabled = false;
     optimizer->defrag_threshold = initial_pool_size / 10;
+    
+    // CORRECTION CRITIQUE RAPPORT 115: Initialiser mutex pour thread safety
+    if (pthread_mutex_init(&optimizer->stats_mutex, NULL) != 0) {
+        TRACKED_FREE(optimizer);
+        return NULL;
+    }
+    
+    if (pthread_mutex_init(&optimizer->optimizer_mutex, NULL) != 0) {
+        pthread_mutex_destroy(&optimizer->stats_mutex);
+        TRACKED_FREE(optimizer);
+        return NULL;
+    }
 
     return optimizer;
 }
@@ -61,6 +73,10 @@ void memory_optimizer_destroy(memory_optimizer_t* optimizer) {
         optimizer->zone_pool.pool_start = NULL;
     }
 
+    // CORRECTION CRITIQUE RAPPORT 115: Détruire mutex pour éviter fuites
+    pthread_mutex_destroy(&optimizer->stats_mutex);
+    pthread_mutex_destroy(&optimizer->optimizer_mutex);
+    
     printf("[MEMORY_OPTIMIZER] Freeing optimizer structure at %p\n", (void*)optimizer);
     TRACKED_FREE(optimizer);
 
@@ -97,6 +113,9 @@ void memory_pool_destroy(memory_pool_t* pool) {
     pool->pool_size = 0;
     pool->used_size = 0;
     pool->is_initialized = false;
+    
+    // CORRECTION CRITIQUE RAPPORT 115: Détruire mutex pool
+    pthread_mutex_destroy(&pool->pool_mutex);
 
     printf("[MEMORY_POOL] Freeing pool structure at %p\n", (void*)pool);
     TRACKED_FREE(pool);
@@ -114,9 +133,17 @@ void memory_pool_get_stats(memory_pool_t* pool, memory_stats_t* stats) {
 bool memory_pool_init(memory_pool_t* pool, size_t size, size_t alignment) {
     if (!pool || size == 0) return false;
 
+    // CORRECTION CRITIQUE RAPPORT 115: Initialiser mutex pool
+    if (pthread_mutex_init(&pool->pool_mutex, NULL) != 0) {
+        return false;
+    }
+
     // Utilise le macro malloc pour allouer le pool, assumant que memory_tracker_alloc est utilisé
     pool->pool_start = TRACKED_MALLOC(size); 
-    if (!pool->pool_start) return false;
+    if (!pool->pool_start) {
+        pthread_mutex_destroy(&pool->pool_mutex);
+        return false;
+    }
 
     pool->current_ptr = pool->pool_start;
     pool->pool_size = size;
@@ -129,6 +156,9 @@ bool memory_pool_init(memory_pool_t* pool, size_t size, size_t alignment) {
 
 void* memory_pool_alloc(memory_pool_t* pool, size_t size) {
     if (!pool || !pool->is_initialized || size == 0) return NULL;
+    
+    // CORRECTION CRITIQUE RAPPORT 115: Protéger accès concurrent pool
+    pthread_mutex_lock(&pool->pool_mutex);
 
     // Align size to boundary
     size_t aligned_size = (size + pool->alignment - 1) & ~(pool->alignment - 1);
@@ -136,6 +166,7 @@ void* memory_pool_alloc(memory_pool_t* pool, size_t size) {
     if (pool->used_size + aligned_size > pool->pool_size) {
         // Si le pool est plein, il faut gérer cela. Pour l'instant, on retourne NULL.
         // Une gestion plus avancée impliquerait une défragmentation ou une allocation externe.
+        pthread_mutex_unlock(&pool->pool_mutex);
         return NULL; // Pool exhausted
     }
 
@@ -145,7 +176,8 @@ void* memory_pool_alloc(memory_pool_t* pool, size_t size) {
 
     // Note: Ici, memory_tracker_alloc est appelé via le macro malloc.
     // Si la gestion de l'alignement est critique pour le tracker, il faudrait ajuster ici.
-
+    
+    pthread_mutex_unlock(&pool->pool_mutex);
     return result;
 }
 
@@ -177,8 +209,11 @@ void memory_pool_reset(memory_pool_t* pool) {
     // Elle réinitialise juste les pointeurs et compteurs internes du pool.
     // Pour une libération réelle, `memory_pool_destroy` doit être appelée.
 
+    // CORRECTION CRITIQUE RAPPORT 115: Protéger reset pool
+    pthread_mutex_lock(&pool->pool_mutex);
     pool->current_ptr = pool->pool_start;
     pool->used_size = 0;
+    pthread_mutex_unlock(&pool->pool_mutex);
 }
 
 // Structure pour tracker les blocs alloués dans le pool

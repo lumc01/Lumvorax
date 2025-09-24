@@ -207,7 +207,7 @@ bool recovery_manager_extension_auto_recover_complete(recovery_manager_extension
 
     // Vérifier limite tentatives
     if (manager->current_recovery_info->recovery_attempts_count > manager->max_recovery_attempts) {
-        printf("❌ Nombre maximum de tentatives recovery atteint\n");
+        printf("[ERROR] Nombre maximum de tentatives recovery atteint\n");
         manager->current_recovery_info->state = RECOVERY_STATE_FAILED_EXTENDED;
         snprintf(manager->current_recovery_info->error_details_extended,
                 sizeof(manager->current_recovery_info->error_details_extended),
@@ -216,49 +216,49 @@ bool recovery_manager_extension_auto_recover_complete(recovery_manager_extension
     }
 
     // Étape 1: Vérifier intégrité WAL
-    printf("🔍 Étape 1: Vérification intégrité WAL...\n");
+    printf("[CHECK] Étape 1: Vérification intégrité WAL...\n");
     if (!wal_extension_verify_integrity_complete(manager->wal_extension_ctx)) {
-        printf("❌ Intégrité WAL compromise\n");
+        printf("[ERROR] Intégrité WAL compromise\n");
         manager->current_recovery_info->state = RECOVERY_STATE_FAILED_EXTENDED;
         snprintf(manager->current_recovery_info->error_details_extended,
                 sizeof(manager->current_recovery_info->error_details_extended),
                 "WAL integrity check failed");
         return false;
     }
-    printf("✅ WAL intègre\n");
+    printf("[OK] WAL intègre\n");
 
     // Étape 2: Vérifier intégrité données persistantes
-    printf("🔍 Étape 2: Vérification intégrité données...\n");
+    printf("[CHECK] Étape 2: Vérification intégrité données...\n");
     if (!recovery_manager_extension_verify_data_integrity_with_existing(manager)) {
-        printf("⚠️ Intégrité données compromise, création backup d'urgence...\n");
+        printf("[WARNING] Intégrité données compromise, création backup d'urgence...\n");
         if (!recovery_manager_extension_create_emergency_backup_extended(manager)) {
-            printf("❌ Échec création backup d'urgence\n");
+            printf("[ERROR] Échec création backup d'urgence\n");
             manager->current_recovery_info->state = RECOVERY_STATE_FAILED_EXTENDED;
             return false;
         }
     }
-    printf("✅ Données intègres\n");
+    printf("[OK] Données intègres\n");
 
     // Étape 3: Replay WAL depuis dernier checkpoint
     printf("🔄 Étape 3: Replay transactions WAL...\n");
     if (!wal_extension_replay_from_existing_persistence(manager->wal_extension_ctx, 
                                                         manager->base_persistence_ctx)) {
-        printf("❌ Échec replay WAL\n");
+        printf("[ERROR] Échec replay WAL\n");
         manager->current_recovery_info->state = RECOVERY_STATE_FAILED_EXTENDED;
         snprintf(manager->current_recovery_info->error_details_extended,
                 sizeof(manager->current_recovery_info->error_details_extended),
                 "WAL replay failed");
         return false;
     }
-    printf("✅ Replay WAL terminé\n");
+    printf("[OK] Replay WAL terminé\n");
 
     // Étape 4: Créer nouveau checkpoint
-    printf("💾 Étape 4: Création checkpoint post-recovery...\n");
+    printf("[SAVE] Étape 4: Création checkpoint post-recovery...\n");
     if (!wal_extension_create_checkpoint_with_existing(manager->wal_extension_ctx,
                                                        manager->base_persistence_ctx)) {
-        printf("⚠️ Échec création checkpoint (non fatal)\n");
+        printf("[WARNING] Échec création checkpoint (non fatal)\n");
     } else {
-        printf("✅ Checkpoint créé\n");
+        printf("[OK] Checkpoint créé\n");
     }
 
     // Recovery réussie
@@ -274,7 +274,7 @@ bool recovery_manager_extension_auto_recover_complete(recovery_manager_extension
              manager->data_directory_path, RECOVERY_STATE_EXTENSION_FILE);
     recovery_info_extension_save(manager->current_recovery_info, recovery_info_path);
 
-    printf("✅ === RECOVERY AUTOMATIQUE TERMINÉE AVEC SUCCÈS ===\n");
+    printf("[SUCCESS] === RECOVERY AUTOMATIQUE TERMINÉE AVEC SUCCÈS ===\n");
     return true;
 }
 
@@ -303,7 +303,7 @@ bool recovery_manager_extension_verify_data_integrity_with_existing(recovery_man
             // Utiliser fonction vérification existante
             if (!persistence_verify_file_integrity(manager->base_persistence_ctx, full_path)) {
                 integrity_errors++;
-                printf("❌ Intégrité compromise: %s\n", entry->d_name);
+                printf("[ERROR] Intégrité compromise: %s\n", entry->d_name);
             } else {
                 files_verified++;
             }
@@ -312,7 +312,7 @@ bool recovery_manager_extension_verify_data_integrity_with_existing(recovery_man
 
     closedir(dir);
 
-    printf("🔍 Intégrité: %zu fichiers OK, %zu erreurs\n", files_verified, integrity_errors);
+    printf("[CHECK] Intégrité: %zu fichiers OK, %zu erreurs\n", files_verified, integrity_errors);
     return integrity_errors == 0;
 }
 
@@ -334,7 +334,7 @@ bool recovery_manager_extension_create_emergency_backup_extended(recovery_manage
 
     int result = system(copy_cmd);
 
-    printf("💾 Backup d'urgence: %s (status: %d)\n", backup_dir, result);
+    printf("[BACKUP] Backup d'urgence: %s (status: %d)\n", backup_dir, result);
     return result == 0;
 }
 
@@ -384,40 +384,40 @@ bool initialize_lum_system_with_auto_recovery_extension(const char* data_directo
                                                        const char* wal_filename) {
     if (!data_directory || !wal_filename) return false;
 
-    printf("🚀 === INITIALISATION SYSTÈME LUM/VORAX AVEC AUTO-RECOVERY ===\n");
+    printf("[INIT] === INITIALISATION SYSTÈME LUM/VORAX AVEC AUTO-RECOVERY ===\n");
 
     // Créer manager recovery
     recovery_manager_extension_t* recovery_manager = 
         recovery_manager_extension_create(data_directory, wal_filename);
 
     if (!recovery_manager) {
-        printf("❌ Échec création recovery manager\n");
+        printf("[ERROR] Échec création recovery manager\n");
         return false;
     }
 
     // Marquer démarrage
     if (!recovery_manager_extension_mark_startup_begin(recovery_manager)) {
-        printf("⚠️ Impossible de marquer démarrage\n");
+        printf("[WARNING] Impossible de marquer démarrage\n");
     }
 
     // Détecter crash précédent
     bool crash_detected = recovery_manager_extension_detect_previous_crash(recovery_manager);
     if (crash_detected) {
-        printf("🚨 CRASH PRÉCÉDENT DÉTECTÉ - Démarrage recovery automatique\n");
+        printf("[ALERT] CRASH PRÉCÉDENT DÉTECTÉ - Démarrage recovery automatique\n");
 
         if (!recovery_manager_extension_auto_recover_complete(recovery_manager)) {
-            printf("❌ Recovery automatique échouée\n");
+            printf("[ERROR] Recovery automatique échouée\n");
             recovery_manager_extension_destroy(recovery_manager);
             return false;
         }
 
-        printf("✅ Recovery automatique réussie\n");
+        printf("[SUCCESS] Recovery automatique réussie\n");
     } else {
-        printf("✅ Démarrage normal - pas de crash détecté\n");
+        printf("[OK] Démarrage normal - pas de crash détecté\n");
     }
 
     // Système prêt
-    printf("✅ === SYSTÈME LUM/VORAX INITIALISÉ AVEC AUTO-RECOVERY ===\n");
+    printf("[SUCCESS] === SYSTÈME LUM/VORAX INITIALISÉ AVEC AUTO-RECOVERY ===\n");
 
     // Note: manager reste actif pour toute la durée du programme
     // Il sera détruit automatiquement à l'arrêt par les signal handlers
