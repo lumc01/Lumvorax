@@ -496,3 +496,86 @@ Pour chaque module, mesurer obligatoirement :
 - **MÉTRIQUES SÉCURITÉ** : Dashboards monitoring qualité code temps réel
 - **PEER REVIEW** : Validation par tiers de tout code sécurité critique
 - **CERTIFICATION** : Validation conformité standards avant production
+
+### SECTION 22: RÈGLES PRÉVENTIVES SPÉCIFIQUES ANOMALIES DÉTECTÉES 2025-09-22
+
+#### 22.1 INTERDICTION ÉMOJIS PRODUCTION ABSOLUE
+- **CARACTÈRES INTERDITS** : Tous émojis Unicode (🔄🔍✅❌⚠️💾🎯📊📋🚨) en code/logs production
+- **REMPLACEMENT OBLIGATOIRE** : Préfixes ASCII clairs [MODULE], [STATUS], [ERROR], [INFO]
+- **COMPATIBILITÉ SYSTÈME** : Garantie fonctionnement terminaux ASCII stricts
+- **PARSING AUTOMATISÉ** : Compatibilité scripts grep/awk/sed d'analyse logs
+- **STANDARDS CONFORMES** : Respect ISO/IEC 27037 logging forensique industriel
+
+#### 22.2 FORWARD DECLARATIONS ORGANISÉES
+- **SECTION OBLIGATOIRE** : Grouper toutes forward declarations en début de fichier
+- **COMMENTAIRES REQUIS** : Documenter raison de chaque forward declaration
+- **ORGANISATION LOGIQUE** : Fonctions publiques → privées → utilitaires
+- **DÉPENDANCES CLAIRES** : Éviter chaînes forward declarations complexes
+- **VALIDATION COMPILATION** : Vérifier aucune déclaration inutile résiduelle
+
+#### 22.3 CONSTANTES CRYPTOGRAPHIQUES DOCUMENTÉES
+- **ORIGINE MATHÉMATIQUE** : Documenter source (RFC, NIST, algorithme génération)
+- **JUSTIFICATION SÉCURITAIRE** : Expliquer propriétés cryptographiques nécessaires
+- **RÉFÉRENCES STANDARDS** : Citer documents officiels (RFC 6234, FIPS 180-4)
+- **VALIDATION CROISÉE** : Vérifier identité avec implémentations référence (OpenSSL)
+- **MISE À JOUR TRACÉE** : Logger toute modification constantes critiques
+
+#### 22.4 SÉCURISATION PATH TRAVERSAL RENFORCÉE
+- **PATTERNS ÉTENDUS** : Bloquer "..", "//", "\\", "./", ".\\", "/..", "\\.."
+- **CARACTÈRES DANGEREUX** : Interdire /<>:"|?*\x00-\x1f\x7f-\x9f
+- **NOMS RÉSERVÉS** : Rejeter CON, PRN, AUX, NUL, COM1, LPT1, dev, proc, sys
+- **LONGUEUR LIMITÉE** : Imposer MAX_SECURE_FILENAME_LENGTH configurable
+- **VALIDATION MULTIPLE** : Appliquer vérifications à tous points d'entrée fichiers
+
+#### 22.5 GÉNÉRATION ID CRYPTOGRAPHIQUEMENT ROBUSTE
+- **SOURCES ENTROPIE** : Utiliser getrandom() puis /dev/urandom puis fallback haute entropie
+- **TESTS UNICITÉ** : Valider absence collisions sur 1M+ générations
+- **SEEDDING SÉCURISÉ** : Combiner timestamp nanoseconde + PID + entropie système
+- **DÉTECTION FAIBLESSE** : Alerter si fallback méthodes faibles nécessaire
+- **ROTATION PÉRIODIQUE** : Changer seeds régulièrement pour générateurs long-terme
+
+#### 22.6 ARCHITECTURE FAIL-SECURE SYSTÉMATIQUE
+- **VALIDATION ENTRÉE** : Vérifier tous paramètres fonction avant traitement
+- **LIMITES SÉCURITAIRES** : Imposer MAX_SECURE_BUFFER_SIZE pour toutes allocations
+- **NETTOYAGE ÉCHEC** : secure_zero_memory() obligatoire avant libération mémoire
+- **LOGGING SYSTÉMATIQUE** : forensic_log() pour toute opération critique success/failure
+- **ÉTATS COHÉRENTS** : Garantir système dans état valide même après erreur
+
+#### 22.7 TEMPLATE SÉCURISÉ UNIVERSEL
+```c
+// PATTERN OBLIGATOIRE TOUTES FONCTIONS CRITIQUES
+bool secure_function_template(const void* input, size_t input_size, void** output) {
+    // 1. Validation paramètres obligatoire
+    if (!input || input_size == 0 || !output) return false;
+    
+    // 2. Vérification limites sécuritaires
+    if (input_size > MAX_SECURE_BUFFER_SIZE) return false;
+    
+    // 3. Allocation trackée obligatoire  
+    *output = TRACKED_MALLOC(input_size);
+    if (!*output) return false;
+    
+    // 4. Opération avec validation continue
+    bool success = perform_operation(input, input_size, *output);
+    
+    // 5. Nettoyage sécurisé obligatoire si échec
+    if (!success) {
+        secure_zero_memory(*output, input_size);
+        TRACKED_FREE(*output);
+        *output = NULL;
+    }
+    
+    // 6. Logging forensique systématique
+    forensic_log(success ? FORENSIC_LEVEL_INFO : FORENSIC_LEVEL_ERROR,
+                "secure_function", "Operation: %s", success ? "SUCCESS" : "FAILURE");
+    
+    return success;
+}
+```
+
+#### 22.8 CHECKLIST PRÉVENTION ANOMALIES
+- **AVANT COMMIT** : Scanner code recherche émojis/TODO critiques/magic numbers
+- **COMPILATION CLEAN** : 0 warning avec -Wall -Wextra -Werror obligatoire
+- **TESTS SÉCURITÉ** : Path traversal, buffer overflow, injection validation
+- **REVIEW CROISÉ** : Validation par autre développeur code cryptographique/sécurité
+- **DOCUMENTATION JOUR** : Mettre à jour standards après découverte anomalie
