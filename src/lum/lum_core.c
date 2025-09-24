@@ -114,7 +114,7 @@ void lum_safe_destroy(lum_t** lum_ptr) {
     if (lum->memory_address != lum && lum->memory_address != NULL) {
         // Cette LUM peut être une copie dans un groupe
         // Ne pas la libérer directement si elle fait partie d'un groupe
-        printf("[WARNING] LUM %u ownership check: memory_address=%p, lum=%p\n",
+        DEBUG_PRINTF("[WARNING] LUM %u ownership check: memory_address=%p, lum=%p\n",
                lum->id, lum->memory_address, lum);
 
         // Marquer comme détruit mais ne pas libérer la mémoire
@@ -171,7 +171,7 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
         if (align_result == 0 && aligned_ptr) {
             group->lums = (lum_t*)aligned_ptr;
             group->alloc_method = LUM_ALLOC_ALIGNED;
-            printf("[OPTIMIZATION] lum_group_create: 64-byte aligned allocation successful (%p)\n",
+            DEBUG_PRINTF("[OPTIMIZATION] lum_group_create: 64-byte aligned allocation successful (%p)\n",
                    group->lums);
         } else {
             // Fallback TRACKED_MALLOC si posix_memalign échoue
@@ -181,7 +181,7 @@ lum_group_t* lum_group_create(size_t initial_capacity) {
                 return NULL;
             }
             group->alloc_method = LUM_ALLOC_TRACKED;
-            printf("[INFO] lum_group_create: Using TRACKED_MALLOC fallback (%p)\n",
+            DEBUG_PRINTF("[INFO] lum_group_create: Using TRACKED_MALLOC fallback (%p)\n",
                    group->lums);
         }
     }
@@ -212,13 +212,13 @@ void lum_group_destroy(lum_group_t* group) {
 
     // CRITICAL: Check magic number first before accessing any other fields
     if (group->magic_number == LUM_MAGIC_DESTROYED) {
-        printf("[DEBUG] lum_group_destroy: group already destroyed\n");
+        DEBUG_PRINTF("[DEBUG] lum_group_destroy: group already destroyed\n");
         return; // Déjà détruit
     }
 
     // Validate magic number - if corrupted, don't trust other fields
     if (group->magic_number != LUM_VALIDATION_PATTERN) {
-        printf("[ERROR] lum_group_destroy: invalid magic number 0x%X, treating as corruption\n",
+        DEBUG_PRINTF("[ERROR] lum_group_destroy: invalid magic number 0x%X, treating as corruption\n",
                group->magic_number);
         group->magic_number = LUM_MAGIC_DESTROYED; // Mark as destroyed
         return; // Don't trust corrupted structure
@@ -232,28 +232,28 @@ void lum_group_destroy(lum_group_t* group) {
 
     // Vérifier intégrité de base du groupe
     if (group->count > group->capacity) {
-        printf("[ERROR] lum_group_destroy: corrupted group count=%zu > capacity=%zu\n",
+        DEBUG_PRINTF("[ERROR] lum_group_destroy: corrupted group count=%zu > capacity=%zu\n",
                group->count, group->capacity);
         is_corrupted = true;
     }
 
     // Vérifier limites raisonnables (plus de 100M éléments est suspect)
     if (group->count > 100000000) {
-        printf("[ERROR] lum_group_destroy: suspicious large count=%zu (corruption detected)\n",
+        DEBUG_PRINTF("[ERROR] lum_group_destroy: suspicious large count=%zu (corruption detected)\n",
                group->count);
         is_corrupted = true;
     }
 
     // Vérifier limites raisonnables pour capacity
     if (group->capacity > 100000000) {
-        printf("[ERROR] lum_group_destroy: suspicious large capacity=%zu (corruption detected)\n",
+        DEBUG_PRINTF("[ERROR] lum_group_destroy: suspicious large capacity=%zu (corruption detected)\n",
                group->capacity);
         is_corrupted = true;
     }
 
     // Si corruption détectée, protéger contre l'accès mémoire
     if (is_corrupted) {
-        printf("[CRITICAL] lum_group_destroy: Memory corruption detected - zeroing structure\n");
+        DEBUG_PRINTF("[CRITICAL] lum_group_destroy: Memory corruption detected - zeroing structure\n");
         group->lums = NULL;
         group->count = 0;
         group->capacity = 0;
@@ -263,10 +263,10 @@ void lum_group_destroy(lum_group_t* group) {
     if (group->lums && group->lums != (lum_t*)group && !is_corrupted) {
         // VALIDATION SUPPLÉMENTAIRE: Vérifier que le pointeur n'est pas manifestement corrompu
         if ((void*)group->lums < (void*)0x1000 || (uintptr_t)group->lums == 0xDEADBEEF) {
-            printf("[ERROR] lum_group_destroy: corrupted lums pointer %p\n", group->lums);
+            DEBUG_PRINTF("[ERROR] lum_group_destroy: corrupted lums pointer %p\n", group->lums);
             group->lums = NULL;
         } else {
-            printf("[DEBUG] lum_group_destroy: freeing lums array at %p (%zu elements) method=%d\n",
+            DEBUG_PRINTF("[DEBUG] lum_group_destroy: freeing lums array at %p (%zu elements) method=%d\n",
                    group->lums, group->count, group->alloc_method);
 
             // CORRECTION FORENSIQUE: Utiliser la méthode de déallocation appropriée
@@ -279,22 +279,22 @@ void lum_group_destroy(lum_group_t* group) {
                     break;
                 case LUM_ALLOC_MMAP:
                     if (munmap(group->lums, group->allocated_size) != 0) {
-                        printf("[ERROR] lum_group_destroy: munmap failed for %p size %zu\n",
+                        DEBUG_PRINTF("[ERROR] lum_group_destroy: munmap failed for %p size %zu\n",
                                group->lums, group->allocated_size);
                     }
                     break;
                 default:
-                    printf("[ERROR] lum_group_destroy: unknown allocation method %d\n", group->alloc_method);
+                    DEBUG_PRINTF("[ERROR] lum_group_destroy: unknown allocation method %d\n", group->alloc_method);
                     break;
             }
             group->lums = NULL;
         }
     } else if (group->lums == (lum_t*)group) {
         // CORRECTION DÉTECTÉE: group->lums pointe vers group lui-même !
-        printf("[WARNING] lum_group_destroy: self-reference detected, avoiding double-free\n");
+        DEBUG_PRINTF("[WARNING] lum_group_destroy: self-reference detected, avoiding double-free\n");
         group->lums = NULL; // Ne pas libérer - éviter double free
     } else if (is_corrupted && group->lums) {
-        printf("[WARNING] lum_group_destroy: corruption detected, not freeing potentially invalid pointer %p\n", group->lums);
+        DEBUG_PRINTF("[WARNING] lum_group_destroy: corruption detected, not freeing potentially invalid pointer %p\n", group->lums);
         group->lums = NULL;
     }
 
@@ -305,11 +305,11 @@ void lum_group_destroy(lum_group_t* group) {
 
     // PROTECTION FINALE: Vérifier que le pointeur groupe lui-même n'est pas corrompu
     if ((void*)group < (void*)0x1000 || is_corrupted) {
-        printf("[CRITICAL] lum_group_destroy: corrupted group pointer %p detected - not freeing\n", group);
+        DEBUG_PRINTF("[CRITICAL] lum_group_destroy: corrupted group pointer %p detected - not freeing\n", group);
         return; // Ne pas libérer un pointeur corrompu
     }
 
-    printf("[DEBUG] lum_group_destroy: freeing group structure at %p\n", group);
+    DEBUG_PRINTF("[DEBUG] lum_group_destroy: freeing group structure at %p\n", group);
     TRACKED_FREE(group);  // Group toujours alloué avec TRACKED_MALLOC
 }
 
@@ -349,11 +349,11 @@ void lum_group_destroy_ultra_secure(lum_group_t** group_ptr) {
                     break;
                 case LUM_ALLOC_MMAP:
                     if (munmap(group->lums, group->allocated_size) != 0) {
-                        printf("[ERROR] lum_group_destroy_ultra_secure: munmap failed\n");
+                        DEBUG_PRINTF("[ERROR] lum_group_destroy_ultra_secure: munmap failed\n");
                     }
                     break;
                 default:
-                    printf("[ERROR] lum_group_destroy_ultra_secure: unknown allocation method %d\n", group->alloc_method);
+                    DEBUG_PRINTF("[ERROR] lum_group_destroy_ultra_secure: unknown allocation method %d\n", group->alloc_method);
                     break;
             }
         }
@@ -375,25 +375,25 @@ void lum_group_safe_destroy(lum_group_t** group_ptr) {
 }
 
 bool lum_group_add(lum_group_t* group, lum_t* lum) {
-    printf("[DEBUG] lum_group_add: ENTREE group=%p, lum=%p\n", (void*)group, (void*)lum);
+    DEBUG_PRINTF("[DEBUG] lum_group_add: ENTREE group=%p, lum=%p\n", (void*)group, (void*)lum);
     if (!group || !lum) {
-        printf("[DEBUG] lum_group_add: SORTIE - group ou lum NULL\n");
+        DEBUG_PRINTF("[DEBUG] lum_group_add: SORTIE - group ou lum NULL\n");
         return false;
     }
 
     // Vérifier si le groupe a été marqué comme détruit
     if (group->magic_number == LUM_MAGIC_DESTROYED) {
-        printf("[DEBUG] lum_group_add: SORTIE - groupe détruit\n");
+        DEBUG_PRINTF("[DEBUG] lum_group_add: SORTIE - groupe détruit\n");
         return false;
     }
 
     // Validate magic number before using group
     if (group->magic_number != LUM_VALIDATION_PATTERN) {
-        printf("[DEBUG] lum_group_add: SORTIE - magic number invalide\n");
+        DEBUG_PRINTF("[DEBUG] lum_group_add: SORTIE - magic number invalide\n");
         return false; // Corrupted group
     }
     
-    printf("[DEBUG] lum_group_add: Validations OK, count=%zu, capacity=%zu\n", group->count, group->capacity);
+    DEBUG_PRINTF("[DEBUG] lum_group_add: Validations OK, count=%zu, capacity=%zu\n", group->count, group->capacity);
 
     // Safety check: ensure count doesn't exceed capacity
     if (group->count >= group->capacity) {
@@ -431,11 +431,11 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
                     break;
                 case LUM_ALLOC_MMAP:
                     if (munmap(group->lums, group->allocated_size) != 0) {
-                        printf("[ERROR] lum_group_add: munmap failed during reallocation\n");
+                        DEBUG_PRINTF("[ERROR] lum_group_add: munmap failed during reallocation\n");
                     }
                     break;
                 default:
-                    printf("[ERROR] lum_group_add: unknown allocation method %d\n", group->alloc_method);
+                    DEBUG_PRINTF("[ERROR] lum_group_add: unknown allocation method %d\n", group->alloc_method);
                     break;
             }
         }
@@ -448,7 +448,7 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
     }
 
     // CORRECTION CRITIQUE: Copie des valeurs SEULEMENT, pas des pointeurs de gestion mémoire
-    printf("[DEBUG] lum_group_add: AVANT copie LUM, index=%zu\n", group->count);
+    DEBUG_PRINTF("[DEBUG] lum_group_add: AVANT copie LUM, index=%zu\n", group->count);
     group->lums[group->count] = *lum;
 
     // IMPORTANT: Réinitialiser les métadonnées de gestion mémoire pour cette copie
@@ -456,7 +456,7 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
     group->lums[group->count].is_destroyed = 0;
 
     group->count++;
-    printf("[DEBUG] lum_group_add: SUCCÈS - nouvelle count=%zu\n", group->count);
+    DEBUG_PRINTF("[DEBUG] lum_group_add: SUCCÈS - nouvelle count=%zu\n", group->count);
 
     return true;
 }
@@ -684,7 +684,7 @@ uint32_t lum_generate_id(void) {
             // Fallback: réinitialiser le compteur avec offset
             lum_id_counter = 1000;
             id = lum_id_counter++;
-            printf("[WARNING] LUM ID counter reset to avoid overflow\n");
+            DEBUG_PRINTF("[WARNING] LUM ID counter reset to avoid overflow\n");
         }
     } else {
         id = lum_id_counter++;
@@ -729,7 +729,7 @@ uint64_t lum_get_timestamp(void) {
 
 void lum_print(const lum_t* lum) {
     if (lum) {
-        printf("LUM[%u]: presence=%u, pos=(%d,%d), type=%u, ts=%lu\n",
+        DEBUG_PRINTF("LUM[%u]: presence=%u, pos=(%d,%d), type=%u, ts=%lu\n",
                lum->id, lum->presence, lum->position_x, lum->position_y,
                lum->structure_type, lum->timestamp);
     }
@@ -739,19 +739,19 @@ void lum_group_print(const lum_group_t* group) {
     if (group) {
         // Vérifier si le groupe a été marqué comme détruit avant de l'imprimer
         if (group->magic_number == LUM_MAGIC_DESTROYED) {
-            printf("Group (destroyed): previously destroyed\n");
+            DEBUG_PRINTF("Group (destroyed): previously destroyed\n");
             return;
         }
 
         // Validate magic number
         if (group->magic_number != LUM_VALIDATION_PATTERN) {
-            printf("Group (corrupted): invalid magic number 0x%X\n", group->magic_number);
+            DEBUG_PRINTF("Group (corrupted): invalid magic number 0x%X\n", group->magic_number);
             return;
         }
 
-        printf("Group[%u]: %zu LUMs\n", group->group_id, group->count);
+        DEBUG_PRINTF("Group[%u]: %zu LUMs\n", group->group_id, group->count);
         for (size_t i = 0; i < group->count; i++) {
-            printf("  ");
+            DEBUG_PRINTF("  ");
             lum_print(&group->lums[i]);
         }
     }
