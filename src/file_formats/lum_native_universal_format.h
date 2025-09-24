@@ -12,9 +12,15 @@
 #define LUM_DATA_MAGIC 0x4C444154       // "LDAT"
 // LUM_DESTROYED_MAGIC déjà défini dans lum_core.h
 
-// Version format fichier natif
-#define LUM_NATIVE_FORMAT_VERSION_MAJOR 2
-#define LUM_NATIVE_FORMAT_VERSION_MINOR 1
+// CORRECTION RAPPORT 117: Version format configurable
+typedef struct {
+    uint16_t major;
+    uint16_t minor;
+    const char* build_info;
+} lum_format_version_t;
+
+lum_format_version_t lum_get_format_version(void);
+bool lum_set_format_version(uint16_t major, uint16_t minor, const char* build_info);
 
 // Types de contenus supportés dans fichier .lum
 typedef enum {
@@ -35,6 +41,10 @@ typedef enum {
     LUM_CONTENT_LUM_NATIVE,     // Structures LUM natives
     LUM_CONTENT_COUNT
 } lum_content_type_e;
+
+// CORRECTION RAPPORT 117: Types de contenus configurables
+const char* lum_get_content_type_name(lum_content_type_e type);
+bool lum_set_custom_content_type_names(const char* names[], size_t count);
 
 // Métadonnées fichier .lum
 typedef struct {

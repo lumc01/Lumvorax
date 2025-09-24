@@ -9,24 +9,134 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-// ================== GESTION CONFIGURATION ==================
+// ================== CONFIGURATION DYNAMIQUE ==================
+
+// CORRECTION RAPPORT 117: Buffer size adaptatif selon ressources système
+static lum_file_error_messages_t global_error_messages = {
+    .success_message = "Operation completed successfully",
+    .invalid_params_message = "Invalid parameters provided",
+    .file_open_error_message = "Failed to open file",
+    .memory_error_message = "Memory allocation failed", 
+    .format_error_message = "Unsupported file format"
+};
+
+size_t lum_file_get_optimal_buffer_size(void) {
+    // Lecture RAM disponible système 
+    FILE* meminfo = fopen("/proc/meminfo", "r");
+    size_t available_kb = 0;
+    
+    if (meminfo) {
+        char line[256];
+        while (fgets(line, sizeof(line), meminfo)) {
+            if (sscanf(line, "MemAvailable: %zu kB", &available_kb) == 1) {
+                break;
+            }
+        }
+        fclose(meminfo);
+    }
+    
+    // Fallback si lecture impossible
+    if (available_kb == 0) available_kb = 4194304; // 4GB par défaut
+    
+    // Buffer = 0.1% de RAM disponible, min 4KB, max 64MB
+    size_t optimal_size = (available_kb * 1024) / 1000;
+    if (optimal_size < 4096) optimal_size = 4096;
+    if (optimal_size > 67108864) optimal_size = 67108864;
+    
+    return optimal_size;
+}
+
+size_t lum_file_calculate_buffer_size_for_count(size_t lum_count) {
+    // Buffer adaptatif selon nombre de LUMs
+    size_t base_size = lum_count * sizeof(lum_t);
+    size_t optimal = base_size / 10; // 10% de la taille données
+    
+    if (optimal < 4096) optimal = 4096;
+    if (optimal > 67108864) optimal = 67108864;
+    
+    return optimal;
+}
+
+lum_file_error_messages_t* lum_file_get_error_messages(void) {
+    return &global_error_messages;
+}
+
+bool lum_file_set_custom_error_messages(const lum_file_error_messages_t* messages) {
+    if (!messages) return false;
+    global_error_messages = *messages;
+    return true;
+}
 
 lum_file_config_t* lum_file_config_create(lum_file_format_e format) {
     lum_file_config_t* config = TRACKED_MALLOC(sizeof(lum_file_config_t));
     if (!config) return NULL;
 
+    // CORRECTION RAPPORT 117: Configuration adaptative selon contexte
     config->format = format;
-    config->include_metadata = true;
-    config->include_timestamps = true;
-    config->include_checksums = true;
-    config->compress_data = false;
-    config->validate_integrity = true;
+    
+    // Configuration selon type de format
+    switch (format) {
+        case LUM_FORMAT_FORENSIC_AUDIT:
+            config->include_metadata = true;
+            config->include_timestamps = true;
+            config->include_checksums = true;
+            config->validate_integrity = true;
+            config->compress_data = false;
+            break;
+            
+        case LUM_FORMAT_COMPRESSED_LZ4:
+        case LUM_FORMAT_COMPRESSED_ZLIB:
+            config->include_metadata = true;
+            config->include_timestamps = false;
+            config->include_checksums = true;
+            config->validate_integrity = true;
+            config->compress_data = true;
+            break;
+            
+        case LUM_FORMAT_NATIVE_BINARY:
+        case LUM_FORMAT_BINARY_OPTIMIZED:
+            config->include_metadata = false;
+            config->include_timestamps = false;
+            config->include_checksums = false;
+            config->validate_integrity = false;
+            config->compress_data = false;
+            break;
+            
+        default:
+            config->include_metadata = true;
+            config->include_timestamps = false;
+            config->include_checksums = false;
+            config->validate_integrity = false;
+            config->compress_data = false;
+            break;
+    }
+    
     config->compression_level = LUM_FILE_DEFAULT_COMPRESSION_LEVEL;
-    config->buffer_size = LUM_FILE_DEFAULT_BUFFER_SIZE;
+    config->buffer_size = lum_file_get_optimal_buffer_size();
     config->custom_encoding = NULL;
     config->memory_address = (void*)config;
     config->config_magic = LUM_FILE_CONFIG_MAGIC;
 
+    return config;
+}
+
+lum_file_config_t* lum_file_config_create_adaptive(size_t expected_lum_count) {
+    lum_file_config_t* config = lum_file_config_create(LUM_FORMAT_NATIVE_BINARY);
+    if (!config) return NULL;
+    
+    // Adaptation selon nombre attendu de LUMs
+    config->buffer_size = lum_file_calculate_buffer_size_for_count(expected_lum_count);
+    
+    if (expected_lum_count > 1000000) {
+        // Pour gros volumes : compression et validation
+        config->compress_data = true;
+        config->include_checksums = true;
+        config->format = LUM_FORMAT_COMPRESSED_LZ4;
+    } else if (expected_lum_count > 100000) {
+        // Pour volumes moyens : checksums
+        config->include_checksums = true;
+    }
+    
     return config;
 }
 
@@ -387,9 +497,15 @@ lum_file_result_t* lum_export_single_json(const lum_t* lum, const char* filename
     fprintf(file, "\n  }");
 
     if (config->include_metadata) {
+        // CORRECTION RAPPORT 117: Métadonnées réelles calculées
+        size_t actual_file_size = ftell(file);
+        
         fprintf(file, ",\n  \"metadata\": {\n");
         fprintf(file, "    \"total_lums\": 1,\n");
-        fprintf(file, "    \"file_size_bytes\": %zu\n", sizeof(lum_t));
+        fprintf(file, "    \"file_size_bytes\": %zu,\n", actual_file_size);
+        fprintf(file, "    \"lum_structure_size\": %zu,\n", sizeof(lum_t));
+        fprintf(file, "    \"format_version\": \"%d.%d\",\n", LUM_FILE_VERSION_MAJOR, LUM_FILE_VERSION_MINOR);
+        fprintf(file, "    \"creation_time\": %llu\n", (unsigned long long)time(NULL));
         fprintf(file, "  }");
     }
 
@@ -606,7 +722,9 @@ bool lum_file_result_set_success(lum_file_result_t* result, const char* filename
     result->filename[sizeof(result->filename) - 1] = '\0';
     result->bytes_processed = bytes;
     result->lums_processed = lums;
-    strcpy(result->error_message, "Success");
+    strncpy(result->error_message, global_error_messages.success_message, 
+            sizeof(result->error_message) - 1);
+    result->error_message[sizeof(result->error_message) - 1] = '\0';
 
     return true;
 }

@@ -228,18 +228,35 @@ void lum_file_result_destroy(lum_file_result_t** result_ptr);
 bool lum_file_result_set_success(lum_file_result_t* result, const char* filename, size_t bytes, size_t lums);
 bool lum_file_result_set_error(lum_file_result_t* result, const char* error_message);
 
-// Configuration par défaut
+// CORRECTION RAPPORT 117: Configuration adaptative
 lum_file_config_t* lum_file_config_create_default(void);
+lum_file_config_t* lum_file_config_create_adaptive(size_t expected_lum_count);
 lum_file_config_t* lum_file_config_create_high_performance(void);
 lum_file_config_t* lum_file_config_create_high_compression(void);
 lum_file_config_t* lum_file_config_create_forensic_audit(void);
 
-// ================== CONSTANTES ==================
+// Configuration messages d'erreur localisables
+typedef struct {
+    const char* success_message;
+    const char* invalid_params_message;
+    const char* file_open_error_message;
+    const char* memory_error_message;
+    const char* format_error_message;
+} lum_file_error_messages_t;
+
+lum_file_error_messages_t* lum_file_get_error_messages(void);
+bool lum_file_set_custom_error_messages(const lum_file_error_messages_t* messages);
+
+// ================== CONSTANTES DYNAMIQUES ==================
 
 #define LUM_FILE_MAGIC_NUMBER 0x4C554D56      // "LUMV"
 #define LUM_FILE_VERSION_MAJOR 1
 #define LUM_FILE_VERSION_MINOR 0
-#define LUM_FILE_DEFAULT_BUFFER_SIZE 8192
+
+// CORRECTION RAPPORT 117: Buffer size dynamique selon système
+size_t lum_file_get_optimal_buffer_size(void);
+size_t lum_file_calculate_buffer_size_for_count(size_t lum_count);
+
 #define LUM_FILE_MAX_FILENAME_LENGTH 512
 #define LUM_FILE_MAX_ERROR_MESSAGE 256
 #define LUM_FILE_CONFIG_MAGIC 0xF11E1234      // "FILE"

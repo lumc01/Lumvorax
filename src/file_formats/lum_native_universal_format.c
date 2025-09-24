@@ -9,13 +9,38 @@
 #include <time.h>
 #include <math.h>
 
-// Noms des types de contenus pour logging
-static const char* CONTENT_TYPE_NAMES[LUM_CONTENT_COUNT] = {
+// CORRECTION RAPPORT 117: Types de contenus configurables
+static const char* DEFAULT_CONTENT_TYPE_NAMES[LUM_CONTENT_COUNT] = {
     "TEXT", "JSON", "CSV", "IMAGE_RGB24", "IMAGE_RGBA32", "IMAGE_GRAY8",
     "AUDIO_PCM16", "AUDIO_PCM32", "VIDEO_H264", "VIDEO_RAW", 
     "SOM_KOHONEN", "NEURAL_WEIGHTS", "QUANTUM_STATES", 
     "BINARY_BLOB", "LUM_NATIVE"
 };
+
+static const char** current_content_type_names = DEFAULT_CONTENT_TYPE_NAMES;
+static lum_format_version_t current_format_version = {2, 1, "LUM_VORAX_NATIVE"};
+
+const char* lum_get_content_type_name(lum_content_type_e type) {
+    if (type >= LUM_CONTENT_COUNT) return "UNKNOWN";
+    return current_content_type_names[type];
+}
+
+bool lum_set_custom_content_type_names(const char* names[], size_t count) {
+    if (!names || count != LUM_CONTENT_COUNT) return false;
+    current_content_type_names = names;
+    return true;
+}
+
+lum_format_version_t lum_get_format_version(void) {
+    return current_format_version;
+}
+
+bool lum_set_format_version(uint16_t major, uint16_t minor, const char* build_info) {
+    current_format_version.major = major;
+    current_format_version.minor = minor;
+    current_format_version.build_info = build_info ? build_info : "UNKNOWN";
+    return true;
+}
 
 // Calcul CRC32 simple pour validation
 static uint32_t calculate_crc32(const uint8_t* data, size_t length) {
@@ -43,10 +68,11 @@ lum_universal_file_manager_t* lum_universal_file_create(const char* filepath) {
         return NULL;
     }
 
-    // Initialisation header
+    // CORRECTION RAPPORT 117: Header avec version configurable
     manager->header->magic_header = LUM_HEADER_MAGIC;
-    manager->header->format_version_major = LUM_NATIVE_FORMAT_VERSION_MAJOR;
-    manager->header->format_version_minor = LUM_NATIVE_FORMAT_VERSION_MINOR;
+    lum_format_version_t version = lum_get_format_version();
+    manager->header->format_version_major = version.major;
+    manager->header->format_version_minor = version.minor;
     
     struct timespec ts;
     clock_gettime(CLOCK_REALTIME, &ts);
@@ -55,7 +81,12 @@ lum_universal_file_manager_t* lum_universal_file_create(const char* filepath) {
     manager->header->total_file_size_bytes = sizeof(lum_file_header_t);
     manager->header->content_sections_count = 0;
     manager->header->lum_structures_count = 0;
-    strncpy(manager->header->creator_signature, "LUM_VORAX_NATIVE_v2.1", 
+    // CORRECTION RAPPORT 117: Signature créateur configurable
+    char signature_buffer[32];
+    lum_format_version_t version_info = lum_get_format_version();
+    snprintf(signature_buffer, sizeof(signature_buffer), "%s_v%d.%d", 
+             version_info.build_info, version_info.major, version_info.minor);
+    strncpy(manager->header->creator_signature, signature_buffer, 
             sizeof(manager->header->creator_signature) - 1);
     manager->header->checksum_crc32 = 0;
     manager->header->compression_type = 0; // Pas de compression par défaut
@@ -71,11 +102,27 @@ lum_universal_file_manager_t* lum_universal_file_create(const char* filepath) {
     manager->filepath[sizeof(manager->filepath) - 1] = '\0';
     manager->is_read_only = false;
     manager->is_dirty = true; // Nouveau fichier considéré "dirty"
-    // Capacité dynamique basée sur la taille estimée du fichier
-    size_t estimated_capacity = 256; // Base minimum
-    if (strlen(filepath) > 0) {
-        estimated_capacity = 512 + (strlen(filepath) * 4); // Capacité basée sur nom fichier
+    // CORRECTION RAPPORT 117: Capacité adaptative intelligente
+    size_t estimated_capacity;
+    
+    // Vérification taille fichier existant
+    FILE* test_file = fopen(filepath, "rb");
+    if (test_file) {
+        fseek(test_file, 0, SEEK_END);
+        long file_size = ftell(test_file);
+        fclose(test_file);
+        
+        // Capacité basée sur taille réelle fichier
+        estimated_capacity = (file_size > 0) ? (file_size / sizeof(lum_t)) : 256;
+    } else {
+        // Nouveau fichier : capacité selon complexité nom
+        size_t path_complexity = strlen(filepath);
+        estimated_capacity = 128 + (path_complexity * 2); // Plus conservateur
     }
+    
+    // Limites sécurisées
+    if (estimated_capacity < 64) estimated_capacity = 64;
+    if (estimated_capacity > 1048576) estimated_capacity = 1048576; // Max 1M LUMs
     manager->cached_lums = lum_group_create(estimated_capacity);
     manager->memory_address = (void*)manager;
     manager->manager_magic = LUM_UNIVERSAL_MAGIC;
@@ -90,7 +137,7 @@ lum_universal_file_manager_t* lum_universal_file_create(const char* filepath) {
     if (logger) {
         char log_msg[512];
         snprintf(log_msg, sizeof(log_msg), "LUM Universal File Manager created: %s, Format version: %d.%d, Capacity: %zu", 
-                 filepath, LUM_NATIVE_FORMAT_VERSION_MAJOR, LUM_NATIVE_FORMAT_VERSION_MINOR, estimated_capacity);
+                 filepath, version.major, version.minor, estimated_capacity);
         lum_log_message(logger, LUM_LOG_INFO, log_msg);
     }
 
@@ -170,7 +217,7 @@ static lum_content_section_t* create_content_section(lum_content_type_e content_
     
     snprintf(section->metadata_json, sizeof(section->metadata_json),
              "{\"type\":\"%s\",\"size\":%zu,\"timestamp\":%lu}",
-             CONTENT_TYPE_NAMES[content_type], data_size, (unsigned long)time(NULL));
+             lum_get_content_type_name(content_type), data_size, (unsigned long)time(NULL));
     
     section->section_checksum = 0; // Sera calculé avec les données
     section->memory_address = (void*)section;
