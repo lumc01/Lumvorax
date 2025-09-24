@@ -181,11 +181,48 @@ jour repondre en francais!
 - Validation AddressSanitizer pour détection fuites mémoire
 - Tests intégration entre modules critiques
 
-### 13. RÈGLES DÉPENDANCES ET INCLUDES CRITIQUES
+### SECTION 13: RÈGLES DÉPENDANCES ET INCLUDES CRITIQUES
 - OBLIGATION : Vérifier TOUS les includes avant compilation
 - Modules interdépendants DOIVENT inclure headers appropriés
 - Types externes (matrix_calculator_t, etc.) EXIGENT include explicite
 - Compilation DOIT être testée après chaque ajout d'include
+
+### SECTION 14: RÈGLES ANTI-FALSIFICATION MODULES AVANCÉS
+
+#### RÈGLE #15: INTERDICTION MÉTRIQUES SIMULÉES
+- **OBLIGATOIRE**: Collecte métriques système réelles (/proc/stat, /proc/meminfo)
+- **INTERDIT**: Valeurs hardcodées simulées pour performance
+- **VALIDATION**: Vérification sources métriques authentiques
+- **EXEMPLE CONFORME**: FILE* stat = fopen("/proc/stat", "r");
+- **EXEMPLE NON-CONFORME**: double cpu_utilization = 0.75; // hardcodé
+
+#### RÈGLE #16: INTERDICTION CALCULS FACTICES DISTRIBUÉS
+- **OBLIGATOIRE**: Fonctions calcul réelles pour tâches distribuées
+- **INTERDIT**: Simulations mathématiques sans calculs effectifs
+- **VALIDATION**: Interface calcul avec fonctions authentiques
+- **EXEMPLE CONFORME**: compute_function(input_lum, &output_lum, params);
+- **EXEMPLE NON-CONFORME**: lum->position_x = lum->position_x * 2; // simulation
+
+#### RÈGLE #17: INTERDICTION OPTIMISATIONS FACTICES
+- **OBLIGATOIRE**: Interfaces système réelles pour optimisations
+- **INTERDIT**: Formules mathématiques simulant optimisations
+- **VALIDATION**: Appels système effectifs documentés
+- **EXEMPLE CONFORME**: sys_interface->optimize_cpu_frequency(target);
+- **EXEMPLE NON-CONFORME**: performance *= (1.0 + sin(iteration)); // factice
+
+#### RÈGLE #18: CONFIGURATION DYNAMIQUE OBLIGATOIRE
+- **OBLIGATOIRE**: Paramètres configurables pour pondérations
+- **INTERDIT**: Constantes hardcodées non-modifiables
+- **VALIDATION**: Structures configuration avec validation
+- **EXEMPLE CONFORME**: weights_config_t avec validation somme = 1.0
+- **EXEMPLE NON-CONFORME**: const double weights[] = {0.25, 0.20}; // fixe
+
+#### RÈGLE #19: TESTS STRESS REPRÉSENTATIFS
+- **OBLIGATOIRE**: Tests sur volumes déclarés ou justification échantillonnage
+- **ACCEPTABLE**: Échantillonnage si justifié par contraintes techniques
+- **VALIDATION**: Documentation claire limitations tests
+- **EXEMPLE CONFORME**: "Test 10K représentatif de 100M (contrainte mémoire)"
+- **EXEMPLE NON-CONFORME**: Tests 10K sans mention limitation
 - Erreurs "unknown type name" = ÉCHEC validation immédiat
 - - Utilisation obligatoire de TRACKED_MALLOC/TRACKED_FREE
 - - Protection double-free avec memory_address
