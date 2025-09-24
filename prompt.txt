@@ -435,6 +435,28 @@ jour repondre en francais!
 - **TESTS RÉGRESSION** : Validation complète après chaque modification
 - **ROLLBACK PROTECTION** : Sauvegarde automatique avant modifications critiques
 
+### SECTION 20: RÈGLES ANTI-DEBUG PRODUCTION CRITIQUE 2025-09-24
+
+#### 20.1 INTERDICTION ABSOLUE DEBUG LOGS EN PRODUCTION
+- **PROBLÈME IDENTIFIÉ** : printf() debug dans lum_group_add() cause dégradation x66 performance
+- **INTERDICTION TOTALE** : printf() debug actifs dans fonctions critiques production
+- **OBLIGATION MACRO** : Utiliser DEBUG_PRINTF() conditionnelle pour tous debug logs
+- **COMPILATION PRODUCTION** : Mode sans -DDEBUG_MODE par défaut obligatoire
+- **VALIDATION PERFORMANCE** : Tests 1M éléments < 10 secondes obligatoire
+
+#### 20.2 RÈGLES MACRO DEBUG CONDITIONNELLE OBLIGATOIRE
+- **MACRO STANDARD** : DEBUG_PRINTF(...) définie dans common_types.h
+- **PRODUCTION MODE** : DEBUG_PRINTF compile vers ((void)0) 
+- **DEBUG MODE** : DEBUG_PRINTF compile vers printf() uniquement si -DDEBUG_MODE
+- **INTERDICTION** : printf() direct dans code production sans macro
+- **VALIDATION** : Tests performance avant/après pour mesurer impact debug
+
+#### 20.3 PROTECTION CONTRE RÉGRESSION DEBUG
+- **AUDIT OBLIGATOIRE** : Vérifier absence printf() debug avant validation
+- **TESTS PERFORMANCE** : Mesures obligatoires avec/sans debug pour comparaison
+- **SEUIL CRITIQUE** : Dégradation > 2x performance = échec validation automatique
+- **DOCUMENTATION** : Consigner impact performance de chaque ajout debug
+
 #### 18.2 TYPEDEF CONSOLIDATION STRICTE  
 - **RÈGLE UNIQUE** : Un seul typedef par type dans common_types.h
 - **INTERDICTION** : Redéfinition typedef dans fichiers .c
