@@ -1033,48 +1033,7 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX Real Metrics"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "LUM/VORAX Complete Tests"
-
-[[workflows.workflow.tasks]]
-task = "workflow.run"
-args = "LUM/VORAX Real Tests"
-
-[[workflows.workflow]]
-name = "LUM/VORAX Real Metrics"
-author = "agent"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax_complete --progressive-stress-all"
-
-[[workflows.workflow]]
-name = "LUM/VORAX Complete Tests"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax_complete --progressive-stress-all"
-
-[workflows.workflow.metadata]
-outputType = "console"
-
-[[workflows.workflow]]
-name = "LUM/VORAX Real Tests"
-author = "agent"
-
-[[workflows.workflow.tasks]]
-task = "shell.exec"
-args = "./bin/lum_vorax_simple_100 --progressive-stress-all"
-
-[workflows.workflow.metadata]
-outputType = "console"
+args = "LUM/VORAX System"
 
 [[workflows.workflow]]
 name = "Finaliser Tests Individuels"
@@ -1144,6 +1103,17 @@ args = "make all"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"✅ Finalisation complète\""
+
+[[workflows.workflow]]
+name = "LUM/VORAX System"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax_complete --progressive-stress-all"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
