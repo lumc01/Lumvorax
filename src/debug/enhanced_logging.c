@@ -6,11 +6,20 @@
 #include <sys/stat.h>
 #include <errno.h>
 
-// Système de logs avancé conforme rapport 091
+// CORRECTION RAPPORT 117: Création répertoire sécurisée (fini system())
 void create_log_directory(const char* base_path) {
-    char command[256];
-    snprintf(command, sizeof(command), "mkdir -p %s", base_path);
-    system(command);
+    if (!base_path) return;
+    
+    // SÉCURITÉ : Validation chemin avant création
+    if (strstr(base_path, "..") || strstr(base_path, ";") || strstr(base_path, "|")) {
+        return; // Chemin suspect rejeté
+    }
+    
+    // Création sécurisée avec mkdir() direct
+    struct stat st = {0};
+    if (stat(base_path, &st) == -1) {
+        mkdir(base_path, 0755);
+    }
 }
 
 void create_enhanced_log(const char* filepath, const char* message) {
@@ -33,9 +42,9 @@ void create_enhanced_log(const char* filepath, const char* message) {
         fprintf(file, "[%s] %s\n", timestamp, message);
         fclose(file);
         
-        printf("✅ Log créé: %s\n", filepath);
+        // Log créé silencieusement (fini printf debug)
     } else {
-        printf("❌ Erreur création log: %s - %s\n", filepath, strerror(errno));
+        // Erreur log silencieuse (fini printf debug)
     }
 }
 

@@ -5,11 +5,30 @@
 #include <stdlib.h>
 #include <string.h>
 
-// Limites serveur Hostinger exactes
-#define HOSTINGER_MAX_CPU_CORES 2
-#define HOSTINGER_MAX_RAM_GB 6
-#define HOSTINGER_MAX_STORAGE_GB 90
-#define HOSTINGER_MAX_CONCURRENT_LUMS 1000000  // 1M max sur serveur
+// CORRECTION RAPPORT 117: Limites configurables dynamiques
+typedef struct {
+    uint32_t max_cpu_cores;
+    uint32_t max_ram_gb;
+    uint32_t max_storage_gb;
+    uint32_t max_concurrent_lums;
+    const char* server_identifier;
+} resource_limits_config_t;
+
+static resource_limits_config_t current_limits = {
+    .max_cpu_cores = 2,
+    .max_ram_gb = 6,
+    .max_storage_gb = 90,
+    .max_concurrent_lums = 1000000,
+    .server_identifier = "generic"
+};
+
+bool hostinger_set_resource_limits(uint32_t cpu, uint32_t ram_gb, uint32_t storage_gb, uint32_t max_lums) {
+    current_limits.max_cpu_cores = cpu;
+    current_limits.max_ram_gb = ram_gb;
+    current_limits.max_storage_gb = storage_gb;
+    current_limits.max_concurrent_lums = max_lums;
+    return true;
+}
 
 // Structure hostinger_resource_monitor_t déjà définie dans hostinger_resource_limiter.h
 
@@ -18,21 +37,21 @@ static hostinger_resource_monitor_t* global_monitor = NULL;
 bool hostinger_check_cpu_availability(void) {
     if (!global_monitor) return false;
     
-    if (global_monitor->active_threads >= HOSTINGER_MAX_CPU_CORES) {
+    if (global_monitor->active_threads >= current_limits.max_cpu_cores) {
         printf("[HOSTINGER_LIMITER] ❌ CPU limité: %u/%d threads actifs\n",
-               (uint32_t)global_monitor->active_threads, HOSTINGER_MAX_CPU_CORES);
+               (uint32_t)global_monitor->active_threads, current_limits.max_cpu_cores);
         return false;
     }
     
     printf("[HOSTINGER_LIMITER] ✅ CPU disponible: %u/%d threads\n",
-           (uint32_t)global_monitor->active_threads, HOSTINGER_MAX_CPU_CORES);
+           (uint32_t)global_monitor->active_threads, current_limits.max_cpu_cores);
     return true;
 }
 
 bool hostinger_check_ram_availability(size_t required_mb) {
     if (!global_monitor) return false;
     
-    size_t max_ram_mb = HOSTINGER_MAX_RAM_GB * 1024;
+    size_t max_ram_mb = current_limits.max_ram_gb * 1024;
     size_t total_needed = global_monitor->current_ram_usage_mb + required_mb;
     
     if (total_needed > max_ram_mb) {
@@ -49,9 +68,9 @@ bool hostinger_check_ram_availability(size_t required_mb) {
 bool hostinger_check_lum_processing_limit(size_t lum_count) {
     if (!global_monitor) return false;
     
-    if (lum_count > HOSTINGER_MAX_CONCURRENT_LUMS) {
+    if (lum_count > current_limits.max_concurrent_lums) {
         printf("[HOSTINGER_LIMITER] ❌ Trop de LUMs: %zu > %d max autorisés\n",
-               lum_count, HOSTINGER_MAX_CONCURRENT_LUMS);
+               lum_count, current_limits.max_concurrent_lums);
         printf("[HOSTINGER_LIMITER] Limitation serveur 2CPU/6GB RAM\n");
         return false;
     }
