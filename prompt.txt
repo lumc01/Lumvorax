@@ -420,6 +420,21 @@ jour repondre en francais!
 - **VALIDATION** : Vérification contenu non-vide avant rapport
 - **TIMESTAMPS** : Nanoseconde obligatoire pour traçabilité
 
+### SECTION 19: RÈGLES ANTI-RÉTROGRADATION CRITIQUES 2025-01-27
+
+#### 19.1 PRÉSERVATION OPTIMISATIONS OBLIGATOIRE
+- **INTERDICTION ABSOLUE** : Suppression corrections cryptographiques appliquées
+- **PROTECTION TIMING ATTACKS** : secure_memcmp() obligatoire TOUS comparaisons crypto
+- **BUFFER CLEARING** : Nettoyage sécurisé contextes crypto OBLIGATOIRE
+- **TESTS NIST RFC 6234** : 5+ vecteurs test MINIMUM pour validation
+- **ÉCHELLES OPTIMISÉES** : Tests 1-1000 éléments (plus 1M-100M pour serveur limité)
+
+#### 19.2 VALIDATION PRÉSERVATION CORRECTIONS
+- **OBLIGATION** : Vérifier aucune suppression code sécurisé avant modification
+- **AUDIT TRAIL** : Logger toute modification code crypto/sécurité
+- **TESTS RÉGRESSION** : Validation complète après chaque modification
+- **ROLLBACK PROTECTION** : Sauvegarde automatique avant modifications critiques
+
 #### 18.2 TYPEDEF CONSOLIDATION STRICTE  
 - **RÈGLE UNIQUE** : Un seul typedef par type dans common_types.h
 - **INTERDICTION** : Redéfinition typedef dans fichiers .c

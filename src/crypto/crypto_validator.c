@@ -93,6 +93,12 @@ void sha256_final(sha256_context_t* ctx, uint8_t* hash) {
         hash[i * 4 + 2] = (ctx->state[i] >> 8) & 0xff;
         hash[i * 4 + 3] = ctx->state[i] & 0xff;
     }
+    
+    // SÉCURITÉ: Clearing sécurisé du contexte
+    volatile uint8_t* vol_ctx = (volatile uint8_t*)ctx;
+    for (size_t i = 0; i < sizeof(sha256_context_t); i++) {
+        vol_ctx[i] = 0;
+    }
 }
 
 void sha256_process_block(sha256_context_t* ctx, const uint8_t* block) {
@@ -157,6 +163,8 @@ void sha256_hash(const uint8_t* data, size_t len, uint8_t* hash) {
 bool crypto_validate_sha256_implementation(void) {
     bool all_tests_passed = true;
     
+    // Tests RFC 6234 complets avec timing-safe comparison
+    
     // Test vector 1: Empty string
     const char* input1 = "";
     const char* expected1 = "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855";
@@ -165,7 +173,7 @@ bool crypto_validate_sha256_implementation(void) {
     
     char hex1[65];
     bytes_to_hex_string(result1, 32, hex1);
-    if (strcmp(hex1, expected1) != 0) all_tests_passed = false;
+    if (secure_memcmp(hex1, expected1, 64) != 0) all_tests_passed = false;
     
     // Test vector 2: "abc"
     const char* input2 = "abc";
@@ -175,7 +183,7 @@ bool crypto_validate_sha256_implementation(void) {
     
     char hex2[65];
     bytes_to_hex_string(result2, 32, hex2);
-    if (strcmp(hex2, expected2) != 0) all_tests_passed = false;
+    if (secure_memcmp(hex2, expected2, 64) != 0) all_tests_passed = false;
     
     // Test vector 3: Long string
     const char* input3 = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
@@ -185,7 +193,27 @@ bool crypto_validate_sha256_implementation(void) {
     
     char hex3[65];
     bytes_to_hex_string(result3, 32, hex3);
-    if (strcmp(hex3, expected3) != 0) all_tests_passed = false;
+    if (secure_memcmp(hex3, expected3, 64) != 0) all_tests_passed = false;
+    
+    // Test vector 4: Single "a" (nouveau test NIST)
+    const char* input4 = "a";
+    const char* expected4 = "ca978112ca1bbdcafac231b39a23dc4da786eff8147c4e72b9807785afee48bb";
+    uint8_t result4[32];
+    sha256_hash((const uint8_t*)input4, strlen(input4), result4);
+    
+    char hex4[65];
+    bytes_to_hex_string(result4, 32, hex4);
+    if (secure_memcmp(hex4, expected4, 64) != 0) all_tests_passed = false;
+    
+    // Test vector 5: Pattern de 56 bytes (boundary test)
+    const char* input5 = "01234567012345670123456701234567012345670123456701234567";
+    const char* expected5 = "b9045a713caed5dff3d3b783e98d1ce5778d8bc331ee4119d707072312af06a7";
+    uint8_t result5[32];
+    sha256_hash((const uint8_t*)input5, strlen(input5), result5);
+    
+    char hex5[65];
+    bytes_to_hex_string(result5, 32, hex5);
+    if (secure_memcmp(hex5, expected5, 64) != 0) all_tests_passed = false;
     
     return all_tests_passed;
 }
@@ -246,13 +274,27 @@ bool compute_data_hash(const void* data, size_t data_size, char* hash_output) {
     return true;
 }
 
+// Protection contre timing attacks - comparaison à temps constant
+static int secure_memcmp(const void* a, const void* b, size_t len) {
+    const volatile unsigned char* va = (const volatile unsigned char*)a;
+    const volatile unsigned char* vb = (const volatile unsigned char*)b;
+    unsigned char result = 0;
+    
+    for (size_t i = 0; i < len; i++) {
+        result |= va[i] ^ vb[i];
+    }
+    
+    return result;
+}
+
 bool verify_data_integrity(const void* data, size_t data_size, const char* expected_hash) {
     if (!data || !expected_hash) return false;
     
     char computed_hash[65];
     if (!compute_data_hash(data, data_size, computed_hash)) return false;
     
-    return strcmp(computed_hash, expected_hash) == 0;
+    // Utilisation comparaison timing-safe
+    return secure_memcmp(computed_hash, expected_hash, strlen(expected_hash)) == 0;
 }
 
 bool validate_lum_integrity(const lum_t* lum) {
