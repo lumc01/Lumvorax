@@ -530,6 +530,92 @@ Pour chaque module, mesurer obligatoirement :
 #### 22.5 GÉNÉRATION ID CRYPTOGRAPHIQUEMENT ROBUSTE
 - **SOURCES ENTROPIE** : Utiliser getrandom() puis /dev/urandom puis fallback haute entropie
 - **TESTS UNICITÉ** : Valider absence collisions sur 1M+ générations
+- **ROTATION SÉCURISÉE** : Algorithmes type ChaCha20 pour génération pseudo-aléatoire
+- **FALLBACK ROBUSTE** : Solution de secours si entropie indisponible
+- **AUDIT ENTROPIE** : Tests statistiques qualité générateurs
+
+### SECTION 23: RÈGLES ANTI-RÉCURRENCE OPTIMISATION 2025-09-22
+
+#### 23.1 THREAD SAFETY OBLIGATOIRE MODULES OPTIMISATION
+- **PROTECTION UNIVERSELLE** : Tous modules avec état partagé DOIVENT avoir protection mutex
+- **MEMORY_OPTIMIZER** : pthread_mutex_t pools_mutex OBLIGATOIRE pour tous accès pools
+- **PARALLEL_PROCESSOR** : Queue thread-safe avec mutex/condition correctement implémentée
+- **PERFORMANCE_METRICS** : Statistiques globales protégées contre race conditions
+- **VALIDATION OBLIGATOIRE** : Tests multi-thread 1000+ iterations avant validation module
+
+#### 23.2 MÉTRIQUES SYSTÈME AUTHENTIQUES OBLIGATOIRES
+- **INTERDICTION ABSOLUE** : Métriques simulées sin/cos/random en modules production
+- **SOURCES RÉELLES** : Utiliser /proc/stat, /proc/meminfo, /proc/loadavg, sysinfo()
+- **CALCULS AUTHENTIQUES** : CPU usage basé compteurs système réels
+- **FALLBACK SÉCURISÉ** : Valeurs par défaut documentées si accès /proc échoue
+- **VALIDATION CROISÉE** : Corrélation avec outils système (htop, iostat, vmstat)
+
+#### 23.3 OPTIMISATIONS VECTORIELLES SIMD VALIDÉES
+- **DÉTECTION HARDWARE** : CPUID runtime obligatoire avec __get_cpuid()
+- **FALLBACK SCALAIRE** : Implémentation non-SIMD TOUJOURS présente et testée
+- **INTRINSICS VALIDÉS** : Compilation testée sur architectures cibles AVX2/AVX-512
+- **PERFORMANCE MESURÉE** : Benchmarks avant/après vectorisation obligatoires
+- **GESTION REMAINDER** : Traitement éléments non-alignés sur largeur vecteur
+
+#### 23.4 ALLOCATEURS MÉMOIRE ROBUSTES AVANCÉS
+- **ZERO-COPY AUTHENTIQUE** : mmap() système réel, pas simulation malloc
+- **DÉFRAGMENTATION RÉELLE** : Algorithmes compaction avec préservation données
+- **PROTECTION CORRUPTION** : Magic numbers validation systématique
+- **MÉTRIQUES DÉTAILLÉES** : Fragmentation, efficacité, hit ratio tracés
+- **TESTS STRESS** : Validation millions allocations/libérations/défragmentations
+
+#### 23.5 PARALLEL PROCESSING INDUSTRIEL
+- **THREAD POOLS** : Gestion complète lifecycle workers (création/destruction/cleanup)
+- **QUEUES THREAD-SAFE** : Mutex/condition proper usage avec timeout protection
+- **LOAD BALANCING** : Distribution équitable tâches avec adaptation charge
+- **MONITORING WORKERS** : Métriques performance par thread individual
+- **FAULT TOLERANCE** : Gestion pannes workers avec relance automatique
+
+#### 23.6 ALGORITHMES PARETO MATHÉMATIQUEMENT CORRECTS
+- **DÉFINITION STRICTE** : Dominance Pareto respectant définition mathématique
+- **PARETO INVERSÉ** : Innovation technique validée avec pondération avancée
+- **MÉTRIQUES MULTI-CRITÈRES** : Efficacité, mémoire, temps, énergie calculés réellement
+- **FRONT NON-DOMINÉ** : Algorithme élimination dominance correct
+- **OPTIMISATION CONTINUE** : Mise à jour dynamique front Pareto
+
+#### 23.7 VALIDATION PERFORMANCE TEMPS RÉEL
+- **CLOCK_MONOTONIC** : Utilisation exclusive pour mesures temporelles
+- **CONVERSIONS AUTHENTIQUES** : sizeof(lum_t) dynamique pour calculs throughput
+- **MÉTRIQUES COMPOSITES** : LUMs/seconde → bits/seconde → Gigabits/seconde
+- **BENCHMARKING REPRODUCTIBLE** : Méthodes mesure standardisées
+- **COMPARAISONS INDUSTRIELLES** : Standards SQLite/Redis/BLAS comme références
+
+#### 22.1 INTERDICTION ÉMOJIS PRODUCTION ABSOLUE
+- **CARACTÈRES INTERDITS** : Tous émojis Unicode (🔄🔍✅❌⚠️💾🎯📊📋🚨) en code/logs production
+- **REMPLACEMENT OBLIGATOIRE** : Préfixes ASCII clairs [MODULE], [STATUS], [ERROR], [INFO]
+- **COMPATIBILITÉ SYSTÈME** : Garantie fonctionnement terminaux ASCII stricts
+- **PARSING AUTOMATISÉ** : Compatibilité scripts grep/awk/sed d'analyse logs
+- **STANDARDS CONFORMES** : Respect ISO/IEC 27037 logging forensique industriel
+
+#### 22.2 FORWARD DECLARATIONS ORGANISÉES
+- **SECTION OBLIGATOIRE** : Grouper toutes forward declarations en début de fichier
+- **COMMENTAIRES REQUIS** : Documenter raison de chaque forward declaration
+- **ORGANISATION LOGIQUE** : Fonctions publiques → privées → utilitaires
+- **DÉPENDANCES CLAIRES** : Éviter chaînes forward declarations complexes
+- **VALIDATION COMPILATION** : Vérifier aucune déclaration inutile résiduelle
+
+#### 22.3 CONSTANTES CRYPTOGRAPHIQUES DOCUMENTÉES
+- **ORIGINE MATHÉMATIQUE** : Documenter source (RFC, NIST, algorithme génération)
+- **JUSTIFICATION SÉCURITAIRE** : Expliquer propriétés cryptographiques nécessaires
+- **RÉFÉRENCES STANDARDS** : Citer documents officiels (RFC 6234, FIPS 180-4)
+- **VALIDATION CROISÉE** : Vérifier identité avec implémentations référence (OpenSSL)
+- **MISE À JOUR TRACÉE** : Logger toute modification constantes critiques
+
+#### 22.4 SÉCURISATION PATH TRAVERSAL RENFORCÉE
+- **PATTERNS ÉTENDUS** : Bloquer "..", "//", "\\", "./", ".\\", "/..", "\\.."
+- **CARACTÈRES DANGEREUX** : Interdire /<>:"|?*\x00-\x1f\x7f-\x9f
+- **NOMS RÉSERVÉS** : Rejeter CON, PRN, AUX, NUL, COM1, LPT1, dev, proc, sys
+- **LONGUEUR LIMITÉE** : Imposer MAX_SECURE_FILENAME_LENGTH configurable
+- **VALIDATION MULTIPLE** : Appliquer vérifications à tous points d'entrée fichiers
+
+#### 22.5 GÉNÉRATION ID CRYPTOGRAPHIQUEMENT ROBUSTE
+- **SOURCES ENTROPIE** : Utiliser getrandom() puis /dev/urandom puis fallback haute entropie
+- **TESTS UNICITÉ** : Valider absence collisions sur 1M+ générations
 - **SEEDDING SÉCURISÉ** : Combiner timestamp nanoseconde + PID + entropie système
 - **DÉTECTION FAIBLESSE** : Alerter si fallback méthodes faibles nécessaire
 - **ROTATION PÉRIODIQUE** : Changer seeds régulièrement pour générateurs long-terme

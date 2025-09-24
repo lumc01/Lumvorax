@@ -722,6 +722,253 @@ static bool validate_secure_filename(const char* filename) {
     size_t len = strlen(filename);
     if (len == 0 || len > MAX_SECURE_FILENAME_LENGTH) return false;
     
+    // Patterns dangereux étendus
+    const char* dangerous_patterns[] = {
+        "..", "//", "\\\\", "./", ".\\", "/..", "\\..",
+        "../", "..\\", "/./", "\\.\\", "~/", "%2e%2e",
+        "%2f", "%5c", "\x00", NULL
+    };
+    
+    // Vérification patterns
+    for (int i = 0; dangerous_patterns[i]; i++) {
+        if (strstr(filename, dangerous_patterns[i])) {
+            return false;
+        }
+    }
+    
+    // Caractères interdits
+    for (size_t i = 0; i < len; i++) {
+        char c = filename[i];
+        if (c < 32 || c == 127 || strchr("<>:\"|?*", c)) {
+            return false;
+        }
+    }
+    
+    // Noms réservés Windows/Unix
+    const char* reserved_names[] = {
+        "CON", "PRN", "AUX", "NUL", "COM1", "COM2", "COM3", "COM4",
+        "LPT1", "LPT2", "LPT3", "dev", "proc", "sys", NULL
+    };
+    
+    for (int i = 0; reserved_names[i]; i++) {
+        if (strcasecmp(filename, reserved_names[i]) == 0) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+```
+
+### 📚 SOLUTION #5: Optimisation Performance CRC32
+
+#### 🔍 ANALYSE OPTIMISATION AVANCÉE
+**Problème** : Duplication table CRC32 entre modules
+**Impact** : Gaspillage mémoire + maintenance difficile
+
+#### ✅ SOLUTION ARCHITECTURALE CENTRALISÉE
+```c
+// FICHIER: src/crypto/crc32_shared.h
+#ifndef CRC32_SHARED_H
+#define CRC32_SHARED_H
+
+#include <stdint.h>
+#include <stddef.h>
+
+// Table CRC32 IEEE 802.3 centralisée
+extern const uint32_t crc32_ieee_table[256];
+
+// Fonction CRC32 optimisée universelle
+uint32_t crc32_ieee_calculate(const void* data, size_t length);
+
+// Fonction CRC32 avec état pour streaming
+typedef struct {
+    uint32_t crc;
+    size_t bytes_processed;
+} crc32_context_t;
+
+void crc32_context_init(crc32_context_t* ctx);
+void crc32_context_update(crc32_context_t* ctx, const void* data, size_t length);
+uint32_t crc32_context_finalize(crc32_context_t* ctx);
+
+#endif // CRC32_SHARED_H
+```
+
+---
+
+## 🛡️ RÈGLES PRÉVENTIVES ANTI-RÉCURRENCE
+
+### 🚨 RÈGLE #1: INTERDICTION ABSOLUE ÉMOJIS PRODUCTION
+- **Application** : Tous modules, logs, comments, printf
+- **Détection** : `grep -r "[🔄🔍✅❌⚠️💾🎯📊📋🚨]" src/`
+- **Sanction** : Échec compilation automatique
+- **Alternative** : Préfixes ASCII `[MODULE]`, `[STATUS]`, `[ERROR]`
+
+### 🚨 RÈGLE #2: ORGANISATION FORWARD DECLARATIONS
+- **Section obligatoire** : Début de chaque .c file
+- **Commentaires requis** : Raison de chaque forward declaration
+- **Validation** : Aucune déclaration inutile tolérée
+- **Organisation** : Public → Private → Utilities
+
+### 🚨 RÈGLE #3: DOCUMENTATION CONSTANTES CRYPTOGRAPHIQUES
+- **Source obligatoire** : RFC/NIST/Standard documenté
+- **Justification** : Propriétés mathématiques expliquées
+- **Validation croisée** : Comparaison OpenSSL/référence
+- **Traçabilité** : Historique modifications obligatoire
+
+### 🚨 RÈGLE #4: SÉCURITÉ PATH TRAVERSAL MAXIMALE
+- **Validation multi-niveaux** : Patterns + caractères + longueur + noms réservés
+- **Tests obligatoires** : Vecteurs d'attaque complets
+- **Logging sécuritaire** : Tentatives intrusion tracées
+- **Mise à jour** : Patterns malveillants actualisés régulièrement
+
+### 🚨 RÈGLE #5: CENTRALISATION CODE COMMUN
+- **Principe DRY** : Don't Repeat Yourself strictement appliqué
+- **Détection** : Scripts analyse duplication automatique
+- **Refactoring** : Extraction headers communs obligatoire
+- **Maintenance** : Point unique modification pour standards
+
+---
+
+### 📚 SOLUTION #1: Élimination des Émojis en Production
+
+#### 🔍 PROBLÈME IDENTIFIÉ
+**Localisation**: `recovery_manager_extension.c:180-185`
+```c
+printf("🔄 === DÉMARRAGE RECOVERY AUTOMATIQUE ===\n");
+printf("🔍 Étape 1: Vérification intégrité WAL...\n");
+```
+
+#### 📖 EXPLICATION PÉDAGOGIQUE
+Les **émojis dans le code de production** posent plusieurs problèmes critiques :
+
+1. **Compatibilité d'encodage** : Les émojis utilisent UTF-8/Unicode, incompatible avec certains terminaux système
+2. **Parsing automatisé** : Les scripts d'analyse logs ne peuvent pas traiter les caractères non-ASCII
+3. **Standards industriels** : Les environnements serveur critiques (bancaire, médical) interdisent les caractères non-standards
+4. **Débogage** : Les émojis compliquent la recherche textuelle et le grep dans les logs
+
+#### ✅ SOLUTION TECHNIQUE COMPLÈTE
+```c
+// AVANT (PROBLÉMATIQUE)
+printf("🔄 === DÉMARRAGE RECOVERY AUTOMATIQUE ===\n");
+printf("🔍 Étape 1: Vérification intégrité WAL...\n");
+printf("✅ WAL intègre\n");
+
+// APRÈS (CONFORME STANDARDS INDUSTRIELS)  
+printf("[RECOVERY] === DEMARRAGE RECOVERY AUTOMATIQUE ===\n");
+printf("[RECOVERY] Etape 1: Verification integrite WAL...\n");
+printf("[RECOVERY] STATUS: WAL integre\n");
+```
+
+#### 🎯 AVANTAGES SOLUTION
+- **Compatibilité universelle** : Fonctionne sur tous les terminaux ASCII
+- **Parsing automatisé** : Compatible grep, awk, sed, scripts d'analyse
+- **Standards conformes** : Respecte ISO/IEC 27037 logging forensique
+- **Lisibilité maintenue** : Préfixes clairs `[MODULE]` pour identification
+
+### 📚 SOLUTION #2: Optimisation Forward Declarations
+
+#### 🔍 PROBLÈME IDENTIFIÉ
+**Localisation**: `crypto_validator.c:18`
+```c
+// Forward declaration for secure_memcmp to fix compilation error
+static int secure_memcmp(const void* a, const void* b, size_t len);
+```
+
+#### 📖 EXPLICATION PÉDAGOGIQUE APPROFONDIE
+Les **forward declarations** sont une technique fondamentale en C pour résoudre les dépendances circulaires :
+
+**Principe technique** :
+1. **Déclaration** : Informe le compilateur qu'une fonction existe
+2. **Définition** : Implémente réellement la fonction
+3. **Ordre indépendant** : Permet d'utiliser une fonction avant sa définition
+
+**Cas d'usage critical** :
+- Fonctions mutuellement récursives
+- Organisation logique du code (fonctions publiques en haut)
+- Réduction dépendances headers
+
+#### ✅ SOLUTION ARCHITECTURALE OPTIMALE
+```c
+// === SECTION FORWARD DECLARATIONS (Organisation claire) ===
+static int secure_memcmp(const void* a, const void* b, size_t len);
+static bool crypto_validate_internal(const uint8_t* data, size_t len);
+static void secure_zero_memory(void* ptr, size_t len);
+
+// === SECTION IMPLEMENTATIONS PUBLIQUES ===
+bool crypto_validate_sha256_implementation(void) {
+    // Utilise secure_memcmp déclaré plus haut
+    return secure_memcmp(result, expected, 64) == 0;
+}
+
+// === SECTION IMPLEMENTATIONS PRIVÉES ===
+static int secure_memcmp(const void* a, const void* b, size_t len) {
+    // Implémentation timing-safe réelle
+    const volatile unsigned char* va = (const volatile unsigned char*)a;
+    const volatile unsigned char* vb = (const volatile unsigned char*)b;
+    unsigned char result = 0;
+    for (size_t i = 0; i < len; i++) {
+        result |= va[i] ^ vb[i];
+    }
+    return result;
+}
+```
+
+### 📚 SOLUTION #3: Élimination Magic Numbers Cryptographiques
+
+#### 🔍 ANALYSE TECHNIQUE AVANCÉE
+Les **constantes cryptographiques hardcodées** ne sont PAS des anomalies mais des **standards RFC obligatoires** :
+
+#### 📖 EXPLICATION CRYPTOGRAPHIQUE SHA-256
+```c
+static const uint32_t sha256_k[64] = {
+    0x428a2f98, 0x71374491, 0xb5c0fbcf, 0xe9b5dba5,
+    // ... 60 autres constantes RFC 6234
+};
+```
+
+**Origine mathématique** :
+1. **Racines cubiques** : Ces valeurs sont les 64 premières racines cubiques des nombres premiers
+2. **Sécurité cryptographique** : Aucune structure cachée, résistance aux attaques différentielles
+3. **Standard mondial** : Identiques dans toutes les implémentations SHA-256 (OpenSSL, etc.)
+
+#### ✅ DOCUMENTATION PÉDAGOGIQUE AMÉLIORÉE
+```c
+// === CONSTANTES CRYPTOGRAPHIQUES SHA-256 RFC 6234 ===
+// Source mathématique: Racines cubiques fractionnaires des 64 premiers nombres premiers
+// Sécurité: Aucune structure algébrique exploitable par cryptanalyse
+// Standard: Identiques OpenSSL, NSA Suite B, FIPS 180-4
+static const uint32_t sha256_k[64] = {
+    0x428a2f98, // sqrt[3](2)  * 2^32, premier = 2
+    0x71374491, // sqrt[3](3)  * 2^32, premier = 3  
+    0xb5c0fbcf, // sqrt[3](5)  * 2^32, premier = 5
+    0xe9b5dba5, // sqrt[3](7)  * 2^32, premier = 7
+    // ... Documentation complète RFC 6234 Section 4.2.2
+};
+```
+
+### 📚 SOLUTION #4: Sécurisation Path Traversal Renforcée
+
+#### 🔍 ANALYSE SÉCURITAIRE CRITIQUE
+La protection actuelle est **excellente mais perfectible** :
+
+```c
+// PROTECTION ACTUELLE (Déjà très bonne)
+if (strstr(filename, "..") || strchr(filename, '/') || strchr(filename, '\\')) {
+    storage_result_set_error(result, "Nom fichier non securise rejete");
+    return result;
+}
+```
+
+#### ✅ SOLUTION SÉCURITAIRE RENFORCÉE
+```c
+// PROTECTION ULTRA-RENFORCÉE (Niveau bancaire/militaire)
+static bool validate_secure_filename(const char* filename) {
+    if (!filename) return false;
+    
+    size_t len = strlen(filename);
+    if (len == 0 || len > MAX_SECURE_FILENAME_LENGTH) return false;
+    
     // Protection path traversal étendue
     const char* forbidden_patterns[] = {
         "..", "//", "\\\\", "./", ".\\", "//", 
