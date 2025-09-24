@@ -566,3 +566,26 @@ void matrix_calculator_demo(void) {
 void matrix_result_destroy(matrix_calculator_result_t** result_ptr) {
     matrix_calculator_result_destroy((matrix_calculator_result_t**)result_ptr);
 }
+
+// Implémentations manquantes pour le linkage
+bool lum_matrix_set_lum(lum_matrix_t* matrix, size_t row, size_t col, lum_t* lum) {
+    if (!matrix || matrix->magic_number != MATRIX_MAGIC_NUMBER) return false;
+    if (row >= matrix->rows || col >= matrix->cols) return false;
+    if (!lum) return false;
+    
+    // Copier le LUM dans la matrice
+    matrix->matrix_data[row][col] = *lum;
+    return true;
+}
+
+lum_t* lum_matrix_get_lum(lum_matrix_t* matrix, size_t row, size_t col) {
+    if (!matrix || matrix->magic_number != MATRIX_MAGIC_NUMBER) return NULL;
+    if (row >= matrix->rows || col >= matrix->cols) return NULL;
+    
+    return &matrix->matrix_data[row][col];
+}
+
+void matrix_calculator_cleanup(void) {
+    // Nettoyage global si nécessaire 
+    // Le memory_tracker s'occupe déjà du nettoyage automatique
+}
