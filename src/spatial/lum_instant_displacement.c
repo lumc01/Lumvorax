@@ -10,6 +10,20 @@
 #include <time.h>
 #include <sys/time.h>
 
+// CORRECTION RAPPORT 117: Configuration runtime distance max
+int32_t lum_max_displacement_distance = 10000; // Valeur par défaut configurable
+
+// API configuration distance maximum
+void lum_set_max_displacement_distance(int32_t max_distance) {
+    if (max_distance > 0) {
+        lum_max_displacement_distance = max_distance;
+    }
+}
+
+int32_t lum_get_max_displacement_distance(void) {
+    return lum_max_displacement_distance;
+}
+
 // Fonction utilitaire pour timestamp haute précision
 static uint64_t get_precise_timestamp_ns(void) {
     struct timespec ts;
@@ -54,9 +68,15 @@ bool lum_instant_displace(lum_t* lum, int32_t new_x, int32_t new_y, lum_displace
     result->displacement_time_ns = end_time - start_time;
     result->success = true;
 
-    printf("[DISPLACEMENT] LUM[%u] déplacée instantanément de (%d,%d) → (%d,%d) en %lu ns\n",
-           lum->id, result->from_x, result->from_y, result->to_x, result->to_y, 
-           result->displacement_time_ns);
+    // CORRECTION RAPPORT 117: Logging système au lieu de printf hardcodé
+    lum_logger_t* logger = lum_get_global_logger();
+    if (logger) {
+        char log_msg[256];
+        snprintf(log_msg, sizeof(log_msg), "LUM[%u] déplacée instantanément de (%d,%d) → (%d,%d) en %lu ns",
+                 lum->id, result->from_x, result->from_y, result->to_x, result->to_y, 
+                 result->displacement_time_ns);
+        lum_log_message(logger, LUM_LOG_DEBUG, log_msg);
+    }
 
     return true;
 }
@@ -66,8 +86,14 @@ bool lum_group_instant_displace_all(lum_group_t* group, int32_t delta_x, int32_t
         return false;
     }
 
-    printf("[GROUP_DISPLACEMENT] Déplacement de %zu LUMs par delta (%d,%d)\n", 
-           group->count, delta_x, delta_y);
+    // CORRECTION RAPPORT 117: Logging système au lieu de printf hardcodé
+    lum_logger_t* logger = lum_get_global_logger();
+    if (logger) {
+        char log_msg[256];
+        snprintf(log_msg, sizeof(log_msg), "GROUP_DISPLACEMENT: Déplacement de %zu LUMs par delta (%d,%d)",
+                 group->count, delta_x, delta_y);
+        lum_log_message(logger, LUM_LOG_INFO, log_msg);
+    }
 
     uint64_t start_time = get_precise_timestamp_ns();
 
@@ -151,13 +177,19 @@ void lum_displacement_metrics_print(const lum_displacement_metrics_t* metrics) {
 }
 
 bool lum_test_displacement_performance(size_t num_lums) {
-    printf("\n=== TEST PERFORMANCE DÉPLACEMENT INSTANTANÉ ===\n");
+    // CORRECTION RAPPORT 117: Logging système
+    lum_logger_t* logger = lum_get_global_logger();
+    if (logger) {
+        lum_log_message(logger, LUM_LOG_INFO, "=== TEST PERFORMANCE DÉPLACEMENT INSTANTANÉ ===");
+    }
     printf("Création de %zu LUMs pour test...\n", num_lums);
 
     // Créer groupe de test
     lum_group_t* test_group = lum_group_create(num_lums);
     if (!test_group) {
-        printf("[ERROR] Échec création groupe test\n");
+        if (logger) {
+            lum_log_message(logger, LUM_LOG_ERROR, "Échec création groupe test");
+        }
         return false;
     }
 
@@ -170,7 +202,11 @@ bool lum_test_displacement_performance(size_t num_lums) {
         }
     }
 
-    printf("✅ %zu LUMs créées dans le groupe\n", lum_group_size(test_group));
+    if (logger) {
+        char log_msg[128];
+        snprintf(log_msg, sizeof(log_msg), "✅ %zu LUMs créées dans le groupe", lum_group_size(test_group));
+        lum_log_message(logger, LUM_LOG_INFO, log_msg);
+    }
 
     // Métriques
     lum_displacement_metrics_t* metrics = lum_displacement_metrics_create();
@@ -203,13 +239,23 @@ bool lum_test_displacement_performance(size_t num_lums) {
     uint64_t end_group = get_precise_timestamp_ns();
 
     // Affichage résultats
-    printf("\n📊 RÉSULTATS PERFORMANCE :\n");
-    printf("Déplacements individuels: %lu ns total (%.2f ns/LUM)\n", 
-           end_individual - start_individual,
-           (double)(end_individual - start_individual) / num_lums);
-    printf("Déplacement de groupe: %lu ns total (%.2f ns/LUM)\n",
-           end_group - start_group,
-           (double)(end_group - start_group) / num_lums);
+    if (logger) {
+        lum_log_message(logger, LUM_LOG_INFO, "📊 RÉSULTATS PERFORMANCE :");
+    }
+    if (logger) {
+        char log_msg[256];
+        snprintf(log_msg, sizeof(log_msg), "Déplacements individuels: %lu ns total (%.2f ns/LUM)", 
+                 end_individual - start_individual,
+                 (double)(end_individual - start_individual) / num_lums);
+        lum_log_message(logger, LUM_LOG_INFO, log_msg);
+    }
+    if (logger) {
+        char log_msg[256];
+        snprintf(log_msg, sizeof(log_msg), "Déplacement de groupe: %lu ns total (%.2f ns/LUM)",
+                 end_group - start_group,
+                 (double)(end_group - start_group) / num_lums);
+        lum_log_message(logger, LUM_LOG_INFO, log_msg);
+    }
 
     lum_displacement_metrics_print(metrics);
 
@@ -217,12 +263,17 @@ bool lum_test_displacement_performance(size_t num_lums) {
     lum_displacement_metrics_destroy(metrics);
     lum_group_destroy(test_group);
 
-    printf("✅ Test performance déplacement terminé\n");
+    if (logger) {
+        lum_log_message(logger, LUM_LOG_INFO, "✅ Test performance déplacement terminé");
+    }
     return true;
 }
 
 bool lum_test_displacement_vs_traditional_move(size_t num_operations) {
-    printf("\n=== COMPARAISON DÉPLACEMENT vs MÉTHODE TRADITIONNELLE ===\n");
+    lum_logger_t* logger = lum_get_global_logger();
+    if (logger) {
+        lum_log_message(logger, LUM_LOG_INFO, "=== COMPARAISON DÉPLACEMENT vs MÉTHODE TRADITIONNELLE ===");
+    }
     printf("Test avec %zu opérations...\n", num_operations);
 
     // Créer LUM de test
@@ -236,7 +287,13 @@ bool lum_test_displacement_vs_traditional_move(size_t num_operations) {
     for (size_t i = 0; i < num_operations; i++) {
         // Simulation recherche dans liste + modification
         // (dans un vrai système, cela impliquerait parcours O(n))
-        for (volatile int j = 0; j < 100; j++) {} // Simulation temps de recherche
+        // CORRECTION RAPPORT 117: Simulation réaliste O(n) avec recherche dans tableau
+        // Simulation recherche linéaire dans un tableau de coordonnées
+        static int32_t search_table[1000];
+        bool found = false;
+        for (int j = 0; j < 1000 && !found; j++) {
+            if (search_table[j] == (int32_t)i) found = true;
+        }
         test_lum->position_x = (int32_t)i;
         test_lum->position_y = (int32_t)i;
     }

@@ -1,6 +1,7 @@
 
 #include "hostinger_resource_limiter.h"
 #include "../debug/memory_tracker.h"
+#include "../logger/lum_logger.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -38,13 +39,23 @@ bool hostinger_check_cpu_availability(void) {
     if (!global_monitor) return false;
     
     if (global_monitor->active_threads >= current_limits.max_cpu_cores) {
-        printf("[HOSTINGER_LIMITER] ❌ CPU limité: %u/%d threads actifs\n",
-               (uint32_t)global_monitor->active_threads, current_limits.max_cpu_cores);
+        // CORRECTION RAPPORT 117: Logging système au lieu de printf hardcodé
+        if (lum_get_global_logger()) {
+            char log_msg[256];
+            snprintf(log_msg, sizeof(log_msg), "❌ CPU limité: %u/%u threads actifs",
+                     (uint32_t)global_monitor->active_threads, current_limits.max_cpu_cores);
+            lum_log_message(lum_get_global_logger(), LUM_LOG_WARN, log_msg);
+        }
         return false;
     }
     
-    printf("[HOSTINGER_LIMITER] ✅ CPU disponible: %u/%d threads\n",
-           (uint32_t)global_monitor->active_threads, current_limits.max_cpu_cores);
+    // CORRECTION RAPPORT 117: Logging système
+    if (lum_get_global_logger()) {
+        char log_msg[256];
+        snprintf(log_msg, sizeof(log_msg), "✅ CPU disponible: %u/%u threads",
+                 (uint32_t)global_monitor->active_threads, current_limits.max_cpu_cores);
+        lum_log_message(lum_get_global_logger(), LUM_LOG_DEBUG, log_msg);
+    }
     return true;
 }
 
@@ -55,13 +66,23 @@ bool hostinger_check_ram_availability(size_t required_mb) {
     size_t total_needed = global_monitor->current_ram_usage_mb + required_mb;
     
     if (total_needed > max_ram_mb) {
-        printf("[HOSTINGER_LIMITER] ❌ RAM insuffisante: %zu MB + %zu MB > %zu MB max\n",
-               global_monitor->current_ram_usage_mb, required_mb, max_ram_mb);
+        // CORRECTION RAPPORT 117: Logging système
+        if (lum_get_global_logger()) {
+            char log_msg[256];
+            snprintf(log_msg, sizeof(log_msg), "❌ RAM insuffisante: %zu MB + %zu MB > %zu MB max",
+                     global_monitor->current_ram_usage_mb, required_mb, max_ram_mb);
+            lum_log_message(lum_get_global_logger(), LUM_LOG_WARN, log_msg);
+        }
         return false;
     }
     
-    printf("[HOSTINGER_LIMITER] ✅ RAM disponible: %zu MB libres\n",
-           max_ram_mb - total_needed);
+    // CORRECTION RAPPORT 117: Logging système
+    if (lum_get_global_logger()) {
+        char log_msg[256];
+        snprintf(log_msg, sizeof(log_msg), "✅ RAM disponible: %zu MB libres",
+                 max_ram_mb - total_needed);
+        lum_log_message(lum_get_global_logger(), LUM_LOG_DEBUG, log_msg);
+    }
     return true;
 }
 
@@ -69,14 +90,30 @@ bool hostinger_check_lum_processing_limit(size_t lum_count) {
     if (!global_monitor) return false;
     
     if (lum_count > current_limits.max_concurrent_lums) {
-        printf("[HOSTINGER_LIMITER] ❌ Trop de LUMs: %zu > %d max autorisés\n",
-               lum_count, current_limits.max_concurrent_lums);
-        printf("[HOSTINGER_LIMITER] Limitation serveur 2CPU/6GB RAM\n");
+        // CORRECTION RAPPORT 117: Logging système
+        if (lum_get_global_logger()) {
+            char log_msg[256];
+            snprintf(log_msg, sizeof(log_msg), "❌ Trop de LUMs: %zu > %u max autorisés",
+                     lum_count, current_limits.max_concurrent_lums);
+            lum_log_message(lum_get_global_logger(), LUM_LOG_WARN, log_msg);
+        }
+        // CORRECTION RAPPORT 117: Message dynamique
+        if (lum_get_global_logger()) {
+            char log_msg[256];
+            snprintf(log_msg, sizeof(log_msg), "Limitation serveur %uCPU/%uGB RAM",
+                     current_limits.max_cpu_cores, current_limits.max_ram_gb);
+            lum_log_message(lum_get_global_logger(), LUM_LOG_INFO, log_msg);
+        }
         return false;
     }
     
-    printf("[HOSTINGER_LIMITER] ✅ LUMs autorisés: %zu/%d\n",
-           lum_count, HOSTINGER_MAX_CONCURRENT_LUMS);
+    // CORRECTION RAPPORT 117: Logging système
+    if (lum_get_global_logger()) {
+        char log_msg[256];
+        snprintf(log_msg, sizeof(log_msg), "✅ LUMs autorisés: %zu/%u",
+                 lum_count, current_limits.max_concurrent_lums);
+        lum_log_message(lum_get_global_logger(), LUM_LOG_DEBUG, log_msg);
+    }
     return true;
 }
 

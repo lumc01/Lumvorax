@@ -23,8 +23,11 @@ typedef struct {
 } lum_displacement_metrics_t;
 
 // Constantes
-#define LUM_DISPLACEMENT_MAGIC 0xDEADC0DE
-#define MAX_DISPLACEMENT_DISTANCE 10000
+// CORRECTION RAPPORT 117: Magic number professionnel
+#define LUM_DISPLACEMENT_MAGIC 0x4C55D151  // "LUD1" en hex professionnel
+// CORRECTION RAPPORT 117: Distance max configurable
+extern int32_t lum_max_displacement_distance;
+#define MAX_DISPLACEMENT_DISTANCE lum_max_displacement_distance
 
 // Fonctions principales
 bool lum_instant_displace(lum_t* lum, int32_t new_x, int32_t new_y, lum_displacement_result_t* result);
@@ -36,6 +39,10 @@ lum_displacement_metrics_t* lum_displacement_metrics_create(void);
 void lum_displacement_metrics_destroy(lum_displacement_metrics_t* metrics);
 void lum_displacement_metrics_record(lum_displacement_metrics_t* metrics, lum_displacement_result_t* result);
 void lum_displacement_metrics_print(const lum_displacement_metrics_t* metrics);
+
+// CORRECTION RAPPORT 117: API configuration distance maximum
+void lum_set_max_displacement_distance(int32_t max_distance);
+int32_t lum_get_max_displacement_distance(void);
 
 // Tests et validation
 bool lum_test_displacement_performance(size_t num_lums);
