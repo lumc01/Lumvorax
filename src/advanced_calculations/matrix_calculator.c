@@ -39,6 +39,34 @@ matrix_calculator_t* matrix_calculator_create(size_t rows, size_t cols) {
     return calc;
 }
 
+// Fonctions utilitaires pour tests simples (correction conflits typedef)
+bool lum_matrix_set(lum_matrix_t* matrix, size_t row, size_t col, double value) {
+    if (!matrix || matrix->magic_number != MATRIX_CALCULATOR_MAGIC) return false;
+    if (row >= matrix->rows || col >= matrix->cols) return false;
+    
+    // Créer un LUM temporaire pour stocker la valeur
+    lum_t* temp_lum = lum_create(1, (int32_t)value, (int32_t)(value * 100), LUM_STRUCTURE_LINEAR);
+    if (!temp_lum) return false;
+    
+    bool result = lum_matrix_set_lum(matrix, row, col, temp_lum);
+    lum_destroy(temp_lum);
+    
+    return result;
+}
+
+double lum_matrix_get(lum_matrix_t* matrix, size_t row, size_t col) {
+    if (!matrix || matrix->magic_number != MATRIX_CALCULATOR_MAGIC) return 0.0;
+    if (row >= matrix->rows || col >= matrix->cols) return 0.0;
+    
+    lum_t* lum = lum_matrix_get_lum(matrix, row, col);
+    if (!lum) return 0.0;
+    
+    // Extraire valeur du LUM
+    return (double)lum->position_x;
+}
+
+// Note: Les fonctions lum_matrix_* sont implémentées plus loin dans le fichier
+
 // Définir élément matriciel
 void matrix_set_element(matrix_calculator_t* calc, size_t row, size_t col, double value) {
     if (!calc || calc->magic_number != MATRIX_CALCULATOR_MAGIC) return;

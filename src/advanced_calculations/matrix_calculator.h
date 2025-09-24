@@ -91,6 +91,10 @@ void lum_matrix_destroy(lum_matrix_t** matrix_ptr);
 bool lum_matrix_set_lum(lum_matrix_t* matrix, size_t row, size_t col, lum_t* lum);
 lum_t* lum_matrix_get_lum(lum_matrix_t* matrix, size_t row, size_t col);
 
+// Fonctions utilitaires pour tests (valeurs simples double)
+bool lum_matrix_set(lum_matrix_t* matrix, size_t row, size_t col, double value);
+double lum_matrix_get(lum_matrix_t* matrix, size_t row, size_t col);
+
 // Opérations matricielles avancées
 matrix_lum_result_t* matrix_add(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config);
 matrix_lum_result_t* matrix_multiply(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, matrix_config_t* config);
