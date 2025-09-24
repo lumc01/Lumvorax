@@ -105,8 +105,8 @@ jour repondre en francais!
 ### SECTION 6: TESTS OBLIGATOIRES MINIMUM
 **AVANT VALIDATION** :
 1. Compilation clean (0 erreur, 0 warning)
-2. Test 1M+ LUMs réussi
-3. Test stress 100M préparé
+2. Tests de base 10-1000 éléments réussis
+3. Tests progressifs 1000-100000 éléments validés
 4. Validation mémoire sans fuite
 5. Tests unitaires 100% pass
 6. Conformité STANDARD_NAMES.md
@@ -176,7 +176,7 @@ jour repondre en francais!
 7. Créer rapport forensique
 
 ### SECTION 12: TESTS OBLIGATOIRES
-- Tests stress 1M+ LUMs OBLIGATOIRES avant toute validation
+- **Tests progressifs 10-100K éléments OBLIGATOIRES** avant toute validation
 - Tests unitaires complets pour chaque module
 - Validation AddressSanitizer pour détection fuites mémoire
 - Tests intégration entre modules critiques
@@ -326,7 +326,7 @@ jour repondre en francais!
 - **INTERDICTION** : rm -rf logs/ dans Makefile ou scripts
 - **MAKEFILE CLEAN** : Ne doit JAMAIS supprimer logs/
 - **SCRIPTS PRÉPARATION** : Doivent créer nouveaux répertoires, pas supprimer existants
-- **PROTECTION SYSTÈME** : Logs critiques dans répertoires système protégés
+- **PROTECTION SYSTÈME** : Logs critiques dans répertoires protégés
 
 #### 16.8 GESTION ESPACE DISQUE
 - **COMPRESSION AUTOMATIQUE** : Logs > 30 jours compressés automatiquement
