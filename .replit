@@ -1041,7 +1041,7 @@ args = "LUM/VORAX Complete Tests"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "LUM/VORAX Simple Tests"
+args = "LUM/VORAX Real Tests"
 
 [[workflows.workflow]]
 name = "LUM/VORAX Real Metrics"
@@ -1066,12 +1066,12 @@ args = "./bin/lum_vorax_complete --progressive-stress-all"
 outputType = "console"
 
 [[workflows.workflow]]
-name = "LUM/VORAX Simple Tests"
+name = "LUM/VORAX Real Tests"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "./bin/lum_vorax_simple_100"
+args = "./bin/lum_vorax_simple_100 --progressive-stress-all"
 
 [workflows.workflow.metadata]
 outputType = "console"
