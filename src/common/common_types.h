@@ -52,6 +52,16 @@ typedef enum {
 // Interface forensique standardisée
 void unified_forensic_log(unified_forensic_level_e level, const char* function, const char* format, ...);
 
+// === MACROS DEBUG CONDITIONNELLES === 
+// SOLUTION CRITIQUE audit forensique 2025-09-24: Éviter dégradation performance x66
+// PROBLÈME: printf() debug dans lum_group_add() causait 4M appels pour 1M éléments
+// SOLUTION: DEBUG_PRINTF conditionnelle - production=((void)0), debug=printf()
+#ifdef DEBUG_MODE
+    #define DEBUG_PRINTF(...) printf(__VA_ARGS__)
+#else
+    #define DEBUG_PRINTF(...) ((void)0)
+#endif
+
 // === SHARED NEURAL NETWORK TYPES ===
 // These types are shared across neural modules to avoid conflicts
 
