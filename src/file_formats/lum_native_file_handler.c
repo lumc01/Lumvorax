@@ -361,8 +361,9 @@ lum_file_result_t* lum_export_single_binary(const lum_t* lum, const char* filena
     // Écrire métadonnées si activées
     if (config->include_metadata) {
         context->metadata->format_type = LUM_FORMAT_NATIVE_BINARY;
-        context->metadata->total_lums = 1;
-        context->metadata->total_groups = 1;
+        // CORRECTION RAPPORT 117: Valeurs réelles calculées, pas falsifiées
+        context->metadata->total_lums = lum ? 1 : 0;  // Nombre réel de LUMs
+        context->metadata->total_groups = lum ? 1 : 0;  // Un groupe contenant cette LUM
         context->metadata->total_size_bytes = sizeof(lum_t);
 
         // CORRECTION CRITIQUE: Utiliser sérialisation sécurisée au lieu de fwrite raw

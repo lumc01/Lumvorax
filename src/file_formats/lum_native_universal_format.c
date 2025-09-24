@@ -609,8 +609,13 @@ bool lum_stress_test_100m_elements(const char* test_file_path) {
 
     LOG_INFOF("=== LUM UNIVERSAL FILE STRESS TEST: 100M+ Elements ===");
 
-    const size_t element_count = 100000000; // 100M éléments
-    const size_t test_elements = 100000;    // 100K test représentatif
+    // CORRECTION RAPPORT 117: Test progressif réel avec justification
+    const size_t max_elements = 100000000; // 100M éléments cible
+    const size_t test_elements = (max_elements > 1000000) ? 1000000 : max_elements; // Test 1M représentatif
+    
+    // Documentation limitation : 1M au lieu de 100M pour contraintes serveur
+    printf("NOTE: Test %zu éléments représentatif de %zu (contrainte RAM serveur)\n", 
+           test_elements, max_elements);
 
     struct timespec start, end;
     clock_gettime(CLOCK_REALTIME, &start);
@@ -624,7 +629,7 @@ bool lum_stress_test_100m_elements(const char* test_file_path) {
 
     LOG_INFOF("✅ LUM file manager created successfully");
     LOG_INFOF("Testing with %zu elements (representative of %zu)...", 
-           test_elements, element_count);
+           test_elements, max_elements);
 
     // Test ajout contenu texte massif
     char* test_text = TRACKED_MALLOC(test_elements * 10); // 10 chars par élément
@@ -683,9 +688,9 @@ bool lum_stress_test_100m_elements(const char* test_file_path) {
         LOG_INFOF("   Processing rate: %.0f elements/second", test_elements / add_time);
 
         // Projection pour 100M
-        double projected_time = add_time * (element_count / (double)test_elements);
+        double projected_time = add_time * (max_elements / (double)test_elements);
         LOG_INFOF("   Projected time for %zu elements: %.1f seconds", 
-               element_count, projected_time);
+               max_elements, projected_time);
 
         TRACKED_FREE(add_result);
     } else {

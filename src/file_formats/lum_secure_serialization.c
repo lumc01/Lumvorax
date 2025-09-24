@@ -461,7 +461,7 @@ bool lum_file_stress_test_100m_write_read(void) {
     metadata.version_minor = LUM_FILE_VERSION_MINOR;
     metadata.format_type = LUM_FORMAT_NATIVE_BINARY;
     metadata.total_lums = test_count;
-    metadata.total_groups = 1;
+    metadata.total_groups = test_count > 0 ? 1 : 0;  // CORRECTION RAPPORT 117: Valeur réelle
     metadata.total_size_bytes = test_count * 32; // 32 bytes par LUM sérialisé
 
     struct timespec ts;
