@@ -3,7 +3,7 @@
 
 ## 🎯 ARCHITECTURE SYSTÈME AVEC MÉTRIQUES RÉELLES
 
-**OBJECTIF PRINCIPAL** : Système de traitement de données LUM avec métriques de performance temps réel et validation forensique complète.
+**OBJECTIF PRINCIPAL** : Système de traitement de données LUM avec métriques de performance temps réel et validation forensique complète (exemple de format de presentation des metrique).
 
 **MÉTRIQUES GLOBALES AUTHENTIQUES** :
 - **CPU Usage** : Monitoring temps réel via getrusage()
