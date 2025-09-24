@@ -3,7 +3,49 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "pareto_optimizer.h"
+#include <unistd.h>
+#include <fcntl.h>
 #include "../debug/memory_tracker.h"
+#include <stdio.h>
+
+// CORRECTION RAPPORT 115: Fonctions lecture métriques système réelles
+static double get_real_memory_efficiency(void) {
+    FILE* meminfo = fopen("/proc/meminfo", "r");
+    if (!meminfo) return 0.85; // Fallback si lecture échoue
+    
+    long mem_total = 0, mem_available = 0;
+    char line[256];
+    
+    while (fgets(line, sizeof(line), meminfo)) {
+        if (sscanf(line, "MemTotal: %ld kB", &mem_total) == 1) continue;
+        if (sscanf(line, "MemAvailable: %ld kB", &mem_available) == 1) break;
+    }
+    fclose(meminfo);
+    
+    if (mem_total > 0 && mem_available > 0) {
+        return (double)mem_available / mem_total; // Efficacité = mémoire disponible/total
+    }
+    return 0.85; // Fallback
+}
+
+static double get_real_cpu_efficiency(void) {
+    FILE* stat = fopen("/proc/stat", "r");
+    if (!stat) return 0.75; // Fallback si lecture échoue
+    
+    long user, nice, system, idle, iowait, irq, softirq;
+    if (fscanf(stat, "cpu %ld %ld %ld %ld %ld %ld %ld", 
+               &user, &nice, &system, &idle, &iowait, &irq, &softirq) != 7) {
+        fclose(stat);
+        return 0.75; // Fallback
+    }
+    fclose(stat);
+    
+    long total = user + nice + system + idle + iowait + irq + softirq;
+    if (total > 0) {
+        return 1.0 - ((double)idle / total); // Efficacité = 1 - temps idle
+    }
+    return 0.75; // Fallback
+}
 #include "memory_optimizer.h"
 #include "../metrics/performance_metrics.h"
 #include "../logger/lum_logger.h"
@@ -49,18 +91,17 @@ static double calculate_system_efficiency(void) {
     clock_gettime(CLOCK_REALTIME, &ts);
     double current_time_ms = ts.tv_sec * 1000.0 + ts.tv_nsec / 1000000.0;
 
-    // Variance basée sur les cycles temporels pour simuler charge variable
-    double time_factor = sin(current_time_ms / 10000.0) * 0.1; // ±10% variation
-    memory_efficiency = 0.85 + time_factor;
+    // CORRECTION RAPPORT 115: Mesures réelles mémoire depuis /proc/meminfo
+    memory_efficiency = get_real_memory_efficiency();
     memory_efficiency = fmax(0.3, fmin(0.95, memory_efficiency)); // Clamp [0.3, 0.95]
 
     // 2. Efficacité CPU basée sur charge système adaptative
     static double last_cpu_measurement = 0.0;
     static double cpu_trend = 0.0;
 
-    // Calcul d'efficacité CPU basé sur patterns temporels et variations
-    double cpu_load_factor = cos(current_time_ms / 8000.0) * 0.15; // ±15% variation
-    cpu_efficiency = 0.75 + cpu_load_factor + cpu_trend;
+    // CORRECTION RAPPORT 115: Mesures réelles CPU depuis /proc/stat
+    cpu_efficiency = get_real_cpu_efficiency();
+    if (cpu_efficiency < 0) cpu_efficiency = 0.75; // Fallback si lecture échoue
 
     // Ajuster trend selon la charge récente
     if (cpu_efficiency > last_cpu_measurement) {
@@ -72,11 +113,9 @@ static double calculate_system_efficiency(void) {
     last_cpu_measurement = cpu_efficiency;
     cpu_efficiency = fmax(0.2, fmin(0.95, cpu_efficiency)); // Clamp [0.2, 0.95]
 
-    // 3. Ratio de débit basé sur équilibrage système intelligent
-    // Calcul hybride basé sur efficacité mémoire et CPU pour débit optimal
-    double throughput_base = (memory_efficiency + cpu_efficiency) / 2.0;
-    double throughput_variance = sin(current_time_ms / 12000.0) * 0.1; // ±10%
-    throughput_ratio = throughput_base + throughput_variance;
+    // CORRECTION RAPPORT 115: Calcul débit basé sur métriques réelles
+    // Calcul hybride basé sur efficacité mémoire et CPU réelles pour débit optimal
+    throughput_ratio = (memory_efficiency * 0.6 + cpu_efficiency * 0.4);
     throughput_ratio = fmax(0.25, fmin(0.9, throughput_ratio)); // Clamp [0.25, 0.9]
 
     // Optimisation multi-objectifs avec pondération dynamique
