@@ -1,4 +1,3 @@
-
 # PROMPT COMPLET FINALISATION TESTS UNITAIRES MODULES LUM/VORAX
 
 ## MISSION PRINCIPALE
@@ -63,17 +62,17 @@ Finaliser TOUS les tests unitaires individuels des 44 modules du système LUM/VO
 // SOLUTION: Limiter à 10x10 avec validation complète
 static bool test_module_stress_100k(void) {
     printf("  Test 3/5: Stress Matrix 10x10 (optimisé)...\n");
-    
+
     const size_t matrix_size = 10; // Réduit pour éviter timeout
     lum_matrix_t* matrix_a = lum_matrix_create(matrix_size, matrix_size);
     lum_matrix_t* matrix_b = lum_matrix_create(matrix_size, matrix_size);
-    
+
     if (!matrix_a || !matrix_b) {
         if (matrix_a) lum_matrix_destroy(&matrix_a);
         if (matrix_b) lum_matrix_destroy(&matrix_b);
         return false;
     }
-    
+
     // Initialisation rapide
     for (size_t i = 0; i < matrix_size; i++) {
         for (size_t j = 0; j < matrix_size; j++) {
@@ -81,19 +80,19 @@ static bool test_module_stress_100k(void) {
             lum_matrix_set(matrix_b, i, j, (double)(i * j + 1));
         }
     }
-    
+
     // Test multiplication avec timeout interne
     matrix_config_t* config = matrix_config_create_default();
     matrix_lum_result_t* result = matrix_multiply(matrix_a, matrix_b, config);
-    
+
     bool success = (result && result->success);
-    
+
     // Nettoyage
     if (result) matrix_lum_result_destroy(&result);
     matrix_config_destroy(&config);
     lum_matrix_destroy(&matrix_a);
     lum_matrix_destroy(&matrix_b);
-    
+
     printf("    ✅ Matrix 10x10 stress réussi\n");
     return success;
 }
@@ -104,22 +103,22 @@ static bool test_module_stress_100k(void) {
 // Remplacer stubs par implémentations minimales mais fonctionnelles
 static bool test_module_create_destroy(void) {
     printf("  Test 1/5: Create/Destroy Neural Network...\n");
-    
+
     size_t layer_sizes[] = {2, 4, 1}; // Architecture simple
     neural_network_t* network = neural_network_create(layer_sizes, 3);
-    
+
     if (!network) {
         printf("    ❌ Échec création réseau neural\n");
         return false;
     }
-    
+
     // Validation structure réseau
     if (network->num_layers != 3) {
         printf("    ❌ Nombre layers incorrect\n");
         neural_network_destroy(&network);
         return false;
     }
-    
+
     neural_network_destroy(&network);
     printf("    ✅ Neural Network create/destroy réussi\n");
     return true;
@@ -127,23 +126,23 @@ static bool test_module_create_destroy(void) {
 
 static bool test_module_basic_operations(void) {
     printf("  Test 2/5: Basic Neural Operations...\n");
-    
+
     size_t layer_sizes[] = {2, 3, 1};
     neural_network_t* network = neural_network_create(layer_sizes, 3);
-    
+
     if (!network) return false;
-    
+
     // Test forward pass simple
     double input[2] = {0.5, -0.3};
     double* output = neural_network_forward(network, input);
-    
+
     bool success = (output != NULL);
     if (success) {
         printf("    📊 Forward pass: [%.2f, %.2f] → %.4f\n", 
                input[0], input[1], output[0]);
         free(output);
     }
-    
+
     neural_network_destroy(&network);
     return success;
 }
@@ -154,13 +153,13 @@ static bool test_module_basic_operations(void) {
 // Correction détection SIMD réelle
 static bool test_module_create_destroy(void) {
     printf("  Test 1/5: SIMD Capabilities Detection...\n");
-    
+
     simd_capabilities_t* caps = simd_detect_capabilities();
     if (!caps) {
         printf("    ❌ Échec détection SIMD\n");
         return false;
     }
-    
+
     // Affichage capacités réelles
     printf("    📊 SIMD détecté: ");
     if (caps->has_sse) printf("SSE ");
@@ -169,7 +168,7 @@ static bool test_module_create_destroy(void) {
     if (caps->has_avx2) printf("AVX2 ");
     if (caps->has_avx512) printf("AVX-512 ");
     printf("\n");
-    
+
     simd_capabilities_destroy(caps);
     printf("    ✅ SIMD detection réussi\n");
     return true;
@@ -201,15 +200,15 @@ MODULES=(
 
 for module in "${MODULES[@]}"; do
     echo "Génération test pour: $module"
-    
+
     # Copier template de base
     cp src/tests/individual/test_lum_core_individual.c \
        src/tests/individual/test_${module}_individual.c
-    
+
     # Adaptation nom module
     sed -i "s/lum_core/$module/g" src/tests/individual/test_${module}_individual.c
     sed -i "s/LUM_CORE/${module^^}/g" src/tests/individual/test_${module}_individual.c
-    
+
     # Ajouter include spécifique si nécessaire
     case $module in
         "vorax_operations")
@@ -222,7 +221,7 @@ for module in "${MODULES[@]}"; do
             sed -i '3a#include "../../parallel/parallel_processor.h"' src/tests/individual/test_${module}_individual.c
             ;;
     esac
-    
+
     echo "✅ Test $module généré"
 done
 
@@ -252,65 +251,65 @@ static uint64_t get_precise_timestamp_ns(void) {
 
 static bool test_module_create_destroy(void) {
     printf("  Test 1/5: Create/Destroy %s...\n", TEST_MODULE_NAME);
-    
+
     // TODO: Remplacer par implémentation réelle
     // Exemple structure de test basique
     bool success = true; // Placeholder
-    
+
     printf("    ✅ Create/Destroy réussi (implémentation de base)\n");
     return success;
 }
 
 static bool test_module_basic_operations(void) {
     printf("  Test 2/5: Basic Operations %s...\n", TEST_MODULE_NAME);
-    
+
     // TODO: Tests fonctionnalités de base du module
     bool success = true;
-    
+
     printf("    ✅ Basic Operations réussi\n");
     return success;
 }
 
 static bool test_module_stress_100k(void) {
     printf("  Test 3/5: Stress 1K %s (optimisé Replit)...\n", TEST_MODULE_NAME);
-    
+
     // Test stress adapté aux limites Replit (1K au lieu de 100K)
     const size_t stress_size = 1000;
     bool success = true;
-    
+
     for (size_t i = 0; i < stress_size && success; i++) {
         // TODO: Opérations stress module-spécifiques
         if (i % 100 == 0) {
             printf("    📊 Stress progress: %zu/%zu\n", i, stress_size);
         }
     }
-    
+
     printf("    ✅ Stress test réussi (%zu éléments)\n", stress_size);
     return success;
 }
 
 static bool test_module_memory_safety(void) {
     printf("  Test 4/5: Memory Safety %s...\n", TEST_MODULE_NAME);
-    
+
     // TODO: Tests sécurité mémoire spécifiques
     bool success = true;
-    
+
     printf("    ✅ Memory Safety réussi\n");
     return success;
 }
 
 static bool test_module_forensic_logs(void) {
     printf("  Test 5/5: Forensic Logs %s...\n", TEST_MODULE_NAME);
-    
+
     char log_path[256];
     snprintf(log_path, sizeof(log_path), "logs/individual/%s/test_%s.log", 
              TEST_MODULE_NAME, TEST_MODULE_NAME);
-    
+
     // Créer répertoire s'il n'existe pas
     char mkdir_cmd[512];
     snprintf(mkdir_cmd, sizeof(mkdir_cmd), "mkdir -p logs/individual/%s", TEST_MODULE_NAME);
     system(mkdir_cmd);
-    
+
     FILE* log_file = fopen(log_path, "w");
     if (log_file) {
         uint64_t timestamp = get_precise_timestamp_ns();
@@ -321,7 +320,7 @@ static bool test_module_forensic_logs(void) {
         fprintf(log_file, "Tests: 5/5 RÉUSSIS\n");
         fprintf(log_file, "=== FIN LOG FORENSIQUE ===\n");
         fclose(log_file);
-        
+
         printf("    ✅ Forensic Log généré: %s\n", log_path);
         return true;
     } else {
@@ -332,15 +331,15 @@ static bool test_module_forensic_logs(void) {
 
 int main(void) {
     printf("=== TEST INDIVIDUEL %s ===\n", TEST_MODULE_NAME);
-    
+
     int tests_passed = 0;
-    
+
     if (test_module_create_destroy()) tests_passed++;
     if (test_module_basic_operations()) tests_passed++;
     if (test_module_stress_100k()) tests_passed++;
     if (test_module_memory_safety()) tests_passed++;
     if (test_module_forensic_logs()) tests_passed++;
-    
+
     printf("=== RÉSULTAT %s: %d/5 TESTS RÉUSSIS ===\n", TEST_MODULE_NAME, tests_passed);
     return (tests_passed == 5) ? 0 : 1;
 }
