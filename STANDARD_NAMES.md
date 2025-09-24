@@ -123,6 +123,12 @@
 2025-01-17 21:30 - blackbox_apply_algorithmic_morphing + Morphing algorithmique dynamique
 2025-01-17 21:30 - blackbox_simulate_neural_behavior + Simulation comportement réseau neuronal
 2025-01-17 21:30 - blackbox_generate_fake_ai_metrics + Génération métriques IA fictives
+2025-09-24 12:00 - DEBUG_PRINTF + Macro conditionnelle debug logs production/développement éviter dégradation x66
+2025-09-24 12:00 - DEBUG_MODE + Flag compilation activation logs debug uniquement mode développement
+2025-09-24 12:00 - audit_forensique_ultra_exhaustif_44_modules + Audit ligne par ligne identification régression critique
+2025-09-24 12:00 - printf_debug_regression_fix + Correction massive 34 printf debug remplacés par DEBUG_PRINTF
+2025-09-24 12:00 - performance_degradation_x66_resolved + Résolution dégradation performance 6600% tests 1M éléments
+2025-09-24 12:00 - anti_debug_production_rules + Règles SECTION 20 prompt.txt prévention future régression debug
 2025-01-17 21:30 - OPACITY_COMPUTATIONAL_FOLDING + Mécanisme repliement computationnel
 2025-01-17 21:30 - OPACITY_SEMANTIC_SHUFFLING + Mécanisme mélange sémantique
 2025-01-17 21:30 - OPACITY_ALGORITHMIC_MORPHING + Mécanisme morphing algorithmique
