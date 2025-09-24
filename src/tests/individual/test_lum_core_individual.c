@@ -232,14 +232,24 @@ static bool test_module_forensic_logs(void) {
     
     printf("  Test 5/5: Forensic Logs...\n");
     
+    // Créer répertoire s'il n'existe pas
+    char dir_path[256];
+    snprintf(dir_path, sizeof(dir_path), "logs/individual/%s", TEST_MODULE_NAME);
+    
+    // Créer répertoire avec mkdir -p équivalent
+    char mkdir_cmd[512];
+    snprintf(mkdir_cmd, sizeof(mkdir_cmd), "mkdir -p %s", dir_path);
+    system(mkdir_cmd);
+    
     // Générer logs forensiques pour ce module
     char log_path[256];
-    snprintf(log_path, sizeof(log_path), "logs/individual/%s/test_%s.log", 
-             TEST_MODULE_NAME, TEST_MODULE_NAME);
+    snprintf(log_path, sizeof(log_path), "logs/individual/%s/test_%s_%lu.log", 
+             TEST_MODULE_NAME, TEST_MODULE_NAME, (unsigned long)time(NULL));
     
     FILE* log_file = fopen(log_path, "w");
     if (!log_file) {
         printf("    ❌ Impossible de créer log forensique: %s\n", log_path);
+        printf("    🔍 Vérification permissions répertoire...\n");
         return false;
     }
     
