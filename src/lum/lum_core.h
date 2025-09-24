@@ -125,10 +125,15 @@ void lum_safe_destroy(lum_t** lum_ptr);
 // PRIORITÉ 1.2: Fonction destruction groupe ultra-sécurisée selon roadmap
 void lum_group_destroy_ultra_secure(lum_group_t** group_ptr);
 
-// Constantes de validation mémoire
-#define LUM_VALIDATION_PATTERN 0x12345678
+// Constantes de validation mémoire - SÉCURISÉES CONFORMES RAPPORT 113
+// CORRECTION CRITIQUE: Magic numbers générés cryptographiquement
+extern uint32_t LUM_VALIDATION_PATTERN; // Généré dynamiquement au runtime
 #define LUM_MAGIC_DESTROYED 0xDEADBEEF
 #define LUM_DESTROYED_MAGIC 0xDEADDEAD
+
+// Fonctions d'initialisation et nettoyage sécurisés
+bool lum_security_init(void);
+void lum_security_cleanup(void);
 
 // Macro de validation magic number
 #define VALIDATE_LUM_MAGIC(lum) \
