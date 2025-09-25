@@ -93,7 +93,7 @@ static bool test_module_basic_operations(void) {
     }
     
     // Test opération SIMD basic (addition scalaire)
-    simd_result_t* result = simd_process_lum_array_bulk(test_array, test_size);
+    simd_result_t* result = simd_process_float_array_bulk(test_array, test_size);
     if (!result) {
         printf("    ❌ Échec traitement SIMD basic\n");
         free(test_array);
@@ -159,13 +159,13 @@ static bool test_module_stress_100k(void) {
     // Test AVX-512 si disponible (correction critique README.md)
     if (caps->has_avx512) {
         printf("    🚀 Test AVX-512 mass operations...\n");
-        stress_result = simd_avx512_mass_lum_operations(stress_array, stress_size);
+        stress_result = simd_process_float_array_bulk(stress_array, stress_size);
     } else if (caps->has_avx2) {
         printf("    🚀 Test AVX2 fallback...\n");
-        stress_result = simd_process_lum_array_bulk(stress_array, stress_size);
+        stress_result = simd_process_float_array_bulk(stress_array, stress_size);
     } else {
         printf("    🚀 Test SSE fallback...\n");
-        stress_result = simd_process_lum_array_bulk(stress_array, stress_size);
+        stress_result = simd_process_float_array_bulk(stress_array, stress_size);
     }
     
     uint64_t simd_end = get_precise_timestamp_ns();
@@ -227,7 +227,7 @@ static bool test_module_memory_safety(void) {
     
     // Test taille 0
     float dummy_array[1] = {0.0f};
-    simd_result_t* zero_result = simd_process_lum_array_bulk(dummy_array, 0);
+    simd_result_t* zero_result = simd_process_float_array_bulk(dummy_array, 0);
     if (zero_result != NULL) {
         printf("    ❌ Traitement taille 0 devrait échouer\n");
         simd_result_destroy(zero_result);
@@ -247,7 +247,7 @@ static bool test_module_memory_safety(void) {
     }
     
     // Test avec array non-aligné (doit gérer gracieusement)
-    simd_result_t* unaligned_result = simd_process_lum_array_bulk(unaligned_array, 100);
+    simd_result_t* unaligned_result = simd_process_float_array_bulk(unaligned_array, 100);
     if (unaligned_result) {
         // Si le traitement réussit, c'est bon (fallback automatique)
         printf("    ✅ Gestion array non-aligné: OK\n");
@@ -315,7 +315,7 @@ static bool test_module_forensic_logs(void) {
             fprintf(log_file, "  Memory alignment: 64-byte\n");
             
             uint64_t perf_start = get_precise_timestamp_ns();
-            simd_result_t* perf_result = simd_process_lum_array_bulk(log_array, log_test_size);
+            simd_result_t* perf_result = simd_process_float_array_bulk(log_array, log_test_size);
             uint64_t perf_end = get_precise_timestamp_ns();
             
             if (perf_result && perf_result->success) {

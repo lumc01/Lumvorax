@@ -171,7 +171,7 @@ void simd_avx2_parallel_coordinate_transform(float* x_coords, float* y_coords, s
 #endif
 
 #ifdef __AVX512F__
-void simd_avx512_mass_lum_operations(lum_t* lums, size_t count) {
+void simd_avx512_mass_lum_operations_void(lum_t* lums, size_t count) {
     if (!lums || count < 16) return;
 
     size_t simd_count = (count / 16) * 16;
@@ -453,8 +453,8 @@ matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_ca
     return NULL; 
 }
 
-// Version corrigée de simd_avx512_mass_lum_operations avec bon type de retour
-simd_result_t* simd_avx512_mass_lum_operations_result(lum_t* lums, size_t count) {
+// Version avec retour pour simd_avx512_mass_lum_operations 
+simd_result_t* simd_avx512_mass_lum_operations(lum_t* lums, size_t count) {
     if (!lums || count == 0) {
         return NULL;
     }
@@ -474,8 +474,40 @@ simd_result_t* simd_avx512_mass_lum_operations_result(lum_t* lums, size_t count)
     
 #ifdef __AVX512F__
     // Appel de l'implémentation void existante si AVX-512 disponible
-    simd_avx512_mass_lum_operations(lums, count);
+    simd_avx512_mass_lum_operations_void(lums, count);
 #endif
+    
+    return result;
+}
+
+// Fonction wrapper pour compatibilité tests avec float*
+simd_result_t* simd_process_float_array_bulk(float* array, size_t count) {
+    if (!array || count == 0) {
+        return NULL;
+    }
+    
+    // Création de LUMs temporaires à partir du tableau float
+    lum_t* temp_lums = TRACKED_MALLOC(count * sizeof(lum_t));
+    if (!temp_lums) return NULL;
+    
+    // Conversion float* vers lum_t* pour compatibilité
+    for (size_t i = 0; i < count; i++) {
+        temp_lums[i].id = i;
+        temp_lums[i].presence = (array[i] > 0.0f) ? 1 : 0;
+        temp_lums[i].position_x = (int32_t)(array[i] * 100);
+        temp_lums[i].position_y = (int32_t)(array[i] * 50);
+        temp_lums[i].structure_type = LUM_STRUCTURE_LINEAR;
+        temp_lums[i].timestamp = 0;
+        temp_lums[i].memory_address = &temp_lums[i];
+        temp_lums[i].checksum = 0;
+        temp_lums[i].is_destroyed = 0;
+    }
+    
+    // Traitement avec la fonction principale
+    simd_result_t* result = simd_process_lum_array_bulk(temp_lums, count);
+    
+    // Nettoyage
+    TRACKED_FREE(temp_lums);
     
     return result;
 }

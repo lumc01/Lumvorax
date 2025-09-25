@@ -100,7 +100,10 @@ static bool test_module_basic_operations(void) {
     // Test forward propagation avec données réelles (utiliser train comme stub)
     double input[2] = {0.5, -0.3};
     double target = 0.8;  // Target pour test
-    neural_result_t* result = neural_network_train(network, input, &target, 1);
+    double* input_ptr = input;
+    double* target_ptr = &target;
+    neural_config_t* config = neural_config_create_default();
+    neural_result_t* result = neural_network_train(network, &input_ptr, &target_ptr, 1, config);
     if (!result || !result->success) {
         printf("    ❌ Échec neural network training (stub détecté)\n");
         neural_network_destroy(&network);
@@ -128,7 +131,7 @@ static bool test_module_basic_operations(void) {
            input[0], input[1], output[0]);
     
     // Test backpropagation réelle (correction critique vs stubs)
-    double target = 1.0;
+    // double target2 = 1.0; // Variable non utilisée dans cette version simplifiée
     double loss = neural_network_backward(network, output, &target);
     if (isnan(loss) || loss < 0.0) {
         printf("    ❌ Backpropagation invalide: loss=%f (stub détecté)\n", loss);
@@ -140,7 +143,7 @@ static bool test_module_basic_operations(void) {
     printf("    📊 Backpropagation: loss=%.6f\n", loss);
     
     free(output);
-    neural_network_destroy(network);
+    neural_network_destroy(&network);
     
     uint64_t end_time = get_precise_timestamp_ns();
     printf("    ✅ Basic Neural Operations réussi - implémentation réelle (%lu ns)\n", 
@@ -204,7 +207,7 @@ static bool test_module_stress_100k(void) {
             if (!prediction) {
                 printf("    ❌ Forward pass échec epoch %zu (stub détecté)\n", epoch);
                 free(dataset);
-                neural_network_destroy(network);
+                neural_network_destroy(&network);
                 return false;
             }
             
@@ -214,7 +217,7 @@ static bool test_module_stress_100k(void) {
                 printf("    ❌ Backward pass invalide epoch %zu (stub détecté)\n", epoch);
                 free(prediction);
                 free(dataset);
-                neural_network_destroy(network);
+                neural_network_destroy(&network);
                 return false;
             }
             
@@ -244,7 +247,7 @@ static bool test_module_stress_100k(void) {
     }
     
     free(dataset);
-    neural_network_destroy(network);
+    neural_network_destroy(&network);
     
     uint64_t end_time = get_precise_timestamp_ns();
     printf("    ✅ Stress Neural Learning réussi - apprentissage réel (%lu ns)\n", 
@@ -262,7 +265,7 @@ static bool test_module_memory_safety(void) {
     neural_network_t* null_network = neural_network_create(NULL, 3);
     if (null_network != NULL) {
         printf("    ❌ Création avec layer_sizes NULL devrait échouer\n");
-        neural_network_destroy(null_network);
+        neural_network_destroy(&null_network);
         return false;
     }
     
@@ -271,7 +274,7 @@ static bool test_module_memory_safety(void) {
     neural_network_t* empty_network = neural_network_create(empty_layers, 0);
     if (empty_network != NULL) {
         printf("    ❌ Création avec 0 layers devrait échouer\n");
-        neural_network_destroy(empty_network);
+        neural_network_destroy(&empty_network);
         return false;
     }
     
@@ -280,7 +283,7 @@ static bool test_module_memory_safety(void) {
     neural_network_t* zero_network = neural_network_create(zero_size_layers, 3);
     if (zero_network != NULL) {
         printf("    ❌ Création avec layer taille 0 devrait échouer\n");
-        neural_network_destroy(zero_network);
+        neural_network_destroy(&zero_network);
         return false;
     }
     
@@ -369,9 +372,9 @@ static bool test_module_forensic_logs(void) {
         fprintf(log_file, "Neural Network Created:\n");
         fprintf(log_file, "  Architecture: %zu layers\n", log_network->num_layers);
         for (size_t i = 0; i < log_network->num_layers; i++) {
-            fprintf(log_file, "  Layer %zu: size=%zu\n", i, log_network->layers[i].size);
-            fprintf(log_file, "    Weights: %s\n", log_network->layers[i].weights ? "REAL" : "STUB");
-            fprintf(log_file, "    Biases: %s\n", log_network->layers[i].biases ? "REAL" : "STUB");
+            fprintf(log_file, "  Layer %zu: neurons=%zu\n", i, log_network->layers[i]->neuron_count);
+            fprintf(log_file, "    Weights: %s\n", log_network->layers[i]->weights ? "REAL" : "STUB");
+            fprintf(log_file, "    Biases: %s\n", log_network->layers[i]->biases ? "REAL" : "STUB");
         }
         
         // Test apprentissage avec logs détaillés
@@ -403,7 +406,7 @@ static bool test_module_forensic_logs(void) {
             fprintf(log_file, "  Status: STUB DETECTED (null output)\n");
         }
         
-        neural_network_destroy(log_network);
+        neural_network_destroy(&log_network);
         fprintf(log_file, "\nNeural Network: TESTED\n");
         fprintf(log_file, "Implementation: REAL vs STUBS\n");
     } else {

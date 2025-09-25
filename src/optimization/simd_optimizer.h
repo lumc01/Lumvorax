@@ -81,9 +81,15 @@ void simd_avx2_parallel_coordinate_transform(float* x_coords, float* y_coords, s
 
 // AVX-512 specific implementations  
 #ifdef __AVX512F__
-void simd_avx512_mass_lum_operations(lum_t* lums, size_t count);
+void simd_avx512_mass_lum_operations_void(lum_t* lums, size_t count);
 void simd_avx512_vectorized_conservation_check(uint64_t* conservation_data, size_t count);
 #endif
+
+// Version avec retour pour tests
+simd_result_t* simd_avx512_mass_lum_operations(lum_t* lums, size_t count);
+
+// Fonction wrapper pour compatibilité tests avec float*
+simd_result_t* simd_process_float_array_bulk(float* array, size_t count);
 
 // Performance benchmarking
 simd_result_t* simd_benchmark_vectorization(size_t test_size);
