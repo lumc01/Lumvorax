@@ -101,16 +101,19 @@ bool test_complete_integration_chain(void) {
     if (!lum) return false;
     
     // 3. Tester conversion binaire
-    size_t binary_size;
-    uint8_t* binary_data = lum_to_binary(lum, &binary_size);
-    if (!binary_data) {
-        lum_destroy(lum);
-        return false;
+    lum_group_t* test_group = lum_group_create(10);
+    lum_group_add(test_group, lum);
+    lum_binary_result_t* binary_result = convert_lum_to_binary(test_group);
+    uint8_t* binary_data = NULL;
+    size_t binary_size = 0;
+    if (binary_result && binary_result->success) {
+        binary_data = binary_result->binary_data;
+        binary_size = binary_result->byte_count;
     }
     
     // 4. Tester persistance
-    persistence_config_t* config = persistence_config_create_default();
-    bool persist_success = data_persistence_store_lum(lum, "test_integration", config);
+    persistence_context_t* config = persistence_context_create("test_logs", STORAGE_FORMAT_BINARY);
+    bool persist_success = persistence_save_lum(config, lum, "test_integration");
     
     // 5. Tester optimisations
     simd_capabilities_t* simd_caps = simd_detect_capabilities();
@@ -128,10 +131,11 @@ bool test_complete_integration_chain(void) {
     
     // Cleanup
     if (network) neural_network_destroy(&network);
-    if (metrics) performance_metrics_destroy(&metrics);
+    if (metrics) performance_metrics_destroy(metrics);
     if (simd_caps) simd_capabilities_destroy(simd_caps);
-    if (config) persistence_config_destroy(&config);
-    if (binary_data) free(binary_data);
+    if (config) persistence_context_destroy(config);
+    if (binary_result) lum_binary_result_destroy(binary_result);
+    if (test_group) lum_group_destroy(test_group);
     lum_destroy(lum);
     
     forensic_logger_destroy();

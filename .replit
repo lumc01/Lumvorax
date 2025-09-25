@@ -1035,6 +1035,14 @@ author = "agent"
 task = "workflow.run"
 args = "LUM/VORAX System"
 
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Tests Forensiques Complets"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Tests Forensiques FINAL"
+
 [[workflows.workflow]]
 name = "Finaliser Tests Individuels"
 author = 47956938
@@ -1251,6 +1259,28 @@ args = ""
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "echo \"🔒 VALIDATION COMPLÈTE TERMINÉE\""
+
+[[workflows.workflow]]
+name = "Tests Forensiques Complets"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/lum_vorax_simple_100 --progressive-stress-all"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Tests Forensiques FINAL"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./bin/test_forensic_complete_system"
+
+[workflows.workflow.metadata]
+outputType = "console"
 
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]

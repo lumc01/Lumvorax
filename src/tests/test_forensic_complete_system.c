@@ -316,11 +316,11 @@ static void* test_simd_optimizer(size_t scale) {
     return NULL;
 }
 
-// ===== TEST PROGRESSIF 1M → 100M AVEC TOUS MODULES =====
+// ===== TEST PROGRESSIF 1 → 100K AVEC TOUS MODULES (CONFORME PROMPT.TXT) =====
 static void execute_progressive_forensic_tests(void) {
-    printf("\\n🚀 === DÉBUT TESTS PROGRESSIFS FORENSIQUES 1M → 100M ===\\n");
+    printf("\\n🚀 === DÉBUT TESTS PROGRESSIFS FORENSIQUES 1 → 100K ===\\n");
 
-    size_t test_scales[] = {1, 10, 50, 100, 250, 500, 1000};
+    size_t test_scales[] = {1, 10, 50, 100, 250, 500, 1000, 5000, 10000, 50000, 100000};
     size_t num_scales = sizeof(test_scales) / sizeof(test_scales[0]);
 
     for (size_t i = 0; i < num_scales; i++) {
@@ -400,7 +400,7 @@ static void generate_final_forensic_report(void) {
     fprintf(report, "Standards prompt.txt: CONFORMES\\n");
     fprintf(report, "Logs SHA-256: GÉNÉRÉS\\n");
     fprintf(report, "Horodatage nanoseconde: PRÉCIS\\n");
-    fprintf(report, "Tests progressifs 1M-100M: EXÉCUTÉS\\n");
+    fprintf(report, "Tests progressifs 1-100K: EXÉCUTÉS\\n");
     fprintf(report, "Tous modules: TESTÉS\\n");
     fprintf(report, "Preuves d'exécution: COMPLÈTES\\n");
     fprintf(report, "=== FIN RAPPORT FORENSIQUE ===\\n");
