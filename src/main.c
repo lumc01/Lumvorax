@@ -164,7 +164,7 @@ static void test_progressive_stress_all_available_modules(void) {
 
             // Test SIMD operations
             if (simd_caps->avx2_available) {
-                printf("🚀 SIMD AVX2: Optimisations +300% activées pour %zu éléments\n", scale);
+                printf("🚀 SIMD AVX2: Optimisations +300%% activées pour %zu éléments\n", scale);
             }
             simd_capabilities_destroy(simd_caps);
         }
@@ -172,14 +172,14 @@ static void test_progressive_stress_all_available_modules(void) {
         // Test Parallel Processor - PARALLEL VORAX ACTIVÉ
         printf("📊 PARALLEL PROCESSOR @ %zu éléments...\n", scale);
         printf("✅ PARALLEL: Multi-threads activé, échelle %zu\n", scale);
-        printf("🚀 PARALLEL VORAX: Optimisations +400% activées\n");
+        printf("🚀 PARALLEL VORAX: Optimisations +400%% activées\n");
 
         // Test Memory Optimizer - CACHE ALIGNMENT ACTIVÉ
         printf("📊 MEMORY OPTIMIZER @ %zu éléments...\n", scale);
         memory_pool_t* mem_pool = memory_pool_create(scale * 64, 64);
         if (mem_pool) {
             printf("✅ MEMORY: Pool %zu bytes, alignement 64B\n", scale * 64);
-            printf("🚀 CACHE ALIGNMENT: +15% performance mémoire\n");
+            printf("🚀 CACHE ALIGNMENT: +15%% performance mémoire\n");
             memory_pool_destroy(mem_pool);
         }
 
@@ -195,7 +195,7 @@ static void test_progressive_stress_all_available_modules(void) {
         image_processor_t* image = image_processor_create(scale > 1920*1080 ? 1920 : (int)(sqrt(scale)), 
                                                          scale > 1920*1080 ? 1080 : (int)(sqrt(scale)));
         if (image) {
-            printf("✅ IMAGE: %dx%d pixels traités\n", image->width, image->height);
+            printf("✅ IMAGE: %zux%zu pixels traités\n", image->width, image->height);
             image_processor_destroy(&image);
         }
 

@@ -1113,7 +1113,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "make clean && make all"
+args = "./bin/lum_vorax_complete --progressive-stress-all"
 
 [[workflows.workflow]]
 name = "VALIDATION COMPLETE LOGS REELS"
