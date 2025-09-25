@@ -49,6 +49,7 @@ typedef struct {
 typedef struct {
     neural_layer_t** layers;      // Array de couches
     size_t layer_count;           // Nombre de couches
+    size_t num_layers;            // Alias pour layer_count (compatibilité tests)
     double* input_data;           // Données d'entrée
     double* output_data;          // Données de sortie
     double* target_data;          // Données cibles (entraînement)
@@ -63,7 +64,9 @@ typedef struct {
 
 // Résultat traitement réseau
 typedef struct {
+    bool success;                 // Indicateur de succès (compatibilité tests)
     double* predictions;          // Prédictions du réseau
+    double* output_data;          // Alias pour predictions (compatibilité tests)
     size_t prediction_count;      // Nombre de prédictions
     double accuracy;              // Précision sur jeu de test
     double loss;                  // Fonction de perte

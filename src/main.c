@@ -104,10 +104,10 @@ static void test_progressive_stress_all_available_modules(void) {
                     fflush(stdout);  // Force affichage immédiat
                 }
 
-                // Timeout de sécurité
-                if (j > 1000) {
-                    printf("  ⚠️ Test limité à 1000 éléments pour éviter blocage\n");
-                    break;
+                // Sécurité avec progression continue au lieu d'arrêt brutal
+                if (j > 0 && j % 5000 == 0) {
+                    printf("  📈 Progression: %zu/%zu LUMs traités (%.1f%%)\n", j, batch_size, (double)j/batch_size*100);
+                    fflush(stdout);
                 }
             }
 

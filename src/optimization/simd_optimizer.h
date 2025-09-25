@@ -20,10 +20,15 @@
 typedef struct {
     bool avx512_available;
     bool avx512_supported;     // Ajouté pour compatibilité
+    bool has_avx512;           // Compatibilité tests individuels
     bool avx2_available;
     bool avx2_supported;       // Ajouté pour compatibilité
+    bool has_avx2;             // Compatibilité tests individuels
+    bool has_avx;              // Compatibilité tests individuels
     bool sse_available;
     bool sse42_supported;      // Ajouté pour compatibilité
+    bool has_sse;              // Compatibilité tests individuels
+    bool has_sse2;             // Compatibilité tests individuels
     int vector_width;
     char cpu_features[256];
 } simd_capabilities_t;
@@ -45,7 +50,9 @@ typedef enum {
 
 // SIMD operation results
 typedef struct {
+    bool success;              // Indicateur de succès (compatibilité tests)
     size_t processed_elements;
+    size_t elements_processed; // Alias pour processed_elements (compatibilité tests)
     double execution_time;
     double throughput_ops_per_sec;
     bool used_vectorization;
@@ -53,6 +60,7 @@ typedef struct {
     size_t vectorized_count;
     size_t scalar_fallback_count;
     double performance_gain;
+    double acceleration_factor; // Alias pour performance_gain (compatibilité tests)
     uint64_t execution_time_ns;
 } simd_result_t;
 
