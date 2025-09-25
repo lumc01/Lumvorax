@@ -59,7 +59,8 @@ TEST_PROGRESSIVE = $(BIN_DIR)/test_progressive_all_modules
 
 # Tests forensiques conformes prompt.txt
 TEST_EXECUTABLES = \
-	$(BIN_DIR)/test_forensic_complete_system
+	$(BIN_DIR)/test_forensic_complete_system \
+	$(BIN_DIR)/test_integration_complete_39_modules
 
 .PHONY: all clean test test-progressive test-stress test-forensic
 
@@ -79,6 +80,10 @@ $(MAIN_EXECUTABLE): $(OBJECTS)
 # Test forensique complet conforme prompt.txt
 $(BIN_DIR)/test_forensic_complete_system: $(OBJECTS)
 	$(CC) $(CFLAGS) src/tests/test_forensic_complete_system.c $(OBJECTS) -o $@ $(LDFLAGS)
+
+# Test d'intégration complète 39 modules
+$(BIN_DIR)/test_integration_complete_39_modules: $(OBJECTS)
+	$(CC) $(CFLAGS) src/tests/test_integration_complete_39_modules.c $(OBJECTS) -o $@ $(LDFLAGS)
 
 # TESTS PROGRESSIFS 1M → 100M avec TOUS les modules + redirection console
 test-progressive: $(MAIN_EXECUTABLE)
