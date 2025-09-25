@@ -280,6 +280,8 @@ static void* test_neural_network(size_t scale) {
             (double)(i % 25) / 25.0,
             (double)(i % 10) / 10.0
         };
+        printf("[TEST] Neural network input processed: [%.1f, %.1f, %.1f, %.1f]\n",
+               input[0], input[1], input[2], input[3]);
 
         // Test réseau neural adapté pour échelles réduites
         if (network && i % 100 == 0) { // Log tous les 100 pour éviter spam
