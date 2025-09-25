@@ -305,7 +305,7 @@ static bool test_module_memory_safety(void) {
     if (null_input_output != NULL) {
         printf("    ❌ Forward avec input NULL devrait échouer\n");
         free(null_input_output);
-        neural_network_destroy(valid_network);
+        neural_network_destroy(&valid_network);
         return false;
     }
     
@@ -314,7 +314,7 @@ static bool test_module_memory_safety(void) {
     double* valid_output = neural_network_forward(valid_network, valid_input);
     if (!valid_output) {
         printf("    ❌ Forward valide devrait réussir\n");
-        neural_network_destroy(valid_network);
+        neural_network_destroy(&valid_network);
         return false;
     }
     
@@ -323,12 +323,12 @@ static bool test_module_memory_safety(void) {
     if (!isnan(invalid_loss)) {
         printf("    ❌ Backward avec target NULL devrait retourner NaN\n");
         free(valid_output);
-        neural_network_destroy(valid_network);
+        neural_network_destroy(&valid_network);
         return false;
     }
     
     free(valid_output);
-    neural_network_destroy(valid_network);
+    neural_network_destroy(&valid_network);
     
     // Test destruction NULL
     neural_network_destroy(NULL); // Doit être safe

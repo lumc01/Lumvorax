@@ -104,6 +104,10 @@ bool neural_layer_backward_pass(neural_layer_t* layer, double* errors, neural_co
 neural_result_t* neural_network_train(neural_network_t* network, double** training_data, double** target_data, size_t sample_count, neural_config_t* config);
 neural_result_t* neural_network_predict(neural_network_t* network, double* input_data, neural_config_t* config);
 
+// Fonctions utilisées dans les tests
+double* neural_network_forward(neural_network_t* network, double* input_data);
+double neural_network_backward(neural_network_t* network, double* output, double* target);
+
 // Algorithmes d'apprentissage avancés
 bool neural_apply_backpropagation(neural_network_t* network, double* target_output, neural_config_t* config);
 bool neural_apply_momentum_update(neural_network_t* network, neural_config_t* config);
