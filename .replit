@@ -1115,6 +1115,143 @@ outputType = "console"
 task = "shell.exec"
 args = "make clean && make all"
 
+[[workflows.workflow]]
+name = "VALIDATION COMPLETE LOGS REELS"
+author = 47968591
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"🎯 === VALIDATION COMPLÈTE AVEC LOGS RÉELS ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Correction warning + Exécution tests + Génération logs authentiques\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = ""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "# Rendre script exécutable"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "chmod +x execute_tests_with_real_logs.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = ""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "# Exécution script complet"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "./execute_tests_with_real_logs.sh"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = ""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"📋 === VALIDATION FINALE ===\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"Vérification existence logs générés:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = ""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "# Vérification logs générés"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "LATEST_LOG_DIR=$(find logs/execution -name \"real_tests_*\" -type d | sort | tail -1)"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "if [ -n \"$LATEST_LOG_DIR\" ]; then"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"✅ Logs trouvés dans: $LATEST_LOG_DIR\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"📊 Nombre de fichiers: $(find \"$LATEST_LOG_DIR\" -name \"*.log\" | wc -l)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"💾 Taille: $(du -sh \"$LATEST_LOG_DIR\" | cut -f1)\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    "
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"📄 ÉCHANTILLON CONTENU RÉEL:\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    find \"$LATEST_LOG_DIR\" -name \"*.log\" | head -3 | while read logfile; do"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "        echo \"--- $logfile ---\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "        head -5 \"$logfile\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "        echo \"\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    done"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "else"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "    echo \"❌ Aucun log généré\""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "fi"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = ""
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "echo \"🔒 VALIDATION COMPLÈTE TERMINÉE\""
+
 [nix]
 packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
 channel = "stable-25_05"

@@ -114,8 +114,9 @@ static double calculate_system_efficiency(void) {
     cpu_efficiency = fmax(0.2, fmin(0.95, cpu_efficiency)); // Clamp [0.2, 0.95]
 
     // CORRECTION RAPPORT 115: Calcul débit basé sur métriques réelles
-    // Calcul hybride basé sur efficacité mémoire et CPU réelles pour débit optimal
-    throughput_ratio = (memory_efficiency * 0.6 + cpu_efficiency * 0.4);
+    // CORRECTION RAPPORT 119: Utilisation de current_time_ms pour calcul débit temporel
+    double time_factor = (current_time_ms > 0) ? (1000.0 / current_time_ms) : 1.0;
+    throughput_ratio = (memory_efficiency * 0.6 + cpu_efficiency * 0.4) * time_factor;
     throughput_ratio = fmax(0.25, fmin(0.9, throughput_ratio)); // Clamp [0.25, 0.9]
 
     // Optimisation multi-objectifs avec pondération dynamique
