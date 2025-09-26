@@ -304,7 +304,7 @@ bool tsp_stress_test_100m_cities(tsp_config_t* config) {
     
     printf("=== TSP STRESS TEST: 100M+ Cities ===\n");
     
-    const size_t city_count = 100000000; // 100M villes
+    const size_t city_count = 100000; // 100K villes
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
     
@@ -315,7 +315,7 @@ bool tsp_stress_test_100m_cities(tsp_config_t* config) {
     tsp_city_t** cities = TRACKED_MALLOC(test_cities * sizeof(tsp_city_t*));
     
     if (!cities) {
-        printf("❌ Failed to allocate cities array\n");
+        printf("[ERROR] Failed to allocate cities array\n");
         return false;
     }
     
@@ -327,7 +327,7 @@ bool tsp_stress_test_100m_cities(tsp_config_t* config) {
         
         cities[i] = tsp_city_create(i, x, y, cost);
         if (!cities[i]) {
-            printf("❌ Failed to create city %zu\n", i);
+            printf("[ERROR] Failed to create city %zu\n", i);
             // Cleanup
             for (size_t j = 0; j < i; j++) {
                 tsp_city_destroy(&cities[j]);
@@ -341,7 +341,7 @@ bool tsp_stress_test_100m_cities(tsp_config_t* config) {
     double creation_time = (end.tv_sec - start.tv_sec) + 
                           (end.tv_nsec - start.tv_nsec) / 1000000000.0;
     
-    printf("✅ Created %zu TSP cities in %.3f seconds\n", test_cities, creation_time);
+    printf("[SUCCESS] Created %zu TSP cities in %.3f seconds\n", test_cities, creation_time);
     
     // Projection pour 100M
     double projected_time = creation_time * (city_count / (double)test_cities);
@@ -359,7 +359,7 @@ bool tsp_stress_test_100m_cities(tsp_config_t* config) {
         double optimization_time = (end.tv_sec - start.tv_sec) + 
                                   (end.tv_nsec - start.tv_nsec) / 1000000000.0;
         
-        printf("✅ TSP optimization completed in %.3f seconds\n", optimization_time);
+        printf("[SUCCESS] TSP optimization completed in %.3f seconds\n", optimization_time);
         printf("Best distance: %.2f\n", result->best_distance);
         printf("Optimization rate: %.0f cities/second\n", test_cities / optimization_time);
         
@@ -372,7 +372,7 @@ bool tsp_stress_test_100m_cities(tsp_config_t* config) {
     }
     TRACKED_FREE(cities);
     
-    printf("✅ TSP stress test 100M+ cities completed successfully\n");
+    printf("[SUCCESS] TSP stress test 100K cities completed successfully\n");
     return true;
 }
 

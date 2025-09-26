@@ -496,14 +496,14 @@ bool golden_score_stress_test(golden_score_optimizer_t* optimizer) {
     printf("Phase 1: Optimisation intensive 10K itérations...\n");
     golden_optimization_result_t* optimization_result = golden_score_optimize_system(optimizer);
     if (!optimization_result || !optimization_result->success) {
-        printf("❌ Échec optimisation Golden Score\n");
+        printf("[ERROR] Échec optimisation Golden Score\n");
         return false;
     }
     
     printf("Phase 2: Comparaison standards industriels...\n");
     golden_comparison_t* comparison_result = golden_score_compare_industrial_standards(optimization_result);
     if (!comparison_result) {
-        printf("❌ Échec comparaison standards\n");
+        printf("[ERROR] Échec comparaison standards\n");
         golden_optimization_result_destroy(&optimization_result);
         return false;
     }
@@ -542,18 +542,18 @@ bool golden_score_stress_test(golden_score_optimizer_t* optimizer) {
     uint64_t end_time = get_monotonic_nanoseconds();
     double total_time = (end_time - start_time) / 1e9;
     
-    printf("✅ GOLDEN SCORE STRESS TEST RÉUSSI\n");
-    printf("✅ Optimisation intensive: %.3f score en %.3f secondes\n", 
+    printf("[SUCCESS] GOLDEN SCORE STRESS TEST RÉUSSI\n");
+    printf("[SUCCESS] Optimisation intensive: %.3f score en %.3f secondes\n", 
            optimization_result->best_score, optimization_result->optimization_time_ns / 1e9);
-    printf("✅ Amélioration: %.1f%% vs score initial\n", optimization_result->improvement_percentage);
-    printf("✅ Convergence: %s à l'itération %u\n", 
+    printf("[SUCCESS] Amélioration: %.1f%% vs score initial\n", optimization_result->improvement_percentage);
+    printf("[SUCCESS] Convergence: %s à l'itération %u\n", 
            optimization_result->converged ? "Atteinte" : "Non atteinte", 
            optimization_result->convergence_iteration);
-    printf("✅ vs Golden Standard (φ): %.2fx ratio\n", comparison_result->golden_ratio_achievement);
-    printf("✅ Position marché: %.2fx vs standards industriels\n", comparison_result->market_position_ratio);
-    printf("✅ Répétabilité: %.3f ± %.3f (σ=%.1f%%)\n", 
+    printf("[SUCCESS] vs Golden Standard (φ): %.2fx ratio\n", comparison_result->golden_ratio_achievement);
+    printf("[SUCCESS] Position marché: %.2fx vs standards industriels\n", comparison_result->market_position_ratio);
+    printf("[SUCCESS] Répétabilité: %.3f ± %.3f (σ=%.1f%%)\n", 
            mean_score, std_deviation, (std_deviation/mean_score)*100.0);
-    printf("✅ Temps total: %.3f secondes\n", total_time);
+    printf("[SUCCESS] Temps total: %.3f secondes\n", total_time);
     
     // Cleanup
     golden_optimization_result_destroy(&optimization_result);

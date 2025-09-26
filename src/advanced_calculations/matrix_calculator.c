@@ -444,7 +444,7 @@ bool matrix_stress_test_100m_lums(matrix_config_t* config) {
 #endif
 
     if (!matrix) {
-        printf("❌ Failed to create matrix\n");
+        printf("[ERROR] Failed to create matrix\n");
         return false;
     }
 
@@ -460,7 +460,7 @@ bool matrix_stress_test_100m_lums(matrix_config_t* config) {
     }
 
     double creation_time = elapsed;
-    printf("✅ Created %lu LUMs in %.3f seconds\n", total_lums, creation_time);
+    printf("[SUCCESS] Created %lu LUMs in %.3f seconds\n", total_lums, creation_time);
     if (creation_time > 0) {
         printf("Creation rate: %.0f LUMs/second\n", total_lums / creation_time);
     }
@@ -470,7 +470,7 @@ bool matrix_stress_test_100m_lums(matrix_config_t* config) {
 
     // Cleanup sécurisé
     lum_matrix_destroy(&matrix);
-    printf("✅ Matrix stress test completed successfully (safe mode)\n");
+    printf("[SUCCESS] Matrix stress test completed successfully (safe mode)\n");
 
     return true;
 }
@@ -526,14 +526,14 @@ void matrix_calculator_demo(void) {
     // Test création et destruction calculateur
     matrix_calculator_t* calc = matrix_calculator_create(100, 100);
     if (calc) {
-        printf("✅ Matrix calculator créé avec succès (100x100)\n");
+        printf("[SUCCESS] Matrix calculator créé avec succès (100x100)\n");
         // Tester la définition d'un élément
         matrix_set_element(calc, 10, 20, 3.14);
-        printf("✅ Élément (10, 20) défini avec la valeur 3.14\n");
+        printf("[SUCCESS] Élément (10, 20) défini avec la valeur 3.14\n");
         matrix_calculator_destroy(&calc);
-        printf("✅ Matrix calculator détruit proprement\n");
+        printf("[SUCCESS] Matrix calculator détruit proprement\n");
     } else {
-        printf("❌ Échec création matrix calculator\n");
+        printf("[ERROR] Échec création matrix calculator\n");
     }
 
     // Test opération de multiplication
@@ -541,7 +541,7 @@ void matrix_calculator_demo(void) {
     matrix_calculator_t* mat_b = matrix_calculator_create(3, 2);
 
     if (mat_a && mat_b) {
-        printf("✅ Matrices pour multiplication créées (2x3 et 3x2)\n");
+        printf("[SUCCESS] Matrices pour multiplication créées (2x3 et 3x2)\n");
         // Initialiser mat_a
         matrix_set_element(mat_a, 0, 0, 1.0); matrix_set_element(mat_a, 0, 1, 2.0); matrix_set_element(mat_a, 0, 2, 3.0);
         matrix_set_element(mat_a, 1, 0, 4.0); matrix_set_element(mat_a, 1, 1, 5.0); matrix_set_element(mat_a, 1, 2, 6.0);
@@ -552,7 +552,7 @@ void matrix_calculator_demo(void) {
 
         matrix_result_t* result = matrix_multiply_lum_optimized(mat_a, mat_b, NULL);
         if (result) {
-            printf("✅ Multiplication matricielle effectuée avec succès.\n");
+            printf("[SUCCESS] Multiplication matricielle effectuée avec succès.\n");
             printf("Temps d'exécution: %" PRIu64 " ns\n", result->execution_time_ns);
             printf("Résultat (2x2):\n");
             for(size_t i = 0; i < result->rows; ++i) {
@@ -563,13 +563,13 @@ void matrix_calculator_demo(void) {
             }
             matrix_result_destroy(&result);
         } else {
-            printf("❌ Échec de la multiplication matricielle.\n");
+            printf("[ERROR] Échec de la multiplication matricielle.\n");
         }
 
         matrix_calculator_destroy(&mat_a);
         matrix_calculator_destroy(&mat_b);
     } else {
-        printf("❌ Échec création matrices pour multiplication.\n");
+        printf("[ERROR] Échec création matrices pour multiplication.\n");
     }
 }
 */

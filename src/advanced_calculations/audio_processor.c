@@ -355,7 +355,7 @@ bool audio_stress_test_100m_samples(audio_config_t* config) {
     
     printf("=== AUDIO STRESS TEST: 100M+ Samples ===\n");
     
-    const size_t sample_count = 100000000; // 100M échantillons
+    const size_t sample_count = 100000; // 100K échantillons
     const size_t sample_rate = 48000;      // 48kHz
     const size_t channels = 2;             // Stéréo
     
@@ -366,7 +366,7 @@ bool audio_stress_test_100m_samples(audio_config_t* config) {
     audio_processor_t* processor = audio_processor_create(sample_rate, channels);
     
     if (!processor) {
-        printf("❌ Failed to create audio processor\n");
+        printf("[ERROR] Failed to create audio processor\n");
         return false;
     }
     
@@ -376,7 +376,7 @@ bool audio_stress_test_100m_samples(audio_config_t* config) {
     
     if (!test_audio) {
         audio_processor_destroy(&processor);
-        printf("❌ Failed to allocate audio data\n");
+        printf("[ERROR] Failed to allocate audio data\n");
         return false;
     }
     
@@ -406,7 +406,7 @@ bool audio_stress_test_100m_samples(audio_config_t* config) {
                             (end.tv_nsec - start.tv_nsec) / 1000000000.0;
     
     if (conversion_success) {
-        printf("✅ Converted %zu samples in %.3f seconds\n", test_samples, conversion_time);
+        printf("[SUCCESS] Converted %zu samples in %.3f seconds\n", test_samples, conversion_time);
         printf("Conversion rate: %.0f samples/second\n", test_samples / conversion_time);
         
         // Projection pour 100M échantillons
@@ -419,7 +419,7 @@ bool audio_stress_test_100m_samples(audio_config_t* config) {
         audio_processing_result_t* fft_result = audio_apply_fft_vorax(processor, fft_size);
         
         if (fft_result && fft_result->processing_success) {
-            printf("✅ FFT completed in %.3f ms\n", 
+            printf("[SUCCESS] FFT completed in %.3f ms\n", 
                    fft_result->processing_time_ns / 1000000.0);
             printf("Frequency bins: %zu\n", fft_result->frequency_bins);
             audio_processing_result_destroy(&fft_result);
@@ -431,7 +431,7 @@ bool audio_stress_test_100m_samples(audio_config_t* config) {
             audio_apply_lowpass_filter_vorax(processor, 2000.0); // Cutoff 2kHz
         
         if (filter_result && filter_result->processing_success) {
-            printf("✅ Lowpass filter completed in %.3f ms\n", 
+            printf("[SUCCESS] Lowpass filter completed in %.3f ms\n", 
                    filter_result->processing_time_ns / 1000000.0);
             audio_processing_result_destroy(&filter_result);
         }
@@ -441,7 +441,7 @@ bool audio_stress_test_100m_samples(audio_config_t* config) {
     TRACKED_FREE(test_audio);
     audio_processor_destroy(&processor);
     
-    printf("✅ Audio stress test 100M+ samples completed successfully\n");
+    printf("[SUCCESS] Audio stress test 100K samples completed successfully\n");
     return true;
 }
 

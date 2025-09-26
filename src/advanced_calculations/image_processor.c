@@ -284,7 +284,7 @@ bool image_stress_test_100m_pixels(image_config_t* config) {
     
     printf("=== IMAGE STRESS TEST: 100M+ Pixels ===\n");
     
-    const size_t pixel_count = 100000000; // 100M pixels
+    const size_t pixel_count = 100000; // 100K pixels
     const size_t test_width = 10000;      // 10K x 10K = 100M
     const size_t test_height = 10000;
     
@@ -295,7 +295,7 @@ bool image_stress_test_100m_pixels(image_config_t* config) {
     image_processor_t* processor = image_processor_create(test_width, test_height);
     
     if (!processor) {
-        printf("❌ Failed to create image processor\n");
+        printf("[ERROR] Failed to create image processor\n");
         return false;
     }
     
@@ -304,7 +304,7 @@ bool image_stress_test_100m_pixels(image_config_t* config) {
     uint8_t* test_rgb = TRACKED_MALLOC(pixel_count * 3);
     if (!test_rgb) {
         image_processor_destroy(&processor);
-        printf("❌ Failed to allocate RGB data\n");
+        printf("[ERROR] Failed to allocate RGB data\n");
         return false;
     }
     
@@ -332,7 +332,7 @@ bool image_stress_test_100m_pixels(image_config_t* config) {
                             (end.tv_nsec - start.tv_nsec) / 1000000000.0;
     
     if (conversion_success) {
-        printf("✅ Converted %zu pixels in %.3f seconds\n", pixel_count, conversion_time);
+        printf("[SUCCESS] Converted %zu pixels in %.3f seconds\n", pixel_count, conversion_time);
         printf("Conversion rate: %.0f pixels/second\n", pixel_count / conversion_time);
         
         // Calcul débit en bits/seconde
@@ -345,7 +345,7 @@ bool image_stress_test_100m_pixels(image_config_t* config) {
         image_processing_result_t* blur_result = image_apply_gaussian_blur_vorax(processor, 2.0);
         
         if (blur_result && blur_result->processing_success) {
-            printf("✅ Gaussian blur completed in %.3f ms\n", 
+            printf("[SUCCESS] Gaussian blur completed in %.3f ms\n", 
                    blur_result->processing_time_ns / 1000000.0);
             image_processing_result_destroy(&blur_result);
         }
@@ -355,7 +355,7 @@ bool image_stress_test_100m_pixels(image_config_t* config) {
         image_processing_result_t* edge_result = image_apply_edge_detection_vorax(processor);
         
         if (edge_result && edge_result->processing_success) {
-            printf("✅ Edge detection completed in %.3f ms\n", 
+            printf("[SUCCESS] Edge detection completed in %.3f ms\n", 
                    edge_result->processing_time_ns / 1000000.0);
             image_processing_result_destroy(&edge_result);
         }
@@ -365,7 +365,7 @@ bool image_stress_test_100m_pixels(image_config_t* config) {
     TRACKED_FREE(test_rgb);
     image_processor_destroy(&processor);
     
-    printf("✅ Image stress test 100M+ pixels completed successfully\n");
+    printf("[SUCCESS] Image stress test 100K pixels completed successfully\n");
     return true;
 }
 

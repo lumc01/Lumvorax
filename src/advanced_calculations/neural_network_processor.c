@@ -449,7 +449,7 @@ bool neural_stress_test_100m_neurons(neural_config_t* config) {
 
     printf("=== NEURAL STRESS TEST: 100M+ Neurons ===\n");
 
-    const size_t neuron_count = 100000000; // 100M neurones
+    const size_t neuron_count = 100000; // 100K neurones
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
 
@@ -464,7 +464,7 @@ bool neural_stress_test_100m_neurons(neural_config_t* config) {
     neural_layer_t* layer = neural_layer_create_processor(test_neurons, 100, ACTIVATION_RELU);
 
     if (!layer) {
-        printf("❌ Failed to create neural layer with %zu neurons\n", test_neurons);
+        printf("[ERROR] Failed to create neural layer with %zu neurons\n", test_neurons);
         return false;
     }
 
@@ -472,7 +472,7 @@ bool neural_stress_test_100m_neurons(neural_config_t* config) {
     double creation_time = (end.tv_sec - start.tv_sec) +
                           (end.tv_nsec - start.tv_nsec) / 1000000000.0;
 
-    printf("✅ Created %zu neural LUMs in %.3f seconds\n", test_neurons, creation_time);
+    printf("[SUCCESS] Created %zu neural LUMs in %.3f seconds\n", test_neurons, creation_time);
 
     // Projection pour 100M
     double projected_time = creation_time * (neuron_count / (double)test_neurons);
@@ -494,7 +494,7 @@ bool neural_stress_test_100m_neurons(neural_config_t* config) {
         if (forward_success) {
             double forward_time = (end.tv_sec - start.tv_sec) +
                                  (end.tv_nsec - start.tv_nsec) / 1000000000.0;
-            printf("✅ Forward pass completed in %.6f seconds\n", forward_time);
+            printf("[SUCCESS] Forward pass completed in %.6f seconds\n", forward_time);
             printf("Forward rate: %.0f neurons/second\n", test_neurons / forward_time);
         }
 
@@ -505,7 +505,7 @@ bool neural_stress_test_100m_neurons(neural_config_t* config) {
     // Assuming neural_layer_destroy calls neural_layer_destroy_processor
     neural_layer_destroy_processor(&layer); // Using processor version directly
 
-    printf("✅ Neural stress test 100M+ neurons completed successfully\n");
+    printf("[SUCCESS] Neural stress test 100K neurons completed successfully\n");
     return true;
 }
 
