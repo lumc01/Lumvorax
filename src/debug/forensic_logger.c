@@ -79,6 +79,22 @@ void forensic_log_lum_operation(const char* operation, uint64_t lum_count, doubl
     fprintf(forensic_log_file, "[%lu] LUM_%s: count=%lu, duration=%.3f ns\n",
             timestamp, operation, lum_count, duration_ns);
     fflush(forensic_log_file);
+    
+    // NOUVEAU: Log détaillé pour chaque LUM individuel
+    printf("[FORENSIC_REALTIME] LUM_%s: count=%lu at timestamp=%lu ns\n", 
+           operation, lum_count, timestamp);
+}
+
+// NOUVELLE FONCTION: Log systématique pour chaque LUM
+void forensic_log_individual_lum(uint32_t lum_id, const char* operation, uint64_t timestamp_ns) {
+    if (!forensic_log_file) return;
+    
+    fprintf(forensic_log_file, "[%lu] [LUM_%u] %s: Individual LUM processing\n",
+            timestamp_ns, lum_id, operation);
+    fflush(forensic_log_file);
+    
+    // TEMPS RÉEL: Affichage console obligatoire
+    printf("[%lu] [LUM_%u] %s\n", timestamp_ns, lum_id, operation);
 }
 
 void forensic_logger_destroy(void) {

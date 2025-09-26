@@ -79,7 +79,7 @@ bool ensure_directory_exists(const char* path) {
     if (check_directory_exists(path)) {
         return true;
     }
-    
+
     printf("[DEBUG] Création répertoire %s...\n", path);
     if (mkdir(path, 0755) == 0) {
         printf("[SUCCESS] Répertoire créé: %s\n", path);
@@ -264,7 +264,7 @@ int main(int argc, char* argv[]) {
     printf("[TEST] === SYSTÈME LUM/VORAX COMPLET - VERSION OPTIMISÉE ===\n");
     printf("Version: PRODUCTION v2.0 - 39 MODULES INTÉGRÉS\n");
     printf("Date: %s %s\n", __DATE__, __TIME__);
-    
+
     // Étape 1: Vérifier les répertoires (structure du main_debug_temp.c qui fonctionne)
     printf("\n📁 === VÉRIFICATION RÉPERTOIRES ===\n");
     ensure_directory_exists("logs");
@@ -272,12 +272,12 @@ int main(int argc, char* argv[]) {
     ensure_directory_exists("logs/tests");
     ensure_directory_exists("logs/execution");
     ensure_directory_exists("bin");
-    
+
     // Étape 2: Initialisation SIMPLE comme main_debug_temp.c (évite le blocage forensique)
     printf("\n🔧 === INITIALISATION MEMORY TRACKER SIMPLE ===\n");
     memory_tracker_init();
     printf("✅ Memory tracker initialisé (initialisation simple fonctionnelle)\n");
-    
+
     // Étape 3: Tests selon argument
     if (argc > 1 && strcmp(argv[1], "--progressive-stress-all") == 0) {
         printf("\n🎯 === MODE STRESS PROGRESSIF - 39 MODULES ===\n");
@@ -297,7 +297,7 @@ int main(int argc, char* argv[]) {
         printf("  --basic-test            : Test minimal LUM core\n");
         printf("  --progressive-stress-all: Test stress progressif 10K→1M avec 39 modules\n");
         printf("\n🔄 === EXÉCUTION TEST PAR DÉFAUT ===\n");
-        
+
         // Test par défaut
         lum_t* test_lum = lum_create(1, 100, 200, LUM_STRUCTURE_LINEAR);
         if (test_lum) {
@@ -306,15 +306,15 @@ int main(int argc, char* argv[]) {
             printf("  ✅ LUM détruite\n");
         }
     }
-    
+
     // Rapport final
     printf("\n📊 === RAPPORT FINAL MEMORY TRACKER ===\n");
     memory_tracker_report();
-    
+
     // Nettoyage
     printf("\n[DEBUG] === NETTOYAGE SYSTÈME ===\n");
     memory_tracker_destroy();
     printf("[SUCCESS] Nettoyage terminé - système LUM/VORAX prêt\n");
-    
+
     return 0;
 }

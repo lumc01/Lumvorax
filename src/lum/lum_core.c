@@ -49,12 +49,12 @@ uint32_t LUM_VALIDATION_PATTERN = 0; // Généré cryptographiquement
 // CONFORME RÈGLE #15: Entropie cryptographique obligatoire
 bool lum_security_init(void) {
     pthread_mutex_lock(&entropy_mutex);
-    
+
     if (security_initialized) {
         pthread_mutex_unlock(&entropy_mutex);
         return true;
     }
-    
+
     // Ouvrir /dev/urandom pour entropie cryptographique
     entropy_fd = open("/dev/urandom", O_RDONLY);
     if (entropy_fd < 0) {
@@ -62,43 +62,43 @@ bool lum_security_init(void) {
                            "Failed to open /dev/urandom: %s", strerror(errno));
         // Fallback: continuer sans /dev/urandom mais avec logging
     }
-    
+
     // Générer magic pattern cryptographiquement sécurisé
     uint32_t magic_bytes[2] = {0};
     bool magic_secure = false;
-    
+
     if (entropy_fd >= 0) {
         ssize_t bytes_read = read(entropy_fd, magic_bytes, sizeof(magic_bytes));
         if (bytes_read == sizeof(magic_bytes)) {
             magic_secure = true;
         }
     }
-    
+
     if (!magic_secure) {
         // Fallback sécurisé: combinaison timestamp + PID + adresse mémoire
         struct timespec ts;
         clock_gettime(CLOCK_MONOTONIC, &ts);
         magic_bytes[0] = (uint32_t)(ts.tv_nsec ^ ts.tv_sec);
         magic_bytes[1] = (uint32_t)(getpid() ^ (uintptr_t)&magic_bytes);
-        
+
         unified_forensic_log(FORENSIC_LEVEL_WARNING, "lum_security_init",
                            "Using fallback entropy for magic pattern");
     }
-    
+
     // Générer pattern final: XOR des deux valeurs + masquage
     LUM_VALIDATION_PATTERN = (magic_bytes[0] ^ magic_bytes[1]) | 0x80000000;
-    
+
     // Garantir que le pattern n'est jamais l'ancien pattern prévisible
     if (LUM_VALIDATION_PATTERN == 0x12345678) {
         LUM_VALIDATION_PATTERN ^= 0x55AA55AA;
     }
-    
+
     security_initialized = true;
-    
+
     unified_forensic_log(FORENSIC_LEVEL_INFO, "lum_security_init",
-                       "Security initialization complete - Magic pattern: 0x%08X", 
+                       "Security initialization complete - Magic pattern: 0x%08X",
                        LUM_VALIDATION_PATTERN);
-    
+
     pthread_mutex_unlock(&entropy_mutex);
     return true;
 }
@@ -106,39 +106,43 @@ bool lum_security_init(void) {
 // Fonction de nettoyage sécurisé
 void lum_security_cleanup(void) {
     pthread_mutex_lock(&entropy_mutex);
-    
+
     if (entropy_fd >= 0) {
         close(entropy_fd);
         entropy_fd = -1;
     }
-    
+
     security_initialized = false;
-    
+
     unified_forensic_log(FORENSIC_LEVEL_INFO, "lum_security_cleanup",
                        "Security cleanup completed");
-    
+
     pthread_mutex_unlock(&entropy_mutex);
 }
 
 // Core LUM functions
-lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e type) {
+lum_t* lum_create(uint32_t id) {
+    if (!lums_initialized) {
+        lum_init_system();
+    }
+
     lum_t* lum = TRACKED_MALLOC(sizeof(lum_t));
-    if (!lum) return NULL;
+    if (!lum) {
+        return NULL;
+    }
 
-    lum->presence = (presence > 0) ? 1 : 0;
-    lum->id = lum_generate_id();
-    lum->position_x = x;
-    lum->position_y = y;
-    lum->structure_type = type;
-    lum->magic_number = LUM_VALIDATION_PATTERN;  // PRIORITÉ 1.2: Initialiser magic number
-    lum->is_destroyed = 0;  // CORRECTION: Initialiser le flag protection double-free
+    lum->id = id;
+    lum->energy = 1.0;
+    lum->state = LUM_STATE_ACTIVE;
     lum->timestamp = lum_get_timestamp();
-    lum->memory_address = (void*)lum;  // Adresse mémoire pour traçabilité
+    lum->memory_address = lum;
+    lum->checksum = lum_calculate_checksum(lum);
+    lum->is_destroyed = 0;
+    lum->magic_number = LUM_VALIDATION_PATTERN;
 
-    // Calcul checksum pour intégrité
-    lum->checksum = (uint32_t)(lum->id ^ lum->presence ^ lum->position_x ^
-                              lum->position_y ^ lum->structure_type ^
-                              (uint32_t)(lum->timestamp & 0xFFFFFFFF));
+    // FORENSIC LOG OBLIGATOIRE: Log chaque LUM créé
+    forensic_log_individual_lum(id, "CREATE", lum->timestamp);
+    forensic_log_lum_operation("CREATE", 1, 0.0);
 
     return lum;
 }
@@ -473,7 +477,7 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
         DEBUG_PRINTF("[DEBUG] lum_group_add: SORTIE - magic number invalide\n");
         return false; // Corrupted group
     }
-    
+
     DEBUG_PRINTF("[DEBUG] lum_group_add: Validations OK, count=%zu, capacity=%zu\n", group->count, group->capacity);
 
     // Safety check: ensure count doesn't exceed capacity
@@ -538,6 +542,10 @@ bool lum_group_add(lum_group_t* group, lum_t* lum) {
 
     group->count++;
     DEBUG_PRINTF("[DEBUG] lum_group_add: SUCCÈS - nouvelle count=%zu\n", group->count);
+
+    // FORENSIC LOG: Log chaque LUM ajouté au groupe
+    forensic_log_individual_lum(group->lums[group->count-1].id, "ADD_TO_GROUP", group->lums[group->count-1].timestamp);
+    forensic_log_lum_operation("ADD_TO_GROUP", group->count, 0.0);
 
     return true;
 }
@@ -749,7 +757,7 @@ lum_group_t* lum_memory_retrieve(lum_memory_t* memory) {
 uint32_t lum_generate_id(void) {
     pthread_mutex_lock(&id_counter_mutex);
     uint32_t id = 0;
-    
+
     // Initialiser la sécurité si nécessaire
     if (!security_initialized) {
         if (!lum_security_init()) {
@@ -766,7 +774,7 @@ uint32_t lum_generate_id(void) {
             return id;
         }
     }
-    
+
     // Génération cryptographiquement sécurisée avec /dev/urandom
     if (entropy_fd >= 0) {
         ssize_t bytes_read = read(entropy_fd, &id, sizeof(id));
@@ -777,7 +785,7 @@ uint32_t lum_generate_id(void) {
             return id;
         }
     }
-    
+
     // Fallback sécurisé: Combinaison timestamp haute précision + entropie système
     struct timespec ts;
     if (clock_gettime(CLOCK_MONOTONIC, &ts) == 0) {
@@ -787,13 +795,13 @@ uint32_t lum_generate_id(void) {
     } else {
         id = (uint32_t)(time(NULL) ^ getpid());
     }
-    
+
     // Garantir ID non-nul
     if (id == 0) id = 1;
-    
+
     unified_forensic_log(FORENSIC_LEVEL_WARNING, "lum_generate_id",
                        "Fallback secure ID generated: %" PRIu32, id);
-    
+
     pthread_mutex_unlock(&id_counter_mutex);
     return id;
 }

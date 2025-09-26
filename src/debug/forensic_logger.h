@@ -34,6 +34,7 @@ typedef unified_forensic_level_e forensic_level_e;
 bool forensic_logger_init(const char* filename);
 void forensic_log_memory_operation(const char* operation, void* ptr, size_t size);
 void forensic_log_lum_operation(const char* operation, uint64_t lum_count, double duration_ns);
+void forensic_log_individual_lum(uint32_t lum_id, const char* operation, uint64_t timestamp_ns);
 void forensic_logger_destroy(void);
 
 // General forensic logging function
