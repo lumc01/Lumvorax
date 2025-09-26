@@ -70,7 +70,7 @@
 bool check_directory_exists(const char* path) {
     struct stat st;
     bool exists = (stat(path, &st) == 0 && S_ISDIR(st.st_mode));
-    printf("🔍 Vérification répertoire %s: %s\n", path, exists ? "EXISTS" : "MISSING");
+    printf("[DEBUG] Vérification répertoire %s: %s\n", path, exists ? "EXISTS" : "MISSING");
     return exists;
 }
 
@@ -80,12 +80,12 @@ bool ensure_directory_exists(const char* path) {
         return true;
     }
     
-    printf("📁 Création répertoire %s...\n", path);
+    printf("[DEBUG] Création répertoire %s...\n", path);
     if (mkdir(path, 0755) == 0) {
-        printf("✅ Répertoire créé: %s\n", path);
+        printf("[SUCCESS] Répertoire créé: %s\n", path);
         return true;
     } else {
-        printf("❌ Échec création répertoire: %s\n", path);
+        printf("[ERROR] Échec création répertoire: %s\n", path);
         return false;
     }
 }
@@ -100,15 +100,15 @@ static void test_progressive_stress_all_available_modules(void) {
 
     for (size_t i = 0; i < num_scales; i++) {
         size_t scale = test_scales[i];
-        printf("\n💥 === ÉCHELLE %zu ÉLÉMENTS - AVEC OPTIMISATIONS SIMD/PARALLEL ===\n", scale);
+        printf("\n[TEST] === ÉCHELLE %zu ÉLÉMENTS - AVEC OPTIMISATIONS SIMD/PARALLEL ===\n", scale);
 
         struct timespec start_time, end_time;
         clock_gettime(CLOCK_MONOTONIC, &start_time);
 
-        printf("🕐 Timestamp: %ld.%09ld ns\n", start_time.tv_sec, start_time.tv_nsec);
+        printf("[DEBUG] Timestamp: %ld.%09ld ns\n", start_time.tv_sec, start_time.tv_nsec);
 
         // Test LUM Core avec cache alignment et optimisations
-        printf("📊 LUM CORE @ %zu éléments...\n", scale);
+        printf("[METRICS] LUM CORE @ %zu éléments...\n", scale);
         lum_group_t* test_group = lum_group_create(scale > 50000 ? 50000 : scale);
         if (test_group) {
             size_t batch_size = scale > 20000 ? 20000 : scale;
@@ -133,20 +133,20 @@ static void test_progressive_stress_all_available_modules(void) {
 
             clock_gettime(CLOCK_MONOTONIC, &end_time);
             double elapsed = (end_time.tv_sec - start_time.tv_sec) + (end_time.tv_nsec - start_time.tv_nsec) / 1e9;
-            printf("✅ LUM CORE: %zu créés en %.3f sec (%.0f ops/sec)\n", created, elapsed, created / elapsed);
+            printf("[SUCCESS] LUM CORE: %zu créés en %.3f sec (%.0f ops/sec)\n", created, elapsed, created / elapsed);
 
             lum_group_destroy(test_group);
         }
 
         // Test VORAX Operations avec fusion parallèle
-        printf("📊 VORAX OPERATIONS @ %zu éléments...\n", scale);
+        printf("[METRICS] VORAX OPERATIONS @ %zu éléments...\n", scale);
         lum_group_t* group1 = lum_group_create(scale/4 > 5000 ? 5000 : scale/4);
         lum_group_t* group2 = lum_group_create(scale/4 > 5000 ? 5000 : scale/4);
 
         if (group1 && group2) {
             vorax_result_t* result = vorax_fuse(group1, group2);
             if (result && result->success) {
-                printf("✅ VORAX: Fusion de %zu éléments réussie\n", 
+                printf("[SUCCESS] VORAX: Fusion de %zu éléments réussie\n", 
                        result->result_group ? result->result_group->count : 0);
                 vorax_result_destroy(result);
             }
@@ -155,113 +155,113 @@ static void test_progressive_stress_all_available_modules(void) {
         }
 
         // Test SIMD Optimizer - OPTIMISATIONS ACTIVÉES
-        printf("📊 SIMD OPTIMIZER @ %zu éléments...\n", scale);
+        printf("[METRICS] SIMD OPTIMIZER @ %zu éléments...\n", scale);
         simd_capabilities_t* simd_caps = simd_detect_capabilities();
         if (simd_caps) {
-            printf("✅ SIMD: AVX2=%s, Vector Width=%d, Échelle %zu\n", 
+            printf("[SUCCESS] SIMD: AVX2=%s, Vector Width=%d, Échelle %zu\n", 
                    simd_caps->avx2_available ? "OUI" : "NON", 
                    simd_caps->vector_width, scale);
 
             // Test SIMD operations
             if (simd_caps->avx2_available) {
-                printf("🚀 SIMD AVX2: Optimisations +300%% activées pour %zu éléments\n", scale);
+                printf("[SUCCESS] SIMD AVX2: Optimisations +300%% activées pour %zu éléments\n", scale);
             }
             simd_capabilities_destroy(simd_caps);
         }
 
         // Test Parallel Processor - PARALLEL VORAX ACTIVÉ
-        printf("📊 PARALLEL PROCESSOR @ %zu éléments...\n", scale);
-        printf("✅ PARALLEL: Multi-threads activé, échelle %zu\n", scale);
-        printf("🚀 PARALLEL VORAX: Optimisations +400%% activées\n");
+        printf("[METRICS] PARALLEL PROCESSOR @ %zu éléments...\n", scale);
+        printf("[SUCCESS] PARALLEL: Multi-threads activé, échelle %zu\n", scale);
+        printf("[SUCCESS] PARALLEL VORAX: Optimisations +400%% activées\n");
 
         // Test Memory Optimizer - CACHE ALIGNMENT ACTIVÉ
-        printf("📊 MEMORY OPTIMIZER @ %zu éléments...\n", scale);
+        printf("[METRICS] MEMORY OPTIMIZER @ %zu éléments...\n", scale);
         memory_pool_t* mem_pool = memory_pool_create(scale * 64, 64);
         if (mem_pool) {
-            printf("✅ MEMORY: Pool %zu bytes, alignement 64B\n", scale * 64);
-            printf("🚀 CACHE ALIGNMENT: +15%% performance mémoire\n");
+            printf("[SUCCESS] MEMORY: Pool %zu bytes, alignement 64B\n", scale * 64);
+            printf("[SUCCESS] CACHE ALIGNMENT: +15%% performance mémoire\n");
             memory_pool_destroy(mem_pool);
         }
 
         // Test modules avancés disponibles
-        printf("📊 AUDIO PROCESSOR @ %zu échantillons...\n", scale);
+        printf("[METRICS] AUDIO PROCESSOR @ %zu échantillons...\n", scale);
         audio_processor_t* audio = audio_processor_create(48000, 2);
         if (audio) {
-            printf("✅ AUDIO: 48kHz stéréo, %zu échantillons simulés\n", scale);
+            printf("[SUCCESS] AUDIO: 48kHz stéréo, %zu échantillons simulés\n", scale);
             audio_processor_destroy(&audio);
         }
 
-        printf("📊 IMAGE PROCESSOR @ %zu pixels...\n", scale);
+        printf("[METRICS] IMAGE PROCESSOR @ %zu pixels...\n", scale);
         image_processor_t* image = image_processor_create(scale > 1920*1080 ? 1920 : (int)(sqrt(scale)), 
                                                          scale > 1920*1080 ? 1080 : (int)(sqrt(scale)));
         if (image) {
-            printf("✅ IMAGE: %zux%zu pixels traités\n", image->width, image->height);
+            printf("[SUCCESS] IMAGE: %zux%zu pixels traités\n", image->width, image->height);
             image_processor_destroy(&image);
         }
 
-        printf("📊 TSP OPTIMIZER @ %zu villes...\n", scale > 1000 ? 1000 : scale);
+        printf("[METRICS] TSP OPTIMIZER @ %zu villes...\n", scale > 1000 ? 1000 : scale);
         tsp_config_t* tsp_config = tsp_config_create_default();
         if (tsp_config) {
-            printf("✅ TSP: Configuration optimisation créée\n");
+            printf("[SUCCESS] TSP: Configuration optimisation créée\n");
             tsp_config_destroy(&tsp_config);
         }
 
         // Test Matrix Calculator
-        printf("📊 MATRIX CALCULATOR @ %zu opérations...\n", scale);
+        printf("[METRICS] MATRIX CALCULATOR @ %zu opérations...\n", scale);
         // Test avec les vraies fonctions disponibles selon header
-        printf("✅ MATRIX: Module matrix_calculator disponible\n");
+        printf("[SUCCESS] MATRIX: Module matrix_calculator disponible\n");
 
         // Test Neural Network Processor  
-        printf("📊 NEURAL NETWORK @ %zu neurones...\n", scale);
+        printf("[METRICS] NEURAL NETWORK @ %zu neurones...\n", scale);
         size_t layer_sizes[] = {128, 64, 10};
         neural_network_t* neural = neural_network_create(layer_sizes, 3);
         if (neural) {
-            printf("✅ NEURAL: Réseau 128-64-10 créé\n");
+            printf("[SUCCESS] NEURAL: Réseau 128-64-10 créé\n");
             neural_network_destroy(&neural);
         }
 
         // Test Crypto Validator
-        printf("📊 CRYPTO VALIDATOR...\n");
+        printf("[METRICS] CRYPTO VALIDATOR...\n");
         bool crypto_valid = crypto_validate_sha256_implementation();
         if (crypto_valid) {
-            printf("✅ CRYPTO: Validation SHA-256 réussie\n");
+            printf("[SUCCESS] CRYPTO: Validation SHA-256 réussie\n");
         } else {
-            printf("❌ CRYPTO: Validation SHA-256 échouée\n");
+            printf("[ERROR] CRYPTO: Validation SHA-256 échouée\n");
         }
 
         // Test Data Persistence
-        printf("📊 DATA PERSISTENCE...\n");
+        printf("[METRICS] DATA PERSISTENCE...\n");
         persistence_context_t* persistence = persistence_context_create("logs");
         if (persistence) {
-            printf("✅ PERSISTENCE: Contexte créé dans logs/\n");
+            printf("[SUCCESS] PERSISTENCE: Contexte créé dans logs/\n");
             persistence_context_destroy(persistence);
         }
 
         // Test Binary LUM Converter
-        printf("📊 BINARY LUM CONVERTER...\n");
+        printf("[METRICS] BINARY LUM CONVERTER...\n");
         binary_lum_result_t* converter_result = binary_lum_result_create();
         if (converter_result) {
-            printf("✅ BINARY: Structure résultat créée\n");
+            printf("[SUCCESS] BINARY: Structure résultat créée\n");
             binary_lum_result_destroy(converter_result);
         }
 
         // Test Performance Metrics
-        printf("📊 PERFORMANCE METRICS...\n");
+        printf("[METRICS] PERFORMANCE METRICS...\n");
         performance_metrics_t* metrics = performance_metrics_create();
         if (metrics) {
-            printf("✅ METRICS: Collecteur de métriques créé\n");
+            printf("[SUCCESS] METRICS: Collecteur de métriques créé\n");
             performance_metrics_destroy(metrics);
         }
 
-        printf("🎯 === ÉCHELLE %zu COMPLÉTÉE ===\n", scale);
+        printf("[TEST] === ÉCHELLE %zu COMPLÉTÉE ===\n", scale);
     }
 
-    printf("🎯 === TESTS PROGRESSIFS COMPLÉTÉS - TOUS MODULES DISPONIBLES ===\n");
+    printf("[TEST] === TESTS PROGRESSIFS COMPLÉTÉS - TOUS MODULES DISPONIBLES ===\n");
     printf("[SUCCESS] TOUS les 39 modules disponibles testés 1 → 100K\n");
 }
 
 int main(int argc, char* argv[]) {
-    printf("🚀 === SYSTÈME LUM/VORAX COMPLET - VERSION OPTIMISÉE ===\n");
+    printf("[TEST] === SYSTÈME LUM/VORAX COMPLET - VERSION OPTIMISÉE ===\n");
     printf("Version: PRODUCTION v2.0 - 39 MODULES INTÉGRÉS\n");
     printf("Date: %s %s\n", __DATE__, __TIME__);
     
@@ -312,9 +312,9 @@ int main(int argc, char* argv[]) {
     memory_tracker_report();
     
     // Nettoyage
-    printf("\n🧹 === NETTOYAGE SYSTÈME ===\n");
+    printf("\n[DEBUG] === NETTOYAGE SYSTÈME ===\n");
     memory_tracker_destroy();
-    printf("✅ Nettoyage terminé - système LUM/VORAX prêt\n");
+    printf("[SUCCESS] Nettoyage terminé - système LUM/VORAX prêt\n");
     
     return 0;
 }

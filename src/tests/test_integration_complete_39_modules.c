@@ -112,7 +112,7 @@ bool test_complete_integration_chain(void) {
     }
     
     // 4. Tester persistance
-    persistence_context_t* config = persistence_context_create("test_logs", STORAGE_FORMAT_BINARY);
+    persistence_context_t* config = persistence_context_create("test_logs");
     bool persist_success = persistence_save_lum(config, lum, "test_integration");
     
     // 5. Tester optimisations
