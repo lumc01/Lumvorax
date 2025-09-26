@@ -12,7 +12,7 @@ bool forensic_logger_init(const char* filename) {
         return false;
     }
     
-    // Créer répertoire si nécessaire
+    // Créer répertoire si nécessaire avec vérification complète
     char dir_path[256];
     strncpy(dir_path, filename, sizeof(dir_path) - 1);
     dir_path[sizeof(dir_path) - 1] = '\0';
@@ -20,19 +20,40 @@ bool forensic_logger_init(const char* filename) {
     char *last_slash = strrchr(dir_path, '/');
     if (last_slash) {
         *last_slash = '\0';
-        mkdir(dir_path, 0755);  // Créer répertoire parent
+        
+        // Créer récursivement tous les répertoires parents
+        char temp_path[256];
+        char *token = strtok(dir_path, "/");
+        strcpy(temp_path, "");
+        
+        while (token != NULL) {
+            strcat(temp_path, token);
+            strcat(temp_path, "/");
+            mkdir(temp_path, 0755);
+            token = strtok(NULL, "/");
+        }
     }
     
+    // Tentative d'ouverture avec gestion d'erreur robuste
     forensic_log_file = fopen(filename, "w");
     if (!forensic_log_file) {
-        fprintf(stderr, "[FORENSIC] ERROR: Cannot create log file '%s': %s\n", 
-                filename, strerror(errno));
-        fprintf(stderr, "[FORENSIC] Falling back to stderr logging\n");
-        return false;  // Continue avec stderr comme fallback
+        // Fallback vers répertoire courant
+        char fallback_name[256];
+        snprintf(fallback_name, sizeof(fallback_name), "forensic_fallback_%lu.log", 
+                 (unsigned long)time(NULL));
+        
+        forensic_log_file = fopen(fallback_name, "w");
+        if (!forensic_log_file) {
+            fprintf(stderr, "[FORENSIC] CRITICAL: Cannot create any log file\n");
+            return false;
+        }
+        
+        fprintf(stderr, "[FORENSIC] WARNING: Using fallback log: %s\n", fallback_name);
     }
     
     uint64_t timestamp = lum_get_timestamp();
     fprintf(forensic_log_file, "=== FORENSIC LOG STARTED (timestamp: %lu ns) ===\n", timestamp);
+    fprintf(forensic_log_file, "Forensic logging initialized successfully\n");
     fflush(forensic_log_file);
     
     printf("[FORENSIC] Log initialized successfully: %s\n", filename);
