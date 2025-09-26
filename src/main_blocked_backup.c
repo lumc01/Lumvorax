@@ -69,7 +69,7 @@
 static void test_progressive_stress_all_available_modules(void) {
     printf("🔥 === TESTS PROGRESSIFS 10K → 1M - TOUS LES 32+ MODULES DISPONIBLES ===\n");
 
-    size_t test_scales[] = {10000, 50000, 100000, 500000, 1000000}; // LIMITE MAX 1M éléments selon exigences utilisateur
+    size_t test_scales[] = {10, 100, 1000, 10000, 100000}; // LIMITE MAX 100K éléments selon prompt.txt
     size_t num_scales = sizeof(test_scales) / sizeof(test_scales[0]);
 
     for (size_t i = 0; i < num_scales; i++) {

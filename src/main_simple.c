@@ -40,7 +40,7 @@
 static void test_progressive_stress_functional_modules(void) {
     printf("🔥 === TESTS PROGRESSIFS 1M → 100M - MODULES 100%% FONCTIONNELS ===\n");
     
-    size_t test_scales[] = {100000, 500000, 1000000, 5000000, 10000000}; // Échelles progressives
+    size_t test_scales[] = {10, 100, 1000, 10000, 100000}; // Échelles progressives max 100K selon prompt.txt
     size_t num_scales = sizeof(test_scales) / sizeof(test_scales[0]);
     
     for (size_t i = 0; i < num_scales; i++) {

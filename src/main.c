@@ -92,10 +92,10 @@ bool ensure_directory_exists(const char* path) {
 
 // ===== TESTS PROGRESSIFS POUR TOUS LES 39 MODULES - AVEC MÉTRIQUES AUTHENTIQUES =====
 static void test_progressive_stress_all_available_modules(void) {
-    printf("🎯 === LANCEMENT TESTS PROGRESSIFS 1M → 100M TOUS MODULES ===\n");
-    printf("🔥 === TESTS PROGRESSIFS 10K → 1M - TOUS LES 39 MODULES DISPONIBLES ===\n");
+    printf("[TEST] === LANCEMENT TESTS PROGRESSIFS 1 → 100K TOUS MODULES ===\n");
+    printf("[TEST] === TESTS PROGRESSIFS 10 → 100K - TOUS LES 39 MODULES DISPONIBLES ===\n");
 
-    size_t test_scales[] = {10000, 50000, 100000, 500000, 1000000}; // LIMITE MAX 1M éléments selon exigences utilisateur
+    size_t test_scales[] = {10, 100, 1000, 10000, 100000}; // LIMITE MAX 100K éléments selon prompt.txt
     size_t num_scales = sizeof(test_scales) / sizeof(test_scales[0]);
 
     for (size_t i = 0; i < num_scales; i++) {
@@ -257,7 +257,7 @@ static void test_progressive_stress_all_available_modules(void) {
     }
 
     printf("🎯 === TESTS PROGRESSIFS COMPLÉTÉS - TOUS MODULES DISPONIBLES ===\n");
-    printf("✅ TOUS les 39 modules disponibles testés 1M → 100M\n");
+    printf("[SUCCESS] TOUS les 39 modules disponibles testés 1 → 100K\n");
 }
 
 int main(int argc, char* argv[]) {
