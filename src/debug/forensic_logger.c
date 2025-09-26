@@ -3,6 +3,9 @@
 #include <stdio.h>
 #include <time.h>
 #include <string.h>
+#include <sys/stat.h>   // Pour mkdir()
+#include <unistd.h>     // Pour access()
+#include <errno.h>      // Pour errno
 
 static FILE* forensic_log_file = NULL;
 

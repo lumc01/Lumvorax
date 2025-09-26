@@ -3,6 +3,7 @@
 #define _POSIX_C_SOURCE 200809L
 
 #include "matrix_calculator.h"
+#include <sys/stat.h>   // Pour mkdir() et autres fonctions système
 #include "../debug/memory_tracker.h"
 #include <stdio.h>
 #include <stdlib.h>
