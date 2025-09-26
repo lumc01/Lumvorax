@@ -7,12 +7,35 @@
 static FILE* forensic_log_file = NULL;
 
 bool forensic_logger_init(const char* filename) {
+    if (!filename) {
+        fprintf(stderr, "[FORENSIC] ERROR: filename is NULL\n");
+        return false;
+    }
+    
+    // Créer répertoire si nécessaire
+    char dir_path[256];
+    strncpy(dir_path, filename, sizeof(dir_path) - 1);
+    dir_path[sizeof(dir_path) - 1] = '\0';
+    
+    char *last_slash = strrchr(dir_path, '/');
+    if (last_slash) {
+        *last_slash = '\0';
+        mkdir(dir_path, 0755);  // Créer répertoire parent
+    }
+    
     forensic_log_file = fopen(filename, "w");
-    if (!forensic_log_file) return false;
+    if (!forensic_log_file) {
+        fprintf(stderr, "[FORENSIC] ERROR: Cannot create log file '%s': %s\n", 
+                filename, strerror(errno));
+        fprintf(stderr, "[FORENSIC] Falling back to stderr logging\n");
+        return false;  // Continue avec stderr comme fallback
+    }
     
     uint64_t timestamp = lum_get_timestamp();
     fprintf(forensic_log_file, "=== FORENSIC LOG STARTED (timestamp: %lu ns) ===\n", timestamp);
     fflush(forensic_log_file);
+    
+    printf("[FORENSIC] Log initialized successfully: %s\n", filename);
     return true;
 }
 

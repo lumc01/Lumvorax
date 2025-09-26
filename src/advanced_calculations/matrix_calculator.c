@@ -43,24 +43,24 @@ matrix_calculator_t* matrix_calculator_create(size_t rows, size_t cols) {
 bool lum_matrix_set(lum_matrix_t* matrix, size_t row, size_t col, double value) {
     if (!matrix || matrix->magic_number != MATRIX_CALCULATOR_MAGIC) return false;
     if (row >= matrix->rows || col >= matrix->cols) return false;
-    
+
     // Créer un LUM temporaire pour stocker la valeur
     lum_t* temp_lum = lum_create(1, (int32_t)value, (int32_t)(value * 100), LUM_STRUCTURE_LINEAR);
     if (!temp_lum) return false;
-    
+
     bool result = lum_matrix_set_lum(matrix, row, col, temp_lum);
     lum_destroy(temp_lum);
-    
+
     return result;
 }
 
 double lum_matrix_get(lum_matrix_t* matrix, size_t row, size_t col) {
     if (!matrix || matrix->magic_number != MATRIX_CALCULATOR_MAGIC) return 0.0;
     if (row >= matrix->rows || col >= matrix->cols) return 0.0;
-    
+
     lum_t* lum = lum_matrix_get_lum(matrix, row, col);
     if (!lum) return 0.0;
-    
+
     // Extraire valeur du LUM
     return (double)lum->position_x;
 }
@@ -90,7 +90,7 @@ __attribute__((unused)) static matrix_result_t* matrix_multiply_lum_optimized_ca
     result->magic_number = MATRIX_CALCULATOR_MAGIC;
     result->rows = a->rows;
     result->cols = b->cols;
-    
+
     // OPTIMISATION 1: Allocation alignée pour SIMD
     size_t result_size = a->rows * b->cols * sizeof(double);
     result->result_data = (double*)aligned_alloc(64, result_size);
@@ -116,31 +116,31 @@ __attribute__((unused)) static matrix_result_t* matrix_multiply_lum_optimized_ca
 
     // OPTIMISATION 3: Multiplication matricielle blocked avec AVX-512 FMA
     const size_t BLOCK_SIZE = 64; // Optimum pour cache L1
-    
+
     #ifdef __AVX512F__
     // Version vectorisée AVX-512 avec FMA pour 100+ GFLOPS
     for (size_t ii = 0; ii < a->rows; ii += BLOCK_SIZE) {
         for (size_t jj = 0; jj < b->cols; jj += BLOCK_SIZE) {
             for (size_t kk = 0; kk < a->cols; kk += BLOCK_SIZE) {
-                
+
                 // Bloc 64x64 avec vectorisation complète
                 size_t i_max = (ii + BLOCK_SIZE < a->rows) ? ii + BLOCK_SIZE : a->rows;
                 size_t j_max = (jj + BLOCK_SIZE < b->cols) ? jj + BLOCK_SIZE : b->cols;
                 size_t k_max = (kk + BLOCK_SIZE < a->cols) ? kk + BLOCK_SIZE : a->cols;
-                
+
                 for (size_t i = ii; i < i_max; i++) {
                     for (size_t j = jj; j < j_max; j += 8) { // 8 doubles par vecteur AVX-512
-                        
+
                         __m512d sum_vec = _mm512_load_pd(&result->result_data[i * b->cols + j]);
-                        
+
                         for (size_t k = kk; k < k_max; k++) {
                             __m512d a_vec = _mm512_set1_pd(a->data[i * a->cols + k]);
                             __m512d b_vec = _mm512_load_pd(&b->data[k * b->cols + j]);
-                            
+
                             // FMA ultra-rapide: sum += a * b en une instruction
                             sum_vec = _mm512_fmadd_pd(a_vec, b_vec, sum_vec);
                         }
-                        
+
                         _mm512_store_pd(&result->result_data[i * b->cols + j], sum_vec);
                     }
                 }
@@ -152,23 +152,23 @@ __attribute__((unused)) static matrix_result_t* matrix_multiply_lum_optimized_ca
     for (size_t ii = 0; ii < a->rows; ii += BLOCK_SIZE) {
         for (size_t jj = 0; jj < b->cols; jj += BLOCK_SIZE) {
             for (size_t kk = 0; kk < a->cols; kk += BLOCK_SIZE) {
-                
+
                 size_t i_max = (ii + BLOCK_SIZE < a->rows) ? ii + BLOCK_SIZE : a->rows;
                 size_t j_max = (jj + BLOCK_SIZE < b->cols) ? jj + BLOCK_SIZE : b->cols;
                 size_t k_max = (kk + BLOCK_SIZE < a->cols) ? kk + BLOCK_SIZE : a->cols;
-                
+
                 for (size_t i = ii; i < i_max; i++) {
                     // Prefetch ligne suivante
                     if (i + 1 < i_max) {
                         __builtin_prefetch(&a->data[(i+1) * a->cols + kk], 0, 3);
                     }
-                    
+
                     for (size_t j = jj; j < j_max; j += 4) { // Unroll par 4
                         double sum0 = result->result_data[i * b->cols + j];
                         double sum1 = (j+1 < j_max) ? result->result_data[i * b->cols + j + 1] : 0.0;
                         double sum2 = (j+2 < j_max) ? result->result_data[i * b->cols + j + 2] : 0.0;
                         double sum3 = (j+3 < j_max) ? result->result_data[i * b->cols + j + 3] : 0.0;
-                        
+
                         for (size_t k = kk; k < k_max; k++) {
                             double a_val = a->data[i * a->cols + k];
                             sum0 += a_val * b->data[k * b->cols + j];
@@ -176,7 +176,7 @@ __attribute__((unused)) static matrix_result_t* matrix_multiply_lum_optimized_ca
                             if (j+2 < j_max) sum2 += a_val * b->data[k * b->cols + j + 2];
                             if (j+3 < j_max) sum3 += a_val * b->data[k * b->cols + j + 3];
                         }
-                        
+
                         result->result_data[i * b->cols + j] = sum0;
                         if (j+1 < j_max) result->result_data[i * b->cols + j + 1] = sum1;
                         if (j+2 < j_max) result->result_data[i * b->cols + j + 2] = sum2;
@@ -572,7 +572,7 @@ bool lum_matrix_set_lum(lum_matrix_t* matrix, size_t row, size_t col, lum_t* lum
     if (!matrix || matrix->magic_number != MATRIX_MAGIC_NUMBER) return false;
     if (row >= matrix->rows || col >= matrix->cols) return false;
     if (!lum) return false;
-    
+
     // Copier le LUM dans la matrice
     matrix->matrix_data[row][col] = *lum;
     return true;
@@ -581,7 +581,7 @@ bool lum_matrix_set_lum(lum_matrix_t* matrix, size_t row, size_t col, lum_t* lum
 lum_t* lum_matrix_get_lum(lum_matrix_t* matrix, size_t row, size_t col) {
     if (!matrix || matrix->magic_number != MATRIX_MAGIC_NUMBER) return NULL;
     if (row >= matrix->rows || col >= matrix->cols) return NULL;
-    
+
     return &matrix->matrix_data[row][col];
 }
 
