@@ -65,23 +65,23 @@
 #include "spatial/lum_instant_displacement.h"
 #include "network/hostinger_resource_limiter.h"
 
-// ===== TESTS PROGRESSIFS 1M → 100M POUR TOUS LES 32+ MODULES =====
+// ===== TESTS PROGRESSIFS 1 → 100K POUR TOUS LES 32+ MODULES DISPONIBLES (conformité prompt.txt) =====
 static void test_progressive_stress_all_available_modules(void) {
-    printf("🔥 === TESTS PROGRESSIFS 10K → 1M - TOUS LES 32+ MODULES DISPONIBLES ===\n");
+    printf(" === TESTS PROGRESSIFS 10K → 100K - TOUS LES 32+ MODULES DISPONIBLES ===\n");
 
     size_t test_scales[] = {10, 100, 1000, 10000, 100000}; // LIMITE MAX 100K éléments selon prompt.txt
     size_t num_scales = sizeof(test_scales) / sizeof(test_scales[0]);
 
     for (size_t i = 0; i < num_scales; i++) {
         size_t scale = test_scales[i];
-        printf("\n💥 === ÉCHELLE %zu ÉLÉMENTS - AVEC OPTIMISATIONS SIMD/PARALLEL ===\n", scale);
+        printf("\n === ÉCHELLE %zu ÉLÉMENTS - AVEC OPTIMISATIONS SIMD/PARALLEL ===\n", scale);
 
         struct timespec start_time, end_time;
         clock_gettime(CLOCK_MONOTONIC, &start_time);
 
-        printf("🕐 Timestamp: %ld.%09ld ns\n", start_time.tv_sec, start_time.tv_nsec);
+        printf("Timestamp: %ld.%09ld ns\n", start_time.tv_sec, start_time.tv_nsec);
 
-        // Test LUM Core avec cache aligREADME.md !ta seul mission est de me fournir cela fonctionnel a 100% avec en rapport final destout les metrique de performence reell collecter de 39 modules sans exception des chaque de teest initaire , je veux savoir ce que tiens chaque test reel , sans inveention ou falsification eu prediction avec de explication E VEUX SAVOIR EXACTEMENT LES RÉSULTATS DE MÉTRIQUES INDIVIDUELS DES PERFORMANCES DES CHAQUE MODULES ! PAS SEULEMENT LES GLORAL ! JE VEUX LES MÉTRIQUES BRUTE ULTRA FINE GRANULAIRE! POUR ANALYSER LES CE QUI A RÉELLEMENT FONCTIONNÉ, DÉTECTER LES ANOMALIE NON PROGRAMMER LIÉ A CHAQUE MODULES ET SONT TEST ! POUVOIR ANALYSER LES RESULTAR DES CALCULE LUM PAR LUM ! ALORS TU MINSPECTIONNE TOUT CELA EN PROFONDEUR ET TU ME FOURNI UN TOUT NOUVEAU RAPPORT MD NUMÉROTÉ SANS OMISSIONS ! SANS INVENTION OU FALSIFICATION DES RÉSULTATS REEL ! ET TU NE MODIFIE RIEN ! TU ATTENDS MES ORDRES APRES AVOIR RÉALISÉ TON RAPPORT AVEC DES EXPLICATIONS PÉDAGOGIQUES STILE ARTICLE AVEC DES LONGE PHRASE! AVEC LE MAXIMUM DE DÉTAIL POSSIBLE POUR QUE JE PUISE COMPRENDRE DE QUOI TU PARLE EXACTEMENT! COMPRENDRE LES NOM TECHNIQUE QUE TU UTILISE ET LES TERMES POUR CHAQUE LIGNE QUE TU ÉCRIS ! AVEC DES AUTOCRITIQUE ET RÉPONSE AU CRITIQUE ET FINALISE AVEC LA RÉPONSE AU QUESTION POUR CHAQUE LIGNE (C'EST A DIRE? )!nment et optimisations
+        // Test LUM Core avec cache alignment et optimisations
         printf("📊 LUM CORE @ %zu éléments...\n", scale);
         lum_group_t* test_group = lum_group_create(scale > 50000 ? 50000 : scale);
         if (test_group) {
@@ -235,7 +235,7 @@ static void generate_ultra_forensic_logs_with_proofs(void) {
              forensic_timestamp.tv_sec, forensic_timestamp.tv_nsec);
 
     printf("🔒 SESSION FORENSIQUE: %s\n", session_forensic);
-    printf("🕐 TIMESTAMP NANOSEC: %ld.%09ld\n", forensic_timestamp.tv_sec, forensic_timestamp.tv_nsec);
+    printf("Timestamp: %ld.%09ld ns\n", forensic_timestamp.tv_sec, forensic_timestamp.tv_nsec);
 
     // Checksums système (simulation SHA-256)
     uint32_t system_sha256_sim = 0xABCDEF01 ^ (uint32_t)forensic_timestamp.tv_sec;
@@ -256,7 +256,7 @@ static void generate_ultra_forensic_logs_with_proofs(void) {
         fprintf(forensic_log, "Session: %s\\n", session_forensic);
         fprintf(forensic_log, "Timestamp: %ld.%09ld\\n", forensic_timestamp.tv_sec, forensic_timestamp.tv_nsec);
         fprintf(forensic_log, "Modules testés: 32+ modules disponibles\\n");
-        fprintf(forensic_log, "Échelles: 1M, 2M, 5M, 10M, 20M, 50M, 100M éléments\\n");
+        fprintf(forensic_log, "Échelles: 100K éléments\\n"); // Corrected scale
         fprintf(forensic_log, "Optimisations: SIMD +300%%, Parallel +400%%, Cache +15%%\\n");
         fprintf(forensic_log, "SHA-256 Système: 0x%08X\\n", system_sha256_sim);
         fprintf(forensic_log, "SHA-256 Exécution: 0x%08X\\n", execution_sha256_sim);
@@ -301,7 +301,7 @@ int main(int argc, char* argv[]) {
     ultra_forensic_logger_init(); // Initialisation sans paramètre
 
     if (argc > 1 && strcmp(argv[1], "--progressive-stress-all") == 0) {
-        printf("\n🎯 === LANCEMENT TESTS PROGRESSIFS 1M → 100M TOUS MODULES ===\n");
+        printf("\n🎯 === LANCEMENT TESTS PROGRESSIFS 1M → 100K TOUS MODULES ===\n");
         printf("Modules inclus: Core, VORAX, Audio, Image, TSP, AI, Analytics, etc.\n");
         printf("Modules exclus: Quantiques et Blackbox (désactivés par prompt.txt)\n");
 
@@ -313,7 +313,7 @@ int main(int argc, char* argv[]) {
         memory_tracker_report();
 
         printf("\n🏆 === VALIDATION COMPLÈTE TERMINÉE ===\n");
-        printf("✅ TOUS les 32+ modules disponibles testés 1M → 100M\n");
+        printf("✅ TOUS les 32+ modules disponibles testés 1M → 100K\n");
         printf("✅ Optimisations SIMD/Parallel/Cache activées\n");
         printf("✅ Logs forensiques avec checksums SHA-256\n");
         printf("✅ Métriques de performance authentiques\n");
@@ -328,7 +328,7 @@ int main(int argc, char* argv[]) {
     }
 
     printf("\nUsage: %s --progressive-stress-all\n", argv[0]);
-    printf("Description: Tests progressifs 1M → 100M pour TOUS les modules disponibles\n");
+    printf("Description: Tests progressifs 1M → 100K pour TOUS les modules disponibles\n");
     printf("Modules: %d+ modules core + avancés + complexes + optimisations\n", 32);
     printf("Preuves: Logs forensiques + checksums + métriques temps réel\n");
 

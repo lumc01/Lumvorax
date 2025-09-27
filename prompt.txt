@@ -531,9 +531,12 @@ Pour chaque module, mesurer obligatoirement :
 - **PEER REVIEW** : Validation par tiers de tout code sécurité critique
 - **CERTIFICATION** : Validation conformité standards avant production
 
-### SECTION 22: RÈGLES PRÉVENTIVES SPÉCIFIQUES ANOMALIES DÉTECTÉES 2025-09-22
+### SECTION 22: RÈGLES PRÉVENTIVES SPÉCIFIQUES ANOMALIES DÉTECTÉES 2025-09-27
 
-#### 22.1 INTERDICTION ÉMOJIS PRODUCTION ABSOLUE
+#### 22.1 INTERDICTION ÉMOJIS PRODUCTION ABSOLUE RENFORCÉE
+- **DÉTECTION AUTOMATIQUE** : Scripts de validation pré-commit obligatoires
+- **REMPLACEMENT SYSTÉMATIQUE** : Conversion automatique émojis → ASCII
+- **VALIDATION CONTINUE** : Aucun commit autorisé avec émojis détectés
 - **CARACTÈRES INTERDITS** : Tous émojis Unicode (🔄🔍✅❌⚠️💾🎯📊📋🚨) en code/logs production
 - **REMPLACEMENT OBLIGATOIRE** : Préfixes ASCII clairs [MODULE], [STATUS], [ERROR], [INFO]
 - **COMPATIBILITÉ SYSTÈME** : Garantie fonctionnement terminaux ASCII stricts
