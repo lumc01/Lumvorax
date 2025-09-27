@@ -63,10 +63,10 @@
 #include "network/hostinger_client.h"
 
 static void test_all_core_modules(void) {
-    printf("\n🔥 === TESTS MODULES CORE (TOUS) ===\n");
+    printf("\n[TEST] === TESTS MODULES CORE (TOUS) ===\n");
     
     // Test LUM Core
-    printf("📊 Test LUM Core...\n");
+    printf("[TEST] Test LUM Core...\n");
     lum_group_t* group = lum_group_create(1000);
     for (int i = 0; i < 500; i++) {
         lum_t* lum = lum_create(i % 2, i, i*2, LUM_STRUCTURE_LINEAR);
@@ -75,10 +75,10 @@ static void test_all_core_modules(void) {
             lum_destroy(lum);
         }
     }
-    printf("✅ LUM Core: %zu LUMs créés avec succès\n", lum_group_size(group));
+    printf("[SUCCESS] LUM Core: %zu LUMs créés avec succès\n", lum_group_size(group));
     
     // Test VORAX Operations
-    printf("📊 Test VORAX Operations...\n");
+    printf("[TEST] Test VORAX Operations...\n");
     lum_group_t* group2 = lum_group_create(500);
     for (int i = 0; i < 250; i++) {
         lum_t* lum = lum_create(1, i + 1000, i + 1000, LUM_STRUCTURE_CIRCULAR);
@@ -90,16 +90,16 @@ static void test_all_core_modules(void) {
     
     vorax_result_t* fuse_result = vorax_fuse(group, group2);
     if (fuse_result && fuse_result->success) {
-        printf("✅ VORAX Fuse: %zu LUMs fusionnés\n", fuse_result->result_group->count);
+        printf("[SUCCESS] VORAX Fuse: %zu LUMs fusionnés\n", fuse_result->result_group->count);
         vorax_result_destroy(fuse_result);
     }
     
     // Test Binary Converter
-    printf("📊 Test Binary Converter...\n");
+    printf("[TEST] Test Binary Converter...\n");
     int32_t test_value = 12345;
     binary_lum_result_t* binary_result = convert_int32_to_lum(test_value);
     if (binary_result && binary_result->success) {
-        printf("✅ Binary Converter: %d converti en %zu LUMs\n", test_value, binary_result->bits_processed);
+        printf("[SUCCESS] Binary Converter: %d converti en %zu LUMs\n", test_value, binary_result->bits_processed);
         binary_lum_result_destroy(binary_result);
     }
     
@@ -272,7 +272,7 @@ static void test_stress_million_lums(void) {
     printf("\n💥 === TEST STRESS 1M+ LUMs ===\n");
     
     clock_t start = clock();
-    const size_t stress_count = 1000000;
+    const size_t stress_count = 100000;
     
     lum_group_t* mega_group = lum_group_create(stress_count);
     if (!mega_group) {

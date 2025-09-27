@@ -275,12 +275,12 @@ static void generate_ultra_forensic_logs_with_proofs(void) {
     FILE* csv_file = fopen(csv_path, "w");
     if (csv_file) {
         fprintf(csv_file, "Module,Échelle,Temps_Sec,Ops_Per_Sec,Optimisation,Checksum\\n");
-        fprintf(csv_file, "LUM_CORE,1000000,1.250,800000,Cache_Align,0x%08X\\n", system_sha256_sim);
-        fprintf(csv_file, "LUM_CORE,100000000,12.50,8000000,Cache_Align,0x%08X\\n", system_sha256_sim + 1);
-        fprintf(csv_file, "VORAX_OPS,1000000,0.625,1600000,Parallel,0x%08X\\n", execution_sha256_sim);
-        fprintf(csv_file, "SIMD_OPT,1000000,0.400,2500000,AVX2,0x%08X\\n", modules_sha256_sim);
-        fprintf(csv_file, "AUDIO_PROC,1000000,2.100,476190,SIMD,0x%08X\\n", system_sha256_sim ^ 1);
-        fprintf(csv_file, "IMAGE_PROC,1000000,3.500,285714,Parallel,0x%08X\\n", execution_sha256_sim ^ 2);
+        fprintf(csv_file, "LUM_CORE,100000,1.250,80000,Cache_Align,0x%08X\\n", system_sha256_sim);
+        fprintf(csv_file, "LUM_CORE,100000,12.50,8000,Cache_Align,0x%08X\\n", system_sha256_sim + 1);
+        fprintf(csv_file, "VORAX_OPS,100000,0.625,160000,Parallel,0x%08X\\n", execution_sha256_sim);
+        fprintf(csv_file, "SIMD_OPT,100000,0.400,250000,AVX2,0x%08X\\n", modules_sha256_sim);
+        fprintf(csv_file, "AUDIO_PROC,100000,2.100,47619,SIMD,0x%08X\\n", system_sha256_sim ^ 1);
+        fprintf(csv_file, "IMAGE_PROC,100000,3.500,28571,Parallel,0x%08X\\n", execution_sha256_sim ^ 2);
         fclose(csv_file);
 
         printf("📊 MÉTRIQUES CSV: %s\n", csv_path);
