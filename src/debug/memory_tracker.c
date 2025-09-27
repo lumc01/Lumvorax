@@ -1,4 +1,4 @@
-#define _GNU_SOURCE  // CORRECTION: Nécessaire pour strdup, strndup, strnlen
+// NOTE: _GNU_SOURCE déjà défini dans Makefile
 #include "memory_tracker.h"
 #include <pthread.h>
 #include <string.h> // Added for strncpy

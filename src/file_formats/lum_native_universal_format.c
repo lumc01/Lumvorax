@@ -86,9 +86,11 @@ lum_universal_file_manager_t* lum_universal_file_create(const char* filepath) {
     lum_format_version_t version_info = lum_get_format_version();
     snprintf(signature_buffer, sizeof(signature_buffer), "%s_v%d.%d", 
              version_info.build_info, version_info.major, version_info.minor);
-    strncpy(manager->header->creator_signature, signature_buffer, 
-            sizeof(manager->header->creator_signature) - 1);
-    manager->header->creator_signature[sizeof(manager->header->creator_signature) - 1] = '\0';
+    size_t sig_len = strlen(signature_buffer);
+    size_t max_sig_len = sizeof(manager->header->creator_signature) - 1;
+    memcpy(manager->header->creator_signature, signature_buffer, 
+           sig_len < max_sig_len ? sig_len : max_sig_len);
+    manager->header->creator_signature[max_sig_len] = '\0';
     manager->header->checksum_crc32 = 0;
     manager->header->compression_type = 0; // Pas de compression par défaut
     manager->header->encryption_type = 0;  // Pas de chiffrement par défaut
