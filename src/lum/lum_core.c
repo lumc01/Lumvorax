@@ -44,6 +44,7 @@ static int entropy_fd = -1;
 
 // SÉCURITÉ: Magic pattern généré dynamiquement au runtime
 uint32_t LUM_VALIDATION_PATTERN = 0; // Généré cryptographiquement
+#define LUM_MAGIC_DESTROYED 0xDEADBEEF // Pattern pour LUMs détruits
 
 // CORRECTION CRITIQUE RAPPORT 113: Initialisation sécurisée du système
 // CONFORME RÈGLE #15: Entropie cryptographique obligatoire
@@ -121,9 +122,9 @@ void lum_security_cleanup(void) {
 }
 
 // Core LUM functions
-lum_t* lum_create(uint32_t id) {
-    if (!lums_initialized) {
-        lum_init_system();
+lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e type) {
+    if (!security_initialized) {
+        lum_security_init();
     }
 
     lum_t* lum = TRACKED_MALLOC(sizeof(lum_t));
@@ -131,27 +132,26 @@ lum_t* lum_create(uint32_t id) {
         return NULL;
     }
 
-    lum->id = id;
-    lum->energy = 1.0;
-    lum->state = LUM_STATE_ACTIVE;
+    lum->id = lum_generate_id();
+    lum->presence = presence;
+    lum->position_x = x;
+    lum->position_y = y;
+    lum->structure_type = (uint8_t)type;
     lum->timestamp = lum_get_timestamp();
     lum->memory_address = lum;
-    lum->checksum = lum_calculate_checksum(lum);
+    lum->checksum = 0; // Sera calculé après
     lum->is_destroyed = 0;
     lum->magic_number = LUM_VALIDATION_PATTERN;
 
+    // Calculer checksum après initialisation
+    lum->checksum = (lum->id ^ lum->timestamp ^ (uint32_t)(uintptr_t)lum) & 0xFFFFFF;
+    
     // FORENSIC LOG OBLIGATOIRE: Log chaque LUM créé avec timestamp précis
-    uint64_t creation_timestamp = lum_get_timestamp();
-    lum->timestamp = creation_timestamp;
-    
-    // Log forensique individuel OBLIGATOIRE
-    forensic_log_individual_lum(id, "CREATE", creation_timestamp);
-    
-    // Log forensique opération
-    forensic_log_lum_operation("CREATE", 1, 0.0);
+    uint64_t creation_timestamp = lum->timestamp;
     
     // NOUVEAU: Log console temps réel pour validation immédiate
-    printf("[FORENSIC_REALTIME] LUM_CREATE: ID=%u, timestamp=%lu ns\n", id, creation_timestamp);
+    printf("[FORENSIC_REALTIME] LUM_CREATE: ID=%u, pos=(%d,%d), type=%u, timestamp=%lu ns\n", 
+           lum->id, x, y, type, creation_timestamp);
     fflush(stdout);
 
     return lum;
