@@ -15,7 +15,7 @@
 bool check_directory_exists(const char* path) {
     struct stat st;
     bool exists = (stat(path, &st) == 0 && S_ISDIR(st.st_mode));
-    printf("🔍 Vérification répertoire %s: %s\n", path, exists ? "EXISTS" : "MISSING");
+    printf("[DEBUG] Vérification répertoire %s: %s\n", path, exists ? "EXISTS" : "MISSING");
     return exists;
 }
 
@@ -25,19 +25,19 @@ bool ensure_directory_exists(const char* path) {
         return true;
     }
     
-    printf("📁 Création répertoire %s...\n", path);
+    printf("[DEBUG] Création répertoire %s...\n", path);
     if (mkdir(path, 0755) == 0) {
-        printf("✅ Répertoire créé: %s\n", path);
+        printf("[SUCCESS] Répertoire créé: %s\n", path);
         return true;
     } else {
-        printf("❌ Échec création répertoire: %s\n", path);
+        printf("[ERROR] Échec création répertoire: %s\n", path);
         return false;
     }
 }
 
 // Test minimal LUM core sans forensique
 void test_basic_lum_operations() {
-    printf("🧪 === TEST BASIC LUM OPERATIONS ===\n");
+    printf("[TEST] === TEST BASIC LUM OPERATIONS ===\n");
     
     struct timespec start, end;
     clock_gettime(CLOCK_MONOTONIC, &start);
@@ -46,32 +46,32 @@ void test_basic_lum_operations() {
     printf("  Test 1: Création LUM...\n");
     lum_t* test_lum = lum_create(1, 100, 200, LUM_STRUCTURE_LINEAR);
     if (test_lum) {
-        printf("  ✅ LUM créée: ID=%u, pos_x=%d, pos_y=%d\n", test_lum->id, test_lum->position_x, test_lum->position_y);
+        printf("  [SUCCESS] LUM créée: ID=%u, pos_x=%d, pos_y=%d\n", test_lum->id, test_lum->position_x, test_lum->position_y);
         
         // Test destruction
         printf("  Test 2: Destruction LUM...\n");
         lum_destroy(test_lum);
-        printf("  ✅ LUM détruite\n");
+        printf("  [SUCCESS] LUM détruite\n");
     } else {
-        printf("  ❌ Échec création LUM\n");
+        printf("  [ERROR] Échec création LUM\n");
         return;
     }
     
     clock_gettime(CLOCK_MONOTONIC, &end);
     double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
-    printf("⏱️  Test terminé en %.6f secondes\n", elapsed);
+    printf("[TIMING] Test terminé en %.6f secondes\n", elapsed);
 }
 
 // Test stress progressif simplifié
 void test_progressive_stress_simple() {
-    printf("🔥 === TEST STRESS PROGRESSIF SIMPLIFIÉ ===\n");
+    printf("[TEST] === TEST STRESS PROGRESSIF SIMPLIFIÉ ===\n");
     
     size_t scales[] = {10, 100, 1000, 10000};
     size_t num_scales = sizeof(scales) / sizeof(scales[0]);
     
     for (size_t i = 0; i < num_scales; i++) {
         size_t scale = scales[i];
-        printf("\n💥 Échelle %zu éléments...\n", scale);
+        printf("\n[TEST] Échelle %zu éléments...\n", scale);
         
         struct timespec start, end;
         clock_gettime(CLOCK_MONOTONIC, &start);
@@ -79,7 +79,7 @@ void test_progressive_stress_simple() {
         // Créer un groupe LUM
         lum_group_t* group = lum_group_create(scale > 1000 ? 1000 : scale);
         if (!group) {
-            printf("  ❌ Échec création groupe LUM\n");
+            printf("  [ERROR] Échec création groupe LUM\n");
             continue;
         }
         
@@ -105,7 +105,7 @@ void test_progressive_stress_simple() {
         clock_gettime(CLOCK_MONOTONIC, &end);
         double elapsed = (end.tv_sec - start.tv_sec) + (end.tv_nsec - start.tv_nsec) / 1e9;
         
-        printf("  ✅ Échelle %zu: %zu LUMs créées en %.3f sec (%.0f ops/sec)\n", 
+        printf("  [SUCCESS] Échelle %zu: %zu LUMs créées en %.3f sec (%.0f ops/sec)\n", 
                scale, created, elapsed, created / elapsed);
         
         lum_group_destroy(group);
@@ -113,48 +113,48 @@ void test_progressive_stress_simple() {
 }
 
 int main(int argc, char* argv[]) {
-    printf("🚀 === MAIN DEBUG TEMPORAIRE - DIAGNOSTIC LUM/VORAX ===\n");
+    printf("[TEST] === MAIN DEBUG TEMPORAIRE - DIAGNOSTIC LUM/VORAX ===\n");
     printf("Version: DEBUG v1.0\n");
     printf("Date: %s %s\n", __DATE__, __TIME__);
     
     // Étape 1: Vérifier les répertoires
-    printf("\n📁 === VÉRIFICATION RÉPERTOIRES ===\n");
+    printf("\n[SETUP] === VÉRIFICATION RÉPERTOIRES ===\n");
     ensure_directory_exists("logs");
     ensure_directory_exists("logs/forensic");
     ensure_directory_exists("logs/tests");
     ensure_directory_exists("logs/execution");
     
     // Étape 2: Initialisation minimale
-    printf("\n🔧 === INITIALISATION MEMORY TRACKER ===\n");
+    printf("\n[SETUP] === INITIALISATION MEMORY TRACKER ===\n");
     memory_tracker_init();
-    printf("✅ Memory tracker initialisé\n");
+    printf("[SUCCESS] Memory tracker initialisé\n");
     
     // Étape 3: Tests selon argument
     if (argc > 1 && strcmp(argv[1], "--progressive-stress-all") == 0) {
-        printf("\n🎯 === MODE STRESS PROGRESSIF ===\n");
+        printf("\n[TEST] === MODE STRESS PROGRESSIF ===\n");
         test_progressive_stress_simple();
     } else if (argc > 1 && strcmp(argv[1], "--basic-test") == 0) {
-        printf("\n🧪 === MODE TEST BASIC ===\n");
+        printf("\n[TEST] === MODE TEST BASIC ===\n");
         test_basic_lum_operations();
     } else {
-        printf("\n📖 === AIDE ===\n");
+        printf("\n[HELP] === AIDE ===\n");
         printf("Usage: %s [--basic-test|--progressive-stress-all]\n", argv[0]);
         printf("  --basic-test            : Test minimal LUM core\n");
         printf("  --progressive-stress-all: Test stress progressif 10→10K\n");
         
         // Test par défaut
-        printf("\n🔄 === EXÉCUTION TEST PAR DÉFAUT ===\n");
+        printf("\n[TEST] === EXÉCUTION TEST PAR DÉFAUT ===\n");
         test_basic_lum_operations();
     }
     
     // Rapport final
-    printf("\n📊 === RAPPORT FINAL ===\n");
+    printf("\n[METRICS] === RAPPORT FINAL ===\n");
     memory_tracker_report();
     
     // Nettoyage
-    printf("\n🧹 === NETTOYAGE ===\n");
+    printf("\n[CLEANUP] === NETTOYAGE ===\n");
     memory_tracker_destroy();
-    printf("✅ Nettoyage terminé\n");
+    printf("[SUCCESS] Nettoyage terminé\n");
     
     return 0;
 }
