@@ -115,19 +115,41 @@ static void test_progressive_stress_all_available_modules(void) {
             size_t created = 0;
 
             for (size_t j = 0; j < batch_size; j++) {
+                // FORENSIC: Log avant création
+                uint64_t before_create = lum_get_timestamp();
+                
                 lum_t* lum = lum_create(j % 2, (int32_t)(j % 10000), (int32_t)(j / 100), LUM_STRUCTURE_LINEAR);
                 if (lum) {
+                    // FORENSIC: Log détaillé de la LUM créée
+                    printf("[FORENSIC_CREATION] LUM_%zu: ID=%u, pos=(%d,%d), timestamp=%lu\n", 
+                           j, lum->id, lum->position_x, lum->position_y, lum->timestamp);
+                    
                     bool add_success = lum_group_add(test_group, lum);
-                    lum_destroy(lum);
                     if (add_success) {
                         created++;
+                        // FORENSIC: Log ajout au groupe
+                        printf("[FORENSIC_GROUP_ADD] LUM_%u added to group (total: %zu)\n", lum->id, created);
                     }
+                    
+                    lum_destroy(lum);
+                    
+                    // FORENSIC: Log après destruction
+                    uint64_t after_destroy = lum_get_timestamp();
+                    printf("[FORENSIC_LIFECYCLE] LUM_%zu: duration=%lu ns\n", j, after_destroy - before_create);
                 }
 
                 // Debug progress plus fréquent pour détecter blocage
-                if (j > 0 && j % 1000 == 0) {
-                    printf("  LUM Progress: %zu/%zu (created: %zu)\n", j, batch_size, created);
+                if (j > 0 && j % 100 == 0) {  // Plus fréquent: tous les 100 au lieu de 1000
+                    printf("  [PROGRESS] %zu/%zu (created: %zu, rate: %.2f LUMs/s)\n", 
+                           j, batch_size, created, (double)created / ((lum_get_timestamp() - start_time.tv_sec * 1000000000ULL - start_time.tv_nsec) / 1e9));
                     fflush(stdout);  // Force affichage immédiat
+                }
+                
+                // FORENSIC: Log chaque LUM individuellement (première 10 et dernières 10)
+                if (j < 10 || j >= (batch_size - 10)) {
+                    printf("[FORENSIC_DETAILED] Processing LUM %zu/%zu at timestamp %lu\n", 
+                           j, batch_size, lum_get_timestamp());
+                    fflush(stdout);
                 }
             }
 

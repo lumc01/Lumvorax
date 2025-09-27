@@ -85,16 +85,43 @@ void forensic_log_lum_operation(const char* operation, uint64_t lum_count, doubl
            operation, lum_count, timestamp);
 }
 
-// NOUVELLE FONCTION: Log systématique pour chaque LUM
+// FONCTION RENFORCÉE: Log systématique pour chaque LUM avec double écriture
 void forensic_log_individual_lum(uint32_t lum_id, const char* operation, uint64_t timestamp_ns) {
-    if (!forensic_log_file) return;
+    if (!forensic_log_file) {
+        printf("[FORENSIC_ERROR] Log file not initialized for LUM_%u\n", lum_id);
+        return;
+    }
     
-    fprintf(forensic_log_file, "[%lu] [LUM_%u] %s: Individual LUM processing\n",
-            timestamp_ns, lum_id, operation);
+    // ÉCRITURE FICHIER: Log détaillé avec flush immédiat
+    fprintf(forensic_log_file, "[%lu] [LUM_%u] %s: Individual LUM processing (memory=%p)\n",
+            timestamp_ns, lum_id, operation, (void*)&lum_id);
     fflush(forensic_log_file);
     
-    // TEMPS RÉEL: Affichage console obligatoire
-    printf("[%lu] [LUM_%u] %s\n", timestamp_ns, lum_id, operation);
+    // ÉCRITURE CONSOLE: Affichage temps réel obligatoire
+    printf("[FORENSIC_LUM] [%lu] LUM_%u %s\n", timestamp_ns, lum_id, operation);
+    fflush(stdout);
+    
+    // NOUVEAU: Log dans fichier séparé horodaté
+    static FILE* individual_log = NULL;
+    if (!individual_log) {
+        char individual_filename[256];
+        time_t now = time(NULL);
+        struct tm* tm_info = localtime(&now);
+        snprintf(individual_filename, sizeof(individual_filename), 
+                 "logs/forensic/individual_lums_%04d%02d%02d_%02d%02d%02d.log",
+                 tm_info->tm_year + 1900, tm_info->tm_mon + 1, tm_info->tm_mday,
+                 tm_info->tm_hour, tm_info->tm_min, tm_info->tm_sec);
+        individual_log = fopen(individual_filename, "w");
+        if (individual_log) {
+            fprintf(individual_log, "=== LOG INDIVIDUEL LUMs - SESSION %lu ===\n", timestamp_ns);
+            fflush(individual_log);
+        }
+    }
+    
+    if (individual_log) {
+        fprintf(individual_log, "[%lu] LUM_%u: %s\n", timestamp_ns, lum_id, operation);
+        fflush(individual_log);
+    }
 }
 
 void forensic_logger_destroy(void) {

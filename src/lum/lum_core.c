@@ -140,9 +140,19 @@ lum_t* lum_create(uint32_t id) {
     lum->is_destroyed = 0;
     lum->magic_number = LUM_VALIDATION_PATTERN;
 
-    // FORENSIC LOG OBLIGATOIRE: Log chaque LUM créé
-    forensic_log_individual_lum(id, "CREATE", lum->timestamp);
+    // FORENSIC LOG OBLIGATOIRE: Log chaque LUM créé avec timestamp précis
+    uint64_t creation_timestamp = lum_get_timestamp();
+    lum->timestamp = creation_timestamp;
+    
+    // Log forensique individuel OBLIGATOIRE
+    forensic_log_individual_lum(id, "CREATE", creation_timestamp);
+    
+    // Log forensique opération
     forensic_log_lum_operation("CREATE", 1, 0.0);
+    
+    // NOUVEAU: Log console temps réel pour validation immédiate
+    printf("[FORENSIC_REALTIME] LUM_CREATE: ID=%u, timestamp=%lu ns\n", id, creation_timestamp);
+    fflush(stdout);
 
     return lum;
 }
