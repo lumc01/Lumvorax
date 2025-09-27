@@ -127,9 +127,14 @@ void lum_group_destroy_ultra_secure(lum_group_t** group_ptr);
 
 // Constantes de validation mémoire - SÉCURISÉES CONFORMES RAPPORT 113
 // CORRECTION CRITIQUE: Magic numbers générés cryptographiquement
-extern uint32_t LUM_VALIDATION_PATTERN; // Généré dynamiquement au runtime
-#define LUM_MAGIC_DESTROYED 0xDEADBEEF
-#define LUM_DESTROYED_MAGIC 0xDEADDEAD
+// CORRECTION RAPPORT 129 ANOMALIE #001: Magic numbers centralisés
+#include "../common/magic_numbers.h"
+
+extern uint32_t LUM_VALIDATION_PATTERN; // Unifié = LUM_CORE_MAGIC
+
+// Compatibilité avec ancien code - aliases vers magic numbers unifiés
+#define LUM_MAGIC_DESTROYED MAGIC_DESTROYED_PATTERN
+#define LUM_DESTROYED_MAGIC MAGIC_DESTROYED_PATTERN
 
 // Fonctions d'initialisation et nettoyage sécurisés
 bool lum_security_init(void);
@@ -243,7 +248,7 @@ typedef struct {
             printf("ERROR: NULL Group pointer at %s:%d\n", __FILE__, __LINE__); \
             return false; \
         } \
-        if ((ptr)->magic_number == LUM_MAGIC_DESTROYED) { \
+        if ((ptr)->magic_number == MAGIC_DESTROYED_PATTERN) { \
             printf("ERROR: Use of destroyed group at %s:%d\n", __FILE__, __LINE__); \
             return false; \
         } \

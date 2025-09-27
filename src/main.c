@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include <unistd.h>
 #include <sys/stat.h>
+#include <inttypes.h>  // CORRECTION RAPPORT 129 ANOMALIE #003
 
 // INCLUDE COMMON TYPES FIRST - AVOID CONFLICTS
 #include "common/common_types.h"
@@ -174,21 +175,22 @@ static void test_progressive_stress_all_available_modules(void) {
                 lum_t* lum = lum_create(j % 2, (int32_t)(j % 10000), (int32_t)(j / 100), LUM_STRUCTURE_LINEAR);
                 if (lum) {
                     // FORENSIC: Log détaillé de la LUM créée
-                    printf("[FORENSIC_CREATION] LUM_%zu: ID=%u, pos=(%d,%d), timestamp=%lu\n", 
+                    // CORRECTION RAPPORT 129 ANOMALIE #003: Format specifiers portables
+                    printf("[FORENSIC_CREATION] LUM_%zu: ID=%" PRIu32 ", pos=(%d,%d), timestamp=%" PRIu64 "\n", 
                            j, lum->id, lum->position_x, lum->position_y, lum->timestamp);
                     
                     bool add_success = lum_group_add(test_group, lum);
                     if (add_success) {
                         created++;
                         // FORENSIC: Log ajout au groupe
-                        printf("[FORENSIC_GROUP_ADD] LUM_%u added to group (total: %zu)\n", lum->id, created);
+                        printf("[FORENSIC_GROUP_ADD] LUM_%" PRIu32 " added to group (total: %zu)\n", lum->id, created);
                     }
                     
                     lum_destroy(lum);
                     
                     // FORENSIC: Log après destruction
                     uint64_t after_destroy = lum_get_timestamp();
-                    printf("[FORENSIC_LIFECYCLE] LUM_%zu: duration=%lu ns\n", j, after_destroy - before_create);
+                    printf("[FORENSIC_LIFECYCLE] LUM_%zu: duration=%" PRIu64 " ns\n", j, after_destroy - before_create);
                 }
 
                 // Debug progress plus fréquent pour détecter blocage
@@ -200,7 +202,7 @@ static void test_progressive_stress_all_available_modules(void) {
                 
                 // FORENSIC: Log chaque LUM individuellement (première 10 et dernières 10)
                 if (j < 10 || j >= (batch_size - 10)) {
-                    printf("[FORENSIC_DETAILED] Processing LUM %zu/%zu at timestamp %lu\n", 
+                    printf("[FORENSIC_DETAILED] Processing LUM %zu/%zu at timestamp %" PRIu64 "\n", 
                            j, batch_size, lum_get_timestamp());
                     fflush(stdout);
                 }
@@ -386,7 +388,7 @@ int main(int argc, char* argv[]) {
         // Test minimal LUM core
         lum_t* test_lum = lum_create(1, 100, 200, LUM_STRUCTURE_LINEAR);
         if (test_lum) {
-            printf("  [SUCCESS] LUM créée: ID=%u, pos_x=%d, pos_y=%d\n", test_lum->id, test_lum->position_x, test_lum->position_y);
+            printf("  [SUCCESS] LUM créée: ID=%" PRIu32 ", pos_x=%d, pos_y=%d\n", test_lum->id, test_lum->position_x, test_lum->position_y);
             lum_destroy(test_lum);
             printf("  [SUCCESS] LUM détruite\n");
         }
@@ -400,7 +402,7 @@ int main(int argc, char* argv[]) {
         // Test par défaut
         lum_t* test_lum = lum_create(1, 100, 200, LUM_STRUCTURE_LINEAR);
         if (test_lum) {
-            printf("  [SUCCESS] LUM créée: ID=%u, pos_x=%d, pos_y=%d\n", test_lum->id, test_lum->position_x, test_lum->position_y);
+            printf("  [SUCCESS] LUM créée: ID=%" PRIu32 ", pos_x=%d, pos_y=%d\n", test_lum->id, test_lum->position_x, test_lum->position_y);
             lum_destroy(test_lum);
             printf("  [SUCCESS] LUM détruite\n");
         }

@@ -42,9 +42,11 @@ static pthread_mutex_t entropy_mutex = PTHREAD_MUTEX_INITIALIZER;
 static bool security_initialized = false;
 static int entropy_fd = -1;
 
-// SÉCURITÉ: Magic pattern généré dynamiquement au runtime
-uint32_t LUM_VALIDATION_PATTERN = 0; // Généré cryptographiquement
-#define LUM_MAGIC_DESTROYED 0xDEADBEEF // Pattern pour LUMs détruits
+// CORRECTION RAPPORT 129 ANOMALIE #001: Magic numbers unifiés
+#include "../common/magic_numbers.h"
+
+// SÉCURITÉ: Magic pattern unifié - plus de génération dynamique incohérente
+uint32_t LUM_VALIDATION_PATTERN = LUM_CORE_MAGIC; // Unifié avec magic_numbers.h
 
 // CORRECTION CRITIQUE RAPPORT 113: Initialisation sécurisée du système
 // CONFORME RÈGLE #15: Entropie cryptographique obligatoire

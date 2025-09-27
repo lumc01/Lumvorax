@@ -1,6 +1,7 @@
 #include "vorax_operations.h"
 #include "../logger/lum_logger.h"
 #include "../debug/memory_tracker.h"  // CORRECTION: Include pour TRACKED_MALLOC/FREE
+#include "../common/magic_numbers.h"  // CORRECTION RAPPORT 129 ANOMALIE #001
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -425,14 +426,15 @@ void vorax_result_destroy(vorax_result_t* result) {
     if (!result) return;
 
     // Vérifier magic number pour détecter corruption
-    static const uint32_t VORAX_RESULT_MAGIC = 0xDEADBEEF;
-    if (result->magic_number == VORAX_RESULT_MAGIC) {
+    // CORRECTION RAPPORT 129 ANOMALIE #001: Magic numbers unifiés
+    static const uint32_t VORAX_RESULT_MAGIC_DESTROY = MAGIC_DESTROYED_PATTERN;
+    if (result->magic_number == VORAX_RESULT_MAGIC_DESTROY) {
         lum_log(LUM_LOG_WARN, "Tentative double destruction vorax_result_t détectée et évitée");
         return;
     }
 
     // Marquer immédiatement comme en cours de destruction
-    result->magic_number = VORAX_RESULT_MAGIC;
+    result->magic_number = VORAX_RESULT_MAGIC_DESTROY;
 
     // Destruction sécurisée du groupe principal
     if (result->result_group) {
