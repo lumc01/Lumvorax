@@ -73,6 +73,30 @@
 2025-01-10 16:15 - VIDEO_PROCESSOR_MAGIC + Constante magique protection double-free video processor
 2025-01-10 16:15 - GOLDEN_SCORE_MAGIC + Constante magique protection double-free golden score optimizer
 2025-01-10 17:00 - audio_processing_result_t + Résultat traitement audio avec métriques timing
+2025-09-27 12:00 - unified_storage_result_t + Type unifié pour tous résultats stockage WAL
+2025-09-27 12:00 - unified_forensic_level_e + Niveaux logging forensique standardisés système
+2025-09-27 12:00 - dependency_manager_t + Gestionnaire dépendances modules avec sync automatique
+2025-09-27 12:00 - module_dependency_t + Structure dépendance module avec validation compatibilité
+2025-09-27 12:00 - dependency_type_e + Types dépendances modules (HARD/SOFT/CIRCULAR)
+2025-09-27 12:00 - memory_entry_t + Entrée tracker mémoire avec génération protection double-free
+2025-09-27 12:00 - portable_hton64 + Fonction conversion endianness 64-bit portable
+2025-09-27 12:00 - portable_ntoh64 + Fonction conversion endianness 64-bit portable inverse
+2025-09-27 12:00 - g_global_generation + Compteur génération global réutilisation pointeurs
+2025-09-27 12:00 - SYSTEM_RECYCLED + Marqueur recyclage automatique adresses mémoire
+2025-09-27 12:00 - vorax_token_type_e + Types tokens complets parser langage VORAX
+2025-09-27 12:00 - vorax_execution_context_t + Contexte exécution programmes VORAX avec zones/mémoires
+2025-09-27 12:00 - binary_lum_result_t + Résultat conversion binaire vers LUM avec validation
+2025-09-27 12:00 - lum_binary_result_t + Résultat conversion LUM vers binaire avec validation
+2025-09-27 12:00 - vorax_ast_node_type_e + Types noeuds AST parser VORAX complets
+2025-09-27 12:00 - vorax_parser_context_t + Contexte parser VORAX avec gestion erreurs
+2025-09-27 12:00 - activation_function_e + Types fonctions activation réseaux neurones partagées
+2025-09-27 12:00 - neural_plasticity_rules_e + Règles plasticité neuronale (HEBBIAN/STDP/HOMEOSTATIC)
+2025-09-27 12:00 - neural_layer_t + Structure couche neuronale avec protection double-free
+2025-09-27 12:00 - opacity_mechanism_e + Mécanismes obfuscation computationnelle avancée
+2025-09-27 12:00 - computational_opacity_t + Structure obfuscation avec transformations seedées
+2025-09-27 12:00 - blackbox_config_t + Configuration modules blackbox avec morphing dynamique
+2025-09-27 12:00 - collatz_analysis_e + Types analyses Collatz (STATISTICAL/PATTERN/PARALLEL)
+2025-09-27 12:00 - matrix_t + Structure matrice partagée modules calcul matriciel
 2025-01-10 17:00 - video_processing_result_t + Résultat traitement vidéo avec métriques 3D
 2025-01-10 17:00 - golden_optimization_result_t + Résultat optimisation Golden Score système
 2025-01-10 17:00 - golden_comparison_t + Comparaison performance vs standards industriels
