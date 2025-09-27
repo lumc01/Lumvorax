@@ -1,3 +1,4 @@
+#define _GNU_SOURCE  // CORRECTION: Nécessaire pour strdup, strndup, strnlen
 #include "memory_tracker.h"
 #include <pthread.h>
 #include <string.h> // Added for strncpy
@@ -244,7 +245,7 @@ void tracked_free(void* ptr, const char* file, int line, const char* func) {
     printf("[MEMORY_TRACKER] FREE: %p (%zu bytes) at %s:%d in %s() - originally allocated at %s:%d\n",
            ptr, entry->size, file, line, func, entry->file, entry->line);
 
-    pthread_mutex_unlock(&g_tracker_mutex);
+    pthread_mutex_unlock(&allocation_mutex);
 
     // LIBÉRATION SÉCURISÉE
     free(ptr);

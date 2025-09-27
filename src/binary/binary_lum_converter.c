@@ -53,7 +53,7 @@ binary_lum_result_t* convert_binary_to_lum(const uint8_t* binary_data, size_t by
                                    LUM_STRUCTURE_LINEAR);
             if (lum) {
                 lum_group_add(lum_group, lum);
-                lum_destroy(lum); // CORRECTION: Utiliser lum_destroy
+                // NOTE: lum_group_add prend possession du LUM, pas de destroy nécessaire
             }
         }
     }
@@ -98,7 +98,7 @@ binary_lum_result_t* convert_bits_to_lum(const char* bit_string) {
         lum_t* lum = lum_create(bit_val, (int32_t)i, 0, LUM_STRUCTURE_LINEAR);
         if (lum) {
             lum_group_add(lum_group, lum);
-            lum_destroy(lum); // CORRECTION: Utiliser lum_destroy
+            // NOTE: lum_group_add prend possession du LUM, pas de destroy nécessaire
         }
     }
 

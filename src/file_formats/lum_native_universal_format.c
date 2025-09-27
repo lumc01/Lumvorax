@@ -88,6 +88,7 @@ lum_universal_file_manager_t* lum_universal_file_create(const char* filepath) {
              version_info.build_info, version_info.major, version_info.minor);
     strncpy(manager->header->creator_signature, signature_buffer, 
             sizeof(manager->header->creator_signature) - 1);
+    manager->header->creator_signature[sizeof(manager->header->creator_signature) - 1] = '\0';
     manager->header->checksum_crc32 = 0;
     manager->header->compression_type = 0; // Pas de compression par défaut
     manager->header->encryption_type = 0;  // Pas de chiffrement par défaut
@@ -631,17 +632,17 @@ bool lum_stress_test_100m_elements(const char* test_file_path) {
     LOG_INFOF("Testing with %zu elements (representative of %zu)...", 
            test_elements, max_elements);
 
-    // Test ajout contenu texte massif
-    char* test_text = TRACKED_MALLOC(test_elements * 10); // 10 chars par élément
+    // Test ajout contenu texte massif - CORRECTION: Buffer 12 chars par élément pour éviter troncature
+    char* test_text = TRACKED_MALLOC(test_elements * 12); // 12 chars par élément (sécurité)
     if (!test_text) {
         lum_universal_file_destroy(&manager);
         LOG_ERRORF("❌ Failed to allocate test text");
         return false;
     }
 
-    // Génération texte test
+    // Génération texte test - CORRECTION: Buffer suffisant pour éviter warning troncature
     for (size_t i = 0; i < test_elements; i++) {
-        snprintf(test_text + (i * 10), 10, "ELEM%05zu", i);
+        snprintf(test_text + (i * 12), 12, "ELEM%05zu", i);
     }
 
     // Création LUMs associés
