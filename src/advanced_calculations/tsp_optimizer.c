@@ -294,7 +294,7 @@ tsp_result_t* tsp_optimize_nearest_neighbor(tsp_city_t** cities, size_t city_cou
     result->total_time_ns = (end.tv_sec - start.tv_sec) * 1000000000ULL + 
                            (end.tv_nsec - start.tv_nsec);
     
-    strcpy(result->error_message, "Nearest neighbor algorithm completed successfully");
+    SAFE_STRCPY(result->error_message, "Nearest neighbor algorithm completed successfully", sizeof(result->error_message));
     
     return result;
 }

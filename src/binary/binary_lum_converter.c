@@ -438,21 +438,21 @@ binary_lum_result_t* convert_hex_string_to_lum(const char* hex_string) {
     if (!result || !hex_string) {
         if (result) {
             result->success = false;
-            strcpy(result->error_message, "Invalid hex string");
+            SAFE_STRCPY(result->error_message, "Invalid hex string", sizeof(result->error_message));
         }
         return result;
     }
 
     if (!validate_hex_string(hex_string)) {
         result->success = false;
-        strcpy(result->error_message, "Invalid hex string format");
+        SAFE_STRCPY(result->error_message, "Invalid hex string format", sizeof(result->error_message));
         return result;
     }
 
     size_t hex_len = strlen(hex_string);
     if (hex_len % 2 != 0) {
         result->success = false;
-        strcpy(result->error_message, "Hex string must have even length");
+        SAFE_STRCPY(result->error_message, "Hex string must have even length", sizeof(result->error_message));
         return result;
     }
 
@@ -477,7 +477,7 @@ binary_lum_result_t* convert_hex_string_to_lum(const char* hex_string) {
         result->lum_group = lum_result->lum_group;
         result->success = lum_result->success;
         result->bits_processed = lum_result->bits_processed;
-        strcpy(result->error_message, lum_result->error_message);
+        SAFE_STRCPY(result->error_message, lum_result->error_message, sizeof(result->error_message));
 
         // Transfer ownership, don't destroy the lum_group
         lum_result->lum_group = NULL;
