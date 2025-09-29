@@ -3,6 +3,7 @@
 
 #include "ai_optimization.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -381,7 +382,7 @@ ai_optimization_result_t* ai_optimize_genetic_algorithm(lum_group_t* initial_sol
     result->optimization_success = false;
     result->iterations_performed = 0;
     result->function_evaluations = 0;
-    strcpy(result->algorithm_used, "Genetic Algorithm");
+    SAFE_STRCPY(result->algorithm_used, "Genetic Algorithm", sizeof(result->algorithm_used));
 
     // Création optimiseur génétique
     genetic_optimizer_t* optimizer = genetic_optimizer_create(100); // Population 100

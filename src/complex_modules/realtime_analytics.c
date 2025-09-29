@@ -4,6 +4,7 @@
 
 #include "realtime_analytics.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -348,7 +349,7 @@ analytics_result_t* realtime_analyze_stream(realtime_stream_t* stream, analytics
             result->current_metrics->variance_y /= (result->current_metrics->total_lums - 1);
         }
     } else {
-        strcpy(result->error_message, "No LUMs found in stream for analysis");
+        SAFE_STRCPY(result->error_message, "No LUMs found in stream for analysis", sizeof(result->error_message));
     }
 
     return result;
