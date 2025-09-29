@@ -5,6 +5,7 @@
 #include "matrix_calculator.h"
 #include <sys/stat.h>   // Pour mkdir() et autres fonctions système
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -360,7 +361,7 @@ matrix_lum_result_t* matrix_add(lum_matrix_t* matrix_a, lum_matrix_t* matrix_b, 
     result->execution_time_ns = (end.tv_sec - start.tv_sec) * 1000000000ULL +
                                 (end.tv_nsec - start.tv_nsec);
     result->success = true;
-    strcpy(result->error_message, "Matrix addition completed successfully");
+    SAFE_STRCPY(result->error_message, "Matrix addition completed successfully", sizeof(result->error_message));
 
     return result;
 }

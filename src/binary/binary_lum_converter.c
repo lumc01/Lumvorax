@@ -1,6 +1,7 @@
 #include "binary_lum_converter.h"
 #include "../lum/lum_core.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <string.h>
 #include <stdio.h>
 #include <arpa/inet.h>
@@ -28,7 +29,7 @@ binary_lum_result_t* convert_binary_to_lum(const uint8_t* binary_data, size_t by
     if (!result || !binary_data || byte_count == 0) {
         if (result) {
             result->success = false;
-            strcpy(result->error_message, "Invalid input parameters");
+            SAFE_STRCPY(result->error_message, "Invalid input parameters", sizeof(result->error_message));
         }
         return result;
     }

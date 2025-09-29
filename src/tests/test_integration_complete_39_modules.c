@@ -105,7 +105,7 @@ bool test_complete_integration_chain(void) {
     lum_group_add(test_group, lum);
     lum_binary_result_t* binary_result = convert_lum_to_binary(test_group);
     uint8_t* binary_data = NULL;
-    size_t binary_size = 0;
+    size_t binary_size __attribute__((unused)) = 0;
     if (binary_result && binary_result->success) {
         binary_data = binary_result->binary_data;
         binary_size = binary_result->byte_count;
