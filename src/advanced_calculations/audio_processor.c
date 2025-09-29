@@ -342,7 +342,7 @@ audio_processing_result_t* audio_apply_lowpass_filter_vorax(audio_processor_t* p
     result->frequency_bins = 0; // Pas d'analyse fréquentielle
     result->quality_metric = cutoff_freq / (processor->sample_rate / 2); // Ratio cutoff
     result->processing_success = true;
-    sprintf(result->error_message, "Lowpass filter applied: cutoff=%.1fHz", cutoff_freq);
+    snprintf(result->error_message, sizeof(result->error_message), "Lowpass filter applied: cutoff=%.1fHz", cutoff_freq);
     
     processor->filters_applied++;
     

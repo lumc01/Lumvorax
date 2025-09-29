@@ -10,6 +10,7 @@
 #include "../lum/lum_core.h"  // For lum_get_timestamp function
 #include "../complex_modules/ai_optimization.h"  // Pour ai_optimization_config_t - CORRECTION APPLIQUÉE
 #include "../advanced_calculations/matrix_calculator.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>       // Pour clock_gettime et CLOCK_MONOTONIC
@@ -92,7 +93,7 @@ simd_result_t* simd_process_lum_array_bulk(lum_t* lums, size_t count) {
 #ifdef __AVX512F__
     simd_avx512_mass_lum_operations(lums, count);
     result->used_vectorization = true;
-    strcpy(result->optimization_used, "AVX-512");
+    SAFE_STRCPY(result->optimization_used, "AVX-512", sizeof(result->optimization_used));
 #elif __AVX2__
     // Process in chunks of 8 for AVX2
     size_t simd_chunks = count / 8;
@@ -116,14 +117,14 @@ simd_result_t* simd_process_lum_array_bulk(lum_t* lums, size_t count) {
     }
 
     result->used_vectorization = true;
-    strcpy(result->optimization_used, "AVX2");
+    SAFE_STRCPY(result->optimization_used, "AVX2", sizeof(result->optimization_used));
 #else
     // Scalar fallback
     for (size_t i = 0; i < count; i++) {
         lums[i].presence = lums[i].presence ? 1 : 0;
     }
     result->used_vectorization = false;
-    strcpy(result->optimization_used, "Scalar");
+    SAFE_STRCPY(result->optimization_used, "Scalar", sizeof(result->optimization_used));
 #endif
 
     clock_t end = clock();
@@ -472,7 +473,7 @@ simd_result_t* simd_avx512_mass_lum_operations(lum_t* lums, size_t count) {
     result->acceleration_factor = 16.0; // AVX-512 facteur théorique
     result->performance_gain = 16.0;
     result->used_vectorization = true;
-    strcpy(result->optimization_used, "AVX512_MASS_OPS");
+    SAFE_STRCPY(result->optimization_used, "AVX512_MASS_OPS", sizeof(result->optimization_used));
     
 #ifdef __AVX512F__
     // Appel de l'implémentation void existante si AVX-512 disponible

@@ -10,7 +10,7 @@
 #define SAFE_STRCAT(dest, src, dest_size) safe_strcat_impl(dest, src, dest_size, __FILE__, __LINE__)
 
 // Fonction strcpy sécurisée avec validation bounds
-bool safe_strcpy_impl(char* dest, const char* src, size_t dest_size, 
+static inline bool safe_strcpy_impl(char* dest, const char* src, size_t dest_size, 
                      const char* file, int line) {
     if (!dest || !src || dest_size == 0) {
         fprintf(stderr, "[SECURITY_ERROR] safe_strcpy: Invalid parameters at %s:%d\n", file, line);
@@ -30,7 +30,7 @@ bool safe_strcpy_impl(char* dest, const char* src, size_t dest_size,
 }
 
 // Fonction strcat sécurisée
-bool safe_strcat_impl(char* dest, const char* src, size_t dest_size, 
+static inline bool safe_strcat_impl(char* dest, const char* src, size_t dest_size, 
                      const char* file, int line) {
     if (!dest || !src || dest_size == 0) {
         fprintf(stderr, "[SECURITY_ERROR] safe_strcat: Invalid parameters at %s:%d\n", file, line);

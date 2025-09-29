@@ -1,5 +1,6 @@
 #include "vorax_parser.h"
 #include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY/STRCAT
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -95,7 +96,7 @@ vorax_token_t vorax_lexer_next_token(vorax_parser_context_t* ctx) {
     // Multi-character tokens
     if (c == '-' && ctx->input[ctx->position + 1] == '>') {
         token.type = TOKEN_ARROW;
-        strcpy(token.value, "->");
+        SAFE_STRCPY(token.value, "->", sizeof(token.value));
         ctx->position += 2;
         ctx->column += 2;
         return token;
@@ -103,7 +104,7 @@ vorax_token_t vorax_lexer_next_token(vorax_parser_context_t* ctx) {
     
     if (c == ':' && ctx->input[ctx->position + 1] == '=') {
         token.type = TOKEN_ASSIGN;
-        strcpy(token.value, ":=");
+        SAFE_STRCPY(token.value, ":=", sizeof(token.value));
         ctx->position += 2;
         ctx->column += 2;
         return token;
@@ -452,7 +453,7 @@ vorax_ast_node_t* vorax_parse_move_statement(vorax_parser_context_t* ctx) {
                 size_t arrow_len = strlen(arrow);
                 size_t value_len = strlen(ctx->current_token.value);
                 if (data_len + arrow_len + value_len < sizeof(node->data) - 1) {
-                    strcat(node->data, arrow);
+                    SAFE_STRCAT(node->data, arrow, sizeof(node->data));
                     strncat(node->data, ctx->current_token.value, sizeof(node->data) - strlen(node->data) - 1);
                 }
                 ctx->current_token = vorax_lexer_next_token(ctx);
