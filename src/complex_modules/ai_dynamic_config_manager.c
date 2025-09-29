@@ -4,6 +4,7 @@
 #include "ai_dynamic_config_manager.h"
 #include "../debug/memory_tracker.h"
 #include "../logger/lum_logger.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -356,7 +357,7 @@ ai_dynamic_optimization_result_t* ai_optimize_all_system_parameters(
             }
             
             result->optimization_success = (result->modules_optimized_count > 0);
-            strcpy(result->optimization_strategy, "AI_Master_Agent_Guided_Optimization");
+            SAFE_STRCPY(result->optimization_strategy, "AI_Master_Agent_Guided_Optimization", sizeof(result->optimization_strategy));
         }
     }
 

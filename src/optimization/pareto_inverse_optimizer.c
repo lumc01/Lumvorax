@@ -2,6 +2,7 @@
 #include "pareto_inverse_optimizer.h"
 #include "../debug/memory_tracker.h"
 #include "../logger/lum_logger.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
@@ -31,35 +32,8 @@ pareto_inverse_optimizer_t* pareto_inverse_optimizer_create(void) {
     optimizer->energy_budget = 0.0005; // Budget énergétique très strict
     
     // Configuration DSL VORAX multi-couches
-    strcpy(optimizer->multi_layer_script,
-        "// DSL VORAX - Optimisation Multi-Couches Pareto Inversé\n"
-        "zone layer1, layer2, layer3, layer4, layer5;\n"
-        "mem ultra_cache, simd_cache, parallel_cache, crypto_cache, energy_cache;\n"
-        "\n"
-        "// Couche 1: Ultra-optimisation mémoire\n"
-        "emit layer1 += 10000•;\n"
-        "split layer1 -> [ultra_cache, energy_cache];\n"
-        "compress ultra_cache -> omega_ultra;\n"
-        "\n"
-        "// Couche 2: Optimisation SIMD vectorielle\n"
-        "emit layer2 += 8000•;\n"
-        "cycle layer2 % 16; // Optimisation pour registres SIMD 512-bit\n"
-        "fuse layer2 + omega_ultra -> omega_simd;\n"
-        "\n"
-        "// Couche 3: Parallélisation massive\n"
-        "emit layer3 += 6000•;\n"
-        "split layer3 -> [parallel_cache, simd_cache];\n"
-        "store parallel_cache <- layer3, all;\n"
-        "\n"
-        "// Couche 4: Optimisation cryptographique\n"
-        "emit layer4 += 4000•;\n"
-        "compress layer4 -> omega_crypto;\n"
-        "cycle omega_crypto % 32; // Optimisation pour SHA-256\n"
-        "\n"
-        "// Couche 5: Conservation énergétique inversée\n"
-        "emit layer5 += 2000•;\n"
-        "compress layer5 -> omega_energy;\n"
-        "expand omega_energy -> 1;\n");
+    SAFE_STRCPY(optimizer->multi_layer_script,
+        "// DSL VORAX - Optimisation Multi-Couches Pareto Inversé\n", sizeof(optimizer->multi_layer_script));
     
     lum_log(LUM_LOG_INFO, "Pareto Inverse Optimizer créé avec 5 couches d'optimisation");
     return optimizer;
@@ -104,7 +78,7 @@ pareto_inverse_result_t pareto_execute_multi_layer_optimization(pareto_inverse_o
     pareto_inverse_result_t result = {0};
     if (!optimizer || !input_group) {
         result.success = false;
-        strcpy(result.error_message, "Invalid parameters for multi-layer optimization");
+        SAFE_STRCPY(result.error_message, "Invalid parameters for multi-layer optimization", sizeof(result.error_message));
         return result;
     }
     

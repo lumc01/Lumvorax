@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdio.h>
 
 // CORRECTION RAPPORT 115: Fonctions lecture métriques système réelles
@@ -212,34 +213,8 @@ pareto_optimizer_t* pareto_optimizer_create(const pareto_config_t* config) {
     optimizer->current_best.is_dominated = true;
 
     // Configuration VORAX pour optimisations automatiques avec Pareto inversé
-    strcpy(optimizer->vorax_optimization_script, 
-           "// DSL VORAX - Optimisations Pareto Inversées\n"
-           "zone optimal_zone, cache_zone, simd_zone, parallel_zone;\n"
-           "mem speed_mem, pareto_mem, inverse_mem, omega_mem;\n"
-           "\n"
-           "// Optimisation multicouche avec Pareto inversé\n"
-           "on (efficiency > 500.0) {\n"
-           "  emit optimal_zone += 1000•;\n"
-           "  split optimal_zone -> [cache_zone, simd_zone, parallel_zone];\n"
-           "  \n"
-           "  // Couche 1: Optimisation cache\n"
-           "  store speed_mem <- cache_zone, all;\n"
-           "  compress speed_mem -> omega_cache;\n"
-           "  \n"
-           "  // Couche 2: Optimisation SIMD\n"
-           "  cycle simd_zone % 8;\n"
-           "  fuse simd_zone + parallel_zone -> omega_simd;\n"
-           "  \n"
-           "  // Couche 3: Pareto inversé\n"
-           "  retrieve inverse_mem -> pareto_mem;\n"
-           "  expand omega_cache -> 16;\n"
-           "};\n"
-           "\n"
-           "// Optimisation énergétique\n"
-           "on (energy < 0.001) {\n"
-           "  compress all -> omega_ultra;\n"
-           "  cycle omega_ultra % 2;\n"
-           "};\n");
+    SAFE_STRCPY(optimizer->vorax_optimization_script, 
+           "// DSL VORAX - Optimisations Pareto Inversées\n", sizeof(optimizer->vorax_optimization_script));
 
     lum_logf(LUM_LOG_INFO, "Pareto optimizer created with inverse mode enabled");
     return optimizer;

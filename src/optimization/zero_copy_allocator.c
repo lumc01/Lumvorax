@@ -7,6 +7,7 @@
 #include "zero_copy_allocator.h"
 #include "../logger/lum_logger.h"
 #include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <sys/mman.h>   // Pour mmap, munmap, madvise, MADV_SEQUENTIAL
 #include <sys/stat.h>   // Pour S_IRUSR, S_IWUSR
 #include <fcntl.h>      // Pour open, O_CREAT, O_RDWR, O_TRUNC
@@ -52,7 +53,7 @@ zero_copy_pool_t* zero_copy_pool_create(size_t size, const char* name) {
     // Nom de région pour debugging
     pool->region_name = TRACKED_MALLOC(strlen(name) + 1);
     if (pool->region_name) {
-        strcpy(pool->region_name, name);
+        SAFE_STRCPY(pool->region_name, name, sizeof(pool->region_name));
     }
 
     // Allocation initiale (standard malloc, upgradée à mmap plus tard si demandé)

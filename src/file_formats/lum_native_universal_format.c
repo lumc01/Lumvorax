@@ -3,6 +3,7 @@
 
 #include "lum_native_universal_format.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include "../logger/lum_logger.h"
 #include <stdlib.h>
 #include <string.h>
@@ -253,7 +254,7 @@ lum_file_operation_result_t* lum_add_text_content(lum_universal_file_manager_t* 
                                                            section_name,
                                                            text_length);
     if (!section) {
-        strcpy(result->error_message, "Failed to create text section");
+        SAFE_STRCPY(result->error_message, "Failed to create text section", sizeof(result->error_message));
         return result;
     }
 
@@ -269,7 +270,7 @@ lum_file_operation_result_t* lum_add_text_content(lum_universal_file_manager_t* 
     
     if (!new_sections) {
         TRACKED_FREE(section);
-        strcpy(result->error_message, "Failed to allocate sections array");
+        SAFE_STRCPY(result->error_message, "Failed to allocate sections array", sizeof(result->error_message));
         return result;
     }
 
@@ -312,7 +313,7 @@ lum_file_operation_result_t* lum_add_text_content(lum_universal_file_manager_t* 
 
     result->operation_success = true;
     result->bytes_processed = text_length;
-    strcpy(result->error_message, "Text content added successfully");
+    SAFE_STRCPY(result->error_message, "Text content added successfully", sizeof(result->error_message));
 
     LOG_INFOF("✅ Text content added: %zu bytes, %u LUMs, %.3f ms",
            text_length, result->lums_affected, result->processing_time_ms);
@@ -345,7 +346,7 @@ lum_file_operation_result_t* lum_add_json_content(lum_universal_file_manager_t* 
 
     if (!has_opening_brace || !has_closing_brace) {
         result->operation_success = false;
-        strcpy(result->error_message, "Invalid JSON format detected");
+        SAFE_STRCPY(result->error_message, "Invalid JSON format detected", sizeof(result->error_message));
         return result;
     }
 
@@ -394,7 +395,7 @@ lum_file_operation_result_t* lum_add_image_rgb24(lum_universal_file_manager_t* m
                                                            image_size);
     if (!section) {
         result->operation_success = false;
-        strcpy(result->error_message, "Failed to create image section");
+        SAFE_STRCPY(result->error_message, "Failed to create image section", sizeof(result->error_message));
         return result;
     }
 
@@ -456,7 +457,7 @@ lum_file_operation_result_t* lum_add_image_rgb24(lum_universal_file_manager_t* m
     if (!new_sections) {
         TRACKED_FREE(section);
         result->operation_success = false;
-        strcpy(result->error_message, "Failed to allocate sections array");
+        SAFE_STRCPY(result->error_message, "Failed to allocate sections array", sizeof(result->error_message));
         return result;
     }
 
@@ -514,7 +515,7 @@ lum_file_operation_result_t* lum_add_som_data(lum_universal_file_manager_t* mana
                                                            som_data_size);
     if (!section) {
         result->operation_success = false;
-        strcpy(result->error_message, "Failed to create SOM section");
+        SAFE_STRCPY(result->error_message, "Failed to create SOM section", sizeof(result->error_message));
         return result;
     }
 
@@ -576,7 +577,7 @@ lum_file_operation_result_t* lum_add_som_data(lum_universal_file_manager_t* mana
     if (!new_sections) {
         TRACKED_FREE(section);
         result->operation_success = false;
-        strcpy(result->error_message, "Failed to allocate sections array");
+        SAFE_STRCPY(result->error_message, "Failed to allocate sections array", sizeof(result->error_message));
         return result;
     }
 

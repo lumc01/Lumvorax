@@ -5,6 +5,9 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
+// SÉCURITÉ: Safe string functions
+#include "common/safe_string.h"
+
 // INCLUDES SELON STANDARD_NAMES.md
 #include "common/common_types.h"
 #include "lum/lum_core.h"
@@ -145,14 +148,14 @@ static void test_vorax_operations_authentic(void) {
             operations++;
         } else {
             success = false;
-            strcpy(error, "VORAX split operation failed");
+            SAFE_STRCPY(error, "VORAX split operation failed", 256);
         }
         
         lum_group_destroy(group1);
         lum_group_destroy(group2);
     } else {
         success = false;
-        strcpy(error, "Group creation failed");
+        SAFE_STRCPY(error, "Group creation failed", 256);
     }
     
     uint64_t end = get_timestamp_ns();
@@ -188,19 +191,19 @@ static void test_simd_optimizer_authentic(void) {
                 printf("  SIMD Processing: %zu elements processed\n", result->processed_elements);
                 simd_result_destroy(result);
             } else {
-                strcpy(error, "SIMD processing failed");
+                SAFE_STRCPY(error, "SIMD processing failed", 256);
                 success = false;
             }
             
             lum_group_destroy(group);
         } else {
-            strcpy(error, "Group creation or population failed");
+            SAFE_STRCPY(error, "Group creation or population failed", 256);
             success = false;
         }
         
         simd_capabilities_destroy(caps);
     } else {
-        strcpy(error, "No SIMD support detected or caps NULL");
+        SAFE_STRCPY(error, "No SIMD support detected or caps NULL", 256);
         success = false;
         if (caps) simd_capabilities_destroy(caps);
     }

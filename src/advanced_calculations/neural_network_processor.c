@@ -4,6 +4,7 @@
 
 #include "neural_network_processor.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -299,13 +300,13 @@ neural_activation_trace_t* neural_layer_trace_activations(neural_layer_t* layer)
 
     // Nom fonction d'activation
     switch (layer->activation) {
-        case ACTIVATION_SIGMOID: strcpy(trace->activation_function_name, "sigmoid"); break;
-        case ACTIVATION_TANH: strcpy(trace->activation_function_name, "tanh"); break;
-        case ACTIVATION_RELU: strcpy(trace->activation_function_name, "relu"); break;
-        case ACTIVATION_LEAKY_RELU: strcpy(trace->activation_function_name, "leaky_relu"); break;
-        case ACTIVATION_SWISH: strcpy(trace->activation_function_name, "swish"); break;
-        case ACTIVATION_GELU: strcpy(trace->activation_function_name, "gelu"); break;
-        default: strcpy(trace->activation_function_name, "linear"); break;
+        case ACTIVATION_SIGMOID: SAFE_STRCPY(trace->activation_function_name, "sigmoid", sizeof(trace->activation_function_name)); break;
+        case ACTIVATION_TANH: SAFE_STRCPY(trace->activation_function_name, "tanh", sizeof(trace->activation_function_name)); break;
+        case ACTIVATION_RELU: SAFE_STRCPY(trace->activation_function_name, "relu", sizeof(trace->activation_function_name)); break;
+        case ACTIVATION_LEAKY_RELU: SAFE_STRCPY(trace->activation_function_name, "leaky_relu", sizeof(trace->activation_function_name)); break;
+        case ACTIVATION_SWISH: SAFE_STRCPY(trace->activation_function_name, "swish", sizeof(trace->activation_function_name)); break;
+        case ACTIVATION_GELU: SAFE_STRCPY(trace->activation_function_name, "gelu", sizeof(trace->activation_function_name)); break;
+        default: SAFE_STRCPY(trace->activation_function_name, "linear", sizeof(trace->activation_function_name)); break;
     }
 
     return trace;
@@ -692,7 +693,7 @@ neural_result_t* neural_network_train(neural_network_t* network, double** traini
     result->loss = 0.12; // Simulation réaliste
     result->convergence_reached = true;
     result->neurons_fired = network->layer_count * 10; // Estimation
-    strcpy(result->error_message, "Training completed successfully");
+    SAFE_STRCPY(result->error_message, "Training completed successfully", sizeof(result->error_message));
     result->memory_address = (void*)result;
     
     // Simulation du forward pass avec premier échantillon

@@ -418,7 +418,7 @@ matrix_lum_result_t* matrix_multiply(lum_matrix_t* matrix_a, lum_matrix_t* matri
     result->execution_time_ns = (end.tv_sec - start.tv_sec) * 1000000000ULL +
                                 (end.tv_nsec - start.tv_nsec);
     result->success = true;
-    strcpy(result->error_message, "Matrix multiplication completed successfully");
+    SAFE_STRCPY(result->error_message, "Matrix multiplication completed successfully", sizeof(result->error_message));
 
     return result;
 }

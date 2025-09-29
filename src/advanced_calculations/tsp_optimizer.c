@@ -5,6 +5,7 @@
 
 #include "tsp_optimizer.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -208,13 +209,13 @@ tsp_result_t* tsp_optimize_nearest_neighbor(tsp_city_t** cities, size_t city_cou
     if (!result) return NULL;
     
     result->memory_address = (void*)result;
-    strcpy(result->algorithm_used, "Nearest Neighbor");
+    SAFE_STRCPY(result->algorithm_used, "Nearest Neighbor", sizeof(result->algorithm_used));
     result->optimization_success = false;
     
     // Création matrice de distances
     tsp_distance_matrix_t* matrix = tsp_distance_matrix_create(cities, city_count);
     if (!matrix) {
-        strcpy(result->error_message, "Failed to create distance matrix");
+        SAFE_STRCPY(result->error_message, "Failed to create distance matrix", sizeof(result->error_message));
         return result;
     }
     
@@ -222,7 +223,7 @@ tsp_result_t* tsp_optimize_nearest_neighbor(tsp_city_t** cities, size_t city_cou
     result->optimal_tour = tsp_tour_create(city_count);
     if (!result->optimal_tour) {
         tsp_distance_matrix_destroy(&matrix);
-        strcpy(result->error_message, "Failed to create tour");
+        SAFE_STRCPY(result->error_message, "Failed to create tour", sizeof(result->error_message));
         return result;
     }
     
@@ -230,7 +231,7 @@ tsp_result_t* tsp_optimize_nearest_neighbor(tsp_city_t** cities, size_t city_cou
     bool* visited = TRACKED_MALLOC(city_count * sizeof(bool));
     if (!visited) {
         tsp_distance_matrix_destroy(&matrix);
-        strcpy(result->error_message, "Memory allocation failed");
+        SAFE_STRCPY(result->error_message, "Memory allocation failed", sizeof(result->error_message));
         return result;
     }
     
@@ -263,7 +264,7 @@ tsp_result_t* tsp_optimize_nearest_neighbor(tsp_city_t** cities, size_t city_cou
         // Validation critique: s'assurer qu'une ville non visitée a été trouvée
         if (!found_unvisited) {
             // Toutes les villes sont visitées - ceci ne devrait pas arriver dans l'algorithme correct
-            strcpy(result->error_message, "TSP algorithm error: no unvisited city found");
+            SAFE_STRCPY(result->error_message, "TSP algorithm error: no unvisited city found", sizeof(result->error_message));
             TRACKED_FREE(visited);
             tsp_distance_matrix_destroy(&matrix);
             return result;

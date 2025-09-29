@@ -5,6 +5,7 @@
 
 #include "audio_processor.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -250,7 +251,7 @@ audio_processing_result_t* audio_apply_fft_vorax(audio_processor_t* processor, s
     result->frequency_bins = fft_size / 2;
     result->quality_metric = (double)actual_size / fft_size; // Ratio remplissage
     result->processing_success = true;
-    strcpy(result->error_message, "FFT completed successfully via VORAX CYCLE operations");
+    SAFE_STRCPY(result->error_message, "FFT completed successfully via VORAX CYCLE operations", sizeof(result->error_message));
     
     processor->filters_applied++;
     processor->frequency_analysis_count++;

@@ -4,6 +4,7 @@
 
 #include "image_processor.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -197,7 +198,7 @@ image_processing_result_t* image_apply_gaussian_blur_vorax(image_processor_t* pr
     result->filter_applied = IMAGE_FILTER_BLUR;
     result->quality_metric = sigma; // Métrique qualité = paramètre sigma
     result->processing_success = true;
-    strcpy(result->error_message, "Gaussian blur applied successfully via VORAX transformations");
+    SAFE_STRCPY(result->error_message, "Gaussian blur applied successfully via VORAX transformations", sizeof(result->error_message));
     
     processor->filters_applied++;
     TRACKED_FREE(kernel);
@@ -271,7 +272,7 @@ image_processing_result_t* image_apply_edge_detection_vorax(image_processor_t* p
     result->filter_applied = IMAGE_FILTER_EDGE_DETECTION;
     result->quality_metric = 0.85; // Métrique qualité détection
     result->processing_success = true;
-    strcpy(result->error_message, "Edge detection completed successfully via Sobel operators");
+    SAFE_STRCPY(result->error_message, "Edge detection completed successfully via Sobel operators", sizeof(result->error_message));
     
     processor->filters_applied++;
     

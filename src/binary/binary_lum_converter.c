@@ -38,7 +38,7 @@ binary_lum_result_t* convert_binary_to_lum(const uint8_t* binary_data, size_t by
     lum_group_t* lum_group = lum_group_create(total_bits);
     if (!lum_group) {
         result->success = false;
-        strcpy(result->error_message, "Failed to create LUM group");
+        SAFE_STRCPY(result->error_message, "Failed to create LUM group", sizeof(result->error_message));
         return result;
     }
 
@@ -62,7 +62,7 @@ binary_lum_result_t* convert_binary_to_lum(const uint8_t* binary_data, size_t by
     result->lum_group = lum_group;
     result->success = true;
     result->bits_processed = total_bits;
-    strcpy(result->error_message, "Conversion successful");
+    SAFE_STRCPY(result->error_message, "Conversion successful", sizeof(result->error_message));
 
     return result;
 }
@@ -73,14 +73,14 @@ binary_lum_result_t* convert_bits_to_lum(const char* bit_string) {
     if (!result || !bit_string) {
         if (result) {
             result->success = false;
-            strcpy(result->error_message, "Invalid bit string");
+            SAFE_STRCPY(result->error_message, "Invalid bit string", sizeof(result->error_message));
         }
         return result;
     }
 
     if (!validate_binary_string(bit_string)) {
         result->success = false;
-        strcpy(result->error_message, "Invalid binary string format");
+        SAFE_STRCPY(result->error_message, "Invalid binary string format", sizeof(result->error_message));
         return result;
     }
 
@@ -88,7 +88,7 @@ binary_lum_result_t* convert_bits_to_lum(const char* bit_string) {
     lum_group_t* lum_group = lum_group_create(bit_count);
     if (!lum_group) {
         result->success = false;
-        strcpy(result->error_message, "Failed to create LUM group");
+        SAFE_STRCPY(result->error_message, "Failed to create LUM group", sizeof(result->error_message));
         return result;
     }
 
@@ -106,7 +106,7 @@ binary_lum_result_t* convert_bits_to_lum(const char* bit_string) {
     result->lum_group = lum_group;
     result->success = true;
     result->bits_processed = bit_count;
-    strcpy(result->error_message, "Conversion successful");
+    SAFE_STRCPY(result->error_message, "Conversion successful", sizeof(result->error_message));
 
     return result;
 }
@@ -117,7 +117,7 @@ lum_binary_result_t* convert_lum_to_binary(const lum_group_t* lum_group) {
     if (!result || !lum_group || lum_group->count == 0) {
         if (result) {
             result->success = false;
-            strcpy(result->error_message, "Invalid LUM group");
+            SAFE_STRCPY(result->error_message, "Invalid LUM group", sizeof(result->error_message));
         }
         return result;
     }
@@ -128,7 +128,7 @@ lum_binary_result_t* convert_lum_to_binary(const lum_group_t* lum_group) {
     result->binary_data = TRACKED_CALLOC(byte_count, sizeof(uint8_t));
     if (!result->binary_data) {
         result->success = false;
-        strcpy(result->error_message, "Memory allocation failed");
+        SAFE_STRCPY(result->error_message, "Memory allocation failed", sizeof(result->error_message));
         return result;
     }
 
@@ -148,7 +148,7 @@ lum_binary_result_t* convert_lum_to_binary(const lum_group_t* lum_group) {
     result->byte_count = byte_count;
     result->bit_count = bit_count;
     result->success = true;
-    strcpy(result->error_message, "Conversion successful");
+    SAFE_STRCPY(result->error_message, "Conversion successful", sizeof(result->error_message));
 
     return result;
 }
@@ -159,7 +159,7 @@ lum_binary_result_t* convert_lum_to_bits(const lum_group_t* lum_group) {
     if (!result || !lum_group || lum_group->count == 0) {
         if (result) {
             result->success = false;
-            strcpy(result->error_message, "Invalid LUM group");
+            SAFE_STRCPY(result->error_message, "Invalid LUM group", sizeof(result->error_message));
         }
         return result;
     }
@@ -169,7 +169,7 @@ lum_binary_result_t* convert_lum_to_bits(const lum_group_t* lum_group) {
     result->binary_data = TRACKED_MALLOC(bit_count + 1);  // +1 for null terminator
     if (!result->binary_data) {
         result->success = false;
-        strcpy(result->error_message, "Memory allocation failed");
+        SAFE_STRCPY(result->error_message, "Memory allocation failed", sizeof(result->error_message));
         return result;
     }
 
@@ -182,7 +182,7 @@ lum_binary_result_t* convert_lum_to_bits(const lum_group_t* lum_group) {
     result->byte_count = bit_count + 1;
     result->bit_count = bit_count;
     result->success = true;
-    strcpy(result->error_message, "Conversion successful");
+    SAFE_STRCPY(result->error_message, "Conversion successful", sizeof(result->error_message));
 
     return result;
 }
@@ -460,7 +460,7 @@ binary_lum_result_t* convert_hex_string_to_lum(const char* hex_string) {
     uint8_t* binary_data = TRACKED_MALLOC(byte_count);
     if (!binary_data) {
         result->success = false;
-        strcpy(result->error_message, "Memory allocation failed");
+        SAFE_STRCPY(result->error_message, "Memory allocation failed", sizeof(result->error_message));
         return result;
     }
 

@@ -4,6 +4,7 @@
 #include "lum_secure_serialization.h"
 #include "../debug/memory_tracker.h"
 #include "../lum/lum_core.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <string.h>
 #include <arpa/inet.h> // Pour htonl/ntohl (endianness)
 #include <time.h> // Pour clock_gettime
@@ -43,7 +44,7 @@ lum_secure_result_t* lum_secure_serialize_group(lum_group_t* group, bool encrypt
 
     result->memory_address = (void*)result;
     result->success = false;
-    strcpy(result->error_message, "");
+    SAFE_STRCPY(result->error_message, "", sizeof(result->error_message));
 
     // Calcul taille nécessaire
     size_t header_size = sizeof(lum_secure_header_t);
@@ -53,7 +54,7 @@ lum_secure_result_t* lum_secure_serialize_group(lum_group_t* group, bool encrypt
     // Allocation buffer sérialisation
     result->serialized_data = TRACKED_MALLOC(total_size);
     if (!result->serialized_data) {
-        strcpy(result->error_message, "Allocation buffer failed");
+        SAFE_STRCPY(result->error_message, "Allocation buffer failed", sizeof(result->error_message));
         return result;
     }
 
@@ -88,7 +89,7 @@ lum_secure_result_t* lum_secure_serialize_group(lum_group_t* group, bool encrypt
 
     result->data_size = total_size;
     result->success = true;
-    strcpy(result->error_message, "Serialization completed successfully");
+    SAFE_STRCPY(result->error_message, "Serialization completed successfully", sizeof(result->error_message));
 
     return result;
 }

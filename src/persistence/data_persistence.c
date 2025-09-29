@@ -3,6 +3,7 @@
 #include "../lum/lum_core.h"
 #include "../debug/forensic_logger.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -250,7 +251,7 @@ transaction_t* begin_transaction(storage_backend_t* backend) {
     if (!transaction) return NULL;
 
     transaction->id = next_transaction_id++;
-    strcpy(transaction->operation, "batch_store");
+    SAFE_STRCPY(transaction->operation, "batch_store", sizeof(transaction->operation));
     transaction->timestamp = (uint64_t)time(NULL);
     transaction->committed = false;
 
@@ -499,7 +500,7 @@ storage_result_t* persistence_save_group(persistence_context_t* ctx,
     header.format_type = ctx->default_format;
     header.timestamp = time(NULL);
     header.data_size = total_data_size;
-    strcpy(header.metadata, "LUM_GROUP");
+    SAFE_STRCPY(header.metadata, "LUM_GROUP", sizeof(header.metadata));
 
     if (fwrite(&header, sizeof(header), 1, file) != 1) {
         fclose(file);

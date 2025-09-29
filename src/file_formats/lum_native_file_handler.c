@@ -3,6 +3,7 @@
 
 #include "lum_native_file_handler.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -212,8 +213,8 @@ lum_file_metadata_t* lum_file_metadata_create(void) {
     metadata->total_size_bytes = 0;
     metadata->checksum_crc32 = 0;
 
-    strcpy(metadata->creator_info, "LUM/VORAX Native File Handler v1.0");
-    strcpy(metadata->file_description, "Native LUM/VORAX File Format");
+    SAFE_STRCPY(metadata->creator_info, "LUM/VORAX Native File Handler v1.0", sizeof(metadata->creator_info));
+    SAFE_STRCPY(metadata->file_description, "Native LUM/VORAX File Format", sizeof(metadata->file_description));
 
     metadata->memory_address = (void*)metadata;
 
