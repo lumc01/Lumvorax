@@ -1,5 +1,6 @@
 #include "lum_logger.h"
 #include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -427,7 +428,7 @@ lum_log_analysis_t* lum_log_analyze(const char* log_filename) {
     if (!analysis) return NULL;
 
     memset(analysis, 0, sizeof(lum_log_analysis_t));
-    strcpy(analysis->most_used_operation, "FUSE");
+    SAFE_STRCPY(analysis->most_used_operation, "FUSE", sizeof(analysis->most_used_operation));
 
     return analysis;
 }

@@ -1,6 +1,7 @@
 
 #include "log_manager.h"
 #include "../debug/memory_tracker.h"
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -42,10 +43,10 @@ bool log_manager_create_structure(log_manager_t* manager) {
     // PRODUCTION: Utiliser /data/logs si disponible, sinon ./logs
     char logs_base[256];
     if (access("/data", F_OK) == 0) {
-        strcpy(logs_base, "/data/logs");
+        SAFE_STRCPY(logs_base, "/data/logs", sizeof(logs_base));
         printf("[LOG_MANAGER] Mode production: logs dans /data/logs\n");
     } else {
-        strcpy(logs_base, "logs");
+        SAFE_STRCPY(logs_base, "logs", sizeof(logs_base));
         printf("[LOG_MANAGER] Mode développement: logs dans ./logs\n");
     }
     
@@ -90,9 +91,9 @@ bool log_manager_archive_session(log_manager_t* manager, const char* session_id)
     // Utiliser logs_base configurable
     char logs_base[256];
     if (access("/data", F_OK) == 0) {
-        strcpy(logs_base, "/data/logs");
+        SAFE_STRCPY(logs_base, "/data/logs", sizeof(logs_base));
     } else {
-        strcpy(logs_base, "logs");
+        SAFE_STRCPY(logs_base, "logs", sizeof(logs_base));
     }
     
     char archive_dir[256];
@@ -142,9 +143,9 @@ module_logger_t* log_manager_get_module_logger(log_manager_t* manager, const cha
     // Utiliser logs_base configurable au lieu de path hardcodé
     char logs_base[256];
     if (access("/data", F_OK) == 0) {
-        strcpy(logs_base, "/data/logs");
+        SAFE_STRCPY(logs_base, "/data/logs", sizeof(logs_base));
     } else {
-        strcpy(logs_base, "logs");
+        SAFE_STRCPY(logs_base, "logs", sizeof(logs_base));
     }
     
     // Création fichier log

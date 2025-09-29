@@ -3,6 +3,7 @@
 #include "parallel_processor.h"
 #include "../logger/lum_logger.h"
 #include "../debug/memory_tracker.h"  // NOUVEAU: Pour TRACKED_MALLOC/FREE
+#include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
 #include <stdlib.h>
 #include <string.h>
 #include <pthread.h>
@@ -395,14 +396,14 @@ parallel_process_result_t parallel_process_lums(lum_t** lums, int count, int thr
 
     if (!lums || count <= 0) {
         result.success = false;
-        strcpy(result.error_message, "Invalid input parameters");
+        SAFE_STRCPY(result.error_message, "Invalid input parameters", sizeof(result.error_message));
         return result;
     }
 
     parallel_processor_t* processor = parallel_processor_create(threads);
     if (!processor) {
         result.success = false;
-        strcpy(result.error_message, "Failed to create processor");
+        SAFE_STRCPY(result.error_message, "Failed to create processor", sizeof(result.error_message));
         return result;
     }
 
