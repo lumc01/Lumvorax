@@ -24,7 +24,7 @@ typedef struct {
 
 // Constantes
 // CORRECTION RAPPORT 117: Magic number professionnel
-#define LUM_DISPLACEMENT_MAGIC 0x4C55D151  // "LUD1" en hex professionnel
+// LUM_DISPLACEMENT_MAGIC moved to src/common/magic_numbers.h for consistency
 // CORRECTION RAPPORT 117: Distance max configurable
 extern int32_t lum_max_displacement_distance;
 #define MAX_DISPLACEMENT_DISTANCE lum_max_displacement_distance

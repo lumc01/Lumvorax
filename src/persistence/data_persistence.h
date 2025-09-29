@@ -12,7 +12,7 @@
 #define STORAGE_MAGIC_NUMBER 0x4C554D58 // "LUMX"
 #define PERSISTENCE_CONTEXT_MAGIC 0xDEADBEEF
 #define LUM_MAGIC_NUMBER 0x4C554D00
-#define LUM_GROUP_MAGIC 0x47525000
+// LUM_GROUP_MAGIC moved to src/common/magic_numbers.h for consistency
 
 // Storage format types
 typedef enum {

@@ -1,7 +1,15 @@
 # Makefile LUM/VORAX - Compilation COMPLÈTE TOUS MODULES
 CC = gcc
 CFLAGS = -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug
+
 LDFLAGS = -lm -lpthread -lrt
+
+# Debug/Release modes for performance control  
+debug: CFLAGS += -DDEBUG_MODE -g3
+debug: all
+
+release: CFLAGS += -O3 -DNDEBUG  
+release: all
 
 # Répertoires
 SRC_DIR = src

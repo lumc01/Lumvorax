@@ -27,11 +27,11 @@ bool forensic_logger_init(const char* filename) {
         // Créer récursivement tous les répertoires parents
         char temp_path[256];
         char *token = strtok(dir_path, "/");
-        strcpy(temp_path, "");
+        temp_path[0] = '\0';  // Secure initialization
         
         while (token != NULL) {
-            strcat(temp_path, token);
-            strcat(temp_path, "/");
+            strncat(temp_path, token, sizeof(temp_path) - strlen(temp_path) - 1);
+            strncat(temp_path, "/", sizeof(temp_path) - strlen(temp_path) - 1);
             mkdir(temp_path, 0755);
             token = strtok(NULL, "/");
         }
@@ -61,6 +61,18 @@ bool forensic_logger_init(const char* filename) {
     
     printf("[FORENSIC] Log initialized successfully: %s\n", filename);
     return true;
+}
+
+// CORRECTION CRITIQUE #001: Initialiser logging forensique AVANT création LUMs
+bool forensic_logger_init_individual_files(void) {
+    // Générer nom de fichier avec timestamp unique
+    char filename[256];
+    uint64_t timestamp = lum_get_timestamp();
+    snprintf(filename, sizeof(filename), 
+             "logs/forensic/forensic_session_%llu_%llu.log",
+             timestamp / 1000000000ULL, timestamp % 1000000000ULL);
+    
+    return forensic_logger_init(filename);
 }
 
 void forensic_log_memory_operation(const char* operation, void* ptr, size_t size) {

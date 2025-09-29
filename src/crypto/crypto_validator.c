@@ -223,7 +223,7 @@ bool crypto_validate_sha256_implementation(void) {
 
 void bytes_to_hex_string(const uint8_t* bytes, size_t len, char* hex_str) {
     for (size_t i = 0; i < len; i++) {
-        sprintf(&hex_str[i * 2], "%02x", bytes[i]);
+        snprintf(&hex_str[i * 2], 3, "%02x", bytes[i]);  // Secure: max 2 chars + null
     }
     hex_str[len * 2] = '\0';
 }

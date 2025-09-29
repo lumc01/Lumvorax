@@ -7,6 +7,7 @@
 
 #include "lum_core.h"
 #include "../common/common_types.h"
+#include "../common/debug_macros.h"
 #include "../debug/memory_tracker.h"
 #include "../debug/forensic_logger.h"
 #include <stdio.h>

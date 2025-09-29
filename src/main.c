@@ -148,6 +148,12 @@ static void close_real_forensic_log_file(void) {
 static void test_progressive_stress_all_available_modules(void) {
     printf("[TEST] === LANCEMENT TESTS PROGRESSIFS 1 → 100K TOUS MODULES ===\n");
     printf("[TEST] === TESTS PROGRESSIFS 10 → 100K - TOUS LES 39 MODULES DISPONIBLES ===\n");
+    
+    // CORRECTION CRITIQUE #001: Initialiser logging forensique AVANT création LUMs
+    printf("[FORENSIC] Initialisation logs individuels...\n");
+    if (!forensic_logger_init_individual_files()) {
+        printf("[WARNING] Forensic logger initialization failed, continuing without\n");
+    }
 
     size_t test_scales[] = {10, 100, 1000, 10000, 100000}; // LIMITE MAX 100K éléments selon prompt.txt
     size_t num_scales = sizeof(test_scales) / sizeof(test_scales[0]);
