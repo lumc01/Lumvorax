@@ -1258,5 +1258,5 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "vm"
-run = ["./bin/lum_vorax_complete", "--progressive-stress-all"]
-build = ["make", "all"]
+run = ["./bin/lum_vorax_complete"]
+build = ["make", "clean", "all"]

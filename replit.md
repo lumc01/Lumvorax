@@ -4,10 +4,11 @@
 This is a comprehensive C-based LUM/VORAX system that provides high-performance data processing with extensive metrics collection and forensic validation. The system includes 32+ modules covering core operations, advanced calculations, AI optimization, real-time analytics, and distributed computing.
 
 ## Recent Changes
-- **September 24, 2025**: Successfully imported and configured for Replit environment
-- **Build System**: Configured with GCC 14.2.1 and optimized compilation flags
-- **Workflow**: Set up console-based execution for progressive stress testing
+- **September 30, 2025**: Successfully imported GitHub project and configured for Replit environment
+- **Build System**: Configured with GCC 14.2.1 and optimized compilation flags (-O3, -march=native)
+- **Workflow**: Set up console-based execution with default help and progressive stress testing
 - **Deployment**: Configured as VM deployment for continuous execution
+- **Compilation**: All 39 modules built successfully with zero errors
 
 ## User Preferences
 - System should maintain high performance with SIMD optimizations
@@ -47,9 +48,22 @@ src/
 
 ### Runtime Configuration
 - **Main Executable**: `bin/lum_vorax_complete`
-- **Test Suite**: `bin/test_forensic_complete_system`
-- **Progressive Testing**: 10K → 100M element scaling
+- **Test Suite**: `bin/test_forensic_complete_system` and `bin/test_integration_complete_39_modules`
+- **Progressive Testing**: 10 → 100K element scaling
 - **Optimization Targets**: CPU efficiency, memory throughput, parallel scaling
+
+### How to Run
+The application accepts the following command-line arguments:
+- No arguments: Shows help and runs a basic LUM creation/destruction test
+- `--basic-test`: Runs a minimal test of the LUM core module
+- `--progressive-stress-all`: Runs progressive stress tests (10, 100, 1000, 10000, 100000 elements) across all 39 modules
+
+The workflow automatically runs the main executable. To run manually:
+```bash
+./bin/lum_vorax_complete                    # Help and basic test
+./bin/lum_vorax_complete --basic-test       # Basic functionality test
+./bin/lum_vorax_complete --progressive-stress-all  # Full stress test
+```
 
 ### Performance Characteristics
 - **CPU Usage**: 15-85% depending on module (optimized for multi-core)
