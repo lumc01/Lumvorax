@@ -10,6 +10,46 @@
 #include <string.h>
 #include <stdlib.h>
 
+// ========== OPTIMISATIONS ENVIRONNEMENT REPLIT ==========
+// Rapport 143 - Optimisations critiques adaptées conteneur Replit
+
+// D\u00e9tection dynamique SIMD pour conteneurs Replit
+#ifdef __has_include
+  #if __has_include(<immintrin.h>)
+    #include <immintrin.h>
+    #define REPLIT_SIMD_AVAILABLE 1
+  #else
+    #define REPLIT_SIMD_AVAILABLE 0
+  #endif
+#else
+  #define REPLIT_SIMD_AVAILABLE 0
+#endif
+
+// Cache line size pour optimisation conteneur (valeur s\u00e9curis\u00e9e)
+#ifndef REPLIT_CACHE_LINE_SIZE
+  #define REPLIT_CACHE_LINE_SIZE 64
+#endif
+
+// Limites m\u00e9moire conteneur Replit (512MB-1GB typique)
+#define REPLIT_MEMORY_LIMIT_MB 768
+#define REPLIT_MEMORY_WARNING_THRESHOLD (REPLIT_MEMORY_LIMIT_MB * 1024 * 1024 * 80 / 100) // 80%
+#define REPLIT_MEMORY_CRITICAL_THRESHOLD (REPLIT_MEMORY_LIMIT_MB * 1024 * 1024 * 95 / 100) // 95%
+
+// Thread pool persistent pour \u00e9viter overhead cr\u00e9ation/destruction
+#define REPLIT_THREAD_POOL_SIZE 4 // 2-4 cores typique conteneur
+
+// Cache timestamp syscalls pour r\u00e9duire overhead
+#define REPLIT_TIMESTAMP_CACHE_NS 1000000 // 1ms cache
+
+// Compression logs pour \u00e9viter saturation stockage
+#define REPLIT_LOG_COMPRESSION_ENABLED 1
+#define REPLIT_LOG_MAX_SIZE_MB 100
+
+// I/O buffering optimization pour NFS storage
+#define REPLIT_IO_BUFFER_SIZE (256 * 1024) // 256KB buffer
+
+// ========== FIN OPTIMISATIONS REPLIT ==========
+
 // FLAGS DE DÉSACTIVATION MODULES
 // Désactivé par défaut - réactivation manuelle uniquement
 // #define MODULES_QUANTIQUES_ACTIFS
