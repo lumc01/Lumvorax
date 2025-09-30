@@ -1113,7 +1113,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "./bin/lum_vorax_complete"
+args = "./bin/lum_vorax_complete --progressive-stress-all"
 
 [[workflows.workflow]]
 name = "VALIDATION COMPLETE LOGS REELS"
@@ -1258,5 +1258,5 @@ channel = "stable-25_05"
 
 [deployment]
 deploymentTarget = "vm"
-run = ["./bin/lum_vorax_complete"]
+run = ["./bin/lum_vorax_complete", "--progressive-stress-all"]
 build = ["make", "clean", "all"]
