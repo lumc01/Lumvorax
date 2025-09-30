@@ -646,7 +646,7 @@ des dependances externes, sont experimentaux, ou ont ete desactives pour focus s
 [0619] 
 [0620] **1. Contexte**: Test stress progressif echelle 10, execution temps reel
 [0621] **3. Operation**: Detection capabilities AVX2, vectorisation 10 operations
-[0622] **4. Throughput**: 3689 ops/sec
+[0622] **4. Throughput**: 3689 ops/secpp
 [0623] **5. Latence**: Moy=271000 ns, P50=243900 ns, P95=406500 ns
 [0624] **7. SIMD/Parallel**: AVX2 actif (8-wide), 4 threads paralleles
 [0625] **8. I/O**: Minimal, operations memoire primaires
