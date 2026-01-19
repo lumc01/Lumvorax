@@ -1,5 +1,5 @@
-#ifndef VORAX_OPERATIONS_H
-#define VORAX_OPERATIONS_H
+#ifndef VORAX_OPERATIONS_H_INCLUDED
+#define VORAX_OPERATIONS_H_INCLUDED
 
 #include "../lum/lum_core.h"
 
@@ -15,13 +15,21 @@ typedef enum {
     VORAX_OP_EXPAND = 7       // Expand from Ω
 } vorax_operation_e;
 
-// Operation result structure
+// OPTIMISATION: Structure résultat VORAX ultra-optimisée
 typedef struct {
     bool success;
     char message[256];
-    lum_group_t* result_group;
+    lum_group_t* result_group;          // Groupe résultat principal
+    lum_group_t* output_group;          // Alias compatibilité
+    lum_group_t** result_groups;        // Array groupes pour split
     size_t result_count;
-    lum_group_t** result_groups;
+    double execution_time;              // Temps en secondes (legacy)
+    uint64_t execution_time_ns;         // OPTIMISATION: Temps nanoseconde précis
+    uint64_t operations_performed;      // OPTIMISATION: Compteur opérations
+    double throughput_lums_per_sec;     // OPTIMISATION: Débit LUMs/sec
+    uint32_t magic_number;              // Protection double-free
+    bool use_zero_copy;                 // OPTIMISATION: Flag zero-copy utilisé
+    bool use_vectorization;             // OPTIMISATION: Flag vectorisation utilisé
 } vorax_result_t;
 
 // Core VORAX operations
@@ -37,6 +45,7 @@ vorax_result_t* vorax_expand(lum_group_t* compressed_group, size_t parts);
 // Utility functions
 vorax_result_t* vorax_result_create(void);
 void vorax_result_destroy(vorax_result_t* result);
+void vorax_result_safe_destroy(vorax_result_t** result_ptr);
 void vorax_result_set_success(vorax_result_t* result, const char* message);
 void vorax_result_set_error(vorax_result_t* result, const char* message);
 
@@ -49,4 +58,4 @@ size_t vorax_count_total_lums(lum_group_t** groups, size_t group_count);
 vorax_result_t* vorax_create_node(lum_group_t* group1, lum_group_t* group2);
 vorax_result_t* vorax_emit_lums(lum_zone_t* zone, size_t count);
 
-#endif // VORAX_OPERATIONS_H
+#endif /* VORAX_OPERATIONS_H_INCLUDED */ // VORAX_OPERATIONS_H

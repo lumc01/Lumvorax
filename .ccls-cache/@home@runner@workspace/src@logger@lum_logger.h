@@ -1,11 +1,24 @@
 #ifndef LUM_LOGGER_H
 #define LUM_LOGGER_H
 
+#include <stdbool.h>
+#include <stdarg.h>
+#include <stdio.h>
+#include <time.h>
+
 #include "../lum/lum_core.h"
 #include "../vorax/vorax_operations.h"
 #include <stdint.h>
-#include <stdio.h>
+#include <stddef.h>
 
+// Système de désactivation des logs pour benchmark performance
+#ifdef DISABLE_LOGGING
+#define lum_log(level, format, ...) do { } while(0)
+#define lum_logf(level, format, ...) do { } while(0)
+#define lum_log_init(filename) (true)
+#define lum_log_destroy() do { } while(0)
+#define lum_log_flush() do { } while(0)
+#else
 // Log levels
 typedef enum {
     LUM_LOG_DEBUG = 0,
@@ -50,13 +63,17 @@ typedef struct {
 // Logger context
 typedef struct {
     FILE* log_file;
+    char log_filename[256];
     bool console_output;
     bool file_output;
     lum_log_level_e min_level;
     uint32_t sequence_counter;
-    char log_filename[256];
-    bool trace_all_lums;      // Trace every LUM operation
-    bool conservation_check;  // Enable conservation checking
+    bool trace_all_lums;
+    bool conservation_check;
+    lum_log_level_e level;              // Niveau de log
+    bool enabled;                       // État activé/désactivé
+    char module_name[64];               // Nom du module
+    char session_id[32];                // ID de session
 } lum_logger_t;
 
 // Logger initialization and cleanup
@@ -166,5 +183,21 @@ lum_log_monitor_t* lum_log_monitor_create(lum_logger_t* logger,
 void lum_log_monitor_destroy(lum_log_monitor_t* monitor);
 bool lum_log_monitor_start(lum_log_monitor_t* monitor);
 void lum_log_monitor_stop(lum_log_monitor_t* monitor);
+
+void lum_log_flush(void);
+
+// Fonction lum_log principale pour compatibilité
+void lum_log(lum_log_level_e level, const char* format, ...);
+
+// Variadic logging helper for replacing incorrect snprintf usage
+void lum_logf(lum_log_level_e level, const char* format, ...);
+
+// Convenience macros
+#define LOG_INFOF(fmt, ...) lum_logf(LUM_LOG_INFO, fmt, ##__VA_ARGS__)
+#define LOG_ERRORF(fmt, ...) lum_logf(LUM_LOG_ERROR, fmt, ##__VA_ARGS__)
+#define LOG_WARNF(fmt, ...) lum_logf(LUM_LOG_WARN, fmt, ##__VA_ARGS__)
+#define LOG_DEBUGF(fmt, ...) lum_logf(LUM_LOG_DEBUG, fmt, ##__VA_ARGS__)
+
+#endif // DISABLE_LOGGING
 
 #endif // LUM_LOGGER_H
