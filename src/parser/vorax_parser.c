@@ -40,59 +40,24 @@ vorax_token_t vorax_lexer_next_token(vorax_parser_context_t* ctx) {
     
     char c = ctx->input[ctx->position];
     
-    // Single character tokens
+    // Single character tokens - BRANCH OPTIMIZED
     switch (c) {
-        case '(':
-            token.type = TOKEN_GROUP_START;
-            token.value[0] = c;
-            token.value[1] = '\0';
-            ctx->position++;
-            ctx->column++;
-            return token;
-        case ')':
-            token.type = TOKEN_GROUP_END;
-            token.value[0] = c;
-            token.value[1] = '\0';
-            ctx->position++;
-            ctx->column++;
-            return token;
-        case ';':
-            token.type = TOKEN_SEMICOLON;
-            token.value[0] = c;
-            token.value[1] = '\0';
-            ctx->position++;
-            ctx->column++;
-            return token;
-        case ',':
-            token.type = TOKEN_COMMA;
-            token.value[0] = c;
-            token.value[1] = '\0';
-            ctx->position++;
-            ctx->column++;
-            return token;
-        case '+':
-            token.type = TOKEN_PLUS;
-            token.value[0] = c;
-            token.value[1] = '\0';
-            ctx->position++;
-            ctx->column++;
-            return token;
-        case '%':
-            token.type = TOKEN_PERCENT;
-            token.value[0] = c;
-            token.value[1] = '\0';
-            ctx->position++;
-            ctx->column++;
-            return token;
-        case '.':  // Use '.' instead of Unicode bullet
-            token.type = TOKEN_LUM_SYMBOL;
-            token.value[0] = c;
-            token.value[1] = '\0';
-            ctx->position++;
-            ctx->column++;
-            return token;
+        case '(': token.type = TOKEN_GROUP_START; break;
+        case ')': token.type = TOKEN_GROUP_END; break;
+        case ';': token.type = TOKEN_SEMICOLON; break;
+        case ',': token.type = TOKEN_COMMA; break;
+        case '+': token.type = TOKEN_PLUS; break;
+        case '%': token.type = TOKEN_PERCENT; break;
+        case '.': token.type = TOKEN_LUM_SYMBOL; break;
+        default: goto check_multi;
     }
-    
+    token.value[0] = c;
+    token.value[1] = '\0';
+    ctx->position++;
+    ctx->column++;
+    return token;
+
+check_multi:
     // Multi-character tokens
     if (c == '-' && ctx->input[ctx->position + 1] == '>') {
         token.type = TOKEN_ARROW;

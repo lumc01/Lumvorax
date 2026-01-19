@@ -362,57 +362,52 @@ static bool neural_layer_forward_pass_processor(neural_layer_t* layer, double* i
     struct timespec start_ts, end_ts;
     clock_gettime(CLOCK_MONOTONIC, &start_ts);
 
-    // Calcul pour chaque neurone avec traçage détaillé
-    for (size_t n = 0; n < layer->neuron_count; n++) {
-        double sum = layer->biases[n];
-
-        // Produit scalaire weights[n*input_size : (n+1)*input_size] · inputs
+    // Calcul pour chaque neurone avec traçage détaillé - LOOP UNROLLED 4x
+    size_t n;
+    size_t unrolled_limit = (layer->neuron_count >= 4) ? (layer->neuron_count & ~3) : 0;
+    
+    for (n = 0; n < unrolled_limit; n += 4) {
+        double sums[4] = {layer->biases[n], layer->biases[n+1], layer->biases[n+2], layer->biases[n+3]};
+        
         for (size_t i = 0; i < layer->input_size; i++) {
-            double weight_contribution = layer->weights[n * layer->input_size + i] * inputs[i];
-            sum += weight_contribution;
-
-            // Traçage des contributions individuelles (debug mode)
-            #ifdef NEURAL_DEBUG_TRACE
-            printf("Layer %zu, Neuron %zu, Input %zu: weight=%.6f, input=%.6f, contrib=%.6f\n",
-                   layer->layer_id, n, i, layer->weights[n * layer->input_size + i],
-                   inputs[i], weight_contribution);
-            #endif
+            double inp = inputs[i];
+            sums[0] += layer->weights[n * layer->input_size + i] * inp;
+            sums[1] += layer->weights[(n+1) * layer->input_size + i] * inp;
+            sums[2] += layer->weights[(n+2) * layer->input_size + i] * inp;
+            sums[3] += layer->weights[(n+3) * layer->input_size + i] * inp;
         }
 
-        // Application fonction d'activation avec traçage
-        // pre_activation stored for potential debugging
-        // Note: Original code had `pre_activation` variable but it was unused after assignment.
-        // Removed `pre_activation` for clarity. If needed, it can be reintroduced.
+        for (int k = 0; k < 4; k++) {
+            double s = sums[k];
+            size_t idx = n + k;
+            switch (layer->activation) {
+                case ACTIVATION_SIGMOID: layer->outputs[idx] = activation_sigmoid(s); break;
+                case ACTIVATION_TANH:    layer->outputs[idx] = activation_tanh(s); break;
+                case ACTIVATION_RELU:    layer->outputs[idx] = activation_relu(s); break;
+                case ACTIVATION_LEAKY_RELU: layer->outputs[idx] = activation_leaky_relu(s, 0.01); break;
+                case ACTIVATION_SWISH:   layer->outputs[idx] = activation_swish(s); break;
+                case ACTIVATION_GELU:    layer->outputs[idx] = activation_gelu(s); break;
+                default:                 layer->outputs[idx] = s; break;
+            }
+        }
+    }
+
+    // Restant de la boucle
+    for (; n < layer->neuron_count; n++) {
+        double sum = layer->biases[n];
+        for (size_t i = 0; i < layer->input_size; i++) {
+            sum += layer->weights[n * layer->input_size + i] * inputs[i];
+        }
+        
         switch (layer->activation) {
-            case ACTIVATION_SIGMOID:
-                layer->outputs[n] = activation_sigmoid(sum);
-                break;
-            case ACTIVATION_TANH:
-                layer->outputs[n] = activation_tanh(sum);
-                break;
-            case ACTIVATION_RELU:
-                layer->outputs[n] = activation_relu(sum);
-                break;
-            case ACTIVATION_LEAKY_RELU:
-                layer->outputs[n] = activation_leaky_relu(sum, 0.01);
-                break;
-            case ACTIVATION_SWISH:
-                layer->outputs[n] = activation_swish(sum);
-                break;
-            case ACTIVATION_GELU:
-                layer->outputs[n] = activation_gelu(sum);
-                break;
-            case ACTIVATION_LINEAR:
-            default:
-                layer->outputs[n] = sum;
-                break;
+            case ACTIVATION_SIGMOID: layer->outputs[n] = activation_sigmoid(sum); break;
+            case ACTIVATION_TANH:    layer->outputs[n] = activation_tanh(sum); break;
+            case ACTIVATION_RELU:    layer->outputs[n] = activation_relu(sum); break;
+            case ACTIVATION_LEAKY_RELU: layer->outputs[n] = activation_leaky_relu(sum, 0.01); break;
+            case ACTIVATION_SWISH:   layer->outputs[n] = activation_swish(sum); break;
+            case ACTIVATION_GELU:    layer->outputs[n] = activation_gelu(sum); break;
+            default:                 layer->outputs[n] = sum; break;
         }
-
-        #ifdef NEURAL_DEBUG_TRACE
-        // Assuming `sum` holds the pre-activation value
-        printf("Layer %zu, Neuron %zu: pre_activation=%.6f, post_activation=%.6f\n",
-               layer->layer_id, n, sum, layer->outputs[n]);
-        #endif
     }
 
     clock_gettime(CLOCK_MONOTONIC, &end_ts);

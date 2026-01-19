@@ -14,23 +14,24 @@
 
 // Vérification de l'ABI - la structure lum_t réelle avec tous ses champs
 
-// Core LUM structure - a single presence unit
+// Core LUM structure - a single presence unit (ALIGNÉ 64 BYTES POUR CACHE/SIMD)
 typedef struct {
     uint32_t id;                    // Identifiant unique
     uint8_t presence;               // État de présence (0 ou 1)
+    uint8_t structure_type;         // Type de LUM (conforme STANDARD_NAMES)
+    uint8_t is_destroyed;           // Protection double-free (nouveau STANDARD_NAMES 2025-01-10)
+    uint8_t reserved_flags;         // Flags réservés
     int32_t position_x;             // Position spatiale X (conforme STANDARD_NAMES)
     int32_t position_y;             // Position spatiale Y (conforme STANDARD_NAMES)
-    uint8_t structure_type;         // Type de LUM (conforme STANDARD_NAMES)
     uint64_t timestamp;             // Timestamp de création nanoseconde
     void* memory_address;           // Adresse mémoire pour traçabilité
     uint32_t checksum;              // Vérification intégrité
-    uint32_t magic_number;          // PRIORITÉ 1.2: Magic number pour validation ultra-sécurisée
-    uint8_t is_destroyed;           // Protection double-free (nouveau STANDARD_NAMES 2025-01-10)
-    uint8_t reserved[3];            // Padding pour alignement
+    uint32_t magic_number;          // Magic number pour validation ultra-sécurisée
+    uint8_t padding[20];            // Padding étendu pour alignement 64 bytes total
 } lum_t;
 
-// Vérification ABI corrigée - la structure lum_t réelle fait 56 bytes avec magic_number (alignement 8 bytes)
-_Static_assert(sizeof(lum_t) == 56, "lum_t structure must be exactly 56 bytes on this platform");
+// Vérification ABI corrigée - alignement 64 bytes pour performance cache/SIMD
+_Static_assert(sizeof(lum_t) == 64, "lum_t structure must be exactly 64 bytes for cache line alignment");
 
 // LUM structure types
 typedef enum {
