@@ -97,6 +97,30 @@ Cet audit exhaustif porte sur les 39 modules du système LUM/VORAX. Chaque compo
     - Sert de base commune pour les messages d'erreurs simples.
 
 ---
-**État d'avancement : 33%**
-*(Prochaine étape : Audit du module Persistance - 3 modules)*
+
+## 5. AUDIT DU MODULE PERSISTANCE (3 MODULES)
+
+### [MODULE 12] Data Persistence (`src/persistence/data_persistence.c`)
+- **Description** : Couche d'abstraction du stockage.
+- **Analyse Pédagogique** : 
+    - Transforme les objets en mémoire (`lum_t`) en fichiers binaires `.lum`.
+    - **Sécurité** : Implémente une sanitisation rigoureuse. Tout nom de fichier contenant `..` ou `/` est rejeté pour éviter qu'un utilisateur malveillant ne puisse écrire en dehors du répertoire dédié.
+    - **Fiabilité** : Utilise des headers de stockage avec versioning (`STORAGE_FORMAT_VERSION`). Cela permet de faire évoluer le format des données sans perdre la compatibilité avec les anciens fichiers.
+
+### [MODULE 13] Transaction WAL Extension (`src/persistence/transaction_wal_extension.c`)
+- **Description** : Journal de transactions haute disponibilité.
+- **Analyse Pédagogique** : 
+    - Le WAL (Write-Ahead Logging) écrit l'intention de modification *avant* de modifier les données réelles.
+    - **C'est-à-dire ?** Si le courant est coupé pendant une sauvegarde, le système peut lire le WAL au redémarrage pour terminer l'opération ou l'annuler proprement.
+    - **Technologie** : Utilise le CRC32 pour détecter les bits corrompus sur le disque.
+
+### [MODULE 14] Recovery Manager Extension (`src/persistence/recovery_manager_extension.c`)
+- **Description** : Système d'auto-guérison.
+- **Analyse Pédagogique** : 
+    - Surveille les signaux système. Si le programme reçoit un `SIGSEGV` (segmentation fault), le manager note l'incident.
+    - **Auto-Critique** : Au redémarrage suivant, il entre en mode "Recovery". Il vérifie l'intégrité de chaque fichier `.lum`. S'il trouve une erreur, il crée un backup d'urgence horodaté avant de tenter une réparation via le WAL.
+
+---
+**État d'avancement : 41%**
+*(Prochaine étape : Audit du module Optimisation et Parallélisme - 7 modules)*
 
