@@ -399,15 +399,21 @@ static bool neural_layer_forward_pass_processor(neural_layer_t* layer, double* i
             sum += layer->weights[n * layer->input_size + i] * inputs[i];
         }
         
-        switch (layer->activation) {
-            case ACTIVATION_SIGMOID: layer->outputs[n] = activation_sigmoid(sum); break;
-            case ACTIVATION_TANH:    layer->outputs[n] = activation_tanh(sum); break;
-            case ACTIVATION_RELU:    layer->outputs[n] = activation_relu(sum); break;
-            case ACTIVATION_LEAKY_RELU: layer->outputs[n] = activation_leaky_relu(sum, 0.01); break;
-            case ACTIVATION_SWISH:   layer->outputs[n] = activation_swish(sum); break;
-            case ACTIVATION_GELU:    layer->outputs[n] = activation_gelu(sum); break;
-            default:                 layer->outputs[n] = sum; break;
-        }
+    // Application fonction d'activation avec traçage
+    switch (layer->activation) {
+        case ACTIVATION_SIGMOID: layer->outputs[n] = activation_sigmoid(sum); break;
+        case ACTIVATION_TANH:    layer->outputs[n] = activation_tanh(sum); break;
+        case ACTIVATION_RELU:    layer->outputs[n] = activation_relu(sum); break;
+        case ACTIVATION_LEAKY_RELU: layer->outputs[n] = activation_leaky_relu(sum, 0.01); break;
+        case ACTIVATION_SWISH:   layer->outputs[n] = activation_swish(sum); break;
+        case ACTIVATION_GELU:    layer->outputs[n] = activation_gelu(sum); break;
+        default:                 layer->outputs[n] = sum; break;
+    }
+
+    #ifdef NEURAL_DEBUG_TRACE
+    printf("Layer %u, Neuron %zu: sum=%.6f, output=%.6f\n",
+           layer->layer_id, n, sum, layer->outputs[n]);
+    #endif
     }
 
     clock_gettime(CLOCK_MONOTONIC, &end_ts);
