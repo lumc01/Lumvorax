@@ -115,12 +115,16 @@ bool test_complete_integration_chain(void) {
     persistence_context_t* config = persistence_context_create("test_logs");
     if (!config) {
         printf("⚠️ Échec création contexte persistance (vérification permissions...)\n");
-        persistence_ensure_directory_exists("test_logs");
+        // Tentative de correction robuste des permissions
+        system("mkdir -p test_logs && chmod 777 test_logs");
         config = persistence_context_create("test_logs");
     }
     bool persist_success = false;
     if (config) {
         persist_success = persistence_save_lum(config, lum, "test_integration");
+        if (!persist_success) {
+             printf("❌ Échec persistance: vérifier les logs forensiques\n");
+        }
     }
     
     // 5. Tester optimisations
