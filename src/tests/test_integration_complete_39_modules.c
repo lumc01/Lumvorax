@@ -113,7 +113,15 @@ bool test_complete_integration_chain(void) {
     
     // 4. Tester persistance
     persistence_context_t* config = persistence_context_create("test_logs");
-    bool persist_success = persistence_save_lum(config, lum, "test_integration");
+    if (!config) {
+        printf("⚠️ Échec création contexte persistance (vérification permissions...)\n");
+        persistence_ensure_directory_exists("test_logs");
+        config = persistence_context_create("test_logs");
+    }
+    bool persist_success = false;
+    if (config) {
+        persist_success = persistence_save_lum(config, lum, "test_integration");
+    }
     
     // 5. Tester optimisations
     simd_capabilities_t* simd_caps = simd_detect_capabilities();

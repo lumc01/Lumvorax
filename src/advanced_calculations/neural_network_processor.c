@@ -162,6 +162,10 @@ double activation_swish(double x) {
     return x * activation_sigmoid(x);
 }
 
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+
 double activation_gelu(double x) {
     return 0.5 * x * (1.0 + tanh(sqrt(2.0/M_PI) * (x + 0.044715 * x * x * x)));
 }
