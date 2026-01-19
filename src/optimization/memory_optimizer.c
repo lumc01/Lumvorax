@@ -13,18 +13,18 @@ memory_optimizer_t* memory_optimizer_create(size_t initial_pool_size) {
     memory_optimizer_t* optimizer = TRACKED_MALLOC(sizeof(memory_optimizer_t));
     if (!optimizer) return NULL;
 
-    // Initialize pools
-    if (!memory_pool_init(&optimizer->lum_pool, initial_pool_size / 4, sizeof(lum_t))) {
+    // Initialize pools - ALIGNEMENT 64 BYTES POUR AVX-512
+    if (!memory_pool_init(&optimizer->lum_pool, initial_pool_size / 4, 64)) {
         TRACKED_FREE(optimizer);
         return NULL;
     }
 
-    if (!memory_pool_init(&optimizer->group_pool, initial_pool_size / 4, sizeof(lum_group_t))) {
+    if (!memory_pool_init(&optimizer->group_pool, initial_pool_size / 4, 64)) {
         TRACKED_FREE(optimizer);
         return NULL;
     }
 
-    if (!memory_pool_init(&optimizer->zone_pool, initial_pool_size / 2, sizeof(lum_zone_t))) {
+    if (!memory_pool_init(&optimizer->zone_pool, initial_pool_size / 2, 64)) {
         TRACKED_FREE(optimizer);
         return NULL;
     }
