@@ -13,6 +13,10 @@
 #include <time.h>
 #include <inttypes.h>
 
+#ifdef __AVX512F__
+#include <immintrin.h>
+#endif
+
 // Constante magique pour protection double-free
 #define MATRIX_CALCULATOR_MAGIC 0x4D415452
 

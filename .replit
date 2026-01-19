@@ -1,4 +1,4 @@
-modules = ["bash", "python-3.12", "c-clang20"]
+modules = ["bash", "python-3.12"]
 [agent]
 expertMode = true
 
@@ -1113,7 +1113,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "./bin/lum_vorax_complete --progressive-stress-all"
+args = "./bin/lum_vorax_complete"
 
 [[workflows.workflow]]
 name = "VALIDATION COMPLETE LOGS REELS"
