@@ -409,11 +409,10 @@ static bool neural_layer_forward_pass_processor(neural_layer_t* layer, double* i
         case ACTIVATION_GELU:    layer->outputs[n] = activation_gelu(sum); break;
         default:                 layer->outputs[n] = sum; break;
     }
-
-    #ifdef NEURAL_DEBUG_TRACE
+#ifdef NEURAL_DEBUG_TRACE
     printf("Layer %u, Neuron %zu: sum=%.6f, output=%.6f\n",
-           layer->layer_id, n, sum, layer->outputs[n]);
-    #endif
+           layer->layer_id, (size_t)n, sum, layer->outputs[n]);
+#endif
     }
 
     clock_gettime(CLOCK_MONOTONIC, &end_ts);
