@@ -1,4 +1,4 @@
-modules = ["bash", "python-3.12"]
+modules = ["bash", "python-3.12", "c-clang20"]
 [agent]
 expertMode = true
 
@@ -1253,7 +1253,7 @@ task = "shell.exec"
 args = "echo \"🔒 VALIDATION COMPLÈTE TERMINÉE\""
 
 [nix]
-packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano"]
+packages = ["openssh", "file", "tree", "clang", "gnumake", "gdb", "vim-full", "nano", "gcc"]
 channel = "stable-25_05"
 
 [deployment]
