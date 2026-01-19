@@ -52,6 +52,51 @@ Cet audit exhaustif porte sur les 39 modules du système LUM/VORAX. Chaque compo
     - Sécurité : Utilise `SAFE_STRCPY` pour éviter les dépassements de tampon lors de l'analyse syntaxique.
 
 ---
-**État d'avancement : 15%**
-*(Prochaine étape : Audit du module Logging/Debug - 7 modules)*
+
+## 4. AUDIT DU MODULE LOGGING/DEBUG (7 MODULES)
+
+### [MODULE 05] LUM Logger (`src/logger/lum_logger.c`)
+- **Description** : Journaliste structuré des opérations VORAX.
+- **Analyse Pédagogique** : 
+    - Il ne se contente pas d'écrire du texte, il vérifie la **loi de conservation**.
+    - **C'est-à-dire ?** Si une opération fusionne 10 LUMs et 10 LUMs mais n'en produit que 19, le logger lève immédiatement une alerte `LUM_LOG_WARN`. C'est une vérification de validité physique du système.
+
+### [MODULE 06] Log Manager (`src/logger/log_manager.c`)
+- **Description** : Archiviste et gestionnaire de structure.
+- **Analyse Pédagogique** : 
+    - Gère intelligemment le stockage. Si le système tourne en production, il privilégie `/data/logs`, sinon il utilise le répertoire local.
+    - **Optimisation** : Sépare les logs par module pour éviter les fichiers géants illisibles.
+
+### [MODULE 07] Memory Tracker (`src/debug/memory_tracker.c`)
+- **Description** : Garde-fou contre les fuites mémoire.
+- **Analyse Pédagogique** : 
+    - Chaque octet alloué est enregistré avec le fichier et la ligne exacte.
+    - **Sécurité** : En cas de "Double Free", le tracker appelle `abort()` instantanément. Il vaut mieux un crash contrôlé qu'une corruption de mémoire silencieuse qui pourrait être exploitée.
+
+### [MODULE 08] Forensic Logger (`src/debug/forensic_logger.c`)
+- **Description** : Boîte noire du système.
+- **Analyse Pédagogique** : 
+    - Utilise des timestamps nanoseconde (`lum_get_timestamp`).
+    - **Standard** : Garantit que chaque création de LUM est gravée dans le marbre avant même que l'objet ne soit utilisé.
+
+### [MODULE 09] Ultra Forensic Logger (`src/debug/ultra_forensic_logger.c`)
+- **Description** : Logging de haute précision conforme ISO/NIST.
+- **Analyse Pédagogique** : 
+    - Implémente des mutex par module pour éviter les collisions d'écriture dans un environnement multithread.
+    - Génère des rapports de validation d'intégrité pour prouver que les logs n'ont pas été altérés.
+
+### [MODULE 10] Enhanced Logging (`src/debug/enhanced_logging.c`)
+- **Description** : Utilitaire de logging sécurisé.
+- **Analyse Pédagogique** : 
+    - Se concentre sur la sécurité du système de fichiers. Remplace les appels dangereux type `system("mkdir...")` par des appels système `mkdir()` directs.
+
+### [MODULE 11] Logging System (`src/debug/logging_system.c`)
+- **Description** : Fondations du logging.
+- **Analyse Pédagogique** : 
+    - Applique la règle stricte "ZÉRO EMOJI". 
+    - Sert de base commune pour les messages d'erreurs simples.
+
+---
+**État d'avancement : 33%**
+*(Prochaine étape : Audit du module Persistance - 3 modules)*
 
