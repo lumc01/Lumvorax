@@ -125,15 +125,47 @@ void lum_security_cleanup(void) {
 }
 
 // Core LUM functions
+// Pool Allocator pour LUM Core - Élimination fragmentation et overhead
+#define LUM_POOL_SIZE 1048576 // 1M LUMs
+static lum_t* g_lum_pool = NULL;
+static uint8_t* g_lum_pool_bitmap = NULL;
+static pthread_mutex_t pool_mutex = PTHREAD_MUTEX_INITIALIZER;
+
+bool lum_pool_init(void) {
+    pthread_mutex_lock(&pool_mutex);
+    if (g_lum_pool) {
+        pthread_mutex_unlock(&pool_mutex);
+        return true;
+    }
+    g_lum_pool = (lum_t*)aligned_alloc(64, LUM_POOL_SIZE * sizeof(lum_t));
+    g_lum_pool_bitmap = (uint8_t*)calloc(LUM_POOL_SIZE / 8, 1);
+    if (!g_lum_pool || !g_lum_pool_bitmap) {
+        pthread_mutex_unlock(&pool_mutex);
+        return false;
+    }
+    memset(g_lum_pool, 0, LUM_POOL_SIZE * sizeof(lum_t));
+    pthread_mutex_unlock(&pool_mutex);
+    return true;
+}
+
 lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e type) {
     if (!security_initialized) {
         lum_security_init();
     }
+    if (!g_lum_pool) lum_pool_init();
 
-    lum_t* lum = TRACKED_MALLOC(sizeof(lum_t));
-    if (!lum) {
-        return NULL;
+    pthread_mutex_lock(&pool_mutex);
+    lum_t* lum = NULL;
+    for (size_t i = 0; i < LUM_POOL_SIZE; i++) {
+        if (!(g_lum_pool_bitmap[i / 8] & (1 << (i % 8)))) {
+            g_lum_pool_bitmap[i / 8] |= (1 << (i % 8));
+            lum = &g_lum_pool[i];
+            break;
+        }
     }
+    pthread_mutex_unlock(&pool_mutex);
+
+    if (!lum) return NULL;
 
     lum->id = lum_generate_id();
     lum->presence = presence;
@@ -142,50 +174,39 @@ lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e t
     lum->structure_type = (uint8_t)type;
     lum->timestamp = lum_get_timestamp();
     lum->memory_address = lum;
-    lum->checksum = 0; // Sera calculé après
+    lum->checksum = 0;
     lum->is_destroyed = 0;
     lum->magic_number = LUM_VALIDATION_PATTERN;
-
-    // Calculer checksum après initialisation
     lum->checksum = (lum->id ^ lum->timestamp ^ (uint32_t)(uintptr_t)lum) & 0xFFFFFF;
     
-    // FORENSIC LOG OBLIGATOIRE: Log chaque LUM créé avec timestamp précis
-    uint64_t creation_timestamp = lum->timestamp;
-    
-    // NOUVEAU: Log console temps réel pour validation immédiate
-    printf("[FORENSIC_REALTIME] LUM_CREATE: ID=%u, pos=(%d,%d), type=%u, timestamp=%lu ns\n", 
-           lum->id, x, y, type, creation_timestamp);
+    printf("[FORENSIC_REALTIME] LUM_CREATE_POOL: ID=%u, pos=(%d,%d), type=%u, timestamp=%lu ns\n", 
+           lum->id, x, y, type, lum->timestamp);
     fflush(stdout);
-
     return lum;
 }
 
 void lum_destroy(lum_t* lum) {
     if (!lum) return;
-
-    // PRIORITÉ 1.2: Vérification magic number AVANT accès
-    if (lum->magic_number != LUM_VALIDATION_PATTERN) {
-        if (lum->magic_number == LUM_MAGIC_DESTROYED) {
-            return; // Déjà détruit
-        } else {
-            // Corruption détectée
-            abort(); // Arrêt sécurisé
-        }
-    }
-
-    // PRIORITÉ 1.2: Validation ownership strict
-    if (lum->memory_address != lum) {
-        // LUM fait partie d'un groupe - ne pas libérer
+    if (lum->magic_number != LUM_VALIDATION_PATTERN) return;
+    
+    if (lum >= g_lum_pool && lum < g_lum_pool + LUM_POOL_SIZE) {
+        size_t index = lum - g_lum_pool;
+        pthread_mutex_lock(&pool_mutex);
+        g_lum_pool_bitmap[index / 8] &= ~(1 << (index % 8));
+        pthread_mutex_unlock(&pool_mutex);
         lum->magic_number = LUM_MAGIC_DESTROYED;
         lum->is_destroyed = 1;
         return;
     }
 
-    // Destruction sécurisée avec écrasement
+    if (lum->memory_address != lum) {
+        lum->magic_number = LUM_MAGIC_DESTROYED;
+        lum->is_destroyed = 1;
+        return;
+    }
     lum->magic_number = LUM_MAGIC_DESTROYED;
     lum->is_destroyed = 1;
-    memset(lum, 0xDE, sizeof(lum_t)); // Écrasement sécurisé
-
+    memset(lum, 0xDE, sizeof(lum_t));
     TRACKED_FREE(lum);
 }
 

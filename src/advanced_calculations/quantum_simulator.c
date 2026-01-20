@@ -206,16 +206,18 @@ quantum_result_t* quantum_measure(quantum_lum_t* qlum, quantum_config_t* config)
         return NULL;
     }
     
-    double total_prob = 0.0;
+// OPTIMISATION PRÉCISION: Calcul de probabilité haute-fidélité
+    long double total_prob = 0.0L;
     for (size_t i = 0; i < qlum->state_count; i++) {
-        double prob = creal(qlum->amplitudes[i]) * creal(qlum->amplitudes[i]) +
-                      cimag(qlum->amplitudes[i]) * cimag(qlum->amplitudes[i]);
-        result->probabilities[i] = prob;
+        long double complex amp = (long double complex)qlum->amplitudes[i];
+        long double prob = creall(amp) * creall(amp) +
+                          cimagl(amp) * cimagl(amp);
+        result->probabilities[i] = (double)prob;
         total_prob += prob;
     }
     
     for (size_t i = 0; i < qlum->state_count; i++) {
-        result->probabilities[i] /= (total_prob > 0 ? total_prob : 1.0);
+        result->probabilities[i] /= (double)(total_prob > 0 ? total_prob : 1.0L);
     }
     
     double random = (double)rand() / RAND_MAX;

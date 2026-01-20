@@ -2,7 +2,10 @@
 
 ## Historique des noms normalisés
 
-2025-01-06 15:26 - memory_optimizer_t + Optimiseur de mémoire avec pools dédiés pour LUM, groupes et zones
+2026-01-20 15:30 - lum_pool_init + Initialisation du Pool Allocator statique pour 1M LUMs
+2026-01-20 15:30 - LUM_POOL_SIZE + Taille fixe du pool d'allocations pour suppression fragmentation
+2026-01-20 15:30 - quantum_precision_boost + Passage aux calculs long double complex pour fidélité quantique
+2026-01-20 15:30 - forensic_pool_logging + Traçabilité spécifique des allocations via le pool statique
 2025-01-07 15:30 - performance_metrics_validator_t + Validateur de cohérence des métriques de performance réalistes
 2025-01-07 16:15 - bytes_to_hex_string + Fonction de conversion bytes vers chaîne hexadécimale
 2025-01-07 16:16 - memory_footprint_impl_t + Structure interne d'implémentation pour empreinte mémoire étendue
