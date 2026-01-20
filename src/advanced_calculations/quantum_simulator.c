@@ -1,4 +1,3 @@
-#ifdef MODULES_QUANTIQUES_ACTIFS
 #include <complex.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -11,12 +10,13 @@
 #include <immintrin.h>
 
 #include "quantum_simulator.h"
+#include "../debug/memory_tracker.h"
+#include "../debug/forensic_logger.h"
+
+#ifdef MODULES_QUANTIQUES_ACTIFS
 
 // Variable atomique pour les IDs (définie ici pour éviter les erreurs de lien)
 _Atomic uint64_t lum_id_counter_atomic = 1000;
-
-#include "../debug/memory_tracker.h"
-#include "../debug/forensic_logger.h"
 
 // OPTIMISATION COMPLÈTE: Création LUM quantique ultra-optimisée pour 1M+ qubits
 quantum_lum_t* quantum_lum_create(int32_t x, int32_t y, size_t initial_states) {
