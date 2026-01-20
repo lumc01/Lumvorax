@@ -1,10 +1,12 @@
 #ifndef QUANTUM_SIMULATOR_H
 #define QUANTUM_SIMULATOR_H
 
-#include "../lum/lum_core.h"
 #include <stdint.h>
 #include <stdbool.h>
 #include <complex.h>
+#include <stddef.h>
+
+#include "../lum/lum_core.h"
 
 // Module Simulateur Quantique pour LUM/VORAX
 // Conforme prompt.txt - nouveau module calculs avancés
