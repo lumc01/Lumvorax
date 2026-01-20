@@ -2,7 +2,11 @@
 
 ## Historique des noms normalisés
 
-2026-01-20 15:30 - lum_pool_init + Initialisation du Pool Allocator statique pour 1M LUMs
+2026-01-20 16:00 - lum_alloc_tlp + Allocation ultra-rapide Thread-Local sans lock mutex
+2026-01-20 16:00 - TLP_POOL_STABILITY + Métrique de stabilité des pools locaux sous charge parallèle
+2026-01-20 16:00 - avx512_quantum_accel + Accélération vectorielle AVX-512 pour calculs long double complex
+2026-01-20 16:00 - sequence_density_anomaly_v1 + Signature de l'anomalie de densité détectée dans Collatz
+2026-01-20 16:00 - forensic_research_chain_of_custody + Protocole d'archivage immuable des logs de recherche
 2026-01-20 15:30 - LUM_POOL_SIZE + Taille fixe du pool d'allocations pour suppression fragmentation
 2026-01-20 15:30 - quantum_precision_boost + Passage aux calculs long double complex pour fidélité quantique
 2026-01-20 15:30 - forensic_pool_logging + Traçabilité spécifique des allocations via le pool statique

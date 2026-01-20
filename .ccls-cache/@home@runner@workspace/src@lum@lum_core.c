@@ -148,24 +148,47 @@ bool lum_pool_init(void) {
     return true;
 }
 
+// Thread-Local Pool Allocator (TLP) pour éliminer la contention mutex
+#define LUM_TLP_SIZE 1024 // 1K LUMs par thread
+static __thread lum_t* tlp_pool = NULL;
+static __thread uint32_t tlp_index = 0;
+
+static lum_t* lum_alloc_tlp(void) {
+    if (!tlp_pool) {
+        tlp_pool = (lum_t*)aligned_alloc(64, LUM_TLP_SIZE * sizeof(lum_t));
+        if (!tlp_pool) return NULL;
+        memset(tlp_pool, 0, LUM_TLP_SIZE * sizeof(lum_t));
+    }
+    if (tlp_index < LUM_TLP_SIZE) {
+        return &tlp_pool[tlp_index++];
+    }
+    return NULL; // Fallback au pool global si TLP plein
+}
+
 lum_t* lum_create(uint8_t presence, int32_t x, int32_t y, lum_structure_type_e type) {
     if (!security_initialized) {
         lum_security_init();
     }
-    if (!g_lum_pool) lum_pool_init();
-
-    pthread_mutex_lock(&pool_mutex);
-    lum_t* lum = NULL;
-    for (size_t i = 0; i < LUM_POOL_SIZE; i++) {
-        if (!(g_lum_pool_bitmap[i / 8] & (1 << (i % 8)))) {
-            g_lum_pool_bitmap[i / 8] |= (1 << (i % 8));
-            lum = &g_lum_pool[i];
-            break;
+    
+    // Tentative d'allocation TLP (O(1) sans lock)
+    lum_t* lum = lum_alloc_tlp();
+    
+    if (!lum) {
+        // Fallback Pool Global avec lock
+        if (!g_lum_pool) lum_pool_init();
+        pthread_mutex_lock(&pool_mutex);
+        for (size_t i = 0; i < LUM_POOL_SIZE; i++) {
+            if (!(g_lum_pool_bitmap[i / 8] & (1 << (i % 8)))) {
+                g_lum_pool_bitmap[i / 8] |= (1 << (i % 8));
+                lum = &g_lum_pool[i];
+                break;
+            }
         }
+        pthread_mutex_unlock(&pool_mutex);
     }
-    pthread_mutex_unlock(&pool_mutex);
 
     if (!lum) return NULL;
+    // ... reste de l'initialisation identique ...
 
     lum->id = lum_generate_id();
     lum->presence = presence;
