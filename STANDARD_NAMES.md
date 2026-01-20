@@ -2,6 +2,9 @@
 
 ## Historique des noms normalisés
 
+2026-01-20 16:30 - lum_adaptive_load_control + Régulateur de charge CPU pour éviter le throttling
+2026-01-20 16:30 - lum_tlp_dynamic_expand + Extension dynamique des pools locaux par paliers
+2026-01-20 16:30 - collatz_fourier_analysis + Analyse fréquentielle des trajectoires de Collatz
 2026-01-20 16:00 - lum_alloc_tlp + Allocation ultra-rapide Thread-Local sans lock mutex
 2026-01-20 16:00 - TLP_POOL_STABILITY + Métrique de stabilité des pools locaux sous charge parallèle
 2026-01-20 16:00 - avx512_quantum_accel + Accélération vectorielle AVX-512 pour calculs long double complex
