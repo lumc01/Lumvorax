@@ -56,7 +56,8 @@ SOURCES = \
 	$(SRC_DIR)/file_formats/lum_native_file_handler.c \
 	$(SRC_DIR)/file_formats/lum_native_universal_format.c \
 	$(SRC_DIR)/spatial/lum_instant_displacement.c \
-	$(SRC_DIR)/network/hostinger_resource_limiter.c
+	$(SRC_DIR)/network/hostinger_resource_limiter.c \
+	$(SRC_DIR)/advanced_calculations/quantum_simulator.c
 
 # Objets
 OBJECTS = $(SOURCES:.c=.o)
@@ -68,7 +69,8 @@ TEST_PROGRESSIVE = $(BIN_DIR)/test_progressive_all_modules
 # Tests forensiques conformes prompt.txt
 TEST_EXECUTABLES = \
 	$(BIN_DIR)/test_forensic_complete_system \
-	$(BIN_DIR)/test_integration_complete_39_modules
+	$(BIN_DIR)/test_integration_complete_39_modules \
+	$(BIN_DIR)/test_quantum
 
 .PHONY: all clean test test-progressive test-stress test-forensic
 
@@ -92,6 +94,9 @@ $(BIN_DIR)/test_forensic_complete_system: $(OBJECTS)
 # Test d'intégration complète 39 modules
 $(BIN_DIR)/test_integration_complete_39_modules: $(OBJECTS)
 	$(CC) $(CFLAGS) src/tests/test_integration_complete_39_modules.c $(OBJECTS) -o $@ $(LDFLAGS)
+
+$(BIN_DIR)/test_quantum: $(OBJECTS)
+	$(CC) $(CFLAGS) src/tests/test_quantum_simulator_complete.c $(OBJECTS) -o $@ $(LDFLAGS)
 
 # TESTS PROGRESSIFS 1M → 100M avec TOUS les modules + redirection console
 test-progressive: $(MAIN_EXECUTABLE)
