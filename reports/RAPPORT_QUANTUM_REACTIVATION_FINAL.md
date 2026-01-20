@@ -33,8 +33,7 @@ L'exécution du test unitaire `src/tests/test_quantum_simulator_complete.c` a va
 
 ## 4. AUDIT SCAN ET DIAGNOSTIC FINAL (LIGNE PAR LIGNE)
 - **Gestion Mémoire** : Utilisation de `aligned_alloc(64)` pour prévenir tout défaut d'alignement SIMD.
-- **Sécurité Replit** : Bridage à 24 qubits pour éviter les débordements de RAM (OOM) dans le conteneur.
-- **Stabilité** : Correction des directives `#ifdef` et inclusion de `<immintrin.h>` pour la compatibilité AVX.
+- **Sécurité tu : Correction des directives `#ifdef` et inclusion de `<immintrin.h>` pour la compatibilité AVX.
 - **Diagnostics LSP** : Élimination des erreurs de syntaxe et de dépendances orphelines.
 
 ---
