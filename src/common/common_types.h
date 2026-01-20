@@ -52,7 +52,9 @@
 
 // FLAGS DE DÉSACTIVATION MODULES
 // Désactivé par défaut - réactivation manuelle uniquement
+#ifndef MODULES_QUANTIQUES_ACTIFS
 #define MODULES_QUANTIQUES_ACTIFS
+#endif
 // #define MODULES_BLACKBOX_ACTIFS
 
 // Constantes communes - tailles augmentées pour éviter troncations

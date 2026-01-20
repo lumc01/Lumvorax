@@ -254,7 +254,7 @@ bool quantum_stress_test_100m_qubits(quantum_config_t* config) {
     return false;
 }
 
-#endif
+#endif // MODULES_QUANTIQUES_ACTIFS
 
 quantum_config_t* quantum_config_create_default(void) {
     quantum_config_t* config = TRACKED_MALLOC(sizeof(quantum_config_t));
