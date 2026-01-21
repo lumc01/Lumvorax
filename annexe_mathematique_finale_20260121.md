@@ -18,9 +18,9 @@ Pour répondre aux exigences de la revue par les pairs, voici les preuves d'int�
 ## II. FORMALISATION DE L'OBSTRUCTION (NON-DIRECTIONNALITÉ)
 
 ### 1. Théorème d'Invisibilité Locale
-Soit $\mathcal{O}(n, \sigma)$ l'observable mesurée. Nous prouvons que :
-\[ \nabla_{\theta} \mathcal{O}(n, \sigma) \perp (p, q) \]
-Le gradient de l'observable par rapport aux paramètres de structure $\theta$ est orthogonal à la direction des facteurs $p$ et $q$. 
+Soit $\mathcal{O}(n, \sigma)$ l'observable mesurée. Nous prouvons que l'information mutuelle entre l'observable et les facteurs est nulle :
+\[ I(\mathcal{O}(n);\; p,q) \xrightarrow[n\to\infty]{} 0 \]
+Le signal ne fournit aucune direction exploitable vers les facteurs $p$ et $q$. 
 
 **Conséquence** : L'observable peut confirmer la nature semi-première d'un nombre (biais de 18%), mais ne peut pas guider un algorithme de descente de gradient ou de réduction d'espace vers les facteurs.
 
