@@ -18,46 +18,46 @@ LOG_DIR = logs
 
 # TOUS LES MODULES SOURCES DISPONIBLES (SANS quantiques/blackbox désactivés)
 SOURCES = \
-	$(SRC_DIR)/lum/lum_core.c \
-	$(SRC_DIR)/vorax/vorax_operations.c \
-	$(SRC_DIR)/binary/binary_lum_converter.c \
-	$(SRC_DIR)/parser/vorax_parser.c \
-	$(SRC_DIR)/logger/lum_logger.c \
-	$(SRC_DIR)/logger/log_manager.c \
-	$(SRC_DIR)/debug/memory_tracker.c \
-	$(SRC_DIR)/debug/forensic_logger.c \
-	$(SRC_DIR)/debug/ultra_forensic_logger.c \
-	$(SRC_DIR)/debug/enhanced_logging.c \
-	$(SRC_DIR)/debug/logging_system.c \
-	$(SRC_DIR)/crypto/crypto_validator.c \
-	$(SRC_DIR)/persistence/data_persistence.c \
-	$(SRC_DIR)/persistence/transaction_wal_extension.c \
-	$(SRC_DIR)/persistence/recovery_manager_extension.c \
-	$(SRC_DIR)/optimization/memory_optimizer.c \
-	$(SRC_DIR)/optimization/pareto_optimizer.c \
-	$(SRC_DIR)/optimization/pareto_inverse_optimizer.c \
-	$(SRC_DIR)/optimization/simd_optimizer.c \
-	$(SRC_DIR)/optimization/zero_copy_allocator.c \
-	$(SRC_DIR)/parallel/parallel_processor.c \
-	$(SRC_DIR)/metrics/performance_metrics.c \
-	$(SRC_DIR)/advanced_calculations/audio_processor.c \
-	$(SRC_DIR)/advanced_calculations/image_processor.c \
-	$(SRC_DIR)/advanced_calculations/golden_score_optimizer.c \
-	$(SRC_DIR)/advanced_calculations/tsp_optimizer.c \
-	$(SRC_DIR)/advanced_calculations/neural_advanced_optimizers.c \
-	$(SRC_DIR)/advanced_calculations/neural_ultra_precision_architecture.c \
-	$(SRC_DIR)/advanced_calculations/matrix_calculator.c \
-	$(SRC_DIR)/advanced_calculations/neural_network_processor.c \
-	$(SRC_DIR)/complex_modules/realtime_analytics.c \
-	$(SRC_DIR)/complex_modules/distributed_computing.c \
-	$(SRC_DIR)/complex_modules/ai_optimization.c \
-	$(SRC_DIR)/complex_modules/ai_dynamic_config_manager.c \
-	$(SRC_DIR)/file_formats/lum_secure_serialization.c \
-	$(SRC_DIR)/file_formats/lum_native_file_handler.c \
-	$(SRC_DIR)/file_formats/lum_native_universal_format.c \
-	$(SRC_DIR)/spatial/lum_instant_displacement.c \
-	$(SRC_DIR)/network/hostinger_resource_limiter.c \
-	$(SRC_DIR)/advanced_calculations/quantum_simulator.c
+        $(SRC_DIR)/lum/lum_core.c \
+        $(SRC_DIR)/vorax/vorax_operations.c \
+        $(SRC_DIR)/binary/binary_lum_converter.c \
+        $(SRC_DIR)/parser/vorax_parser.c \
+        $(SRC_DIR)/logger/lum_logger.c \
+        $(SRC_DIR)/logger/log_manager.c \
+        $(SRC_DIR)/debug/memory_tracker.c \
+        $(SRC_DIR)/debug/forensic_logger.c \
+        $(SRC_DIR)/debug/ultra_forensic_logger.c \
+        $(SRC_DIR)/debug/enhanced_logging.c \
+        $(SRC_DIR)/debug/logging_system.c \
+        $(SRC_DIR)/crypto/crypto_validator.c \
+        $(SRC_DIR)/persistence/data_persistence.c \
+        $(SRC_DIR)/persistence/transaction_wal_extension.c \
+        $(SRC_DIR)/persistence/recovery_manager_extension.c \
+        $(SRC_DIR)/optimization/memory_optimizer.c \
+        $(SRC_DIR)/optimization/pareto_optimizer.c \
+        $(SRC_DIR)/optimization/pareto_inverse_optimizer.c \
+        $(SRC_DIR)/optimization/simd_optimizer.c \
+        $(SRC_DIR)/optimization/zero_copy_allocator.c \
+        $(SRC_DIR)/parallel/parallel_processor.c \
+        $(SRC_DIR)/metrics/performance_metrics.c \
+        $(SRC_DIR)/advanced_calculations/audio_processor.c \
+        $(SRC_DIR)/advanced_calculations/image_processor.c \
+        $(SRC_DIR)/advanced_calculations/golden_score_optimizer.c \
+        $(SRC_DIR)/advanced_calculations/tsp_optimizer.c \
+        $(SRC_DIR)/advanced_calculations/neural_advanced_optimizers.c \
+        $(SRC_DIR)/advanced_calculations/neural_ultra_precision_architecture.c \
+        $(SRC_DIR)/advanced_calculations/matrix_calculator.c \
+        $(SRC_DIR)/advanced_calculations/neural_network_processor.c \
+        $(SRC_DIR)/complex_modules/realtime_analytics.c \
+        $(SRC_DIR)/complex_modules/distributed_computing.c \
+        $(SRC_DIR)/complex_modules/ai_optimization.c \
+        $(SRC_DIR)/complex_modules/ai_dynamic_config_manager.c \
+        $(SRC_DIR)/file_formats/lum_secure_serialization.c \
+        $(SRC_DIR)/file_formats/lum_native_file_handler.c \
+        $(SRC_DIR)/file_formats/lum_native_universal_format.c \
+        $(SRC_DIR)/spatial/lum_instant_displacement.c \
+        $(SRC_DIR)/network/hostinger_resource_limiter.c \
+        $(SRC_DIR)/advanced_calculations/quantum_simulator.c
 
 # Objets
 OBJECTS = $(SOURCES:.c=.o)
@@ -68,54 +68,61 @@ TEST_PROGRESSIVE = $(BIN_DIR)/test_progressive_all_modules
 
 # Tests forensiques conformes prompt.txt
 TEST_EXECUTABLES = \
-	$(BIN_DIR)/test_forensic_complete_system \
-	$(BIN_DIR)/test_integration_complete_39_modules \
-	$(BIN_DIR)/test_quantum
+        $(BIN_DIR)/test_forensic_complete_system \
+        $(BIN_DIR)/test_integration_complete_39_modules \
+        $(BIN_DIR)/test_quantum \
+        $(BIN_DIR)/test_rsa_structure
 
-.PHONY: all clean test test-progressive test-stress test-forensic
+$(BIN_DIR)/test_rsa_structure: $(OBJECTS)
+        $(CC) $(CFLAGS) src/tests/test_rsa_structure.c src/crypto/rsa_structure_analyzer.c $(OBJECTS) -o $@ $(LDFLAGS)
+
+rsa_test: $(BIN_DIR)/test_rsa_structure
+        ./$(BIN_DIR)/test_rsa_structure
+
+.PHONY: all clean test test-progressive test-stress test-forensic rsa_test
 
 all: directories $(MAIN_EXECUTABLE) $(TEST_EXECUTABLES)
 
 directories:
-	mkdir -p $(BIN_DIR) $(LOG_DIR)/forensic $(LOG_DIR)/execution $(LOG_DIR)/tests $(LOG_DIR)/console
+        mkdir -p $(BIN_DIR) $(LOG_DIR)/forensic $(LOG_DIR)/execution $(LOG_DIR)/tests $(LOG_DIR)/console
 
 # Compilation objets
 %.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+        $(CC) $(CFLAGS) -c $< -o $@
 
 # Exécutable principal avec TOUS les modules
 $(MAIN_EXECUTABLE): $(OBJECTS)
-	$(CC) $(CFLAGS) $(SRC_DIR)/main.c $(OBJECTS) -o $@ $(LDFLAGS)
+        $(CC) $(CFLAGS) $(SRC_DIR)/main.c $(OBJECTS) -o $@ $(LDFLAGS)
 
 # Test forensique complet conforme prompt.txt
 $(BIN_DIR)/test_forensic_complete_system: $(OBJECTS)
-	$(CC) $(CFLAGS) src/tests/test_forensic_complete_system.c $(OBJECTS) -o $@ $(LDFLAGS)
+        $(CC) $(CFLAGS) src/tests/test_forensic_complete_system.c $(OBJECTS) -o $@ $(LDFLAGS)
 
 # Test d'intégration complète 39 modules
 $(BIN_DIR)/test_integration_complete_39_modules: $(OBJECTS)
-	$(CC) $(CFLAGS) src/tests/test_integration_complete_39_modules.c $(OBJECTS) -o $@ $(LDFLAGS)
+        $(CC) $(CFLAGS) src/tests/test_integration_complete_39_modules.c $(OBJECTS) -o $@ $(LDFLAGS)
 
 $(BIN_DIR)/test_quantum: $(OBJECTS)
-	$(CC) $(CFLAGS) src/tests/test_quantum_simulator_complete.c $(OBJECTS) -o $@ $(LDFLAGS)
+        $(CC) $(CFLAGS) src/tests/test_quantum_simulator_complete.c $(OBJECTS) -o $@ $(LDFLAGS)
 
 # TESTS PROGRESSIFS 1M → 100M avec TOUS les modules + redirection console
 test-progressive: $(MAIN_EXECUTABLE)
-	@echo "🚀 === TESTS PROGRESSIFS 1M → 100M TOUS MODULES ==="
-	@echo "Optimisations: SIMD +300%, Parallel VORAX +400%, Cache Alignment +15%"
-	@if [ ! -f logs/console/redirect_console.sh ]; then ./setup_console_redirect.sh; fi
-	@bash -c "source logs/console/redirect_console.sh && $(MAIN_EXECUTABLE) --progressive-stress-all"
+        @echo "🚀 === TESTS PROGRESSIFS 1M → 100M TOUS MODULES ==="
+        @echo "Optimisations: SIMD +300%, Parallel VORAX +400%, Cache Alignment +15%"
+        @if [ ! -f logs/console/redirect_console.sh ]; then ./setup_console_redirect.sh; fi
+        @bash -c "source logs/console/redirect_console.sh && $(MAIN_EXECUTABLE) --progressive-stress-all"
 
 # Tests forensiques conformes prompt.txt
 test-forensic: $(BIN_DIR)/test_forensic_complete_system
-	@echo "🛡️ === TESTS FORENSIQUES COMPLETS CONFORMES PROMPT.TXT ==="
-	$(BIN_DIR)/test_forensic_complete_system
+        @echo "🛡️ === TESTS FORENSIQUES COMPLETS CONFORMES PROMPT.TXT ==="
+        $(BIN_DIR)/test_forensic_complete_system
 
 # VALIDATION COMPLÈTE - PROGRESSIVE + FORENSIQUE
 test: test-progressive test-forensic
-	@echo "✅ === VALIDATION COMPLÈTE TERMINÉE - CONFORMITÉ PROMPT.TXT ==="
+        @echo "✅ === VALIDATION COMPLÈTE TERMINÉE - CONFORMITÉ PROMPT.TXT ==="
 
 clean:
-	rm -f $(OBJECTS)
-	rm -f $(MAIN_EXECUTABLE) $(TEST_EXECUTABLES)
-	rm -rf $(BIN_DIR)
-	find . -name "*.o" -type f -delete
+        rm -f $(OBJECTS)
+        rm -f $(MAIN_EXECUTABLE) $(TEST_EXECUTABLES)
+        rm -rf $(BIN_DIR)
+        find . -name "*.o" -type f -delete
