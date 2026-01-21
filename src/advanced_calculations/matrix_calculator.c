@@ -1,3 +1,6 @@
+#include <stdint.h>
+#include <stdbool.h>
+
 // Crible Quadratique (QS) pour accélération RSA-512
 void rsa_quadratic_sieve(uint64_t n, uint64_t* factors) {
     // Algorithme de factorisation pour nombres < 100 digits
