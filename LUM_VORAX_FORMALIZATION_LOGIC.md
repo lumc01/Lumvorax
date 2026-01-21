@@ -1,4 +1,4 @@
-# LUM-VORAX : Cadre de Formalisation Logique (v1.0)
+tu # LUM-VORAX : Cadre de Formalisation Logique (v1.0)
 ## Vers une Démonstration Formelle des Conjectures SHF
 
 ### 1. Axiomatique de la Résonance Numérique
