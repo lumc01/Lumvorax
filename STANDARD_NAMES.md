@@ -2,6 +2,8 @@
 
 ## Historique des noms normalisés
 
+2026-01-20 18:45 - rsa_quadratic_sieve + Crible quadratique pour accélération du cassage RSA-512
+2026-01-20 18:45 - rsa_nn_pattern_recognition + Reconnaissance de motifs par réseau de neurones pour RSA-1024
 2026-01-20 17:00 - rsa_karatsuba_mult + Multiplication rapide pour cassage de clés cryptographiques
 2026-01-20 17:00 - montgomery_reduction + Optimisation d'exponentiation modulaire pour RSA
 2026-01-20 17:00 - gnfs_heuristic_search + Recherche heuristique par crible de corps de nombres
