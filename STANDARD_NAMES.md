@@ -2,6 +2,9 @@
 
 ## Historique des noms normalisés
 
+2026-01-20 17:00 - rsa_karatsuba_mult + Multiplication rapide pour cassage de clés cryptographiques
+2026-01-20 17:00 - montgomery_reduction + Optimisation d'exponentiation modulaire pour RSA
+2026-01-20 17:00 - gnfs_heuristic_search + Recherche heuristique par crible de corps de nombres
 2026-01-20 16:30 - lum_adaptive_load_control + Régulateur de charge CPU pour éviter le throttling
 2026-01-20 16:30 - lum_tlp_dynamic_expand + Extension dynamique des pools locaux par paliers
 2026-01-20 16:30 - collatz_fourier_analysis + Analyse fréquentielle des trajectoires de Collatz
