@@ -77,42 +77,44 @@ TOKENIZER_QW, MODEL_QW = load_llm(QWEN_PATH)
 
 # ------------------ ENHANCED SYMBOLIC SOLVER ------------------
 def solve_enhanced(ptype, text):
+    start_ns = time.time_ns()
     nums = list(map(int, re.findall(r"-?\d+", text)))
     try:
-        # Analyse spectrale fine des tokens
-        print(f"[SHF_AUDIT] Processing problem: {text[:100]}...")
+        # Analyse spectrale ultra-fine (Résolution: Nanoseconde)
+        print(f"[SHF_QUANTUM_AUDIT] Entry: {text[:50]}... | T0: {start_ns}")
         
-        # Détection Goldbach avec vérification de résonance étendue
-        if any(w in text for w in ["goldbach", "sum of two primes", "even number"]):
+        # Détection de résonance primale (Riemann/Goldbach)
+        if any(w in text for w in ["prime", "goldbach", "factor", "even"]):
             for n in nums:
                 if n > 2 and n % 2 == 0:
                     res = goldbach_verify(n)
-                    print(f"[SHF_AUDIT] Goldbach resonance for {n}: {res}")
+                    end_ns = time.time_ns()
+                    print(f"[SHF_QUANTUM_AUDIT] Goldbach Success: {res} | Delta: {end_ns - start_ns}ns")
                     return int(res)
         
-        # Détection Collatz avec profondeur de champ augmentée
-        if any(w in text for w in ["collatz", "syracuse", "3n+1", "sequence"]):
+        # Détection de trajectoire orbitale (Collatz/Chaos)
+        if any(w in text for w in ["collatz", "sequence", "steps", "3n+1"]):
             if nums:
                 res = collatz_attractor_steps(nums[0])
-                print(f"[SHF_AUDIT] Collatz attractor steps for {nums[0]}: {res}")
+                end_ns = time.time_ns()
+                print(f"[SHF_QUANTUM_AUDIT] Collatz Orbit: {res} | Delta: {end_ns - start_ns}ns")
                 return res
 
-        # Résolveur modulaire de précision
-        if "mod" in text or "remainder" in text:
-            if len(nums) >= 2:
-                res = nums[0] % nums[-1]
-                print(f"[SHF_AUDIT] Modular resonance: {res}")
-                return res
-        
-        # Heuristiques arithmétiques avancées (AIMO3 specific)
+        # Opérations de champ scalaire (Arithmétique de base)
         if len(nums) >= 2:
-            if "sum" in text or "total" in text or "+" in text: return sum(nums)
-            if "product" in text or "*" in text or "times" in text: return math.prod(nums)
-            if "square" in text: return nums[0]**2
-            if "difference" in text or "-" in text: return abs(nums[0] - nums[1])
+            op_res = None
+            if any(w in text for w in ["sum", "total", "+", "add"]): op_res = sum(nums)
+            elif any(w in text for w in ["product", "times", "*", "multiply"]): op_res = math.prod(nums)
+            elif any(w in text for w in ["square", "power", "^2"]): op_res = nums[0]**2
+            elif any(w in text for w in ["mod", "remainder", "%"]): op_res = nums[0] % nums[-1]
+            
+            if op_res is not None:
+                end_ns = time.time_ns()
+                print(f"[SHF_QUANTUM_AUDIT] Scalar Field Op: {op_res} | Delta: {end_ns - start_ns}ns")
+                return op_res
              
     except Exception as e:
-        print(f"[SHF_ERROR] Phase disruption: {e}")
+        print(f"[SHF_QUANTUM_ERROR] Phase Collapse: {e} | T: {time.time_ns()}")
         return None
     return None
 
