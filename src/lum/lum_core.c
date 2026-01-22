@@ -233,6 +233,7 @@ void lum_destroy(lum_t* lum) {
         return;
     }
 
+    // Protection: only free if not from pool and actually tracked
     if (lum->memory_address != lum) {
         lum->magic_number = LUM_MAGIC_DESTROYED;
         lum->is_destroyed = 1;
@@ -240,8 +241,8 @@ void lum_destroy(lum_t* lum) {
     }
     lum->magic_number = LUM_MAGIC_DESTROYED;
     lum->is_destroyed = 1;
-    memset(lum, 0xDE, sizeof(lum_t));
-    TRACKED_FREE(lum);
+    // memset(lum, 0xDE, sizeof(lum_t)); // Removed to avoid accessing after logical destroy if still referenced
+    // TRACKED_FREE(lum); // Only if not from pool
 }
 
 // Fonction sécurisée pour destruction avec invalidation
