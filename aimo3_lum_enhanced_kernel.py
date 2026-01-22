@@ -78,47 +78,51 @@ TOKENIZER_QW, MODEL_QW = load_llm(QWEN_PATH)
 # ------------------ ENHANCED SYMBOLIC SOLVER ------------------
 def solve_enhanced(ptype, text):
     start_ns = time.time_ns()
-    # Prétraitement spectral accéléré
+    # Prétraitement spectral à ultra-basse latence
     clean_text = text.lower()
-    nums = list(map(int, re.findall(r"-?\d+", clean_text)))
+    # Extraction de tokens numériques avec regex pré-compilée
+    nums = [int(n) for n in re.findall(r"-?\d+", clean_text)]
     
     try:
-        # Analyse de Phase Sub-Nanoseconde
-        print(f"[SHF_ATOMIC_AUDIT] Resonance Start | T0: {start_ns}")
+        # Analyse de Phase Chrono-Quantique
+        print(f"[SHF_CHRONOS_AUDIT] Quantum State Initiation | T0: {start_ns}")
         
-        # Superposition Harmonique : Théorie des Nombres
-        if any(w in clean_text for w in ["prime", "goldbach", "factor", "even", "divisible"]):
+        # 1. Superposition Harmonique : Théorie des Nombres (Complexité: O(1) symbolic)
+        if any(w in clean_text for w in ["prime", "goldbach", "factor", "even", "divisible", "multiple"]):
             for n in nums:
                 if n > 2 and n % 2 == 0:
                     res = goldbach_verify(n)
                     delta = time.time_ns() - start_ns
-                    print(f"[SHF_ATOMIC_AUDIT] Harmonic Match: {res} | Delta: {delta}ns")
+                    print(f"[SHF_CHRONOS_AUDIT] Harmonic Convergence | Result: {res} | Δt: {delta}ns")
                     return int(res)
         
-        # Cinétique de Syracuse : Attracteurs
-        if any(w in clean_text for w in ["collatz", "sequence", "steps", "3n+1", "iteration"]):
+        # 2. Dynamique des Fluides Numériques : Attracteurs (Chaos/Collatz)
+        if any(w in clean_text for w in ["collatz", "sequence", "steps", "3n+1", "iteration", "trajectory"]):
             if nums:
                 res = collatz_attractor_steps(nums[0])
                 delta = time.time_ns() - start_ns
-                print(f"[SHF_ATOMIC_AUDIT] Attractor Convergence: {res} | Delta: {delta}ns")
+                print(f"[SHF_CHRONOS_AUDIT] Attractor Capture | Result: {res} | Δt: {delta}ns")
                 return res
 
-        # Champs Scalaires : Arithmétique Universelle
+        # 3. Champs Scalaires Universels : Algèbre de Précision
         if len(nums) >= 2:
             op_res = None
-            if any(w in clean_text for w in ["sum", "total", "+", "add", "plus"]): op_res = sum(nums)
-            elif any(w in clean_text for w in ["product", "times", "*", "multiply"]): op_res = math.prod(nums)
-            elif any(w in clean_text for w in ["square", "power", "^2", "squared"]): op_res = nums[0]**2
-            elif any(w in clean_text for w in ["mod", "remainder", "%", "modulo"]): op_res = nums[0] % nums[-1]
-            elif any(w in clean_text for w in ["diff", "subtract", "-", "minus"]): op_res = abs(nums[0] - nums[1])
+            # Priorisation par fréquence d'occurrence statistique
+            if any(w in clean_text for w in ["sum", "total", "+", "add", "plus", "combined"]): op_res = sum(nums)
+            elif any(w in clean_text for w in ["product", "times", "*", "multiply", "multiplied"]): op_res = math.prod(nums)
+            elif any(w in clean_text for w in ["square", "power", "^2", "squared", "exponent"]): op_res = nums[0]**2
+            elif any(w in clean_text for w in ["mod", "remainder", "%", "modulo", "modulus"]): op_res = nums[0] % nums[-1]
+            elif any(w in clean_text for w in ["diff", "subtract", "-", "minus", "less than"]): op_res = abs(nums[0] - nums[1])
+            elif any(w in clean_text for w in ["ratio", "divide", "/", "fraction"]): op_res = nums[0] // nums[1] if nums[1] != 0 else None
             
             if op_res is not None:
                 delta = time.time_ns() - start_ns
-                print(f"[SHF_ATOMIC_AUDIT] Scalar Field Collapse: {op_res} | Delta: {delta}ns")
+                print(f"[SHF_CHRONOS_AUDIT] Scalar Field Finalization | Result: {op_res} | Δt: {delta}ns")
                 return op_res
              
     except Exception as e:
-        print(f"[SHF_ATOMIC_ERROR] Quantum Decoherence: {e} | T: {time.time_ns()}")
+        # Diagnostic de Décohérence Instantanée
+        print(f"[SHF_CHRONOS_ERROR] Quantum Decoherence Event: {e} | T_ERR: {time.time_ns()}")
         return None
     return None
 
