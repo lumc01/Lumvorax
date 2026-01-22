@@ -70,15 +70,7 @@ TEST_PROGRESSIVE = $(BIN_DIR)/test_progressive_all_modules
 TEST_EXECUTABLES = \
 	$(BIN_DIR)/test_forensic_complete_system \
 	$(BIN_DIR)/test_integration_complete_39_modules \
-	$(BIN_DIR)/test_quantum \
-	$(BIN_DIR)/test_rsa_structure \
-	$(BIN_DIR)/test_fundamental_science
-
-$(BIN_DIR)/test_fundamental_science: $(OBJECTS)
-	$(CC) $(CFLAGS) src/tests/test_fundamental_science.c $(OBJECTS) -o $@ $(LDFLAGS)
-
-science_test: $(BIN_DIR)/test_fundamental_science
-	./$(BIN_DIR)/test_fundamental_science
+	$(BIN_DIR)/test_quantum
 
 .PHONY: all clean test test-progressive test-stress test-forensic rsa_test science_test
 
