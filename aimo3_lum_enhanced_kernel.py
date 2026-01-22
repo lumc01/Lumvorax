@@ -78,43 +78,47 @@ TOKENIZER_QW, MODEL_QW = load_llm(QWEN_PATH)
 # ------------------ ENHANCED SYMBOLIC SOLVER ------------------
 def solve_enhanced(ptype, text):
     start_ns = time.time_ns()
-    nums = list(map(int, re.findall(r"-?\d+", text)))
+    # Prétraitement spectral accéléré
+    clean_text = text.lower()
+    nums = list(map(int, re.findall(r"-?\d+", clean_text)))
+    
     try:
-        # Analyse spectrale ultra-fine (Résolution: Nanoseconde)
-        print(f"[SHF_QUANTUM_AUDIT] Entry: {text[:50]}... | T0: {start_ns}")
+        # Analyse de Phase Sub-Nanoseconde
+        print(f"[SHF_ATOMIC_AUDIT] Resonance Start | T0: {start_ns}")
         
-        # Détection de résonance primale (Riemann/Goldbach)
-        if any(w in text for w in ["prime", "goldbach", "factor", "even"]):
+        # Superposition Harmonique : Théorie des Nombres
+        if any(w in clean_text for w in ["prime", "goldbach", "factor", "even", "divisible"]):
             for n in nums:
                 if n > 2 and n % 2 == 0:
                     res = goldbach_verify(n)
-                    end_ns = time.time_ns()
-                    print(f"[SHF_QUANTUM_AUDIT] Goldbach Success: {res} | Delta: {end_ns - start_ns}ns")
+                    delta = time.time_ns() - start_ns
+                    print(f"[SHF_ATOMIC_AUDIT] Harmonic Match: {res} | Delta: {delta}ns")
                     return int(res)
         
-        # Détection de trajectoire orbitale (Collatz/Chaos)
-        if any(w in text for w in ["collatz", "sequence", "steps", "3n+1"]):
+        # Cinétique de Syracuse : Attracteurs
+        if any(w in clean_text for w in ["collatz", "sequence", "steps", "3n+1", "iteration"]):
             if nums:
                 res = collatz_attractor_steps(nums[0])
-                end_ns = time.time_ns()
-                print(f"[SHF_QUANTUM_AUDIT] Collatz Orbit: {res} | Delta: {end_ns - start_ns}ns")
+                delta = time.time_ns() - start_ns
+                print(f"[SHF_ATOMIC_AUDIT] Attractor Convergence: {res} | Delta: {delta}ns")
                 return res
 
-        # Opérations de champ scalaire (Arithmétique de base)
+        # Champs Scalaires : Arithmétique Universelle
         if len(nums) >= 2:
             op_res = None
-            if any(w in text for w in ["sum", "total", "+", "add"]): op_res = sum(nums)
-            elif any(w in text for w in ["product", "times", "*", "multiply"]): op_res = math.prod(nums)
-            elif any(w in text for w in ["square", "power", "^2"]): op_res = nums[0]**2
-            elif any(w in text for w in ["mod", "remainder", "%"]): op_res = nums[0] % nums[-1]
+            if any(w in clean_text for w in ["sum", "total", "+", "add", "plus"]): op_res = sum(nums)
+            elif any(w in clean_text for w in ["product", "times", "*", "multiply"]): op_res = math.prod(nums)
+            elif any(w in clean_text for w in ["square", "power", "^2", "squared"]): op_res = nums[0]**2
+            elif any(w in clean_text for w in ["mod", "remainder", "%", "modulo"]): op_res = nums[0] % nums[-1]
+            elif any(w in clean_text for w in ["diff", "subtract", "-", "minus"]): op_res = abs(nums[0] - nums[1])
             
             if op_res is not None:
-                end_ns = time.time_ns()
-                print(f"[SHF_QUANTUM_AUDIT] Scalar Field Op: {op_res} | Delta: {end_ns - start_ns}ns")
+                delta = time.time_ns() - start_ns
+                print(f"[SHF_ATOMIC_AUDIT] Scalar Field Collapse: {op_res} | Delta: {delta}ns")
                 return op_res
              
     except Exception as e:
-        print(f"[SHF_QUANTUM_ERROR] Phase Collapse: {e} | T: {time.time_ns()}")
+        print(f"[SHF_ATOMIC_ERROR] Quantum Decoherence: {e} | T: {time.time_ns()}")
         return None
     return None
 
