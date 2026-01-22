@@ -1,8 +1,7 @@
 # Makefile LUM/VORAX - Compilation COMPLÈTE TOUS MODULES
 CC = gcc
-CFLAGS = -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations
-
-LDFLAGS = -lm -lpthread -lrt
+CFLAGS = -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216
+LDFLAGS = -lm -lpthread -lrt -Wl,-z,stack-size=16777216
 
 # Debug/Release modes for performance control  
 debug: CFLAGS += -DDEBUG_MODE -g3
