@@ -1,7 +1,7 @@
 import numpy as np
 import time
 
-def lum_vorax_optimization_v12(n):
+def lum_vorax_optimization_v12(n: int) -> float:
     # Kahan Summation implementation
     sum_val = 0.0
     c = 0.0
@@ -12,7 +12,7 @@ def lum_vorax_optimization_v12(n):
         sum_val = t
     return sum_val
 
-def rsa_observable_test(n_bits):
+def rsa_observable_test(n_bits: int) -> None:
     print(f"[TEST] Starting RSA Observable at {time.time_ns()} ns")
     # Simulation of observables comparison
     # In a real kernel, this would analyze raw bits
