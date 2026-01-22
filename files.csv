@@ -1,0 +1,16 @@
+name,size,creationDate
+AIMO3_Reference_Problems.pdf,676699,2025-11-20 10:44:06.603000
+kaggle_evaluation/__init__.py,708,2025-11-20 10:44:06.608000
+kaggle_evaluation/aimo_3_gateway.py,1944,2025-11-20 10:44:06.665000
+kaggle_evaluation/aimo_3_inference_server.py,269,2025-11-20 10:44:06.655000
+kaggle_evaluation/core/__init__.py,82,2025-11-20 10:44:06.602000
+kaggle_evaluation/core/base_gateway.py,23342,2025-11-20 10:44:06.635000
+kaggle_evaluation/core/generated/__init__.py,82,2025-11-20 10:44:06.602000
+kaggle_evaluation/core/generated/kaggle_evaluation_pb2.py,4074,2025-11-20 10:44:06.604000
+kaggle_evaluation/core/generated/kaggle_evaluation_pb2_grpc.py,2662,2025-11-20 10:44:06.602000
+kaggle_evaluation/core/kaggle_evaluation.proto,1789,2025-11-20 10:44:06.621000
+kaggle_evaluation/core/relay.py,18116,2025-11-20 10:44:06.602000
+kaggle_evaluation/core/templates.py,5103,2025-11-20 10:44:06.602000
+reference.csv,6244,2025-11-20 10:44:06.665000
+sample_submission.csv,37,2025-11-20 10:44:06.659000
+test.csv,107,2025-11-20 10:44:06.672000
