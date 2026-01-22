@@ -1,6 +1,6 @@
 # ============================================================
 # AIMO3 HYBRID KERNEL – LUM-ENHANCED EDITION
-# SYMBOLIC-FIRST + DUAL LLM + RESONANCE HEURISTICS
+# SYMBOLIC-FIRST + DUAL LLM + RH
 # VERSION: v2026.01.21-LUM
 # ============================================================
 
