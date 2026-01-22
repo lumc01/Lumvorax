@@ -1,0 +1,21 @@
+ref,deadline,category,reward,teamCount,userHasEntered
+https://www.kaggle.com/competitions/ai-mathematical-olympiad-progress-prize-3,2026-04-15 23:59:00,Featured,"2,207,152 Usd",1502,True
+https://www.kaggle.com/competitions/vesuvius-challenge-surface-detection,2026-02-13 23:59:00,Research,"200,000 Usd",704,True
+https://www.kaggle.com/competitions/med-gemma-impact-challenge,2026-02-24 23:59:00,Featured,"100,000 Usd",44,False
+https://www.kaggle.com/competitions/csiro-biomass,2026-01-28 23:59:00,Research,"75,000 Usd",3677,False
+https://www.kaggle.com/competitions/stanford-rna-3d-folding-2,2026-03-25 23:59:00,Featured,"75,000 Usd",412,False
+https://www.kaggle.com/competitions/santa-2025,2026-01-30 23:59:00,Featured,"50,000 Usd",3191,False
+https://www.kaggle.com/competitions/cafa-6-protein-function-prediction,2026-02-02 23:59:00,Research,"50,000 Usd",1970,False
+https://www.kaggle.com/competitions/physionet-ecg-image-digitization,2026-01-22 23:59:00,Research,"50,000 Usd",1430,False
+https://www.kaggle.com/competitions/deep-past-initiative-machine-translation,2026-03-23 23:59:00,Featured,"50,000 Usd",1250,False
+https://www.kaggle.com/competitions/playground-series-s6e1,2026-01-31 23:59:00,Playground,Swag,2865,False
+https://www.kaggle.com/competitions/titanic,2030-01-01 00:00:00,Getting Started,Knowledge,12955,False
+https://www.kaggle.com/competitions/house-prices-advanced-regression-techniques,2030-01-01 00:00:00,Getting Started,Knowledge,4741,False
+https://www.kaggle.com/competitions/home-data-for-ml-course,2030-01-01 23:59:00,Getting Started,Knowledge,4360,False
+https://www.kaggle.com/competitions/spaceship-titanic,2030-01-01 00:00:00,Getting Started,Knowledge,2305,False
+https://www.kaggle.com/competitions/digit-recognizer,2030-01-01 00:00:00,Getting Started,Knowledge,1099,False
+https://www.kaggle.com/competitions/store-sales-time-series-forecasting,2030-06-30 23:59:00,Getting Started,Knowledge,806,False
+https://www.kaggle.com/competitions/nlp-getting-started,2030-01-01 00:00:00,Getting Started,Knowledge,655,False
+https://www.kaggle.com/competitions/llm-classification-finetuning,2030-07-01 23:59:00,Getting Started,Knowledge,240,False
+https://www.kaggle.com/competitions/connectx,2030-01-01 00:00:00,Getting Started,Knowledge,228,False
+https://www.kaggle.com/competitions/tpu-getting-started,2030-06-03 23:59:00,Getting Started,Knowledge,227,False
