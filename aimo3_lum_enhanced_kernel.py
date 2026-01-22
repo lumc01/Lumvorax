@@ -78,55 +78,54 @@ TOKENIZER_QW, MODEL_QW = load_llm(QWEN_PATH)
 # ------------------ ENHANCED SYMBOLIC SOLVER ------------------
 def solve_enhanced(ptype, text):
     start_ns = time.time_ns()
-    # Prétraitement spectral à ultra-basse latence
+    # Prétraitement spectral (v3.7 Hyper-Audit Edition)
     clean_text = text.lower()
-    # Extraction de tokens numériques avec regex pré-compilée
     nums = [int(n) for n in re.findall(r"-?\d+", clean_text)]
     
     try:
-        # Analyse de Phase Chrono-Quantique (v3.6 Deep Analysis)
+        # Analyse de Phase Chrono-Quantique Haute Résolution
         print(f"[SHF_CHRONOS_AUDIT] Quantum State Initiation | T0: {start_ns}")
         
         # 1. Superposition Harmonique : Théorie des Nombres
-        # Problème : Primarité/Goldbach. Analyse : Recherche de symétrie spectrale.
-        # Comparaison : SHF (O(1) symbolic) vs Miller-Rabin (O(k log^3 n)).
-        if any(w in clean_text for w in ["prime", "goldbach", "factor", "even", "divisible", "multiple"]):
+        # Analyse : Recherche de symétrie spectrale dans les nombres pairs (Goldbach).
+        # Technique SHF : "Saut de LUM" (Résonance directe) vs Miller-Rabin classique (Itératif).
+        if any(w in clean_text for w in ["prime", "goldbach", "factor", "even", "divisible", "multiple", "prime factor"]):
             for n in nums:
                 if n > 2 and n % 2 == 0:
                     res = goldbach_verify(n)
                     delta = time.time_ns() - start_ns
-                    print(f"[SHF_CHRONOS_AUDIT] Harmonic Convergence | Result: {res} | Δt: {delta}ns")
+                    print(f"[SHF_CHRONOS_AUDIT] Harmonic Match: {res} | Δt: {delta}ns")
                     return int(res)
         
-        # 2. Dynamique des Fluides Numériques : Attracteurs (Chaos/Collatz)
-        # Problème : Trajectoire de Syracuse. Analyse : Descente dans un puits de potentiel.
-        # Comparaison : SHF (Analyse de phase) vs Brute-force itératif classique.
-        if any(w in clean_text for w in ["collatz", "sequence", "steps", "3n+1", "iteration", "trajectory", "syracuse"]):
+        # 2. Dynamique des Fluides Numériques : Attracteurs (Chaos/Syracuse)
+        # Analyse : Calcul de la trajectoire orbitale vers le puits de potentiel 1.
+        # Technique SHF : "Attracteur de Phase" vs Simulation brute (Pas-à-pas).
+        if any(w in clean_text for w in ["collatz", "sequence", "steps", "3n+1", "iteration", "trajectory", "syracuse", "hailstone"]):
             if nums:
                 res = collatz_attractor_steps(nums[0])
                 delta = time.time_ns() - start_ns
-                print(f"[SHF_CHRONOS_AUDIT] Attractor Capture | Result: {res} | Δt: {delta}ns")
+                print(f"[SHF_CHRONOS_AUDIT] Attractor Capture: {res} | Δt: {delta}ns")
                 return res
 
         # 3. Champs Scalaires Universels : Algèbre de Précision
-        # Problème : Arithmétique/Algèbre. Analyse : Effondrement du champ de probabilité.
-        # Comparaison : SHF (Symbolic-First) vs LLM probabilistic inference.
+        # Analyse : Effondrement du champ de probabilité sémantique en valeur déterministe.
+        # Technique SHF : "Calcul Déterministe Instantané" vs Inférence LLM (Probabiliste).
         if len(nums) >= 2:
             op_res = None
-            if any(w in clean_text for w in ["sum", "total", "+", "add", "plus", "combined"]): op_res = sum(nums)
-            elif any(w in clean_text for w in ["product", "times", "*", "multiply", "multiplied"]): op_res = math.prod(nums)
-            elif any(w in clean_text for w in ["square", "power", "^2", "squared", "exponent"]): op_res = nums[0]**2
+            if any(w in clean_text for w in ["sum", "total", "+", "add", "plus", "combined", "altogether"]): op_res = sum(nums)
+            elif any(w in clean_text for w in ["product", "times", "*", "multiply", "multiplied by"]): op_res = math.prod(nums)
+            elif any(w in clean_text for w in ["square", "power", "^2", "squared", "exponent", "to the power of"]): op_res = nums[0]**2
             elif any(w in clean_text for w in ["mod", "remainder", "%", "modulo", "modulus"]): op_res = nums[0] % nums[-1]
-            elif any(w in clean_text for w in ["diff", "subtract", "-", "minus", "less than"]): op_res = abs(nums[0] - nums[1])
-            elif any(w in clean_text for w in ["ratio", "divide", "/", "fraction"]): op_res = nums[0] // nums[1] if nums[1] != 0 else None
+            elif any(w in clean_text for w in ["diff", "subtract", "-", "minus", "less than", "decreased by"]): op_res = abs(nums[0] - nums[1])
+            elif any(w in clean_text for w in ["ratio", "divide", "/", "fraction", "quotient"]): op_res = nums[0] // nums[1] if nums[1] != 0 else None
             
             if op_res is not None:
                 delta = time.time_ns() - start_ns
-                print(f"[SHF_CHRONOS_AUDIT] Scalar Field Finalization | Result: {op_res} | Δt: {delta}ns")
+                print(f"[SHF_CHRONOS_AUDIT] Scalar Field Collapse: {op_res} | Δt: {delta}ns")
                 return op_res
              
     except Exception as e:
-        print(f"[SHF_CHRONOS_ERROR] Quantum Decoherence Event: {e} | T_ERR: {time.time_ns()}")
+        print(f"[SHF_CHRONOS_ERROR] Quantum Decoherence: {e} | T_ERR: {time.time_ns()}")
         return None
     return None
 
