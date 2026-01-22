@@ -1253,7 +1253,7 @@ task = "shell.exec"
 args = "echo \"🔒 VALIDATION COMPLÈTE TERMINÉE\""
 
 [nix]
-packages = ["clang", "file", "gcc", "gdb", "gnumake", "kaggle", "nano", "openssh", "tree", "vim-full"]
+packages = ["arrow-cpp", "clang", "file", "gcc", "gdb", "glibcLocales", "gnumake", "kaggle", "nano", "openssh", "pkg-config", "tree", "vim-full"]
 channel = "stable-25_05"
 
 [deployment]
