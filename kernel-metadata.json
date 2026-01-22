@@ -1,5 +1,6 @@
 {
-  "id": "lumvorax/aimo3-shf-resonance-v3",
+  "id": "gabrielchavesreinann/aimo3-shf-resonance-v3",
+  "id_no": 107563439,
   "title": "AIMO3 SHF Resonance v3",
   "code_file": "aimo3_lum_enhanced_kernel.py",
   "language": "python",
@@ -8,12 +9,14 @@
   "enable_gpu": true,
   "enable_tpu": false,
   "enable_internet": true,
+  "keywords": [],
   "dataset_sources": [
     "christianmariothomas/deepseek-math-7b-rl",
     "sorokin/qwen2-5-math-rm-72b"
   ],
+  "kernel_sources": [],
   "competition_sources": [
     "ai-mathematical-olympiad-progress-prize-3"
   ],
-  "kernel_sources": []
+  "model_sources": []
 }

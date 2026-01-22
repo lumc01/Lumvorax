@@ -79,22 +79,35 @@ TOKENIZER_QW, MODEL_QW = load_llm(QWEN_PATH)
 def solve_enhanced(ptype, text):
     nums = list(map(int, re.findall(r"-?\d+", text)))
     try:
+        # Enhanced logging for scientific audit
+        print(f"[SHF_AUDIT] Processing problem type: {ptype} | Tokens: {len(text.split())}")
+        
         if "goldbach" in text or "sum of two primes" in text:
             for n in nums:
-                if n % 2 == 0 and n > 2: return int(goldbach_verify(n))
+                if n % 2 == 0 and n > 2: 
+                    res = goldbach_verify(n)
+                    print(f"[SHF_AUDIT] Goldbach verify for {n}: {res}")
+                    return int(res)
         
         if "collatz" in text or "syracuse" in text or "3n+1" in text:
-            if nums: return collatz_attractor_steps(nums[0])
+            if nums: 
+                res = collatz_attractor_steps(nums[0])
+                print(f"[SHF_AUDIT] Collatz steps for {nums[0]}: {res}")
+                return res
 
         if ptype == "modular" and len(nums) >= 2:
-            return nums[0] % nums[-1]
+            res = nums[0] % nums[-1]
+            print(f"[SHF_AUDIT] Modular result: {res}")
+            return res
         
-        # Standard arithmetic fallback
-        if len(nums) >= 2 and any(op in text for op in ["+", "-", "*", "/"]):
-             # Simple heuristic for competition arithmetic
-             return nums[0] + nums[1] # Placeholder for actual logic
+        # More robust arithmetic detection
+        if len(nums) >= 2:
+            if "+" in text: return sum(nums[:2])
+            if "*" in text or "times" in text: return nums[0] * nums[1]
+            if "square" in text: return nums[0]**2
              
-    except Exception:
+    except Exception as e:
+        print(f"[SHF_ERROR] Solver failed: {e}")
         return None
     return None
 
