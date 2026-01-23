@@ -1,4 +1,4 @@
-modules = ["bash", "c-clang20", "python-3.11"]
+modules = ["python-3.12", "bash"]
 [agent]
 expertMode = true
 
@@ -1113,7 +1113,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "make all && ./bin/lum_vorax_complete"
+args = "python main.py"
 
 [[workflows.workflow]]
 name = "VALIDATION COMPLETE LOGS REELS"
