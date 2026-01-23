@@ -1,4 +1,4 @@
-modules = ["python-3.12", "bash", "c-clang20"]
+modules = ["bash", "c-clang20", "python-3.11"]
 [agent]
 expertMode = true
 

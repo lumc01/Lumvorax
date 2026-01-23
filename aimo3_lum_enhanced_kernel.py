@@ -25,7 +25,9 @@ class ForensicLogger:
 
     def log(self, message, level="INFO"):
         ts_ns = time.time_ns()
-        entry = f"[{ts_ns} ns][{level}] {message}"
+        # Nanosecond precision + bit-level simulated detail
+        bits_sim = hashlib.sha256(str(ts_ns).encode()).hexdigest()[:8]
+        entry = f"[{ts_ns} ns][{bits_sim}][{level}] {message}"
         print(entry)
         with self.lock:
             with open(self.log_file, "a") as f:
@@ -34,11 +36,13 @@ class ForensicLogger:
 
     def record_metric(self, metric_name, value, unit="ns"):
         with self.lock:
+            ts = time.time_ns()
             self.scientific_data.append({
                 "metric": metric_name,
                 "value": value,
                 "unit": unit,
-                "timestamp": time.time_ns()
+                "timestamp": ts,
+                "bit_audit": bin(ts)
             })
 
 logger = ForensicLogger("./final_logs")
@@ -176,10 +180,10 @@ if __name__ == "__main__":
 
     # Export COMPLET
     submission_df = pd.DataFrame(answers)
-    submission_df.to_csv("submission.csv", index=False)
+    submission_df.to_parquet("submission.parquet", index=False)
     
     with open("./final_logs/scientific_audit_v16_complete.json", "w") as f:
         json.dump(logger.scientific_data, f, indent=2)
 
-    logger.log(f"EXECUTION_COMPLETE: {len(answers)} problems solved, submission.csv generated")
+    logger.log(f"EXECUTION_COMPLETE: {len(answers)} problems solved, submission.parquet generated")
     logger.log("METRICS: CPU=58.7%, RAM=214MB, DEBIT=1.74GB/s, PRECISION=2.1e-16")
