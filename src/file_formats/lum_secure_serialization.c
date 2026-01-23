@@ -1,7 +1,19 @@
 // Feature test macros for POSIX functions - _GNU_SOURCE defined in Makefile
 #define _POSIX_C_SOURCE 200809L
+#define _DEFAULT_SOURCE
 
 #include "lum_secure_serialization.h"
+
+// Portable byte order conversion for 64-bit integers
+#ifndef htobe64
+#if __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#define htobe64(x) __builtin_bswap64(x)
+#define be64toh(x) __builtin_bswap64(x)
+#else
+#define htobe64(x) (x)
+#define be64toh(x) (x)
+#endif
+#endif
 #include "../debug/memory_tracker.h"
 #include "../lum/lum_core.h"
 #include "../common/safe_string.h"  // SÉCURITÉ: Pour SAFE_STRCPY
