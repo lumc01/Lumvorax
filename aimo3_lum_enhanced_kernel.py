@@ -140,7 +140,15 @@ def solve_enhanced(text):
                 logger.record_metric("P4_LATENCY", time.time_ns() - start_ns)
                 return res
 
-        # Fallback arithmétique basique
+        # Fallback arithmétique basique (Amélioré: détection d'équations simples)
+        if any(w in clean_text for w in ["solve", "for x", "=", "equation"]):
+            # Extraction x + a = b -> x = b - a
+            match = re.search(r"(-?\d+)\s*\+\s*x\s*=\s*(-?\d+)", clean_text)
+            if match:
+                res = int(match.group(2)) - int(match.group(1))
+                logger.record_metric("EQUATION_SOLVE_LATENCY", time.time_ns() - start_ns)
+                return res
+
         if any(w in clean_text for w in ["add", "+", "sum"]) and nums:
             res = sum(nums)
             logger.record_metric("FALLBACK_LATENCY", time.time_ns() - start_ns)
