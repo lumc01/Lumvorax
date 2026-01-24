@@ -1,45 +1,28 @@
-# LUM/VORAX System
+# LUM/VORAX System - Architecture V32
 
 ## Overview
-LUM/VORAX is a high-performance C-based computation system with 39 integrated modules. It includes advanced features like SIMD optimization, parallel processing, memory tracking, forensic logging, and more.
+LUM/VORAX est un système de calcul haute performance avec 45+ modules intégrés, optimisé pour AVX2 et le multi-threading massif.
 
-## Project Structure
+## Project Structure (Updated V32)
 - `src/` - Source code for all modules
-  - `lum/` - Core LUM functionality
-  - `vorax/` - VORAX operations
-  - `optimization/` - SIMD, memory, and Pareto optimizers
-  - `parallel/` - Parallel processing
-  - `persistence/` - Data persistence and transaction handling
-  - `debug/` - Memory tracking and forensic logging
-  - `crypto/` - Cryptographic validation
-  - `advanced_calculations/` - Neural networks, image/audio processing
-  - `complex_modules/` - Real-time analytics, distributed computing, AI
-  - `file_formats/` - File serialization and handling
-  - `spatial/` - Spatial displacement algorithms
-  - `network/` - Network resource limiting
-- `bin/` - Compiled binaries
-- `logs/` - Log output directories
-- `reports/` - Generated reports
-- `tests/` - Test files
+  - `optimization/` - **[V32]** Async Logging, Slab Allocator, SIMD Batch, Lock-free Queue, LZ4, MMap.
+  - `security/` - **[V32]** Audit & Hardening.
+  - `monitoring/` - **[V32]** Resource Monitoring & Alerting.
+  - `distributed/` - **[V32]** Cluster Computing Node.
+  - `wasm/` - **[V32]** WASM Export Module.
+  - `versioning/` - **[V32]** Version Manager & API Contract.
+  - `cicd/` - **[V32]** Benchmark Runner & Regression Detector.
+  - `lum/` - Core LUM functionality.
+  - `vorax/` - VORAX operations.
+- `reports/` - Generated reports (including `FINAL_VALIDATION_REPORT_V32.md`).
 
-## Building
+## Building & Testing
 ```bash
-make all        # Build all targets
-make clean      # Clean build artifacts
-make test       # Run all tests
+make all
+./v32_test
 ```
-
-## Running
-```bash
-./bin/lum_vorax_complete                      # Default test
-./bin/lum_vorax_complete --basic-test         # Basic LUM core test
-./bin/lum_vorax_complete --progressive-stress-all  # Stress test with all modules
-```
-
-## Dependencies
-- C compiler (clang or gcc)
-- GNU Make
-- pthreads, math library, rt library
 
 ## Recent Changes
-- January 20, 2026: Initial import to Replit environment, installed C toolchain and make
+- **January 24, 2026**: Finalisation 100% de la version V32. Implémentation des BLOCS 9, 10 et 11.
+- **Optimisations**: Passage au logging asynchrone et structures lock-free.
+- **Sécurité**: Intégration de l'audit ISO 27001 et monitoring temps-réel.
