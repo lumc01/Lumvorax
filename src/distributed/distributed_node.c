@@ -18,12 +18,16 @@ static uint32_t generate_node_id(void) {
 
 static void* heartbeat_thread_func(void* arg) {
     dist_cluster_t* cluster = (dist_cluster_t*)arg;
+    if (!cluster) return NULL;
     
-    while (cluster->running) {
-        uint64_t now = get_timestamp_ms();
-        
+    while (1) {
         pthread_mutex_lock(&cluster->lock);
+        if (!cluster->running) {
+            pthread_mutex_unlock(&cluster->lock);
+            break;
+        }
         
+        uint64_t now = get_timestamp_ms();
         for (size_t i = 0; i < cluster->node_count; i++) {
             dist_node_info_t* node = cluster->nodes[i];
             if (!node || node->is_local) continue;
@@ -33,13 +37,19 @@ static void* heartbeat_thread_func(void* arg) {
             }
         }
         
-        dist_node_info_t* local = dist_cluster_get_node(cluster, cluster->local_node_id);
+        dist_node_info_t* local = NULL;
+        for (size_t i = 0; i < cluster->node_count; i++) {
+            if (cluster->nodes[i] && cluster->nodes[i]->node_id == cluster->local_node_id) {
+                local = cluster->nodes[i];
+                break;
+            }
+        }
+        
         if (local) {
             local->last_heartbeat = now;
         }
         
         pthread_mutex_unlock(&cluster->lock);
-        
         usleep(DIST_HEARTBEAT_INTERVAL_MS * 1000);
     }
     
@@ -161,14 +171,15 @@ dist_node_info_t* dist_cluster_get_node(dist_cluster_t* cluster, uint32_t node_i
 int dist_cluster_start(dist_cluster_t* cluster) {
     if (!cluster || cluster->running) return -1;
     
+    pthread_mutex_lock(&cluster->lock);
     cluster->running = true;
     
     if (pthread_create(&cluster->heartbeat_thread, NULL, heartbeat_thread_func, cluster) != 0) {
         cluster->running = false;
+        pthread_mutex_unlock(&cluster->lock);
         return -2;
     }
     
-    pthread_mutex_lock(&cluster->lock);
     dist_node_info_t* local = dist_cluster_get_node(cluster, cluster->local_node_id);
     if (local) {
         local->state = DIST_NODE_READY;
@@ -248,7 +259,7 @@ int dist_task_wait(dist_cluster_t* cluster, dist_task_t* task, uint64_t timeout_
 }
 
 int dist_broadcast(dist_cluster_t* cluster, dist_message_t* msg) {
-    if (!cluster || !msg) return -1;
+    if (!cluster || !msg || !cluster->running) return -1;
     
     msg->timestamp = get_timestamp_ms();
     msg->sender_id = cluster->local_node_id;

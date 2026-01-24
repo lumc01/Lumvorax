@@ -257,20 +257,21 @@ int wasm_instance_call(wasm_instance_t* instance, const char* func_name,
                        wasm_value_t* args, size_t arg_count,
                        wasm_value_t* results, size_t result_count) {
     if (!instance || !func_name) return -1;
+    if (!instance->module) return -5;
     
-    wasm_export_func_t* func = NULL;
-    for (size_t i = 0; i < instance->module->export_count; i++) {
-        if (strcmp(instance->module->exports[i].name, func_name) == 0) {
-            func = &instance->module->exports[i];
-            break;
+    wasm_module_t* mod = instance->module;
+    if (!mod->exports) return -6;
+    
+    for (size_t i = 0; i < mod->export_count; i++) {
+        if (mod->exports[i].name && strcmp(mod->exports[i].name, func_name) == 0) {
+            wasm_export_func_t* func = &mod->exports[i];
+            if (func->param_count != arg_count) return -3;
+            if (func->result_count != result_count) return -4;
+            return 0;
         }
     }
     
-    if (!func) return -2;
-    if (func->param_count != arg_count) return -3;
-    if (func->result_count != result_count) return -4;
-    
-    return 0;
+    return -2;
 }
 
 void* wasm_memory_get_ptr(wasm_instance_t* instance, uint32_t offset) {

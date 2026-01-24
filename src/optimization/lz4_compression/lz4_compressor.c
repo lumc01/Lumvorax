@@ -205,7 +205,6 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
     uint8_t* op_end = op + dst_capacity;
     
     while (ip < ip_end) {
-        if (ip >= ip_end) break;
         uint8_t token = *ip++;
         
         size_t literal_len = (token >> 4) & 0x0F;
@@ -222,7 +221,7 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
             if (ip + literal_len > ip_end) return -3;
             if (op + literal_len > op_end) return -4;
             
-            memcpy(op, ip, literal_len);
+            for (size_t i = 0; i < literal_len; i++) op[i] = ip[i];
             ip += literal_len;
             op += literal_len;
         }
@@ -230,8 +229,7 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
         if (ip >= ip_end) break;
         
         if (ip + 2 > ip_end) return -5;
-        uint16_t offset;
-        memcpy(&offset, ip, sizeof(offset));
+        uint16_t offset = (uint16_t)ip[0] | ((uint16_t)ip[1] << 8);
         ip += 2;
         
         if (offset == 0) return -6;
@@ -250,9 +248,11 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
         if (op + match_len > op_end) return -9;
         
         const uint8_t* match = op - offset;
-        while (match_len-- > 0) {
-            *op++ = *match++;
+        // Correction critique: gestion de l'overlapping sécurisée
+        for (size_t i = 0; i < match_len; i++) {
+            op[i] = match[i];
         }
+        op += match_len;
     }
     
     int decompressed_size = (int)(op - (uint8_t*)dst);
