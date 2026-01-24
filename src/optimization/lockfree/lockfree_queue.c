@@ -226,9 +226,13 @@ bool lockfree_stack_push(lockfree_stack_t* stack, void* data) {
     if (!node) return false;
     
     node->data = data;
-    node->next = (simple_stack_node_t*)atomic_load(&stack->top);
+    simple_stack_node_t* old_top;
     
-    atomic_store(&stack->top, (lockfree_stack_node_t*)node);
+    do {
+        old_top = (simple_stack_node_t*)atomic_load(&stack->top);
+        node->next = old_top;
+    } while (!atomic_compare_exchange_weak(&stack->top, (lockfree_stack_node_t**)&old_top, (lockfree_stack_node_t*)node));
+    
     atomic_fetch_add(&stack->size, 1);
     atomic_fetch_add(&stack->push_count, 1);
     
@@ -238,12 +242,17 @@ bool lockfree_stack_push(lockfree_stack_t* stack, void* data) {
 void* lockfree_stack_pop(lockfree_stack_t* stack) {
     if (!stack) return NULL;
     
-    simple_stack_node_t* node = (simple_stack_node_t*)atomic_load(&stack->top);
-    if (!node) return NULL;
+    simple_stack_node_t* old_top;
+    simple_stack_node_t* next_node;
     
-    void* data = node->data;
-    atomic_store(&stack->top, (lockfree_stack_node_t*)node->next);
-    free(node);
+    do {
+        old_top = (simple_stack_node_t*)atomic_load(&stack->top);
+        if (!old_top) return NULL;
+        next_node = old_top->next;
+    } while (!atomic_compare_exchange_weak(&stack->top, (lockfree_stack_node_t**)&old_top, (lockfree_stack_node_t*)next_node));
+    
+    void* data = old_top->data;
+    free(old_top);
     
     atomic_fetch_sub(&stack->size, 1);
     atomic_fetch_add(&stack->pop_count, 1);

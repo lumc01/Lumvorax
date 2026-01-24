@@ -205,6 +205,7 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
     uint8_t* op_end = op + dst_capacity;
     
     while (ip < ip_end) {
+        if (ip >= ip_end) break;
         uint8_t token = *ip++;
         
         size_t literal_len = (token >> 4) & 0x0F;
@@ -217,12 +218,14 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
             } while (s == 255);
         }
         
-        if (ip + literal_len > ip_end) return -3;
-        if (op + literal_len > op_end) return -4;
-        
-        memcpy(op, ip, literal_len);
-        ip += literal_len;
-        op += literal_len;
+        if (literal_len > 0) {
+            if (ip + literal_len > ip_end) return -3;
+            if (op + literal_len > op_end) return -4;
+            
+            memcpy(op, ip, literal_len);
+            ip += literal_len;
+            op += literal_len;
+        }
         
         if (ip >= ip_end) break;
         
@@ -232,9 +235,7 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
         ip += 2;
         
         if (offset == 0) return -6;
-        if (op - (uint8_t*)dst < offset) return -7;
-        
-        const uint8_t* match = op - offset;
+        if ((size_t)(op - (uint8_t*)dst) < (size_t)offset) return -7;
         
         size_t match_len = (token & 0x0F) + LZ4_MIN_MATCH;
         if ((token & 0x0F) == 15) {
@@ -248,6 +249,7 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
         
         if (op + match_len > op_end) return -9;
         
+        const uint8_t* match = op - offset;
         while (match_len-- > 0) {
             *op++ = *match++;
         }
