@@ -5,10 +5,14 @@
 #include <stdbool.h>
 #include <time.h>
 
+#include "formal_kernel_v40.h"
+
 typedef struct {
     char decision_label[128];
     float confidence;
     float lyapunov_stability;
+    logic_layer_t layer; // [V40] Identification de la couche
+    bool formal_validation; // [V40] Validation par le Kernel
     time_t timestamp;
 } reasoning_node_t;
 
