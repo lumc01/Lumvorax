@@ -196,17 +196,13 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
                    void* dst, size_t dst_capacity) {
     if (!ctx || !src || !dst || src_size == 0) return -1;
     
-    uint64_t start = get_time_ns();
-    
     const uint8_t* ip = (const uint8_t*)src;
     const uint8_t* ip_end = ip + src_size;
-    
     uint8_t* op = (uint8_t*)dst;
     uint8_t* op_end = op + dst_capacity;
     
     while (ip < ip_end) {
         uint8_t token = *ip++;
-        
         size_t literal_len = (token >> 4) & 0x0F;
         if (literal_len == 15) {
             uint8_t s;
@@ -218,24 +214,20 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
         }
         
         if (literal_len > 0) {
-            if (ip + literal_len > ip_end) return -3;
-            if (op + literal_len > op_end) return -4;
-            
+            if (ip + literal_len > ip_end || op + literal_len > op_end) return -3;
             for (size_t i = 0; i < literal_len; i++) op[i] = ip[i];
             ip += literal_len;
             op += literal_len;
         }
         
         if (ip >= ip_end) break;
-        
         if (ip + 2 > ip_end) return -5;
         uint16_t offset = (uint16_t)ip[0] | ((uint16_t)ip[1] << 8);
         ip += 2;
         
-        if (offset == 0) return -6;
-        if ((size_t)(op - (uint8_t*)dst) < (size_t)offset) return -7;
+        if (offset == 0 || (size_t)(op - (uint8_t*)dst) < (size_t)offset) return -6;
         
-        size_t match_len = (token & 0x0F) + LZ4_MIN_MATCH;
+        size_t match_len = (token & 0x0F) + 4;
         if ((token & 0x0F) == 15) {
             uint8_t s;
             do {
@@ -246,19 +238,13 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
         }
         
         if (op + match_len > op_end) return -9;
-        
         const uint8_t* match = op - offset;
-        // Correction critique: gestion de l'overlapping sécurisée
         for (size_t i = 0; i < match_len; i++) {
             op[i] = match[i];
         }
         op += match_len;
     }
-    
-    int decompressed_size = (int)(op - (uint8_t*)dst);
-    ctx->stats.decompression_time_ns += get_time_ns() - start;
-    
-    return decompressed_size;
+    return (int)(op - (uint8_t*)dst);
 }
 
 int lz4_compress_fast(lz4_context_t* ctx, const void* src, size_t src_size,

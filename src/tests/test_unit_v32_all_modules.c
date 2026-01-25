@@ -239,9 +239,9 @@ void test_lz4_compression(void) {
         int c_size = lz4_compress(ctx, src, src_size, compressed, bound);
         TEST("lz4_compress", c_size > 0);
         
-        // ISOLATION: Le crash semble lié à la décompression LZ4
-        // int d_size = lz4_decompress(ctx, compressed, c_size, decompressed, src_size);
-        // TEST("lz4_decompress_size", d_size == (int)src_size);
+        int d_size = lz4_decompress(ctx, compressed, c_size, decompressed, src_size);
+        TEST("lz4_decompress_size", d_size == (int)src_size);
+        TEST("lz4_decompress_content", strcmp(src, decompressed) == 0);
         
         free(compressed);
         free(decompressed);
@@ -251,11 +251,46 @@ void test_lz4_compression(void) {
 
 void test_distributed_node(void) {
     printf(ANSI_YELLOW "\n[MODULE] DISTRIBUTED_NODE\n" ANSI_RESET);
-    // ISOLATION: Le crash peut aussi venir des threads distributed
+    dist_cluster_t* cluster = dist_cluster_create("test_node", 5001);
+    TEST("dist_cluster_create", cluster != NULL);
+    if (cluster) {
+        int node_id = dist_cluster_add_node(cluster, "remote_1", "127.0.0.1", 5002);
+        TEST("dist_cluster_add_node", node_id > 0);
+        
+        TEST("dist_cluster_start", dist_cluster_start(cluster) == 0);
+        
+        dist_task_t task = {0};
+        TEST("dist_task_submit", dist_task_submit(cluster, &task) == 0);
+        
+        dist_cluster_destroy(cluster);
+        TEST("dist_cluster_destroy", true);
+    }
 }
 
 void test_wasm_export(void) {
     printf(ANSI_YELLOW "\n[MODULE] WASM_EXPORT\n" ANSI_RESET);
+    wasm_module_t* module = wasm_module_create();
+    TEST("wasm_module_create", module != NULL);
+    if (module) {
+        wasm_value_type_t params[] = {WASM_TYPE_I32, WASM_TYPE_I32};
+        wasm_value_type_t results[] = {WASM_TYPE_I32};
+        
+        TEST("wasm_module_add_export", wasm_module_add_export(module, "add", (void*)12345, params, 2, results, 1) == 0);
+        TEST("wasm_module_compile", wasm_module_compile(module) == 0);
+        
+        wasm_instance_t* instance = wasm_instance_create(module);
+        TEST("wasm_instance_create", instance != NULL);
+        if (instance) {
+            wasm_value_t args[2] = {
+                {.type = WASM_TYPE_I32, .value = {.i32 = 10}},
+                {.type = WASM_TYPE_I32, .value = {.i32 = 20}}
+            };
+            wasm_value_t results_val[1];
+            TEST("wasm_instance_call", wasm_instance_call(instance, "add", args, 2, results_val, 1) == 0);
+            wasm_instance_destroy(instance);
+        }
+        wasm_module_destroy(module);
+    }
 }
 
 void test_version_manager(void) {
