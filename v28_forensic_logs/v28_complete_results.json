@@ -1,146 +1,146 @@
 {
   "bloc1_performance": {
     "create_destroy": {
-      "ops_per_sec": 1519018.3374374679,
-      "mean_ns": 658.3199,
-      "median_ns": 550,
+      "ops_per_sec": 1020426.9058003107,
+      "mean_ns": 979.982,
+      "median_ns": 950,
       "std_ns": 0,
       "p99_ns": 0,
-      "min_ns": 510,
-      "max_ns": 17410
+      "min_ns": 850,
+      "max_ns": 53220
     },
     "move": {
-      "throughput_gbps": 4.902430149945422,
-      "mean_ns": 208.876,
-      "cycles_per_byte_est": 0.713931640625
+      "throughput_gbps": 3.4444018379112933,
+      "mean_ns": 297.294,
+      "cycles_per_byte_est": 1.0161416015625
     },
     "fuse": {
-      "mean_ns": 8876.749,
-      "elements_per_sec": 11265385.559510583,
+      "mean_ns": 12327.1,
+      "elements_per_sec": 8112208.061912372,
       "p99_ns": 0
     },
     "split": {
-      "mean_ns": 1386.39,
-      "splits_per_sec": 5770382.071422904
+      "mean_ns": 1075.23,
+      "splits_per_sec": 7440268.593696232
     },
     "align_ab": {
-      "mean_unaligned_ns": 54102.6665,
-      "mean_aligned_ns": 54357.6575,
-      "speedup_factor": 0.995309014189951,
-      "alignment_benefit_pct": -0.46909858100490087
+      "mean_unaligned_ns": 55349.571,
+      "mean_aligned_ns": 58013.9155,
+      "speedup_factor": 0.9540740445281616,
+      "alignment_benefit_pct": -4.592595547183842
     },
     "scaling": {
       "1": {
-        "total_ns": 2602550,
-        "throughput": 3842385.352827035
+        "total_ns": 3657700,
+        "throughput": 2733958.498509993
       },
       "2": {
-        "total_ns": 2303280,
-        "throughput": 4341634.538571081,
-        "efficiency": 56.49660484179084
+        "total_ns": 2683189,
+        "throughput": 3726908.5405463423,
+        "efficiency": 68.15956684378177
       },
       "4": {
-        "total_ns": 2740839,
-        "throughput": 3648517.844353499,
-        "efficiency": 23.738625289555497
+        "total_ns": 3313940,
+        "throughput": 3017556.141632015,
+        "efficiency": 27.59328774811855
       }
     }
   },
   "bloc2_cache": {
     "cache_hit": {
       "1024": {
-        "sequential_ns": 41019.5,
-        "random_ns": 34180.5,
-        "seq_rand_ratio": 0.833274418264484,
+        "sequential_ns": 45346.89,
+        "random_ns": 22721.3,
+        "seq_rand_ratio": 0.5010553094159269,
         "likely_cache_level": "L1"
       },
       "32768": {
-        "sequential_ns": 472874.67,
-        "random_ns": 215029.28,
-        "seq_rand_ratio": 0.45472784575244857,
+        "sequential_ns": 472836.16,
+        "random_ns": 292473.88,
+        "seq_rand_ratio": 0.6185522697756449,
         "likely_cache_level": "L1"
       },
       "262144": {
-        "sequential_ns": 474547.48,
-        "random_ns": 258550.28,
-        "seq_rand_ratio": 0.5448354293231101,
+        "sequential_ns": 436755.37,
+        "random_ns": 226347.99,
+        "seq_rand_ratio": 0.5182488998360798,
         "likely_cache_level": "L2"
       },
       "1048576": {
-        "sequential_ns": 571101.27,
-        "random_ns": 354457.28,
-        "seq_rand_ratio": 0.6206557376417672,
+        "sequential_ns": 433914.26,
+        "random_ns": 335731.47,
+        "seq_rand_ratio": 0.7737276714528809,
         "likely_cache_level": "L3"
       },
       "8388608": {
-        "sequential_ns": 390173.08,
-        "random_ns": 251768.08,
-        "seq_rand_ratio": 0.6452728107228719,
+        "sequential_ns": 468456.76,
+        "random_ns": 276886.48,
+        "seq_rand_ratio": 0.5910609124308506,
         "likely_cache_level": "L3"
       }
     },
     "temporal_locality": {
       "64": {
-        "mean_ns": 532452533.92,
-        "ns_per_access": 50.77863063049317
+        "mean_ns": 566445127.34,
+        "ns_per_access": 54.02041695976258
       },
       "256": {
-        "mean_ns": 197953430.76,
-        "ns_per_access": 48.32847430664062
+        "mean_ns": 209251302.38,
+        "ns_per_access": 51.08674374511719
       },
       "1024": {
-        "mean_ns": 49449447.28,
-        "ns_per_access": 48.290475859375
+        "mean_ns": 51887943.74,
+        "ns_per_access": 50.67182005859375
       },
       "4096": {
-        "mean_ns": 11705927.94,
-        "ns_per_access": 45.726281015625
+        "mean_ns": 13691735.58,
+        "ns_per_access": 53.483342109375
       }
     },
     "cache_line": {
-      "stride_1_ns": 87075.5648,
-      "stride_64_ns": 77340.3074,
-      "ratio": 1.1258755974378243
+      "stride_1_ns": 83898.7298,
+      "stride_64_ns": 87288.9514,
+      "ratio": 0.9611609310728871
     },
     "saturation": {
       "by_size": {
         "0.25": {
-          "mean_ns": 662581.45,
-          "ns_per_access": 65.71924717317992,
-          "bandwidth_mbs": 15.21624247101998
+          "mean_ns": 682030.95,
+          "ns_per_access": 67.64837829795675,
+          "bandwidth_mbs": 14.782320362441029
         },
         "0.5": {
-          "mean_ns": 530366.0,
-          "ns_per_access": 52.60523705613966,
-          "bandwidth_mbs": 19.00951418454426
+          "mean_ns": 568882.95,
+          "ns_per_access": 56.4256050386828,
+          "bandwidth_mbs": 17.722450637692695
         },
         "1": {
-          "mean_ns": 557908.95,
-          "ns_per_access": 55.33713052965681,
-          "bandwidth_mbs": 18.071049048415517
+          "mean_ns": 592743.45,
+          "ns_per_access": 58.79224856179329,
+          "bandwidth_mbs": 17.00904497552862
         },
         "2": {
-          "mean_ns": 563171.45,
-          "ns_per_access": 56.12631552720749,
-          "bandwidth_mbs": 17.816954321814432
+          "mean_ns": 525493.45,
+          "ns_per_access": 52.3712826390273,
+          "bandwidth_mbs": 19.094434002935717
         },
         "4": {
-          "mean_ns": 568967.95,
-          "ns_per_access": 56.83995504495504,
-          "bandwidth_mbs": 17.593258108826692
+          "mean_ns": 590200.45,
+          "ns_per_access": 58.961083916083915,
+          "bandwidth_mbs": 16.960339491438884
         },
         "8": {
-          "mean_ns": 985373.45,
-          "ns_per_access": 98.43890609390608,
-          "bandwidth_mbs": 10.158585052195185
+          "mean_ns": 627533.5,
+          "ns_per_access": 62.69065934065934,
+          "bandwidth_mbs": 15.951339649596397
         },
         "16": {
-          "mean_ns": 567783.5,
-          "ns_per_access": 56.75564774090364,
-          "bandwidth_mbs": 17.619391898496524
+          "mean_ns": 623808.45,
+          "ns_per_access": 62.355902638944414,
+          "bandwidth_mbs": 16.036974170516608
         }
       },
-      "saturation_point_mb": 8
+      "saturation_point_mb": null
     }
   },
   "bloc3_forensic": {
@@ -165,47 +165,47 @@
       "lost_events": 0
     },
     "overhead": {
-      "mean_without_log_ns": 1852.78,
-      "mean_with_log_ns": 2881.9,
-      "overhead_ns": 1029.1200000000001,
-      "overhead_pct": 55.54464102591782
+      "mean_without_log_ns": 4734.0,
+      "mean_with_log_ns": 2663.109,
+      "overhead_ns": -2070.891,
+      "overhead_pct": -43.74505703422054
     }
   },
   "bloc4_differentiation": {
     "malloc_vs_lum": {
       "64": {
-        "malloc_mean_ns": 243.93,
-        "lum_mean_ns": 1875.4,
-        "overhead_ns": 1631.47,
-        "overhead_pct": 668.8271225351535,
+        "malloc_mean_ns": 143.83,
+        "lum_mean_ns": 1419.61,
+        "overhead_ns": 1275.78,
+        "overhead_pct": 887.005492595425,
         "forensic_value_added": true
       },
       "256": {
-        "malloc_mean_ns": 262.93,
-        "lum_mean_ns": 1823.18,
-        "overhead_ns": 1560.25,
-        "overhead_pct": 593.4088921005591,
+        "malloc_mean_ns": 237.48,
+        "lum_mean_ns": 2432.25,
+        "overhead_ns": 2194.77,
+        "overhead_pct": 924.1915108640727,
         "forensic_value_added": true
       },
       "1024": {
-        "malloc_mean_ns": 266.55,
-        "lum_mean_ns": 1219.1,
-        "overhead_ns": 952.55,
-        "overhead_pct": 357.3625961358094,
+        "malloc_mean_ns": 217.65,
+        "lum_mean_ns": 1845.46,
+        "overhead_ns": 1627.81,
+        "overhead_pct": 747.902595910866,
         "forensic_value_added": true
       },
       "4096": {
-        "malloc_mean_ns": 210.4,
-        "lum_mean_ns": 1222.51,
-        "overhead_ns": 1012.11,
-        "overhead_pct": 481.0408745247148,
+        "malloc_mean_ns": 370.99,
+        "lum_mean_ns": 1972.64,
+        "overhead_ns": 1601.65,
+        "overhead_pct": 431.72322704116016,
         "forensic_value_added": true
       },
       "16384": {
-        "malloc_mean_ns": 352.34,
-        "lum_mean_ns": 1408.61,
-        "overhead_ns": 1056.27,
-        "overhead_pct": 299.78713742407905,
+        "malloc_mean_ns": 533.57,
+        "lum_mean_ns": 2181.83,
+        "overhead_ns": 1648.2599999999998,
+        "overhead_pct": 308.9116704462394,
         "forensic_value_added": true
       }
     },
