@@ -222,6 +222,7 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
         
         if (ip >= ip_end) break;
         if (ip + 2 > ip_end) return -5;
+        // Extraction sécurisée bit-à-bit pour éviter l'alignement mémoire
         uint16_t offset = (uint16_t)ip[0] | ((uint16_t)ip[1] << 8);
         ip += 2;
         
@@ -239,6 +240,7 @@ int lz4_decompress(lz4_context_t* ctx, const void* src, size_t src_size,
         
         if (op + match_len > op_end) return -9;
         const uint8_t* match = op - offset;
+        // Boucle de copie explicite pour gérer l'overlapping sans memcpy
         for (size_t i = 0; i < match_len; i++) {
             op[i] = match[i];
         }
