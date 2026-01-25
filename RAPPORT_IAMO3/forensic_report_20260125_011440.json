@@ -1,0 +1,1385 @@
+{
+  "metadata": {
+    "timestamp": "2026-01-25T01:13:54.499887Z",
+    "system": {
+      "sysname": "Linux",
+      "nodename": "dd1906387582",
+      "release": "6.14.11",
+      "version": "#1-NixOS SMP PREEMPT_DYNAMIC Tue Jan  1 00:00:00 UTC 1980",
+      "machine": "x86_64"
+    },
+    "python_version": "3.12.11 (main, Jun  3 2025, 15:41:47) [GCC 14.2.1 20250322]",
+    "working_directory": "/home/runner/workspace"
+  },
+  "source_analysis": {
+    "total_files": 188,
+    "total_code_lines": 29676,
+    "files": [
+      {
+        "path": "src/main.c",
+        "size_bytes": 19147,
+        "code_lines": 310,
+        "total_lines": 427,
+        "sha256": "f6f47c7f8c29a544a9861bb4d9de2aebb45269763dc4ac2e7be1f381e5237735"
+      },
+      {
+        "path": "src/main_blocked_backup.c",
+        "size_bytes": 15512,
+        "code_lines": 252,
+        "total_lines": 340,
+        "sha256": "0e64333bbaa57895d458f9488cada0c15579773c46f3fd7a61599f46d3fc6c74"
+      },
+      {
+        "path": "src/main_complete_backup.c",
+        "size_bytes": 12342,
+        "code_lines": 266,
+        "total_lines": 347,
+        "sha256": "8426702a6c36eebf9407f918cb2abf00bd2f09050478d5895a4278d60e7ae93a"
+      },
+      {
+        "path": "src/main_debug_temp.c",
+        "size_bytes": 5510,
+        "code_lines": 117,
+        "total_lines": 160,
+        "sha256": "76b05ee019380b251318349b56cbe2d18af89e0b8077babb5c75c86478fa3ab8"
+      },
+      {
+        "path": "src/main_simple.c",
+        "size_bytes": 12368,
+        "code_lines": 200,
+        "total_lines": 272,
+        "sha256": "e697b8b9ab349361bff01a71b533554ef298a0615a9ae20a3964ebe485341fbc"
+      },
+      {
+        "path": "src/main_working_backup.c",
+        "size_bytes": 1,
+        "code_lines": 0,
+        "total_lines": 1,
+        "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+      },
+      {
+        "path": "src/test_all_modules_authentic.c",
+        "size_bytes": 11109,
+        "code_lines": 223,
+        "total_lines": 305,
+        "sha256": "50c6be4ef77ab91124cf4032b13f41ffa17c024a125167df11ffbcedf0615c46"
+      },
+      {
+        "path": "src/advanced_calculations/audio_processor.c",
+        "size_bytes": 19258,
+        "code_lines": 334,
+        "total_lines": 486,
+        "sha256": "00a862601fddfadb2727af32dc64e260f377ce198678f2356dd5478031aeb0c8"
+      },
+      {
+        "path": "src/advanced_calculations/audio_processor.h",
+        "size_bytes": 2428,
+        "code_lines": 57,
+        "total_lines": 80,
+        "sha256": "6034b8b98429ea020ba2545ddf097e11ad700336bb01bd66b58ab9d62472f470"
+      },
+      {
+        "path": "src/advanced_calculations/golden_score_optimizer.c",
+        "size_bytes": 23321,
+        "code_lines": 416,
+        "total_lines": 593,
+        "sha256": "c2df0a74c9cb67dae726f208a96acae48e7ea89db50eab8e9f15cb74b1922143"
+      },
+      {
+        "path": "src/advanced_calculations/golden_score_optimizer.h",
+        "size_bytes": 4759,
+        "code_lines": 100,
+        "total_lines": 138,
+        "sha256": "4a366d29922ea6b1d93e3eef959144bb78904f83b110b35e5057496006693231"
+      },
+      {
+        "path": "src/advanced_calculations/image_processor.c",
+        "size_bytes": 16022,
+        "code_lines": 282,
+        "total_lines": 410,
+        "sha256": "61ce93efeb1d895ab9f6c2ee76dda8acd65c2ec2a79f3a0cd4c0fa3c28178835"
+      },
+      {
+        "path": "src/advanced_calculations/image_processor.h",
+        "size_bytes": 2245,
+        "code_lines": 54,
+        "total_lines": 77,
+        "sha256": "4e906c1d0081eab9bc54a9d0f24a29bc27574517acecf2c9c505f98b80767230"
+      },
+      {
+        "path": "src/advanced_calculations/matrix_calculator.c",
+        "size_bytes": 23744,
+        "code_lines": 453,
+        "total_lines": 647,
+        "sha256": "9b2cd94c869dbe9dbe4a4fac0e7c9647fa155c7c7c344bb3e8ab93b682657435"
+      },
+      {
+        "path": "src/advanced_calculations/matrix_calculator.h",
+        "size_bytes": 6133,
+        "code_lines": 93,
+        "total_lines": 127,
+        "sha256": "20bf2335da5906f238d232131a212e352b03faeeb5cd05e52fbe1d6808a74303"
+      },
+      {
+        "path": "src/advanced_calculations/neural_advanced_optimizers.c",
+        "size_bytes": 15318,
+        "code_lines": 278,
+        "total_lines": 399,
+        "sha256": "fd7402cef60f268afb7eaeec7a2eaac65b9567f162900dcc4d30f318f2943496"
+      },
+      {
+        "path": "src/advanced_calculations/neural_advanced_optimizers.h",
+        "size_bytes": 5560,
+        "code_lines": 99,
+        "total_lines": 149,
+        "sha256": "2da37bda6b9b478bbe8f9358d54fe2611782b25da773b9d3e039a91908a72462"
+      },
+      {
+        "path": "src/advanced_calculations/neural_network_processor.c",
+        "size_bytes": 25931,
+        "code_lines": 504,
+        "total_lines": 711,
+        "sha256": "a02ee2322d869ba42f885b96f4c5703a26f97e466448e579fead589dda86efa3"
+      },
+      {
+        "path": "src/advanced_calculations/neural_network_processor.h",
+        "size_bytes": 7168,
+        "code_lines": 118,
+        "total_lines": 159,
+        "sha256": "15d139950e225b291afcad35227eb7d919e28599cf3bd09067b72e6ee4df70c7"
+      },
+      {
+        "path": "src/advanced_calculations/neural_ultra_precision_architecture.c",
+        "size_bytes": 5861,
+        "code_lines": 126,
+        "total_lines": 163,
+        "sha256": "2a120c5a3ec398cfeb849bbaf65fcf40b442057454a261d4b0694f70422dced9"
+      },
+      {
+        "path": "src/advanced_calculations/neural_ultra_precision_architecture.h",
+        "size_bytes": 3417,
+        "code_lines": 73,
+        "total_lines": 97,
+        "sha256": "eb98426457f3df575d5586c41c143d6966c8cb6d87018157b17c13fe6ec77c39"
+      },
+      {
+        "path": "src/advanced_calculations/quantum_simulator.c",
+        "size_bytes": 11686,
+        "code_lines": 265,
+        "total_lines": 335,
+        "sha256": "aec17b119fd6d3779b4851b57d500d665d10f8df1bbdd99928f0c9aa2e6f3de7"
+      },
+      {
+        "path": "src/advanced_calculations/quantum_simulator.h",
+        "size_bytes": 6509,
+        "code_lines": 103,
+        "total_lines": 137,
+        "sha256": "11300632077763fc9488f46762e488ade31ed18f0fd0faaa7cc2fd215ecdce87"
+      },
+      {
+        "path": "src/advanced_calculations/tsp_optimizer.c",
+        "size_bytes": 14152,
+        "code_lines": 305,
+        "total_lines": 425,
+        "sha256": "262cfd510161bd21f71c6c2a7ff64125218e56d07b8631af01879516ef8d6b0b"
+      },
+      {
+        "path": "src/advanced_calculations/tsp_optimizer.h",
+        "size_bytes": 3705,
+        "code_lines": 90,
+        "total_lines": 117,
+        "sha256": "37d83f66138e8d388dbb7837ba6f9879c0da57c61420f6af0950df68a7797358"
+      },
+      {
+        "path": "src/advanced_calculations/video_processor.h",
+        "size_bytes": 2070,
+        "code_lines": 39,
+        "total_lines": 55,
+        "sha256": "345b46b3b561f74133e785f75fef91e446947d41741f41aad6defe376df9e75e"
+      },
+      {
+        "path": "src/advanced_calculations/disabled/video_processor.c",
+        "size_bytes": 19569,
+        "code_lines": 332,
+        "total_lines": 472,
+        "sha256": "ee76cfef76672a5f2367369f600d410886a80084b3292d66102ef30b6de4e29d"
+      },
+      {
+        "path": "src/binary/binary_lum_converter.c",
+        "size_bytes": 15868,
+        "code_lines": 384,
+        "total_lines": 488,
+        "sha256": "6fd8b666eff2bc6c5e9c171547480c20e4f2680c9c33109538d5e87d79d68a52"
+      },
+      {
+        "path": "src/binary/binary_lum_converter.h",
+        "size_bytes": 2542,
+        "code_lines": 46,
+        "total_lines": 68,
+        "sha256": "91a6d0b5ee05d047d699384c78e23ef3d766a716d108e684a8a38aca8677a9f8"
+      },
+      {
+        "path": "src/cicd/benchmark_runner.c",
+        "size_bytes": 9722,
+        "code_lines": 239,
+        "total_lines": 302,
+        "sha256": "e602beddf3ed68856782ebe81ca184e49224f69994f882a2c43d94edb51de5a8"
+      },
+      {
+        "path": "src/cicd/benchmark_runner.h",
+        "size_bytes": 2602,
+        "code_lines": 68,
+        "total_lines": 76,
+        "sha256": "2684077b70cfe63c68f1fdc85506fdf350d8840844a02da9bddf9a13767e95c0"
+      },
+      {
+        "path": "src/cicd/regression_detector.c",
+        "size_bytes": 9776,
+        "code_lines": 215,
+        "total_lines": 276,
+        "sha256": "cba2b06824ef5d37f235fa1a2ec5acb42f21aad01410b4344db05281ed485278"
+      },
+      {
+        "path": "src/cicd/regression_detector.h",
+        "size_bytes": 2551,
+        "code_lines": 63,
+        "total_lines": 71,
+        "sha256": "8f164d94ca6e7978d5fdcf77985ec8ef83e95289dbd2c38226c219c79e509abf"
+      },
+      {
+        "path": "src/common/common_types.h",
+        "size_bytes": 9286,
+        "code_lines": 224,
+        "total_lines": 303,
+        "sha256": "37bbb2edb9df6b9ab9476a24704769ba9a40d956e784daf3506d351be1bb88b4"
+      },
+      {
+        "path": "src/common/debug_macros.h",
+        "size_bytes": 593,
+        "code_lines": 17,
+        "total_lines": 22,
+        "sha256": "8c1420525f65c1727e3945284cea0c618ccc9fc8d3c1a4fa1a6b521e37324231"
+      },
+      {
+        "path": "src/common/float_utils.h",
+        "size_bytes": 1124,
+        "code_lines": 27,
+        "total_lines": 38,
+        "sha256": "b4b5e9177ba0b4ba5a86a1412b206ca122be5089047ea69999cb37c8d605028f"
+      },
+      {
+        "path": "src/common/magic_numbers.h",
+        "size_bytes": 1945,
+        "code_lines": 28,
+        "total_lines": 45,
+        "sha256": "bfceba7ba58f174491bcd06ad5d81e3da960fcc3af7f52058379c47b2cf07174"
+      },
+      {
+        "path": "src/common/module_dependency_manager.h",
+        "size_bytes": 1650,
+        "code_lines": 36,
+        "total_lines": 51,
+        "sha256": "c92e6146deaac27c82f17fc1689949954e79dbd2e84098851858b2b082f8fcbf"
+      },
+      {
+        "path": "src/common/safe_arithmetic.h",
+        "size_bytes": 911,
+        "code_lines": 35,
+        "total_lines": 47,
+        "sha256": "ee8d1bdfd19289a75e27e6421ca13561efe59c90a75cd6b3b2907dd30efdbbba"
+      },
+      {
+        "path": "src/common/safe_string.h",
+        "size_bytes": 1796,
+        "code_lines": 40,
+        "total_lines": 53,
+        "sha256": "499c3f4b82afd85c8410ae1e22b0a86a4ed44ed93c3444e8dceb4d0075fc6e42"
+      },
+      {
+        "path": "src/complex_modules/ai_dynamic_config_manager.c",
+        "size_bytes": 20268,
+        "code_lines": 365,
+        "total_lines": 492,
+        "sha256": "cd334f02751bb692d5ec9bcf332e7ff90937dc635ce4bd41c65382330409c056"
+      },
+      {
+        "path": "src/complex_modules/ai_dynamic_config_manager.h",
+        "size_bytes": 7952,
+        "code_lines": 128,
+        "total_lines": 192,
+        "sha256": "3165418b16516669aab64d8e5519199b18f33650e74c2a5b8337c6d8087b65ff"
+      },
+      {
+        "path": "src/complex_modules/ai_optimization.c",
+        "size_bytes": 21186,
+        "code_lines": 417,
+        "total_lines": 594,
+        "sha256": "e124e0de37bfc479b38df75b49fbd021c3a17c35f968f7e9c69ebfb0d11b97e4"
+      },
+      {
+        "path": "src/complex_modules/ai_optimization.h",
+        "size_bytes": 9000,
+        "code_lines": 139,
+        "total_lines": 179,
+        "sha256": "a874e75231cd4a6381a9bfcf3187ebed9aac803aaef82048db15eefce0dc8dcc"
+      },
+      {
+        "path": "src/complex_modules/distributed_computing.c",
+        "size_bytes": 13193,
+        "code_lines": 294,
+        "total_lines": 423,
+        "sha256": "f2cd7f966a21e712f6d0dd030b4db010495f87469d1d7c09f51ed095e28e4b50"
+      },
+      {
+        "path": "src/complex_modules/distributed_computing.h",
+        "size_bytes": 7891,
+        "code_lines": 126,
+        "total_lines": 162,
+        "sha256": "25f7213496d1d19d4cd6312774ab3a632828e75e8d45eb166869975661f1db77"
+      },
+      {
+        "path": "src/complex_modules/realtime_analytics.c",
+        "size_bytes": 17367,
+        "code_lines": 345,
+        "total_lines": 488,
+        "sha256": "d0cac1517f45d61bfa9da2ce1f4f9b65016dd26806d73b7061f77efcccf5228e"
+      },
+      {
+        "path": "src/complex_modules/realtime_analytics.h",
+        "size_bytes": 6749,
+        "code_lines": 109,
+        "total_lines": 143,
+        "sha256": "9b2412467f4a8908b0cb936661a437d9422ac50cb20d7e07140aea170328cf5c"
+      },
+      {
+        "path": "src/crypto/crypto_validator.c",
+        "size_bytes": 11572,
+        "code_lines": 263,
+        "total_lines": 354,
+        "sha256": "8e29ec8e591ae3c890f1d0eb3316c6910e04116a0aaf2d77d02c7c862f5130f2"
+      },
+      {
+        "path": "src/crypto/crypto_validator.h",
+        "size_bytes": 5316,
+        "code_lines": 116,
+        "total_lines": 158,
+        "sha256": "f586cd660b8f036934f45a01b245e05a4773d2eb41157d6c6217866523f545a7"
+      },
+      {
+        "path": "src/crypto/rsa_structure_analyzer.c",
+        "size_bytes": 2697,
+        "code_lines": 47,
+        "total_lines": 59,
+        "sha256": "9e29e7f870f2400bcb9f22c77107df3d92b50170455bc41558ae1cdde622f424"
+      },
+      {
+        "path": "src/crypto/rsa_structure_analyzer.h",
+        "size_bytes": 1049,
+        "code_lines": 36,
+        "total_lines": 45,
+        "sha256": "a42b001c214deea43b286df6564fbc169ebf2955aa5521f0055c615dfb12f430"
+      },
+      {
+        "path": "src/crypto/sha256_test_vectors.h",
+        "size_bytes": 961,
+        "code_lines": 17,
+        "total_lines": 32,
+        "sha256": "7a32d822c321d564329c3ce64684fbd8e6f07d2e498a642680fe46cdecc6eab1"
+      },
+      {
+        "path": "src/crypto/shf/cryo_test.c",
+        "size_bytes": 2651,
+        "code_lines": 62,
+        "total_lines": 84,
+        "sha256": "13d0817b7350a43689bddef71c89487bcb51f37190bd0d19c8f0c87aef410fc2"
+      },
+      {
+        "path": "src/crypto/shf/millennium_solver.c",
+        "size_bytes": 693,
+        "code_lines": 27,
+        "total_lines": 31,
+        "sha256": "ab23dec89869a92099c8ea42a4cc1ab609a6708179608c417d20c2931adcd071"
+      },
+      {
+        "path": "src/crypto/shf/millennium_solver.h",
+        "size_bytes": 333,
+        "code_lines": 9,
+        "total_lines": 13,
+        "sha256": "985224d9ac073e3e59c7f1195ee95e841e6a5264553e7141190575a02a31ae94"
+      },
+      {
+        "path": "src/crypto/shf/shf_core.c",
+        "size_bytes": 1158,
+        "code_lines": 38,
+        "total_lines": 45,
+        "sha256": "dcd17083b8a6310952a0f6eb2201558e5c6e2f354ddfbe6401ee829eca1e3a75"
+      },
+      {
+        "path": "src/crypto/shf/shf_core.h",
+        "size_bytes": 420,
+        "code_lines": 11,
+        "total_lines": 15,
+        "sha256": "46918eeb1ec7bd84443a3fb27d0a45dd7b3f8d5d6927a6fab317e97dcfd573c9"
+      },
+      {
+        "path": "src/crypto/shf/shf_v2.c",
+        "size_bytes": 1259,
+        "code_lines": 42,
+        "total_lines": 51,
+        "sha256": "b02db07f23c0d17205d6a6566c48452117f30f8df1dae15ee88cb1d93ebed175"
+      },
+      {
+        "path": "src/crypto/shf/shf_v2.h",
+        "size_bytes": 448,
+        "code_lines": 15,
+        "total_lines": 20,
+        "sha256": "3f0858e866a53621d6b6e356876ee266375ed793879be50e8493d09722a1ec0c"
+      },
+      {
+        "path": "src/crypto/shf/shf_v3.c",
+        "size_bytes": 912,
+        "code_lines": 36,
+        "total_lines": 41,
+        "sha256": "7e043e440f82ad43d0e44fee06d93c1f22d8d27107ac9333577263e3b2f11d20"
+      },
+      {
+        "path": "src/crypto/shf/shf_v3.h",
+        "size_bytes": 454,
+        "code_lines": 16,
+        "total_lines": 21,
+        "sha256": "309bc6f23844c700069507fb05dfa3a113b050f58b4b21b3ac8cfd36092eeb76"
+      },
+      {
+        "path": "src/debug/enhanced_logging.c",
+        "size_bytes": 2298,
+        "code_lines": 51,
+        "total_lines": 72,
+        "sha256": "74a2bf524fd0c003a6db2be9b9a295681a7b98cb610cef56c0068f62a82d0edc"
+      },
+      {
+        "path": "src/debug/enhanced_logging.h",
+        "size_bytes": 633,
+        "code_lines": 11,
+        "total_lines": 18,
+        "sha256": "1879e797b1f45a96dba1c61f5988c4121bfd0f48206212a99330fad8ced2b438"
+      },
+      {
+        "path": "src/debug/forensic_logger.c",
+        "size_bytes": 6510,
+        "code_lines": 132,
+        "total_lines": 177,
+        "sha256": "e27adac781a685019e2e29f6bec315957c45de185a035171600d3d369458b6ca"
+      },
+      {
+        "path": "src/debug/forensic_logger.h",
+        "size_bytes": 1523,
+        "code_lines": 31,
+        "total_lines": 44,
+        "sha256": "675990edd88849f9d04b256d0264ab602eaf9e498e43f405bf26f28764af5f27"
+      },
+      {
+        "path": "src/debug/logging_system.c",
+        "size_bytes": 2193,
+        "code_lines": 44,
+        "total_lines": 64,
+        "sha256": "059350a18a398750815da11df0f737af069e3960609ee858185a0ab767445755"
+      },
+      {
+        "path": "src/debug/logging_system.h",
+        "size_bytes": 1026,
+        "code_lines": 17,
+        "total_lines": 28,
+        "sha256": "bb2ffde7b85da80a31b4d30c9d6ebf50c240e710c6db899c430e74a2e2c0af50"
+      },
+      {
+        "path": "src/debug/memory_tracker.c",
+        "size_bytes": 17312,
+        "code_lines": 371,
+        "total_lines": 478,
+        "sha256": "55f67b3f907d0f0e793b9715db02ac2928f4b1d49c4c4c0b7a724cd8d56882fe"
+      },
+      {
+        "path": "src/debug/memory_tracker.h",
+        "size_bytes": 2756,
+        "code_lines": 59,
+        "total_lines": 74,
+        "sha256": "bdf671fd76dd52b8c7642e864d8e144797f0f0906649b026f2a6f776b7b0425b"
+      },
+      {
+        "path": "src/debug/ultra_forensic_logger.c",
+        "size_bytes": 12865,
+        "code_lines": 262,
+        "total_lines": 352,
+        "sha256": "7ccb07dd30be5f3dc51975d3596486007b171b3dbaf33b900804d53b796710ad"
+      },
+      {
+        "path": "src/debug/ultra_forensic_logger.h",
+        "size_bytes": 2605,
+        "code_lines": 48,
+        "total_lines": 64,
+        "sha256": "1216a4fc0adcbf5602ad16440fbf1decf1e98017d67f308d19bd348bed30285b"
+      },
+      {
+        "path": "src/distributed/distributed_node.c",
+        "size_bytes": 8695,
+        "code_lines": 231,
+        "total_lines": 308,
+        "sha256": "e92750ff8c0653e0f54af6a78fb6cb87ea8b498ebedf290b7d09174081148168"
+      },
+      {
+        "path": "src/distributed/distributed_node.h",
+        "size_bytes": 2672,
+        "code_lines": 86,
+        "total_lines": 97,
+        "sha256": "6f7617b8dd86eb61de7ce75f838cf919c59d4dec72336af9f86e2fe43cf17c7c"
+      },
+      {
+        "path": "src/file_formats/lum_native_file_handler.c",
+        "size_bytes": 26637,
+        "code_lines": 572,
+        "total_lines": 780,
+        "sha256": "a4ff70551a536c38c1f73719892fb72cba8a3f701dc9fb2ad086136083ed0d1f"
+      },
+      {
+        "path": "src/file_formats/lum_native_file_handler.h",
+        "size_bytes": 13856,
+        "code_lines": 186,
+        "total_lines": 274,
+        "sha256": "c5c729e2bc53c397b4c1e22fb46e587b459d04bc6c31c7e836027dd895637414"
+      },
+      {
+        "path": "src/file_formats/lum_native_universal_format.c",
+        "size_bytes": 29272,
+        "code_lines": 515,
+        "total_lines": 715,
+        "sha256": "c367923c18db1ca0433338e4b71d9966770d13fc7bbee5bf73bc35b0bfe66ae7"
+      },
+      {
+        "path": "src/file_formats/lum_native_universal_format.h",
+        "size_bytes": 15138,
+        "code_lines": 210,
+        "total_lines": 312,
+        "sha256": "e8b37f396f82e6933009c5cd71ab7f0d724853301808cd95de4cf47bfe2a56fa"
+      },
+      {
+        "path": "src/file_formats/lum_secure_serialization.c",
+        "size_bytes": 23486,
+        "code_lines": 436,
+        "total_lines": 598,
+        "sha256": "ca62a642d8d622f115fc5d420d87b78645b3e6c78e65d91bbacae07df3679688"
+      },
+      {
+        "path": "src/file_formats/lum_secure_serialization.h",
+        "size_bytes": 2155,
+        "code_lines": 36,
+        "total_lines": 55,
+        "sha256": "4923817636b4966902282c187418c5bf3071548123a5c5982e1d3efc75a946b3"
+      },
+      {
+        "path": "src/logger/log_manager.c",
+        "size_bytes": 8005,
+        "code_lines": 168,
+        "total_lines": 232,
+        "sha256": "8fdc948b7039c5c7767244e40061d1dc65f64f29879ad32d62e0d0ea7b62f581"
+      },
+      {
+        "path": "src/logger/log_manager.h",
+        "size_bytes": 1727,
+        "code_lines": 37,
+        "total_lines": 49,
+        "sha256": "3da50d58438d047d1b429b116b57ca4e4e3d9289b73060ef599cf5e498d5d016"
+      },
+      {
+        "path": "src/logger/lum_logger.c",
+        "size_bytes": 17399,
+        "code_lines": 390,
+        "total_lines": 512,
+        "sha256": "84dcfa87ed24f2ef0528739cfd4d5885ccc9b70f482a7b919c7e8d76cefc2c7b"
+      },
+      {
+        "path": "src/logger/lum_logger.h",
+        "size_bytes": 7586,
+        "code_lines": 152,
+        "total_lines": 203,
+        "sha256": "030e467f538158b6569f78bd29d1633add6f56396cc29ac22fd9d0ab1ff0899e"
+      },
+      {
+        "path": "src/lum/lum_core.c",
+        "size_bytes": 42341,
+        "code_lines": 779,
+        "total_lines": 1124,
+        "sha256": "88f3308cec10b353941dd90ded6f25a73567c0f3dd4d8314d03efe2d9c5c29da"
+      },
+      {
+        "path": "src/lum/lum_core.h",
+        "size_bytes": 10161,
+        "code_lines": 191,
+        "total_lines": 262,
+        "sha256": "178dc7b4463c920850007b6dafd750fe78a27375872d03407b51418e07a54362"
+      },
+      {
+        "path": "src/lum/lum_optimized_variants.h",
+        "size_bytes": 5362,
+        "code_lines": 113,
+        "total_lines": 142,
+        "sha256": "1d809f2a597188d61e5a2fc77fa1b6507e71515d9d08c280df6193cb588334d2"
+      },
+      {
+        "path": "src/metrics/performance_metrics.c",
+        "size_bytes": 14845,
+        "code_lines": 354,
+        "total_lines": 474,
+        "sha256": "7f3e16a623c16dc3da730e2c080d8760af84d23716c7e471431e302c19ed0874"
+      },
+      {
+        "path": "src/metrics/performance_metrics.h",
+        "size_bytes": 6601,
+        "code_lines": 139,
+        "total_lines": 192,
+        "sha256": "993d121ac9118c7ba8f32037fd5a851ed90d61ab4feb69f596b0191b592605da"
+      },
+      {
+        "path": "src/monitoring/monitoring_alerting.c",
+        "size_bytes": 364,
+        "code_lines": 14,
+        "total_lines": 17,
+        "sha256": "691f874fc971e688cda7c041006e18b1773d6ce469079c41d858e9b240244dc3"
+      },
+      {
+        "path": "src/monitoring/monitoring_alerting.h",
+        "size_bytes": 306,
+        "code_lines": 7,
+        "total_lines": 7,
+        "sha256": "3895d21cdd51531c95e13f98754b1cadf87a9671d41972ab617db76674104153"
+      },
+      {
+        "path": "src/network/hostinger_resource_limiter.c",
+        "size_bytes": 5345,
+        "code_lines": 112,
+        "total_lines": 143,
+        "sha256": "67a11527bc35d77661716f6f790bbf56d24b72f499776f559e5ab71d2a9c5fe1"
+      },
+      {
+        "path": "src/network/hostinger_resource_limiter.h",
+        "size_bytes": 1431,
+        "code_lines": 25,
+        "total_lines": 36,
+        "sha256": "52d43af2c8f4137d6ece310d85ef719431a1fd3c8ece7151246851e68a811eac"
+      },
+      {
+        "path": "src/optimization/memory_optimizer.c",
+        "size_bytes": 20613,
+        "code_lines": 310,
+        "total_lines": 508,
+        "sha256": "06a5c54b36fa8b0e615b776765e0be6f5bbf452c3fc611f98c1f2c007b29b231"
+      },
+      {
+        "path": "src/optimization/memory_optimizer.h",
+        "size_bytes": 2854,
+        "code_lines": 59,
+        "total_lines": 76,
+        "sha256": "46d51f0372c1ffebdf1edd8e731c7bb80863593212145500359ff984a52d20d8"
+      },
+      {
+        "path": "src/optimization/pareto_inverse_optimizer.c",
+        "size_bytes": 14748,
+        "code_lines": 252,
+        "total_lines": 336,
+        "sha256": "dd0d20e0c05cd15d00592a03b214493c3193124371a8ec1a7b97a2fa30f07c7c"
+      },
+      {
+        "path": "src/optimization/pareto_inverse_optimizer.h",
+        "size_bytes": 3519,
+        "code_lines": 61,
+        "total_lines": 84,
+        "sha256": "5e0bb06d933418684fcb7eeccfda6bb61de58c305c1b7eb865fe36dc702e6db2"
+      },
+      {
+        "path": "src/optimization/pareto_metrics_documentation.h",
+        "size_bytes": 922,
+        "code_lines": 25,
+        "total_lines": 29,
+        "sha256": "7659c54f2fe2ec403f8934ba1a61e2de774a23111a1589717578ab2b58a1cc52"
+      },
+      {
+        "path": "src/optimization/pareto_optimizer.c",
+        "size_bytes": 28173,
+        "code_lines": 499,
+        "total_lines": 706,
+        "sha256": "62ee89086a8b0d3c38d0e27f1fc355dd2ca197322741da147627ce21f1759b34"
+      },
+      {
+        "path": "src/optimization/pareto_optimizer.h",
+        "size_bytes": 2966,
+        "code_lines": 49,
+        "total_lines": 71,
+        "sha256": "9109474347a042aa9d443a31b08b7a1ed265a6f09469f8b611ba7e955bc1786b"
+      },
+      {
+        "path": "src/optimization/simd_optimizer.c",
+        "size_bytes": 19878,
+        "code_lines": 374,
+        "total_lines": 516,
+        "sha256": "b1a85c91f170ae0b8430351ae25f447ed57c972cd8d5d036e1e214cebdb27e40"
+      },
+      {
+        "path": "src/optimization/simd_optimizer.h",
+        "size_bytes": 4089,
+        "code_lines": 81,
+        "total_lines": 111,
+        "sha256": "c8581a00b9d01c60ddf6fcacd8dd9d2e7b02a98c307a38c0fb2c73aa732f32aa"
+      },
+      {
+        "path": "src/optimization/thermal_regulator.c",
+        "size_bytes": 212,
+        "code_lines": 8,
+        "total_lines": 9,
+        "sha256": "bc941f3efbc7692df55bf40ef2268eb699eb6d7a6c859cfac860bee9475e3a0e"
+      },
+      {
+        "path": "src/optimization/zero_copy_allocator.c",
+        "size_bytes": 23798,
+        "code_lines": 478,
+        "total_lines": 662,
+        "sha256": "411e0e22d81fc0d292fa8180ae5f80fb9487f516f4a19d739ff9c64095a97d4b"
+      },
+      {
+        "path": "src/optimization/zero_copy_allocator.h",
+        "size_bytes": 2059,
+        "code_lines": 47,
+        "total_lines": 70,
+        "sha256": "239d6b0c515e5ceade2f1e7354a95fb801f9d1e90d45e917f4212b2217299920"
+      },
+      {
+        "path": "src/optimization/async_logging/async_logger.c",
+        "size_bytes": 6339,
+        "code_lines": 170,
+        "total_lines": 213,
+        "sha256": "f465f9a1a35bd6bb875a21710b28501ba813647609dc3e97766eef5fd6858d3b"
+      },
+      {
+        "path": "src/optimization/async_logging/async_logger.h",
+        "size_bytes": 2302,
+        "code_lines": 60,
+        "total_lines": 70,
+        "sha256": "4c6286693d84dae65dc5450172f94ccb98a63ee317bcb326a0465d682679d211"
+      },
+      {
+        "path": "src/optimization/lockfree/lockfree_queue.c",
+        "size_bytes": 7362,
+        "code_lines": 208,
+        "total_lines": 265,
+        "sha256": "5b4fa08ffcb04ad80aa82e884061cce311112829d9e285b8c85ffb0f756a938c"
+      },
+      {
+        "path": "src/optimization/lockfree/lockfree_queue.h",
+        "size_bytes": 2281,
+        "code_lines": 58,
+        "total_lines": 70,
+        "sha256": "4eef7b2ed74dfb4cefc2700ee679dbb19faf704782cb647905a8ccfb6ba93385"
+      },
+      {
+        "path": "src/optimization/lz4_compression/lz4_compressor.c",
+        "size_bytes": 8414,
+        "code_lines": 229,
+        "total_lines": 286,
+        "sha256": "729ec6392cfd91cdaeeb5d21def4e4f0d32f68df58bc91b7658bdbf40ffe2ca9"
+      },
+      {
+        "path": "src/optimization/lz4_compression/lz4_compressor.h",
+        "size_bytes": 1861,
+        "code_lines": 56,
+        "total_lines": 65,
+        "sha256": "b61623a9633052cfb8ed22de46ec146a7f4b0e9025cda81ad22f0515c3f5a181"
+      },
+      {
+        "path": "src/optimization/mmap_io/mmap_persistence.c",
+        "size_bytes": 7031,
+        "code_lines": 192,
+        "total_lines": 244,
+        "sha256": "bb9153a6f90dbf67f4fd00909a3fc8559c3921e37f29636d32bb9a2972952f37"
+      },
+      {
+        "path": "src/optimization/mmap_io/mmap_persistence.h",
+        "size_bytes": 1936,
+        "code_lines": 63,
+        "total_lines": 72,
+        "sha256": "f2b6c8e07c25f80b3fe8fe16be432faae126cee26c1d798f61b38b3809ae8481"
+      },
+      {
+        "path": "src/optimization/simd_batch/simd_batch_processor.c",
+        "size_bytes": 8236,
+        "code_lines": 235,
+        "total_lines": 286,
+        "sha256": "b5f9cb20ed4e0bacacb92cc99bc2acfd7d0c93195b6a17d60fba9cc806084c35"
+      },
+      {
+        "path": "src/optimization/simd_batch/simd_batch_processor.h",
+        "size_bytes": 2331,
+        "code_lines": 64,
+        "total_lines": 73,
+        "sha256": "a784fd6886e168c50949342c67599133cc2f8fced5b05fbde5ba5f99f888d386"
+      },
+      {
+        "path": "src/optimization/slab_allocator/slab_allocator.c",
+        "size_bytes": 8766,
+        "code_lines": 230,
+        "total_lines": 295,
+        "sha256": "9e10919915d252826920bcae20ef05b3943232d17d3d3fe7befb97241e51657d"
+      },
+      {
+        "path": "src/optimization/slab_allocator/slab_allocator.h",
+        "size_bytes": 1912,
+        "code_lines": 59,
+        "total_lines": 68,
+        "sha256": "cb264d05432c3458ba017629c9aefef8cfbdfac8779a23fadc43034ebebe5379"
+      },
+      {
+        "path": "src/parallel/parallel_processor.c",
+        "size_bytes": 14007,
+        "code_lines": 340,
+        "total_lines": 463,
+        "sha256": "600fea8aa075868750e762aeac51677877cbccaa03a6b7637d1f010caeb81207"
+      },
+      {
+        "path": "src/parallel/parallel_processor.h",
+        "size_bytes": 3836,
+        "code_lines": 93,
+        "total_lines": 127,
+        "sha256": "b8f4968fed6297a43e553431bf5291da2590ffd3598cd66e817f4ed549240d79"
+      },
+      {
+        "path": "src/parser/vorax_parser.c",
+        "size_bytes": 19758,
+        "code_lines": 466,
+        "total_lines": 594,
+        "sha256": "31764a8ed6c00061f2a3195beb13eeb43babe5cec67e20fe105c2a18e6ee3bc7"
+      },
+      {
+        "path": "src/parser/vorax_parser.h",
+        "size_bytes": 5408,
+        "code_lines": 139,
+        "total_lines": 165,
+        "sha256": "416b6cc5663fa0b1d761158d78a10daf1568596a62b6c1c5be138157c1a97096"
+      },
+      {
+        "path": "src/persistence/async_io_manager.c",
+        "size_bytes": 1521,
+        "code_lines": 36,
+        "total_lines": 46,
+        "sha256": "831af9df2658b1b80a96d443fd3d0d99110056bb2dcc11289928e3d486a3be07"
+      },
+      {
+        "path": "src/persistence/async_io_manager.h",
+        "size_bytes": 589,
+        "code_lines": 16,
+        "total_lines": 21,
+        "sha256": "dac08d8af29e5f74b9e28f53e65055aacf23dac1d41e2d8491d00cf6c37989ab"
+      },
+      {
+        "path": "src/persistence/data_persistence.c",
+        "size_bytes": 28077,
+        "code_lines": 625,
+        "total_lines": 854,
+        "sha256": "1592246f57971af39b573f85636202f051dda01512e75f97611c759b13a26edd"
+      },
+      {
+        "path": "src/persistence/data_persistence.h",
+        "size_bytes": 8645,
+        "code_lines": 173,
+        "total_lines": 225,
+        "sha256": "d66369eff1fdbc7322ac846006b9a59a030a08ba0c8c0454f3e0b51efc78b6e7"
+      },
+      {
+        "path": "src/persistence/mmap_wal.c",
+        "size_bytes": 435,
+        "code_lines": 14,
+        "total_lines": 16,
+        "sha256": "fb5f241cb432fa7d88b0a5f7cc4629f1a4d68635d945598a5d6fc094f827bcf3"
+      },
+      {
+        "path": "src/persistence/recovery_manager_extension.c",
+        "size_bytes": 16322,
+        "code_lines": 307,
+        "total_lines": 426,
+        "sha256": "33262e24568e828e5159f955e290bee3d4419c78d911ec707f26eb6b45fe1d29"
+      },
+      {
+        "path": "src/persistence/recovery_manager_extension.h",
+        "size_bytes": 3162,
+        "code_lines": 51,
+        "total_lines": 72,
+        "sha256": "53bdeac5ea6050b922e72ead68c715f0f3a4c9ba25c980a3cb6e12a7d1691cd4"
+      },
+      {
+        "path": "src/persistence/storage_backend.h",
+        "size_bytes": 576,
+        "code_lines": 4,
+        "total_lines": 24,
+        "sha256": "3f86b697632d35ffe178fac5dca51b46ac7c9415b43116fa501a8cd7493d27c5"
+      },
+      {
+        "path": "src/persistence/transaction_wal_extension.c",
+        "size_bytes": 23561,
+        "code_lines": 388,
+        "total_lines": 538,
+        "sha256": "8b50dd0e0b2180cd8bf4280c6d02900652d58ea513d97584770cf5336e9f060b"
+      },
+      {
+        "path": "src/persistence/transaction_wal_extension.h",
+        "size_bytes": 3091,
+        "code_lines": 54,
+        "total_lines": 68,
+        "sha256": "6d4279dbe4f10dad5449e34a63c57df12f3d3df363f4617c975caefaeb129a2e"
+      },
+      {
+        "path": "src/security/audit_hardening.c",
+        "size_bytes": 398,
+        "code_lines": 15,
+        "total_lines": 18,
+        "sha256": "e7f722c02d43a24edfb0382bd475e69a0087263008b3f1936539bfc4d2de9d03"
+      },
+      {
+        "path": "src/security/audit_hardening.h",
+        "size_bytes": 339,
+        "code_lines": 9,
+        "total_lines": 9,
+        "sha256": "6b18844b8d30a4cbf6cdffc2d4470cd179c5137b598769031fd42c76d1e42a10"
+      },
+      {
+        "path": "src/spatial/lum_instant_displacement.c",
+        "size_bytes": 11905,
+        "code_lines": 244,
+        "total_lines": 333,
+        "sha256": "695e904ceff4cb16cc572c89a6c19a3c6d08554b79a3c94c939a1daccf6c4c8a"
+      },
+      {
+        "path": "src/spatial/lum_instant_displacement.h",
+        "size_bytes": 1860,
+        "code_lines": 32,
+        "total_lines": 51,
+        "sha256": "7f0a8ae067425cdb65b3f9e9b3a2ffe9fe1bcf591d6208a5856aac96ebc1c9b6"
+      },
+      {
+        "path": "src/tests/test_forensic_complete_system.c",
+        "size_bytes": 18001,
+        "code_lines": 341,
+        "total_lines": 460,
+        "sha256": "7b3051afd9923f2c73d4e23255057d9c27594163295cfc6eb15b55ee5e714045"
+      },
+      {
+        "path": "src/tests/test_integration_complete_39_modules.c",
+        "size_bytes": 6074,
+        "code_lines": 137,
+        "total_lines": 159,
+        "sha256": "0108f4d5d2ce402fb83cc725cedb07672c9d7ebd60353fe13910234713f2023f"
+      },
+      {
+        "path": "src/tests/test_integration_complete_45_modules.c",
+        "size_bytes": 13961,
+        "code_lines": 352,
+        "total_lines": 445,
+        "sha256": "369d7469c8f0d84063808a4279bbda36088bc14d830ab2ea73ebdf3c52938a74"
+      },
+      {
+        "path": "src/tests/test_quantum_simulator_complete.c",
+        "size_bytes": 1451,
+        "code_lines": 32,
+        "total_lines": 43,
+        "sha256": "f186b6d0bdd94d56f48bee0241eb4379b0ff5b5bb3072935e054c00e6d754378"
+      },
+      {
+        "path": "src/tests/test_unit_all_47_modules.c",
+        "size_bytes": 30757,
+        "code_lines": 756,
+        "total_lines": 917,
+        "sha256": "b55476639c53e4d533b0c2a245c13e2e0098897794b7a693dc12c5e89696fc42"
+      },
+      {
+        "path": "src/tests/test_unit_v32_all_modules.c",
+        "size_bytes": 19393,
+        "code_lines": 378,
+        "total_lines": 497,
+        "sha256": "4133d013e066a2e994fa6bd2de227c21eea6b4e16f11f8c2b3780e3ad626fa66"
+      },
+      {
+        "path": "src/tests/individual/test_ai_dynamic_config_manager_individual.c",
+        "size_bytes": 4415,
+        "code_lines": 101,
+        "total_lines": 114,
+        "sha256": "2c6a08e1776fe4593de61ef439321ce49548772eacf6e59d0e4c58472063f91c"
+      },
+      {
+        "path": "src/tests/individual/test_ai_optimization_individual.c",
+        "size_bytes": 4172,
+        "code_lines": 105,
+        "total_lines": 118,
+        "sha256": "fec97c7bc50595656dd3152cd023c7acfafdcb144a0199d35ed1943134fa025b"
+      },
+      {
+        "path": "src/tests/individual/test_audio_processor_individual.c",
+        "size_bytes": 6499,
+        "code_lines": 131,
+        "total_lines": 174,
+        "sha256": "65645fe1391f8501836883bcf22cf199d062418b5f87b42b67da9e7d909efe3a"
+      },
+      {
+        "path": "src/tests/individual/test_binary_lum_converter_individual.c",
+        "size_bytes": 5332,
+        "code_lines": 116,
+        "total_lines": 154,
+        "sha256": "9e709a07845a9864be2cab0600bd7f723c90a05f20850330430dd46f621ee61f"
+      },
+      {
+        "path": "src/tests/individual/test_crypto_validator_individual.c",
+        "size_bytes": 6073,
+        "code_lines": 139,
+        "total_lines": 183,
+        "sha256": "e587ec48256c5a27448dd8012cc2ae2d7762d0b12f4913d52c06cde260367621"
+      },
+      {
+        "path": "src/tests/individual/test_data_persistence_individual.c",
+        "size_bytes": 5675,
+        "code_lines": 124,
+        "total_lines": 162,
+        "sha256": "9ab7af1af2fe24b80530b2ce19a35fa9cfb33ee11133f27858686d569f09e0d7"
+      },
+      {
+        "path": "src/tests/individual/test_distributed_computing_individual.c",
+        "size_bytes": 4220,
+        "code_lines": 105,
+        "total_lines": 118,
+        "sha256": "182405b472f7947affc20d735eae88bc2a9ae01b39610e1c0735f7255b3699d8"
+      },
+      {
+        "path": "src/tests/individual/test_enhanced_logging_individual.c",
+        "size_bytes": 4548,
+        "code_lines": 95,
+        "total_lines": 131,
+        "sha256": "eeccc0037a10db815f93c4717f6e22359642775ac70c205614e7392126ab8d27"
+      },
+      {
+        "path": "src/tests/individual/test_forensic_logger_individual.c",
+        "size_bytes": 4915,
+        "code_lines": 100,
+        "total_lines": 142,
+        "sha256": "080af921bb0920391b19942d8a321b2d7a6217b82e4aa5a9e8a5a772b0afe598"
+      },
+      {
+        "path": "src/tests/individual/test_golden_score_optimizer_individual.c",
+        "size_bytes": 4319,
+        "code_lines": 105,
+        "total_lines": 118,
+        "sha256": "4244ebf59fcb8b9bbd8f96f473e77e2cfb8c96a9570de4fe259c3c881b655abe"
+      },
+      {
+        "path": "src/tests/individual/test_hostinger_resource_limiter_individual.c",
+        "size_bytes": 3967,
+        "code_lines": 91,
+        "total_lines": 104,
+        "sha256": "032b223f0762d0c9f6a8a6f5f2a28d84dd646f944616030283a24340162b4c14"
+      },
+      {
+        "path": "src/tests/individual/test_image_processor_individual.c",
+        "size_bytes": 4319,
+        "code_lines": 107,
+        "total_lines": 120,
+        "sha256": "b451c4bda58076587520bb176d9588c76be47cafdaba57395f26396a0fc680d6"
+      },
+      {
+        "path": "src/tests/individual/test_log_manager_individual.c",
+        "size_bytes": 3615,
+        "code_lines": 92,
+        "total_lines": 105,
+        "sha256": "db9a72363c6edae7e53b8ef069ce0f5347b62ca9813789ddc3526f5b8a4ccbe5"
+      },
+      {
+        "path": "src/tests/individual/test_logging_system_individual.c",
+        "size_bytes": 3359,
+        "code_lines": 83,
+        "total_lines": 96,
+        "sha256": "c1c63cc96395c5b16cb16f52017b89f3421ce1336b07c5468d195b3fc852e11d"
+      },
+      {
+        "path": "src/tests/individual/test_lum_core_individual.c",
+        "size_bytes": 11832,
+        "code_lines": 253,
+        "total_lines": 362,
+        "sha256": "c7344a76781e94831acd60451b49f8f8be181f886fbb99bfaa777b8b87b183ec"
+      },
+      {
+        "path": "src/tests/individual/test_lum_instant_displacement_individual.c",
+        "size_bytes": 3858,
+        "code_lines": 92,
+        "total_lines": 105,
+        "sha256": "b5c09c80996ad0e7bb41e8bc6902bdbea80aa915f87335aae06402733435e3a0"
+      },
+      {
+        "path": "src/tests/individual/test_lum_logger_individual.c",
+        "size_bytes": 3433,
+        "code_lines": 88,
+        "total_lines": 101,
+        "sha256": "5111ee4dbb64a63b02e72227ca813c3c960ff050620ec572c4eb10e4df29950a"
+      },
+      {
+        "path": "src/tests/individual/test_lum_native_file_handler_individual.c",
+        "size_bytes": 2623,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "8a9719ccfa860fe3dd1b2ff616ad1d1b10011e544e984641d13801df8dd4346d"
+      },
+      {
+        "path": "src/tests/individual/test_lum_native_universal_format_individual.c",
+        "size_bytes": 2651,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "3731e6dcd8742ac3d69b889a91fb13d0b9d53ca4e45ba11c2261b5fc5d1f682a"
+      },
+      {
+        "path": "src/tests/individual/test_lum_secure_serialization_individual.c",
+        "size_bytes": 2630,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "8165b2f09bb45c821faec40655ca9ec510db73296675071330535f61d714b5a6"
+      },
+      {
+        "path": "src/tests/individual/test_matrix_calculator_individual.c",
+        "size_bytes": 14276,
+        "code_lines": 308,
+        "total_lines": 405,
+        "sha256": "63f3629ddb9d6eed9d848e4990981003ea9652cfa8222e727ed1a67927049c45"
+      },
+      {
+        "path": "src/tests/individual/test_memory_optimizer_individual.c",
+        "size_bytes": 3572,
+        "code_lines": 91,
+        "total_lines": 104,
+        "sha256": "d392103b88fe2b8802f316da3ffce58e9f9c6370107109e7f3135426bd5436ac"
+      },
+      {
+        "path": "src/tests/individual/test_memory_tracker_individual.c",
+        "size_bytes": 3120,
+        "code_lines": 82,
+        "total_lines": 95,
+        "sha256": "35cc99e3c394c95ed5d4c44e51eba0d12e5b5a3f73496b9ead155401580fac69"
+      },
+      {
+        "path": "src/tests/individual/test_neural_advanced_optimizers_individual.c",
+        "size_bytes": 2644,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "60d7ce418b000edff0db314e6f5223e4d347f84ae8c2bd10c39eb4792c45cef6"
+      },
+      {
+        "path": "src/tests/individual/test_neural_network_processor_individual.c",
+        "size_bytes": 18468,
+        "code_lines": 371,
+        "total_lines": 488,
+        "sha256": "831bcc770e51e3d1df0fb314c9b3839bd2b04d4c6261d97c9fcc903234c77c8e"
+      },
+      {
+        "path": "src/tests/individual/test_neural_ultra_precision_architecture_individual.c",
+        "size_bytes": 2707,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "9d4cc21d55a88de5aa67a568207edfbcc2df61d4ffe2a3d7b54b6c2035bb7fae"
+      },
+      {
+        "path": "src/tests/individual/test_parallel_processor_individual.c",
+        "size_bytes": 3644,
+        "code_lines": 90,
+        "total_lines": 103,
+        "sha256": "c4ae46398aa143977a340d0da1fade797f74a830ad0b390713f4234a4773709b"
+      },
+      {
+        "path": "src/tests/individual/test_pareto_inverse_optimizer_individual.c",
+        "size_bytes": 2630,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "77a653db35df25317f59e781f5ed37a2700260104d88aa2780b74f72ebd046ee"
+      },
+      {
+        "path": "src/tests/individual/test_pareto_optimizer_individual.c",
+        "size_bytes": 2574,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "619e153cfe160e98f74c9ced1254eeedb8699ce5b3351ddb8a713c3da275f06a"
+      },
+      {
+        "path": "src/tests/individual/test_performance_metrics_individual.c",
+        "size_bytes": 3354,
+        "code_lines": 86,
+        "total_lines": 99,
+        "sha256": "074fe4194e78d9b669ad9f51f0b36011b1ebdbe6380cb376bd58f1f722a9e58e"
+      },
+      {
+        "path": "src/tests/individual/test_realtime_analytics_individual.c",
+        "size_bytes": 2588,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "a42e0f6781e20cf1b81752632828b439e56653d3d6a04e6aa8ff334b9e384b2b"
+      },
+      {
+        "path": "src/tests/individual/test_recovery_manager_extension_individual.c",
+        "size_bytes": 2644,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "de9b095142b5d5bf227d3c2a4326b553d83cd7480acd7f4deef4ff8524452bc5"
+      },
+      {
+        "path": "src/tests/individual/test_simd_optimizer_individual.c",
+        "size_bytes": 15252,
+        "code_lines": 309,
+        "total_lines": 415,
+        "sha256": "009d4df5965631a0240e47034d7e54116f099f38c21971103aa8219c7dfb0658"
+      },
+      {
+        "path": "src/tests/individual/test_transaction_wal_extension_individual.c",
+        "size_bytes": 2637,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "b80d345eae1d14f41792c252b8da31fcaaf2f71e0a40dbed05797e634589c6a2"
+      },
+      {
+        "path": "src/tests/individual/test_tsp_optimizer_individual.c",
+        "size_bytes": 2553,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "074faf9ef35ad0dbb823ec5a18d310755ffaba470afe69cb940843d0cc36573a"
+      },
+      {
+        "path": "src/tests/individual/test_ultra_forensic_logger_individual.c",
+        "size_bytes": 3263,
+        "code_lines": 79,
+        "total_lines": 92,
+        "sha256": "ea92f61ab7d29bf54dd46ae6c90ead434ab3b4bdfa727f719a9dc5199daf716c"
+      },
+      {
+        "path": "src/tests/individual/test_vorax_operations_individual.c",
+        "size_bytes": 2574,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "bd7282644868f76d18a6cceaf03e6321478f22069a45b50769e511a7455042fd"
+      },
+      {
+        "path": "src/tests/individual/test_vorax_parser_individual.c",
+        "size_bytes": 2546,
+        "code_lines": 63,
+        "total_lines": 76,
+        "sha256": "7b2ee65259e5668e2fdb7d6364584d7730874b86a7e3ad9fb6d1417963125cd0"
+      },
+      {
+        "path": "src/tests/individual/test_zero_copy_allocator_individual.c",
+        "size_bytes": 3621,
+        "code_lines": 89,
+        "total_lines": 102,
+        "sha256": "8618ac58e2deeef4155defabaec62fb4a3d46a0d303672830d347287c1cd7249"
+      },
+      {
+        "path": "src/versioning/api_contract.c",
+        "size_bytes": 6027,
+        "code_lines": 148,
+        "total_lines": 180,
+        "sha256": "c0c1068835273ab66411455054e297766a720c62d333a702020c0078d70821d0"
+      },
+      {
+        "path": "src/versioning/api_contract.h",
+        "size_bytes": 1945,
+        "code_lines": 56,
+        "total_lines": 64,
+        "sha256": "98d114a61baff87e41dd83bf1c4418224ebf434736fa62d36e17624e4eff3950"
+      },
+      {
+        "path": "src/versioning/version_manager.c",
+        "size_bytes": 6964,
+        "code_lines": 159,
+        "total_lines": 194,
+        "sha256": "44c40125f50bec74af60d8eed49232364ccb7d40616a5592db24750eb7e56f4c"
+      },
+      {
+        "path": "src/versioning/version_manager.h",
+        "size_bytes": 1777,
+        "code_lines": 54,
+        "total_lines": 62,
+        "sha256": "ae08d34c5669ca052a20d5a7c3056151bea91b483ae77df18e06dcd5a4e8b9b0"
+      },
+      {
+        "path": "src/vorax/vorax_operations.c",
+        "size_bytes": 19920,
+        "code_lines": 428,
+        "total_lines": 561,
+        "sha256": "6fef89e8803b10f5f7c8679bc6cfc3c8f61af61af9ab67033ef5ea5063ea9574"
+      },
+      {
+        "path": "src/vorax/vorax_operations.h",
+        "size_bytes": 2910,
+        "code_lines": 47,
+        "total_lines": 61,
+        "sha256": "a999fd6cf5defaf70e0560b177aa09b0f7ae8dae228aeb6c7b58b05593f0911b"
+      },
+      {
+        "path": "src/wasm/wasm_export.c",
+        "size_bytes": 9530,
+        "code_lines": 241,
+        "total_lines": 306,
+        "sha256": "2485469dcdfa0f337963aba21df0ea035c70b9db7f387a8d0a7bb2f2d27ac1d4"
+      },
+      {
+        "path": "src/wasm/wasm_export.h",
+        "size_bytes": 2341,
+        "code_lines": 75,
+        "total_lines": 86,
+        "sha256": "92eabe7b8f66eb90130a476a2931535541213c0908127853d0368bb4a38bd35b"
+      }
+    ]
+  },
+  "build_analysis": {
+    "success": true,
+    "stdout": "rm -f src/lum/lum_core.o src/vorax/vorax_operations.o src/binary/binary_lum_converter.o src/parser/vorax_parser.o src/logger/lum_logger.o src/logger/log_manager.o src/debug/memory_tracker.o src/debug/forensic_logger.o src/debug/ultra_forensic_logger.o src/debug/enhanced_logging.o src/debug/logging_system.o src/crypto/crypto_validator.o src/persistence/data_persistence.o src/persistence/transaction_wal_extension.o src/persistence/recovery_manager_extension.o src/optimization/memory_optimizer.o src/optimization/pareto_optimizer.o src/optimization/pareto_inverse_optimizer.o src/optimization/simd_optimizer.o src/optimization/zero_copy_allocator.o src/parallel/parallel_processor.o src/metrics/performance_metrics.o src/advanced_calculations/audio_processor.o src/advanced_calculations/image_processor.o src/advanced_calculations/golden_score_optimizer.o src/advanced_calculations/tsp_optimizer.o src/advanced_calculations/neural_advanced_optimizers.o src/advanced_calculations/neural_ultra_precision_architecture.o src/advanced_calculations/matrix_calculator.o src/advanced_calculations/neural_network_processor.o src/complex_modules/realtime_analytics.o src/complex_modules/distributed_computing.o src/complex_modules/ai_optimization.o src/complex_modules/ai_dynamic_config_manager.o src/file_formats/lum_secure_serialization.o src/file_formats/lum_native_file_handler.o src/file_formats/lum_native_universal_format.o src/spatial/lum_instant_displacement.o src/network/hostinger_resource_limiter.o src/advanced_calculations/quantum_simulator.o\nrm -f bin/lum_vorax_complete bin/test_forensic_complete_system bin/test_integration_complete_39_modules bin/test_quantum\nrm -rf bin\nfind . -name \"*.o\" -type f -delete\nmkdir -p bin logs/forensic logs/execution logs/tests logs/console\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/lum/lum_core.c -o src/lum/lum_core.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/vorax/vorax_operations.c -o src/vorax/vorax_operations.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/binary/binary_lum_converter.c -o src/binary/binary_lum_converter.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/parser/vorax_parser.c -o src/parser/vorax_parser.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/logger/lum_logger.c -o src/logger/lum_logger.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/logger/log_manager.c -o src/logger/log_manager.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/debug/memory_tracker.c -o src/debug/memory_tracker.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/debug/forensic_logger.c -o src/debug/forensic_logger.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/debug/ultra_forensic_logger.c -o src/debug/ultra_forensic_logger.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/debug/enhanced_logging.c -o src/debug/enhanced_logging.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/debug/logging_system.c -o src/debug/logging_system.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/crypto/crypto_validator.c -o src/crypto/crypto_validator.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/persistence/data_persistence.c -o src/persistence/data_persistence.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/persistence/transaction_wal_extension.c -o src/persistence/transaction_wal_extension.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/persistence/recovery_manager_extension.c -o src/persistence/recovery_manager_extension.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/optimization/memory_optimizer.c -o src/optimization/memory_optimizer.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/optimization/pareto_optimizer.c -o src/optimization/pareto_optimizer.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/optimization/pareto_inverse_optimizer.c -o src/optimization/pareto_inverse_optimizer.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/optimization/simd_optimizer.c -o src/optimization/simd_optimizer.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/optimization/zero_copy_allocator.c -o src/optimization/zero_copy_allocator.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/parallel/parallel_processor.c -o src/parallel/parallel_processor.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/metrics/performance_metrics.c -o src/metrics/performance_metrics.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/advanced_calculations/audio_processor.c -o src/advanced_calculations/audio_processor.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/advanced_calculations/image_processor.c -o src/advanced_calculations/image_processor.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/advanced_calculations/golden_score_optimizer.c -o src/advanced_calculations/golden_score_optimizer.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/advanced_calculations/tsp_optimizer.c -o src/advanced_calculations/tsp_optimizer.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/advanced_calculations/neural_advanced_optimizers.c -o src/advanced_calculations/neural_advanced_optimizers.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/advanced_calculations/neural_ultra_precision_architecture.c -o src/advanced_calculations/neural_ultra_precision_architecture.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/advanced_calculations/matrix_calculator.c -o src/advanced_calculations/matrix_calculator.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/advanced_calculations/neural_network_processor.c -o src/advanced_calculations/neural_network_processor.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/complex_modules/realtime_analytics.c -o src/complex_modules/realtime_analytics.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/complex_modules/distributed_computing.c -o src/complex_modules/distributed_computing.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/complex_modules/ai_optimization.c -o src/complex_modules/ai_optimization.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/complex_modules/ai_dynamic_config_manager.c -o src/complex_modules/ai_dynamic_config_manager.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/file_formats/lum_secure_serialization.c -o src/file_formats/lum_secure_serialization.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/file_formats/lum_native_file_handler.c -o src/file_formats/lum_native_file_handler.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/file_formats/lum_native_universal_format.c -o src/file_formats/lum_native_universal_format.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/spatial/lum_instant_displacement.c -o src/spatial/lum_instant_displacement.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/network/hostinger_resource_limiter.c -o src/network/hostinger_resource_limiter.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 -c src/advanced_calculations/quantum_simulator.c -o src/advanced_calculations/quantum_simulator.o\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 src/main.c src/lum/lum_core.o src/vorax/vorax_operations.o src/binary/binary_lum_converter.o src/parser/vorax_parser.o src/logger/lum_logger.o src/logger/log_manager.o src/debug/memory_tracker.o src/debug/forensic_logger.o src/debug/ultra_forensic_logger.o src/debug/enhanced_logging.o src/debug/logging_system.o src/crypto/crypto_validator.o src/persistence/data_persistence.o src/persistence/transaction_wal_extension.o src/persistence/recovery_manager_extension.o src/optimization/memory_optimizer.o src/optimization/pareto_optimizer.o src/optimization/pareto_inverse_optimizer.o src/optimization/simd_optimizer.o src/optimization/zero_copy_allocator.o src/parallel/parallel_processor.o src/metrics/performance_metrics.o src/advanced_calculations/audio_processor.o src/advanced_calculations/image_processor.o src/advanced_calculations/golden_score_optimizer.o src/advanced_calculations/tsp_optimizer.o src/advanced_calculations/neural_advanced_optimizers.o src/advanced_calculations/neural_ultra_precision_architecture.o src/advanced_calculations/matrix_calculator.o src/advanced_calculations/neural_network_processor.o src/complex_modules/realtime_analytics.o src/complex_modules/distributed_computing.o src/complex_modules/ai_optimization.o src/complex_modules/ai_dynamic_config_manager.o src/file_formats/lum_secure_serialization.o src/file_formats/lum_native_file_handler.o src/file_formats/lum_native_universal_format.o src/spatial/lum_instant_displacement.o src/network/hostinger_resource_limiter.o src/advanced_calculations/quantum_simulator.o -o bin/lum_vorax_complete -lm -lpthread -lrt -Wl,-z,stack-size=16777216\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 src/tests/test_forensic_complete_system.c src/lum/lum_core.o src/vorax/vorax_operations.o src/binary/binary_lum_converter.o src/parser/vorax_parser.o src/logger/lum_logger.o src/logger/log_manager.o src/debug/memory_tracker.o src/debug/forensic_logger.o src/debug/ultra_forensic_logger.o src/debug/enhanced_logging.o src/debug/logging_system.o src/crypto/crypto_validator.o src/persistence/data_persistence.o src/persistence/transaction_wal_extension.o src/persistence/recovery_manager_extension.o src/optimization/memory_optimizer.o src/optimization/pareto_optimizer.o src/optimization/pareto_inverse_optimizer.o src/optimization/simd_optimizer.o src/optimization/zero_copy_allocator.o src/parallel/parallel_processor.o src/metrics/performance_metrics.o src/advanced_calculations/audio_processor.o src/advanced_calculations/image_processor.o src/advanced_calculations/golden_score_optimizer.o src/advanced_calculations/tsp_optimizer.o src/advanced_calculations/neural_advanced_optimizers.o src/advanced_calculations/neural_ultra_precision_architecture.o src/advanced_calculations/matrix_calculator.o src/advanced_calculations/neural_network_processor.o src/complex_modules/realtime_analytics.o src/complex_modules/distributed_computing.o src/complex_modules/ai_optimization.o src/complex_modules/ai_dynamic_config_manager.o src/file_formats/lum_secure_serialization.o src/file_formats/lum_native_file_handler.o src/file_formats/lum_native_universal_format.o src/spatial/lum_instant_displacement.o src/network/hostinger_resource_limiter.o src/advanced_calculations/quantum_simulator.o -o bin/test_forensic_complete_system -lm -lpthread -lrt -Wl,-z,stack-size=16777216\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 src/tests/test_integration_complete_39_modules.c src/lum/lum_core.o src/vorax/vorax_operations.o src/binary/binary_lum_converter.o src/parser/vorax_parser.o src/logger/lum_logger.o src/logger/log_manager.o src/debug/memory_tracker.o src/debug/forensic_logger.o src/debug/ultra_forensic_logger.o src/debug/enhanced_logging.o src/debug/logging_system.o src/crypto/crypto_validator.o src/persistence/data_persistence.o src/persistence/transaction_wal_extension.o src/persistence/recovery_manager_extension.o src/optimization/memory_optimizer.o src/optimization/pareto_optimizer.o src/optimization/pareto_inverse_optimizer.o src/optimization/simd_optimizer.o src/optimization/zero_copy_allocator.o src/parallel/parallel_processor.o src/metrics/performance_metrics.o src/advanced_calculations/audio_processor.o src/advanced_calculations/image_processor.o src/advanced_calculations/golden_score_optimizer.o src/advanced_calculations/tsp_optimizer.o src/advanced_calculations/neural_advanced_optimizers.o src/advanced_calculations/neural_ultra_precision_architecture.o src/advanced_calculations/matrix_calculator.o src/advanced_calculations/neural_network_processor.o src/complex_modules/realtime_analytics.o src/complex_modules/distributed_computing.o src/complex_modules/ai_optimization.o src/complex_modules/ai_dynamic_config_manager.o src/file_formats/lum_secure_serialization.o src/file_formats/lum_native_file_handler.o src/file_formats/lum_native_universal_format.o src/spatial/lum_instant_displacement.o src/network/hostinger_resource_limiter.o src/advanced_calculations/quantum_simulator.o -o bin/test_integration_complete_39_modules -lm -lpthread -lrt -Wl,-z,stack-size=16777216\ngcc -Wall -Wextra -std=c99 -g -O3 -march=native -fPIC -D_GNU_SOURCE -D_POSIX_C_SOURCE=200809L -I./src/common -I./src/debug -I./src/crypto -I./src/advanced_calculations -Wl,-z,stack-size=16777216 src/tests/test_quantum_simulator_complete.c src/lum/lum_core.o src/vorax/vorax_operations.o src/binary/binary_lum_converter.o src/parser/vorax_parser.o src/logger/lum_logger.o src/logger/log_manager.o src/debug/memory_tracker.o src/debug/forensic_logger.o src/debug/ultra_forensic_logger.o src/debug/enhanced_logging.o src/debug/logging_system.o src/crypto/crypto_validator.o src/persistence/data_persistence.o src/persistence/transaction_wal_extension.o src/persistence/recovery_manager_extension.o src/optimization/memory_optimizer.o src/optimization/pareto_optimizer.o src/optimization/pareto_inverse_optimizer.o src/optimization/simd_optimizer.o src/optimization/zero_copy_allocator.o src/parallel/parallel_processor.o src/metrics/performance_metrics.o src/advanced_calculations/audio_processor.o src/advanced_calculations/image_processor.o src/advanced_calculations/golden_score_optimizer.o src/advanced_calculations/tsp_optimizer.o src/advanced_calculations/neural_advanced_optimizers.o src/advanced_calculations/neural_ultra_precision_architecture.o src/advanced_calculations/matrix_calculator.o src/advanced_calculations/neural_network_processor.o src/complex_modules/realtime_analytics.o src/complex_modules/distributed_computing.o src/complex_modules/ai_optimization.o src/complex_modules/ai_dynamic_config_manager.o src/file_formats/lum_secure_serialization.o src/file_formats/lum_native_file_handler.o src/file_formats/lum_native_universal_format.o src/spatial/lum_instant_displacement.o src/network/hostinger_resource_limiter.o src/advanced_calculations/quantum_simulator.o -o bin/test_quantum -lm -lpthread -lrt -Wl,-z,stack-size=16777216\n",
+    "stderr": "src/advanced_calculations/matrix_calculator.c: In function \u2018montgomery_reduction\u2019:\nsrc/advanced_calculations/matrix_calculator.c:43:30: warning: right shift count >= width of type [-Wshift-count-overflow]\n   43 |     uint64_t t = (T + m * N) >> 64; // Approximation p\u00e9dagogique\n      |                              ^~\nsrc/advanced_calculations/matrix_calculator.c: In function \u2018rsa_karatsuba_mult\u2019:\nsrc/advanced_calculations/matrix_calculator.c:55:12: warning: unused variable \u2018m\u2019 [-Wunused-variable]\n   55 |     size_t m = n / 2;\n      |            ^\n"
+  },
+  "execution_tests": {
+    "sizeof-checks": {
+      "description": "V\u00e9rification taille structures",
+      "success": false,
+      "stdout": "",
+      "stderr": "/nix/store/ih68ar79msmj0496pgld4r3vqfr7bbin-bash-5.2p37/bin/sh: line 1: ./bin/lum_vorax: No such file or directory\n"
+    },
+    "crypto-validation": {
+      "description": "Validation cryptographique",
+      "success": false,
+      "stdout": "",
+      "stderr": "/nix/store/ih68ar79msmj0496pgld4r3vqfr7bbin-bash-5.2p37/bin/sh: line 1: ./bin/lum_vorax: No such file or directory\n"
+    },
+    "threading-tests": {
+      "description": "Tests threading",
+      "success": false,
+      "stdout": "",
+      "stderr": "/nix/store/ih68ar79msmj0496pgld4r3vqfr7bbin-bash-5.2p37/bin/sh: line 1: ./bin/lum_vorax: No such file or directory\n"
+    },
+    "binary-conversion-tests": {
+      "description": "Tests conversion binaire",
+      "success": false,
+      "stdout": "",
+      "stderr": "/nix/store/ih68ar79msmj0496pgld4r3vqfr7bbin-bash-5.2p37/bin/sh: line 1: ./bin/lum_vorax: No such file or directory\n"
+    },
+    "parser-tests": {
+      "description": "Tests parser",
+      "success": false,
+      "stdout": "",
+      "stderr": "/nix/store/ih68ar79msmj0496pgld4r3vqfr7bbin-bash-5.2p37/bin/sh: line 1: ./bin/lum_vorax: No such file or directory\n"
+    },
+    "memory-stress-tests": {
+      "description": "Tests m\u00e9moire",
+      "success": false,
+      "stdout": "",
+      "stderr": "/nix/store/ih68ar79msmj0496pgld4r3vqfr7bbin-bash-5.2p37/bin/sh: line 1: ./bin/lum_vorax: No such file or directory\n"
+    }
+  },
+  "validation_results": {},
+  "forensic_hashes": {
+    "Makefile": "3746803e085ccff29cfcd4317571ea667e95518fd47bca387c7da612f42d873c",
+    "src/main.c": "f6f47c7f8c29a544a9861bb4d9de2aebb45269763dc4ac2e7be1f381e5237735",
+    "README.md": "84806c82f5f8217f50217447cd010d70c1fe2b10310eff4eea024ff00a852329"
+  }
+}
