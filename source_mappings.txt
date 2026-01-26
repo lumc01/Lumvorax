@@ -1,0 +1,460 @@
+src/advanced_calculations/audio_processor.c:136:    // Bit-reversal permutation
+src/advanced_calculations/audio_processor.c:227:    // Stockage magnitude spectrale dans LUMs
+src/advanced_calculations/audio_processor.c:235:            processor->processed_lums[i].presence = (magnitude > 0.1) ? 1 : 0; // Seuil spectral
+src/advanced_calculations/matrix_calculator.c:5:void rsa_quadratic_sieve(uint64_t n, uint64_t* factors) {
+src/advanced_calculations/matrix_calculator.c:14:void rsa_nn_pattern_recognition(uint64_t n, double* bias) {
+src/advanced_calculations/matrix_calculator.c:16:    // Elle ne prédit pas les facteurs mais mesure la "visibilité" spectrale
+src/advanced_calculations/matrix_calculator.c:41:uint64_t montgomery_reduction(uint64_t T, uint64_t N, uint64_t N_prime, uint64_t R) {
+src/advanced_calculations/matrix_calculator.c:42:    uint64_t m = (T * N_prime) & (R - 1);
+src/advanced_calculations/matrix_calculator.c:49:void rsa_karatsuba_mult(uint64_t* a, uint64_t* b, uint64_t* res, size_t n) {
+src/advanced_calculations/neural_advanced_optimizers.c:4:#include "../debug/forensic_logger.h"
+src/advanced_calculations/neural_advanced_optimizers.c:13:// Temporary logging macros until forensic_log is properly implemented
+src/advanced_calculations/neural_advanced_optimizers.c:19:#define forensic_log(level, func, fmt, ...) printf("[%s] " fmt "\n", func, ##__VA_ARGS__)
+src/advanced_calculations/neural_advanced_optimizers.c:31:        forensic_log(FORENSIC_LEVEL_ERROR, "neural_adam_create_ultra_precise",
+src/advanced_calculations/neural_advanced_optimizers.c:41:        forensic_log(FORENSIC_LEVEL_ERROR, "neural_adam_create_ultra_precise",
+src/advanced_calculations/neural_advanced_optimizers.c:70:    forensic_log(FORENSIC_LEVEL_INFO, "neural_adam_create_ultra_precise",
+src/advanced_calculations/neural_advanced_optimizers.c:84:        forensic_log(FORENSIC_LEVEL_ERROR, "neural_adam_destroy_ultra_precise",
+src/advanced_calculations/neural_advanced_optimizers.c:90:    forensic_log(FORENSIC_LEVEL_DEBUG, "neural_adam_destroy_ultra_precise",
+src/advanced_calculations/neural_advanced_optimizers.c:113:        forensic_log(FORENSIC_LEVEL_ERROR, "neural_adam_ultra_precise_update",
+src/advanced_calculations/neural_advanced_optimizers.c:120:        forensic_log(FORENSIC_LEVEL_ERROR, "neural_adam_ultra_precise_update",
+src/advanced_calculations/neural_advanced_optimizers.c:127:        forensic_log(FORENSIC_LEVEL_WARNING, "neural_adam_ultra_precise_update",
+src/advanced_calculations/neural_advanced_optimizers.c:142:            forensic_log(FORENSIC_LEVEL_DEBUG, "neural_adam_ultra_precise_update",
+src/advanced_calculations/neural_advanced_optimizers.c:180:        forensic_log(FORENSIC_LEVEL_INFO, "neural_adam_ultra_precise_update",
+src/advanced_calculations/neural_advanced_optimizers.c:195:    forensic_log(FORENSIC_LEVEL_DEBUG, "neural_adam_reset_moments",
+src/advanced_calculations/neural_advanced_optimizers.c:208:        forensic_log(FORENSIC_LEVEL_ERROR, "neural_lbfgs_create",
+src/advanced_calculations/neural_advanced_optimizers.c:220:        forensic_log(FORENSIC_LEVEL_ERROR, "neural_lbfgs_create",
+src/advanced_calculations/neural_advanced_optimizers.c:264:    forensic_log(FORENSIC_LEVEL_INFO, "neural_lbfgs_create",
+src/advanced_calculations/neural_advanced_optimizers.c:278:        forensic_log(FORENSIC_LEVEL_ERROR, "neural_lbfgs_destroy",
+src/advanced_calculations/neural_advanced_optimizers.c:283:    forensic_log(FORENSIC_LEVEL_DEBUG, "neural_lbfgs_destroy",
+src/advanced_calculations/neural_advanced_optimizers.c:374:        forensic_log(FORENSIC_LEVEL_WARNING, "neural_wolfe_line_search_ultra_precise",
+src/advanced_calculations/neural_advanced_optimizers.c:387:            forensic_log(FORENSIC_LEVEL_DEBUG, "neural_wolfe_line_search_ultra_precise",
+src/advanced_calculations/neural_advanced_optimizers.c:395:    forensic_log(FORENSIC_LEVEL_INFO, "neural_wolfe_line_search_ultra_precise",
+src/advanced_calculations/quantum_simulator.c:12:#include "quantum_simulator.h"
+src/advanced_calculations/quantum_simulator.c:14:#include "../debug/forensic_logger.h"
+src/advanced_calculations/quantum_simulator.c:22:quantum_lum_t* quantum_lum_create(int32_t x, int32_t y, size_t initial_states) {
+src/advanced_calculations/quantum_simulator.c:31:    quantum_lum_t* qlum = (quantum_lum_t*)malloc(sizeof(quantum_lum_t));
+src/advanced_calculations/quantum_simulator.c:33:    memset(qlum, 0, sizeof(quantum_lum_t));
+src/advanced_calculations/quantum_simulator.c:36:    uint64_t quantum_id = atomic_fetch_add(&lum_id_counter_atomic, 1);
+src/advanced_calculations/quantum_simulator.c:39:    qlum->base_lum.id = quantum_id;
+src/advanced_calculations/quantum_simulator.c:53:    qlum->base_lum.checksum = (uint32_t)(quantum_id ^ x ^ y ^ initial_states ^ 
+src/advanced_calculations/quantum_simulator.c:75:    qlum->quantum_magic = QUANTUM_MAGIC_NUMBER;
+src/advanced_calculations/quantum_simulator.c:82:void quantum_lum_destroy(quantum_lum_t** qlum_ptr) {
+src/advanced_calculations/quantum_simulator.c:85:    quantum_lum_t* qlum = *qlum_ptr;
+src/advanced_calculations/quantum_simulator.c:88:    if (qlum->quantum_magic != QUANTUM_MAGIC_NUMBER || 
+src/advanced_calculations/quantum_simulator.c:100:    qlum->quantum_magic = QUANTUM_DESTROYED_MAGIC;
+src/advanced_calculations/quantum_simulator.c:108:bool quantum_apply_gate(quantum_lum_t* qlum, quantum_gate_e gate, quantum_config_t* config) {
+src/advanced_calculations/quantum_simulator.c:165:bool quantum_entangle_lums(quantum_lum_t* qlum1, quantum_lum_t* qlum2, quantum_config_t* config) {
+src/advanced_calculations/quantum_simulator.c:192:quantum_result_t* quantum_measure(quantum_lum_t* qlum, quantum_config_t* config) {
+src/advanced_calculations/quantum_simulator.c:195:    quantum_result_t* result = TRACKED_MALLOC(sizeof(quantum_result_t));
+src/advanced_calculations/quantum_simulator.c:197:    memset(result, 0, sizeof(quantum_result_t));
+src/advanced_calculations/quantum_simulator.c:201:    result->quantum_operations = 1;
+src/advanced_calculations/quantum_simulator.c:247:bool quantum_stress_test_100m_qubits(quantum_config_t* config) {
+src/advanced_calculations/quantum_simulator.c:250:    quantum_lum_t* q = quantum_lum_create(0, 0, 2);
+src/advanced_calculations/quantum_simulator.c:253:        quantum_lum_destroy(&q);
+src/advanced_calculations/quantum_simulator.c:261:quantum_config_t* quantum_config_create_default(void) {
+src/advanced_calculations/quantum_simulator.c:262:    quantum_config_t* config = TRACKED_MALLOC(sizeof(quantum_config_t));
+src/advanced_calculations/quantum_simulator.c:264:    memset(config, 0, sizeof(quantum_config_t));
+src/advanced_calculations/quantum_simulator.c:275:void quantum_config_destroy(quantum_config_t** config_ptr) {
+src/advanced_calculations/quantum_simulator.c:277:    quantum_config_t* config = *config_ptr;
+src/advanced_calculations/quantum_simulator.c:284:void quantum_result_destroy(quantum_result_t** result_ptr) {
+src/advanced_calculations/quantum_simulator.c:286:    quantum_result_t* result = *result_ptr;
+src/advanced_calculations/quantum_simulator.c:295:quantum_simulator_t* quantum_simulator_create(size_t qubit_count, quantum_config_t* config) {
+src/advanced_calculations/quantum_simulator.c:297:    quantum_simulator_t* simulator = TRACKED_MALLOC(sizeof(quantum_simulator_t));
+src/advanced_calculations/quantum_simulator.c:299:    memset(simulator, 0, sizeof(quantum_simulator_t));
+src/advanced_calculations/quantum_simulator.c:308:void quantum_simulator_destroy(quantum_simulator_t** simulator_ptr) {
+src/advanced_calculations/quantum_simulator.c:310:    quantum_simulator_t* simulator = *simulator_ptr;
+src/advanced_calculations/quantum_simulator.c:318:quantum_circuit_t* quantum_circuit_create(size_t qubit_count, size_t max_gates) {
+src/advanced_calculations/quantum_simulator.c:320:    quantum_circuit_t* circuit = TRACKED_MALLOC(sizeof(quantum_circuit_t));
+src/advanced_calculations/quantum_simulator.c:322:    memset(circuit, 0, sizeof(quantum_circuit_t));
+src/advanced_calculations/quantum_simulator.c:328:void quantum_circuit_destroy(quantum_circuit_t** circuit_ptr) {
+src/advanced_calculations/quantum_simulator.c:330:    quantum_circuit_t* circuit = *circuit_ptr;
+src/complex_modules/ai_dynamic_config_manager.c:21:    "quantum_simulator",
+src/crypto/rsa_structure_analyzer.c:1:#include "rsa_structure_analyzer.h"
+src/crypto/rsa_structure_analyzer.c:7:#include "../debug/forensic_logger.h"
+src/crypto/rsa_structure_analyzer.c:18:    uint32_t coprime_count = 0;
+src/crypto/rsa_structure_analyzer.c:23:        if (a == 1) coprime_count++;
+src/crypto/rsa_structure_analyzer.c:26:    obs.coprimality_density = (double)coprime_count / 100.0;
+src/crypto/rsa_structure_analyzer.c:28:    obs.spectral_signature = (obs.coprimality_density) + (obs.residual_variance) * I;
+src/crypto/rsa_structure_analyzer.c:34:void generate_forensic_report(const char* filename) {
+src/debug/forensic_logger.c:2:#include "forensic_logger.h"
+src/debug/forensic_logger.c:10:static FILE* forensic_log_file = NULL;
+src/debug/forensic_logger.c:12:bool forensic_logger_init(const char* filename) {
+src/debug/forensic_logger.c:41:    forensic_log_file = fopen(filename, "w");
+src/debug/forensic_logger.c:42:    if (!forensic_log_file) {
+src/debug/forensic_logger.c:45:        snprintf(fallback_name, sizeof(fallback_name), "forensic_fallback_%lu.log", 
+src/debug/forensic_logger.c:48:        forensic_log_file = fopen(fallback_name, "w");
+src/debug/forensic_logger.c:49:        if (!forensic_log_file) {
+src/debug/forensic_logger.c:58:    fprintf(forensic_log_file, "=== FORENSIC LOG STARTED (timestamp: %lu ns) ===\n", timestamp);
+src/debug/forensic_logger.c:59:    fprintf(forensic_log_file, "Forensic logging initialized successfully\n");
+src/debug/forensic_logger.c:60:    fflush(forensic_log_file);
+src/debug/forensic_logger.c:67:bool forensic_logger_init_individual_files(void) {
+src/debug/forensic_logger.c:72:             "logs/forensic/forensic_session_%llu_%llu.log",
+src/debug/forensic_logger.c:75:    return forensic_logger_init(filename);
+src/debug/forensic_logger.c:78:void forensic_log_memory_operation(const char* operation, void* ptr, size_t size) {
+src/debug/forensic_logger.c:79:    if (!forensic_log_file) return;
+src/debug/forensic_logger.c:82:    fprintf(forensic_log_file, "[%lu] MEMORY_%s: ptr=%p, size=%zu\n", 
+src/debug/forensic_logger.c:84:    fflush(forensic_log_file);
+src/debug/forensic_logger.c:87:void forensic_log_lum_operation(const char* operation, uint64_t lum_count, double duration_ns) {
+src/debug/forensic_logger.c:88:    if (!forensic_log_file) return;
+src/debug/forensic_logger.c:91:    fprintf(forensic_log_file, "[%lu] LUM_%s: count=%lu, duration=%.3f ns\n",
+src/debug/forensic_logger.c:93:    fflush(forensic_log_file);
+src/debug/forensic_logger.c:101:void forensic_log_individual_lum(uint32_t lum_id, const char* operation, uint64_t timestamp_ns) {
+src/debug/forensic_logger.c:102:    if (!forensic_log_file) {
+src/debug/forensic_logger.c:108:    fprintf(forensic_log_file, "[%lu] [LUM_%u] %s: Individual LUM processing (memory=%p)\n",
+src/debug/forensic_logger.c:110:    fflush(forensic_log_file);
+src/debug/forensic_logger.c:123:                 "logs/forensic/individual_lums_%04d%02d%02d_%02d%02d%02d.log",
+src/debug/forensic_logger.c:139:void forensic_logger_destroy(void) {
+src/debug/forensic_logger.c:140:    if (forensic_log_file) {
+src/debug/forensic_logger.c:142:        fprintf(forensic_log_file, "=== FORENSIC LOG ENDED (timestamp: %lu ns) ===\n", timestamp);
+src/debug/forensic_logger.c:143:        fclose(forensic_log_file);
+src/debug/forensic_logger.c:144:        forensic_log_file = NULL;
+src/debug/forensic_logger.c:148:void forensic_log(forensic_level_e level, const char* function, const char* format, ...) {
+src/debug/forensic_logger.c:149:    if (!forensic_log_file) return;
+src/debug/forensic_logger.c:155:    fprintf(forensic_log_file, "[%lu] [%d] %s: ", timestamp, level, function);
+src/debug/forensic_logger.c:156:    vfprintf(forensic_log_file, format, args);
+src/debug/forensic_logger.c:157:    fprintf(forensic_log_file, "\n");
+src/debug/forensic_logger.c:158:    fflush(forensic_log_file);
+src/debug/forensic_logger.c:163:// Implementation of unified_forensic_log for compatibility
+src/debug/forensic_logger.c:164:void unified_forensic_log(unified_forensic_level_e level, const char* function, const char* format, ...) {
+src/debug/forensic_logger.c:165:    if (!forensic_log_file) return;
+src/debug/forensic_logger.c:171:    fprintf(forensic_log_file, "[%lu] [UNIFIED_%d] %s: ", timestamp, level, function);
+src/debug/forensic_logger.c:172:    vfprintf(forensic_log_file, format, args);
+src/debug/forensic_logger.c:173:    fprintf(forensic_log_file, "\n");
+src/debug/forensic_logger.c:174:    fflush(forensic_log_file);
+src/debug/logging_system.c:20:        unified_forensic_log(FORENSIC_LEVEL_ERROR, "create_log", "Path trop long pour répertoire logs");
+src/debug/ultra_forensic_logger.c:5:#include "ultra_forensic_logger.h"
+src/debug/ultra_forensic_logger.c:19:static module_forensic_tracker_t g_module_trackers[MAX_MODULES];
+src/debug/ultra_forensic_logger.c:22:static bool g_forensic_initialized = false;
+src/debug/ultra_forensic_logger.c:34:static bool create_forensic_directories(void) {
+src/debug/ultra_forensic_logger.c:36:        "logs/forensic",
+src/debug/ultra_forensic_logger.c:37:        "logs/forensic/modules", 
+src/debug/ultra_forensic_logger.c:38:        "logs/forensic/tests",
+src/debug/ultra_forensic_logger.c:39:        "logs/forensic/metrics",
+src/debug/ultra_forensic_logger.c:40:        "logs/forensic/sessions"
+src/debug/ultra_forensic_logger.c:55:bool ultra_forensic_logger_init(void) {
+src/debug/ultra_forensic_logger.c:56:    if (g_forensic_initialized) {
+src/debug/ultra_forensic_logger.c:60:    if (!create_forensic_directories()) {
+src/debug/ultra_forensic_logger.c:71:    g_forensic_initialized = true;
+src/debug/ultra_forensic_logger.c:74:    // Note: La fonction ultra_forensic_log_header n'est pas définie dans le code fourni, 
+src/debug/ultra_forensic_logger.c:76:    // Si elle existe dans "ultra_forensic_logger.h", il faudrait l'inclure et l'appeler correctement.
+src/debug/ultra_forensic_logger.c:79:    // ultra_forensic_log_header("SYSTEM", "INIT", "Système forensique initialisé");
+src/debug/ultra_forensic_logger.c:84:void ultra_forensic_logger_destroy(void) {
+src/debug/ultra_forensic_logger.c:85:    if (!g_forensic_initialized) return;
+src/debug/ultra_forensic_logger.c:91:        module_forensic_tracker_t* tracker = &g_module_trackers[i];
+src/debug/ultra_forensic_logger.c:100:    g_forensic_initialized = false;
+src/debug/ultra_forensic_logger.c:109:static module_forensic_tracker_t* get_or_create_module_tracker(const char* module) {
+src/debug/ultra_forensic_logger.c:126:    module_forensic_tracker_t* tracker = &g_module_trackers[g_tracker_count++];
+src/debug/ultra_forensic_logger.c:135:             "logs/forensic/modules/%s_forensic_%lu.log", module, timestamp);
+src/debug/ultra_forensic_logger.c:164:void ultra_forensic_log_module_start(const char* file, int line, const char* func, 
+src/debug/ultra_forensic_logger.c:166:    if (!g_forensic_initialized) return;
+src/debug/ultra_forensic_logger.c:168:    module_forensic_tracker_t* tracker = get_or_create_module_tracker(module);
+src/debug/ultra_forensic_logger.c:188:void ultra_forensic_log_module_end(const char* file, int line, const char* func,
+src/debug/ultra_forensic_logger.c:190:    if (!g_forensic_initialized) return;
+src/debug/ultra_forensic_logger.c:192:    module_forensic_tracker_t* tracker = get_or_create_module_tracker(module);
+src/debug/ultra_forensic_logger.c:213:void ultra_forensic_log_module_operation(const char* file, int line, const char* func,
+src/debug/ultra_forensic_logger.c:215:    if (!g_forensic_initialized) return;
+src/debug/ultra_forensic_logger.c:217:    module_forensic_tracker_t* tracker = get_or_create_module_tracker(module);
+src/debug/ultra_forensic_logger.c:255:void ultra_forensic_log_module_metric(const char* file, int line, const char* func,
+src/debug/ultra_forensic_logger.c:257:    if (!g_forensic_initialized) return;
+src/debug/ultra_forensic_logger.c:259:    module_forensic_tracker_t* tracker = get_or_create_module_tracker(module);
+src/debug/ultra_forensic_logger.c:275:             "logs/forensic/metrics/%s_metrics.log", module);
+src/debug/ultra_forensic_logger.c:285:bool ultra_forensic_validate_all_logs_exist(void) {
+src/debug/ultra_forensic_logger.c:288:             "logs/forensic/validation/logs_validation_%lu.txt", get_precise_timestamp_ns());
+src/debug/ultra_forensic_logger.c:302:        module_forensic_tracker_t* tracker = &g_module_trackers[i];
+src/debug/ultra_forensic_logger.c:329:void ultra_forensic_generate_summary_report(void) {
+src/debug/ultra_forensic_logger.c:332:             "logs/forensic/sessions/summary_%lu.txt", get_precise_timestamp_ns());
+src/debug/ultra_forensic_logger.c:343:        module_forensic_tracker_t* tracker = &g_module_trackers[i];
+src/file_formats/lum_native_file_handler.c:771:lum_file_config_t* lum_file_config_create_forensic_audit(void) {
+src/file_formats/lum_native_universal_format.c:4:#include "lum_native_universal_format.h"
+src/file_formats/lum_native_universal_format.c:59:lum_universal_file_manager_t* lum_universal_file_create(const char* filepath) {
+src/file_formats/lum_native_universal_format.c:62:    lum_universal_file_manager_t* manager = TRACKED_MALLOC(sizeof(lum_universal_file_manager_t));
+src/file_formats/lum_native_universal_format.c:143:        snprintf(log_msg, sizeof(log_msg), "LUM Universal File Manager created: %s, Format version: %d.%d, Capacity: %zu", 
+src/file_formats/lum_native_universal_format.c:152:void lum_universal_file_destroy(lum_universal_file_manager_t** manager_ptr) {
+src/file_formats/lum_native_universal_format.c:155:    lum_universal_file_manager_t* manager = *manager_ptr;
+src/file_formats/lum_native_universal_format.c:233:lum_file_operation_result_t* lum_add_text_content(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.c:325:lum_file_operation_result_t* lum_add_json_content(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.c:373:lum_file_operation_result_t* lum_add_image_rgb24(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.c:490:lum_file_operation_result_t* lum_add_som_data(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.c:628:    lum_universal_file_manager_t* manager = lum_universal_file_create(test_file_path);
+src/file_formats/lum_native_universal_format.c:641:        lum_universal_file_destroy(&manager);
+src/file_formats/lum_native_universal_format.c:655:        lum_universal_file_destroy(&manager);
+src/file_formats/lum_native_universal_format.c:711:    lum_universal_file_destroy(&manager);
+src/file_formats/lum_native_universal_format.c:713:    LOG_INFOF("✅ LUM Universal File stress test 100M+ elements completed");
+src/lum/lum_core.c:12:#include "../debug/forensic_logger.h"
+src/lum/lum_core.c:65:        unified_forensic_log(FORENSIC_LEVEL_ERROR, "lum_security_init",
+src/lum/lum_core.c:88:        unified_forensic_log(FORENSIC_LEVEL_WARNING, "lum_security_init",
+src/lum/lum_core.c:102:    unified_forensic_log(FORENSIC_LEVEL_INFO, "lum_security_init",
+src/lum/lum_core.c:121:    unified_forensic_log(FORENSIC_LEVEL_INFO, "lum_security_cleanup",
+src/lum/lum_core.c:616:    forensic_log_individual_lum(group->lums[group->count-1].id, "ADD_TO_GROUP", group->lums[group->count-1].timestamp);
+src/lum/lum_core.c:617:    forensic_log_lum_operation("ADD_TO_GROUP", group->count, 0.0);
+src/lum/lum_core.c:840:            unified_forensic_log(FORENSIC_LEVEL_ERROR, "lum_generate_id",
+src/lum/lum_core.c:851:            unified_forensic_log(FORENSIC_LEVEL_DEBUG, "lum_generate_id",
+src/lum/lum_core.c:871:    unified_forensic_log(FORENSIC_LEVEL_WARNING, "lum_generate_id",
+src/lum/lum_core.c:921:        // Vérifier si le groupe a été marqué comme détruit avant de l'imprimer
+src/lum/lum_core.c:979:            unified_forensic_log(FORENSIC_LEVEL_WARNING, "lum_group_process_batch_50m_optimized",
+src/lum/lum_core.c:986:        unified_forensic_log(FORENSIC_LEVEL_INFO, "lum_group_process_batch_50m_optimized",
+src/optimization/formal_kernel_v40.c:19:bool v41_prove_non_universality(void) {
+src/optimization/formal_kernel_v40.c:21:    printf("[V41] LRM: Théorème 1 prouvé - Non-universalité confirmée.\n");
+src/optimization/reasoning_path_tracker.c:46:    fprintf(f, "Execution-ID: session_lrm_v41_forensic\n");
+src/persistence/data_persistence.c:4:#include "../debug/forensic_logger.h"
+src/persistence/data_persistence.c:71:        unified_forensic_log(FORENSIC_LEVEL_ERROR, "persistence_context_create",
+src/persistence/data_persistence.c:301:    // SÉCURITÉ: Sanitization du nom de fichier pour éviter path traversal
+src/persistence/data_persistence.c:376:    // SÉCURITÉ: Sanitization du nom de fichier pour éviter path traversal
+src/persistence/data_persistence.c:469:    // SÉCURITÉ: Sanitization du nom de fichier pour éviter path traversal
+src/persistence/data_persistence.c:564:    // SÉCURITÉ: Sanitization du nom de fichier pour éviter path traversal
+src/persistence/data_persistence.c:725:        unified_forensic_log(FORENSIC_LEVEL_ERROR, "persistence_start_transaction_log",
+src/persistence/data_persistence.c:791:    forensic_log(FORENSIC_LEVEL_DEBUG, "persistence_verify_file_integrity",
+src/persistence/data_persistence.c:797:        forensic_log(FORENSIC_LEVEL_ERROR, "persistence_verify_file_integrity",
+src/persistence/data_persistence.c:804:        forensic_log(FORENSIC_LEVEL_ERROR, "persistence_verify_file_integrity",
+src/persistence/data_persistence.c:812:        forensic_log(FORENSIC_LEVEL_ERROR, "persistence_verify_file_integrity",
+src/persistence/data_persistence.c:822:        forensic_log(FORENSIC_LEVEL_ERROR, "persistence_verify_file_integrity",
+src/persistence/data_persistence.c:834:        forensic_log(FORENSIC_LEVEL_ERROR, "persistence_verify_file_integrity",
+src/persistence/data_persistence.c:839:    forensic_log(FORENSIC_LEVEL_DEBUG, "persistence_verify_file_integrity",
+src/persistence/data_persistence.c:852:    forensic_log(FORENSIC_LEVEL_INFO, "recovery_manager_verify_file_integrity", "Called with %s", filepath);
+src/persistence/mmap_wal.c:15:    // Log forensic : WAL Initialisé en MMap
+src/persistence/recovery_manager_extension.c:29:    (void)sig; // Supprime warning unused parameter
+src/persistence/recovery_manager_extension.c:30:    (void)sig; // Supprime warning unused parameter
+src/persistence/recovery_manager_extension.c:158:    // Supprimer fichier crash pour indiquer arrêt propre
+src/persistence/transaction_wal_extension.c:13:#include "../debug/forensic_logger.h"
+src/persistence/transaction_wal_extension.c:63:    forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_replay_from_existing_persistence",
+src/persistence/transaction_wal_extension.c:75:                forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_replay_from_existing_persistence",
+src/persistence/transaction_wal_extension.c:82:                forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_replay_from_existing_persistence",
+src/persistence/transaction_wal_extension.c:88:                forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_replay_from_existing_persistence",
+src/persistence/transaction_wal_extension.c:96:            forensic_log(FORENSIC_LEVEL_DEBUG, "wal_extension_replay_from_existing_persistence", msg);
+src/persistence/transaction_wal_extension.c:101:        forensic_log(FORENSIC_LEVEL_WARNING, "wal_extension_replay_from_existing_persistence",
+src/persistence/transaction_wal_extension.c:107:    forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_replay_from_existing_persistence", msg);
+src/persistence/transaction_wal_extension.c:117:    forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_create_checkpoint_with_existing",
+src/persistence/transaction_wal_extension.c:129:    forensic_log(FORENSIC_LEVEL_INFO, "wal_extension_create_checkpoint_with_existing", msg);
+src/persistence/transaction_wal_extension.c:447:        forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_verify_integrity_complete", "Failed to seek WAL file");
+src/persistence/transaction_wal_extension.c:462:            forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_verify_integrity_complete",
+src/persistence/transaction_wal_extension.c:470:             forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_verify_integrity_complete",
+src/persistence/transaction_wal_extension.c:479:            forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_verify_integrity_complete",
+src/persistence/transaction_wal_extension.c:487:            forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_verify_integrity_complete",
+src/persistence/transaction_wal_extension.c:500:                     forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_verify_integrity_complete",
+src/persistence/transaction_wal_extension.c:505:                 forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_verify_integrity_complete",
+src/persistence/transaction_wal_extension.c:516:        forensic_log(FORENSIC_LEVEL_ERROR, "wal_extension_verify_integrity_complete",
+src/tests/test_forensic_complete_system.c:23:#include "../debug/forensic_logger.h"
+src/tests/test_forensic_complete_system.c:24:#include "../debug/ultra_forensic_logger.h"
+src/tests/test_forensic_complete_system.c:51:#include "../file_formats/lum_native_universal_format.h"
+src/tests/test_forensic_complete_system.c:67:} forensic_test_result_t;
+src/tests/test_forensic_complete_system.c:70:    forensic_test_result_t results[64]; // Support jusqu'à 64 modules
+src/tests/test_forensic_complete_system.c:78:} forensic_session_t;
+src/tests/test_forensic_complete_system.c:80:static forensic_session_t g_forensic_session;
+src/tests/test_forensic_complete_system.c:110:static void forensic_session_init(void) {
+src/tests/test_forensic_complete_system.c:111:    memset(&g_forensic_session, 0, sizeof(g_forensic_session));
+src/tests/test_forensic_complete_system.c:114:    snprintf(g_forensic_session.session_id, sizeof(g_forensic_session.session_id), 
+src/tests/test_forensic_complete_system.c:117:    g_forensic_session.result_count = 0;
+src/tests/test_forensic_complete_system.c:118:    g_forensic_session.all_tests_passed = true;
+src/tests/test_forensic_complete_system.c:121:    printf("Session ID: %s\\n", g_forensic_session.session_id);
+src/tests/test_forensic_complete_system.c:126:static void forensic_add_result(const char* module_name, uint64_t execution_time, 
+src/tests/test_forensic_complete_system.c:129:    if (g_forensic_session.result_count >= 64) return;
+src/tests/test_forensic_complete_system.c:131:    forensic_test_result_t* result = &g_forensic_session.results[g_forensic_session.result_count];
+src/tests/test_forensic_complete_system.c:155:    g_forensic_session.total_execution_time_ns += execution_time;
+src/tests/test_forensic_complete_system.c:156:    g_forensic_session.total_memory_used += memory_used;
+src/tests/test_forensic_complete_system.c:157:    g_forensic_session.total_operations += operations;
+src/tests/test_forensic_complete_system.c:158:    g_forensic_session.global_checksum ^= result->checksum_result;
+src/tests/test_forensic_complete_system.c:161:        g_forensic_session.all_tests_passed = false;
+src/tests/test_forensic_complete_system.c:164:    g_forensic_session.result_count++;
+src/tests/test_forensic_complete_system.c:172:static void test_module_with_forensics(const char* module_name, void* (*test_func)(size_t), size_t test_scale) {
+src/tests/test_forensic_complete_system.c:174:        forensic_add_result(module_name, 0, 0, 0, false, "Function pointer null");
+src/tests/test_forensic_complete_system.c:192:    forensic_add_result(module_name, execution_time, memory_estimate, test_scale, 
+src/tests/test_forensic_complete_system.c:320:static void execute_progressive_forensic_tests(void) {
+src/tests/test_forensic_complete_system.c:331:        test_module_with_forensics("LUM_CORE", test_lum_core, scale);
+src/tests/test_forensic_complete_system.c:332:        test_module_with_forensics("VORAX_OPERATIONS", test_vorax_operations, scale);
+src/tests/test_forensic_complete_system.c:335:        test_module_with_forensics("MATRIX_CALCULATOR", test_matrix_calculator, scale);
+src/tests/test_forensic_complete_system.c:336:        test_module_with_forensics("NEURAL_NETWORK", test_neural_network, scale);
+src/tests/test_forensic_complete_system.c:337:        test_module_with_forensics("SIMD_OPTIMIZER", test_simd_optimizer, scale);
+src/tests/test_forensic_complete_system.c:344:static void generate_final_forensic_report(void) {
+src/tests/test_forensic_complete_system.c:349:             "logs/forensic/REPORT_%s.txt", g_forensic_session.session_id);
+src/tests/test_forensic_complete_system.c:358:    fprintf(report, "Session: %s\\n", g_forensic_session.session_id);
+src/tests/test_forensic_complete_system.c:364:    fprintf(report, "Modules testés: %zu\\n", g_forensic_session.result_count);
+src/tests/test_forensic_complete_system.c:366:            g_forensic_session.total_execution_time_ns,
+src/tests/test_forensic_complete_system.c:367:            g_forensic_session.total_execution_time_ns / 1e9);
+src/tests/test_forensic_complete_system.c:369:            g_forensic_session.total_memory_used,
+src/tests/test_forensic_complete_system.c:370:            g_forensic_session.total_memory_used / (1024.0 * 1024.0));
+src/tests/test_forensic_complete_system.c:371:    fprintf(report, "Opérations totales: %lu\\n", g_forensic_session.total_operations);
+src/tests/test_forensic_complete_system.c:372:    fprintf(report, "Checksum global: 0x%08X\\n", g_forensic_session.global_checksum);
+src/tests/test_forensic_complete_system.c:373:    fprintf(report, "Résultat final: %s\\n", g_forensic_session.all_tests_passed ? "TOUS TESTS PASSÉS" : "ÉCHECS DÉTECTÉS");
+src/tests/test_forensic_complete_system.c:377:    for (size_t i = 0; i < g_forensic_session.result_count; i++) {
+src/tests/test_forensic_complete_system.c:378:        forensic_test_result_t* result = &g_forensic_session.results[i];
+src/tests/test_forensic_complete_system.c:412:           g_forensic_session.result_count,
+src/tests/test_forensic_complete_system.c:413:           g_forensic_session.all_tests_passed ? "TOUS SUCCÈS" : "ÉCHECS DÉTECTÉS");
+src/tests/test_forensic_complete_system.c:425:    forensic_logger_init("logs/forensic/test_execution.log");
+src/tests/test_forensic_complete_system.c:426:    ultra_forensic_logger_init();
+src/tests/test_forensic_complete_system.c:429:    forensic_session_init();
+src/tests/test_forensic_complete_system.c:432:    execute_progressive_forensic_tests();
+src/tests/test_forensic_complete_system.c:435:    generate_final_forensic_report();
+src/tests/test_forensic_complete_system.c:443:    if (g_forensic_session.all_tests_passed) {
+src/tests/test_forensic_complete_system.c:447:        printf("✅ Modules testés: %zu\\n", g_forensic_session.result_count);
+src/tests/test_forensic_complete_system.c:455:    forensic_logger_destroy();
+src/tests/test_forensic_complete_system.c:456:    ultra_forensic_logger_destroy();
+src/tests/test_forensic_complete_system.c:459:    return g_forensic_session.all_tests_passed ? 0 : 1;
+src/tests/test_integration_complete_39_modules.c:15:#include "../debug/forensic_logger.h"
+src/tests/test_integration_complete_39_modules.c:79:    forensic_logger_init("logs/integration_test.log");
+src/tests/test_integration_complete_39_modules.c:118:    forensic_logger_destroy();
+src/tests/test_integration_complete_45_modules.c:19:#include "../debug/forensic_logger.h"
+src/tests/test_integration_complete_45_modules.c:22:#include "../debug/ultra_forensic_logger.h"
+src/tests/test_integration_complete_45_modules.c:55:#include "../advanced_calculations/quantum_simulator.h"
+src/tests/test_integration_complete_45_modules.c:65:#include "../file_formats/lum_native_universal_format.h"
+src/tests/test_integration_complete_45_modules.c:137:bool test_forensic_logger(void) {
+src/tests/test_integration_complete_45_modules.c:138:    bool init_ok = forensic_logger_init("logs/v30/test_forensic.log");
+src/tests/test_integration_complete_45_modules.c:140:        forensic_log_memory_operation("TEST", NULL, 0);
+src/tests/test_integration_complete_45_modules.c:141:        forensic_logger_destroy();
+src/tests/test_integration_complete_45_modules.c:154:bool test_ultra_forensic_logger(void) {
+src/tests/test_integration_complete_45_modules.c:267:bool test_quantum_simulator(void) {
+src/tests/test_integration_complete_45_modules.c:291:bool test_lum_native_universal_format(void) {
+src/tests/test_integration_complete_45_modules.c:309:    forensic_logger_init("logs/v30/integration_chain.log");
+src/tests/test_integration_complete_45_modules.c:337:    forensic_logger_destroy();
+src/tests/test_integration_complete_45_modules.c:349:    mkdir("logs/forensic", 0755);
+src/tests/test_integration_complete_45_modules.c:351:    forensic_logger_init("logs/v30/integration_45_modules.log");
+src/tests/test_integration_complete_45_modules.c:362:        {"FORENSIC_LOGGER", test_forensic_logger, false, 0, NULL},
+src/tests/test_integration_complete_45_modules.c:365:        {"ULTRA_FORENSIC_LOGGER", test_ultra_forensic_logger, false, 0, NULL},
+src/tests/test_integration_complete_45_modules.c:386:        {"QUANTUM_SIMULATOR", test_quantum_simulator, false, 0, NULL},
+src/tests/test_integration_complete_45_modules.c:392:        {"LUM_NATIVE_UNIVERSAL_FORMAT", test_lum_native_universal_format, false, 0, NULL},
+src/tests/test_integration_complete_45_modules.c:442:    forensic_logger_destroy();
+src/tests/test_quantum_simulator_complete.c:1:#include "../advanced_calculations/quantum_simulator.h"
+src/tests/test_quantum_simulator_complete.c:7:void test_quantum_basic() {
+src/tests/test_quantum_simulator_complete.c:10:    quantum_config_t* config = quantum_config_create_default();
+src/tests/test_quantum_simulator_complete.c:14:    quantum_lum_t* qlum = quantum_lum_create(10, 20, 2);
+src/tests/test_quantum_simulator_complete.c:22:    bool gate_ok = quantum_apply_gate(qlum, QUANTUM_GATE_HADAMARD, config);
+src/tests/test_quantum_simulator_complete.c:28:    quantum_result_t* res = quantum_measure(qlum, config);
+src/tests/test_quantum_simulator_complete.c:33:    quantum_result_destroy(&res);
+src/tests/test_quantum_simulator_complete.c:34:    quantum_lum_destroy(&qlum);
+src/tests/test_quantum_simulator_complete.c:35:    quantum_config_destroy(&config);
+src/tests/test_quantum_simulator_complete.c:41:    test_quantum_basic();
+src/tests/test_unit_all_47_modules.c:16:#include "../debug/forensic_logger.h"
+src/tests/test_unit_all_47_modules.c:19:#include "../debug/ultra_forensic_logger.h"
+src/tests/test_unit_all_47_modules.c:21:#include "../crypto/rsa_structure_analyzer.h"
+src/tests/test_unit_all_47_modules.c:45:#include "../advanced_calculations/quantum_simulator.h"
+src/tests/test_unit_all_47_modules.c:51:#include "../file_formats/lum_native_universal_format.h"
+src/tests/test_unit_all_47_modules.c:200:bool test_forensic_logger_init(void) {
+src/tests/test_unit_all_47_modules.c:201:    bool ok = forensic_logger_init("logs/v31/unit_forensic.log");
+src/tests/test_unit_all_47_modules.c:205:bool test_forensic_logger_event(void) {
+src/tests/test_unit_all_47_modules.c:206:    forensic_log_event("UNIT_TEST", "Test event from unit tests");
+src/tests/test_unit_all_47_modules.c:230:bool test_ultra_forensic_init(void) {
+src/tests/test_unit_all_47_modules.c:231:    ultra_forensic_init();
+src/tests/test_unit_all_47_modules.c:235:bool test_ultra_forensic_capture(void) {
+src/tests/test_unit_all_47_modules.c:236:    ultra_forensic_capture_state("UNIT_TEST_STATE");
+src/tests/test_unit_all_47_modules.c:257:bool test_rsa_analyzer_init(void) {
+src/tests/test_unit_all_47_modules.c:258:    rsa_analyzer_t* analyzer = rsa_analyzer_create();
+src/tests/test_unit_all_47_modules.c:260:    if (analyzer) rsa_analyzer_destroy(analyzer);
+src/tests/test_unit_all_47_modules.c:264:bool test_rsa_analyzer_validate(void) {
+src/tests/test_unit_all_47_modules.c:580:bool test_quantum_simulator_init(void) {
+src/tests/test_unit_all_47_modules.c:581:    quantum_simulator_t* qs = quantum_simulator_create(4);
+src/tests/test_unit_all_47_modules.c:583:    if (qs) quantum_simulator_destroy(qs);
+src/tests/test_unit_all_47_modules.c:587:bool test_quantum_simulator_gate(void) {
+src/tests/test_unit_all_47_modules.c:588:    quantum_simulator_t* qs = quantum_simulator_create(2);
+src/tests/test_unit_all_47_modules.c:590:    int result = quantum_simulator_apply_hadamard(qs, 0);
+src/tests/test_unit_all_47_modules.c:591:    quantum_simulator_destroy(qs);
+src/tests/test_unit_all_47_modules.c:651:bool test_universal_format_init(void) {
+src/tests/test_unit_all_47_modules.c:652:    lum_universal_format_init();
+src/tests/test_unit_all_47_modules.c:656:bool test_universal_format_convert(void) {
+src/tests/test_unit_all_47_modules.c:719:    REGISTER_TEST("FORENSIC_LOGGER", "init", test_forensic_logger_init);
+src/tests/test_unit_all_47_modules.c:720:    REGISTER_TEST("FORENSIC_LOGGER", "event", test_forensic_logger_event);
+src/tests/test_unit_all_47_modules.c:728:    REGISTER_TEST("ULTRA_FORENSIC_LOGGER", "init", test_ultra_forensic_init);
+src/tests/test_unit_all_47_modules.c:729:    REGISTER_TEST("ULTRA_FORENSIC_LOGGER", "capture", test_ultra_forensic_capture);
+src/tests/test_unit_all_47_modules.c:735:    REGISTER_TEST("RSA_STRUCTURE_ANALYZER", "init", test_rsa_analyzer_init);
+src/tests/test_unit_all_47_modules.c:736:    REGISTER_TEST("RSA_STRUCTURE_ANALYZER", "validate", test_rsa_analyzer_validate);
+src/tests/test_unit_all_47_modules.c:807:    REGISTER_TEST("QUANTUM_SIMULATOR", "create", test_quantum_simulator_init);
+src/tests/test_unit_all_47_modules.c:808:    REGISTER_TEST("QUANTUM_SIMULATOR", "gate", test_quantum_simulator_gate);
+src/tests/test_unit_all_47_modules.c:825:    REGISTER_TEST("LUM_NATIVE_UNIVERSAL_FORMAT", "init", test_universal_format_init);
+src/tests/test_unit_all_47_modules.c:826:    REGISTER_TEST("LUM_NATIVE_UNIVERSAL_FORMAT", "convert", test_universal_format_convert);
+src/tests/v44_real_execution.c:5:#include "debug/ultra_forensic_logger.h"
+src/advanced_calculations/quantum_simulator.h:25:    uint32_t quantum_magic;       // Validation intégrité quantique
+src/advanced_calculations/quantum_simulator.h:27:} quantum_lum_t;
+src/advanced_calculations/quantum_simulator.h:40:} quantum_gate_e;
+src/advanced_calculations/quantum_simulator.h:44:    quantum_lum_t** qubits;       // Array de qubits quantiques
+src/advanced_calculations/quantum_simulator.h:46:    quantum_gate_e* gate_sequence;// Séquence de portes
+src/advanced_calculations/quantum_simulator.h:53:} quantum_circuit_t;
+src/advanced_calculations/quantum_simulator.h:57:    quantum_lum_t** final_states; // États finaux des qubits
+src/advanced_calculations/quantum_simulator.h:65:    uint64_t quantum_operations;  // Nombre d'opérations quantiques
+src/advanced_calculations/quantum_simulator.h:67:} quantum_result_t;
+src/advanced_calculations/quantum_simulator.h:78:} quantum_config_t;
+src/advanced_calculations/quantum_simulator.h:85:    quantum_circuit_t* circuit;  // Circuit quantique associé
+src/advanced_calculations/quantum_simulator.h:86:    quantum_config_t* config;    // Configuration du simulateur
+src/advanced_calculations/quantum_simulator.h:91:} quantum_simulator_t;
+src/advanced_calculations/quantum_simulator.h:94:quantum_lum_t* quantum_lum_create(int32_t x, int32_t y, size_t initial_states);
+src/advanced_calculations/quantum_simulator.h:95:void quantum_lum_destroy(quantum_lum_t** qlum_ptr);
+src/advanced_calculations/quantum_simulator.h:96:quantum_circuit_t* quantum_circuit_create(size_t qubit_count, size_t max_gates);
+src/advanced_calculations/quantum_simulator.h:97:void quantum_circuit_destroy(quantum_circuit_t** circuit_ptr);
+src/advanced_calculations/quantum_simulator.h:100:quantum_simulator_t* quantum_simulator_create(size_t qubit_count, quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:101:void quantum_simulator_destroy(quantum_simulator_t** simulator_ptr);
+src/advanced_calculations/quantum_simulator.h:104:bool quantum_apply_gate(quantum_lum_t* qlum, quantum_gate_e gate, quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:105:bool quantum_entangle_lums(quantum_lum_t* qlum1, quantum_lum_t* qlum2, quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:106:quantum_result_t* quantum_measure(quantum_lum_t* qlum, quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:107:bool quantum_create_superposition(quantum_lum_t* qlum, double* amplitudes, size_t state_count);
+src/advanced_calculations/quantum_simulator.h:110:quantum_result_t* quantum_simulate_circuit(quantum_circuit_t* circuit, quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:111:bool quantum_add_gate_to_circuit(quantum_circuit_t* circuit, quantum_gate_e gate, size_t target, size_t control);
+src/advanced_calculations/quantum_simulator.h:114:quantum_result_t* quantum_shor_algorithm(uint64_t number_to_factor, quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:115:quantum_result_t* quantum_grover_search(lum_group_t* search_space, lum_t* target, quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:116:quantum_result_t* quantum_quantum_fourier_transform(quantum_circuit_t* circuit, quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:119:bool quantum_stress_test_100m_qubits(quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:120:quantum_result_t* quantum_benchmark_entanglement(size_t qubit_count, quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:121:quantum_result_t* quantum_test_decoherence_scaling(size_t max_qubits, quantum_config_t* config);
+src/advanced_calculations/quantum_simulator.h:124:quantum_config_t* quantum_config_create_default(void);
+src/advanced_calculations/quantum_simulator.h:125:void quantum_config_destroy(quantum_config_t** config_ptr);
+src/advanced_calculations/quantum_simulator.h:126:void quantum_result_destroy(quantum_result_t** result_ptr);
+src/advanced_calculations/quantum_simulator.h:127:double quantum_calculate_fidelity(quantum_lum_t* qlum_ideal, quantum_lum_t* qlum_actual);
+src/advanced_calculations/quantum_simulator.h:128:bool quantum_validate_state_vector(double complex* state_vector, size_t size);
+src/common/common_types.h:92:} unified_forensic_level_e;
+src/common/common_types.h:95:void unified_forensic_log(unified_forensic_level_e level, const char* function, const char* format, ...);
+src/common/common_types.h:193:} collatz_analysis_e;
+src/complex_modules/ai_dynamic_config_manager.h:10:// #include "../advanced_calculations/quantum_simulator.h" // DÉSACTIVÉ par prompt.txt
+src/complex_modules/ai_dynamic_config_manager.h:134:bool ai_configure_quantum_simulator(ai_dynamic_config_manager_t* manager,
+src/crypto/rsa_structure_analyzer.h:28:    double complex spectral_signature;
+src/crypto/rsa_structure_analyzer.h:42:bool run_differential_analysis(const experiment_result_t* baseline, const experiment_result_t* rsa_like, size_t count);
+src/crypto/rsa_structure_analyzer.h:43:void generate_forensic_report(const char* filename);
+src/debug/forensic_logger.h:10:// Using unified forensic levels from common_types.h
+src/debug/forensic_logger.h:11:typedef unified_forensic_level_e forensic_level_e;
+src/debug/forensic_logger.h:34:bool forensic_logger_init(const char* filename);
+src/debug/forensic_logger.h:35:bool forensic_logger_init_individual_files(void);
+src/debug/forensic_logger.h:36:void forensic_log_memory_operation(const char* operation, void* ptr, size_t size);
+src/debug/forensic_logger.h:37:void forensic_log_lum_operation(const char* operation, uint64_t lum_count, double duration_ns);
+src/debug/forensic_logger.h:38:void forensic_log_individual_lum(uint32_t lum_id, const char* operation, uint64_t timestamp_ns);
+src/debug/forensic_logger.h:39:void forensic_logger_destroy(void);
+src/debug/forensic_logger.h:41:// General forensic logging function
+src/debug/forensic_logger.h:42:void forensic_log(forensic_level_e level, const char* function, const char* format, ...);
+src/debug/ultra_forensic_logger.h:19:} ultra_forensic_level_e;
+src/debug/ultra_forensic_logger.h:31:} module_forensic_tracker_t;
+src/debug/ultra_forensic_logger.h:35:    ultra_forensic_log_module_start(__FILE__, __LINE__, __func__, module, test)
+src/debug/ultra_forensic_logger.h:38:    ultra_forensic_log_module_end(__FILE__, __LINE__, __func__, module, test, result)
+src/debug/ultra_forensic_logger.h:41:    ultra_forensic_log_module_operation(__FILE__, __LINE__, __func__, module, operation, data)
+src/debug/ultra_forensic_logger.h:44:    ultra_forensic_log_module_metric(__FILE__, __LINE__, __func__, module, metric_name, value)
+src/debug/ultra_forensic_logger.h:47:void ultra_forensic_logger_init_lum(const char* log_file);
+src/debug/ultra_forensic_logger.h:48:bool ultra_forensic_logger_init(void);
+src/debug/ultra_forensic_logger.h:49:void ultra_forensic_logger_destroy(void);
+src/debug/ultra_forensic_logger.h:51:void ultra_forensic_log_module_start(const char* file, int line, const char* func, 
+src/debug/ultra_forensic_logger.h:53:void ultra_forensic_log_module_end(const char* file, int line, const char* func,
+src/debug/ultra_forensic_logger.h:55:void ultra_forensic_log_module_operation(const char* file, int line, const char* func,
+src/debug/ultra_forensic_logger.h:57:void ultra_forensic_log_module_metric(const char* file, int line, const char* func,
+src/debug/ultra_forensic_logger.h:61:bool ultra_forensic_validate_all_logs_exist(void);
+src/debug/ultra_forensic_logger.h:62:void ultra_forensic_generate_summary_report(void);
+src/file_formats/lum_native_file_handler.h:236:lum_file_config_t* lum_file_config_create_forensic_audit(void);
+src/file_formats/lum_native_universal_format.h:104:} lum_universal_file_manager_t;
+src/file_formats/lum_native_universal_format.h:120:lum_universal_file_manager_t* lum_universal_file_create(const char* filepath);
+src/file_formats/lum_native_universal_format.h:123:lum_universal_file_manager_t* lum_universal_file_open(const char* filepath, bool read_only);
+src/file_formats/lum_native_universal_format.h:126:bool lum_universal_file_save_and_close(lum_universal_file_manager_t** manager_ptr);
+src/file_formats/lum_native_universal_format.h:129:void lum_universal_file_destroy(lum_universal_file_manager_t** manager_ptr);
+src/file_formats/lum_native_universal_format.h:134:lum_file_operation_result_t* lum_add_text_content(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:141:lum_file_operation_result_t* lum_add_json_content(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:147:lum_file_operation_result_t* lum_add_csv_content(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:154:lum_file_operation_result_t* lum_add_image_rgb24(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:162:lum_file_operation_result_t* lum_add_image_rgba32(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:170:lum_file_operation_result_t* lum_add_audio_pcm(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:180:lum_file_operation_result_t* lum_add_video_content(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:191:lum_file_operation_result_t* lum_add_som_data(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:200:lum_file_operation_result_t* lum_add_neural_weights(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:209:lum_file_operation_result_t* lum_add_binary_blob(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:218:lum_file_operation_result_t* lum_extract_content_by_name(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:224:lum_file_operation_result_t* lum_extract_content_by_type(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:230:lum_group_t* lum_extract_associated_lums(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:272:bool lum_enable_compression(lum_universal_file_manager_t* manager,
+src/file_formats/lum_native_universal_format.h:276:bool lum_enable_encryption(lum_universal_file_manager_t* manager,
+src/lum/lum_core.h:47:// Allocation tracking for forensic memory management
+src/lum/lum_core.h:148:            forensic_log(FORENSIC_LEVEL_ERROR, __func__, \
+src/lum/lum_core.h:158:            forensic_log(FORENSIC_LEVEL_ERROR, __func__, \
+src/optimization/formal_kernel_v40.h:30:// Théorème 1: Preuve d'obstruction (Non-universalité)
+src/optimization/formal_kernel_v40.h:31:bool v41_prove_non_universality(void);
+proofs/lean/collatz_proof.lean:12:theorem collatz_attractor_fixed_point (n : ℕ) (h : n > 0) :
+proofs/lean/prime_symmetry.lean:7:L'alignement de phase spectral du signal O(n, σ) est isomorphe à la distribution
+proofs/lean/prime_symmetry.lean:11:theorem prime_symmetry_isomorphism (p : ℕ) (hp : Nat.Prime p) :
