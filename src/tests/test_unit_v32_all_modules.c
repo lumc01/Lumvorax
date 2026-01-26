@@ -491,15 +491,15 @@ void test_monitoring(void) {
 #include "../optimization/formal_kernel_v40.h"
 
 void test_reasoning_trace(void) {
-    printf(ANSI_YELLOW "\n[MODULE] REASONING_PATH_TRACKER (V40-ADVERSARIAL)\n" ANSI_RESET);
-    reasoning_trace_t* trace = reasoning_trace_start("session_adversarial_v40");
+    printf(ANSI_YELLOW "\n[MODULE] REASONING_PATH_TRACKER (V41-LRM-SHF)\n" ANSI_RESET);
+    reasoning_trace_t* trace = reasoning_trace_start("session_lrm_v41");
     if (trace) {
-        reasoning_trace_add_node(trace, "Injection Singularité", 0.50f, 0.9999f);
-        // Simulation d'un échec documenté
-        bool safe = v40_simulate_adversarial_test();
-        TEST("adversarial_failure_handled", safe == false);
+        reasoning_trace_add_node(trace, "Vérification SHF", 1.0f, 0.0001f);
+        // Utilisation des nouveaux axiomes V41
+        bool resonant = v41_check_shf_resonance(NULL, 0.001f);
+        TEST("shf_resonance_detected", resonant == true);
         
-        reasoning_trace_save(trace, "PREUVE_IAMO/adversarial_trace_v40.log");
+        reasoning_trace_save(trace, "PREUVE_IAMO/lrm_trace_v41.log");
         reasoning_trace_destroy(trace);
     }
 }

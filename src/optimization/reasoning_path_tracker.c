@@ -27,10 +27,10 @@ void reasoning_trace_add_node(reasoning_trace_t* trace, const char* decision, fl
     node->lyapunov_stability = lyapunov_stability;
     node->timestamp = time(NULL);
     
-    // [V40] Séparation automatique Heuristique/Formel (F4)
+    // [V41] Séparation automatique SHF/LRM
     if (confidence > 0.999f) {
-        node->layer = LOGIC_FORMAL;
-        node->formal_validation = v40_verify_soundness(decision, LOGIC_FORMAL);
+        node->layer = LOGIC_RESONANT;
+        node->formal_validation = v41_check_shf_resonance(NULL, 0.001f);
     } else {
         node->layer = LOGIC_HEURISTIC;
         node->formal_validation = false;

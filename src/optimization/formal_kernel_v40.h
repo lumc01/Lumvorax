@@ -1,36 +1,33 @@
-#ifndef FORMAL_KERNEL_V40_H
-#define FORMAL_KERNEL_V40_H
+#ifndef FORMAL_KERNEL_V41_H
+#define FORMAL_KERNEL_V41_H
 
 #include <stdbool.h>
 #include <stdint.h>
 
 /**
- * [V40] SÉMANTIQUE FORMELLE ET KERNEL DE VÉRITÉ
- * Répond aux exigences F1, F2, F3 de la Checklist Scientifique.
+ * [V41] LOCAL RESONANT MATHEMATICS (LRM) - SHF / RSR
+ * Axiomatique minimale : Résonance locale et Obstruction globale.
  */
 
+typedef struct {
+    float scale;      // l
+    float omega;      // Omega (localisation)
+    float time_window; // T
+} resonance_mode_t;
+
 typedef enum {
-    LOGIC_HEURISTIC, // Heuristique (non-prouvé)
-    LOGIC_FORMAL     // Formel (prouvé par Lean/ZFC)
+    LOGIC_HEURISTIC,
+    LOGIC_FORMAL,
+    LOGIC_RESONANT   // [V41] Mode résonance locale SHF
 } logic_layer_t;
 
-typedef struct {
-    char axiom_id[64];
-    bool is_verified;
-    float completeness_score;
-} formal_proof_t;
+// SHF Axiom: Vérifie si un sous-ensemble est résonant
+bool v41_check_shf_resonance(const void* state_space, float epsilon);
 
-// F1: Sémantique formelle explicite
-// F2: Théorème de correction globale (Soundness)
-bool v40_verify_soundness(const char* result_id, logic_layer_t layer);
+// RSR Principle: Résolution par structure résonante stable
+bool v41_resolve_rsr(const char* problem_id);
 
-// F3: Théorème de complétude (ou délimitation)
-float v40_get_completeness_limit(void);
-
-// F8: Documentation d'un échec structurel (Singularité de Données)
-bool v40_simulate_adversarial_test(void);
-
-// F4: Séparation Heuristique/Formel
-void v40_audit_layer_separation(void);
+// Théorème 1: Preuve d'obstruction (Non-universalité)
+bool v41_prove_non_universality(void);
 
 #endif
