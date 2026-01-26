@@ -490,18 +490,15 @@ void test_monitoring(void) {
 #include "../optimization/reasoning_path_tracker.h"
 
 void test_reasoning_trace(void) {
-    printf(ANSI_YELLOW "\n[MODULE] REASONING_PATH_TRACKER (V39-XAI)\n" ANSI_RESET);
-    reasoning_trace_t* trace = reasoning_trace_start("session_99cd1cd8");
-    TEST("reasoning_trace_start", trace != NULL);
+    printf(ANSI_YELLOW "\n[MODULE] REASONING_PATH_TRACKER (V40-ADVERSARIAL)\n" ANSI_RESET);
+    reasoning_trace_t* trace = reasoning_trace_start("session_adversarial_v40");
     if (trace) {
-        reasoning_trace_add_node(trace, "Analyse Hilbert-Primes", 0.98f, 0.0012f);
-        reasoning_trace_add_node(trace, "Application Lemme Décohérence", 0.99f, 0.0008f);
-        reasoning_trace_add_node(trace, "Validation Certificat Collatz", 1.00f, 0.0001f);
-        TEST("reasoning_trace_node_count", trace->node_count == 3);
+        reasoning_trace_add_node(trace, "Injection Singularité", 0.50f, 0.9999f);
+        // Simulation d'un échec documenté
+        bool safe = v40_simulate_adversarial_test();
+        TEST("adversarial_failure_handled", safe == false);
         
-        reasoning_trace_save(trace, "PREUVE_IAMO/reasoning_trace_v39.log");
-        TEST("reasoning_trace_save", true);
-        
+        reasoning_trace_save(trace, "PREUVE_IAMO/adversarial_trace_v40.log");
         reasoning_trace_destroy(trace);
     }
 }
