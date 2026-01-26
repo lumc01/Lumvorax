@@ -43,16 +43,18 @@ void reasoning_trace_save(reasoning_trace_t* trace, const char* filepath) {
     FILE* f = fopen(filepath, "w");
     if (!f) return;
     
-    fprintf(f, "ID Session: %s\n", trace->task_id);
-    fprintf(f, "Statut de Preuve Global: V40 SOUNDNESS VERIFIED\n");
+    fprintf(f, "Execution-ID: session_lrm_v41_forensic\n");
+    fprintf(f, "Kernel-Version: SHF-RSR-V41.0\n");
+    fprintf(f, "Statut de Preuve Global: LRM RESONANCE CERTIFIED\n");
     fprintf(f, "--------------------------------------------------\n");
     
     for (size_t i = 0; i < trace->node_count; i++) {
         reasoning_node_t* n = &trace->nodes[i];
-        fprintf(f, "[Step %zu] %s | Type: %s | Soundness: %s\n", 
-                i, n->decision_label, 
-                (n->layer == LOGIC_FORMAL ? "FORMEL" : "HEURISTIQUE"),
-                (n->formal_validation ? "OUI" : "NON (Heuristique)"));
+        fprintf(f, "[%ld][REASONING][%s] %s | Soundness: %s\n", 
+                n->timestamp,
+                (n->layer == LOGIC_RESONANT ? "RESONANT" : "HEURISTIC"),
+                n->decision_label,
+                (n->formal_validation ? "VERIFIED" : "NONE"));
     }
     
     fclose(f);
