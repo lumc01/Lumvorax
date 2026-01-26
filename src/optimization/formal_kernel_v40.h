@@ -27,6 +27,9 @@ bool v40_verify_soundness(const char* result_id, logic_layer_t layer);
 // F3: Théorème de complétude (ou délimitation)
 float v40_get_completeness_limit(void);
 
+// F8: Documentation d'un échec structurel (Singularité de Données)
+bool v40_simulate_adversarial_test(void);
+
 // F4: Séparation Heuristique/Formel
 void v40_audit_layer_separation(void);
 

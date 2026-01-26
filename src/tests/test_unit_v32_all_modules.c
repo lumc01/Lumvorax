@@ -488,6 +488,7 @@ void test_monitoring(void) {
 }
 
 #include "../optimization/reasoning_path_tracker.h"
+#include "../optimization/formal_kernel_v40.h"
 
 void test_reasoning_trace(void) {
     printf(ANSI_YELLOW "\n[MODULE] REASONING_PATH_TRACKER (V40-ADVERSARIAL)\n" ANSI_RESET);
