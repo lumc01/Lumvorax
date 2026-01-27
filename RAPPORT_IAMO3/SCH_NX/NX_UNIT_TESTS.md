@@ -9,9 +9,9 @@
 - **Validation** : Le bruit thermique génère les structures attendues sans stabilisation.
 
 ## 🧪 2. NX-BIO-02 (Énergie)
-- **Résultat** : Drainage d'ATP fonctionnel. Mort neuronale confirmée après épuisement du budget.
+- **Résultat** : Drainage d'ATP fonctionnel (Loggé dynamiquement dans `NX-BIO_energy.log`). Mort neuronale confirmée après épuisement du budget.
 - **Validation** : La contrainte énergétique est destructive et irréversible.
 
 ## 🧪 3. NX-DISS-01 (Instabilité)
-- **Résultat** : Flux dissipatif maintenu pendant 100 cycles.
+- **Résultat** : Flux dissipatif maintenu pendant 100 cycles (Tracé dans `NX-DISS_dynamics.log`).
 - **Validation** : L'instabilité est le moteur de la simulation.
