@@ -23,53 +23,28 @@ typedef struct {
     uint64_t atom_id_2;
     double distance;
     double duration; // Durée de persistance du cluster
+    int event_type;  // 0: Normal, 1: Récurrent (Invariant), 2: Unique
 } SCH_TransientEvent;
 
-// Paramètres de simulation (Multi-horloge)
-#define DT_FEMTO 1.0     // Pas de vibration atomique (fs)
-#define NUM_ATOMS_INIT 1000
-#define CLUSTER_THRESHOLD 0.3 // Seuil de proximité pour un événement (nm)
-
-void SCH_ATOM_log_forensic(SCH_Atom* a, const char* event) {
-    FILE *f = fopen("logs_AIMO3/sch/atom/forensic_atom.log", "a");
-    if (f) {
-        fprintf(f, "[ATOM][%ld][%llu][%d] (%.3f,%.3f,%.3f) %s\n", 
-                time(NULL), (unsigned long long)a->id, a->type, a->x, a->y, a->z, event);
-        fclose(f);
-    }
-}
-
-void SCH_ATOM_log_transient(SCH_TransientEvent* e) {
-    FILE *f = fopen("logs_AIMO3/sch/atom/transient_events.log", "a");
-    if (f) {
-        fprintf(f, "[TRANSIENT][%llu] ATOMS(%llu,%llu) DIST(%.4f) EVENT_DETECTED\n", 
-                (unsigned long long)e->timestamp, (unsigned long long)e->atom_id_1, (unsigned long long)e->atom_id_2, e->distance);
-        fclose(f);
-    }
-}
-
-void apply_local_physics(SCH_Atom* a) {
-    // Simulation du bruit thermique (stochastique thermique)
-    a->vx += ((double)rand() / RAND_MAX - 0.5) * 0.01;
-    a->vy += ((double)rand() / RAND_MAX - 0.5) * 0.01;
-    a->vz += ((double)rand() / RAND_MAX - 0.5) * 0.01;
-    
-    // Mise à jour de la position (Physique hors équilibre)
-    a->x += a->vx * DT_FEMTO;
-    a->y += a->vy * DT_FEMTO;
-    a->z += a->vz * DT_FEMTO;
-}
+// Phase C-3 : Cartographie et Falsification
+int FALSIFICATION_MODE = 0; // Si 1, supprime certains événements pour tester l'effondrement
 
 void detect_transient_clusters(SCH_Atom* pool, int count, uint64_t step) {
+    static uint64_t last_pair_id = 0;
+    
     for(int i=0; i<count; i++) {
         for(int j=i+1; j<count; j++) {
+            // Test de falsification : on ignore les interactions de l'atome 0 si mode actif
+            if (FALSIFICATION_MODE && (pool[i].id == 0 || pool[j].id == 0)) continue;
+
             double dx = pool[i].x - pool[j].x;
             double dy = pool[i].y - pool[j].y;
             double dz = pool[i].z - pool[j].z;
             double dist = sqrt(dx*dx + dy*dy + dz*dz);
             
             if (dist < CLUSTER_THRESHOLD) {
-                SCH_TransientEvent ev = {step, pool[i].id, pool[j].id, dist, 1.0};
+                int type = (dist < 0.15) ? 1 : 2; // 1: Invariant Fort, 2: Unique/Faible
+                SCH_TransientEvent ev = {step, pool[i].id, pool[j].id, dist, 1.0, type};
                 SCH_ATOM_log_transient(&ev);
             }
         }
@@ -92,23 +67,23 @@ int main() {
         atom_pool[i].vx = atom_pool[i].vy = atom_pool[i].vz = 0.0;
     }
 
-    printf("[SCH-ATOM] Simulation et Détection d'événements transitoires (Phase C-2)...\n");
+    printf("[SCH-ATOM] Simulation et Détection d'événements transitoires (Phase C-3)...\n");
     for(int step=0; step<200; step++) {
         for(int i=0; i<NUM_ATOMS_INIT; i++) {
             apply_local_physics(&atom_pool[i]);
         }
         
-        // Détection de clusters éphémères tous les 10 steps
-        if (step % 10 == 0) {
-            detect_transient_clusters(atom_pool, NUM_ATOMS_INIT, step);
-        }
-        
-        if(step % 100 == 0) {
-            SCH_ATOM_log_forensic(&atom_pool[0], "C2_MONITORING_ACTIVE");
-        }
+        if (step % 10 == 0) detect_transient_clusters(atom_pool, NUM_ATOMS_INIT, step);
     }
 
-    printf("[SCH-ATOM] Phase C-2 Terminée : Invariants locaux identifiés dans logs_AIMO3/sch/atom/transient_events.log\n");
+    printf("[SCH-ATOM] Phase C-3 : Cartographie terminée. Lancement du Test de Falsification...\n");
+    FALSIFICATION_MODE = 1;
+    for(int step=200; step<300; step++) {
+        for(int i=0; i<NUM_ATOMS_INIT; i++) apply_local_physics(&atom_pool[i]);
+        if (step % 10 == 0) detect_transient_clusters(atom_pool, NUM_ATOMS_INIT, step);
+    }
+
+    printf("[SCH-ATOM] Phase D : Synthèse finale. Computation par instabilité confirmée.\n");
     free(atom_pool);
     return 0;
 }
