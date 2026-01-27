@@ -26,12 +26,45 @@ typedef struct {
     int event_type;  // 0: Normal, 1: Récurrent (Invariant), 2: Unique
 } SCH_TransientEvent;
 
+// Paramètres de simulation (Multi-horloge)
+#define DT_FEMTO 1.0     // Pas de vibration atomique (fs)
+#define NUM_ATOMS_INIT 1000
+#define CLUSTER_THRESHOLD 0.3 // Seuil de proximité pour un événement (nm)
+
 // Phase C-3 : Cartographie et Falsification
 int FALSIFICATION_MODE = 0; // Si 1, supprime certains événements pour tester l'effondrement
 
-void detect_transient_clusters(SCH_Atom* pool, int count, uint64_t step) {
-    static uint64_t last_pair_id = 0;
+void SCH_ATOM_log_forensic(SCH_Atom* a, const char* event) {
+    FILE *f = fopen("logs_AIMO3/sch/atom/forensic_atom.log", "a");
+    if (f) {
+        fprintf(f, "[ATOM][%ld][%llu][%d] (%.3f,%.3f,%.3f) %s\n", 
+                (long)time(NULL), (unsigned long long)a->id, a->type, a->x, a->y, a->z, event);
+        fclose(f);
+    }
+}
+
+void SCH_ATOM_log_transient(SCH_TransientEvent* e) {
+    FILE *f = fopen("logs_AIMO3/sch/atom/transient_events.log", "a");
+    if (f) {
+        fprintf(f, "[TRANSIENT][%llu] ATOMS(%llu,%llu) DIST(%.4f) TYPE(%d) EVENT_DETECTED\n", 
+                (unsigned long long)e->timestamp, (unsigned long long)e->atom_id_1, (unsigned long long)e->atom_id_2, e->distance, e->event_type);
+        fclose(f);
+    }
+}
+
+void apply_local_physics(SCH_Atom* a) {
+    // Simulation du bruit thermique (stochastique thermique)
+    a->vx += ((double)rand() / RAND_MAX - 0.5) * 0.01;
+    a->vy += ((double)rand() / RAND_MAX - 0.5) * 0.01;
+    a->vz += ((double)rand() / RAND_MAX - 0.5) * 0.01;
     
+    // Mise à jour de la position (Physique hors équilibre)
+    a->x += a->vx * DT_FEMTO;
+    a->y += a->vy * DT_FEMTO;
+    a->z += a->vz * DT_FEMTO;
+}
+
+void detect_transient_clusters(SCH_Atom* pool, int count, uint64_t step) {
     for(int i=0; i<count; i++) {
         for(int j=i+1; j<count; j++) {
             // Test de falsification : on ignore les interactions de l'atome 0 si mode actif
@@ -73,14 +106,14 @@ int main() {
             apply_local_physics(&atom_pool[i]);
         }
         
-        if (step % 10 == 0) detect_transient_clusters(atom_pool, NUM_ATOMS_INIT, step);
+        if (step % 10 == 0) detect_transient_clusters(atom_pool, NUM_ATOMS_INIT, (uint64_t)step);
     }
 
     printf("[SCH-ATOM] Phase C-3 : Cartographie terminée. Lancement du Test de Falsification...\n");
     FALSIFICATION_MODE = 1;
     for(int step=200; step<300; step++) {
         for(int i=0; i<NUM_ATOMS_INIT; i++) apply_local_physics(&atom_pool[i]);
-        if (step % 10 == 0) detect_transient_clusters(atom_pool, NUM_ATOMS_INIT, step);
+        if (step % 10 == 0) detect_transient_clusters(atom_pool, NUM_ATOMS_INIT, (uint64_t)step);
     }
 
     printf("[SCH-ATOM] Phase D : Synthèse finale. Computation par instabilité confirmée.\n");
