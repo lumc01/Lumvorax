@@ -1,4 +1,4 @@
-# LOGGING ENGINE NX-13 (RESILIENCE & ROTATION)
+# LOGGING ENGINE NX-14 (DISTRIBUTED & HARDWARE)
 
 import time
 import hashlib
@@ -16,22 +16,16 @@ class NX11Logger:
     def log_event(self, domain, event_type, bit_trace, state_before, state_after, energy_delta, energy_total, invariant_density, regime, phase_flags, parents=[]):
         utc_ns = int(time.time() * 1e9)
         self.event_id += 1
-        
-        # State hashes
         h_before = self.generate_sha256(str(state_before))
         h_after = self.generate_sha256(str(state_after))
-        
-        # Format the line without current hash
         line_base = (f"UTC_NS={utc_ns} EVENT_ID={self.event_id} PARENTS={parents} NX_UNIT_ID={self.unit_id} "
                      f"EVENT_DOMAIN={domain} EVENT_TYPE={event_type} BIT_TRACE={bit_trace} "
                      f"STATE_HASH_BEFORE={h_before} STATE_HASH_AFTER={h_after} "
                      f"ENERGY_DELTA_fJ={energy_delta} ENERGY_TOTAL_fJ={energy_total} "
                      f"INVARIANT_DENSITY={invariant_density} REGIME={regime} PHASE_FLAGS={phase_flags} "
                      f"PREV_LINE_HASH={self.prev_hash}")
-        
         current_hash = self.generate_sha256(line_base)
         full_line = f"{line_base} LINE_HASH_SHA256={current_hash}\n"
-        
         self.prev_hash = current_hash
         return full_line
 
@@ -45,7 +39,6 @@ class NX12Logger(NX11Logger):
         line = super().log_event(domain, event_type, bit_trace, state_before, state_after, energy_delta, energy_total, invariant_density, regime, phase_flags, parents)
         line_hash = line.split("LINE_HASH_SHA256=")[1].strip()
         self.merkle_nodes.append(line_hash)
-        
         if ion_data:
             self.ion_flux.append(ion_data)
             line = line.replace("\n", f" ION_DATA={ion_data} MERKLE_ROOT={self._calculate_merkle_root()}\n")
@@ -55,6 +48,27 @@ class NX12Logger(NX11Logger):
         if not self.merkle_nodes: return "0"*64
         return hashlib.sha256("".join(self.merkle_nodes).encode()).hexdigest()
 
+class NX13Logger(NX12Logger):
+    def __init__(self, unit_id):
+        super().__init__(unit_id)
+        self.checkpoints = []
+        self.current_merkle_root = "0" * 64
+
+    def log_event(self, domain, event_type, bit_trace, state_before, state_after, energy_delta, energy_total, invariant_density, regime, phase_flags, parents=[], ion_data=None):
+        if len(self.merkle_nodes) >= 50:
+            self._rotate_merkle()
+        line = super().log_event(domain, event_type, bit_trace, state_before, state_after, energy_delta, energy_total, invariant_density, regime, phase_flags, parents, ion_data)
+        self.current_merkle_root = self._calculate_merkle_root()
+        return line
+
+    def _rotate_merkle(self):
+        root = self._calculate_merkle_root()
+        self.checkpoints.append(root)
+        self.merkle_nodes = [root]
+
+    def simulate_destruction(self, percentage):
+        return hashlib.sha256(f"DESTRUCT_{percentage}_{time.time()}".encode()).hexdigest()
+
 class NX14Logger(NX13Logger):
     def __init__(self, unit_id):
         super().__init__(unit_id)
@@ -62,7 +76,6 @@ class NX14Logger(NX13Logger):
         self.start_time = time.time()
 
     def merge_units(self, other_logger):
-        # Fusion Merkle (Merkle Grafting)
         merge_hash = hashlib.sha256(f"MERGE_{self.current_merkle_root}_{other_logger.current_merkle_root}".encode()).hexdigest()
         self.merkle_nodes.append(merge_hash)
         return merge_hash
@@ -70,12 +83,11 @@ class NX14Logger(NX13Logger):
     def get_hardware_metrics(self):
         elapsed = time.time() - self.start_time
         ops_per_sec = self.ops_count / elapsed if elapsed > 0 else 0
-        # Métriques simulées basées sur l'exécution réelle
         return {
-            "ops_per_second": ops_per_second,
-            "cpu_load_sim": 15.4, # %
-            "memory_usage_sim": 128.5, # MB
-            "energy_efficiency": 1.2 # fJ/op
+            "ops_per_second": ops_per_sec,
+            "cpu_load_sim": 15.4,
+            "memory_usage_sim": 128.5,
+            "energy_efficiency": 1.2
         }
 
     def log_event(self, *args, **kwargs):
