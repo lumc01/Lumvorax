@@ -1,4 +1,4 @@
-# LOGGING ENGINE NX-15 (RESONANCE & PRUNING)
+# LOGGING ENGINE NX-16 (HOLOGRAPHIC & MAX CAPACITY)
 
 import time
 import hashlib
@@ -100,15 +100,39 @@ class NX15Logger(NX14Logger):
         self.resonance_index = 1.0
 
     def resolve_resonance(self, stimulus_conflict):
-        # Arbitrage de phase
         self.resonance_index = 1.0 - (stimulus_conflict * 0.2)
         return hashlib.sha256(f"RESONANCE_RESOLVED_{self.resonance_index}".encode()).hexdigest()
 
     def prune_logs(self, percentage):
-        # Élagage des logs obsolètes
         original_size = len(self.merkle_nodes)
         self.merkle_nodes = self.merkle_nodes[int(original_size * (percentage/100)):]
         return len(self.merkle_nodes)
+
+class NX16Logger(NX15Logger):
+    def __init__(self, unit_id):
+        super().__init__(unit_id)
+        self.clusters = {}
+        self.max_capacity_reached = False
+
+    def organize_holographic_clusters(self, total_neurons, cluster_count):
+        self.neurons_per_cluster = total_neurons // cluster_count
+        for i in range(cluster_count):
+            self.clusters[f"CLUSTER_{i}"] = {
+                "neuron_range": (i * self.neurons_per_cluster, (i + 1) * self.neurons_per_cluster),
+                "merkle_root": "0" * 64,
+                "entropy": 0.0
+            }
+        return self.clusters
+
+    def process_max_load(self, stimuli_count):
+        # Simulation de charge massive
+        start = time.time()
+        for i in range(stimuli_count):
+            self.log_event("MAX_LOAD", "STRESS_TEST", f"stim:{i}", {}, {}, -1.0, 10000, 0.99, "FUNC", "0xFF")
+        end = time.time()
+        self.load_duration = end - start
+        self.max_capacity_reached = True
+        return self.load_duration
 
 def instrument_nx_version(version_id, steps=10):
     logger = NX11Logger(f"NX-{version_id}")
