@@ -23,6 +23,6 @@ make all
 ```
 
 ## Recent Changes
-- **January 24, 2026**: Finalisation 100% de la version V32. Implémentation des BLOCS 9, 10 et 11.
-- **Optimisations**: Passage au logging asynchrone et structures lock-free.
-- **Sécurité**: Intégration de l'audit ISO 27001 et monitoring temps-réel.
+- **January 27, 2026**: Phase NX-11 finalisée selon la norme **NX-11-HFBL-360**. Instrumentation forensique bit-à-bit, horodatage nanoseconde et traçabilité causale complète.
+- **NX-11-HFBL-360**: High-Frequency Bit-Level 360 Forensic Logging implémenté.
+- **Validation**: Index Merkle et logs multi-flux (ATOM, DISS, MEM, COMM, CTRL) opérationnels.
