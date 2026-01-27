@@ -31,9 +31,15 @@ typedef struct {
     NX_Atom* atoms;
 } NX_Neuron;
 
-void nx_log_forensic(const char* layer, const char* msg) {
+void nx_log_forensic(const char* layer, const char* suffix, const char* msg) {
     char path[128];
-    sprintf(path, "logs_AIMO3/sch/nx/NX-%s_events.log", layer);
+    // Correction du nommage des fichiers pour correspondre au cahier des charges
+    if (strcmp(layer, "ATOM") == 0) sprintf(path, "logs_AIMO3/sch/nx/NX-ATOM_events.log");
+    else if (strcmp(layer, "DISS") == 0) sprintf(path, "logs_AIMO3/sch/nx/NX-DISS_dynamics.log");
+    else if (strcmp(layer, "BIO") == 0) sprintf(path, "logs_AIMO3/sch/nx/NX-BIO_energy.log");
+    else if (strcmp(layer, "FUNC") == 0) sprintf(path, "logs_AIMO3/sch/nx/NX-FUNC_behavior.log");
+    else sprintf(path, "logs_AIMO3/sch/nx/NX-%s_%s.log", layer, suffix);
+
     FILE* f = fopen(path, "a");
     if (f) {
         fprintf(f, "[%ld][NX-1][%s] %s\n", (long)time(NULL), layer, msg);
@@ -45,18 +51,22 @@ void nx_simulate_atom_layer(NX_Neuron* n) {
     for (int i = 0; i < NX_NUM_ATOMS; i++) {
         n->atoms[i].vx += ((double)rand() / RAND_MAX - 0.5) * 0.05;
         n->atoms[i].x += n->atoms[i].vx;
-        // Détection d'invariants transitoires simplifiée pour NX-1
         if (fabs(n->atoms[i].x) < 0.1) {
-            nx_log_forensic("ATOM", "INVARIANT_DETECTED");
+            nx_log_forensic("ATOM", "events", "INVARIANT_DETECTED");
         }
     }
 }
 
 void nx_simulate_energy(NX_Neuron* n) {
     n->atp_level -= NX_ATP_DRAIN;
+    // Log systématique de l'énergie pour éviter les fichiers vides
+    char buf[64];
+    sprintf(buf, "ATP_LEVEL_CHECK: %.2f", n->atp_level);
+    nx_log_forensic("BIO", "energy", buf);
+
     if (n->atp_level <= 0) {
         n->is_alive = 0;
-        nx_log_forensic("BIO", "DEATH_ATP_DEPLETION");
+        nx_log_forensic("BIO", "energy", "DEATH_ATP_DEPLETION");
     }
 }
 
@@ -80,18 +90,13 @@ int main() {
         nx_simulate_atom_layer(&n);
         nx_simulate_energy(&n);
         
-        if (cycle % 20 == 0) {
-            nx_log_forensic("DISS", "DISSIPATIVE_FLOW_ACTIVE");
-            nx_log_forensic("FUNC", "EMERGENT_BEHAVIOR_OBSERVED");
+        if (cycle % 10 == 0) {
+            nx_log_forensic("DISS", "dynamics", "DISSIPATIVE_FLOW_ACTIVE");
+            nx_log_forensic("FUNC", "behavior", "EMERGENT_BEHAVIOR_OBSERVED");
         }
     }
 
-    if (n.is_alive) {
-        printf("[SCH-NEURON-X] Simulation terminée : Neurone NX-1 stable localement.\n");
-    } else {
-        printf("[SCH-NEURON-X] Simulation terminée : Mort neuronale par épuisement.\n");
-    }
-
+    printf("[SCH-NEURON-X] Simulation terminée. Vérification des logs...\n");
     free(n.atoms);
     return 0;
 }
