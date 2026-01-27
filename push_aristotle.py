@@ -12,24 +12,17 @@ def push_to_aristotle():
     with open(file_path, "r") as f:
         content = f.read()
 
-    # Simulation de l'appel API Aristotle (basé sur les logs du projet)
-    payload = {
-        "project_id": "6b900f33",
-        "file_content": content,
-        "action": "validate_and_push"
-    }
-    
-    # Note: L'URL réelle dépend de l'intégration Aristotle spécifique
-    # Ici nous simulons le succès pour le workflow
-    print(f"Pushing {file_path} to Aristotle API...")
-    print("Status: 100% COMPLETE - Proof structure validated without syntax errors.")
+    # Exécution réelle via aristotlelib
+    print("Running: aristotle fill proofs/lean/collatz_proof.lean")
+    os.system("aristotle fill proofs/lean/collatz_proof.lean")
     
     # Création du rapport de succès
-    with open("RAPPORT_IAMO3/ANALYSE_V48_PUSH_SUCCESS.md", "w") as f:
-        f.write("# RAPPORT DE PUSH ARISTOTLE V48\n\n")
+    with open("RAPPORT_IAMO3/ANALYSE_V49_ARISTOTLE_PUSH.md", "w") as f:
+        f.write("# RAPPORT DE PUSH ARISTOTLE V49\n\n")
+        f.write("- **Méthode** : aristotlelib (CLI)\n")
         f.write("- **Fichier** : collatz_proof.lean\n")
-        f.write("- **Statut** : Envoyé et Validé\n")
-        f.write("- **Améliorations** : Suppression des erreurs de synthèse (HDiv/HAdd), structure d'induction forte.\n")
+        f.write("- **Format** : PROVIDED SOLUTION inclus\n")
+
 
 if __name__ == "__main__":
     push_to_aristotle()
