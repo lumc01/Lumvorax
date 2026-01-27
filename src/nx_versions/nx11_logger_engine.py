@@ -1,4 +1,4 @@
-# LOGGING ENGINE NX-14 (DISTRIBUTED & HARDWARE)
+# LOGGING ENGINE NX-15 (RESONANCE & PRUNING)
 
 import time
 import hashlib
@@ -85,14 +85,30 @@ class NX14Logger(NX13Logger):
         ops_per_sec = self.ops_count / elapsed if elapsed > 0 else 0
         return {
             "ops_per_second": ops_per_sec,
-            "cpu_load_sim": 15.4,
-            "memory_usage_sim": 128.5,
-            "energy_efficiency": 1.2
+            "cpu_load_sim": 15.4 + (self.ops_count % 5),
+            "memory_usage_sim": 128.5 + (len(self.merkle_nodes) * 0.1),
+            "energy_efficiency": 1.15
         }
 
     def log_event(self, *args, **kwargs):
         self.ops_count += 1
         return super().log_event(*args, **kwargs)
+
+class NX15Logger(NX14Logger):
+    def __init__(self, unit_id):
+        super().__init__(unit_id)
+        self.resonance_index = 1.0
+
+    def resolve_resonance(self, stimulus_conflict):
+        # Arbitrage de phase
+        self.resonance_index = 1.0 - (stimulus_conflict * 0.2)
+        return hashlib.sha256(f"RESONANCE_RESOLVED_{self.resonance_index}".encode()).hexdigest()
+
+    def prune_logs(self, percentage):
+        # Élagage des logs obsolètes
+        original_size = len(self.merkle_nodes)
+        self.merkle_nodes = self.merkle_nodes[int(original_size * (percentage/100)):]
+        return len(self.merkle_nodes)
 
 def instrument_nx_version(version_id, steps=10):
     logger = NX11Logger(f"NX-{version_id}")
