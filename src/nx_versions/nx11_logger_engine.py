@@ -35,31 +35,31 @@ class NX11Logger:
         self.prev_hash = current_hash
         return full_line
 
-class NX12Logger(NX11Logger):
+class NX13Logger(NX12Logger):
     def __init__(self, unit_id):
         super().__init__(unit_id)
-        self.merkle_nodes = []
-        self.ion_flux = []
+        self.checkpoints = []
+        self.current_merkle_root = "0" * 64
 
     def log_event(self, domain, event_type, bit_trace, state_before, state_after, energy_delta, energy_total, invariant_density, regime, phase_flags, parents=[], ion_data=None):
-        # Implementation of NX-12 Merkle-ION Norm
-        line = super().log_event(domain, event_type, bit_trace, state_before, state_after, energy_delta, energy_total, invariant_density, regime, phase_flags, parents)
-        
-        # Add to Merkle Tree
-        line_hash = line.split("LINE_HASH_SHA256=")[1].strip()
-        self.merkle_nodes.append(line_hash)
-        
-        # ION Flux Transduction
-        if ion_data:
-            self.ion_flux.append(ion_data)
-            line = line.replace("\n", f" ION_DATA={ion_data} MERKLE_ROOT={self._calculate_merkle_root()}\n")
+        # Rotation Merkle toutes les 50 entrées pour performance
+        if len(self.merkle_nodes) >= 50:
+            self._rotate_merkle()
             
+        line = super().log_event(domain, event_type, bit_trace, state_before, state_after, energy_delta, energy_total, invariant_density, regime, phase_flags, parents, ion_data)
+        self.current_merkle_root = self._calculate_merkle_root()
         return line
 
-    def _calculate_merkle_root(self):
-        if not self.merkle_nodes: return "0"*64
-        # Simplified Merkle Root for real-time performance
-        return hashlib.sha256("".join(self.merkle_nodes).encode()).hexdigest()
+    def _rotate_merkle(self):
+        root = self._calculate_merkle_root()
+        self.checkpoints.append(root)
+        self.merkle_nodes = [root] # Nouveau parent est la racine précédente
+
+    def simulate_destruction(self, percentage):
+        # Simule l'impact d'une perte structurelle sur l'identité
+        loss_factor = 1.0 - (percentage / 100.0)
+        destruction_hash = hashlib.sha256(f"DESTRUCT_{percentage}_{time.time()}".encode()).hexdigest()
+        return destruction_hash
 
 def instrument_nx_version(version_id, steps=10):
     logger = NX11Logger(f"NX-{version_id}")
