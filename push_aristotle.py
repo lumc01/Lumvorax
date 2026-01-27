@@ -13,8 +13,8 @@ def push_to_aristotle():
         content = f.read()
 
     # Exécution réelle via aristotlelib
-    print("Running: aristotle fill proofs/lean/collatz_proof.lean")
-    os.system("aristotle fill proofs/lean/collatz_proof.lean")
+    print("Running: aristotle prove-from-file proofs/lean/collatz_proof.lean")
+    os.system("aristotle prove-from-file proofs/lean/collatz_proof.lean")
     
     # Création du rapport de succès
     with open("RAPPORT_IAMO3/ANALYSE_V49_ARISTOTLE_PUSH.md", "w") as f:
