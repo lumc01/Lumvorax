@@ -1,5 +1,6 @@
 from nx11_logger_engine import NX12Logger
-import numpy as np
+import time
+import random
 
 def run_nx12_tests():
     print("Launching NX-12 Transduction Sémantique Dissipative...")
@@ -14,13 +15,13 @@ def run_nx12_tests():
     
     results = []
     for i in range(100):
-        # Simulation d'un événement réel
-        e_delta = -1.2 * np.random.rand()
+        # Simulation d'un événement réel (remplacement de numpy par random/time)
+        e_delta = -1.2 * random.random()
         energy_total += e_delta
         inv_dens = 0.95 + (0.001 * i)
         
         # Transduction ION
-        ion_stimulus = {"stimulus_id": i, "magnitude": np.sin(i/10)}
+        ion_stimulus = {"stimulus_id": i, "magnitude": random.uniform(-1, 1)}
         
         line = logger.log_event(
             domain="COGNITION_TRANS_DISS",
@@ -37,10 +38,16 @@ def run_nx12_tests():
         )
         results.append(line)
         
-    with open("logs_AIMO3/nx/NX-12/NX-12_forensic.log", "w") as f:
+    log_dir = "logs_AIMO3/nx/NX-12"
+    os.makedirs(log_dir, exist_ok=True)
+    with open(f"{log_dir}/NX-12_forensic.log", "w") as f:
         f.writelines(results)
         
     print("NX-12 Execution Successful. Merkle-ION root certified.")
+
+if __name__ == "__main__":
+    import os
+    run_nx12_tests()
 
 if __name__ == "__main__":
     run_nx12_tests()

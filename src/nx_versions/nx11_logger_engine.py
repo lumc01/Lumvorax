@@ -1,8 +1,39 @@
-# LOGGING ENGINE NX-11-HFBL-360
+# LOGGING ENGINE NX-12 (MERKLE-ION)
 
 import time
 import hashlib
 import os
+
+class NX11Logger:
+    def __init__(self, unit_id):
+        self.unit_id = unit_id
+        self.prev_hash = "0" * 64
+        self.event_id = int(time.time() * 1e6)
+        
+    def generate_sha256(self, data):
+        return hashlib.sha256(data.encode()).hexdigest()
+
+    def log_event(self, domain, event_type, bit_trace, state_before, state_after, energy_delta, energy_total, invariant_density, regime, phase_flags, parents=[]):
+        utc_ns = int(time.time() * 1e9)
+        self.event_id += 1
+        
+        # State hashes
+        h_before = self.generate_sha256(str(state_before))
+        h_after = self.generate_sha256(str(state_after))
+        
+        # Format the line without current hash
+        line_base = (f"UTC_NS={utc_ns} EVENT_ID={self.event_id} PARENTS={parents} NX_UNIT_ID={self.unit_id} "
+                     f"EVENT_DOMAIN={domain} EVENT_TYPE={event_type} BIT_TRACE={bit_trace} "
+                     f"STATE_HASH_BEFORE={h_before} STATE_HASH_AFTER={h_after} "
+                     f"ENERGY_DELTA_fJ={energy_delta} ENERGY_TOTAL_fJ={energy_total} "
+                     f"INVARIANT_DENSITY={invariant_density} REGIME={regime} PHASE_FLAGS={phase_flags} "
+                     f"PREV_LINE_HASH={self.prev_hash}")
+        
+        current_hash = self.generate_sha256(line_base)
+        full_line = f"{line_base} LINE_HASH_SHA256={current_hash}\n"
+        
+        self.prev_hash = current_hash
+        return full_line
 
 class NX12Logger(NX11Logger):
     def __init__(self, unit_id):
@@ -30,7 +61,6 @@ class NX12Logger(NX11Logger):
         # Simplified Merkle Root for real-time performance
         return hashlib.sha256("".join(self.merkle_nodes).encode()).hexdigest()
 
-# Implementation function for older versions
 def instrument_nx_version(version_id, steps=10):
     logger = NX11Logger(f"NX-{version_id}")
     log_file = f"logs_AIMO3/nx/NX-{version_id}/NX-{version_id}_forensic.log"
