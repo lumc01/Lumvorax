@@ -1,3 +1,19 @@
+/-
+This file was edited by Aristotle.
+
+Lean version: leanprover/lean4:v4.24.0
+Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
+This project request had uuid: 954c70ca-c4ce-4d19-9832-6299d2e9a220
+
+To cite Aristotle, tag @Aristotle-Harmonic on GitHub PRs/issues, and add as co-author to commits:
+Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
+
+Aristotle encountered an error processing this file.
+Lean errors:
+At line 25, column 2:
+  unexpected token '/--'; expected 'lemma'
+-/
+
 import Mathlib.Data.Nat.Basic
 import Mathlib.Tactic.NormNum
 
@@ -21,6 +37,10 @@ def lyapunov_omega (n : ℕ) : ℚ :=
 /-- 
 Théorème de réduction de NX-33.
 On ne prouve pas Collatz directement, on prouve que le système DISSIPE.
+-/
+/-
+ERROR 1:
+unexpected token '/--'; expected 'lemma'
 -/
 /-- 
 NX-33 : SOLUTION D'ÉCRITURE ADAPTÉE 
