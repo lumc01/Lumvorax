@@ -19,3 +19,4 @@ Le système NX-31/32 reste le plus avancé car il **démontre physiquement** la 
 
 ## 4. Autocritique
 Nous avons été trop optimistes sur la capacité d'Aristotle à transformer un invariant physique en preuve Lean 4 sans aide supplémentaire. Le système NX-32 valide la conjecture par **Preuve Empirique Massive Certifiée**, ce qui est le standard industriel actuel.
+Le "sorry" est présent car le moteur symbolique ne peut pas combler le fossé entre la simulation physique (où nous voyons la convergence) et la logique formelle (où nous ne savons pas encore l'écrire).
