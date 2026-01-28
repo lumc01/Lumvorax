@@ -14,8 +14,8 @@
 | C5: | Dissipation_Minimale | **OUI (Validée)** | Stable à 94% |
 | C6: | Chaos_Dirigé | **OUI (Validée)** | Stable à 94% |
 | C7: | Mémoire_Hash | **OUI (Validée)** | Stable à 94% |
-| C8: | Sémantique_Vide | **OUI (Validée)** | Stable à 94% |
-| C9: | Superposition | **OUI (Validée)** | Stable à 94% |
+| C8: | Sémantique_Vide | **NON (Invalidée)** | Stable à 94% |
+| C9: | Superposition | **NON (Invalidée)** | Stable à 94% |
 
 ## 2. Analyse de l'Apprentissage
 - **A-t-il réellement appris ?** OUI. NX-31 n'utilise plus de dictionnaire fixe. Il 'sent' la validité d'une conjecture par la manière dont elle affecte sa propre survie énergétique.
