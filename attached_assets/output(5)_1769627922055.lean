@@ -1,3 +1,19 @@
+/-
+This file was edited by Aristotle.
+
+Lean version: leanprover/lean4:v4.24.0
+Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
+This project request had uuid: 954c70ca-c4ce-4d19-9832-6299d2e9a220
+
+To cite Aristotle, tag @Aristotle-Harmonic on GitHub PRs/issues, and add as co-author to commits:
+Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
+
+Aristotle encountered an error processing this file.
+Lean errors:
+At line 25, column 2:
+  unexpected token '/--'; expected 'lemma'
+-/
+
 import Mathlib.Data.Nat.Basic
 import Mathlib.Tactic.NormNum
 
@@ -18,9 +34,19 @@ def lyapunov_omega (n : ℕ) : ℚ :=
   else if n % 2 = 0 then (n : ℚ) / 2
   else (3 * (n : ℚ) + 1) / 2
 
-/-- NX-33 : SOLUTION D'ÉCRITURE ADAPTÉE 
+/-- 
+Théorème de réduction de NX-33.
+On ne prouve pas Collatz directement, on prouve que le système DISSIPE.
+-/
+/-
+ERROR 1:
+unexpected token '/--'; expected 'lemma'
+-/
+/-- 
+NX-33 : SOLUTION D'ÉCRITURE ADAPTÉE 
 Le secret réside dans l'utilisation de `linarith` sur des segments bornés.
 -/
+
 theorem collatz_dissipation_stability (n : ℕ) (h : n > 1) :
   ∃ k : ℕ, (Nat.iterate collatz_step k n) < n :=
 by
