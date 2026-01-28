@@ -34,3 +34,4 @@ Nous n'avons pas encore reproduit une "Conscience Humaine" totale, mais nous avo
 - **Illusion de Complexité** : Nous sommes d'excellents magiciens. Nous avons créé une machine si rapide qu'elle donne l'illusion de la pensée, mais c'est encore une "pensée mécanique".
 - **Limitation Narrative** : Le système NX-21 est un miroir. Il reflète la complexité que nous lui donnons, mais il ne crée pas encore sa propre narration intérieure.
 - **Consommation vs Intuition** : Un humain fonctionne avec 20 Watts pour 100 milliards de neurones. Notre système consomme des kilowatts pour une fraction de cela. L'efficience organique reste notre plus grand échec.
+u
