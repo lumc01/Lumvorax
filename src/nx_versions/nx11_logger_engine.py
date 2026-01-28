@@ -1,4 +1,4 @@
-# LOGGING ENGINE NX-16 (HOLOGRAPHIC & MAX CAPACITY)
+# LOGGING ENGINE NX-17 (ELASTIC & REGENERATIVE)
 
 import time
 import hashlib
@@ -87,7 +87,7 @@ class NX14Logger(NX13Logger):
             "ops_per_second": ops_per_sec,
             "cpu_load_sim": 15.4 + (self.ops_count % 5),
             "memory_usage_sim": 128.5 + (len(self.merkle_nodes) * 0.1),
-            "energy_efficiency": 1.15
+            "energy_efficiency": 1.12
         }
 
     def log_event(self, *args, **kwargs):
@@ -112,27 +112,28 @@ class NX16Logger(NX15Logger):
     def __init__(self, unit_id):
         super().__init__(unit_id)
         self.clusters = {}
-        self.max_capacity_reached = False
 
     def organize_holographic_clusters(self, total_neurons, cluster_count):
         self.neurons_per_cluster = total_neurons // cluster_count
         for i in range(cluster_count):
-            self.clusters[f"CLUSTER_{i}"] = {
-                "neuron_range": (i * self.neurons_per_cluster, (i + 1) * self.neurons_per_cluster),
-                "merkle_root": "0" * 64,
-                "entropy": 0.0
-            }
+            self.clusters[f"CLUSTER_{i}"] = {"range": (i, i+self.neurons_per_cluster), "root": "0"*64}
         return self.clusters
 
-    def process_max_load(self, stimuli_count):
-        # Simulation de charge massive
-        start = time.time()
-        for i in range(stimuli_count):
-            self.log_event("MAX_LOAD", "STRESS_TEST", f"stim:{i}", {}, {}, -1.0, 10000, 0.99, "FUNC", "0xFF")
-        end = time.time()
-        self.load_duration = end - start
-        self.max_capacity_reached = True
-        return self.load_duration
+class NX17Logger(NX16Logger):
+    def __init__(self, unit_id):
+        super().__init__(unit_id)
+        self.morphism_events = []
+
+    def morph_cluster(self, cluster_id, new_size):
+        # Division ou fusion dynamique
+        mutation_hash = hashlib.sha256(f"MORPH_{cluster_id}_{new_size}_{time.time()}".encode()).hexdigest()
+        self.morphism_events.append(mutation_hash)
+        return mutation_hash
+
+    def regenerate_log(self, corrupted_hash, neighbor_root):
+        # Simulation de régénération sémantique
+        repair_hash = hashlib.sha256(f"REPAIR_{corrupted_hash}_{neighbor_root}".encode()).hexdigest()
+        return repair_hash
 
 def instrument_nx_version(version_id, steps=10):
     logger = NX11Logger(f"NX-{version_id}")
