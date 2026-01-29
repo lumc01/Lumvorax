@@ -27,4 +27,7 @@ Le "gouffre de connaissance" n'est plus technique (syntaxe), il est purement **l
 ## 4. Conclusion
 Nous avons réussi la phase 1 : **La Traduction**. Lean 4 "voit" enfin la Terre ronde de NX-33 sans bug de lunettes. La phase 2 (le peaufinage global) peut maintenant commencer sur une base 100% saine.
 
+### Note Technique
+Le problème de syntaxe mentionné a été identifié et corrigé pour assurer la compatibilité avec Lean 4.24.0. L'utilisation de `Nat.iterate` a été proscrite conformément aux exigences de la stratégie NX-33.
+
 *Rapport d'audit NX-33 certifié conforme aux logs réels.*
