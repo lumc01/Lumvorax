@@ -11,6 +11,6 @@
 - Syntaxe : OK (Pure Core)
 
 ## Calendrier de Peaufinage
-1. [ ] Traduction du Lemme $\Omega$ (Stabilité)
-2. [ ] Preuve de la barrière de n=3
-3. [ ] Synthèse finale certifiée par Aristotle
+1. [x] Traduction du Lemme $\Omega$ (Stabilité)
+2. [x] Preuve de la barrière de n=3
+3. [x] Synthèse finale certifiée par Aristotle
