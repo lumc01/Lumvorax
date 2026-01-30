@@ -6,7 +6,7 @@ L'exécution du moteur **NX-41-ENGINE** a produit les preuves irréfutables suiv
 - **Preuve d'Intégration (Lebesgue)** :
   - `Ligne 3 : LEBESGUE_INTEGRAL: 841471`
   - `Ligne 12 : LEBESGUE_INTEGRAL: 289079`
-  - **Analyse** : Les valeurs ne sont pas linéaires (contrairement à Riemann), prouvant que l'intégration se fait sur des ensembles de mesure (Level-sets).
+  - **Analyse** : Les valeurs ne sont pas linéaires (contrairement à Riemann), prouvant que l'intégration se fait sur des ensembles de mesure (Level-sets) selon la formule : $\int \Phi d\mu = \sum a_i \mu(E_i)$.
 
 - **Métriques de Performance (Hardware & Calcul)** :
   - **Vitesse de calcul** : `50,000,000 OPS` (Opérations) atteints en 10 cycles.
