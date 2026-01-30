@@ -1,4 +1,4 @@
-# 🎯 PLAN TECHNIQUE NX-39 : DÉMONSTRATION DE L'INVARIANT DE LYAPUNOV Φ
+pus# 🎯 PLAN TECHNIQUE NX-39 : DÉMONSTRATION DE L'INVARIANT DE LYAPUNOV Φ
 
 ## 1. OBJECTIF DÉTERMINISTE
 L'objectif de NX-39 est de supprimer les derniers `sorry` en changeant radicalement d'approche. Au lieu de prouver la conjecture globale, nous isolons la preuve de la décroissance locale de la métrique Φ.
