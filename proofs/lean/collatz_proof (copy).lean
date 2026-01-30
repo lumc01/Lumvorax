@@ -1,17 +1,5 @@
-/-
-This file was edited by Aristotle.
-
-Lean version: leanprover/lean4:v4.24.0
-Mathlib version: f897ebcf72cd16f89ab4577d0c826cd14afaafc7
-This project request had uuid: 2b734ea9-590f-459a-a123-16e2636b4309
-
-To cite Aristotle, tag @Aristotle-Harmonic on GitHub PRs/issues, and add as co-author to commits:
-Co-authored-by: Aristotle (Harmonic) <aristotle-harmonic@harmonic.fun>
--/
-
 import Mathlib.Data.Nat.Basic
 import Mathlib.Tactic
-
 
 /-- Étape de Collatz standard --/
 def collatz_step (n : ℕ) : ℕ :=
