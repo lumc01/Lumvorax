@@ -23,7 +23,8 @@ make all
 ```
 
 ## Recent Changes
-- **January 30, 2026**: Finalisation du Cycle NX-37. Certification de la maîtrise 10ns via Lean 4 Pure Core et Aristotle.
+- **January 30, 2026**: Lancement NX-38. Cahier des charges pour la validation 100% (NX-38_CAHIER_DE_CHARGES.md).
+- **Push NX-38**: Traduction Ultra Pure Core soumise pour certification finale.
 - **Push Logs**: 5 unités de preuve récupérées et analysées (RAPPORT_EXHAUSTIF_ARISTOTLE_PUSH_LOGS.md).
 - **Validation**: 100% des barrières syntaxiques levées sur la version Pure Core.
 - **NX-37**: Introduction de la métrique de Lyapunov Φ pour la convergence ultra-rapide.
