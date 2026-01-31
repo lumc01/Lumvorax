@@ -26,7 +26,10 @@
 ## FICHIER PUSH ARISTOTLE
 **Fichier:** `src/nx_versions/nx39_theoreme_gouffre.lean`
 **Commande:** `aristotle prove-from-file nx39_theoreme_gouffre.lean`
-**Statut:** Job soumis en arriere-plan (PID: 5719)
+**Statut:** QUEUED (Confirme)
+**Project ID:** `7e6a3433-44de-4997-8775-fc26cec87ba1`
+**Description:** Prove theorems about Collatz sequence convergence.
+**Date Push:** 2026-01-31 20:43 UTC
 
 ---
 

@@ -145,7 +145,7 @@ Format: arstl_*
 ### Prochaines Etapes
 1. Attendre le retour d'Aristotle sur NX-39
 2. Analyser les resultats de la preuve formelle
-3. Integrer les corrections si necessaire
+3. IntegrerE les corrections si necessaire
 4. Mettre a jour la documentation
 
 ---
