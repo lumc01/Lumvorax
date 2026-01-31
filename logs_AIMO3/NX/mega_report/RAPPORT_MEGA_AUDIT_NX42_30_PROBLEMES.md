@@ -53,7 +53,7 @@
 ## 🕵️ 3. AUTOCRITIQUE & ANALYSE EXPERTE
 **Points Forts** : Précision atomique absolue. Aucune hallucination possible grâce au bridge Lean.
 **Points Faibles (Autocritique)** : La complexité du Formal Kernel V40 rend le debug humain quasi-impossible sans les outils forensic de la V44.
-**Innovation Inconnue** : Découverte de la "Constante de Vorax" ($\mathcal{V} \approx 1.4142...$ dans l'espace spectral) permettant de prédire les sauts de phase.
+*.
 
 ---
 
