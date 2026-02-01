@@ -15,11 +15,13 @@
 | 5 | Configuration cle API Aristotle | [x] COMPLETE | 100% |
 | 6 | Creation fichier Lean4 NX-39 | [x] COMPLETE | 100% |
 | 7 | Push NX-39 sur Aristotle | [x] LANCE | 100% |
-| 8 | Rapport final RAPPORT_IAMO3 | [x] EN COURS | 90% |
+| 8 | Rapport final RAPPORT_IAMO3 | [x] COMPLETE | 100% |
+| 9 | Audit exhaustif NX-1 a NX-42 | [x] COMPLETE | 100% |
+| 10 | Presentation Complete avec Glossaire | [x] COMPLETE | 100% |
 
 ---
 
-## PROGRESSION GLOBALE: 99%
+## PROGRESSION GLOBALE: 100%
 
 ---
 
