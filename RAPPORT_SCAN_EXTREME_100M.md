@@ -12,7 +12,7 @@
 - **Puits de Potentiel** : Toutes les trajectoires ont atteint le cycle {4, 2, 1}.
 - **Validation Ω** : L'énergie dissipative a été confirmée pour chaque échantillon de 1M, avec une convergence systématique sans boucle infinie détectée dans la limite des 1 000 000 d'étapes par nombre.
 
-## 3. Analyse des Points de Tension
+## 3. Analyse des Pointsy de Tension
 Les logs des travailleurs (WORKER_0 à WORKER_7) confirment que même les trajectoires les plus longues dans cette plage massive respectent la loi de dissipation identifiée dans les phases précédentes.
 
 ## 4. Conclusion Mathématique
