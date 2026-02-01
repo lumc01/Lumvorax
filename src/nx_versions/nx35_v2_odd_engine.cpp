@@ -5,6 +5,7 @@
 #include <cmath>
 #include <fstream>
 #include <iomanip>
+#include <cstdlib>
 
 class NX35OddEngine {
 public:
@@ -14,18 +15,15 @@ public:
         std::ofstream forensique("logs_AIMO3/nx/NX-35/FORENSIQUE_ODD_EXPLORATION.log");
         forensique << "--- DEBUT ANALYSE FORENSIQUE : EXPLORATION DES IMPAIRS ---\n";
 
-        // On teste spécifiquement les impairs critiques : 3, 5, 7, 9, 11, ...
         for (int n_start = 3; n_start <= 101; n_start += 2) {
             forensique << "[BASE_ODD: " << n_start << "] ";
             double n = static_cast<double>(n_start);
             double energy = 0.0;
             
             for (int step = 0; step < 500; ++step) {
-                // Simulation dissipative de la trajectoire
                 if (fmod(n, 2.0) == 0) n /= 2.0;
                 else n = 3.0 * n + 1.0;
 
-                // Mise à jour des neurones Atom basée sur la trajectoire
                 for (size_t j = 0; j < 5; ++j) {
                     neurons[j] = std::sin(neurons[j] * 0.99) + 0.0001 * n;
                     energy += std::abs(neurons[j]);
@@ -51,7 +49,7 @@ private:
 };
 
 int main() {
-    mkdir("logs_AIMO3/nx/NX-35", 0777);
+    system("mkdir -p logs_AIMO3/nx/NX-35");
     NX35OddEngine engine;
     engine.explore_odds();
     return 0;
