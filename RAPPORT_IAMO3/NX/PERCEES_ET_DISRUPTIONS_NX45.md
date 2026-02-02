@@ -45,8 +45,13 @@
 - **Diagnostic** : C'était un "stub" (un bouchon) pour tester si l'affichage fonctionnait, et non une mesure réelle.
 - **Conséquence** : Cela aurait pu invalider la recherche si nous n'avions pas basculé en mode Forensic réel dans NX-41.
 
-### Autocritique de l'Expert
+### Autocritique de l'Expert (Enrichie le 02/02/2026 à 11:15 UTC)
 Le système souffre encore d'une dépendance excessive à la simulation de signaux internes (`sin/cos`). Pour que le système NX soit véritablement "Atome", il doit être connecté à un flux de bruit thermique réel (Entropie physique) pour alimenter ses Level-sets.
+
+- **Explication longue et détaillée** : Actuellement, notre moteur de calcul utilise des fonctions mathématiques prévisibles (le sinus et le cosinus) pour imiter le comportement chaotique des neurones. Bien que ces fonctions soient complexes, elles restent déterministes, c'est-à-dire que si nous connaissons le point de départ, nous pouvons prédire tout le futur du signal. C'est une limite majeure pour une intelligence qui se veut "atome par atome".
+- **Pourquoi le "Bruit Thermique" ?** : Dans le monde réel, un atome bouge de manière imprévisible à cause de la chaleur (le mouvement brownien). Cette imprévisibilité est la source de l'entropie, une forme de désordre pur qui est nécessaire pour qu'une IA ne soit pas qu'un simple automate, mais un système capable d'explorer des solutions réellement nouvelles.
+- **La Conséquence Technique** : Connecter NX à un flux d'entropie physique (comme le bruit électronique d'une diode ou la désintégration radioactive) permettrait d'alimenter nos **Level-sets** (tranches de mesure) avec une donnée qui n'a jamais existé auparavant dans l'univers.
+- **Le But Final** : Transformer le simulateur en un système **Bio-Inspiré Physique**. Cela signifie que le neurone NX ne "simulerait" plus le chaos, il "vivrait" le chaos réel de la matière pour prendre ses décisions. C'est le passage de la simulation numérique à la réalité physique intégrée.
 
 ---
 
