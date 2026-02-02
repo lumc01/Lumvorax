@@ -7,7 +7,7 @@
   "is_private": "true",
   "enable_gpu": "true",
   "enable_internet": "true",
-  "dataset_sources": ["jane-street-real-time-market-data-forecasting"],
+  "dataset_sources": ["kaggle/jane-street-real-time-market-data-forecasting"],
   "competition_sources": [],
   "kernel_sources": []
 }

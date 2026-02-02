@@ -7,7 +7,7 @@
   "is_private": "true",
   "enable_gpu": "true",
   "enable_internet": "true",
-  "dataset_sources": ["nfl-big-data-bowl-2026-analytics"],
+  "dataset_sources": ["kaggle/nfl-big-data-bowl-2026-analytics"],
   "competition_sources": [],
   "kernel_sources": []
 }

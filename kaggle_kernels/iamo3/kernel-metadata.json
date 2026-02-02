@@ -7,7 +7,7 @@
   "is_private": "true",
   "enable_gpu": "true",
   "enable_internet": "true",
-  "dataset_sources": ["ai-mathematical-olympiad-progress-prize-3"],
+  "dataset_sources": ["kaggle/ai-mathematical-olympiad-progress-prize-3"],
   "competition_sources": [],
   "kernel_sources": []
 }
