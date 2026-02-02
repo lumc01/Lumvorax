@@ -1,7 +1,0 @@
-name = "nx47_arc"
-version = "0.1.0"
-keywords = ["mathematics", "proof"]
-defaultTargets = ["nx47_arc"]
-
-[[lean_lib]]
-name = "Nx47Arc"
