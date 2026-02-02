@@ -1,15 +1,13 @@
 {
   "id": "gabrielchavesreinann/nx47-arc-kernel",
-  "title": "NX47 ARC KERNEL",
-  "code_file": "aimo3_lum_enhanced_kernel.py",
+  "title": "NX47 ARC KERNEL V2 FIXED",
+  "code_file": "script.py",
   "language": "python",
   "kernel_type": "script",
   "is_private": "true",
   "enable_gpu": "true",
   "enable_internet": "true",
   "dataset_sources": [],
-  "competition_sources": [
-    "ai-mathematical-olympiad-progress-prize"
-  ],
+  "competition_sources": [],
   "kernel_sources": []
 }
