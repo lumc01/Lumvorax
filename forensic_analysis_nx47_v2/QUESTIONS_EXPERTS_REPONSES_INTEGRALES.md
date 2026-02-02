@@ -219,7 +219,7 @@
 
 66. **Quelles anomalies ont été détectées ?**
     Réponse : Une erreur d'interprétation de type 'bytes' dans le Bloc 5.2 (Compression) lors de la Version 2.
-
+u
 67. **Quelles failles ont été identifiées ?**
     Réponse : Une faiblesse dans la construction dynamique de tableaux binaires qui provoquait des plantages lors de la compression zlib.
 
