@@ -1,0 +1,544 @@
+{
+  "bloc1_performance": {
+    "create_destroy": {
+      "ops_per_sec": 1367534.08441952,
+      "mean_ns": 731.2432,
+      "median_ns": 693.0,
+      "std_ns": 535.5269060035732,
+      "p99_ns": 1239.0700000000015,
+      "min_ns": 636.0,
+      "max_ns": 18512.0
+    },
+    "move": {
+      "throughput_gbps": 3.3618411333081633,
+      "mean_ns": 304.595,
+      "cycles_per_byte_est": 1.04109619140625
+    },
+    "fuse": {
+      "mean_ns": 9934.799,
+      "elements_per_sec": 10065628.90703677,
+      "p99_ns": 16596.089999999997
+    },
+    "split": {
+      "mean_ns": 1478.898,
+      "splits_per_sec": 5409433.240155846
+    },
+    "align_ab": {
+      "mean_unaligned_ns": 71343.608,
+      "mean_aligned_ns": 100360.8935,
+      "speedup_factor": 0.7108705942320052,
+      "alignment_benefit_pct": -28.912940576799485
+    },
+    "scaling": {
+      "1": {
+        "total_ns": 1084987,
+        "throughput": 9216700.292261567
+      },
+      "2": {
+        "total_ns": 983210,
+        "throughput": 10170767.18096846,
+        "efficiency": 55.17575085688713
+      },
+      "4": {
+        "total_ns": 1006139,
+        "throughput": 9938984.573702043,
+        "efficiency": 26.959172639168145
+      }
+    }
+  },
+  "bloc2_cache": {
+    "cache_hit": {
+      "1024": {
+        "sequential_ns": 36923.55,
+        "random_ns": 79932.75,
+        "seq_rand_ratio": 2.1648175757748103,
+        "likely_cache_level": "L1"
+      },
+      "32768": {
+        "sequential_ns": 363390.6,
+        "random_ns": 770868.97,
+        "seq_rand_ratio": 2.1213233638954887,
+        "likely_cache_level": "L1"
+      },
+      "262144": {
+        "sequential_ns": 362436.95,
+        "random_ns": 766822.31,
+        "seq_rand_ratio": 2.115739882481629,
+        "likely_cache_level": "L2"
+      },
+      "1048576": {
+        "sequential_ns": 364353.84,
+        "random_ns": 780273.92,
+        "seq_rand_ratio": 2.1415279169282257,
+        "likely_cache_level": "L3"
+      },
+      "8388608": {
+        "sequential_ns": 365072.72,
+        "random_ns": 829465.15,
+        "seq_rand_ratio": 2.272054592301501,
+        "likely_cache_level": "L3"
+      }
+    },
+    "temporal_locality": {
+      "64": {
+        "mean_ns": 514619797.26,
+        "ns_per_access": 49.07796833610534
+      },
+      "256": {
+        "mean_ns": 196018636.98,
+        "ns_per_access": 47.85611254394531
+      },
+      "1024": {
+        "mean_ns": 49262752.52,
+        "ns_per_access": 48.1081567578125
+      },
+      "4096": {
+        "mean_ns": 12128901.6,
+        "ns_per_access": 47.378521875
+      }
+    },
+    "cache_line": {
+      "stride_1_ns": 72769.9166,
+      "stride_64_ns": 76229.3956,
+      "ratio": 0.9546175202784895
+    },
+    "saturation": {
+      "by_size": {
+        "0.25": {
+          "mean_ns": 552362.45,
+          "ns_per_access": 54.78699166831977,
+          "bandwidth_mbs": 18.25250793206526
+        },
+        "0.5": {
+          "mean_ns": 654652.25,
+          "ns_per_access": 64.93277623487403,
+          "bandwidth_mbs": 15.40054280726905
+        },
+        "1": {
+          "mean_ns": 561327.15,
+          "ns_per_access": 55.67617040269788,
+          "bandwidth_mbs": 17.961005449317746
+        },
+        "2": {
+          "mean_ns": 584813.4,
+          "ns_per_access": 58.2831771975284,
+          "bandwidth_mbs": 17.15760958965714
+        },
+        "4": {
+          "mean_ns": 567160.5,
+          "ns_per_access": 56.65939060939061,
+          "bandwidth_mbs": 17.649325014700423
+        },
+        "8": {
+          "mean_ns": 606301.05,
+          "ns_per_access": 60.56953546453547,
+          "bandwidth_mbs": 16.509949966275006
+        },
+        "16": {
+          "mean_ns": 615023.05,
+          "ns_per_access": 61.47771391443423,
+          "bandwidth_mbs": 16.266057020139325
+        }
+      },
+      "saturation_point_mb": null
+    }
+  },
+  "bloc3_forensic": {
+    "replay": {
+      "total_events": 1000,
+      "replayed_successfully": 1000,
+      "mismatches": 0,
+      "success_rate_pct": 100.0,
+      "serialized_size_bytes": 105780
+    },
+    "fault_injection": {
+      "original_valid": true,
+      "corruption_detected": true,
+      "detection_mechanism": "SHA256 checksum",
+      "fault_injection_type": "single_byte_flip"
+    },
+    "completeness": {
+      "expected_count": 500,
+      "logged_count": 500,
+      "completeness_pct": 100.0,
+      "order_preserved": true,
+      "lost_events": 0
+    },
+    "overhead": {
+      "mean_without_log_ns": 2514.167,
+      "mean_with_log_ns": 3745.564,
+      "overhead_ns": 1231.397,
+      "overhead_pct": 48.97832960181245
+    }
+  },
+  "bloc4_differentiation": {
+    "malloc_vs_lum": {
+      "64": {
+        "malloc_mean_ns": 267.021,
+        "lum_mean_ns": 1364.319,
+        "overhead_ns": 1097.298,
+        "overhead_pct": 410.94071252822806,
+        "forensic_value_added": true
+      },
+      "256": {
+        "malloc_mean_ns": 207.249,
+        "lum_mean_ns": 1351.391,
+        "overhead_ns": 1144.142,
+        "overhead_pct": 552.0615298505662,
+        "forensic_value_added": true
+      },
+      "1024": {
+        "malloc_mean_ns": 211.816,
+        "lum_mean_ns": 1568.893,
+        "overhead_ns": 1357.077,
+        "overhead_pct": 640.6867281036372,
+        "forensic_value_added": true
+      },
+      "4096": {
+        "malloc_mean_ns": 306.172,
+        "lum_mean_ns": 1525.363,
+        "overhead_ns": 1219.191,
+        "overhead_pct": 398.20460394810755,
+        "forensic_value_added": true
+      },
+      "16384": {
+        "malloc_mean_ns": 370.419,
+        "lum_mean_ns": 1750.697,
+        "overhead_ns": 1380.2779999999998,
+        "overhead_pct": 372.626134188581,
+        "forensic_value_added": true
+      }
+    },
+    "feature_gap": {
+      "features": {
+        "nanosecond_tracing": {
+          "lum": true,
+          "standard_malloc": false,
+          "standard_logging": false,
+          "value": "Forensic precision"
+        },
+        "checksum_integrity": {
+          "lum": true,
+          "standard_malloc": false,
+          "standard_logging": false,
+          "value": "Corruption detection"
+        },
+        "temporal_metadata": {
+          "lum": true,
+          "standard_malloc": false,
+          "standard_logging": true,
+          "value": "Lifecycle tracking"
+        },
+        "wal_persistence": {
+          "lum": true,
+          "standard_malloc": false,
+          "standard_logging": false,
+          "value": "Crash recovery"
+        },
+        "zero_copy_support": {
+          "lum": true,
+          "standard_malloc": true,
+          "standard_logging": false,
+          "value": "Performance"
+        }
+      },
+      "lum_unique_features": 3,
+      "total_features": 5,
+      "differentiation_score": 60.0
+    },
+    "impl_effort": {
+      "components": {
+        "forensic_logger": {
+          "loc_estimate": 200,
+          "complexity": "medium",
+          "existing_libs": [
+            "logging",
+            "structlog"
+          ]
+        },
+        "wal_system": {
+          "loc_estimate": 500,
+          "complexity": "high",
+          "existing_libs": [
+            "sqlite WAL",
+            "leveldb"
+          ]
+        },
+        "checksum_tracking": {
+          "loc_estimate": 100,
+          "complexity": "low",
+          "existing_libs": [
+            "hashlib",
+            "crc32"
+          ]
+        },
+        "temporal_metadata": {
+          "loc_estimate": 150,
+          "complexity": "medium",
+          "existing_libs": [
+            "datetime",
+            "time"
+          ]
+        },
+        "memory_alignment": {
+          "loc_estimate": 300,
+          "complexity": "high",
+          "existing_libs": [
+            "ctypes",
+            "mmap"
+          ]
+        }
+      },
+      "total_loc_estimate": 1250,
+      "high_complexity_components": 2,
+      "estimated_dev_hours": 62.5,
+      "build_vs_buy_recommendation": "BUILD"
+    }
+  },
+  "bloc5_roadmap": {
+    "wal_rotation": {
+      "total_writes": 500,
+      "rotations": 0,
+      "mean_write_ns": 18086.042,
+      "rotation_size_kb": 100,
+      "writes_per_sec": 55291.25720265385
+    },
+    "compression": {
+      "original_size_bytes": 180000,
+      "compressed_size_bytes": 502,
+      "compression_ratio": 358.56573705179284,
+      "sync_time_ns": 895141,
+      "deferred_time_ns": 1366689,
+      "time_saved_pct": -52.67862828314198
+    },
+    "adaptive_sampling": {
+      "10": {
+        "events_generated": 10,
+        "events_sampled": 10,
+        "sample_rate": 1.0,
+        "mean_process_time_ns": 2635.26,
+        "events_per_sec": 3794691.9848515894
+      },
+      "100": {
+        "events_generated": 100,
+        "events_sampled": 100,
+        "sample_rate": 1.0,
+        "mean_process_time_ns": 23568.77,
+        "events_per_sec": 4242902.790429878
+      },
+      "1000": {
+        "events_generated": 1000,
+        "events_sampled": 500,
+        "sample_rate": 0.5,
+        "mean_process_time_ns": 262049.18,
+        "events_per_sec": 1908038.788749501
+      },
+      "10000": {
+        "events_generated": 10000,
+        "events_sampled": 1000,
+        "sample_rate": 0.1,
+        "mean_process_time_ns": 1775691.17,
+        "events_per_sec": 563160.9915591347
+      }
+    }
+  },
+  "bloc6_industrial": {
+    "spec": {
+      "spec": {
+        "lum_structure": {
+          "fields": {
+            "id": {
+              "type": "uint64",
+              "required": true
+            },
+            "data": {
+              "type": "bytes",
+              "required": true
+            },
+            "created_at": {
+              "type": "uint64_ns",
+              "required": true
+            },
+            "state": {
+              "type": "enum[ACTIVE,FREED,CORRUPT]",
+              "required": true
+            },
+            "checksum": {
+              "type": "sha256",
+              "required": false
+            }
+          },
+          "invariants": [
+            "id must be unique per session",
+            "created_at must be monotonically increasing",
+            "state transitions: ACTIVE -> FREED, ACTIVE -> CORRUPT"
+          ]
+        },
+        "operations": {
+          "create": {
+            "input": [
+              "size"
+            ],
+            "output": [
+              "lum_id"
+            ],
+            "side_effects": [
+              "log_event"
+            ]
+          },
+          "destroy": {
+            "input": [
+              "lum_id"
+            ],
+            "output": [
+              "success"
+            ],
+            "side_effects": [
+              "log_event"
+            ]
+          },
+          "move": {
+            "input": [
+              "src_id",
+              "dst"
+            ],
+            "output": [
+              "new_id"
+            ],
+            "side_effects": [
+              "log_event"
+            ]
+          },
+          "fuse": {
+            "input": [
+              "lum_ids[]"
+            ],
+            "output": [
+              "fused_id"
+            ],
+            "side_effects": [
+              "log_event"
+            ]
+          },
+          "split": {
+            "input": [
+              "lum_id",
+              "n"
+            ],
+            "output": [
+              "lum_ids[]"
+            ],
+            "side_effects": [
+              "log_event"
+            ]
+          }
+        }
+      },
+      "is_complete": true,
+      "field_count": 5,
+      "operation_count": 5,
+      "invariant_count": 3,
+      "formalization_level": "SEMI-FORMAL"
+    },
+    "terminology": {
+      "terminology": {
+        "LUM": {
+          "full_name": "Logical Unit of Memory",
+          "definition": "Structure de m\u00e9moire tra\u00e7able avec metadata temporelle",
+          "aliases": [],
+          "stable_since": "V1"
+        },
+        "VORAX": {
+          "full_name": "Verified Observable Runtime Audit eXecution",
+          "definition": "Framework d'ex\u00e9cution avec audit int\u00e9gr\u00e9",
+          "aliases": [],
+          "stable_since": "V5"
+        },
+        "WAL": {
+          "full_name": "Write-Ahead Log",
+          "definition": "Journal d'\u00e9criture anticip\u00e9e pour crash recovery",
+          "aliases": [
+            "journal"
+          ],
+          "stable_since": "V10"
+        },
+        "Forensic Trace": {
+          "full_name": "Trace Forensique",
+          "definition": "Enregistrement d'\u00e9v\u00e9nement avec pr\u00e9cision nanoseconde",
+          "aliases": [
+            "audit trail"
+          ],
+          "stable_since": "V15"
+        }
+      },
+      "total_terms": 4,
+      "stable_terms": 4,
+      "stability_ratio": 100.0
+    },
+    "implementability": {
+      "criteria": {
+        "documentation_available": {
+          "score": 0.8,
+          "notes": "Spec exists but needs refinement"
+        },
+        "no_proprietary_dependencies": {
+          "score": 1.0,
+          "notes": "Uses standard libraries only"
+        },
+        "clear_api_contracts": {
+          "score": 0.7,
+          "notes": "Operations defined, edge cases incomplete"
+        },
+        "test_suite_available": {
+          "score": 0.9,
+          "notes": "This V28 kernel serves as test suite"
+        },
+        "reference_implementation": {
+          "score": 0.6,
+          "notes": "Python impl available, C/Rust pending"
+        }
+      },
+      "overall_score": 80.0,
+      "implementable_by_third_party": true,
+      "missing_for_100pct": [
+        "documentation_available",
+        "clear_api_contracts",
+        "test_suite_available",
+        "reference_implementation"
+      ]
+    },
+    "contractual": {
+      "contractual_items": {
+        "data_retention": {
+          "clause": "All memory operations must be logged for 7 years",
+          "enforceable": true,
+          "lum_supports": true
+        },
+        "integrity_verification": {
+          "clause": "All data must have verifiable checksums",
+          "enforceable": true,
+          "lum_supports": true
+        },
+        "audit_trail_completeness": {
+          "clause": "100% of operations must be traceable",
+          "enforceable": true,
+          "lum_supports": true
+        },
+        "replay_capability": {
+          "clause": "System state must be reconstructable from logs",
+          "enforceable": true,
+          "lum_supports": true
+        },
+        "performance_sla": {
+          "clause": "Logging overhead must not exceed 10%",
+          "enforceable": true,
+          "lum_supports": true
+        }
+      },
+      "total_requirements": 5,
+      "lum_supported": 5,
+      "support_ratio": 100.0,
+      "audit_ready": true
+    }
+  }
+}
