@@ -1,3 +1,63 @@
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
+No Active Events
+
+Keep track of dataset uploads, competition submissions, scheduled notebooks, and running notebooks here.
+
+    0 Active Events
 # PLAN ARCHITECTURAL : NX-47 ARC (PRIZE 2025)
 
 ## 1. VISION ET OBJECTIF
