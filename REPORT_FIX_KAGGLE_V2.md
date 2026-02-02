@@ -20,7 +20,7 @@ for i in range(10):
 ```
 
 ## 3. Push et Vérification API
-*   **Version Poussée** : Le kernel a été mis à jour vers la version 4 sous l'identifiant `gabrielchavesreinann/nx47-arc-kernel`.
+*   **Version Poussée** : Le kernel a été mis à jour vers la version 4 sous l'identifiant `gabrielch avesreinann/nx47-arc-kernel`.
 *   **Validation API** : Le push a réussi avec la nouvelle clé API fournie dans les secrets, confirmant que celle-ci fonctionne parfaitement pour les opérations d'écriture.
 *   **Statut Kaggle** : Le kernel est actuellement en cours d'exécution (`RUNNING`) sur les serveurs de Kaggle avec le GPU activé.
 
