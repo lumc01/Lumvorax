@@ -16,13 +16,17 @@ def deploy_to_kaggle():
     kaggle_dir = os.path.expanduser("~/.kaggle")
     os.makedirs(kaggle_dir, exist_ok=True)
     
-    # Le token fourni est un KAGGLE_API_TOKEN complet (probablement format KGAT_...)
-    # On va tenter de l'utiliser via les variables d'environnement pour l'API
-    os.environ['KAGGLE_API_TOKEN'] = "KGAT_e2fa3badec70f88d56cf75757cca7e68"
+    # Le token fourni par l'utilisateur
+    new_token = "KGAT_147c649a54eb31af840fcdfdf2d85c1b"
+    os.environ['KAGGLE_API_TOKEN'] = new_token
+    
+    # Pour s'assurer que le CLI utilise ce token, on peut aussi l'ecrire dans kaggle.json 
+    # mais KGAT est souvent utilise directement comme env var ou via config set.
+    # On va essayer de configurer le username si on le trouve dans le token ou via une commande.
     
     # 3. Preparation des Metadatas pour le Kernel
     metadata = {
-        "id": "lumvorax/nx47-vesu-kernel",
+        "id": "gabrielchavesreinann/nx47-vesu-kernel",
         "title": "nx47-vesu-kernel",
         "code_file": kernel_file,
         "language": "python",

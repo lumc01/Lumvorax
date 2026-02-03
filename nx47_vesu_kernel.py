@@ -5,6 +5,10 @@ import numpy as np
 import time
 from hashlib import sha512
 import glob
+try:
+    from PIL import Image
+except ImportError:
+    Image = None
 
 # NX-47 VESU - Production Architecture for Vesuvius Challenge
 class NX47_VESU:
@@ -56,7 +60,12 @@ class NX47_VESU:
 
     def run_inference(self):
         self.log_event("INFERENCE_START", "Starting global inference")
-        test_fragments = [d for d in os.listdir(os.path.join(self.data_path, 'test')) if os.path.isdir(os.path.join(self.data_path, 'test', d))]
+        test_path = os.path.join(self.data_path, 'test')
+        if not os.path.exists(test_path):
+            self.log_event("ERROR", f"Test path {test_path} not found")
+            test_fragments = []
+        else:
+            test_fragments = [d for d in os.listdir(test_path) if os.path.isdir(os.path.join(test_path, d))]
         
         all_submissions = []
         for frag in test_fragments:
