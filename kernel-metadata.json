@@ -1,0 +1,17 @@
+{
+    "id": "lumvorax/nx47-vesu-kernel",
+    "title": "nx47-vesu-kernel",
+    "code_file": "nx47_vesu_kernel.py",
+    "language": "python",
+    "kernel_type": "script",
+    "is_private": "true",
+    "enable_gpu": "true",
+    "enable_internet": "true",
+    "dataset_sources": [
+        "trentonmclouth/vesuvius-challenge-surface-detection"
+    ],
+    "competition_sources": [
+        "vesuvius-challenge-surface-detection"
+    ],
+    "kernel_sources": []
+}

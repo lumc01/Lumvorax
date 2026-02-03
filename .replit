@@ -1264,6 +1264,6 @@ build = ["make", "clean", "all"]
 [userenv]
 
 [userenv.shared]
-KAGGLE_API_TOKEN = "KGAT_622e28b5346139b10b2e23432fee61ec"
+KAGGLE_API_TOKEN = "KGAT_e2fa3badec70f88d56cf75757cca7e68"
 KAGGLE_USERNAME = "einann"
 ARISTOTLE_API_KEY = "arstl_YykBEXr6oNR5R9toq_wI1wTtyfVrj5eUZfgpe_BlgYo"
