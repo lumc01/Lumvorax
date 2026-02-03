@@ -1,20 +1,20 @@
 [
     {
-        "timestamp_ns": 1770154258137094099,
+        "timestamp_ns": 1770157277961846637,
         "event": "INFERENCE_START",
         "details": "Starting global inference",
-        "signature": "8e58bca54b8b1c7a85c3cb6f5c18a603740ea6767852d7fb38985df38ab6e2da5f6305aa0387e8a11a8194ca37f08f5c28ce03f7814f9487b33fa0b1cd21cdeb"
+        "signature": "fd54565dbabac88d9a34651a4b24aa9ca133a99a11c97c15b03f058c47e59167dfef0bd2186f63a8df7e46dab2fc29196d595aa0e1db0f123c52377e37594723"
     },
     {
-        "timestamp_ns": 1770154258137923604,
+        "timestamp_ns": 1770157277963168546,
         "event": "ERROR",
         "details": "Test path /kaggle/input/vesuvius-challenge-surface-detection/test not found",
-        "signature": "ccdfe2948c247a8511fb0fd173a34c68638182a37a1c3341ebdbc488bf14d2a4929fd64b71aa64910feefb3e387621af4da636a594081abb71a750d9566af39b"
+        "signature": "f7bbca347cfd9b1f5e1bad9bd26dcc458456ea30c40968c0cead5e9453a56899829addeb5a2cd327af51732a42a990ef4b0efe01c5bae2ce44377a5fd5ea541b"
     },
     {
-        "timestamp_ns": 1770154258166061422,
+        "timestamp_ns": 1770157277990271266,
         "event": "SUBMISSION_GENERATED",
-        "details": "submission.csv saved",
-        "signature": "82e9353543a5095405777140fc3d02366e8059506991842b34db22a50387c789390a54f807f6c1c708703ef0cc884496e39e6741e5c050e4266e08f07cb29c0f"
+        "details": "submission.csv saved with 0 entries",
+        "signature": "5e537317d42bd229248d41d5279989338a80ba78d81e0d475545a577aae890636bcff42c315d04422a700b45c169e190bd327bdc282e8a188dbcfefa591f3f04"
     }
 ]
