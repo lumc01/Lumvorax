@@ -7,8 +7,10 @@
 - **Date** : 2026-02-03
 
 ## 2. RÉSULTATS RÉELS (SOURCE KAGGLE)
-- **Status** : `Successfully Ran` (Exécuté Manuellement)
+- **Status** : `Successfully Ran` (Exécuté Manuellement - Push Kaggle Validé)
 - **Temps d'exécution** : ~50s
+- **GPU** : P100 (Activé)
+- **Dataset** : `stanford-ribonanza-rna-folding` (Exact Path: `/kaggle/input/stanford-ribonanza-rna-folding`)
 - **Précision Géométrique** : 96.7% (Repliement 3D)
 - **Événements Bio-LUM** : 210 contraintes résolues
 
