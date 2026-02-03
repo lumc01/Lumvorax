@@ -1,0 +1,20 @@
+[
+    {
+        "timestamp_ns": 1770154258137094099,
+        "event": "INFERENCE_START",
+        "details": "Starting global inference",
+        "signature": "8e58bca54b8b1c7a85c3cb6f5c18a603740ea6767852d7fb38985df38ab6e2da5f6305aa0387e8a11a8194ca37f08f5c28ce03f7814f9487b33fa0b1cd21cdeb"
+    },
+    {
+        "timestamp_ns": 1770154258137923604,
+        "event": "ERROR",
+        "details": "Test path /kaggle/input/vesuvius-challenge-surface-detection/test not found",
+        "signature": "ccdfe2948c247a8511fb0fd173a34c68638182a37a1c3341ebdbc488bf14d2a4929fd64b71aa64910feefb3e387621af4da636a594081abb71a750d9566af39b"
+    },
+    {
+        "timestamp_ns": 1770154258166061422,
+        "event": "SUBMISSION_GENERATED",
+        "details": "submission.csv saved",
+        "signature": "82e9353543a5095405777140fc3d02366e8059506991842b34db22a50387c789390a54f807f6c1c708703ef0cc884496e39e6741e5c050e4266e08f07cb29c0f"
+    }
+]
