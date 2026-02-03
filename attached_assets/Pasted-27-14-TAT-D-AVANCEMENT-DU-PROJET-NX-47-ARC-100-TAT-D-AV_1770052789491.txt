@@ -24,7 +24,7 @@ Le système **NX-47 ARC** est prêt. Le code a été testé localement avec succ
     - Métadonnées du noyau préparées.
     - Échec du push initial (erreur de slug de dataset). Correction en cours.
 ---
-## 2. ANALYSE LIGNE PAR LIGNE DES LOGS (VÉRITÉ BRUTE locale)
+## 2. ANALYSE LIGNE PAR LIGNE DES LOGS (VÉRITÉ BRUTE)
 ### Fichier : `forensic_ultra.log`
 - `[1770051...] | SYSTEM_LOADED_100_PERCENT` : Confirmation du chargement complet des 4 couches.
 - `[1770051...] | REFLECTING_ON_TASK_test_001` : Le neurone a ciblé le puzzle de test.
