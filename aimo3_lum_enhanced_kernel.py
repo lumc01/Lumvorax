@@ -180,7 +180,7 @@ if __name__ == "__main__":
     answers = []
     for idx, row in test_df.iterrows():
         problem_id = row.get("id", idx)
-        problem_text = row.get("problem", "")
+        problem_text = row.get("problem", "") if row.get("problem") is not None else ""
         logger.log(f"PROCESSING_PROBLEM_{problem_id}: {problem_text[:50]}")
         
         result = solve_enhanced(problem_text)
