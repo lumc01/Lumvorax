@@ -1,6 +1,6 @@
 # DOCUMENTATION SYSTÈME NX47 - ANALYSE EXHAUSTIVE ET FORENSIC
 
-## 1. Architecture du Code (Scan Ligne par Ligne)
+## 1. Architecture du Code (Scan Ligne par Ligne) 
 Après analyse des 1827 lignes de code et de logs, voici la structure technique identifiée :
 
 ### Moteurs de Calcul
