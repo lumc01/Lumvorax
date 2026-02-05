@@ -435,25 +435,66 @@ matrix_result_t* matrix_multiply_lum_optimized(matrix_calculator_t* a, matrix_ca
     (void)b; // Suppress unused parameter warning
     (void)config; // Suppress unused parameter warning
 
+    if (!a || !b || a->magic_number != MATRIX_CALCULATOR_MAGIC || b->magic_number != MATRIX_CALCULATOR_MAGIC) {
+        return NULL;
+    }
+    if (a->cols != b->rows) {
+        return NULL;
+    }
+
     // Détection automatique des capacités SIMD
     simd_capabilities_t* caps = simd_detect_capabilities();
     if (!caps) return NULL;
 
-    printf("[SIMD] Utilisation: %s (largeur vectorielle: %u)\n", 
+    printf("[SIMD] Utilisation: %s (largeur vectorielle: %u)\n",
            caps->cpu_features, caps->vector_width);
 
-    // Placeholder for actual SIMD matrix multiplication logic
-    // This would involve selecting the appropriate SIMD implementation based on 'caps'
-    // and then performing the matrix multiplication.
+    struct timespec start, end;
+    clock_gettime(CLOCK_MONOTONIC, &start);
 
-    // For demonstration, we'll just call a hypothetical scalar version
-    // and free the detected capabilities.
-    // matrix_result_t* result = matrix_multiply_scalar(a, b, config); // Hypothetical scalar multiply
+    matrix_result_t* result = TRACKED_MALLOC(sizeof(matrix_result_t));
+    if (!result) {
+        simd_capabilities_destroy(caps);
+        return NULL;
+    }
 
-    simd_capabilities_destroy(caps); // Clean up detected capabilities
+    result->magic_number = MATRIX_CALCULATOR_MAGIC;
+    result->rows = a->rows;
+    result->cols = b->cols;
+    result->operation_success = false;
+    result->memory_address = result;
 
-    // Returning NULL as a placeholder for actual result
-    return NULL; 
+    size_t result_count = a->rows * b->cols;
+    result->result_data = TRACKED_MALLOC(sizeof(double) * result_count);
+    if (!result->result_data) {
+        TRACKED_FREE(result);
+        simd_capabilities_destroy(caps);
+        return NULL;
+    }
+
+    for (size_t i = 0; i < result_count; i++) {
+        result->result_data[i] = 0.0;
+    }
+
+    for (size_t i = 0; i < a->rows; i++) {
+        for (size_t k = 0; k < a->cols; k++) {
+            double a_val = a->data[i * a->cols + k];
+            size_t b_row_offset = k * b->cols;
+            size_t r_row_offset = i * b->cols;
+            for (size_t j = 0; j < b->cols; j++) {
+                result->result_data[r_row_offset + j] += a_val * b->data[b_row_offset + j];
+            }
+        }
+    }
+
+    clock_gettime(CLOCK_MONOTONIC, &end);
+    result->execution_time_ns = (uint64_t)(end.tv_sec - start.tv_sec) * 1000000000ULL
+                                + (uint64_t)(end.tv_nsec - start.tv_nsec);
+    result->operation_success = true;
+
+    simd_capabilities_destroy(caps);
+
+    return result;
 }
 
 // Version avec retour pour simd_avx512_mass_lum_operations 

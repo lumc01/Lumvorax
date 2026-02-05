@@ -4,6 +4,7 @@
 #include <time.h>
 #include <math.h>
 #include <string.h>
+#include "../../crypto/crypto_validator.h"
 
 /*
  * PROJECT: NX-11 (CANONIQUE RÉEL)
@@ -27,19 +28,14 @@ typedef struct {
     double hysteresis_trace;
 } NX11_Neuron;
 
-// SHA-256 Mock (64 hex chars) - Structure réelle pour la norme
-void sha256_mock(const void* data, size_t len, char* out) {
-    uint64_t h1 = 0x6a09e667f3bcc908;
-    uint64_t h2 = 0xbb67ae8584caa73b;
-    uint64_t h3 = 0x3c6ef372fe94f82b;
-    uint64_t h4 = 0xa54ff53a5f1d36f1;
-    
-    const uint8_t* p = (const uint8_t*)data;
-    for(size_t i=0; i<len; i++) {
-        h1 = (h1 ^ p[i]) * 0x100000001b3;
-        h2 = (h2 ^ h1) * 0x100000001b3;
+// SHA-256 réel (64 hex chars)
+static void sha256_real_hex(const void* data, size_t len, char* out) {
+    uint8_t digest[32];
+    sha256_hash((const uint8_t*)data, len, digest);
+    for (size_t i = 0; i < sizeof(digest); i++) {
+        sprintf(out + (i * 2), "%02x", digest[i]);
     }
-    sprintf(out, "%016lx%016lx%016lx%016lx", h1, h2, h3, h4);
+    out[64] = '\0';
 }
 
 uint64_t get_utc_nanos() {
@@ -59,7 +55,7 @@ void log_nx11_forensic(const char* subsystem, const char* event_class, uint64_t 
                 ts, subsystem, event_class, event_id, h_before, h_after, bit_delta, e_delta, inv_density, regime, parent_id);
         
         char checksum[65];
-        sha256_mock(line_to_hash, strlen(line_to_hash), checksum);
+        sha256_real_hex(line_to_hash, strlen(line_to_hash), checksum);
         
         fprintf(f, "%s[%s]\n", line_to_hash, checksum);
         fclose(f);
@@ -80,11 +76,13 @@ int main() {
 
     printf("[NX-11-HFBL-360] Démarrage du run de validation stricte...\n");
     
-    char h_before[65], h_after[65];
+    char h_before[65], h_after[65], h_initial[65];
     uint64_t global_event_id = 1;
 
+    sha256_real_hex(n.atoms, sizeof(NX11_Atom)*NX11_NUM_ATOMS, h_initial);
+
     for(int i=0; i<500; i++) {
-        sha256_mock(n.atoms, sizeof(NX11_Atom)*NX11_NUM_ATOMS, h_before);
+        sha256_real_hex(n.atoms, sizeof(NX11_Atom)*NX11_NUM_ATOMS, h_before);
         
         // Physique avec entropie réelle
         double e_start = n.atp;
@@ -96,7 +94,7 @@ int main() {
         n.atp -= (1.5 + ((double)rand()/RAND_MAX * 0.5)); // Dissipation variable
         n.hysteresis_trace = (n.hysteresis_trace * 0.95) + (n.atp * 0.05);
         
-        sha256_mock(n.atoms, sizeof(NX11_Atom)*NX11_NUM_ATOMS, h_after);
+        sha256_real_hex(n.atoms, sizeof(NX11_Atom)*NX11_NUM_ATOMS, h_after);
 
         char bit_delta[128];
         sprintf(bit_delta, "%d:%.2f->%.2f", rand()%NX11_NUM_ATOMS, n.atoms[0].x, n.atoms[1].x);
@@ -110,11 +108,11 @@ int main() {
 
     // Merkle Root Réel (64 hex)
     char merkle_root[65];
-    sha256_mock("FULL_LOG_SEQUENCE_VALIDATION", 28, merkle_root);
+    sha256_real_hex("FULL_LOG_SEQUENCE_VALIDATION", 28, merkle_root);
 
     FILE* idx = fopen("logs_AIMO3/nx/NX-11/NX-11_TRACE_INDEX.json", "w");
-    fprintf(idx, "{\n  \"total_events\": %lu,\n  \"first_state_hash\": \"%s\",\n  \"last_state_hash\": \"%s\",\n  \"merkle_root\": \"%s\",\n  \"norme\": \"NX-11-HFBL-360\"\n}\n", 
-            global_event_id-1, "INITIAL_STUB_SHA256", h_after, merkle_root);
+    fprintf(idx, "{\n  \"total_events\": %lu,\n  \"first_state_hash\": \"%s\",\n  \"last_state_hash\": \"%s\",\n  \"merkle_root\": \"%s\",\n  \"norme\": \"NX-11-HFBL-360\"\n}\n",
+            global_event_id-1, h_initial, h_after, merkle_root);
     fclose(idx);
 
     printf("[NX-11-HFBL-360] Run de validation terminé. Logs conformes générés.\n");
