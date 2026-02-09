@@ -48,9 +48,9 @@ class NX47_VESU_Production:
         
         results = []
         if not test_fragments:
-            # Fallback robuste pour la structure de soumission
-            for i in range(100):
-                results.append({"id": f"dummy_{i}", "target": 0.5})
+            raise FileNotFoundError(
+                f"No test fragments found in {self.input_dir}; real data required."
+            )
         else:
             for frag in test_fragments:
                 frag_id = os.path.basename(frag)

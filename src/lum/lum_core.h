@@ -31,7 +31,11 @@ typedef struct {
 } lum_t;
 
 // Vérification ABI corrigée - alignement 64 bytes pour performance cache/SIMD
+#ifdef __cplusplus
+static_assert(sizeof(lum_t) == 64, "lum_t structure must be exactly 64 bytes for cache line alignment");
+#else
 _Static_assert(sizeof(lum_t) == 64, "lum_t structure must be exactly 64 bytes for cache line alignment");
+#endif
 
 // LUM structure types
 typedef enum {

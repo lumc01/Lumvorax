@@ -171,16 +171,9 @@ if __name__ == "__main__":
     # CORRECTION : Charger TOUS les problèmes du test.csv
     try:
         test_df = pd.read_csv("/kaggle/input/ai-mathematical-olympiad-progress-prize-3/test.csv")
-    except:
-        logger.log("CSV_LOAD_FAILED: Using mock data", level="WARNING")
-        test_df = pd.DataFrame({
-            "id": [0, 1, 2],
-            "problem": [
-                "Is 28 the sum of two primes?",
-                "How many steps does Collatz 13 take?",
-                "What is RSA jitter for 1769?"
-            ]
-        })
+    except Exception as exc:
+        logger.log(f"CSV_LOAD_FAILED: {exc}", level="ERROR")
+        raise
 
     logger.log(f"DATASET_LOADED: {len(test_df)} problems detected")
     

@@ -424,11 +424,52 @@ bool lum_log_export_csv(const char* log_filename, const char* csv_filename) {
 lum_log_analysis_t* lum_log_analyze(const char* log_filename) {
     if (!log_filename) return NULL;
 
+    FILE* log_file = fopen(log_filename, "r");
+    if (!log_file) {
+        return NULL;
+    }
+
     lum_log_analysis_t* analysis = TRACKED_MALLOC(sizeof(lum_log_analysis_t));
-    if (!analysis) return NULL;
+    if (!analysis) {
+        fclose(log_file);
+        return NULL;
+    }
 
     memset(analysis, 0, sizeof(lum_log_analysis_t));
-    SAFE_STRCPY(analysis->most_used_operation, "FUSE", sizeof(analysis->most_used_operation));
+    SAFE_STRCPY(analysis->most_used_operation, "UNKNOWN", sizeof(analysis->most_used_operation));
+
+    const char* operations[] = {"FUSE", "SPLIT", "MOVE", "STORE", "RETRIEVE"};
+    size_t operation_counts[5] = {0};
+
+    char line[2048];
+    while (fgets(line, sizeof(line), log_file)) {
+        analysis->total_operations++;
+
+        if (strstr(line, "LUM_CREATE")) analysis->total_lums_created++;
+        if (strstr(line, "LUM_DESTROY")) analysis->total_lums_destroyed++;
+        if (strstr(line, "VIOLATION")) analysis->conservation_violations++;
+        if (strstr(line, "[ERROR]") || strstr(line, "ERROR")) analysis->error_count++;
+
+        for (size_t i = 0; i < 5; i++) {
+            if (strstr(line, operations[i])) {
+                operation_counts[i]++;
+            }
+        }
+    }
+
+    fclose(log_file);
+
+    size_t max_index = 0;
+    size_t max_count = 0;
+    for (size_t i = 0; i < 5; i++) {
+        if (operation_counts[i] > max_count) {
+            max_count = operation_counts[i];
+            max_index = i;
+        }
+    }
+    if (max_count > 0) {
+        SAFE_STRCPY(analysis->most_used_operation, operations[max_index], sizeof(analysis->most_used_operation));
+    }
 
     return analysis;
 }

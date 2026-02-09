@@ -130,15 +130,10 @@ class NX47_VESU:
 
 if __name__ == "__main__":
     data_dir = "/kaggle/input/vesuvius-challenge-surface-detection"
-    # Local fallback for Replit verification
     if not os.path.exists(data_dir):
-        print("Local mode: Creating dummy dataset...")
-        os.makedirs("test_data/test/a/layers", exist_ok=True)
-        dummy_img = np.random.randint(0, 255, (256, 256), dtype=np.uint8)
-        if Image:
-            Image.fromarray(dummy_img).save("test_data/test/a/layers/00.tif")
-            Image.fromarray(dummy_img).save("test_data/test/a/layers/01.tif")
-        data_dir = "test_data"
+        raise FileNotFoundError(
+            f"Dataset not found at {data_dir}; real data required for authentic execution."
+        )
         
     node = NX47_VESU(data_path=data_dir)
     node.run_inference()

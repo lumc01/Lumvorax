@@ -1539,23 +1539,12 @@ def main():
     logger.log("=" * 60)
     
     try:
-        if HAS_PANDAS:
-            test_df = pd.read_csv("/kaggle/input/ai-mathematical-olympiad-progress-prize-3/test.csv")
-        else:
-            raise FileNotFoundError("Using mock data")
-    except:
-        logger.log("DATASET_FALLBACK: Using mock data", level="WARNING")
-        if HAS_PANDAS:
-            test_df = pd.DataFrame({
-                "id": [0, 1, 2],
-                "problem": [
-                    "What is the sum of 10 and 20?",
-                    "Is 17 a prime number?",
-                    "Calculate 5 + 10 + 15"
-                ]
-            })
-        else:
-            test_df = None
+        if not HAS_PANDAS:
+            raise RuntimeError("Pandas unavailable; real dataset required.")
+        test_df = pd.read_csv("/kaggle/input/ai-mathematical-olympiad-progress-prize-3/test.csv")
+    except Exception as exc:
+        logger.log(f"DATASET_REQUIRED: {exc}", level="ERROR")
+        raise
     
     answers = []
     if test_df is not None and HAS_PANDAS:
