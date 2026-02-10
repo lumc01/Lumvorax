@@ -1,14 +1,14 @@
 [
     {
-        "timestamp_ns": 1770686370384911266,
+        "timestamp_ns": 1770686986969592707,
         "event": "INFERENCE_START",
-        "details": "Starting global inference",
-        "signature": "07ffea8425162df99f9f994f227a0e812e71a46cb73b75a0db38859be7abc7c5ca976f15caffc77b887762d8a609d3888724f867088d22f61aac477709a2c469"
+        "details": "Starting competitive inference",
+        "signature": "63c2d443283aff4cff8406fd0c38bc10063dbd6479976372f701c1507e167fe717e2f82667106dd82766785a9b27ffb48c4523b48b168ab5f11f31771a2af1fd"
     },
     {
-        "timestamp_ns": 1770686373870975920,
+        "timestamp_ns": 1770686988885367410,
         "event": "INFO",
         "details": "Processing 1613 files",
-        "signature": "a95b175181e5fa9b13fb38b4c1d587ff0863f17804730112821455c25067e0bb972adb049ac77fee6d180cff7361c7807c8639f3ad7387ff64f3c33c19806ff9"
+        "signature": "cf323f95cac9401ff646af107c47cecf6a6ebba4598804517ab34e584dcc5ee1b109fe860eb8794493f59fdc21acafd9382b7b711020894038c6e5e91b68b7df"
     }
 ]
