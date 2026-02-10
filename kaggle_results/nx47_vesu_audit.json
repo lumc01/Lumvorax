@@ -1,0 +1,14 @@
+[
+    {
+        "timestamp_ns": 1770686370384911266,
+        "event": "INFERENCE_START",
+        "details": "Starting global inference",
+        "signature": "07ffea8425162df99f9f994f227a0e812e71a46cb73b75a0db38859be7abc7c5ca976f15caffc77b887762d8a609d3888724f867088d22f61aac477709a2c469"
+    },
+    {
+        "timestamp_ns": 1770686373870975920,
+        "event": "INFO",
+        "details": "Processing 1613 files",
+        "signature": "a95b175181e5fa9b13fb38b4c1d587ff0863f17804730112821455c25067e0bb972adb049ac77fee6d180cff7361c7807c8639f3ad7387ff64f3c33c19806ff9"
+    }
+]
