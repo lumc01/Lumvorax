@@ -36,9 +36,21 @@ def install_offline(package_name: str) -> None:
         "tifffile": exact_wheel_dir / "tifffile-2026.1.28-py3-none-any.whl",
     }
 
+    # Avoid forcing an incompatible NumPy wheel (e.g. cp311 wheel on cp312 runtime).
+    if package_name == "numpy":
+        try:
+            import numpy as _np  # noqa: F401
+            return
+        except Exception:
+            pass
+
     if package_name in exact_wheels and exact_wheels[package_name].exists():
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-index", str(exact_wheels[package_name])])
-        return
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-index", str(exact_wheels[package_name])])
+            return
+        except subprocess.CalledProcessError:
+            # Fall back to --find-links resolution for interpreter/platform compatibility.
+            pass
 
     if exact_wheel_dir.exists():
         subprocess.check_call(
@@ -76,6 +88,7 @@ def install_offline(package_name: str) -> None:
 
 def bootstrap_dependencies_fail_fast() -> None:
     # Respect exact offline process and ordering requested for Kaggle runtime.
+    # NumPy is often already present and wheel tags may differ by Python minor version.
     install_offline("numpy")
     install_offline("imagecodecs")
     install_offline("tifffile")
