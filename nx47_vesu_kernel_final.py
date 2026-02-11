@@ -1,4 +1,5 @@
 import gc
+import importlib
 import json
 import math
 import os
@@ -93,6 +94,10 @@ def bootstrap_dependencies_fail_fast() -> None:
     install_offline("imagecodecs")
     install_offline("tifffile")
 
+    # Refresh tifffile module state after wheel installs in the same interpreter.
+    global tifffile
+    tifffile = importlib.reload(tifffile)
+
 
 def ensure_imagecodecs() -> bool:
     """Ensure imagecodecs is available for LZW TIFF read/write."""
@@ -105,6 +110,11 @@ def ensure_imagecodecs() -> bool:
     try:
         install_offline("imagecodecs")
         import imagecodecs  # noqa: F401
+
+        # tifffile may have been imported before imagecodecs installation.
+        # Reload it so compression codecs are re-detected in the same process.
+        global tifffile
+        tifffile = importlib.reload(tifffile)
         return True
     except Exception:
         return False
