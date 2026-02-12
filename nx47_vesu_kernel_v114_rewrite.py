@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import gc
-import glob
 import importlib
 import json
 import math
@@ -222,25 +221,25 @@ def write_tiff_lzw_safe(path: Path, arr: np.ndarray) -> None:
     pages[0].save(path, save_all=True, append_images=pages[1:], compression="tiff_lzw")
 
 
-class NX47V114Kernel:
+class NX47V114RebuildKernel:
     def __init__(
         self,
         root: Path = Path("/kaggle/input/competitions/vesuvius-challenge-surface-detection"),
         output_dir: Path = Path("/kaggle/working"),
         config: V114Config | None = None,
     ) -> None:
-        self.version = "NX47 V114"
+        self.version = "NX47 V114 REWRITE"
         self.root = self._resolve_root(root)
         self.test_dir = self.root / "test_images"
         self.output_dir = output_dir
         self.tmp_dir = output_dir / "tmp_masks"
         self.overlay_dir = output_dir / "overlays"
         self.submission_path = output_dir / "submission.zip"
-        self.roadmap_path = output_dir / "v114_roadmap_realtime.json"
-        self.logs_path = output_dir / "v114_execution_logs.json"
-        self.memory_path = output_dir / "v114_memory_tracker.json"
-        self.metadata_path = output_dir / "v114_execution_metadata.json"
-        self.diff_report_path = output_dir / "v114_competitor_diff_report.json"
+        self.roadmap_path = output_dir / "v114_rewrite_roadmap_realtime.json"
+        self.logs_path = output_dir / "v114_rewrite_execution_logs.json"
+        self.memory_path = output_dir / "v114_rewrite_memory_tracker.json"
+        self.metadata_path = output_dir / "v114_rewrite_execution_metadata.json"
+        self.diff_report_path = output_dir / "v114_rewrite_competitor_diff_report.json"
 
         self.cfg = config or V114Config()
         self.plan = PlanTracker(output_path=self.roadmap_path)
@@ -275,7 +274,11 @@ class NX47V114Kernel:
                 return c
 
         if preferred.parent.exists():
-            matches = [p for p in preferred.parent.iterdir() if p.is_dir() and "vesuvius" in p.name.lower() and "surface" in p.name.lower()]
+            matches = [
+                p
+                for p in preferred.parent.iterdir()
+                if p.is_dir() and "vesuvius" in p.name.lower() and "surface" in p.name.lower()
+            ]
             if matches:
                 return matches[0]
         raise FileNotFoundError(f"Dataset path missing. Tried: {[str(c) for c in candidates]}")
@@ -378,7 +381,9 @@ class NX47V114Kernel:
 
         nx47_signal = 0.35 * math.tanh(gradient_energy / 2.0) + 0.30 * math.tanh(intensity_std * 8.0)
         nx47_signal += 0.20 * math.tanh((p95 - p50) * 6.0) + 0.15 * (entropy / math.log(64.0))
-        atom_signal = 0.5 * (1.0 + math.tanh((intensity_mean - 0.35) * 6.0)) + 0.5 * (1.0 + math.tanh((intensity_std - 0.10) * 10.0))
+        atom_signal = 0.5 * (1.0 + math.tanh((intensity_mean - 0.35) * 6.0)) + 0.5 * (
+            1.0 + math.tanh((intensity_std - 0.10) * 10.0)
+        )
         fusion_score = float(np.clip(0.5 + 0.5 * math.tanh((0.7 * nx47_signal + 0.3 * (atom_signal - 0.5)) * 1.2), 0.05, 0.95))
 
         self.plan.update("features", 100.0, done=True)
@@ -432,7 +437,11 @@ class NX47V114Kernel:
         strong = prob_cpu >= self.cfg.t_high
         weak = (prob_cpu >= self.cfg.t_low) | public_anchor
 
-        base2d = binary_propagation(strong, mask=weak, structure=generate_binary_structure(2, 2)) if strong.any() else np.zeros_like(strong, dtype=bool)
+        if strong.any():
+            base2d = binary_propagation(strong, mask=weak, structure=generate_binary_structure(2, 2))
+        else:
+            base2d = np.zeros_like(strong, dtype=bool)
+
         mask3d = np.repeat(base2d[np.newaxis, ...], vol.shape[0], axis=0)
         closed3d = binary_closing(mask3d, structure=self._build_struct(self.cfg.z_radius, self.cfg.xy_radius))
         out2d = closed3d.any(axis=0)
@@ -444,7 +453,16 @@ class NX47V114Kernel:
             traces = []
             for i in range(budget):
                 y, x = int(ys[i]), int(xs[i])
-                traces.append({"y": y, "x": x, "private_prob": float(prob_cpu[y, x]), "mean_sig": float(mean_cpu[y, x]), "bit": 1, "ts_ns": time.time_ns()})
+                traces.append(
+                    {
+                        "y": y,
+                        "x": x,
+                        "private_prob": float(prob_cpu[y, x]),
+                        "mean_sig": float(mean_cpu[y, x]),
+                        "bit": 1,
+                        "ts_ns": time.time_ns(),
+                    }
+                )
             self.log("PIXEL_TRACE", count=len(traces), sample=traces[:20])
 
         self.memory_tracker.log_array("private_prob", prob_cpu)
@@ -469,7 +487,14 @@ class NX47V114Kernel:
             threshold_source = f"target_active_ratio_{target_ratio:.3f}"
 
         binary_mask = (reconstruction >= threshold).astype(np.uint8)
-        self.log("SUBMISSION_MASK_STATS", version="v114", file=file_name, threshold=round(threshold, 6), threshold_source=threshold_source, active_ratio=round(float(binary_mask.mean()), 6))
+        self.log(
+            "SUBMISSION_MASK_STATS",
+            version="v114_rewrite",
+            file=file_name,
+            threshold=round(threshold, 6),
+            threshold_source=threshold_source,
+            active_ratio=round(float(binary_mask.mean()), 6),
+        )
         return binary_mask
 
     def _save_overlay(self, file_stem: str, vol: np.ndarray, mask: np.ndarray) -> None:
@@ -517,6 +542,7 @@ class NX47V114Kernel:
                 vol = self.read_volume(fpath)
                 features = self.extract_features(vol)
                 self.log("FEATURES", file=fpath.name, **{k: round(v, 6) for k, v in features.items()})
+
                 mask_stack = self.segment_volume(vol, fusion_score=features["fusion_score"])
                 self._save_overlay(fpath.stem, vol, mask_stack)
 
@@ -549,11 +575,6 @@ class NX47V114Kernel:
         return self.submission_path
 
 
-NX47V113Kernel = NX47V114Kernel
-NX47V112Kernel = NX47V114Kernel
-NX47V111Kernel = NX47V114Kernel
-
-
 if __name__ == "__main__":
     cfg = V114Config(
         full_pixel_trace=os.environ.get("V114_FULL_PIXEL_TRACE", "0") == "1",
@@ -561,7 +582,7 @@ if __name__ == "__main__":
         overlay_stride=int(os.environ.get("V114_OVERLAY_STRIDE", "8")),
         target_active_ratio=float(os.environ.get("V114_TARGET_ACTIVE_RATIO", "0.20")),
     )
-    kernel = NX47V114Kernel(
+    kernel = NX47V114RebuildKernel(
         root=Path(os.environ.get("VESUVIUS_ROOT", "/kaggle/input/competitions/vesuvius-challenge-surface-detection")),
         output_dir=Path(os.environ.get("VESUVIUS_OUTPUT", "/kaggle/working")),
         config=cfg,
