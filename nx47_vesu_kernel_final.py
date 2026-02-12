@@ -127,26 +127,33 @@ def ensure_imagecodecs() -> bool:
 
 
 def read_tiff_lzw_safe(path: Path) -> np.ndarray:
-    """Read TIFF volumes with tifffile, fallback to Pillow when imagecodecs is unavailable."""
+    """Read TIFF volumes with tifffile, then robustly fallback if LZW codecs still fail."""
     try:
         return tifffile.imread(path)
     except ValueError as exc:
         if "requires the 'imagecodecs' package" not in str(exc):
             raise
 
-    if ensure_imagecodecs():
+    # Try to install/refresh codecs, then retry tifffile once.
+    ensure_imagecodecs()
+    try:
         return tifffile.imread(path)
+    except ValueError as exc:
+        if "requires the 'imagecodecs' package" not in str(exc):
+            raise
 
+    # Final fallback: Pillow decoder path.
     if Image is None or ImageSequence is None:
         raise RuntimeError(
-            "LZW TIFF read failed and Pillow fallback is unavailable. "
-            "Install imagecodecs or ensure Pillow with TIFF support is present."
+            "LZW TIFF read failed after imagecodecs bootstrap and Pillow fallback is unavailable."
         )
 
     with Image.open(path) as img:
         frames = [np.array(frame, dtype=np.float32) for frame in ImageSequence.Iterator(img)]
+
     if not frames:
         raise RuntimeError(f"No frames decoded from TIFF: {path}")
+
     return np.stack(frames, axis=0)
 
 
@@ -284,13 +291,7 @@ class NX47V96Kernel:
 
     def read_volume(self, path: Path) -> np.ndarray:
         self.plan.update("load", 25.0)
-        try:
-            vol = read_tiff_lzw_safe(path).astype(np.float32)
-        except ValueError as exc:
-            if "requires the 'imagecodecs' package" in str(exc) and ensure_imagecodecs():
-                vol = read_tiff_lzw_safe(path).astype(np.float32)
-            else:
-                raise
+        vol = read_tiff_lzw_safe(path).astype(np.float32)
         if vol.ndim != 3:
             raise RuntimeError(f"Unsupported TIFF shape for {path.name}: {vol.shape}")
         vmin = float(vol.min())
