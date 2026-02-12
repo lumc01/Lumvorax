@@ -339,6 +339,34 @@ class NX47V96Kernel:
             "fusion_score": fusion_score,
         }
 
+    def _slice_fusion_score(self, vol: np.ndarray, z: int, global_fusion: float) -> float:
+        """Compute slice-aware fusion score to avoid constant global fusion collapse."""
+        z_count = vol.shape[0]
+        z0, z1 = max(0, z - 2), min(z_count, z + 3)
+        local = vol[z0:z1]
+
+        local_std = float(np.std(local))
+        local_mean = float(np.mean(local))
+        local_p95 = float(np.percentile(local, 95))
+        local_p50 = float(np.percentile(local, 50))
+
+        # Use lightweight directional gradients on current slice.
+        sl = vol[z]
+        gx = np.diff(sl, axis=1, append=sl[:, -1:])
+        gy = np.diff(sl, axis=0, append=sl[-1:, :])
+        grad_energy = float(np.mean(np.sqrt(gx * gx + gy * gy)))
+
+        slice_signal = (
+            0.35 * math.tanh(grad_energy * 4.0)
+            + 0.30 * math.tanh(local_std * 8.0)
+            + 0.20 * math.tanh((local_p95 - local_p50) * 8.0)
+            + 0.15 * math.tanh((local_mean - 0.30) * 6.0)
+        )
+        slice_fusion = float(np.clip(0.5 + 0.5 * math.tanh(slice_signal * 2.0), 0.05, 0.95))
+
+        # Blend global + local so each slice can vary while keeping stability.
+        return float(np.clip(0.65 * global_fusion + 0.35 * slice_fusion, 0.05, 0.95))
+
     def segment_volume(self, vol: np.ndarray, fusion_score: float) -> np.ndarray:
         self.plan.update("segment", 10.0)
         xp = self._xp()
@@ -358,7 +386,8 @@ class NX47V96Kernel:
             proj = xp.mean(resid[z0:z1], axis=0)
             local_std = float(xp.std(vol_xp[max(0, z - 2):min(z_count, z + 3)]))
 
-            adaptive_weight = 0.12 + 0.22 * math.tanh(fusion_score * 2.2) * math.tanh(local_std * 6.0)
+            slice_fusion = self._slice_fusion_score(vol, z, fusion_score)
+            adaptive_weight = 0.12 + 0.22 * math.tanh(slice_fusion * 2.2) * math.tanh(local_std * 6.0)
             proj = proj + adaptive_weight
 
             proj_cpu = cp.asnumpy(proj) if self.using_gpu else proj
@@ -375,7 +404,7 @@ class NX47V96Kernel:
             self.log(
                 "SLICE_METRIC",
                 z=z,
-                fusion_score=round(fusion_score, 6),
+                fusion_score=round(slice_fusion, 6),
                 local_std=round(local_std, 6),
                 adaptive_weight=round(adaptive_weight, 6),
                 p_lo=round(p_lo, 6),
