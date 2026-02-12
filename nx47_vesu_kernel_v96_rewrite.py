@@ -1,5 +1,5 @@
 # ================================================================
-# 01) NX47 V109 Kernel
+# 01) NX47 V110 Kernel
 # 02) Kaggle Vesuvius pipeline: discovery -> load -> features -> segment -> overlay -> package
 # 03) Robust offline dependencies + LZW-safe TIFF I/O + slice-wise adaptive fusion
 # ================================================================
@@ -26,6 +26,7 @@ except Exception:
     cp = None
     gpu_gaussian_filter = None
 
+from scipy.ndimage import binary_opening
 from scipy.ndimage import gaussian_filter as cpu_gaussian_filter
 from scipy.ndimage import sobel
 
@@ -230,9 +231,9 @@ class PlanTracker:
         self.output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-class NX47V109Kernel:
+class NX47V110Kernel:
     """
-    V109 pipeline data-driven for Vesuvius test_images format.
+    V110 pipeline data-driven for Vesuvius test_images format.
     - Input format: *.tif volume files in /kaggle/input/competitions/vesuvius-challenge-surface-detection/test_images
     - Output format: submission.zip containing one LZW-compressed TIFF mask per input file with same filename.
     """
@@ -248,7 +249,7 @@ class NX47V109Kernel:
         self.output_dir = output_dir
         self.tmp_dir = output_dir / "tmp_masks"
         self.overlay_dir = output_dir / "overlays"
-        self.roadmap_path = output_dir / "v109_roadmap_realtime.json"
+        self.roadmap_path = output_dir / "v110_roadmap_realtime.json"
         self.submission_path = output_dir / "submission.zip"
         self.overlay_stride = max(1, int(overlay_stride))
 
@@ -338,7 +339,7 @@ class NX47V109Kernel:
         atom_neuron_signal = 0.5 * (1.0 + math.tanh((intensity_mean - 0.35) * 6.0)) + 0.5 * (1.0 + math.tanh((intensity_std - 0.10) * 10.0))
 
         fusion_raw = 0.7 * nx47_signal + 0.3 * (atom_neuron_signal - 0.5)
-        fusion_score = float(np.clip(0.5 + 0.5 * math.tanh(fusion_raw * 2.0), 0.05, 0.95))
+        fusion_score = float(np.clip(0.5 + 0.5 * math.tanh(fusion_raw * 1.2), 0.15, 0.85))
 
         self.plan.update("features", 100.0, done=True)
         return {
@@ -404,11 +405,11 @@ class NX47V109Kernel:
             adaptive_weight_raw = 0.12 + 0.22 * math.tanh(slice_fusion * 2.2) * math.tanh(local_std * 6.0)
             adaptive_cap = 0.238 + 0.018 * math.tanh((local_std - 0.108) * 18.0)
             adaptive_weight = min(adaptive_weight_raw, adaptive_cap)
-            proj = proj + adaptive_weight
+            proj = proj * (1.0 + adaptive_weight * 0.6)
 
             proj_cpu = cp.asnumpy(proj) if self.using_gpu else proj
-            p_lo = float(np.percentile(proj_cpu, 84))
-            p_hi = float(np.percentile(proj_cpu, 92))
+            p_lo = float(np.percentile(proj_cpu, 75))
+            p_hi = float(np.percentile(proj_cpu, 95))
 
             den = (p_hi - p_lo) + 1e-6
             w = xp.clip((proj - p_lo) / den, 0.0, 1.0)
@@ -435,7 +436,7 @@ class NX47V109Kernel:
 
     def _build_submission_mask(self, mask_stack: np.ndarray, file_name: str) -> np.ndarray:
         """Convert 3D mask stack to strict binary 2D mask (values 0/1) for Kaggle submission."""
-        reconstruction = np.mean(mask_stack.astype(np.float32) / 255.0, axis=0)
+        reconstruction = np.percentile(mask_stack.astype(np.float32) / 255.0, 65, axis=0)
 
         # Diagnostics before thresholding: distribution is critical for calibration.
         p01 = float(np.percentile(reconstruction, 1))
@@ -444,7 +445,7 @@ class NX47V109Kernel:
         p95 = float(np.percentile(reconstruction, 95))
         p99 = float(np.percentile(reconstruction, 99))
 
-        env_threshold = os.environ.get("V109_SUBMISSION_THRESHOLD")
+        env_threshold = os.environ.get("V110_SUBMISSION_THRESHOLD", os.environ.get("V109_SUBMISSION_THRESHOLD"))
         if env_threshold is not None:
             threshold = float(np.clip(float(env_threshold), 0.0, 1.0))
             threshold_source = "env"
@@ -457,6 +458,7 @@ class NX47V109Kernel:
         sweep = {f"{th:.2f}": round(float((reconstruction >= th).mean()), 6) for th in sweep_thresholds}
 
         binary_mask = (reconstruction >= threshold).astype(np.uint8)
+        binary_mask = binary_opening(binary_mask.astype(bool), structure=np.ones((3, 3), dtype=bool)).astype(np.uint8)
         active_ratio = float(binary_mask.mean())
 
         self.log(
@@ -560,26 +562,27 @@ class NX47V109Kernel:
             "log_count": len(self.logs),
             "gpu": self.using_gpu,
         }
-        (self.output_dir / "v109_execution_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
-        (self.output_dir / "v109_execution_logs.json").write_text(json.dumps(self.logs, indent=2), encoding="utf-8")
+        (self.output_dir / "v110_execution_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+        (self.output_dir / "v110_execution_logs.json").write_text(json.dumps(self.logs, indent=2), encoding="utf-8")
         self.plan.update("package", 100.0, done=True)
         self.log("EXEC_COMPLETE", submission=str(self.submission_path))
         return self.submission_path
 
 
 # Backward-compatible class aliases (legacy references).
-NX47V108Kernel = NX47V109Kernel
-NX47V107Kernel = NX47V109Kernel
-NX47V106Kernel = NX47V109Kernel
-NX47V96Kernel = NX47V109Kernel
+NX47V109Kernel = NX47V110Kernel
+NX47V108Kernel = NX47V110Kernel
+NX47V107Kernel = NX47V110Kernel
+NX47V106Kernel = NX47V110Kernel
+NX47V96Kernel = NX47V110Kernel
 
 
 if __name__ == "__main__":
-    kernel = NX47V109Kernel(
+    kernel = NX47V110Kernel(
         root=Path(os.environ.get("VESUVIUS_ROOT", "/kaggle/input/competitions/vesuvius-challenge-surface-detection")),
         output_dir=Path(os.environ.get("VESUVIUS_OUTPUT", "/kaggle/working")),
         overlay_stride=int(
-            os.environ.get("V109_OVERLAY_STRIDE", os.environ.get("V108_OVERLAY_STRIDE", os.environ.get("V107_OVERLAY_STRIDE", os.environ.get("V106_OVERLAY_STRIDE", os.environ.get("V96_OVERLAY_STRIDE", "8")))))
+            os.environ.get("V110_OVERLAY_STRIDE", os.environ.get("V109_OVERLAY_STRIDE", os.environ.get("V108_OVERLAY_STRIDE", os.environ.get("V107_OVERLAY_STRIDE", os.environ.get("V106_OVERLAY_STRIDE", os.environ.get("V96_OVERLAY_STRIDE", "8"))))))
         ),
     )
     submission = kernel.run()
