@@ -1,5 +1,5 @@
 # ================================================================
-# 01) NX47 V106 Kernel
+# 01) NX47 V107 Kernel
 # 02) Kaggle Vesuvius pipeline: discovery -> load -> features -> segment -> overlay -> package
 # 03) Robust offline dependencies + LZW-safe TIFF I/O + slice-wise adaptive fusion
 # ================================================================
@@ -26,6 +26,8 @@ except Exception:
     cp = None
     gpu_gaussian_filter = None
 
+from scipy.ndimage import binary_closing
+from scipy.ndimage import binary_opening
 from scipy.ndimage import gaussian_filter as cpu_gaussian_filter
 from scipy.ndimage import sobel
 
@@ -224,9 +226,9 @@ class PlanTracker:
         self.output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-class NX47V106Kernel:
+class NX47V107Kernel:
     """
-    V106 pipeline data-driven for Vesuvius test_images format.
+    V107 pipeline data-driven for Vesuvius test_images format.
     - Input format: *.tif volume files in /kaggle/input/competitions/vesuvius-challenge-surface-detection/test_images
     - Output format: submission.zip containing one LZW-compressed TIFF mask per input file with same filename.
     """
@@ -242,7 +244,7 @@ class NX47V106Kernel:
         self.output_dir = output_dir
         self.tmp_dir = output_dir / "tmp_masks"
         self.overlay_dir = output_dir / "overlays"
-        self.roadmap_path = output_dir / "v106_roadmap_realtime.json"
+        self.roadmap_path = output_dir / "v107_roadmap_realtime.json"
         self.submission_path = output_dir / "submission.zip"
         self.overlay_stride = max(1, int(overlay_stride))
 
@@ -379,7 +381,9 @@ class NX47V106Kernel:
         vol_xp = xp.asarray(vol)
 
         sigma = float(max(0.5, np.std(vol) * 1.1 + 0.35))
-        smooth = self._gaussian(vol_xp, sigma=sigma)
+        smooth_lo = self._gaussian(vol_xp, sigma=sigma)
+        smooth_hi = self._gaussian(vol_xp, sigma=sigma * 1.8)
+        smooth = 0.65 * smooth_lo + 0.35 * smooth_hi
         resid = vol_xp - smooth
 
         z_count = int(vol.shape[0])
@@ -393,7 +397,9 @@ class NX47V106Kernel:
             local_std = float(xp.std(vol_xp[max(0, z - 2):min(z_count, z + 3)]))
 
             slice_fusion = self._slice_fusion_score(vol, z, fusion_score)
-            adaptive_weight = 0.12 + 0.22 * math.tanh(slice_fusion * 2.2) * math.tanh(local_std * 6.0)
+            adaptive_weight_raw = 0.12 + 0.22 * math.tanh(slice_fusion * 2.2) * math.tanh(local_std * 6.0)
+            adaptive_cap = 0.238 + 0.018 * math.tanh((local_std - 0.108) * 18.0)
+            adaptive_weight = min(adaptive_weight_raw, adaptive_cap)
             proj = proj + adaptive_weight
 
             proj_cpu = cp.asnumpy(proj) if self.using_gpu else proj
@@ -405,7 +411,11 @@ class NX47V106Kernel:
             hi = proj > p_hi
             lo = proj > p_lo
             final = (w * xp.logical_and(hi, lo) + (1.0 - w) * xp.logical_or(hi, lo)) > 0.5
-            masks.append(final.astype(xp.uint8) * 255)
+
+            final_cpu = cp.asnumpy(final) if self.using_gpu else np.asarray(final)
+            final_cpu = binary_opening(final_cpu, structure=np.ones((2, 2), dtype=bool))
+            final_cpu = binary_closing(final_cpu, structure=np.ones((2, 2), dtype=bool))
+            masks.append(final_cpu.astype(np.uint8) * 255)
 
             self.log(
                 "SLICE_METRIC",
@@ -417,9 +427,9 @@ class NX47V106Kernel:
                 p_hi=round(p_hi, 6),
             )
 
-        stacked = xp.stack(masks)
+        stacked = np.stack(masks)
         self.plan.update("segment", 100.0, done=True)
-        return cp.asnumpy(stacked) if self.using_gpu else stacked
+        return stacked
 
     def _save_overlay(self, file_stem: str, vol: np.ndarray, mask: np.ndarray) -> None:
         self.plan.update("overlay", 20.0)
@@ -496,22 +506,25 @@ class NX47V106Kernel:
             "log_count": len(self.logs),
             "gpu": self.using_gpu,
         }
-        (self.output_dir / "v106_execution_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
-        (self.output_dir / "v106_execution_logs.json").write_text(json.dumps(self.logs, indent=2), encoding="utf-8")
+        (self.output_dir / "v107_execution_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+        (self.output_dir / "v107_execution_logs.json").write_text(json.dumps(self.logs, indent=2), encoding="utf-8")
         self.plan.update("package", 100.0, done=True)
         self.log("EXEC_COMPLETE", submission=str(self.submission_path))
         return self.submission_path
 
 
-# Backward-compatible class alias (legacy references).
-NX47V96Kernel = NX47V106Kernel
+# Backward-compatible class aliases (legacy references).
+NX47V106Kernel = NX47V107Kernel
+NX47V96Kernel = NX47V107Kernel
 
 
 if __name__ == "__main__":
-    kernel = NX47V106Kernel(
+    kernel = NX47V107Kernel(
         root=Path(os.environ.get("VESUVIUS_ROOT", "/kaggle/input/competitions/vesuvius-challenge-surface-detection")),
         output_dir=Path(os.environ.get("VESUVIUS_OUTPUT", "/kaggle/working")),
-        overlay_stride=int(os.environ.get("V106_OVERLAY_STRIDE", os.environ.get("V96_OVERLAY_STRIDE", "8"))),
+        overlay_stride=int(
+            os.environ.get("V107_OVERLAY_STRIDE", os.environ.get("V106_OVERLAY_STRIDE", os.environ.get("V96_OVERLAY_STRIDE", "8")))
+        ),
     )
     submission = kernel.run()
     print(f"READY: {submission}")
