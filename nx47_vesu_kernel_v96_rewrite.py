@@ -25,6 +25,12 @@ from scipy.ndimage import sobel
 
 import tifffile
 
+try:
+    from PIL import Image, ImageSequence
+except Exception:
+    Image = None
+    ImageSequence = None
+
 
 def install_offline(package_name: str) -> None:
     """Install a package from exact Kaggle offline dependency locations only."""
@@ -118,6 +124,50 @@ def ensure_imagecodecs() -> bool:
         return True
     except Exception:
         return False
+
+
+def read_tiff_lzw_safe(path: Path) -> np.ndarray:
+    """Read TIFF volumes with tifffile, fallback to Pillow when imagecodecs is unavailable."""
+    try:
+        return tifffile.imread(path)
+    except ValueError as exc:
+        if "requires the 'imagecodecs' package" not in str(exc):
+            raise
+
+    if ensure_imagecodecs():
+        return tifffile.imread(path)
+
+    if Image is None or ImageSequence is None:
+        raise RuntimeError(
+            "LZW TIFF read failed and Pillow fallback is unavailable. "
+            "Install imagecodecs or ensure Pillow with TIFF support is present."
+        )
+
+    with Image.open(path) as img:
+        frames = [np.array(frame, dtype=np.float32) for frame in ImageSequence.Iterator(img)]
+    if not frames:
+        raise RuntimeError(f"No frames decoded from TIFF: {path}")
+    return np.stack(frames, axis=0)
+
+
+def write_tiff_lzw_safe(path: Path, arr: np.ndarray) -> None:
+    """Write LZW TIFF using tifffile, fallback to Pillow when codecs are unavailable."""
+    try:
+        if ensure_imagecodecs():
+            tifffile.imwrite(path, arr, compression="LZW")
+            return
+    except Exception:
+        pass
+
+    if Image is None:
+        raise RuntimeError(
+            "LZW TIFF write failed: imagecodecs unavailable and Pillow fallback unavailable."
+        )
+
+    pages = [Image.fromarray(frame.astype(np.uint8)) for frame in arr]
+    if not pages:
+        raise RuntimeError("Cannot write empty TIFF volume")
+    pages[0].save(path, save_all=True, append_images=pages[1:], compression="tiff_lzw")
 
 
 @dataclass
@@ -235,10 +285,10 @@ class NX47V96Kernel:
     def read_volume(self, path: Path) -> np.ndarray:
         self.plan.update("load", 25.0)
         try:
-            vol = tifffile.imread(path).astype(np.float32)
+            vol = read_tiff_lzw_safe(path).astype(np.float32)
         except ValueError as exc:
             if "requires the 'imagecodecs' package" in str(exc) and ensure_imagecodecs():
-                vol = tifffile.imread(path).astype(np.float32)
+                vol = read_tiff_lzw_safe(path).astype(np.float32)
             else:
                 raise
         if vol.ndim != 3:
@@ -391,7 +441,7 @@ class NX47V96Kernel:
                         "imagecodecs is required to write Kaggle-compatible LZW TIFF masks. "
                         "Provide /kaggle/input/datasets/ndarray2000/nx47-dependencies or /kaggle/input/nx47-dependencies."
                     )
-                tifffile.imwrite(out_mask, mask, compression="LZW")
+                write_tiff_lzw_safe(out_mask, mask)
                 zf.write(out_mask, arcname=fpath.name)
                 out_mask.unlink(missing_ok=True)
                 gc.collect()
