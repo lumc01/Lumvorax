@@ -312,13 +312,21 @@ class NX47V96Kernel:
         p95 = float(np.percentile(vol, 95))
         p50 = float(np.percentile(vol, 50))
 
-        hist, _ = np.histogram(vol, bins=64, range=(0.0, 1.0), density=True)
-        entropy = -float(np.sum(hist * np.log(hist + 1e-8)))
+        hist_counts, _ = np.histogram(vol, bins=64, range=(0.0, 1.0), density=False)
+        hist_probs = hist_counts.astype(np.float64)
+        hist_probs /= max(float(hist_probs.sum()), 1.0)
+        entropy = -float(np.sum(hist_probs * np.log(hist_probs + 1e-12)))
 
-        nx47_signal = 0.35 * gradient_energy + 0.30 * intensity_std + 0.20 * (p95 - p50) + 0.15 * entropy
-        atom_neuron_signal = (1.0 + math.tanh((intensity_mean - 0.45) * 4.0)) * (1.0 + math.tanh((intensity_std - 0.12) * 8.0))
-        fusion_score = 0.7 * math.tanh(nx47_signal * 3.0) + 0.3 * math.tanh(atom_neuron_signal)
-        fusion_score = float(np.clip(fusion_score + 0.05, 0.0, 1.0))
+        grad_term = math.tanh(gradient_energy / 2.0)
+        std_term = math.tanh(intensity_std * 8.0)
+        contrast_term = math.tanh((p95 - p50) * 6.0)
+        entropy_term = entropy / math.log(64.0)
+
+        nx47_signal = 0.35 * grad_term + 0.30 * std_term + 0.20 * contrast_term + 0.15 * entropy_term
+        atom_neuron_signal = 0.5 * (1.0 + math.tanh((intensity_mean - 0.35) * 6.0)) + 0.5 * (1.0 + math.tanh((intensity_std - 0.10) * 10.0))
+
+        fusion_raw = 0.7 * nx47_signal + 0.3 * (atom_neuron_signal - 0.5)
+        fusion_score = float(np.clip(0.5 + 0.5 * math.tanh(fusion_raw * 2.0), 0.05, 0.95))
 
         self.plan.update("features", 100.0, done=True)
         return {
@@ -437,11 +445,6 @@ class NX47V96Kernel:
                 self._save_overlay(fpath.stem, vol, mask)
 
                 out_mask = self.tmp_dir / fpath.name
-                if not ensure_imagecodecs():
-                    raise RuntimeError(
-                        "imagecodecs is required to write Kaggle-compatible LZW TIFF masks. "
-                        "Provide /kaggle/input/datasets/ndarray2000/nx47-dependencies or /kaggle/input/nx47-dependencies."
-                    )
                 write_tiff_lzw_safe(out_mask, mask)
                 zf.write(out_mask, arcname=fpath.name)
                 out_mask.unlink(missing_ok=True)
