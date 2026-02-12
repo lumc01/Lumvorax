@@ -167,6 +167,12 @@ def read_tiff_lzw_safe(path: Path) -> np.ndarray:
 
 def write_tiff_lzw_safe(path: Path, arr: np.ndarray) -> None:
     """Write LZW TIFF using tifffile, fallback to Pillow when codecs are unavailable."""
+    arr = np.asarray(arr)
+    if arr.ndim == 2:
+        arr = arr[np.newaxis, ...]
+    if arr.ndim != 3:
+        raise RuntimeError(f"Unsupported TIFF array shape for write: {arr.shape}")
+
     try:
         if ensure_imagecodecs():
             tifffile.imwrite(path, arr, compression="LZW")
