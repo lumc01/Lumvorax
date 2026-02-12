@@ -1,3 +1,9 @@
+# ================================================================
+# 01) NX47 V106 Kernel
+# 02) Kaggle Vesuvius pipeline: discovery -> load -> features -> segment -> overlay -> package
+# 03) Robust offline dependencies + LZW-safe TIFF I/O + slice-wise adaptive fusion
+# ================================================================
+
 import gc
 import importlib
 import json
@@ -218,9 +224,9 @@ class PlanTracker:
         self.output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-class NX47V96Kernel:
+class NX47V106Kernel:
     """
-    V96 pipeline data-driven for Vesuvius test_images format.
+    V106 pipeline data-driven for Vesuvius test_images format.
     - Input format: *.tif volume files in /kaggle/input/competitions/vesuvius-challenge-surface-detection/test_images
     - Output format: submission.zip containing one LZW-compressed TIFF mask per input file with same filename.
     """
@@ -236,7 +242,7 @@ class NX47V96Kernel:
         self.output_dir = output_dir
         self.tmp_dir = output_dir / "tmp_masks"
         self.overlay_dir = output_dir / "overlays"
-        self.roadmap_path = output_dir / "v96_roadmap_realtime.json"
+        self.roadmap_path = output_dir / "v106_roadmap_realtime.json"
         self.submission_path = output_dir / "submission.zip"
         self.overlay_stride = max(1, int(overlay_stride))
 
@@ -490,18 +496,22 @@ class NX47V96Kernel:
             "log_count": len(self.logs),
             "gpu": self.using_gpu,
         }
-        (self.output_dir / "v96_execution_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
-        (self.output_dir / "v96_execution_logs.json").write_text(json.dumps(self.logs, indent=2), encoding="utf-8")
+        (self.output_dir / "v106_execution_metadata.json").write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+        (self.output_dir / "v106_execution_logs.json").write_text(json.dumps(self.logs, indent=2), encoding="utf-8")
         self.plan.update("package", 100.0, done=True)
         self.log("EXEC_COMPLETE", submission=str(self.submission_path))
         return self.submission_path
 
 
+# Backward-compatible class alias (legacy references).
+NX47V96Kernel = NX47V106Kernel
+
+
 if __name__ == "__main__":
-    kernel = NX47V96Kernel(
+    kernel = NX47V106Kernel(
         root=Path(os.environ.get("VESUVIUS_ROOT", "/kaggle/input/competitions/vesuvius-challenge-surface-detection")),
         output_dir=Path(os.environ.get("VESUVIUS_OUTPUT", "/kaggle/working")),
-        overlay_stride=int(os.environ.get("V96_OVERLAY_STRIDE", "8")),
+        overlay_stride=int(os.environ.get("V106_OVERLAY_STRIDE", os.environ.get("V96_OVERLAY_STRIDE", "8"))),
     )
     submission = kernel.run()
     print(f"READY: {submission}")
