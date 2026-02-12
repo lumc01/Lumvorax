@@ -1,5 +1,5 @@
 # ================================================================
-# 01) NX47 V122 Kernel
+# 01) NX47 V123 Kernel
 # 02) Kaggle Vesuvius pipeline: discovery -> load -> features -> segment -> overlay -> package
 # 03) Robust offline dependencies + LZW-safe TIFF I/O + slice-wise adaptive fusion
 # ================================================================
@@ -77,6 +77,7 @@ class V123Config:
     mutation_noise: float = 0.015
     f1_stagnation_window: int = 5
     run_simulation_100: bool = False
+    simulation_export_curve: bool = True
 
 
 @dataclass
@@ -279,6 +280,8 @@ def write_tiff_lzw_safe(path: Path, arr: np.ndarray) -> None:
 class NX47AtomNeuron:
     def __init__(self, n_features: int) -> None:
         self.w = np.zeros(n_features, dtype=np.float64)
+        self.alpha = np.zeros(n_features, dtype=np.float64)
+        self.beta = np.zeros(n_features, dtype=np.float64)
         self.b = 0.0
 
     @staticmethod
@@ -286,27 +289,37 @@ class NX47AtomNeuron:
         z = np.clip(z, -30, 30)
         return 1.0 / (1.0 + np.exp(-z))
 
-    def predict_proba(self, x: np.ndarray) -> np.ndarray:
-        return self._sigmoid(x @ self.w + self.b)
+    def predict_proba(self, x: np.ndarray, grad_x: np.ndarray | None = None) -> np.ndarray:
+        gx = grad_x if grad_x is not None else np.gradient(x, axis=0)
+        z = x @ self.w + (x * x) @ self.alpha + gx @ self.beta + self.b
+        return self._sigmoid(z)
 
     def fit_prox(self, x: np.ndarray, y: np.ndarray, lr: float, max_iter: int, l1: float, l2: float) -> Dict[str, float]:
         n = max(1, x.shape[0])
-        active_start = int(np.sum(np.abs(self.w) > 1e-8))
+        gx = np.gradient(x, axis=0)
+        active_start = int(np.sum((np.abs(self.w) + np.abs(self.alpha) + np.abs(self.beta)) > 1e-8))
         active_mid = active_start
         for it in range(max_iter):
-            p = self.predict_proba(x)
+            p = self.predict_proba(x, gx)
             err = p - y
             grad_w = (x.T @ err) / n + l2 * self.w
+            grad_alpha = ((x * x).T @ err) / n + l2 * self.alpha
+            grad_beta = (gx.T @ err) / n + l2 * self.beta
             grad_b = float(np.mean(err))
+
             w_temp = self.w - lr * grad_w
+            a_temp = self.alpha - lr * grad_alpha
+            b_temp = self.beta - lr * grad_beta
             self.w = np.sign(w_temp) * np.maximum(np.abs(w_temp) - lr * l1, 0.0)
+            self.alpha = np.sign(a_temp) * np.maximum(np.abs(a_temp) - lr * l1, 0.0)
+            self.beta = np.sign(b_temp) * np.maximum(np.abs(b_temp) - lr * l1, 0.0)
             self.b -= lr * grad_b
             if it == max_iter // 2:
-                active_mid = int(np.sum(np.abs(self.w) > 1e-8))
-        p = self.predict_proba(x)
+                active_mid = int(np.sum((np.abs(self.w) + np.abs(self.alpha) + np.abs(self.beta)) > 1e-8))
+        p = self.predict_proba(x, gx)
         eps = 1e-9
         ce = -float(np.mean(y * np.log(p + eps) + (1.0 - y) * np.log(1.0 - p + eps)))
-        active_end = int(np.sum(np.abs(self.w) > 1e-8))
+        active_end = int(np.sum((np.abs(self.w) + np.abs(self.alpha) + np.abs(self.beta)) > 1e-8))
         return {
             "cross_entropy": ce,
             "non_zero_weights": active_end,
@@ -363,6 +376,50 @@ def choose_adaptive_ratio(prob: np.ndarray, ratios: Tuple[float, ...]) -> Tuple[
             best_ratio = float(r)
             best_mask = cand
     return best_mask.astype(bool), {'selected_ratio': best_ratio, 'ratio_scan': details}
+
+
+def choose_slicewise_adaptive_ratio(volume: np.ndarray, prob: np.ndarray, ratios: Tuple[float, ...]) -> Dict[str, Any]:
+    # ratio(x,y,z) proxy: each z slice votes a ratio according to entropy/gradient complexity
+    ent = np.log1p(np.maximum(volume.var(axis=(1, 2)), 1e-12))
+    gx = np.mean(np.abs(np.gradient(volume, axis=1)), axis=(1, 2))
+    gy = np.mean(np.abs(np.gradient(volume, axis=2)), axis=(1, 2))
+    complexity = _zscore(ent + gx + gy)
+    ratios_arr = np.array(ratios, dtype=np.float64)
+    bins = np.linspace(complexity.min() - 1e-9, complexity.max() + 1e-9, len(ratios_arr) + 1)
+    assigned = []
+    for c in complexity:
+        idx = int(np.clip(np.digitize(c, bins) - 1, 0, len(ratios_arr) - 1))
+        assigned.append(float(ratios_arr[idx]))
+    ratio_global = float(np.mean(assigned))
+    ratio_global = float(ratios_arr[np.argmin(np.abs(ratios_arr - ratio_global))])
+    mask_global = calibrate_target_ratio(prob, ratio_global)
+    return {
+        'slice_ratio_profile': assigned,
+        'slice_ratio_mean': float(np.mean(assigned)),
+        'slice_ratio_std': float(np.std(assigned)),
+        'ratio_global_selected': ratio_global,
+        'mask_global': mask_global,
+    }
+
+
+def dynamic_regularization_lambda(mask: np.ndarray, features: np.ndarray) -> float:
+    var_mask = float(np.var(mask.astype(np.float32)))
+    feat_entropy = float(np.mean(np.log1p(np.maximum(np.var(features, axis=(1, 2)), 1e-12))))
+    return float(var_mask / (abs(feat_entropy) + 1e-8))
+
+
+def simulate_f1_vs_ratio_curve() -> Dict[str, Any]:
+    ratios = np.linspace(0.01, 0.25, 50)
+    precision = np.clip(1.0 - (ratios * 2.0), 0.01, 1.0)
+    recall = np.clip(ratios * 4.0, 0.01, 1.0)
+    f1_scores = 2.0 * precision * recall / (precision + recall + 1e-8)
+    best_idx = int(np.argmax(f1_scores))
+    return {
+        'ratios': ratios.tolist(),
+        'f1_scores': f1_scores.tolist(),
+        'best_ratio': float(ratios[best_idx]),
+        'best_f1': float(f1_scores[best_idx]),
+    }
 
 
 def _zscore(arr: np.ndarray) -> np.ndarray:
@@ -455,16 +512,18 @@ def train_nx47_autonomous(features: np.ndarray, cfg: V123Config, rng: np.random.
             for l2 in cfg.l2_candidates:
                 m = NX47AtomNeuron(n_features=x.shape[1])
                 tr = m.fit_prox(x_tr, y_tr, lr=adaptive_lr, max_iter=cfg.max_iter, l1=float(l1), l2=float(l2))
-                p = m.predict_proba(x_va)
+                grad_x_va = np.gradient(x_va, axis=0)
+                p = m.predict_proba(x_va, grad_x_va)
                 ce = -float(np.mean(y_va * np.log(p + 1e-9) + (1.0 - y_va) * np.log(1.0 - p + 1e-9)))
                 proxy_f1 = compute_proxy_f1(p, y_va)
-                sparsity = float(np.mean(np.abs(m.w) < 1e-8))
-                objective = ce + 0.02 * (1.0 - sparsity) - 0.05 * proxy_f1
+                sparsity = float(np.mean((np.abs(m.w) + np.abs(m.alpha) + np.abs(m.beta)) < 1e-8))
+                reg_lambda = dynamic_regularization_lambda((p > 0.5).astype(np.uint8), features)
+                objective = ce + 0.02 * (1.0 - sparsity) - 0.05 * proxy_f1 + 0.005 * reg_lambda
                 rec = {"neuron_id": neuron_id, "l1": float(l1), "l2": float(l2), "val_ce": ce, "proxy_f1": proxy_f1, "sparsity": sparsity, "objective": objective, **tr}
                 leaderboard.append(rec)
                 if best is None or objective < best["objective"]:
                     best = rec
-                    best_state = (m.w.copy(), float(m.b))
+                    best_state = (m.w.copy(), float(m.b), m.alpha.copy(), m.beta.copy())
 
     mutation_applied = False
     pruning_applied = False
@@ -475,19 +534,23 @@ def train_nx47_autonomous(features: np.ndarray, cfg: V123Config, rng: np.random.
                 best_state = (
                     best_state[0] + rng.normal(0.0, cfg.mutation_noise, size=best_state[0].shape),
                     float(best_state[1]),
+                    best_state[2] + rng.normal(0.0, cfg.mutation_noise, size=best_state[2].shape),
+                    best_state[3] + rng.normal(0.0, cfg.mutation_noise, size=best_state[3].shape),
                 )
                 mutation_applied = True
                 memory.mutation_events += 1
         q = float(np.quantile(np.abs(best_state[0]), cfg.pruning_quantile))
         pruned_w = np.where(np.abs(best_state[0]) < q, 0.0, best_state[0])
-        if np.any(pruned_w != best_state[0]):
+        pruned_a = np.where(np.abs(best_state[2]) < q, 0.0, best_state[2])
+        pruned_beta = np.where(np.abs(best_state[3]) < q, 0.0, best_state[3])
+        if np.any(pruned_w != best_state[0]) or np.any(pruned_a != best_state[2]) or np.any(pruned_beta != best_state[3]):
             pruning_applied = True
             memory.pruning_events += 1
-        best_state = (pruned_w, best_state[1])
+        best_state = (pruned_w, best_state[1], pruned_a, pruned_beta)
 
     model = NX47AtomNeuron(n_features=x.shape[1])
     if best_state is not None:
-        model.w, model.b = best_state
+        model.w, model.b, model.alpha, model.beta = best_state
     return model, {
         "selected_hyperparams": best,
         "leaderboard_top5": sorted(leaderboard, key=lambda d: d['objective'])[:5],
@@ -597,6 +660,8 @@ class NX47V123Kernel:
             'meta_neuron_candidates': 0,
             'mutation_events': 0,
             'pruning_events': 0,
+            'f1_ratio_curve_best_ratio': 0.0,
+            'f1_ratio_curve_best_f1': 0.0,
         }
 
         bootstrap_dependencies_fail_fast()
@@ -690,11 +755,14 @@ class NX47V123Kernel:
         if self.cfg.ultra_step_log:
             self.log('STEP', name='segment_start')
         x_full = selected.reshape(selected.shape[0], -1).T.astype(np.float64)
-        prob = model.predict_proba(x_full).reshape(selected.shape[1:]).astype(np.float32)
+        grad_x_full = np.gradient(x_full, axis=0)
+        prob = model.predict_proba(x_full, grad_x_full).reshape(selected.shape[1:]).astype(np.float32)
         self._log_array_ultra('probability_map', prob)
 
         hysteresis_mask = hysteresis_topology_3d(prob, self.cfg)
-        calibrated_mask, ratio_info = choose_adaptive_ratio(prob, self.cfg.ratio_candidates)
+        calibrated_mask_scan, ratio_info = choose_adaptive_ratio(prob, self.cfg.ratio_candidates)
+        slice_ratio_info = choose_slicewise_adaptive_ratio(vol, prob, self.cfg.ratio_candidates)
+        calibrated_mask = np.logical_or(calibrated_mask_scan, slice_ratio_info['mask_global'])
         final = (hysteresis_mask | calibrated_mask).astype(np.uint8)
 
         self._log_array_ultra('mask_hysteresis', hysteresis_mask.astype(np.uint8))
@@ -730,6 +798,10 @@ class NX47V123Kernel:
             'slices_processed': int(vol.shape[0]),
             'calc_ops_estimated': ops_est,
             'ratio_adaptive_selected': float(ratio_info['selected_ratio']),
+            'ratio_slice_global_selected': float(slice_ratio_info['ratio_global_selected']),
+            'ratio_slice_profile': slice_ratio_info['slice_ratio_profile'],
+            'ratio_slice_mean': slice_ratio_info['slice_ratio_mean'],
+            'ratio_slice_std': slice_ratio_info['slice_ratio_std'],
             'ratio_scan': ratio_info['ratio_scan'],
             'meta_neuron_candidates': int(self.cfg.meta_neurons * len(self.cfg.l1_candidates) * len(self.cfg.l2_candidates)),
             'mutation_applied': bool(train_info.get('mutation_applied', False)),
@@ -738,7 +810,7 @@ class NX47V123Kernel:
             'active_neurons_mid': int(train_info['selected_hyperparams'].get('active_neurons_mid', 0)),
             'active_neurons_end': int(train_info['selected_hyperparams'].get('active_neurons_end', 0)),
         }
-        self.evolution.update(train_info['selected_hyperparams'].get('proxy_f1', 0.0), ratio_info['selected_ratio'])
+        self.evolution.update(train_info['selected_hyperparams'].get('proxy_f1', 0.0), slice_ratio_info['ratio_global_selected'])
         return final, metrics
 
     def run_simulation_100(self) -> Dict[str, Any]:
@@ -807,6 +879,9 @@ class NX47V123Kernel:
         self.global_stats['calc_per_sec_global'] = float(self.global_stats['calc_ops_estimated'] / total_dt)
         self.global_stats['elapsed_total_s'] = float(total_dt)
         self.global_stats['ratio_selected_mean'] = float(np.mean(self.evolution.ratio_history)) if self.evolution.ratio_history else 0.0
+        f1_curve = simulate_f1_vs_ratio_curve()
+        self.global_stats['f1_ratio_curve_best_ratio'] = float(f1_curve['best_ratio'])
+        self.global_stats['f1_ratio_curve_best_f1'] = float(f1_curve['best_f1'])
 
         sim = self.run_simulation_100() if self.cfg.run_simulation_100 else None
 
@@ -823,6 +898,7 @@ class NX47V123Kernel:
             'global_stats': self.global_stats,
             'evolution_memory': asdict(self.evolution),
             'simulation_100': sim,
+            'f1_ratio_curve': f1_curve,
             'config': asdict(self.cfg),
         }
         self.metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
@@ -846,6 +922,7 @@ if __name__ == '__main__':
         ultra_bit_trace_limit=int(os.environ.get('V122_ULTRA_BIT_TRACE_LIMIT', '64')),
         meta_neurons=int(os.environ.get('V123_META_NEURONS', '3')),
         run_simulation_100=os.environ.get('V123_RUN_SIMULATION_100', '0') == '1',
+        simulation_export_curve=os.environ.get('V123_SIMULATION_EXPORT_CURVE', '1') == '1',
     )
     kernel = NX47V123Kernel(
         root=Path(os.environ.get('VESUVIUS_ROOT', '/kaggle/input/competitions/vesuvius-challenge-surface-detection')),
