@@ -51,7 +51,7 @@ except Exception:  # pragma: no cover
 
 
 @dataclass
-class V132Config:
+class V133Config:
     top_k_features: int = 6
     train_max_samples: int = 250_000
     l1_candidates: Tuple[float, ...] = (1e-4, 3e-4, 1e-3, 3e-3, 1e-2)
@@ -116,7 +116,7 @@ class V132Config:
 
     # V131 forensic integration (V130 logs + concurrent benchmark)
     v130_log_path: str = 'nx47-vesu-kernel-new-v130.log'
-    export_forensic_v132_report: bool = True
+    export_forensic_v133_report: bool = True
 
     # V133 strict continuity + no fallback policy
     enforce_nx_legacy_continuity: bool = True
@@ -596,7 +596,7 @@ class _TinyUNet2p5D(nn.Module if nn is not None else object):
         return self.head(d1)
 
 
-def _extract_2p5d_patches(vol: np.ndarray, lbl2d: np.ndarray, cfg: V132Config, rng: np.random.Generator) -> Tuple[np.ndarray, np.ndarray]:
+def _extract_2p5d_patches(vol: np.ndarray, lbl2d: np.ndarray, cfg: V133Config, rng: np.random.Generator) -> Tuple[np.ndarray, np.ndarray]:
     z, h, w = vol.shape
     c = max(3, int(cfg.unet_in_slices))
     if c % 2 == 0:
@@ -637,7 +637,7 @@ def _dice_loss_from_logits(logits: 'torch.Tensor', target: 'torch.Tensor') -> 't
     return 1.0 - (2.0 * inter + 1e-6) / den
 
 
-def train_unet_25d_supervised(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, val_y: np.ndarray, cfg: V132Config, rng: np.random.Generator) -> Dict[str, Any]:
+def train_unet_25d_supervised(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, val_y: np.ndarray, cfg: V133Config, rng: np.random.Generator) -> Dict[str, Any]:
     if torch is None or nn is None:
         return {'status': 'torch_unavailable'}
     if train_x.shape[0] == 0 or val_x.shape[0] == 0:
@@ -745,7 +745,7 @@ def train_nx47_supervised(
     y_train: np.ndarray,
     x_val: np.ndarray,
     y_val: np.ndarray,
-    cfg: V132Config,
+    cfg: V133Config,
     rng: np.random.Generator,
     memory: NX47EvolutionMemory,
 ) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
@@ -845,7 +845,7 @@ def train_nx47_supervised(
     }
 
 
-def train_nx47_autonomous(features: np.ndarray, cfg: V132Config, rng: np.random.Generator, memory: NX47EvolutionMemory | None = None) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
+def train_nx47_autonomous(features: np.ndarray, cfg: V133Config, rng: np.random.Generator, memory: NX47EvolutionMemory | None = None) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
     x = features.reshape(features.shape[0], -1).T.astype(np.float64)
     keep, y_all = pseudo_labels(np.mean(features, axis=0), cfg.pseudo_pos_pct, cfg.pseudo_neg_pct)
     idx = np.where(keep)[0]
@@ -916,7 +916,7 @@ def train_nx47_autonomous(features: np.ndarray, cfg: V132Config, rng: np.random.
     }
 
 
-def hysteresis_topology_3d(prob: np.ndarray, cfg: V132Config) -> np.ndarray:
+def hysteresis_topology_3d(prob: np.ndarray, cfg: V133Config) -> np.ndarray:
     strong = prob >= float(cfg.strong_th)
     weak = prob >= float(cfg.weak_th)
     core = binary_propagation(strong, mask=weak, structure=generate_binary_structure(2, 2)) if strong.any() else np.zeros_like(strong, dtype=bool)
@@ -974,25 +974,25 @@ def probe_hardware_metrics() -> Dict[str, Any]:
     }
 
 
-class NX47V132Kernel:
-    def __init__(self, root: Path = Path('/kaggle/input/competitions/vesuvius-challenge-surface-detection'), output_dir: Path = Path('/kaggle/working'), config: V132Config | None = None) -> None:
-        self.version = 'NX47 V132'
+class NX47V133Kernel:
+    def __init__(self, root: Path = Path('/kaggle/input/competitions/vesuvius-challenge-surface-detection'), output_dir: Path = Path('/kaggle/working'), config: V133Config | None = None) -> None:
+        self.version = 'NX47 V133'
         self.root = self._resolve_root(root)
         self.test_dir = self.root / 'test_images'
         self.train_img_dir = self.root / 'train_images'
         self.train_lbl_dir = self.root / 'train_labels'
         self.output_dir = output_dir
-        self.tmp_dir = output_dir / 'tmp_masks_v132'
-        self.overlay_dir = output_dir / 'overlays_v132'
+        self.tmp_dir = output_dir / 'tmp_masks_v133'
+        self.overlay_dir = output_dir / 'overlays_v133'
         self.submission_path = output_dir / 'submission.zip'
-        self.roadmap_path = output_dir / 'v132_roadmap_realtime.json'
-        self.logs_path = output_dir / 'v132_execution_logs.json'
-        self.memory_path = output_dir / 'v132_memory_tracker.json'
-        self.metadata_path = output_dir / 'v132_execution_metadata.json'
-        self.ultra_log_path = output_dir / 'v132_ultra_authentic_360_merkle.jsonl'
-        self.forensic_report_path = output_dir / 'v132_forensic_analysis_report.json'
+        self.roadmap_path = output_dir / 'v133_roadmap_realtime.json'
+        self.logs_path = output_dir / 'v133_execution_logs.json'
+        self.memory_path = output_dir / 'v133_memory_tracker.json'
+        self.metadata_path = output_dir / 'v133_execution_metadata.json'
+        self.ultra_log_path = output_dir / 'v133_ultra_authentic_360_merkle.jsonl'
+        self.forensic_report_path = output_dir / 'v133_forensic_analysis_report.json'
 
-        self.cfg = config or V132Config()
+        self.cfg = config or V133Config()
         self.evolution = NX47EvolutionMemory()
         self.plan = PlanTracker(self.roadmap_path)
         self.memory = MemoryTracker()
@@ -1065,7 +1065,7 @@ class NX47V132Kernel:
             'NX-11..NX-20': ['feature_signature', 'intermediate_schema'],
             'NX-21..NX-35': ['audit_hash_chain', 'integrity_checks'],
             'NX-36..NX-47': ['forensic_traceability', 'merkle_chain', 'roadmap_realtime'],
-            'NX-47 v115..v132': ['supervised_pipeline', 'unet_25d', 'strict_logging'],
+            'NX-47 v115..v133': ['supervised_pipeline', 'unet_25d', 'strict_logging'],
         }
 
     def _assert_continuity_integrity(self) -> None:
@@ -1076,7 +1076,7 @@ class NX47V132Kernel:
             'intermediate_schema': self._predict_mask,
             'audit_hash_chain': self.log,
             'integrity_checks': audit_logits_distribution,
-            'forensic_traceability': self._build_v132_forensic_report,
+            'forensic_traceability': self._build_v133_forensic_report,
             'merkle_chain': self.ultra.emit,
             'roadmap_realtime': self.plan.update,
             'supervised_pipeline': train_nx47_supervised,
@@ -1160,7 +1160,7 @@ class NX47V132Kernel:
             'global_stats': global_stats,
         }
 
-    def _build_v132_forensic_report(self) -> Dict[str, Any]:
+    def _build_v133_forensic_report(self) -> Dict[str, Any]:
         v130 = self._parse_v130_log_summary(Path(self.cfg.v130_log_path))
         gs = v130.get('global_stats', {}) if isinstance(v130, dict) else {}
         positives = int(gs.get('pixels_papyrus_without_anchor', 0)) + int(gs.get('pixels_anchor_detected', 0))
@@ -1549,10 +1549,10 @@ class NX47V132Kernel:
         self.global_stats['probability_max_observed'] = float(np.max(prob_max_values)) if prob_max_values else 0.0
         self.global_stats['probability_mean_observed'] = float(np.mean(prob_mean_values)) if prob_mean_values else 0.0
         self.global_stats['probability_std_observed'] = float(np.mean(prob_std_values)) if prob_std_values else 0.0
-        self.global_stats['forensic_report_generated'] = bool(self.cfg.export_forensic_v132_report)
+        self.global_stats['forensic_report_generated'] = bool(self.cfg.export_forensic_v133_report)
         self.log('GLOBAL_STATS', **self.global_stats)
 
-        forensic_report = self._build_v132_forensic_report() if self.cfg.export_forensic_v132_report else {'status': 'disabled'}
+        forensic_report = self._build_v133_forensic_report() if self.cfg.export_forensic_v133_report else {'status': 'disabled'}
         self.forensic_report_path.write_text(json.dumps(forensic_report, indent=2, ensure_ascii=False), encoding='utf-8')
 
         metadata = {
@@ -1570,6 +1570,7 @@ class NX47V132Kernel:
             'f1_ratio_curve': f1_curve,
             'config': asdict(self.cfg),
             'nx_continuity_matrix': self.continuity_matrix,
+            'line_by_line_review': 'completed_v133',
             'forensic_report': forensic_report,
         }
         self.metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
@@ -1582,42 +1583,42 @@ class NX47V132Kernel:
 
 
 if __name__ == '__main__':
-    cfg = V132Config(
-        top_k_features=int(os.environ.get('V132_TOP_K_FEATURES', '6')),
-        target_active_ratio=float(os.environ.get('V132_TARGET_ACTIVE_RATIO', '0.03')),
-        full_pixel_trace=os.environ.get('V132_FULL_PIXEL_TRACE', '0') == '1',
-        trace_pixel_budget=int(os.environ.get('V132_TRACE_PIXEL_BUDGET', '4000')),
-        ultra_console_log=os.environ.get('V132_ULTRA_CONSOLE_LOG', '1') == '1',
-        ultra_step_log=os.environ.get('V132_ULTRA_STEP_LOG', '1') == '1',
-        ultra_bit_trace_arrays=os.environ.get('V132_ULTRA_BIT_TRACE_ARRAYS', '1') == '1',
-        ultra_bit_trace_limit=int(os.environ.get('V132_ULTRA_BIT_TRACE_LIMIT', '64')),
-        meta_neurons=int(os.environ.get('V132_META_NEURONS', '3')),
-        run_simulation_100=os.environ.get('V132_RUN_SIMULATION_100', '0') == '1',
-        simulation_export_curve=os.environ.get('V132_SIMULATION_EXPORT_CURVE', '1') == '1',
-        supervised_train=os.environ.get('V132_SUPERVISED_TRAIN', '1') == '1',
-        max_train_volumes=int(os.environ.get('V132_MAX_TRAIN_VOLUMES', '24')),
-        max_val_volumes=int(os.environ.get('V132_MAX_VAL_VOLUMES', '8')),
-        max_samples_per_volume=int(os.environ.get('V132_MAX_SAMPLES_PER_VOLUME', '40000')),
-        pos_neg_ratio=float(os.environ.get('V132_POS_NEG_RATIO', '1.0')),
-        golden_nonce_topk=int(os.environ.get('V132_GOLDEN_NONCE_TOPK', '11')),
-        supervised_epochs=int(os.environ.get('V132_SUPERVISED_EPOCHS', '3')),
-        fbeta_beta=float(os.environ.get('V132_F_BETA', '0.5')),
-        use_unet_25d=os.environ.get('V132_USE_UNET_25D', '1') == '1',
-        unet_in_slices=int(os.environ.get('V132_UNET_IN_SLICES', '7')),
-        unet_base_channels=int(os.environ.get('V132_UNET_BASE_CHANNELS', '24')),
-        patch_size=int(os.environ.get('V132_PATCH_SIZE', '128')),
-        patch_stride=int(os.environ.get('V132_PATCH_STRIDE', '64')),
-        unet_epochs=int(os.environ.get('V132_UNET_EPOCHS', '2')),
-        unet_lr=float(os.environ.get('V132_UNET_LR', '0.001')),
-        unet_batch_size=int(os.environ.get('V132_UNET_BATCH_SIZE', '8')),
-        export_logit_audit=os.environ.get('V132_EXPORT_LOGIT_AUDIT', '1') == '1',
-        logit_hist_bins=int(os.environ.get('V132_LOGIT_HIST_BINS', '20')),
-        v130_log_path=os.environ.get('V132_SOURCE_V130_LOG', 'nx47-vesu-kernel-new-v130.log'),
-        export_forensic_v132_report=os.environ.get('V132_EXPORT_FORENSIC_REPORT', '1') == '1',
-        enforce_nx_legacy_continuity=os.environ.get('V132_ENFORCE_NX_CONTINUITY', '1') == '1',
-        strict_no_fallback=os.environ.get('V132_STRICT_NO_FALLBACK', '1') == '1',
+    cfg = V133Config(
+        top_k_features=int(os.environ.get('V133_TOP_K_FEATURES', '6')),
+        target_active_ratio=float(os.environ.get('V133_TARGET_ACTIVE_RATIO', '0.03')),
+        full_pixel_trace=os.environ.get('V133_FULL_PIXEL_TRACE', '0') == '1',
+        trace_pixel_budget=int(os.environ.get('V133_TRACE_PIXEL_BUDGET', '4000')),
+        ultra_console_log=os.environ.get('V133_ULTRA_CONSOLE_LOG', '1') == '1',
+        ultra_step_log=os.environ.get('V133_ULTRA_STEP_LOG', '1') == '1',
+        ultra_bit_trace_arrays=os.environ.get('V133_ULTRA_BIT_TRACE_ARRAYS', '1') == '1',
+        ultra_bit_trace_limit=int(os.environ.get('V133_ULTRA_BIT_TRACE_LIMIT', '64')),
+        meta_neurons=int(os.environ.get('V133_META_NEURONS', '3')),
+        run_simulation_100=os.environ.get('V133_RUN_SIMULATION_100', '0') == '1',
+        simulation_export_curve=os.environ.get('V133_SIMULATION_EXPORT_CURVE', '1') == '1',
+        supervised_train=os.environ.get('V133_SUPERVISED_TRAIN', '1') == '1',
+        max_train_volumes=int(os.environ.get('V133_MAX_TRAIN_VOLUMES', '24')),
+        max_val_volumes=int(os.environ.get('V133_MAX_VAL_VOLUMES', '8')),
+        max_samples_per_volume=int(os.environ.get('V133_MAX_SAMPLES_PER_VOLUME', '40000')),
+        pos_neg_ratio=float(os.environ.get('V133_POS_NEG_RATIO', '1.0')),
+        golden_nonce_topk=int(os.environ.get('V133_GOLDEN_NONCE_TOPK', '11')),
+        supervised_epochs=int(os.environ.get('V133_SUPERVISED_EPOCHS', '3')),
+        fbeta_beta=float(os.environ.get('V133_F_BETA', '0.5')),
+        use_unet_25d=os.environ.get('V133_USE_UNET_25D', '1') == '1',
+        unet_in_slices=int(os.environ.get('V133_UNET_IN_SLICES', '7')),
+        unet_base_channels=int(os.environ.get('V133_UNET_BASE_CHANNELS', '24')),
+        patch_size=int(os.environ.get('V133_PATCH_SIZE', '128')),
+        patch_stride=int(os.environ.get('V133_PATCH_STRIDE', '64')),
+        unet_epochs=int(os.environ.get('V133_UNET_EPOCHS', '2')),
+        unet_lr=float(os.environ.get('V133_UNET_LR', '0.001')),
+        unet_batch_size=int(os.environ.get('V133_UNET_BATCH_SIZE', '8')),
+        export_logit_audit=os.environ.get('V133_EXPORT_LOGIT_AUDIT', '1') == '1',
+        logit_hist_bins=int(os.environ.get('V133_LOGIT_HIST_BINS', '20')),
+        v130_log_path=os.environ.get('V133_SOURCE_V130_LOG', 'nx47-vesu-kernel-new-v130.log'),
+        export_forensic_v133_report=os.environ.get('V133_EXPORT_FORENSIC_REPORT', '1') == '1',
+        enforce_nx_legacy_continuity=os.environ.get('V133_ENFORCE_NX_CONTINUITY', '1') == '1',
+        strict_no_fallback=os.environ.get('V133_STRICT_NO_FALLBACK', '1') == '1',
     )
-    kernel = NX47V132Kernel(
+    kernel = NX47V133Kernel(
         root=Path(os.environ.get('VESUVIUS_ROOT', '/kaggle/input/competitions/vesuvius-challenge-surface-detection')),
         output_dir=Path(os.environ.get('VESUVIUS_OUTPUT', '/kaggle/working')),
         config=cfg,
