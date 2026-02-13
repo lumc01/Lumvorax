@@ -1025,9 +1025,6 @@ class NX47V131Kernel:
             'unet_25d_status': 'n/a',
             'unet_25d_best_fbeta': 0.0,
             'forensic_report_generated': False,
-            'probability_max_observed': 0.0,
-            'probability_mean_observed': 0.0,
-            'probability_std_observed': 0.0,
         }
 
         bootstrap_dependencies_fail_fast()
@@ -1105,36 +1102,20 @@ class NX47V131Kernel:
         text = log_path.read_text(encoding='utf-8', errors='ignore')
         lines = [ln for ln in text.splitlines() if ln.strip()]
         global_stats = {}
-        event_counts: Dict[str, int] = {}
-        file_done = {}
-        for line in lines:
-            start = line.find('{')
-            if start < 0:
-                continue
-            chunk = line[start:]
-            if '"event"' not in chunk:
-                continue
-            try:
-                payload = json.loads(chunk)
-            except Exception:
-                continue
-            ev = str(payload.get('event', ''))
-            event_counts[ev] = event_counts.get(ev, 0) + 1
-            if ev == 'FILE_DONE':
-                file_done = {
-                    'file': payload.get('file'),
-                    'elapsed_s': float(payload.get('elapsed_s', 0.0)),
-                    'calc_per_sec': float(payload.get('calc_per_sec', 0.0)),
-                }
-            if ev == 'GLOBAL_STATS':
-                global_stats = payload
+        for line in lines[::-1]:
+            if '"event": "GLOBAL_STATS"' in line:
+                start = line.find('{')
+                if start >= 0:
+                    try:
+                        global_stats = json.loads(line[start:])
+                    except Exception:
+                        global_stats = {}
+                break
         return {
             'status': 'ok',
             'path': str(log_path),
             'line_count': len(lines),
             'has_exec_complete': any('"event": "EXEC_COMPLETE"' in ln for ln in lines),
-            'event_counts': event_counts,
-            'file_done': file_done,
             'global_stats': global_stats,
         }
 
@@ -1175,12 +1156,6 @@ class NX47V131Kernel:
                 "Préparer base CV 5-fold (pilotage par variables d'environnement)",
                 'Préparer extension ensemble multi-backbone (slot unet_25d déjà maintenu)',
                 'Conserver compatibilité Kaggle submission.zip',
-            ],
-            'expert_questions_open': [
-                'Pourquoi val_f1_mean_supervised=0.0 et val_iou_mean_supervised=0.0 ?',
-                'Pourquoi pixels_anchor_detected=0 sur ce run ?',
-                'Pourquoi mutation_applied reste faux sur ce volume ?',
-                'Pourquoi un seul fichier test traité (dataset test actuel) ?',
             ],
         }
 
@@ -1445,9 +1420,6 @@ class NX47V131Kernel:
         sup_f1_values: List[float] = []
         sup_iou_values: List[float] = []
         sup_th_values: List[float] = []
-        prob_max_values: List[float] = []
-        prob_mean_values: List[float] = []
-        prob_std_values: List[float] = []
 
         with zipfile.ZipFile(self.submission_path, 'w', zipfile.ZIP_STORED) as zf:
             for i, fpath in enumerate(files, start=1):
@@ -1477,11 +1449,6 @@ class NX47V131Kernel:
                 self.global_stats['meta_neuron_candidates'] += m['meta_neuron_candidates']
                 self.global_stats['mutation_events'] += int(m['mutation_applied'])
                 self.global_stats['pruning_events'] += int(m['pruning_applied'])
-                pa = m.get('probability_audit', {})
-                if isinstance(pa, dict):
-                    prob_max_values.append(float(pa.get('max', 0.0)))
-                    prob_mean_values.append(float(pa.get('mean', 0.0)))
-                    prob_std_values.append(float(pa.get('std', 0.0)))
                 if m.get('train_mode') == 'supervised':
                     self.global_stats['files_supervised_mode'] += 1
                     shp = m.get('train_info', {}).get('selected_hyperparams', {})
@@ -1524,14 +1491,11 @@ class NX47V131Kernel:
 
         sim = self.run_simulation_100() if self.cfg.run_simulation_100 else None
 
-        self.global_stats['probability_max_observed'] = float(np.max(prob_max_values)) if prob_max_values else 0.0
-        self.global_stats['probability_mean_observed'] = float(np.mean(prob_mean_values)) if prob_mean_values else 0.0
-        self.global_stats['probability_std_observed'] = float(np.mean(prob_std_values)) if prob_std_values else 0.0
-        self.global_stats['forensic_report_generated'] = bool(self.cfg.export_forensic_v131_report)
         self.log('GLOBAL_STATS', **self.global_stats)
 
         forensic_report = self._build_v131_forensic_report() if self.cfg.export_forensic_v131_report else {'status': 'disabled'}
         self.forensic_report_path.write_text(json.dumps(forensic_report, indent=2, ensure_ascii=False), encoding='utf-8')
+        self.global_stats['forensic_report_generated'] = bool(self.cfg.export_forensic_v131_report)
 
         metadata = {
             'version': self.version,
