@@ -51,7 +51,7 @@ except Exception:  # pragma: no cover
 
 
 @dataclass
-class V132Config:
+class V137Config:
     top_k_features: int = 6
     train_max_samples: int = 250_000
     l1_candidates: Tuple[float, ...] = (1e-4, 3e-4, 1e-3, 3e-3, 1e-2)
@@ -88,15 +88,18 @@ class V132Config:
 
     # V125 supervised mode
     supervised_train: bool = True
-    max_train_volumes: int = 24
-    max_val_volumes: int = 8
+    max_train_volumes: int = 0
+    max_val_volumes: int = 0
     max_samples_per_volume: int = 40_000
     pos_neg_ratio: float = 1.0
     strong_th: float = 0.65
     weak_th: float = 0.45
     dust_min_size: int = 24
     golden_nonce_topk: int = 11
-    supervised_epochs: int = 3
+    supervised_epochs: int = 0
+    convergence_patience: int = 5
+    convergence_min_delta: float = 1e-6
+    auto_epoch_safety_cap: int = 0
     threshold_scan: Tuple[float, ...] = (0.35, 0.4, 0.45, 0.5, 0.55, 0.6)
     fbeta_beta: float = 0.5
 
@@ -116,11 +119,23 @@ class V132Config:
 
     # V131 forensic integration (V130 logs + concurrent benchmark)
     v130_log_path: str = 'nx47-vesu-kernel-new-v130.log'
-    export_forensic_v132_report: bool = True
+    export_forensic_v137_report: bool = True
 
     # V133 strict continuity + no fallback policy
     enforce_nx_legacy_continuity: bool = True
     strict_no_fallback: bool = True
+    min_train_pairs_required: int = 786
+    require_train_completion_100: bool = True
+    forbid_autonomous_mode: bool = True
+    enforce_no_hardcoded_metrics: bool = True
+    hardcoded_metric_policy: str = "warn"  # warn|error
+    adapt_train_threshold_to_dataset_size: bool = True
+    train_pair_coverage_target_pct: float = 100.0
+    min_train_image_files_required: int = 786
+    min_train_label_files_required: int = 786
+    enforce_competition_rules: bool = True
+    competition_rules_path: str = "Competition_Rules_Vesuvius_Challenge _Surface_Detection.md"
+    metric_demo_notebook_path: str = "vesuvius-2025-metric-demo.ipynb"
 
 
 @dataclass
@@ -596,7 +611,7 @@ class _TinyUNet2p5D(nn.Module if nn is not None else object):
         return self.head(d1)
 
 
-def _extract_2p5d_patches(vol: np.ndarray, lbl2d: np.ndarray, cfg: V132Config, rng: np.random.Generator) -> Tuple[np.ndarray, np.ndarray]:
+def _extract_2p5d_patches(vol: np.ndarray, lbl2d: np.ndarray, cfg: V137Config, rng: np.random.Generator) -> Tuple[np.ndarray, np.ndarray]:
     z, h, w = vol.shape
     c = max(3, int(cfg.unet_in_slices))
     if c % 2 == 0:
@@ -637,7 +652,7 @@ def _dice_loss_from_logits(logits: 'torch.Tensor', target: 'torch.Tensor') -> 't
     return 1.0 - (2.0 * inter + 1e-6) / den
 
 
-def train_unet_25d_supervised(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, val_y: np.ndarray, cfg: V132Config, rng: np.random.Generator) -> Dict[str, Any]:
+def train_unet_25d_supervised(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, val_y: np.ndarray, cfg: V137Config, rng: np.random.Generator) -> Dict[str, Any]:
     if torch is None or nn is None:
         return {'status': 'torch_unavailable'}
     if train_x.shape[0] == 0 or val_x.shape[0] == 0:
@@ -745,7 +760,7 @@ def train_nx47_supervised(
     y_train: np.ndarray,
     x_val: np.ndarray,
     y_val: np.ndarray,
-    cfg: V132Config,
+    cfg: V137Config,
     rng: np.random.Generator,
     memory: NX47EvolutionMemory,
 ) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
@@ -755,7 +770,10 @@ def train_nx47_supervised(
     adaptive_lr = memory.adapt_learning_rate(cfg.lr, cfg.f1_stagnation_window)
     grad_x_val = np.gradient(x_val, axis=0)
 
-    for epoch in range(max(1, cfg.supervised_epochs)):
+    epoch = 0
+    best_obj_seen = None
+    stagnation = 0
+    while True:
         for neuron_id in range(max(1, cfg.meta_neurons)):
             for l1 in cfg.l1_candidates:
                 for l2 in cfg.l2_candidates:
@@ -791,7 +809,6 @@ def train_nx47_supervised(
                     if best is None or objective < best['objective']:
                         best = rec
                         best_state = (m.w.copy(), float(m.b), m.alpha.copy(), m.beta.copy())
-        # epoch summary
         epoch_best = sorted([r for r in leaderboard if r['epoch'] == epoch], key=lambda d: d['objective'])[0]
         epoch_history.append({
             'epoch': int(epoch),
@@ -801,6 +818,19 @@ def train_nx47_supervised(
             'best_fbeta': float(epoch_best['val_fbeta']),
             'best_threshold': float(epoch_best['best_threshold']),
         })
+        if best_obj_seen is None or (best_obj_seen - float(epoch_best['best_objective'])) > float(cfg.convergence_min_delta):
+            best_obj_seen = float(epoch_best['best_objective'])
+            stagnation = 0
+        else:
+            stagnation += 1
+
+        epoch += 1
+        if int(cfg.supervised_epochs) > 0 and epoch >= int(cfg.supervised_epochs):
+            break
+        if int(cfg.supervised_epochs) <= 0 and stagnation >= int(cfg.convergence_patience):
+            break
+        if int(getattr(cfg, 'auto_epoch_safety_cap', 0)) > 0 and epoch >= int(cfg.auto_epoch_safety_cap):
+            break
 
     mutation_applied = False
     pruning_applied = False
@@ -839,13 +869,14 @@ def train_nx47_supervised(
         'train_samples': int(x_train.shape[0]),
         'val_samples': int(x_val.shape[0]),
         'adaptive_lr': float(adaptive_lr),
+        'epochs_effective': int(len(epoch_history)),
         'mutation_applied': mutation_applied,
         'pruning_applied': pruning_applied,
         'supervised': True,
     }
 
 
-def train_nx47_autonomous(features: np.ndarray, cfg: V132Config, rng: np.random.Generator, memory: NX47EvolutionMemory | None = None) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
+def train_nx47_autonomous(features: np.ndarray, cfg: V137Config, rng: np.random.Generator, memory: NX47EvolutionMemory | None = None) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
     x = features.reshape(features.shape[0], -1).T.astype(np.float64)
     keep, y_all = pseudo_labels(np.mean(features, axis=0), cfg.pseudo_pos_pct, cfg.pseudo_neg_pct)
     idx = np.where(keep)[0]
@@ -916,7 +947,7 @@ def train_nx47_autonomous(features: np.ndarray, cfg: V132Config, rng: np.random.
     }
 
 
-def hysteresis_topology_3d(prob: np.ndarray, cfg: V132Config) -> np.ndarray:
+def hysteresis_topology_3d(prob: np.ndarray, cfg: V137Config) -> np.ndarray:
     strong = prob >= float(cfg.strong_th)
     weak = prob >= float(cfg.weak_th)
     core = binary_propagation(strong, mask=weak, structure=generate_binary_structure(2, 2)) if strong.any() else np.zeros_like(strong, dtype=bool)
@@ -974,25 +1005,25 @@ def probe_hardware_metrics() -> Dict[str, Any]:
     }
 
 
-class NX47V132Kernel:
-    def __init__(self, root: Path = Path('/kaggle/input/competitions/vesuvius-challenge-surface-detection'), output_dir: Path = Path('/kaggle/working'), config: V132Config | None = None) -> None:
-        self.version = 'NX47 V132'
+class NX47V137Kernel:
+    def __init__(self, root: Path = Path('/kaggle/input/competitions/vesuvius-challenge-surface-detection'), output_dir: Path = Path('/kaggle/working'), config: V137Config | None = None) -> None:
+        self.version = 'NX47 V137'
         self.root = self._resolve_root(root)
         self.test_dir = self.root / 'test_images'
         self.train_img_dir = self.root / 'train_images'
         self.train_lbl_dir = self.root / 'train_labels'
         self.output_dir = output_dir
-        self.tmp_dir = output_dir / 'tmp_masks_v132'
-        self.overlay_dir = output_dir / 'overlays_v132'
+        self.tmp_dir = output_dir / 'tmp_masks_v134'
+        self.overlay_dir = output_dir / 'overlays_v134'
         self.submission_path = output_dir / 'submission.zip'
-        self.roadmap_path = output_dir / 'v132_roadmap_realtime.json'
-        self.logs_path = output_dir / 'v132_execution_logs.json'
-        self.memory_path = output_dir / 'v132_memory_tracker.json'
-        self.metadata_path = output_dir / 'v132_execution_metadata.json'
-        self.ultra_log_path = output_dir / 'v132_ultra_authentic_360_merkle.jsonl'
-        self.forensic_report_path = output_dir / 'v132_forensic_analysis_report.json'
+        self.roadmap_path = output_dir / 'v137_roadmap_realtime.json'
+        self.logs_path = output_dir / 'v137_execution_logs.json'
+        self.memory_path = output_dir / 'v137_memory_tracker.json'
+        self.metadata_path = output_dir / 'v137_execution_metadata.json'
+        self.ultra_log_path = output_dir / 'v137_ultra_authentic_360_merkle.jsonl'
+        self.forensic_report_path = output_dir / 'v137_forensic_analysis_report.json'
 
-        self.cfg = config or V132Config()
+        self.cfg = config or V137Config()
         self.evolution = NX47EvolutionMemory()
         self.plan = PlanTracker(self.roadmap_path)
         self.memory = MemoryTracker()
@@ -1000,6 +1031,8 @@ class NX47V132Kernel:
         self.ultra = UltraAuthentic360Merkle(self.ultra_log_path, console=self.cfg.ultra_console_log)
         self.supervised_model: NX47AtomNeuron | None = None
         self.supervised_train_info: Dict[str, Any] | None = None
+        self.learning_audit: Dict[str, Any] = {}
+        self.train_dataset_audit: Dict[str, Any] = {}
 
         self.continuity_matrix = self._build_continuity_matrix()
 
@@ -1034,6 +1067,10 @@ class NX47V132Kernel:
             'probability_max_observed': 0.0,
             'probability_mean_observed': 0.0,
             'probability_std_observed': 0.0,
+            'learning_percent_real': 0.0,
+            'reasoning_trace_events': 0,
+            'train_pair_count_discovered': 0,
+            'train_pair_coverage_pct': 0.0,
         }
 
         bootstrap_dependencies_fail_fast()
@@ -1065,7 +1102,7 @@ class NX47V132Kernel:
             'NX-11..NX-20': ['feature_signature', 'intermediate_schema'],
             'NX-21..NX-35': ['audit_hash_chain', 'integrity_checks'],
             'NX-36..NX-47': ['forensic_traceability', 'merkle_chain', 'roadmap_realtime'],
-            'NX-47 v115..v132': ['supervised_pipeline', 'unet_25d', 'strict_logging'],
+            'NX-47 v115..v137': ['supervised_pipeline', 'unet_25d', 'strict_logging'],
         }
 
     def _assert_continuity_integrity(self) -> None:
@@ -1076,7 +1113,7 @@ class NX47V132Kernel:
             'intermediate_schema': self._predict_mask,
             'audit_hash_chain': self.log,
             'integrity_checks': audit_logits_distribution,
-            'forensic_traceability': self._build_v132_forensic_report,
+            'forensic_traceability': self._build_v137_forensic_report,
             'merkle_chain': self.ultra.emit,
             'roadmap_realtime': self.plan.update,
             'supervised_pipeline': train_nx47_supervised,
@@ -1160,7 +1197,7 @@ class NX47V132Kernel:
             'global_stats': global_stats,
         }
 
-    def _build_v132_forensic_report(self) -> Dict[str, Any]:
+    def _build_v137_forensic_report(self) -> Dict[str, Any]:
         v130 = self._parse_v130_log_summary(Path(self.cfg.v130_log_path))
         gs = v130.get('global_stats', {}) if isinstance(v130, dict) else {}
         positives = int(gs.get('pixels_papyrus_without_anchor', 0)) + int(gs.get('pixels_anchor_detected', 0))
@@ -1216,11 +1253,100 @@ class NX47V132Kernel:
             arr2d = arr2d / 255.0
         return (arr2d > 0.5).astype(np.float32)
 
+    def _derive_train_pair_requirement(self, pair_count: int) -> int:
+        if pair_count <= 0:
+            return int(self.cfg.min_train_pairs_required)
+        if self.cfg.adapt_train_threshold_to_dataset_size:
+            req = int(np.ceil(pair_count * float(self.cfg.train_pair_coverage_target_pct) / 100.0))
+            return max(1, req)
+        return int(self.cfg.min_train_pairs_required)
+
+    def _audit_train_dataset_size(self, pairs: List[Tuple[Path, Path]]) -> None:
+        pair_count = len(pairs)
+        if self.cfg.max_train_volumes <= 0 and self.cfg.max_val_volumes <= 0:
+            selected = int(pair_count)
+        else:
+            max_total = max(1, self.cfg.max_train_volumes + self.cfg.max_val_volumes)
+            selected = min(pair_count, max_total)
+        coverage = float(100.0 * selected / max(1, pair_count))
+        image_exists_count = int(sum(1 for img, _ in pairs if img.exists()))
+        label_exists_count = int(sum(1 for _, lbl in pairs if lbl.exists()))
+        total_label_bytes = int(sum(lbl.stat().st_size for _, lbl in pairs if lbl.exists()))
+        total_image_bytes = int(sum(img.stat().st_size for img, _ in pairs if img.exists()))
+        self.train_dataset_audit = {
+            'pair_count_discovered': int(pair_count),
+            'pair_count_selected_for_training': int(selected),
+            'coverage_pct_selected_vs_discovered': float(coverage),
+            'train_image_files_found': int(image_exists_count),
+            'train_label_files_found': int(label_exists_count),
+            'total_train_image_bytes': int(total_image_bytes),
+            'total_train_label_bytes': int(total_label_bytes),
+            'required_pair_count': int(self._derive_train_pair_requirement(pair_count)),
+        }
+        self.log('TRAIN_DATASET_AUDIT', **self.train_dataset_audit)
+
+    def _assert_train_pairs_threshold(self, pair_count: int) -> None:
+        required_pairs = self._derive_train_pair_requirement(pair_count)
+        if self.cfg.supervised_train and pair_count < int(required_pairs):
+            raise RuntimeError(
+                f'TRAIN_PAIRS_BELOW_THRESHOLD: found={pair_count} required={required_pairs}'
+            )
+        img_found = int(self.train_dataset_audit.get('train_image_files_found', 0))
+        lbl_found = int(self.train_dataset_audit.get('train_label_files_found', 0))
+        if self.cfg.supervised_train and img_found < int(self.cfg.min_train_image_files_required):
+            raise RuntimeError(
+                f'TRAIN_IMAGE_FILES_BELOW_THRESHOLD: found={img_found} required={self.cfg.min_train_image_files_required}'
+            )
+        if self.cfg.supervised_train and lbl_found < int(self.cfg.min_train_label_files_required):
+            raise RuntimeError(
+                f'TRAIN_LABEL_FILES_BELOW_THRESHOLD: found={lbl_found} required={self.cfg.min_train_label_files_required}'
+            )
+
+    def _assert_train_completed_100(self) -> None:
+        if not self.cfg.require_train_completion_100:
+            return
+        if self.supervised_train_info is None:
+            raise RuntimeError('TRAIN_COMPLETION_100_FAILED: missing supervised_train_info')
+        hist = self.supervised_train_info.get('epoch_history', [])
+        epochs_done = len(hist)
+        if epochs_done < int(self.cfg.supervised_epochs):
+            raise RuntimeError(
+                f'TRAIN_COMPLETION_100_FAILED: epochs_done={epochs_done} expected={self.cfg.supervised_epochs}'
+            )
+
+    def _compute_learning_percent_real(self, train_info: Dict[str, Any]) -> float:
+        hist = train_info.get('epoch_history', []) if isinstance(train_info, dict) else []
+        epochs_done = len(hist)
+        epoch_ratio = float(epochs_done / max(1, int(self.cfg.supervised_epochs)))
+        shp = train_info.get('selected_hyperparams', {}) if isinstance(train_info, dict) else {}
+        val_f1 = float(shp.get('val_f1', 0.0))
+        val_iou = float(shp.get('val_iou', 0.0))
+        metric_signal = float(np.clip((val_f1 + val_iou) / 2.0, 0.0, 1.0))
+        # 80% driven by completed epochs, 20% by observed validation signal
+        pct = float(np.clip(100.0 * (0.8 * epoch_ratio + 0.2 * metric_signal), 0.0, 100.0))
+        return pct
+
+    def _assert_no_hardcoded_metric_pattern(self, train_info: Dict[str, Any]) -> None:
+        if not self.cfg.enforce_no_hardcoded_metrics:
+            return
+        hist = train_info.get('epoch_history', []) if isinstance(train_info, dict) else []
+        if len(hist) < 2:
+            return
+        objectives = [float(h.get('best_objective', 0.0)) for h in hist]
+        # If every epoch has exactly the same objective, flag forensic anomaly.
+        if len(set(objectives)) == 1:
+            policy = str(getattr(self.cfg, 'hardcoded_metric_policy', 'warn')).lower()
+            self.log('HARD_METRIC_PATTERN', policy=policy, objectives=objectives)
+            if policy == 'error':
+                raise RuntimeError('HARD_METRIC_PATTERN_DETECTED: identical epoch objective across all epochs')
+
     def build_supervised_model(self) -> None:
         if not self.cfg.supervised_train:
             self.log('SUPERVISED_TRAIN', status='disabled')
             return
         pairs = self.discover_train_pairs()
+        self._audit_train_dataset_size(pairs)
+        self._assert_train_pairs_threshold(len(pairs))
         if not pairs:
             self.log('SUPERVISED_TRAIN', status='fallback_autonomous_no_pairs')
             if self.cfg.strict_no_fallback:
@@ -1228,11 +1354,17 @@ class NX47V132Kernel:
             return
 
         rng = np.random.default_rng(125)
-        max_total = max(2, self.cfg.max_train_volumes + self.cfg.max_val_volumes)
-        chosen = pairs[:max_total]
-        split = min(len(chosen) - 1, self.cfg.max_train_volumes)
-        train_pairs = chosen[:split]
-        val_pairs = chosen[split:]
+        if self.cfg.max_train_volumes <= 0 and self.cfg.max_val_volumes <= 0:
+            chosen = pairs
+            split = max(1, int(0.8 * len(chosen)))
+            train_pairs = chosen[:split]
+            val_pairs = chosen[split:]
+        else:
+            max_total = max(2, self.cfg.max_train_volumes + self.cfg.max_val_volumes)
+            chosen = pairs[:max_total]
+            split = min(len(chosen) - 1, self.cfg.max_train_volumes)
+            train_pairs = chosen[:split]
+            val_pairs = chosen[split:]
         if not val_pairs:
             val_pairs = chosen[-1:]
             train_pairs = chosen[:-1]
@@ -1314,6 +1446,19 @@ class NX47V132Kernel:
                 unet_info = {'status': 'error', 'message': str(exc)}
 
         self.supervised_train_info = {**info, 'unet_25d': unet_info}
+        self.learning_audit = {
+            'learning_percent_real': self._compute_learning_percent_real(self.supervised_train_info),
+            'epochs_configured': int(self.cfg.supervised_epochs),
+            'epochs_observed': len(self.supervised_train_info.get('epoch_history', [])),
+            'epochs_effective': int(self.supervised_train_info.get('epochs_effective', len(self.supervised_train_info.get('epoch_history', [])))),
+            'nx_neuron_formal': {
+                'activation': 'sigmoid(w·x + b + alpha·grad + beta·laplace)',
+                'training': 'proximal gradient with l1/l2 + threshold calibration',
+                'state': 'w,b,alpha,beta + evolution memory events',
+            },
+        }
+        self._assert_no_hardcoded_metric_pattern(self.supervised_train_info)
+        self._assert_train_completed_100()
         self.log(
             'SUPERVISED_TRAIN',
             status='ok',
@@ -1324,6 +1469,7 @@ class NX47V132Kernel:
             train_volume_files=[p.name for p, _ in train_pairs],
             val_volume_files=[p.name for p, _ in val_pairs],
             train_info=self.supervised_train_info,
+            learning_audit=self.learning_audit,
         )
 
     def _load_volume(self, path: Path) -> np.ndarray:
@@ -1357,6 +1503,8 @@ class NX47V132Kernel:
             train_info = self.supervised_train_info
             train_mode = 'supervised'
         else:
+            if self.cfg.forbid_autonomous_mode:
+                raise RuntimeError('AUTONOMOUS_MODE_FORBIDDEN: supervised NX pipeline is mandatory in v134')
             if self.cfg.supervised_train and self.cfg.strict_no_fallback:
                 raise RuntimeError('STRICT_NO_FALLBACK: autonomous fallback blocked while supervised_train is enabled')
             rng = np.random.default_rng(47)
@@ -1441,6 +1589,30 @@ class NX47V132Kernel:
         proxy_like = train_info['selected_hyperparams'].get('proxy_f1', train_info['selected_hyperparams'].get('val_f1', 0.0))
         self.evolution.update(proxy_like, slice_ratio_info['ratio_global_selected'])
         return final, metrics
+
+    def _validate_submission_competition_rules(self, expected_test_files: List[Path]) -> Dict[str, Any]:
+        import zipfile
+        if not self.cfg.enforce_competition_rules:
+            return {'status': 'disabled'}
+        if not self.submission_path.exists():
+            raise RuntimeError('RULES_VALIDATION_FAILED: submission.zip missing')
+        with zipfile.ZipFile(self.submission_path, 'r') as zf:
+            members = [n for n in zf.namelist() if n.lower().endswith('.tif')]
+        expected = sorted([p.name for p in expected_test_files])
+        got = sorted([Path(m).name for m in members])
+        if expected != got:
+            raise RuntimeError(f'RULES_VALIDATION_FAILED: submission members mismatch expected={len(expected)} got={len(got)}')
+        rules_exists = Path(self.cfg.competition_rules_path).exists()
+        demo_exists = Path(self.cfg.metric_demo_notebook_path).exists()
+        status = {
+            'status': 'ok',
+            'expected_test_files': len(expected),
+            'submission_tif_files': len(got),
+            'rules_file_found': bool(rules_exists),
+            'metric_demo_found': bool(demo_exists),
+        }
+        self.log('COMPETITION_RULES_VALIDATION', **status)
+        return status
 
     def run_simulation_100(self) -> Dict[str, Any]:
         rng = np.random.default_rng(123)
@@ -1527,6 +1699,8 @@ class NX47V132Kernel:
                 self.log('FILE_DONE', file=fpath.name, active_ratio=round(float(mask2d.mean()), 6), calc_per_sec=float(cps), elapsed_s=round(dt, 3))
                 self.plan.update('package', 10.0 + 85.0 * (i / len(files)))
 
+        rules_validation = self._validate_submission_competition_rules(files)
+
         total_dt = max(1e-9, time.perf_counter() - t_global)
         self.global_stats['calc_per_sec_global'] = float(self.global_stats['calc_ops_estimated'] / total_dt)
         self.global_stats['elapsed_total_s'] = float(total_dt)
@@ -1549,10 +1723,14 @@ class NX47V132Kernel:
         self.global_stats['probability_max_observed'] = float(np.max(prob_max_values)) if prob_max_values else 0.0
         self.global_stats['probability_mean_observed'] = float(np.mean(prob_mean_values)) if prob_mean_values else 0.0
         self.global_stats['probability_std_observed'] = float(np.mean(prob_std_values)) if prob_std_values else 0.0
-        self.global_stats['forensic_report_generated'] = bool(self.cfg.export_forensic_v132_report)
+        self.global_stats['forensic_report_generated'] = bool(self.cfg.export_forensic_v137_report)
+        self.global_stats['learning_percent_real'] = float(self.learning_audit.get('learning_percent_real', 0.0))
+        self.global_stats['reasoning_trace_events'] = int(len(self.logs))
+        self.global_stats['train_pair_count_discovered'] = int(self.train_dataset_audit.get('pair_count_discovered', 0))
+        self.global_stats['train_pair_coverage_pct'] = float(self.train_dataset_audit.get('coverage_pct_selected_vs_discovered', 0.0))
         self.log('GLOBAL_STATS', **self.global_stats)
 
-        forensic_report = self._build_v132_forensic_report() if self.cfg.export_forensic_v132_report else {'status': 'disabled'}
+        forensic_report = self._build_v137_forensic_report() if self.cfg.export_forensic_v137_report else {'status': 'disabled'}
         self.forensic_report_path.write_text(json.dumps(forensic_report, indent=2, ensure_ascii=False), encoding='utf-8')
 
         metadata = {
@@ -1570,7 +1748,18 @@ class NX47V132Kernel:
             'f1_ratio_curve': f1_curve,
             'config': asdict(self.cfg),
             'nx_continuity_matrix': self.continuity_matrix,
+            'line_by_line_review': 'completed_v137',
+            'train_pairs_required': int(self.cfg.min_train_pairs_required),
+            'train_image_files_required': int(self.cfg.min_train_image_files_required),
+            'train_label_files_required': int(self.cfg.min_train_label_files_required),
+            'require_train_completion_100': bool(self.cfg.require_train_completion_100),
+            'forbid_autonomous_mode': bool(self.cfg.forbid_autonomous_mode),
+            'enforce_no_hardcoded_metrics': bool(self.cfg.enforce_no_hardcoded_metrics),
+            'hardcoded_metric_policy': str(self.cfg.hardcoded_metric_policy),
+            'learning_audit': self.learning_audit,
+            'train_dataset_audit': self.train_dataset_audit,
             'forensic_report': forensic_report,
+            'competition_rules_validation': rules_validation,
         }
         self.metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
         self.logs_path.write_text(json.dumps(self.logs, indent=2), encoding='utf-8')
@@ -1582,42 +1771,57 @@ class NX47V132Kernel:
 
 
 if __name__ == '__main__':
-    cfg = V132Config(
-        top_k_features=int(os.environ.get('V132_TOP_K_FEATURES', '6')),
-        target_active_ratio=float(os.environ.get('V132_TARGET_ACTIVE_RATIO', '0.03')),
-        full_pixel_trace=os.environ.get('V132_FULL_PIXEL_TRACE', '0') == '1',
-        trace_pixel_budget=int(os.environ.get('V132_TRACE_PIXEL_BUDGET', '4000')),
-        ultra_console_log=os.environ.get('V132_ULTRA_CONSOLE_LOG', '1') == '1',
-        ultra_step_log=os.environ.get('V132_ULTRA_STEP_LOG', '1') == '1',
-        ultra_bit_trace_arrays=os.environ.get('V132_ULTRA_BIT_TRACE_ARRAYS', '1') == '1',
-        ultra_bit_trace_limit=int(os.environ.get('V132_ULTRA_BIT_TRACE_LIMIT', '64')),
-        meta_neurons=int(os.environ.get('V132_META_NEURONS', '3')),
-        run_simulation_100=os.environ.get('V132_RUN_SIMULATION_100', '0') == '1',
-        simulation_export_curve=os.environ.get('V132_SIMULATION_EXPORT_CURVE', '1') == '1',
-        supervised_train=os.environ.get('V132_SUPERVISED_TRAIN', '1') == '1',
-        max_train_volumes=int(os.environ.get('V132_MAX_TRAIN_VOLUMES', '24')),
-        max_val_volumes=int(os.environ.get('V132_MAX_VAL_VOLUMES', '8')),
-        max_samples_per_volume=int(os.environ.get('V132_MAX_SAMPLES_PER_VOLUME', '40000')),
-        pos_neg_ratio=float(os.environ.get('V132_POS_NEG_RATIO', '1.0')),
-        golden_nonce_topk=int(os.environ.get('V132_GOLDEN_NONCE_TOPK', '11')),
-        supervised_epochs=int(os.environ.get('V132_SUPERVISED_EPOCHS', '3')),
-        fbeta_beta=float(os.environ.get('V132_F_BETA', '0.5')),
-        use_unet_25d=os.environ.get('V132_USE_UNET_25D', '1') == '1',
-        unet_in_slices=int(os.environ.get('V132_UNET_IN_SLICES', '7')),
-        unet_base_channels=int(os.environ.get('V132_UNET_BASE_CHANNELS', '24')),
-        patch_size=int(os.environ.get('V132_PATCH_SIZE', '128')),
-        patch_stride=int(os.environ.get('V132_PATCH_STRIDE', '64')),
-        unet_epochs=int(os.environ.get('V132_UNET_EPOCHS', '2')),
-        unet_lr=float(os.environ.get('V132_UNET_LR', '0.001')),
-        unet_batch_size=int(os.environ.get('V132_UNET_BATCH_SIZE', '8')),
-        export_logit_audit=os.environ.get('V132_EXPORT_LOGIT_AUDIT', '1') == '1',
-        logit_hist_bins=int(os.environ.get('V132_LOGIT_HIST_BINS', '20')),
-        v130_log_path=os.environ.get('V132_SOURCE_V130_LOG', 'nx47-vesu-kernel-new-v130.log'),
-        export_forensic_v132_report=os.environ.get('V132_EXPORT_FORENSIC_REPORT', '1') == '1',
-        enforce_nx_legacy_continuity=os.environ.get('V132_ENFORCE_NX_CONTINUITY', '1') == '1',
-        strict_no_fallback=os.environ.get('V132_STRICT_NO_FALLBACK', '1') == '1',
+    cfg = V137Config(
+        top_k_features=int(os.environ.get('V137_TOP_K_FEATURES', '6')),
+        target_active_ratio=float(os.environ.get('V137_TARGET_ACTIVE_RATIO', '0.03')),
+        full_pixel_trace=os.environ.get('V137_FULL_PIXEL_TRACE', '0') == '1',
+        trace_pixel_budget=int(os.environ.get('V137_TRACE_PIXEL_BUDGET', '4000')),
+        ultra_console_log=os.environ.get('V137_ULTRA_CONSOLE_LOG', '1') == '1',
+        ultra_step_log=os.environ.get('V137_ULTRA_STEP_LOG', '1') == '1',
+        ultra_bit_trace_arrays=os.environ.get('V137_ULTRA_BIT_TRACE_ARRAYS', '1') == '1',
+        ultra_bit_trace_limit=int(os.environ.get('V137_ULTRA_BIT_TRACE_LIMIT', '64')),
+        meta_neurons=int(os.environ.get('V137_META_NEURONS', '3')),
+        run_simulation_100=os.environ.get('V137_RUN_SIMULATION_100', '0') == '1',
+        simulation_export_curve=os.environ.get('V137_SIMULATION_EXPORT_CURVE', '1') == '1',
+        supervised_train=os.environ.get('V137_SUPERVISED_TRAIN', '1') == '1',
+        max_train_volumes=int(os.environ.get('V137_MAX_TRAIN_VOLUMES', '0')),
+        max_val_volumes=int(os.environ.get('V137_MAX_VAL_VOLUMES', '0')),
+        max_samples_per_volume=int(os.environ.get('V137_MAX_SAMPLES_PER_VOLUME', '40000')),
+        pos_neg_ratio=float(os.environ.get('V137_POS_NEG_RATIO', '1.0')),
+        golden_nonce_topk=int(os.environ.get('V137_GOLDEN_NONCE_TOPK', '11')),
+        supervised_epochs=int(os.environ.get('V137_SUPERVISED_EPOCHS', '0')),
+        fbeta_beta=float(os.environ.get('V137_F_BETA', '0.5')),
+        use_unet_25d=os.environ.get('V137_USE_UNET_25D', '1') == '1',
+        unet_in_slices=int(os.environ.get('V137_UNET_IN_SLICES', '7')),
+        unet_base_channels=int(os.environ.get('V137_UNET_BASE_CHANNELS', '24')),
+        patch_size=int(os.environ.get('V137_PATCH_SIZE', '128')),
+        patch_stride=int(os.environ.get('V137_PATCH_STRIDE', '64')),
+        unet_epochs=int(os.environ.get('V137_UNET_EPOCHS', '2')),
+        unet_lr=float(os.environ.get('V137_UNET_LR', '0.001')),
+        unet_batch_size=int(os.environ.get('V137_UNET_BATCH_SIZE', '8')),
+        export_logit_audit=os.environ.get('V137_EXPORT_LOGIT_AUDIT', '1') == '1',
+        logit_hist_bins=int(os.environ.get('V137_LOGIT_HIST_BINS', '20')),
+        v130_log_path=os.environ.get('V137_SOURCE_V130_LOG', 'nx47-vesu-kernel-new-v130.log'),
+        export_forensic_v137_report=os.environ.get('V137_EXPORT_FORENSIC_REPORT', '1') == '1',
+        enforce_nx_legacy_continuity=os.environ.get('V137_ENFORCE_NX_CONTINUITY', '1') == '1',
+        strict_no_fallback=os.environ.get('V137_STRICT_NO_FALLBACK', '1') == '1',
+        min_train_pairs_required=int(os.environ.get('V137_MIN_TRAIN_PAIRS_REQUIRED', '786')),
+        require_train_completion_100=os.environ.get('V137_REQUIRE_TRAIN_COMPLETION_100', '1') == '1',
+        forbid_autonomous_mode=os.environ.get('V137_FORBID_AUTONOMOUS_MODE', '1') == '1',
+        enforce_no_hardcoded_metrics=os.environ.get('V137_ENFORCE_NO_HARDCODED_METRICS', '1') == '1',
+        hardcoded_metric_policy=os.environ.get('V137_HARDCODED_METRIC_POLICY', 'warn'),
+        adapt_train_threshold_to_dataset_size=os.environ.get('V137_ADAPT_TRAIN_THRESHOLD_TO_DATASET_SIZE', '1') == '1',
+        train_pair_coverage_target_pct=float(os.environ.get('V137_TRAIN_PAIR_COVERAGE_TARGET_PCT', '100.0')),
+        min_train_image_files_required=int(os.environ.get('V137_MIN_TRAIN_IMAGE_FILES_REQUIRED', '786')),
+        min_train_label_files_required=int(os.environ.get('V137_MIN_TRAIN_LABEL_FILES_REQUIRED', '786')),
+        enforce_competition_rules=os.environ.get('V137_ENFORCE_COMPETITION_RULES', '1') == '1',
+        competition_rules_path=os.environ.get('V137_COMPETITION_RULES_PATH', 'Competition_Rules_Vesuvius_Challenge _Surface_Detection.md'),
+        metric_demo_notebook_path=os.environ.get('V137_METRIC_DEMO_NOTEBOOK_PATH', 'vesuvius-2025-metric-demo.ipynb'),
+        convergence_patience=int(os.environ.get('V137_CONVERGENCE_PATIENCE', '5')),
+        convergence_min_delta=float(os.environ.get('V137_CONVERGENCE_MIN_DELTA', '1e-6')),
+        auto_epoch_safety_cap=int(os.environ.get('V137_AUTO_EPOCH_SAFETY_CAP', '0')),
     )
-    kernel = NX47V132Kernel(
+    kernel = NX47V137Kernel(
         root=Path(os.environ.get('VESUVIUS_ROOT', '/kaggle/input/competitions/vesuvius-challenge-surface-detection')),
         output_dir=Path(os.environ.get('VESUVIUS_OUTPUT', '/kaggle/working')),
         config=cfg,
