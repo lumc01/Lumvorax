@@ -123,6 +123,8 @@ class V134Config:
     strict_no_fallback: bool = True
     min_train_pairs_required: int = 1500
     require_train_completion_100: bool = True
+    forbid_autonomous_mode: bool = True
+    enforce_no_hardcoded_metrics: bool = True
 
 
 @dataclass
@@ -1002,6 +1004,7 @@ class NX47V134Kernel:
         self.ultra = UltraAuthentic360Merkle(self.ultra_log_path, console=self.cfg.ultra_console_log)
         self.supervised_model: NX47AtomNeuron | None = None
         self.supervised_train_info: Dict[str, Any] | None = None
+        self.learning_audit: Dict[str, Any] = {}
 
         self.continuity_matrix = self._build_continuity_matrix()
 
@@ -1036,6 +1039,8 @@ class NX47V134Kernel:
             'probability_max_observed': 0.0,
             'probability_mean_observed': 0.0,
             'probability_std_observed': 0.0,
+            'learning_percent_real': 0.0,
+            'reasoning_trace_events': 0,
         }
 
         bootstrap_dependencies_fail_fast()
@@ -1236,6 +1241,29 @@ class NX47V134Kernel:
                 f'TRAIN_COMPLETION_100_FAILED: epochs_done={epochs_done} expected={self.cfg.supervised_epochs}'
             )
 
+    def _compute_learning_percent_real(self, train_info: Dict[str, Any]) -> float:
+        hist = train_info.get('epoch_history', []) if isinstance(train_info, dict) else []
+        epochs_done = len(hist)
+        epoch_ratio = float(epochs_done / max(1, int(self.cfg.supervised_epochs)))
+        shp = train_info.get('selected_hyperparams', {}) if isinstance(train_info, dict) else {}
+        val_f1 = float(shp.get('val_f1', 0.0))
+        val_iou = float(shp.get('val_iou', 0.0))
+        metric_signal = float(np.clip((val_f1 + val_iou) / 2.0, 0.0, 1.0))
+        # 80% driven by completed epochs, 20% by observed validation signal
+        pct = float(np.clip(100.0 * (0.8 * epoch_ratio + 0.2 * metric_signal), 0.0, 100.0))
+        return pct
+
+    def _assert_no_hardcoded_metric_pattern(self, train_info: Dict[str, Any]) -> None:
+        if not self.cfg.enforce_no_hardcoded_metrics:
+            return
+        hist = train_info.get('epoch_history', []) if isinstance(train_info, dict) else []
+        if len(hist) < 2:
+            return
+        objectives = [float(h.get('best_objective', 0.0)) for h in hist]
+        # If every epoch has exactly the same objective at float precision, flag for forensic review.
+        if len(set(objectives)) == 1:
+            raise RuntimeError('HARD_METRIC_PATTERN_DETECTED: identical epoch objective across all epochs')
+
     def build_supervised_model(self) -> None:
         if not self.cfg.supervised_train:
             self.log('SUPERVISED_TRAIN', status='disabled')
@@ -1335,6 +1363,12 @@ class NX47V134Kernel:
                 unet_info = {'status': 'error', 'message': str(exc)}
 
         self.supervised_train_info = {**info, 'unet_25d': unet_info}
+        self.learning_audit = {
+            'learning_percent_real': self._compute_learning_percent_real(self.supervised_train_info),
+            'epochs_configured': int(self.cfg.supervised_epochs),
+            'epochs_observed': len(self.supervised_train_info.get('epoch_history', [])),
+        }
+        self._assert_no_hardcoded_metric_pattern(self.supervised_train_info)
         self._assert_train_completed_100()
         self.log(
             'SUPERVISED_TRAIN',
@@ -1346,6 +1380,7 @@ class NX47V134Kernel:
             train_volume_files=[p.name for p, _ in train_pairs],
             val_volume_files=[p.name for p, _ in val_pairs],
             train_info=self.supervised_train_info,
+            learning_audit=self.learning_audit,
         )
 
     def _load_volume(self, path: Path) -> np.ndarray:
@@ -1379,6 +1414,8 @@ class NX47V134Kernel:
             train_info = self.supervised_train_info
             train_mode = 'supervised'
         else:
+            if self.cfg.forbid_autonomous_mode:
+                raise RuntimeError('AUTONOMOUS_MODE_FORBIDDEN: supervised NX pipeline is mandatory in v134')
             if self.cfg.supervised_train and self.cfg.strict_no_fallback:
                 raise RuntimeError('STRICT_NO_FALLBACK: autonomous fallback blocked while supervised_train is enabled')
             rng = np.random.default_rng(47)
@@ -1572,6 +1609,8 @@ class NX47V134Kernel:
         self.global_stats['probability_mean_observed'] = float(np.mean(prob_mean_values)) if prob_mean_values else 0.0
         self.global_stats['probability_std_observed'] = float(np.mean(prob_std_values)) if prob_std_values else 0.0
         self.global_stats['forensic_report_generated'] = bool(self.cfg.export_forensic_v134_report)
+        self.global_stats['learning_percent_real'] = float(self.learning_audit.get('learning_percent_real', 0.0))
+        self.global_stats['reasoning_trace_events'] = int(len(self.logs))
         self.log('GLOBAL_STATS', **self.global_stats)
 
         forensic_report = self._build_v134_forensic_report() if self.cfg.export_forensic_v134_report else {'status': 'disabled'}
@@ -1595,6 +1634,9 @@ class NX47V134Kernel:
             'line_by_line_review': 'completed_v134',
             'train_pairs_required': int(self.cfg.min_train_pairs_required),
             'require_train_completion_100': bool(self.cfg.require_train_completion_100),
+            'forbid_autonomous_mode': bool(self.cfg.forbid_autonomous_mode),
+            'enforce_no_hardcoded_metrics': bool(self.cfg.enforce_no_hardcoded_metrics),
+            'learning_audit': self.learning_audit,
             'forensic_report': forensic_report,
         }
         self.metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
@@ -1643,6 +1685,8 @@ if __name__ == '__main__':
         strict_no_fallback=os.environ.get('V134_STRICT_NO_FALLBACK', '1') == '1',
         min_train_pairs_required=int(os.environ.get('V134_MIN_TRAIN_PAIRS_REQUIRED', '1500')),
         require_train_completion_100=os.environ.get('V134_REQUIRE_TRAIN_COMPLETION_100', '1') == '1',
+        forbid_autonomous_mode=os.environ.get('V134_FORBID_AUTONOMOUS_MODE', '1') == '1',
+        enforce_no_hardcoded_metrics=os.environ.get('V134_ENFORCE_NO_HARDCODED_METRICS', '1') == '1',
     )
     kernel = NX47V134Kernel(
         root=Path(os.environ.get('VESUVIUS_ROOT', '/kaggle/input/competitions/vesuvius-challenge-surface-detection')),
