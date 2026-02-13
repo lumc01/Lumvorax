@@ -118,6 +118,10 @@ class V132Config:
     v130_log_path: str = 'nx47-vesu-kernel-new-v130.log'
     export_forensic_v132_report: bool = True
 
+    # V133 strict continuity + no fallback policy
+    enforce_nx_legacy_continuity: bool = True
+    strict_no_fallback: bool = True
+
 
 @dataclass
 class PlanStep:
@@ -592,7 +596,7 @@ class _TinyUNet2p5D(nn.Module if nn is not None else object):
         return self.head(d1)
 
 
-def _extract_2p5d_patches(vol: np.ndarray, lbl2d: np.ndarray, cfg: V131Config, rng: np.random.Generator) -> Tuple[np.ndarray, np.ndarray]:
+def _extract_2p5d_patches(vol: np.ndarray, lbl2d: np.ndarray, cfg: V132Config, rng: np.random.Generator) -> Tuple[np.ndarray, np.ndarray]:
     z, h, w = vol.shape
     c = max(3, int(cfg.unet_in_slices))
     if c % 2 == 0:
@@ -633,7 +637,7 @@ def _dice_loss_from_logits(logits: 'torch.Tensor', target: 'torch.Tensor') -> 't
     return 1.0 - (2.0 * inter + 1e-6) / den
 
 
-def train_unet_25d_supervised(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, val_y: np.ndarray, cfg: V131Config, rng: np.random.Generator) -> Dict[str, Any]:
+def train_unet_25d_supervised(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, val_y: np.ndarray, cfg: V132Config, rng: np.random.Generator) -> Dict[str, Any]:
     if torch is None or nn is None:
         return {'status': 'torch_unavailable'}
     if train_x.shape[0] == 0 or val_x.shape[0] == 0:
@@ -741,7 +745,7 @@ def train_nx47_supervised(
     y_train: np.ndarray,
     x_val: np.ndarray,
     y_val: np.ndarray,
-    cfg: V131Config,
+    cfg: V132Config,
     rng: np.random.Generator,
     memory: NX47EvolutionMemory,
 ) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
@@ -841,7 +845,7 @@ def train_nx47_supervised(
     }
 
 
-def train_nx47_autonomous(features: np.ndarray, cfg: V131Config, rng: np.random.Generator, memory: NX47EvolutionMemory | None = None) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
+def train_nx47_autonomous(features: np.ndarray, cfg: V132Config, rng: np.random.Generator, memory: NX47EvolutionMemory | None = None) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
     x = features.reshape(features.shape[0], -1).T.astype(np.float64)
     keep, y_all = pseudo_labels(np.mean(features, axis=0), cfg.pseudo_pos_pct, cfg.pseudo_neg_pct)
     idx = np.where(keep)[0]
@@ -912,7 +916,7 @@ def train_nx47_autonomous(features: np.ndarray, cfg: V131Config, rng: np.random.
     }
 
 
-def hysteresis_topology_3d(prob: np.ndarray, cfg: V131Config) -> np.ndarray:
+def hysteresis_topology_3d(prob: np.ndarray, cfg: V132Config) -> np.ndarray:
     strong = prob >= float(cfg.strong_th)
     weak = prob >= float(cfg.weak_th)
     core = binary_propagation(strong, mask=weak, structure=generate_binary_structure(2, 2)) if strong.any() else np.zeros_like(strong, dtype=bool)
@@ -988,7 +992,7 @@ class NX47V132Kernel:
         self.ultra_log_path = output_dir / 'v132_ultra_authentic_360_merkle.jsonl'
         self.forensic_report_path = output_dir / 'v132_forensic_analysis_report.json'
 
-        self.cfg = config or V131Config()
+        self.cfg = config or V132Config()
         self.evolution = NX47EvolutionMemory()
         self.plan = PlanTracker(self.roadmap_path)
         self.memory = MemoryTracker()
@@ -996,6 +1000,8 @@ class NX47V132Kernel:
         self.ultra = UltraAuthentic360Merkle(self.ultra_log_path, console=self.cfg.ultra_console_log)
         self.supervised_model: NX47AtomNeuron | None = None
         self.supervised_train_info: Dict[str, Any] | None = None
+
+        self.continuity_matrix = self._build_continuity_matrix()
 
         self.global_stats: Dict[str, Any] = {
             'files_processed': 0,
@@ -1048,7 +1054,39 @@ class NX47V132Kernel:
             self.plan.add_step(n, d)
         self.plan._write()
 
+        if self.cfg.enforce_nx_legacy_continuity:
+            self._assert_continuity_integrity()
+
         self.log('BOOT', version=self.version, root=str(self.root), config=asdict(self.cfg), hardware=probe_hardware_metrics())
+
+    def _build_continuity_matrix(self) -> Dict[str, List[str]]:
+        return {
+            'NX-1..NX-10': ['preprocess', 'input_format_invariants'],
+            'NX-11..NX-20': ['feature_signature', 'intermediate_schema'],
+            'NX-21..NX-35': ['audit_hash_chain', 'integrity_checks'],
+            'NX-36..NX-47': ['forensic_traceability', 'merkle_chain', 'roadmap_realtime'],
+            'NX-47 v115..v132': ['supervised_pipeline', 'unet_25d', 'strict_logging'],
+        }
+
+    def _assert_continuity_integrity(self) -> None:
+        required_caps = {
+            'preprocess': extract_multi_features,
+            'input_format_invariants': read_tiff_lzw_safe,
+            'feature_signature': auto_select_features,
+            'intermediate_schema': self._predict_mask,
+            'audit_hash_chain': self.log,
+            'integrity_checks': audit_logits_distribution,
+            'forensic_traceability': self._build_v132_forensic_report,
+            'merkle_chain': self.ultra.emit,
+            'roadmap_realtime': self.plan.update,
+            'supervised_pipeline': train_nx47_supervised,
+            'unet_25d': train_unet_25d_supervised,
+            'strict_logging': self.logs.append,
+        }
+        missing = [name for name, ref in required_caps.items() if ref is None]
+        if missing:
+            raise RuntimeError(f'NX_CONTINUITY_BROKEN: missing capabilities {missing}')
+        self.log('NX_CONTINUITY_OK', matrix=self.continuity_matrix)
 
     def _resolve_root(self, preferred: Path) -> Path:
         cands = [preferred, Path('/kaggle/input/competitions/vesuvius-challenge-surface-detection'), Path('/kaggle/input/vesuvius-challenge-surface-detection')]
@@ -1185,6 +1223,8 @@ class NX47V132Kernel:
         pairs = self.discover_train_pairs()
         if not pairs:
             self.log('SUPERVISED_TRAIN', status='fallback_autonomous_no_pairs')
+            if self.cfg.strict_no_fallback:
+                raise RuntimeError('STRICT_NO_FALLBACK: supervised_train enabled but no train pairs found')
             return
 
         rng = np.random.default_rng(125)
@@ -1228,6 +1268,8 @@ class NX47V132Kernel:
 
         if not x_train_chunks or not x_val_chunks:
             self.log('SUPERVISED_TRAIN', status='fallback_autonomous_empty_chunks')
+            if self.cfg.strict_no_fallback:
+                raise RuntimeError('STRICT_NO_FALLBACK: supervised_train enabled but sampled chunks are empty')
             return
 
         x_train = np.concatenate(x_train_chunks, axis=0)
@@ -1315,6 +1357,8 @@ class NX47V132Kernel:
             train_info = self.supervised_train_info
             train_mode = 'supervised'
         else:
+            if self.cfg.supervised_train and self.cfg.strict_no_fallback:
+                raise RuntimeError('STRICT_NO_FALLBACK: autonomous fallback blocked while supervised_train is enabled')
             rng = np.random.default_rng(47)
             model, train_info = train_nx47_autonomous(selected, self.cfg, rng, self.evolution)
             train_mode = 'autonomous_fallback'
@@ -1525,6 +1569,7 @@ class NX47V132Kernel:
             'simulation_100': sim,
             'f1_ratio_curve': f1_curve,
             'config': asdict(self.cfg),
+            'nx_continuity_matrix': self.continuity_matrix,
             'forensic_report': forensic_report,
         }
         self.metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
@@ -1569,6 +1614,8 @@ if __name__ == '__main__':
         logit_hist_bins=int(os.environ.get('V132_LOGIT_HIST_BINS', '20')),
         v130_log_path=os.environ.get('V132_SOURCE_V130_LOG', 'nx47-vesu-kernel-new-v130.log'),
         export_forensic_v132_report=os.environ.get('V132_EXPORT_FORENSIC_REPORT', '1') == '1',
+        enforce_nx_legacy_continuity=os.environ.get('V132_ENFORCE_NX_CONTINUITY', '1') == '1',
+        strict_no_fallback=os.environ.get('V132_STRICT_NO_FALLBACK', '1') == '1',
     )
     kernel = NX47V132Kernel(
         root=Path(os.environ.get('VESUVIUS_ROOT', '/kaggle/input/competitions/vesuvius-challenge-surface-detection')),
