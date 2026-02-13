@@ -1,5 +1,5 @@
 # ================================================================
-# 01) NX47 V131 Kernel
+# 01) NX47 V132 Kernel
 # 02) Kaggle Vesuvius pipeline: discovery -> load -> features -> segment -> overlay -> package
 # 03) Robust offline dependencies + LZW-safe TIFF I/O + slice-wise adaptive fusion
 # ================================================================
@@ -51,7 +51,7 @@ except Exception:  # pragma: no cover
 
 
 @dataclass
-class V131Config:
+class V132Config:
     top_k_features: int = 6
     train_max_samples: int = 250_000
     l1_candidates: Tuple[float, ...] = (1e-4, 3e-4, 1e-3, 3e-3, 1e-2)
@@ -116,7 +116,7 @@ class V131Config:
 
     # V131 forensic integration (V130 logs + concurrent benchmark)
     v130_log_path: str = 'nx47-vesu-kernel-new-v130.log'
-    export_forensic_v131_report: bool = True
+    export_forensic_v132_report: bool = True
 
 
 @dataclass
@@ -970,23 +970,23 @@ def probe_hardware_metrics() -> Dict[str, Any]:
     }
 
 
-class NX47V131Kernel:
-    def __init__(self, root: Path = Path('/kaggle/input/competitions/vesuvius-challenge-surface-detection'), output_dir: Path = Path('/kaggle/working'), config: V131Config | None = None) -> None:
-        self.version = 'NX47 V131'
+class NX47V132Kernel:
+    def __init__(self, root: Path = Path('/kaggle/input/competitions/vesuvius-challenge-surface-detection'), output_dir: Path = Path('/kaggle/working'), config: V132Config | None = None) -> None:
+        self.version = 'NX47 V132'
         self.root = self._resolve_root(root)
         self.test_dir = self.root / 'test_images'
         self.train_img_dir = self.root / 'train_images'
         self.train_lbl_dir = self.root / 'train_labels'
         self.output_dir = output_dir
-        self.tmp_dir = output_dir / 'tmp_masks_v131'
-        self.overlay_dir = output_dir / 'overlays_v131'
+        self.tmp_dir = output_dir / 'tmp_masks_v132'
+        self.overlay_dir = output_dir / 'overlays_v132'
         self.submission_path = output_dir / 'submission.zip'
-        self.roadmap_path = output_dir / 'v131_roadmap_realtime.json'
-        self.logs_path = output_dir / 'v131_execution_logs.json'
-        self.memory_path = output_dir / 'v131_memory_tracker.json'
-        self.metadata_path = output_dir / 'v131_execution_metadata.json'
-        self.ultra_log_path = output_dir / 'v131_ultra_authentic_360_merkle.jsonl'
-        self.forensic_report_path = output_dir / 'v131_forensic_analysis_report.json'
+        self.roadmap_path = output_dir / 'v132_roadmap_realtime.json'
+        self.logs_path = output_dir / 'v132_execution_logs.json'
+        self.memory_path = output_dir / 'v132_memory_tracker.json'
+        self.metadata_path = output_dir / 'v132_execution_metadata.json'
+        self.ultra_log_path = output_dir / 'v132_ultra_authentic_360_merkle.jsonl'
+        self.forensic_report_path = output_dir / 'v132_forensic_analysis_report.json'
 
         self.cfg = config or V131Config()
         self.evolution = NX47EvolutionMemory()
@@ -1105,46 +1105,30 @@ class NX47V131Kernel:
         text = log_path.read_text(encoding='utf-8', errors='ignore')
         lines = [ln for ln in text.splitlines() if ln.strip()]
         global_stats = {}
-        event_counts: Dict[str, int] = {}
-        file_done = {}
-        for line in lines:
-            start = line.find('{')
-            if start < 0:
-                continue
-            chunk = line[start:]
-            if '"event"' not in chunk:
-                continue
-            try:
-                payload = json.loads(chunk)
-            except Exception:
-                continue
-            ev = str(payload.get('event', ''))
-            event_counts[ev] = event_counts.get(ev, 0) + 1
-            if ev == 'FILE_DONE':
-                file_done = {
-                    'file': payload.get('file'),
-                    'elapsed_s': float(payload.get('elapsed_s', 0.0)),
-                    'calc_per_sec': float(payload.get('calc_per_sec', 0.0)),
-                }
-            if ev == 'GLOBAL_STATS':
-                global_stats = payload
+        for line in lines[::-1]:
+            if '"event": "GLOBAL_STATS"' in line:
+                start = line.find('{')
+                if start >= 0:
+                    try:
+                        global_stats = json.loads(line[start:])
+                    except Exception:
+                        global_stats = {}
+                break
         return {
             'status': 'ok',
             'path': str(log_path),
             'line_count': len(lines),
             'has_exec_complete': any('"event": "EXEC_COMPLETE"' in ln for ln in lines),
-            'event_counts': event_counts,
-            'file_done': file_done,
             'global_stats': global_stats,
         }
 
-    def _build_v131_forensic_report(self) -> Dict[str, Any]:
+    def _build_v132_forensic_report(self) -> Dict[str, Any]:
         v130 = self._parse_v130_log_summary(Path(self.cfg.v130_log_path))
         gs = v130.get('global_stats', {}) if isinstance(v130, dict) else {}
         positives = int(gs.get('pixels_papyrus_without_anchor', 0)) + int(gs.get('pixels_anchor_detected', 0))
         return {
             'version': self.version,
-            'objective': 'Réintégration complète V130 + analyse forensic + plan V131 de A à Z',
+            'objective': 'Réintégration complète V130 + analyse forensic + plan V132 de A à Z',
             'v130_log_forensic': {
                 'summary': v130,
                 'computed_total_positives': positives,
@@ -1162,7 +1146,7 @@ class NX47V131Kernel:
             ],
             'concurrent_comparison': {
                 'public_pipeline': 'single-path drop-in, seuils fixes, propagation binaire',
-                'v131_advantages': [
+                'v132_advantages': [
                     'apprentissage supervisé réel et audité',
                     'calibration de seuil optimisée F-beta',
                     'intégration golden nonces top-K',
@@ -1171,16 +1155,10 @@ class NX47V131Kernel:
                 ],
             },
             'remaining_steps_executed_simultaneously': [
-                'Consolider rapport forensic dans les artefacts V131',
+                'Consolider rapport forensic dans les artefacts V132',
                 "Préparer base CV 5-fold (pilotage par variables d'environnement)",
                 'Préparer extension ensemble multi-backbone (slot unet_25d déjà maintenu)',
                 'Conserver compatibilité Kaggle submission.zip',
-            ],
-            'expert_questions_open': [
-                'Pourquoi val_f1_mean_supervised=0.0 et val_iou_mean_supervised=0.0 ?',
-                'Pourquoi pixels_anchor_detected=0 sur ce run ?',
-                'Pourquoi mutation_applied reste faux sur ce volume ?',
-                'Pourquoi un seul fichier test traité (dataset test actuel) ?',
             ],
         }
 
@@ -1527,10 +1505,10 @@ class NX47V131Kernel:
         self.global_stats['probability_max_observed'] = float(np.max(prob_max_values)) if prob_max_values else 0.0
         self.global_stats['probability_mean_observed'] = float(np.mean(prob_mean_values)) if prob_mean_values else 0.0
         self.global_stats['probability_std_observed'] = float(np.mean(prob_std_values)) if prob_std_values else 0.0
-        self.global_stats['forensic_report_generated'] = bool(self.cfg.export_forensic_v131_report)
+        self.global_stats['forensic_report_generated'] = bool(self.cfg.export_forensic_v132_report)
         self.log('GLOBAL_STATS', **self.global_stats)
 
-        forensic_report = self._build_v131_forensic_report() if self.cfg.export_forensic_v131_report else {'status': 'disabled'}
+        forensic_report = self._build_v132_forensic_report() if self.cfg.export_forensic_v132_report else {'status': 'disabled'}
         self.forensic_report_path.write_text(json.dumps(forensic_report, indent=2, ensure_ascii=False), encoding='utf-8')
 
         metadata = {
@@ -1559,40 +1537,40 @@ class NX47V131Kernel:
 
 
 if __name__ == '__main__':
-    cfg = V131Config(
-        top_k_features=int(os.environ.get('V131_TOP_K_FEATURES', '6')),
-        target_active_ratio=float(os.environ.get('V131_TARGET_ACTIVE_RATIO', '0.03')),
-        full_pixel_trace=os.environ.get('V131_FULL_PIXEL_TRACE', '0') == '1',
-        trace_pixel_budget=int(os.environ.get('V131_TRACE_PIXEL_BUDGET', '4000')),
-        ultra_console_log=os.environ.get('V131_ULTRA_CONSOLE_LOG', '1') == '1',
-        ultra_step_log=os.environ.get('V131_ULTRA_STEP_LOG', '1') == '1',
-        ultra_bit_trace_arrays=os.environ.get('V131_ULTRA_BIT_TRACE_ARRAYS', '1') == '1',
-        ultra_bit_trace_limit=int(os.environ.get('V131_ULTRA_BIT_TRACE_LIMIT', '64')),
-        meta_neurons=int(os.environ.get('V131_META_NEURONS', '3')),
-        run_simulation_100=os.environ.get('V131_RUN_SIMULATION_100', '0') == '1',
-        simulation_export_curve=os.environ.get('V131_SIMULATION_EXPORT_CURVE', '1') == '1',
-        supervised_train=os.environ.get('V131_SUPERVISED_TRAIN', '1') == '1',
-        max_train_volumes=int(os.environ.get('V131_MAX_TRAIN_VOLUMES', '24')),
-        max_val_volumes=int(os.environ.get('V131_MAX_VAL_VOLUMES', '8')),
-        max_samples_per_volume=int(os.environ.get('V131_MAX_SAMPLES_PER_VOLUME', '40000')),
-        pos_neg_ratio=float(os.environ.get('V131_POS_NEG_RATIO', '1.0')),
-        golden_nonce_topk=int(os.environ.get('V131_GOLDEN_NONCE_TOPK', '11')),
-        supervised_epochs=int(os.environ.get('V131_SUPERVISED_EPOCHS', '3')),
-        fbeta_beta=float(os.environ.get('V131_F_BETA', '0.5')),
-        use_unet_25d=os.environ.get('V131_USE_UNET_25D', '1') == '1',
-        unet_in_slices=int(os.environ.get('V131_UNET_IN_SLICES', '7')),
-        unet_base_channels=int(os.environ.get('V131_UNET_BASE_CHANNELS', '24')),
-        patch_size=int(os.environ.get('V131_PATCH_SIZE', '128')),
-        patch_stride=int(os.environ.get('V131_PATCH_STRIDE', '64')),
-        unet_epochs=int(os.environ.get('V131_UNET_EPOCHS', '2')),
-        unet_lr=float(os.environ.get('V131_UNET_LR', '0.001')),
-        unet_batch_size=int(os.environ.get('V131_UNET_BATCH_SIZE', '8')),
-        export_logit_audit=os.environ.get('V131_EXPORT_LOGIT_AUDIT', '1') == '1',
-        logit_hist_bins=int(os.environ.get('V131_LOGIT_HIST_BINS', '20')),
-        v130_log_path=os.environ.get('V131_SOURCE_V130_LOG', 'nx47-vesu-kernel-new-v130.log'),
-        export_forensic_v131_report=os.environ.get('V131_EXPORT_FORENSIC_REPORT', '1') == '1',
+    cfg = V132Config(
+        top_k_features=int(os.environ.get('V132_TOP_K_FEATURES', '6')),
+        target_active_ratio=float(os.environ.get('V132_TARGET_ACTIVE_RATIO', '0.03')),
+        full_pixel_trace=os.environ.get('V132_FULL_PIXEL_TRACE', '0') == '1',
+        trace_pixel_budget=int(os.environ.get('V132_TRACE_PIXEL_BUDGET', '4000')),
+        ultra_console_log=os.environ.get('V132_ULTRA_CONSOLE_LOG', '1') == '1',
+        ultra_step_log=os.environ.get('V132_ULTRA_STEP_LOG', '1') == '1',
+        ultra_bit_trace_arrays=os.environ.get('V132_ULTRA_BIT_TRACE_ARRAYS', '1') == '1',
+        ultra_bit_trace_limit=int(os.environ.get('V132_ULTRA_BIT_TRACE_LIMIT', '64')),
+        meta_neurons=int(os.environ.get('V132_META_NEURONS', '3')),
+        run_simulation_100=os.environ.get('V132_RUN_SIMULATION_100', '0') == '1',
+        simulation_export_curve=os.environ.get('V132_SIMULATION_EXPORT_CURVE', '1') == '1',
+        supervised_train=os.environ.get('V132_SUPERVISED_TRAIN', '1') == '1',
+        max_train_volumes=int(os.environ.get('V132_MAX_TRAIN_VOLUMES', '24')),
+        max_val_volumes=int(os.environ.get('V132_MAX_VAL_VOLUMES', '8')),
+        max_samples_per_volume=int(os.environ.get('V132_MAX_SAMPLES_PER_VOLUME', '40000')),
+        pos_neg_ratio=float(os.environ.get('V132_POS_NEG_RATIO', '1.0')),
+        golden_nonce_topk=int(os.environ.get('V132_GOLDEN_NONCE_TOPK', '11')),
+        supervised_epochs=int(os.environ.get('V132_SUPERVISED_EPOCHS', '3')),
+        fbeta_beta=float(os.environ.get('V132_F_BETA', '0.5')),
+        use_unet_25d=os.environ.get('V132_USE_UNET_25D', '1') == '1',
+        unet_in_slices=int(os.environ.get('V132_UNET_IN_SLICES', '7')),
+        unet_base_channels=int(os.environ.get('V132_UNET_BASE_CHANNELS', '24')),
+        patch_size=int(os.environ.get('V132_PATCH_SIZE', '128')),
+        patch_stride=int(os.environ.get('V132_PATCH_STRIDE', '64')),
+        unet_epochs=int(os.environ.get('V132_UNET_EPOCHS', '2')),
+        unet_lr=float(os.environ.get('V132_UNET_LR', '0.001')),
+        unet_batch_size=int(os.environ.get('V132_UNET_BATCH_SIZE', '8')),
+        export_logit_audit=os.environ.get('V132_EXPORT_LOGIT_AUDIT', '1') == '1',
+        logit_hist_bins=int(os.environ.get('V132_LOGIT_HIST_BINS', '20')),
+        v130_log_path=os.environ.get('V132_SOURCE_V130_LOG', 'nx47-vesu-kernel-new-v130.log'),
+        export_forensic_v132_report=os.environ.get('V132_EXPORT_FORENSIC_REPORT', '1') == '1',
     )
-    kernel = NX47V131Kernel(
+    kernel = NX47V132Kernel(
         root=Path(os.environ.get('VESUVIUS_ROOT', '/kaggle/input/competitions/vesuvius-challenge-surface-detection')),
         output_dir=Path(os.environ.get('VESUVIUS_OUTPUT', '/kaggle/working')),
         config=cfg,
