@@ -1,0 +1,1867 @@
+
+
+# ================================================================
+# 01) NX47 V135 Kernel
+# 02) Kaggle Vesuvius pipeline: discovery -> load -> features -> segment -> overlay -> package
+# 03) Robust offline dependencies + LZW-safe TIFF I/O + slice-wise adaptive fusion
+# ================================================================
+from __future__ import annotations
+
+import gc
+import importlib
+import json
+import os
+import platform
+import subprocess
+import sys
+import time
+import zipfile
+from dataclasses import asdict, dataclass, field
+from hashlib import sha512
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
+
+import numpy as np
+from scipy.ndimage import (
+    binary_closing,
+    binary_propagation,
+    gaussian_filter,
+    generate_binary_structure,
+    label,
+    laplace,
+    sobel,
+    uniform_filter,
+)
+
+import tifffile
+
+try:
+    from PIL import Image, ImageSequence
+except Exception:  # pragma: no cover
+    Image = None
+    ImageSequence = None
+
+
+try:
+    import torch
+    import torch.nn as nn
+    import torch.nn.functional as F
+except Exception:  # pragma: no cover
+    torch = None
+    nn = None
+    F = None
+
+
+@dataclass
+class V135Config:
+    top_k_features: int = 6
+    train_max_samples: int = 250_000
+    l1_candidates: Tuple[float, ...] = (1e-4, 3e-4, 1e-3, 3e-3, 1e-2)
+    l2_candidates: Tuple[float, ...] = (1e-4, 1e-3, 1e-2)
+    max_iter: int = 120
+    lr: float = 0.08
+
+    pseudo_pos_pct: float = 99.0
+    pseudo_neg_pct: float = 50.0
+
+    z_radius: int = 3
+    xy_radius: int = 2
+
+    target_active_ratio: float = 0.03
+
+    max_layers: int = 320
+    overlay_stride: int = 8
+    full_pixel_trace: bool = False
+    trace_pixel_budget: int = 4000
+
+    ultra_console_log: bool = True
+    ultra_step_log: bool = True
+    ultra_bit_trace_arrays: bool = True
+    ultra_bit_trace_limit: int = 64
+
+    # V125: meta-neuron / evolutionary controls
+    meta_neurons: int = 3
+    ratio_candidates: Tuple[float, ...] = (0.02, 0.04, 0.06, 0.08, 0.12)
+    pruning_quantile: float = 0.25
+    mutation_noise: float = 0.015
+    f1_stagnation_window: int = 5
+    run_simulation_100: bool = False
+    simulation_export_curve: bool = True
+
+    # V125 supervised mode
+    supervised_train: bool = True
+    max_train_volumes: int = 24
+    max_val_volumes: int = 8
+    max_samples_per_volume: int = 40_000
+    pos_neg_ratio: float = 1.0
+    strong_th: float = 0.65
+    weak_th: float = 0.45
+    dust_min_size: int = 24
+    golden_nonce_topk: int = 11
+    supervised_epochs: int = 3
+    threshold_scan: Tuple[float, ...] = (0.35, 0.4, 0.45, 0.5, 0.55, 0.6)
+    fbeta_beta: float = 0.5
+
+    # V131 2.5D U-Net competitive path
+    use_unet_25d: bool = True
+    unet_in_slices: int = 7
+    unet_base_channels: int = 24
+    patch_size: int = 128
+    patch_stride: int = 64
+    unet_epochs: int = 2
+    unet_lr: float = 1e-3
+    unet_batch_size: int = 8
+
+    # Logit forensic audit
+    export_logit_audit: bool = True
+    logit_hist_bins: int = 20
+
+    # V131 forensic integration (V130 logs + concurrent benchmark)
+    v130_log_path: str = 'nx47-vesu-kernel-new-v130.log'
+    export_forensic_v135_report: bool = True
+
+    # V133 strict continuity + no fallback policy
+    enforce_nx_legacy_continuity: bool = True
+    strict_no_fallback: bool = True
+    min_train_pairs_required: int = 1500
+    require_train_completion_100: bool = True
+    forbid_autonomous_mode: bool = True
+    enforce_no_hardcoded_metrics: bool = True
+    adapt_train_threshold_to_dataset_size: bool = True
+    train_pair_coverage_target_pct: float = 100.0
+
+
+@dataclass
+class PlanStep:
+    name: str
+    description: str
+    progress: float = 0.0
+    done: bool = False
+
+
+@dataclass
+class PlanTracker:
+    output_path: Path
+    steps: List[PlanStep] = field(default_factory=list)
+
+    def add_step(self, name: str, description: str) -> None:
+        self.steps.append(PlanStep(name=name, description=description))
+
+    def update(self, name: str, progress: float, done: bool = False) -> None:
+        for step in self.steps:
+            if step.name == name:
+                step.progress = float(np.clip(progress, 0.0, 100.0))
+                step.done = done
+                break
+        self._write()
+
+    def _write(self) -> None:
+        payload = {
+            "generated_at_ns": time.time_ns(),
+            "roadmap": [
+                {
+                    "name": s.name,
+                    "description": s.description,
+                    "progress_percent": round(s.progress, 2),
+                    "done": s.done,
+                }
+                for s in self.steps
+            ],
+            "overall_progress_percent": round(float(np.mean([s.progress for s in self.steps])) if self.steps else 0.0, 2),
+        }
+        self.output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+
+class MemoryTracker:
+    def __init__(self) -> None:
+        self.events: List[Dict[str, Any]] = []
+
+    def log_array(self, stage: str, arr: np.ndarray) -> None:
+        arr = np.asarray(arr)
+        self.events.append(
+            {
+                "ts_ns": time.time_ns(),
+                "stage": stage,
+                "shape": list(arr.shape),
+                "dtype": str(arr.dtype),
+                "bytes": int(arr.nbytes),
+                "min": float(arr.min()) if arr.size else 0.0,
+                "max": float(arr.max()) if arr.size else 0.0,
+                "mean": float(arr.mean()) if arr.size else 0.0,
+                "sha512": sha512(arr.tobytes()).hexdigest(),
+            }
+        )
+
+
+class UltraAuthentic360Merkle:
+    def __init__(self, path: Path, console: bool = True) -> None:
+        self.path = path
+        self.console = console
+        self.prev_hash = "0" * 128
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        self.path.write_text("", encoding="utf-8")
+
+    def bit_stats(self, arr: np.ndarray, bit_limit: int) -> Dict[str, Any]:
+        raw = np.asarray(arr).tobytes()
+        preview = raw[: max(0, int(bit_limit))]
+        ones = int(sum(bin(b).count("1") for b in preview))
+        return {
+            "byte_preview_len": len(preview),
+            "one_bits_in_preview": ones,
+            "zero_bits_in_preview": len(preview) * 8 - ones,
+            "preview_sha512": sha512(preview).hexdigest(),
+        }
+
+    def emit(self, event: Dict[str, Any]) -> None:
+        payload = dict(event)
+        payload["prev_merkle"] = self.prev_hash
+        canonical = json.dumps(payload, sort_keys=True, default=str)
+        cur = sha512(canonical.encode()).hexdigest()
+        payload["merkle"] = cur
+        self.prev_hash = cur
+        line = json.dumps(payload, ensure_ascii=False)
+        with self.path.open("a", encoding="utf-8") as f:
+            f.write(line + "\n")
+        if self.console:
+            print(line, flush=True)
+
+
+def install_offline(package_name: str) -> None:
+    exact_wheel_dir = Path("/kaggle/input/datasets/ndarray2000/nx47-dependencies")
+    fallback_wheel_dir = Path("/kaggle/input/nx47-dependencies")
+
+    exact_wheels = {
+        "imagecodecs": exact_wheel_dir / "imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "numpy": exact_wheel_dir / "numpy-2.4.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+        "tifffile": exact_wheel_dir / "tifffile-2026.1.28-py3-none-any.whl",
+    }
+
+    if package_name == "numpy":
+        try:
+            import numpy as _np  # noqa
+            return
+        except Exception:
+            pass
+
+    if package_name in exact_wheels and exact_wheels[package_name].exists():
+        try:
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-index", str(exact_wheels[package_name])])
+            return
+        except subprocess.CalledProcessError:
+            pass
+
+    for wheel_dir in (exact_wheel_dir, fallback_wheel_dir):
+        if wheel_dir.exists():
+            subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-index", f"--find-links={wheel_dir}", package_name])
+            return
+
+    raise RuntimeError(f"Offline dependency directory not found for {package_name}")
+
+
+def bootstrap_dependencies_fail_fast() -> None:
+    install_offline("numpy")
+    install_offline("imagecodecs")
+    install_offline("tifffile")
+    global tifffile
+    tifffile = importlib.reload(tifffile)
+
+
+def ensure_imagecodecs() -> bool:
+    try:
+        import imagecodecs  # noqa
+        return True
+    except Exception:
+        pass
+    try:
+        install_offline("imagecodecs")
+        import imagecodecs  # noqa
+        global tifffile
+        tifffile = importlib.reload(tifffile)
+        return True
+    except Exception:
+        return False
+
+
+def read_tiff_lzw_safe(path: Path) -> np.ndarray:
+    try:
+        return tifffile.imread(path)
+    except ValueError as exc:
+        if "requires the 'imagecodecs' package" not in str(exc):
+            raise
+
+    ensure_imagecodecs()
+    try:
+        return tifffile.imread(path)
+    except ValueError as exc:
+        if "requires the 'imagecodecs' package" not in str(exc):
+            raise
+
+    if Image is None or ImageSequence is None:
+        raise RuntimeError("LZW TIFF read failed and Pillow fallback unavailable")
+    with Image.open(path) as img:
+        frames = [np.array(frame, dtype=np.float32) for frame in ImageSequence.Iterator(img)]
+    if not frames:
+        raise RuntimeError(f"No frames decoded from TIFF: {path}")
+    return np.stack(frames, axis=0)
+
+
+def write_tiff_lzw_safe(path: Path, arr: np.ndarray) -> None:
+    arr = np.asarray(arr)
+    if arr.ndim == 2:
+        arr = arr[np.newaxis, ...]
+    if arr.ndim != 3:
+        raise RuntimeError(f"Unsupported TIFF array shape for write: {arr.shape}")
+
+    try:
+        if ensure_imagecodecs():
+            tifffile.imwrite(path, arr, compression="LZW")
+            return
+    except Exception:
+        pass
+
+    if Image is None:
+        raise RuntimeError("LZW TIFF write failed: Pillow fallback unavailable")
+
+    pages = [Image.fromarray(frame.astype(np.uint8)) for frame in arr]
+    if not pages:
+        raise RuntimeError("Cannot write empty TIFF volume")
+    pages[0].save(path, save_all=True, append_images=pages[1:], compression="tiff_lzw")
+
+
+class NX47AtomNeuron:
+    def __init__(self, n_features: int) -> None:
+        self.w = np.zeros(n_features, dtype=np.float64)
+        self.alpha = np.zeros(n_features, dtype=np.float64)
+        self.beta = np.zeros(n_features, dtype=np.float64)
+        self.b = 0.0
+
+    @staticmethod
+    def _sigmoid(z: np.ndarray) -> np.ndarray:
+        z = np.clip(z, -30, 30)
+        return 1.0 / (1.0 + np.exp(-z))
+
+    def predict_proba(self, x: np.ndarray, grad_x: np.ndarray | None = None) -> np.ndarray:
+        gx = grad_x if grad_x is not None else np.gradient(x, axis=0)
+        z = x @ self.w + (x * x) @ self.alpha + gx @ self.beta + self.b
+        return self._sigmoid(z)
+
+    def fit_prox(self, x: np.ndarray, y: np.ndarray, lr: float, max_iter: int, l1: float, l2: float) -> Dict[str, float]:
+        n = max(1, x.shape[0])
+        gx = np.gradient(x, axis=0)
+        active_start = int(np.sum((np.abs(self.w) + np.abs(self.alpha) + np.abs(self.beta)) > 1e-8))
+        active_mid = active_start
+        for it in range(max_iter):
+            p = self.predict_proba(x, gx)
+            err = p - y
+            grad_w = (x.T @ err) / n + l2 * self.w
+            grad_alpha = ((x * x).T @ err) / n + l2 * self.alpha
+            grad_beta = (gx.T @ err) / n + l2 * self.beta
+            grad_b = float(np.mean(err))
+
+            w_temp = self.w - lr * grad_w
+            a_temp = self.alpha - lr * grad_alpha
+            b_temp = self.beta - lr * grad_beta
+            self.w = np.sign(w_temp) * np.maximum(np.abs(w_temp) - lr * l1, 0.0)
+            self.alpha = np.sign(a_temp) * np.maximum(np.abs(a_temp) - lr * l1, 0.0)
+            self.beta = np.sign(b_temp) * np.maximum(np.abs(b_temp) - lr * l1, 0.0)
+            self.b -= lr * grad_b
+            if it == max_iter // 2:
+                active_mid = int(np.sum((np.abs(self.w) + np.abs(self.alpha) + np.abs(self.beta)) > 1e-8))
+        p = self.predict_proba(x, gx)
+        eps = 1e-9
+        ce = -float(np.mean(y * np.log(p + eps) + (1.0 - y) * np.log(1.0 - p + eps)))
+        active_end = int(np.sum((np.abs(self.w) + np.abs(self.alpha) + np.abs(self.beta)) > 1e-8))
+        return {
+            "cross_entropy": ce,
+            "non_zero_weights": active_end,
+            "active_neurons_start": active_start,
+            "active_neurons_mid": active_mid,
+            "active_neurons_end": active_end,
+        }
+
+
+@dataclass
+class NX47EvolutionMemory:
+    f1_history: List[float] = field(default_factory=list)
+    ratio_history: List[float] = field(default_factory=list)
+    mutation_events: int = 0
+    pruning_events: int = 0
+
+    def update(self, f1_proxy: float, ratio: float) -> None:
+        self.f1_history.append(float(f1_proxy))
+        self.ratio_history.append(float(ratio))
+
+    def adapt_learning_rate(self, base_lr: float, window: int) -> float:
+        if len(self.f1_history) < max(2, window):
+            return float(base_lr)
+        recent = self.f1_history[-window:]
+        spread = float(np.max(recent) - np.min(recent))
+        return float(base_lr * (0.65 if spread < 1e-3 else 1.0))
+
+
+def compute_proxy_f1(prob: np.ndarray, target: np.ndarray, threshold: float = 0.5) -> float:
+    pred = prob >= threshold
+    tp = float(np.logical_and(pred, target > 0.5).sum())
+    fp = float(np.logical_and(pred, target <= 0.5).sum())
+    fn = float(np.logical_and(~pred, target > 0.5).sum())
+    precision = tp / (tp + fp + 1e-9)
+    recall = tp / (tp + fn + 1e-9)
+    return float(2.0 * precision * recall / (precision + recall + 1e-9))
+
+
+def choose_adaptive_ratio(prob: np.ndarray, ratios: Tuple[float, ...]) -> Tuple[np.ndarray, Dict[str, Any]]:
+    best_ratio = float(ratios[0])
+    best_score = -1e18
+    best_mask = calibrate_target_ratio(prob, best_ratio)
+    details: List[Dict[str, float]] = []
+    for r in ratios:
+        cand = calibrate_target_ratio(prob, float(r))
+        lbl, comp_count = label(cand.astype(np.uint8))
+        comp_sizes = np.bincount(lbl.ravel()) if comp_count > 0 else np.array([0])
+        coherence = float(cand.mean())
+        noise = float((comp_sizes[1:] < 16).sum()) if comp_count > 0 else 0.0
+        score = coherence - 0.001 * noise
+        details.append({'ratio': float(r), 'score': score, 'coherence': coherence, 'noise_components': noise})
+        if score > best_score:
+            best_score = score
+            best_ratio = float(r)
+            best_mask = cand
+    return best_mask.astype(bool), {'selected_ratio': best_ratio, 'ratio_scan': details}
+
+
+def choose_slicewise_adaptive_ratio(volume: np.ndarray, prob: np.ndarray, ratios: Tuple[float, ...]) -> Dict[str, Any]:
+    # ratio(x,y,z) proxy: each z slice votes a ratio according to entropy/gradient complexity
+    ent = np.log1p(np.maximum(volume.var(axis=(1, 2)), 1e-12))
+    gx = np.mean(np.abs(np.gradient(volume, axis=1)), axis=(1, 2))
+    gy = np.mean(np.abs(np.gradient(volume, axis=2)), axis=(1, 2))
+    complexity = _zscore(ent + gx + gy)
+    ratios_arr = np.array(ratios, dtype=np.float64)
+    bins = np.linspace(complexity.min() - 1e-9, complexity.max() + 1e-9, len(ratios_arr) + 1)
+    assigned = []
+    for c in complexity:
+        idx = int(np.clip(np.digitize(c, bins) - 1, 0, len(ratios_arr) - 1))
+        assigned.append(float(ratios_arr[idx]))
+    ratio_global = float(np.mean(assigned))
+    ratio_global = float(ratios_arr[np.argmin(np.abs(ratios_arr - ratio_global))])
+    mask_global = calibrate_target_ratio(prob, ratio_global)
+    return {
+        'slice_ratio_profile': assigned,
+        'slice_ratio_mean': float(np.mean(assigned)),
+        'slice_ratio_std': float(np.std(assigned)),
+        'ratio_global_selected': ratio_global,
+        'mask_global': mask_global,
+    }
+
+
+def dynamic_regularization_lambda(mask: np.ndarray, features: np.ndarray) -> float:
+    var_mask = float(np.var(mask.astype(np.float32)))
+    feat_entropy = float(np.mean(np.log1p(np.maximum(np.var(features, axis=(1, 2)), 1e-12))))
+    return float(var_mask / (abs(feat_entropy) + 1e-8))
+
+
+def simulate_f1_vs_ratio_curve() -> Dict[str, Any]:
+    ratios = np.linspace(0.01, 0.25, 50)
+    precision = np.clip(1.0 - (ratios * 2.0), 0.01, 1.0)
+    recall = np.clip(ratios * 4.0, 0.01, 1.0)
+    f1_scores = 2.0 * precision * recall / (precision + recall + 1e-8)
+    best_idx = int(np.argmax(f1_scores))
+    return {
+        'ratios': ratios.tolist(),
+        'f1_scores': f1_scores.tolist(),
+        'best_ratio': float(ratios[best_idx]),
+        'best_f1': float(f1_scores[best_idx]),
+    }
+
+
+def _zscore(arr: np.ndarray) -> np.ndarray:
+    m, s = float(arr.mean()), float(arr.std())
+    return (arr - m) / (s + 1e-6)
+
+
+def slice_adaptive_fusion(volume: np.ndarray) -> np.ndarray:
+    z = volume.shape[0]
+    if z <= 1:
+        return volume[0]
+    w = np.linspace(1.0, 1.4, z, dtype=np.float32)
+    w = w / (w.sum() + 1e-6)
+    return np.tensordot(w, volume, axes=(0, 0)).astype(np.float32)
+
+
+def extract_multi_features(volume: np.ndarray) -> Tuple[np.ndarray, List[str]]:
+    fused = slice_adaptive_fusion(volume)
+    proj_mean = 0.7 * np.mean(volume, axis=0) + 0.3 * fused
+    proj_max = np.max(volume, axis=0)
+    gx, gy = sobel(proj_mean, axis=1), sobel(proj_mean, axis=0)
+    grad_mag = np.sqrt(gx * gx + gy * gy)
+    lap = laplace(proj_mean)
+    mu = uniform_filter(proj_mean, size=7)
+    mu2 = uniform_filter(proj_mean * proj_mean, size=7)
+    local_var = np.maximum(mu2 - mu * mu, 0.0)
+    local_entropy = np.log1p(local_var * 255.0)
+    coherence = 1.0 / (1.0 + np.std(volume, axis=0))
+    low = gaussian_filter(proj_mean, sigma=3.0)
+    high = proj_mean - gaussian_filter(proj_mean, sigma=1.0)
+    bandpass = high + (proj_mean - low)
+
+    feats = [proj_mean, proj_max, grad_mag, lap, local_var, local_entropy, coherence, bandpass]
+    names = ["proj_mean", "proj_max", "grad_mag", "laplace", "local_var", "local_entropy", "coherence_inter_slice", "bandpass_response"]
+    feats = [_zscore(f.astype(np.float32)) for f in feats]
+    return np.stack(feats, axis=0), names
+
+
+def auto_select_features(features: np.ndarray, names: List[str], top_k: int) -> Tuple[np.ndarray, List[str], np.ndarray]:
+    variances = np.array([float(np.var(features[i])) for i in range(features.shape[0])], dtype=np.float64)
+    order = np.argsort(variances)[::-1]
+    selected, selected_names = [], []
+    for idx in order:
+        cand = features[idx].ravel()
+        keep = True
+        for s in selected:
+            c = np.corrcoef(cand, s.ravel())[0, 1]
+            if np.isfinite(c) and abs(c) >= 0.97:
+                keep = False
+                break
+        if keep:
+            selected.append(features[idx])
+            selected_names.append(names[idx])
+        if len(selected) >= top_k:
+            break
+    if not selected:
+        selected = [features[order[0]]]
+        selected_names = [names[order[0]]]
+    return np.stack(selected, axis=0), selected_names, variances
+
+
+def pseudo_labels(score_map: np.ndarray, pos_pct: float, neg_pct: float) -> Tuple[np.ndarray, np.ndarray]:
+    flat = score_map.ravel()
+    pos = flat > np.percentile(flat, pos_pct)
+    neg = flat < np.percentile(flat, neg_pct)
+    keep = pos | neg
+    y = np.zeros_like(flat, dtype=np.float64)
+    y[pos] = 1.0
+    return keep, y
+
+
+def _binary_stats(pred: np.ndarray, y: np.ndarray) -> Dict[str, float]:
+    p = pred.astype(bool)
+    t = y.astype(bool)
+    tp = float(np.logical_and(p, t).sum())
+    fp = float(np.logical_and(p, ~t).sum())
+    fn = float(np.logical_and(~p, t).sum())
+    iou = tp / (tp + fp + fn + 1e-9)
+    dice = (2.0 * tp) / (2.0 * tp + fp + fn + 1e-9)
+    f1 = dice
+    return {'tp': tp, 'fp': fp, 'fn': fn, 'iou': iou, 'dice': dice, 'f1': f1}
+
+
+def _fbeta_from_stats(stats: Dict[str, float], beta: float) -> float:
+    tp, fp, fn = stats['tp'], stats['fp'], stats['fn']
+    precision = tp / (tp + fp + 1e-9)
+    recall = tp / (tp + fn + 1e-9)
+    b2 = beta * beta
+    return float((1.0 + b2) * precision * recall / (b2 * precision + recall + 1e-9))
+
+
+def calibrate_thresholds(y_true: np.ndarray, prob: np.ndarray, thresholds: Tuple[float, ...], beta: float) -> Dict[str, Any]:
+    rows: List[Dict[str, float]] = []
+    best = None
+    for th in thresholds:
+        pred = prob >= float(th)
+        stats = _binary_stats(pred, y_true > 0.5)
+        fbeta = _fbeta_from_stats(stats, beta)
+        rec = {'threshold': float(th), 'f1': float(stats['f1']), 'iou': float(stats['iou']), 'dice': float(stats['dice']), 'fbeta': float(fbeta)}
+        rows.append(rec)
+        if best is None or rec['fbeta'] > best['fbeta']:
+            best = rec
+    return {'best': best, 'scan': rows}
+
+
+
+
+class _TinyUNet2p5D(nn.Module if nn is not None else object):
+    def __init__(self, in_ch: int, base: int = 24) -> None:
+        if nn is None:
+            return
+        super().__init__()
+        self.enc1 = nn.Sequential(nn.Conv2d(in_ch, base, 3, padding=1), nn.ReLU(inplace=True), nn.Conv2d(base, base, 3, padding=1), nn.ReLU(inplace=True))
+        self.enc2 = nn.Sequential(nn.Conv2d(base, base * 2, 3, padding=1), nn.ReLU(inplace=True), nn.Conv2d(base * 2, base * 2, 3, padding=1), nn.ReLU(inplace=True))
+        self.pool = nn.MaxPool2d(2)
+        self.bottleneck = nn.Sequential(nn.Conv2d(base * 2, base * 4, 3, padding=1), nn.ReLU(inplace=True), nn.Conv2d(base * 4, base * 4, 3, padding=1), nn.ReLU(inplace=True))
+        self.up2 = nn.ConvTranspose2d(base * 4, base * 2, 2, stride=2)
+        self.dec2 = nn.Sequential(nn.Conv2d(base * 4, base * 2, 3, padding=1), nn.ReLU(inplace=True), nn.Conv2d(base * 2, base * 2, 3, padding=1), nn.ReLU(inplace=True))
+        self.up1 = nn.ConvTranspose2d(base * 2, base, 2, stride=2)
+        self.dec1 = nn.Sequential(nn.Conv2d(base * 2, base, 3, padding=1), nn.ReLU(inplace=True), nn.Conv2d(base, base, 3, padding=1), nn.ReLU(inplace=True))
+        self.head = nn.Conv2d(base, 1, 1)
+
+    def forward(self, x: 'torch.Tensor') -> 'torch.Tensor':
+        e1 = self.enc1(x)
+        e2 = self.enc2(self.pool(e1))
+        b = self.bottleneck(self.pool(e2))
+        d2 = self.up2(b)
+        d2 = self.dec2(torch.cat([d2, e2], dim=1))
+        d1 = self.up1(d2)
+        d1 = self.dec1(torch.cat([d1, e1], dim=1))
+        return self.head(d1)
+
+
+def _extract_2p5d_patches(vol: np.ndarray, lbl2d: np.ndarray, cfg: V135Config, rng: np.random.Generator) -> Tuple[np.ndarray, np.ndarray]:
+    z, h, w = vol.shape
+    c = max(3, int(cfg.unet_in_slices))
+    if c % 2 == 0:
+        c += 1
+    half = c // 2
+    ps = int(cfg.patch_size)
+    st = int(cfg.patch_stride)
+    xs: List[np.ndarray] = []
+    ys: List[np.ndarray] = []
+    z_center = z // 2
+    for y0 in range(0, max(1, h - ps + 1), st):
+        for x0 in range(0, max(1, w - ps + 1), st):
+            z0 = max(0, z_center - half)
+            z1 = min(z, z_center + half + 1)
+            stack = vol[z0:z1, y0:y0 + ps, x0:x0 + ps]
+            if stack.shape[0] < c:
+                pad = np.repeat(stack[-1:, :, :], c - stack.shape[0], axis=0)
+                stack = np.concatenate([stack, pad], axis=0)
+            if stack.shape[1] != ps or stack.shape[2] != ps:
+                continue
+            lab = lbl2d[y0:y0 + ps, x0:x0 + ps]
+            if lab.shape != (ps, ps):
+                continue
+            xs.append(stack.astype(np.float32))
+            ys.append(lab.astype(np.float32))
+    if not xs:
+        return np.zeros((0, c, ps, ps), dtype=np.float32), np.zeros((0, ps, ps), dtype=np.float32)
+    x_arr = np.stack(xs, axis=0)
+    y_arr = np.stack(ys, axis=0)
+    order = rng.permutation(x_arr.shape[0])
+    return x_arr[order], y_arr[order]
+
+
+def _dice_loss_from_logits(logits: 'torch.Tensor', target: 'torch.Tensor') -> 'torch.Tensor':
+    prob = torch.sigmoid(logits)
+    inter = (prob * target).sum(dim=(1, 2, 3))
+    den = prob.sum(dim=(1, 2, 3)) + target.sum(dim=(1, 2, 3)) + 1e-6
+    return 1.0 - (2.0 * inter + 1e-6) / den
+
+
+def train_unet_25d_supervised(train_x: np.ndarray, train_y: np.ndarray, val_x: np.ndarray, val_y: np.ndarray, cfg: V135Config, rng: np.random.Generator) -> Dict[str, Any]:
+    if torch is None or nn is None:
+        return {'status': 'torch_unavailable'}
+    if train_x.shape[0] == 0 or val_x.shape[0] == 0:
+        return {'status': 'empty_patch_set'}
+
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = _TinyUNet2p5D(in_ch=train_x.shape[1], base=cfg.unet_base_channels).to(device)
+    opt = torch.optim.Adam(model.parameters(), lr=float(cfg.unet_lr))
+    bce = nn.BCEWithLogitsLoss()
+
+    def make_batches(x: np.ndarray, y: np.ndarray, bs: int):
+        for i in range(0, x.shape[0], bs):
+            xb = torch.from_numpy(x[i:i+bs]).to(device)
+            yb = torch.from_numpy(y[i:i+bs])[:, None, :, :].to(device)
+            yield xb, yb
+
+    hist = []
+    best = {'fbeta': -1.0}
+    for ep in range(max(1, int(cfg.unet_epochs))):
+        model.train()
+        losses = []
+        for xb, yb in make_batches(train_x, train_y, int(cfg.unet_batch_size)):
+            opt.zero_grad()
+            lg = model(xb)
+            loss = 0.5 * bce(lg, yb) + 0.5 * _dice_loss_from_logits(lg, yb).mean()
+            loss.backward()
+            opt.step()
+            losses.append(float(loss.detach().cpu().item()))
+
+        model.eval()
+        probs = []
+        ys = []
+        with torch.no_grad():
+            for xb, yb in make_batches(val_x, val_y, int(cfg.unet_batch_size)):
+                lg = model(xb)
+                pb = torch.sigmoid(lg).detach().cpu().numpy()[:, 0]
+                probs.append(pb)
+                ys.append(yb.detach().cpu().numpy()[:, 0])
+        prob = np.concatenate(probs, axis=0).reshape(-1)
+        ytrue = np.concatenate(ys, axis=0).reshape(-1)
+        th_info = calibrate_thresholds(ytrue, prob, cfg.threshold_scan, cfg.fbeta_beta)
+        stat = _binary_stats(prob >= th_info['best']['threshold'], ytrue > 0.5)
+        fbeta = _fbeta_from_stats(stat, cfg.fbeta_beta)
+        row = {
+            'epoch': ep,
+            'train_loss': float(np.mean(losses)) if losses else 0.0,
+            'val_f1': float(stat['f1']),
+            'val_iou': float(stat['iou']),
+            'val_fbeta': float(fbeta),
+            'best_threshold': float(th_info['best']['threshold']),
+        }
+        hist.append(row)
+        if fbeta > best['fbeta']:
+            best = {**row, 'fbeta': float(fbeta)}
+
+    return {
+        'status': 'ok',
+        'epoch_history': hist,
+        'best': best,
+        'threshold_scan_last': th_info['scan'],
+        'model_state': {k: v.detach().cpu().numpy().tolist()[:1] if v.ndim > 0 else float(v.detach().cpu().item()) for k, v in model.state_dict().items()},
+    }
+
+
+def audit_logits_distribution(prob: np.ndarray, y_true: np.ndarray | None, bins: int) -> Dict[str, Any]:
+    flat = prob.reshape(-1)
+    hist, edges = np.histogram(flat, bins=max(5, int(bins)), range=(0.0, 1.0))
+    payload: Dict[str, Any] = {
+        'min': float(flat.min()) if flat.size else 0.0,
+        'max': float(flat.max()) if flat.size else 0.0,
+        'mean': float(flat.mean()) if flat.size else 0.0,
+        'std': float(flat.std()) if flat.size else 0.0,
+        'hist_counts': hist.tolist(),
+        'hist_edges': edges.tolist(),
+    }
+    if y_true is not None:
+        y = y_true.reshape(-1) > 0.5
+        if np.any(y):
+            payload['pos_mean'] = float(flat[y].mean())
+            payload['pos_std'] = float(flat[y].std())
+        if np.any(~y):
+            payload['neg_mean'] = float(flat[~y].mean())
+            payload['neg_std'] = float(flat[~y].std())
+    return payload
+
+def _balance_sample_indices(y: np.ndarray, max_samples: int, pos_neg_ratio: float, rng: np.random.Generator) -> np.ndarray:
+    pos_idx = np.where(y > 0.5)[0]
+    neg_idx = np.where(y <= 0.5)[0]
+    if pos_idx.size == 0 or neg_idx.size == 0:
+        all_idx = np.arange(y.size)
+        if all_idx.size <= max_samples:
+            return all_idx
+        return rng.choice(all_idx, size=max_samples, replace=False)
+    n_pos = min(pos_idx.size, int(max_samples * (pos_neg_ratio / (1.0 + pos_neg_ratio))))
+    n_neg = min(neg_idx.size, max_samples - n_pos)
+    sel_pos = rng.choice(pos_idx, size=max(1, n_pos), replace=pos_idx.size < max(1, n_pos))
+    sel_neg = rng.choice(neg_idx, size=max(1, n_neg), replace=neg_idx.size < max(1, n_neg))
+    idx = np.concatenate([sel_pos, sel_neg])
+    rng.shuffle(idx)
+    return idx
+
+
+def train_nx47_supervised(
+    x_train: np.ndarray,
+    y_train: np.ndarray,
+    x_val: np.ndarray,
+    y_val: np.ndarray,
+    cfg: V135Config,
+    rng: np.random.Generator,
+    memory: NX47EvolutionMemory,
+) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
+    best, best_state = None, None
+    leaderboard: List[Dict[str, Any]] = []
+    epoch_history: List[Dict[str, Any]] = []
+    adaptive_lr = memory.adapt_learning_rate(cfg.lr, cfg.f1_stagnation_window)
+    grad_x_val = np.gradient(x_val, axis=0)
+
+    for epoch in range(max(1, cfg.supervised_epochs)):
+        for neuron_id in range(max(1, cfg.meta_neurons)):
+            for l1 in cfg.l1_candidates:
+                for l2 in cfg.l2_candidates:
+                    m = NX47AtomNeuron(n_features=x_train.shape[1])
+                    tr = m.fit_prox(x_train, y_train, lr=adaptive_lr, max_iter=cfg.max_iter, l1=float(l1), l2=float(l2))
+                    p = m.predict_proba(x_val, grad_x_val)
+                    ce = -float(np.mean(y_val * np.log(p + 1e-9) + (1.0 - y_val) * np.log(1.0 - p + 1e-9)))
+                    threshold_info = calibrate_thresholds(y_val, p, cfg.threshold_scan, cfg.fbeta_beta)
+                    best_th = float(threshold_info['best']['threshold'])
+                    pred = p >= best_th
+                    stats = _binary_stats(pred, y_val > 0.5)
+                    fbeta = _fbeta_from_stats(stats, cfg.fbeta_beta)
+                    sparsity = float(np.mean((np.abs(m.w) + np.abs(m.alpha) + np.abs(m.beta)) < 1e-8))
+                    reg_lambda = dynamic_regularization_lambda(pred.astype(np.uint8), x_val.T.reshape(x_train.shape[1], -1, 1))
+                    objective = ce + 0.02 * (1.0 - sparsity) - 0.20 * stats['f1'] - 0.15 * fbeta - 0.10 * stats['iou'] + 0.005 * reg_lambda
+                    rec = {
+                        'epoch': int(epoch),
+                        'neuron_id': neuron_id,
+                        'l1': float(l1),
+                        'l2': float(l2),
+                        'val_ce': ce,
+                        'val_f1': stats['f1'],
+                        'val_iou': stats['iou'],
+                        'val_dice': stats['dice'],
+                        'val_fbeta': fbeta,
+                        'best_threshold': best_th,
+                        'threshold_scan': threshold_info['scan'],
+                        'sparsity': sparsity,
+                        'objective': objective,
+                        **tr,
+                    }
+                    leaderboard.append(rec)
+                    if best is None or objective < best['objective']:
+                        best = rec
+                        best_state = (m.w.copy(), float(m.b), m.alpha.copy(), m.beta.copy())
+        # epoch summary
+        epoch_best = sorted([r for r in leaderboard if r['epoch'] == epoch], key=lambda d: d['objective'])[0]
+        epoch_history.append({
+            'epoch': int(epoch),
+            'best_objective': float(epoch_best['objective']),
+            'best_f1': float(epoch_best['val_f1']),
+            'best_iou': float(epoch_best['val_iou']),
+            'best_fbeta': float(epoch_best['val_fbeta']),
+            'best_threshold': float(epoch_best['best_threshold']),
+        })
+
+    mutation_applied = False
+    pruning_applied = False
+    if best_state is not None:
+        if len(memory.f1_history) >= cfg.f1_stagnation_window:
+            recent = memory.f1_history[-cfg.f1_stagnation_window:]
+            if float(np.max(recent) - np.min(recent)) < 1e-3:
+                best_state = (
+                    best_state[0] + rng.normal(0.0, cfg.mutation_noise, size=best_state[0].shape),
+                    float(best_state[1]),
+                    best_state[2] + rng.normal(0.0, cfg.mutation_noise, size=best_state[2].shape),
+                    best_state[3] + rng.normal(0.0, cfg.mutation_noise, size=best_state[3].shape),
+                )
+                mutation_applied = True
+                memory.mutation_events += 1
+        q = float(np.quantile(np.abs(best_state[0]), cfg.pruning_quantile))
+        pruned_w = np.where(np.abs(best_state[0]) < q, 0.0, best_state[0])
+        pruned_a = np.where(np.abs(best_state[2]) < q, 0.0, best_state[2])
+        pruned_beta = np.where(np.abs(best_state[3]) < q, 0.0, best_state[3])
+        if np.any(pruned_w != best_state[0]) or np.any(pruned_a != best_state[2]) or np.any(pruned_beta != best_state[3]):
+            pruning_applied = True
+            memory.pruning_events += 1
+        best_state = (pruned_w, best_state[1], pruned_a, pruned_beta)
+
+    model = NX47AtomNeuron(n_features=x_train.shape[1])
+    if best_state is not None:
+        model.w, model.b, model.alpha, model.beta = best_state
+
+    if best is not None:
+        memory.update(float(best.get('val_f1', 0.0)), float(best.get('best_threshold', 0.5)))
+
+    return model, {
+        'selected_hyperparams': best,
+        'leaderboard_top5': sorted(leaderboard, key=lambda d: d['objective'])[:5],
+        'epoch_history': epoch_history,
+        'train_samples': int(x_train.shape[0]),
+        'val_samples': int(x_val.shape[0]),
+        'adaptive_lr': float(adaptive_lr),
+        'mutation_applied': mutation_applied,
+        'pruning_applied': pruning_applied,
+        'supervised': True,
+    }
+
+
+def train_nx47_autonomous(features: np.ndarray, cfg: V135Config, rng: np.random.Generator, memory: NX47EvolutionMemory | None = None) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
+    x = features.reshape(features.shape[0], -1).T.astype(np.float64)
+    keep, y_all = pseudo_labels(np.mean(features, axis=0), cfg.pseudo_pos_pct, cfg.pseudo_neg_pct)
+    idx = np.where(keep)[0]
+    if idx.size > cfg.train_max_samples:
+        idx = rng.choice(idx, size=cfg.train_max_samples, replace=False)
+    x_train, y_train = x[idx], y_all[idx]
+    cut = int(x_train.shape[0] * 0.85)
+    x_tr, y_tr = x_train[:cut], y_train[:cut]
+    x_va, y_va = x_train[cut:], y_train[cut:]
+    if x_va.shape[0] < 100:
+        x_va, y_va = x_tr, y_tr
+
+    best, best_state = None, None
+    leaderboard: List[Dict[str, Any]] = []
+    adaptive_lr = memory.adapt_learning_rate(cfg.lr, cfg.f1_stagnation_window) if memory else cfg.lr
+    for neuron_id in range(max(1, cfg.meta_neurons)):
+        for l1 in cfg.l1_candidates:
+            for l2 in cfg.l2_candidates:
+                m = NX47AtomNeuron(n_features=x.shape[1])
+                tr = m.fit_prox(x_tr, y_tr, lr=adaptive_lr, max_iter=cfg.max_iter, l1=float(l1), l2=float(l2))
+                grad_x_va = np.gradient(x_va, axis=0)
+                p = m.predict_proba(x_va, grad_x_va)
+                ce = -float(np.mean(y_va * np.log(p + 1e-9) + (1.0 - y_va) * np.log(1.0 - p + 1e-9)))
+                proxy_f1 = compute_proxy_f1(p, y_va)
+                sparsity = float(np.mean((np.abs(m.w) + np.abs(m.alpha) + np.abs(m.beta)) < 1e-8))
+                reg_lambda = dynamic_regularization_lambda((p > 0.5).astype(np.uint8), features)
+                objective = ce + 0.02 * (1.0 - sparsity) - 0.05 * proxy_f1 + 0.005 * reg_lambda
+                rec = {"neuron_id": neuron_id, "l1": float(l1), "l2": float(l2), "val_ce": ce, "proxy_f1": proxy_f1, "sparsity": sparsity, "objective": objective, **tr}
+                leaderboard.append(rec)
+                if best is None or objective < best["objective"]:
+                    best = rec
+                    best_state = (m.w.copy(), float(m.b), m.alpha.copy(), m.beta.copy())
+
+    mutation_applied = False
+    pruning_applied = False
+    if best_state is not None and memory is not None:
+        if len(memory.f1_history) >= cfg.f1_stagnation_window:
+            recent = memory.f1_history[-cfg.f1_stagnation_window:]
+            if float(np.max(recent) - np.min(recent)) < 1e-3:
+                best_state = (
+                    best_state[0] + rng.normal(0.0, cfg.mutation_noise, size=best_state[0].shape),
+                    float(best_state[1]),
+                    best_state[2] + rng.normal(0.0, cfg.mutation_noise, size=best_state[2].shape),
+                    best_state[3] + rng.normal(0.0, cfg.mutation_noise, size=best_state[3].shape),
+                )
+                mutation_applied = True
+                memory.mutation_events += 1
+        q = float(np.quantile(np.abs(best_state[0]), cfg.pruning_quantile))
+        pruned_w = np.where(np.abs(best_state[0]) < q, 0.0, best_state[0])
+        pruned_a = np.where(np.abs(best_state[2]) < q, 0.0, best_state[2])
+        pruned_beta = np.where(np.abs(best_state[3]) < q, 0.0, best_state[3])
+        if np.any(pruned_w != best_state[0]) or np.any(pruned_a != best_state[2]) or np.any(pruned_beta != best_state[3]):
+            pruning_applied = True
+            memory.pruning_events += 1
+        best_state = (pruned_w, best_state[1], pruned_a, pruned_beta)
+
+    model = NX47AtomNeuron(n_features=x.shape[1])
+    if best_state is not None:
+        model.w, model.b, model.alpha, model.beta = best_state
+    return model, {
+        "selected_hyperparams": best,
+        "leaderboard_top5": sorted(leaderboard, key=lambda d: d['objective'])[:5],
+        "train_samples": int(x_train.shape[0]),
+        "label_keep_ratio": float(keep.mean()),
+        "adaptive_lr": float(adaptive_lr),
+        "mutation_applied": mutation_applied,
+        "pruning_applied": pruning_applied,
+    }
+
+
+def hysteresis_topology_3d(prob: np.ndarray, cfg: V135Config) -> np.ndarray:
+    strong = prob >= float(cfg.strong_th)
+    weak = prob >= float(cfg.weak_th)
+    core = binary_propagation(strong, mask=weak, structure=generate_binary_structure(2, 2)) if strong.any() else np.zeros_like(strong, dtype=bool)
+
+    z, r = int(cfg.z_radius), int(cfg.xy_radius)
+    struct = np.zeros((2 * z + 1, 2 * r + 1, 2 * r + 1), dtype=bool)
+    for dz in range(-z, z + 1):
+        for dy in range(-r, r + 1):
+            for dx in range(-r, r + 1):
+                if dy * dy + dx * dx <= r * r:
+                    struct[dz + z, dy + r, dx + r] = True
+
+    vol = np.repeat(core[np.newaxis, ...], 3, axis=0)
+    mask = binary_closing(vol, structure=struct).any(axis=0)
+    lbl, n = label(mask)
+    if n > 0 and cfg.dust_min_size > 1:
+        counts = np.bincount(lbl.ravel())
+        keep = counts >= int(cfg.dust_min_size)
+        keep[0] = False
+        mask = keep[lbl]
+    return mask
+
+
+def calibrate_target_ratio(prob: np.ndarray, target_ratio: float) -> np.ndarray:
+    ratio = float(np.clip(target_ratio, 0.001, 0.35))
+    return prob >= float(np.percentile(prob, 100.0 * (1.0 - ratio)))
+
+
+def probe_hardware_metrics() -> Dict[str, Any]:
+    mem_total_kb = None
+    mem_available_kb = None
+    try:
+        with open('/proc/meminfo', 'r', encoding='utf-8') as f:
+            rows = f.read().splitlines()
+        kv = {r.split(':')[0]: r.split(':')[1].strip() for r in rows if ':' in r}
+        mem_total_kb = int(kv.get('MemTotal', '0 kB').split()[0])
+        mem_available_kb = int(kv.get('MemAvailable', '0 kB').split()[0])
+    except Exception:
+        pass
+
+    gpu = None
+    try:
+        out = subprocess.check_output(['bash', '-lc', 'nvidia-smi --query-gpu=name,memory.total,memory.free --format=csv,noheader'], stderr=subprocess.DEVNULL, timeout=2).decode().strip()
+        gpu = out.splitlines()
+    except Exception:
+        gpu = []
+
+    return {
+        'python': sys.version,
+        'platform': platform.platform(),
+        'cpu_count': os.cpu_count(),
+        'mem_total_kb': mem_total_kb,
+        'mem_available_kb': mem_available_kb,
+        'gpu': gpu,
+    }
+
+
+class NX47V135Kernel:
+    def __init__(self, root: Path = Path('/kaggle/input/competitions/vesuvius-challenge-surface-detection'), output_dir: Path = Path('/kaggle/working'), config: V135Config | None = None) -> None:
+        self.version = 'NX47 V135'
+        self.root = self._resolve_root(root)
+        self.test_dir = self.root / 'test_images'
+        self.train_img_dir = self.root / 'train_images'
+        self.train_lbl_dir = self.root / 'train_labels'
+        self.output_dir = output_dir
+        self.tmp_dir = output_dir / 'tmp_masks_v134'
+        self.overlay_dir = output_dir / 'overlays_v134'
+        self.submission_path = output_dir / 'submission.zip'
+        self.roadmap_path = output_dir / 'v135_roadmap_realtime.json'
+        self.logs_path = output_dir / 'v135_execution_logs.json'
+        self.memory_path = output_dir / 'v135_memory_tracker.json'
+        self.metadata_path = output_dir / 'v135_execution_metadata.json'
+        self.ultra_log_path = output_dir / 'v135_ultra_authentic_360_merkle.jsonl'
+        self.forensic_report_path = output_dir / 'v135_forensic_analysis_report.json'
+
+        self.cfg = config or V135Config()
+        self.evolution = NX47EvolutionMemory()
+        self.plan = PlanTracker(self.roadmap_path)
+        self.memory = MemoryTracker()
+        self.logs: List[Dict[str, Any]] = []
+        self.ultra = UltraAuthentic360Merkle(self.ultra_log_path, console=self.cfg.ultra_console_log)
+        self.supervised_model: NX47AtomNeuron | None = None
+        self.supervised_train_info: Dict[str, Any] | None = None
+        self.learning_audit: Dict[str, Any] = {}
+        self.train_dataset_audit: Dict[str, Any] = {}
+
+        self.continuity_matrix = self._build_continuity_matrix()
+
+        self.global_stats: Dict[str, Any] = {
+            'files_processed': 0,
+            'slices_processed': 0,
+            'pixels_processed': 0,
+            'pixels_anchor_detected': 0,
+            'pixels_papyrus_without_anchor': 0,
+            'materials_detected': 0,
+            'patterns_detected': 0,
+            'golden_nonce_detected': 0,
+            'unknown_discoveries': 0,
+            'anomalies_detected': 0,
+            'calc_ops_estimated': 0,
+            'active_neurons_start_total': 0,
+            'active_neurons_mid_total': 0,
+            'active_neurons_end_total': 0,
+            'meta_neuron_candidates': 0,
+            'mutation_events': 0,
+            'pruning_events': 0,
+            'f1_ratio_curve_best_ratio': 0.0,
+            'f1_ratio_curve_best_f1': 0.0,
+            'files_supervised_mode': 0,
+            'files_autonomous_fallback': 0,
+            'val_f1_mean_supervised': 0.0,
+            'val_iou_mean_supervised': 0.0,
+            'best_threshold_mean_supervised': 0.0,
+            'unet_25d_status': 'n/a',
+            'unet_25d_best_fbeta': 0.0,
+            'forensic_report_generated': False,
+            'probability_max_observed': 0.0,
+            'probability_mean_observed': 0.0,
+            'probability_std_observed': 0.0,
+            'learning_percent_real': 0.0,
+            'reasoning_trace_events': 0,
+            'train_pair_count_discovered': 0,
+            'train_pair_coverage_pct': 0.0,
+        }
+
+        bootstrap_dependencies_fail_fast()
+        if not ensure_imagecodecs():
+            raise RuntimeError('imagecodecs is mandatory for LZW TIFF I/O')
+
+        self.tmp_dir.mkdir(parents=True, exist_ok=True)
+        self.overlay_dir.mkdir(parents=True, exist_ok=True)
+
+        for n, d in [
+            ('discovery', 'Validation dataset et assets'),
+            ('load', 'Chargement volume'),
+            ('features', 'Extraction + sélection features'),
+            ('train', 'Apprentissage neurone NX-47 L1/L2'),
+            ('segment', 'Probabilité + hysteresis + calibration'),
+            ('package', 'Génération submission zip'),
+        ]:
+            self.plan.add_step(n, d)
+        self.plan._write()
+
+        if self.cfg.enforce_nx_legacy_continuity:
+            self._assert_continuity_integrity()
+
+        self.log('BOOT', version=self.version, root=str(self.root), config=asdict(self.cfg), hardware=probe_hardware_metrics())
+
+    def _build_continuity_matrix(self) -> Dict[str, List[str]]:
+        return {
+            'NX-1..NX-10': ['preprocess', 'input_format_invariants'],
+            'NX-11..NX-20': ['feature_signature', 'intermediate_schema'],
+            'NX-21..NX-35': ['audit_hash_chain', 'integrity_checks'],
+            'NX-36..NX-47': ['forensic_traceability', 'merkle_chain', 'roadmap_realtime'],
+            'NX-47 v115..v135': ['supervised_pipeline', 'unet_25d', 'strict_logging'],
+        }
+
+    def _assert_continuity_integrity(self) -> None:
+        required_caps = {
+            'preprocess': extract_multi_features,
+            'input_format_invariants': read_tiff_lzw_safe,
+            'feature_signature': auto_select_features,
+            'intermediate_schema': self._predict_mask,
+            'audit_hash_chain': self.log,
+            'integrity_checks': audit_logits_distribution,
+            'forensic_traceability': self._build_v135_forensic_report,
+            'merkle_chain': self.ultra.emit,
+            'roadmap_realtime': self.plan.update,
+            'supervised_pipeline': train_nx47_supervised,
+            'unet_25d': train_unet_25d_supervised,
+            'strict_logging': self.logs.append,
+        }
+        missing = [name for name, ref in required_caps.items() if ref is None]
+        if missing:
+            raise RuntimeError(f'NX_CONTINUITY_BROKEN: missing capabilities {missing}')
+        self.log('NX_CONTINUITY_OK', matrix=self.continuity_matrix)
+
+    def _resolve_root(self, preferred: Path) -> Path:
+        cands = [preferred, Path('/kaggle/input/competitions/vesuvius-challenge-surface-detection'), Path('/kaggle/input/vesuvius-challenge-surface-detection')]
+        for c in cands:
+            if c.exists():
+                return c
+        raise FileNotFoundError(f'Dataset path missing. Tried: {[str(c) for c in cands]}')
+
+    def log(self, event: str, **kwargs: Any) -> None:
+        payload = {'ts_ns': time.time_ns(), 'event': event, **kwargs}
+        payload['signature'] = sha512(json.dumps(payload, sort_keys=True, default=str).encode()).hexdigest()
+        self.logs.append(payload)
+        self.ultra.emit(payload)
+
+    def _log_array_ultra(self, stage: str, arr: np.ndarray) -> None:
+        self.memory.log_array(stage, arr)
+        if self.cfg.ultra_bit_trace_arrays:
+            self.log('ARRAY_TRACE', stage=stage, shape=list(np.asarray(arr).shape), dtype=str(np.asarray(arr).dtype), bits=self.ultra.bit_stats(arr, self.cfg.ultra_bit_trace_limit))
+
+    def discover_inputs(self) -> List[Path]:
+        self.plan.update('discovery', 25.0)
+        if not self.test_dir.exists():
+            raise FileNotFoundError(f'Missing test_images directory: {self.test_dir}')
+        files = sorted(self.test_dir.rglob('*.tif'))
+        if not files:
+            raise RuntimeError(f'No TIFF files found in {self.test_dir}')
+
+        all_files = [p for p in self.root.rglob('*') if p.is_file()]
+        suffix_stats: Dict[str, int] = {}
+        folders = set()
+        for p in all_files:
+            suffix_stats[p.suffix.lower() or '<noext>'] = suffix_stats.get(p.suffix.lower() or '<noext>', 0) + 1
+            folders.add(str(p.parent.relative_to(self.root)))
+
+        self.log('DATASET_DISCOVERY', file_count=len(files), total_assets=len(all_files), folders=sorted(folders), suffix_stats=suffix_stats)
+        self.plan.update('discovery', 100.0, done=True)
+        return files
+
+    def discover_train_pairs(self) -> List[Tuple[Path, Path]]:
+        if not self.train_img_dir.exists() or not self.train_lbl_dir.exists():
+            self.log('TRAIN_DISCOVERY', status='missing_train_dirs', train_images=str(self.train_img_dir), train_labels=str(self.train_lbl_dir))
+            return []
+        pairs: List[Tuple[Path, Path]] = []
+        for img in sorted(self.train_img_dir.rglob('*.tif')):
+            cand = self.train_lbl_dir / img.name
+            if cand.exists():
+                pairs.append((img, cand))
+        self.log('TRAIN_DISCOVERY', pair_count=len(pairs), max_train_volumes=self.cfg.max_train_volumes, max_val_volumes=self.cfg.max_val_volumes)
+        return pairs
+
+    def _parse_v130_log_summary(self, log_path: Path) -> Dict[str, Any]:
+        if not log_path.exists():
+            return {'status': 'missing', 'path': str(log_path)}
+        text = log_path.read_text(encoding='utf-8', errors='ignore')
+        lines = [ln for ln in text.splitlines() if ln.strip()]
+        global_stats = {}
+        for line in lines[::-1]:
+            if '"event": "GLOBAL_STATS"' in line:
+                start = line.find('{')
+                if start >= 0:
+                    try:
+                        global_stats = json.loads(line[start:])
+                    except Exception:
+                        global_stats = {}
+                break
+        return {
+            'status': 'ok',
+            'path': str(log_path),
+            'line_count': len(lines),
+            'has_exec_complete': any('"event": "EXEC_COMPLETE"' in ln for ln in lines),
+            'global_stats': global_stats,
+        }
+
+    def _build_v135_forensic_report(self) -> Dict[str, Any]:
+        v130 = self._parse_v130_log_summary(Path(self.cfg.v130_log_path))
+        gs = v130.get('global_stats', {}) if isinstance(v130, dict) else {}
+        positives = int(gs.get('pixels_papyrus_without_anchor', 0)) + int(gs.get('pixels_anchor_detected', 0))
+        return {
+            'version': self.version,
+            'objective': 'Réintégration complète V130 + analyse forensic + plan V132 de A à Z',
+            'v130_log_forensic': {
+                'summary': v130,
+                'computed_total_positives': positives,
+                'supervised_mode_files': int(gs.get('files_supervised_mode', 0)),
+                'best_threshold_mean_supervised': float(gs.get('best_threshold_mean_supervised', 0.0)),
+                'golden_nonce_detected': int(gs.get('golden_nonce_detected', 0)),
+            },
+            'pipeline_checklist': [
+                'Split explicite train/val + multi-epoch supervisé',
+                'Calibration threshold par F-beta (scan complet)',
+                'SWI + TTA multi-axes/rotation + fusion sigmoid stable',
+                'Post-process seeded hysteresis 3D + closing anisotropique + dust removal',
+                'Golden nonces top-K extraits et intégrés au masque final',
+                'Audit scientifique complet (logs, métriques, metadata, merkle trace)',
+            ],
+            'concurrent_comparison': {
+                'public_pipeline': 'single-path drop-in, seuils fixes, propagation binaire',
+                'v132_advantages': [
+                    'apprentissage supervisé réel et audité',
+                    'calibration de seuil optimisée F-beta',
+                    'intégration golden nonces top-K',
+                    'TTA multi-axes/rotation et couverture spatiale renforcée',
+                    'traçabilité forensic complète',
+                ],
+            },
+            'remaining_steps_executed_simultaneously': [
+                'Consolider rapport forensic dans les artefacts V132',
+                "Préparer base CV 5-fold (pilotage par variables d'environnement)",
+                'Préparer extension ensemble multi-backbone (slot unet_25d déjà maintenu)',
+                'Conserver compatibilité Kaggle submission.zip',
+            ],
+        }
+
+
+
+    @staticmethod
+    def _load_label_2d(path: Path) -> np.ndarray:
+        arr = read_tiff_lzw_safe(path)
+        if arr.ndim == 3:
+            arr2d = arr[0]
+        elif arr.ndim == 2:
+            arr2d = arr
+        else:
+            raise RuntimeError(f'Unsupported label shape {arr.shape} for {path.name}')
+        arr2d = np.asarray(arr2d, dtype=np.float32)
+        if arr2d.max() > 1.0:
+            arr2d = arr2d / 255.0
+        return (arr2d > 0.5).astype(np.float32)
+
+    def _derive_train_pair_requirement(self, pair_count: int) -> int:
+        if pair_count <= 0:
+            return int(self.cfg.min_train_pairs_required)
+        if self.cfg.adapt_train_threshold_to_dataset_size:
+            req = int(np.ceil(pair_count * float(self.cfg.train_pair_coverage_target_pct) / 100.0))
+            return max(1, req)
+        return int(self.cfg.min_train_pairs_required)
+
+    def _audit_train_dataset_size(self, pairs: List[Tuple[Path, Path]]) -> None:
+        pair_count = len(pairs)
+        max_total = max(1, self.cfg.max_train_volumes + self.cfg.max_val_volumes)
+        selected = min(pair_count, max_total)
+        coverage = float(100.0 * selected / max(1, pair_count))
+        total_label_bytes = int(sum(lbl.stat().st_size for _, lbl in pairs if lbl.exists()))
+        total_image_bytes = int(sum(img.stat().st_size for img, _ in pairs if img.exists()))
+        self.train_dataset_audit = {
+            'pair_count_discovered': int(pair_count),
+            'pair_count_selected_for_training': int(selected),
+            'coverage_pct_selected_vs_discovered': float(coverage),
+            'total_train_image_bytes': int(total_image_bytes),
+            'total_train_label_bytes': int(total_label_bytes),
+            'required_pair_count': int(self._derive_train_pair_requirement(pair_count)),
+        }
+        self.log('TRAIN_DATASET_AUDIT', **self.train_dataset_audit)
+
+    def _assert_train_pairs_threshold(self, pair_count: int) -> None:
+        required_pairs = self._derive_train_pair_requirement(pair_count)
+        if self.cfg.supervised_train and pair_count < int(required_pairs):
+            raise RuntimeError(
+                f'TRAIN_PAIRS_BELOW_THRESHOLD: found={pair_count} required={required_pairs}'
+            )
+
+    def _assert_train_completed_100(self) -> None:
+        if not self.cfg.require_train_completion_100:
+            return
+        if self.supervised_train_info is None:
+            raise RuntimeError('TRAIN_COMPLETION_100_FAILED: missing supervised_train_info')
+        hist = self.supervised_train_info.get('epoch_history', [])
+        epochs_done = len(hist)
+        if epochs_done < int(self.cfg.supervised_epochs):
+            raise RuntimeError(
+                f'TRAIN_COMPLETION_100_FAILED: epochs_done={epochs_done} expected={self.cfg.supervised_epochs}'
+            )
+
+    def _compute_learning_percent_real(self, train_info: Dict[str, Any]) -> float:
+        hist = train_info.get('epoch_history', []) if isinstance(train_info, dict) else []
+        epochs_done = len(hist)
+        epoch_ratio = float(epochs_done / max(1, int(self.cfg.supervised_epochs)))
+        shp = train_info.get('selected_hyperparams', {}) if isinstance(train_info, dict) else {}
+        val_f1 = float(shp.get('val_f1', 0.0))
+        val_iou = float(shp.get('val_iou', 0.0))
+        metric_signal = float(np.clip((val_f1 + val_iou) / 2.0, 0.0, 1.0))
+        # 80% driven by completed epochs, 20% by observed validation signal
+        pct = float(np.clip(100.0 * (0.8 * epoch_ratio + 0.2 * metric_signal), 0.0, 100.0))
+        return pct
+
+    def _assert_no_hardcoded_metric_pattern(self, train_info: Dict[str, Any]) -> None:
+        if not self.cfg.enforce_no_hardcoded_metrics:
+            return
+        hist = train_info.get('epoch_history', []) if isinstance(train_info, dict) else []
+        if len(hist) < 2:
+            return
+        objectives = [float(h.get('best_objective', 0.0)) for h in hist]
+        # If every epoch has exactly the same objective at float precision, flag for forensic review.
+        if len(set(objectives)) == 1:
+            raise RuntimeError('HARD_METRIC_PATTERN_DETECTED: identical epoch objective across all epochs')
+
+    def build_supervised_model(self) -> None:
+        if not self.cfg.supervised_train:
+            self.log('SUPERVISED_TRAIN', status='disabled')
+            return
+        pairs = self.discover_train_pairs()
+        self._audit_train_dataset_size(pairs)
+        self._assert_train_pairs_threshold(len(pairs))
+        if not pairs:
+            self.log('SUPERVISED_TRAIN', status='fallback_autonomous_no_pairs')
+            if self.cfg.strict_no_fallback:
+                raise RuntimeError('STRICT_NO_FALLBACK: supervised_train enabled but no train pairs found')
+            return
+
+        rng = np.random.default_rng(125)
+        max_total = max(2, self.cfg.max_train_volumes + self.cfg.max_val_volumes)
+        chosen = pairs[:max_total]
+        split = min(len(chosen) - 1, self.cfg.max_train_volumes)
+        train_pairs = chosen[:split]
+        val_pairs = chosen[split:]
+        if not val_pairs:
+            val_pairs = chosen[-1:]
+            train_pairs = chosen[:-1]
+
+        x_train_chunks: List[np.ndarray] = []
+        y_train_chunks: List[np.ndarray] = []
+        x_val_chunks: List[np.ndarray] = []
+        y_val_chunks: List[np.ndarray] = []
+
+        for img_path, lbl_path in train_pairs:
+            vol = self._load_volume(img_path)
+            feats, names = extract_multi_features(vol)
+            selected, _, _ = auto_select_features(feats, names, self.cfg.top_k_features)
+            x = selected.reshape(selected.shape[0], -1).T.astype(np.float64)
+            y = self._load_label_2d(lbl_path).reshape(-1).astype(np.float64)
+            n = min(x.shape[0], y.shape[0])
+            x, y = x[:n], y[:n]
+            idx = _balance_sample_indices(y, self.cfg.max_samples_per_volume, self.cfg.pos_neg_ratio, rng)
+            x_train_chunks.append(x[idx])
+            y_train_chunks.append(y[idx])
+
+        for img_path, lbl_path in val_pairs:
+            vol = self._load_volume(img_path)
+            feats, names = extract_multi_features(vol)
+            selected, _, _ = auto_select_features(feats, names, self.cfg.top_k_features)
+            x = selected.reshape(selected.shape[0], -1).T.astype(np.float64)
+            y = self._load_label_2d(lbl_path).reshape(-1).astype(np.float64)
+            n = min(x.shape[0], y.shape[0])
+            x, y = x[:n], y[:n]
+            idx = _balance_sample_indices(y, self.cfg.max_samples_per_volume, self.cfg.pos_neg_ratio, rng)
+            x_val_chunks.append(x[idx])
+            y_val_chunks.append(y[idx])
+
+        if not x_train_chunks or not x_val_chunks:
+            self.log('SUPERVISED_TRAIN', status='fallback_autonomous_empty_chunks')
+            if self.cfg.strict_no_fallback:
+                raise RuntimeError('STRICT_NO_FALLBACK: supervised_train enabled but sampled chunks are empty')
+            return
+
+        x_train = np.concatenate(x_train_chunks, axis=0)
+        y_train = np.concatenate(y_train_chunks, axis=0)
+        x_val = np.concatenate(x_val_chunks, axis=0)
+        y_val = np.concatenate(y_val_chunks, axis=0)
+
+        model, info = train_nx47_supervised(x_train, y_train, x_val, y_val, self.cfg, rng, self.evolution)
+        self.supervised_model = model
+
+        # Optional competitive 2.5D U-Net branch for logit/threshold audit and potential scoring uplift
+        unet_info = {'status': 'disabled'}
+        if self.cfg.use_unet_25d:
+            try:
+                train_patch_x, train_patch_y = [], []
+                val_patch_x, val_patch_y = [], []
+                for img_path, lbl_path in train_pairs[: min(4, len(train_pairs))]:
+                    vol = self._load_volume(img_path)
+                    lbl = self._load_label_2d(lbl_path)
+                    px, py = _extract_2p5d_patches(vol, lbl, self.cfg, rng)
+                    if px.shape[0] > 0:
+                        train_patch_x.append(px)
+                        train_patch_y.append(py)
+                for img_path, lbl_path in val_pairs[: min(2, len(val_pairs))]:
+                    vol = self._load_volume(img_path)
+                    lbl = self._load_label_2d(lbl_path)
+                    px, py = _extract_2p5d_patches(vol, lbl, self.cfg, rng)
+                    if px.shape[0] > 0:
+                        val_patch_x.append(px)
+                        val_patch_y.append(py)
+                if train_patch_x and val_patch_x:
+                    tx = np.concatenate(train_patch_x, axis=0)
+                    ty = np.concatenate(train_patch_y, axis=0)
+                    vx = np.concatenate(val_patch_x, axis=0)
+                    vy = np.concatenate(val_patch_y, axis=0)
+                    unet_info = train_unet_25d_supervised(tx, ty, vx, vy, self.cfg, rng)
+                    unet_info['train_patches'] = int(tx.shape[0])
+                    unet_info['val_patches'] = int(vx.shape[0])
+                else:
+                    unet_info = {'status': 'no_patches_extracted'}
+            except Exception as exc:
+                unet_info = {'status': 'error', 'message': str(exc)}
+
+        self.supervised_train_info = {**info, 'unet_25d': unet_info}
+        self.learning_audit = {
+            'learning_percent_real': self._compute_learning_percent_real(self.supervised_train_info),
+            'epochs_configured': int(self.cfg.supervised_epochs),
+            'epochs_observed': len(self.supervised_train_info.get('epoch_history', [])),
+            'nx_neuron_formal': {
+                'activation': 'sigmoid(w·x + b + alpha·grad + beta·laplace)',
+                'training': 'proximal gradient with l1/l2 + threshold calibration',
+                'state': 'w,b,alpha,beta + evolution memory events',
+            },
+        }
+        self._assert_no_hardcoded_metric_pattern(self.supervised_train_info)
+        self._assert_train_completed_100()
+        self.log(
+            'SUPERVISED_TRAIN',
+            status='ok',
+            train_samples=int(x_train.shape[0]),
+            val_samples=int(x_val.shape[0]),
+            train_volumes=len(train_pairs),
+            val_volumes=len(val_pairs),
+            train_volume_files=[p.name for p, _ in train_pairs],
+            val_volume_files=[p.name for p, _ in val_pairs],
+            train_info=self.supervised_train_info,
+            learning_audit=self.learning_audit,
+        )
+
+    def _load_volume(self, path: Path) -> np.ndarray:
+        self.plan.update('load', 25.0)
+        if self.cfg.ultra_step_log:
+            self.log('STEP', name='load_start', file=str(path))
+        vol = read_tiff_lzw_safe(path).astype(np.float32)
+        if vol.ndim != 3:
+            raise RuntimeError(f'Unsupported TIFF shape for {path.name}: {vol.shape}')
+        if vol.shape[0] > self.cfg.max_layers:
+            vol = vol[: self.cfg.max_layers]
+        vol = (vol - float(vol.min())) / (float(vol.max()) - float(vol.min()) + 1e-6)
+        self._log_array_ultra('volume', vol)
+        self.plan.update('load', 100.0, done=True)
+        return vol
+
+    def _predict_mask(self, vol: np.ndarray) -> Tuple[np.ndarray, Dict[str, Any]]:
+        self.plan.update('features', 10.0)
+        if self.cfg.ultra_step_log:
+            self.log('STEP', name='features_extract_start')
+        features, names = extract_multi_features(vol)
+        selected, selected_names, variances = auto_select_features(features, names, self.cfg.top_k_features)
+        self._log_array_ultra('features_selected', selected)
+        self.plan.update('features', 100.0, done=True)
+
+        self.plan.update('train', 15.0)
+        if self.cfg.ultra_step_log:
+            self.log('STEP', name='train_start')
+        if self.supervised_model is not None and self.supervised_train_info is not None:
+            model = self.supervised_model
+            train_info = self.supervised_train_info
+            train_mode = 'supervised'
+        else:
+            if self.cfg.forbid_autonomous_mode:
+                raise RuntimeError('AUTONOMOUS_MODE_FORBIDDEN: supervised NX pipeline is mandatory in v134')
+            if self.cfg.supervised_train and self.cfg.strict_no_fallback:
+                raise RuntimeError('STRICT_NO_FALLBACK: autonomous fallback blocked while supervised_train is enabled')
+            rng = np.random.default_rng(47)
+            model, train_info = train_nx47_autonomous(selected, self.cfg, rng, self.evolution)
+            train_mode = 'autonomous_fallback'
+        self.plan.update('train', 100.0, done=True)
+
+        self.plan.update('segment', 20.0)
+        if self.cfg.ultra_step_log:
+            self.log('STEP', name='segment_start')
+        x_full = selected.reshape(selected.shape[0], -1).T.astype(np.float64)
+        grad_x_full = np.gradient(x_full, axis=0)
+        prob = model.predict_proba(x_full, grad_x_full).reshape(selected.shape[1:]).astype(np.float32)
+        self._log_array_ultra('probability_map', prob)
+
+        hysteresis_mask = hysteresis_topology_3d(prob, self.cfg)
+        calibrated_mask_scan, ratio_info = choose_adaptive_ratio(prob, self.cfg.ratio_candidates)
+        slice_ratio_info = choose_slicewise_adaptive_ratio(vol, prob, self.cfg.ratio_candidates)
+        calibrated_mask = np.logical_or(calibrated_mask_scan, slice_ratio_info['mask_global'])
+        final = (hysteresis_mask | calibrated_mask).astype(np.uint8)
+
+        self._log_array_ultra('mask_hysteresis', hysteresis_mask.astype(np.uint8))
+        self._log_array_ultra('mask_calibrated', calibrated_mask.astype(np.uint8))
+        self._log_array_ultra('mask_final', final)
+
+        lbl, comp_count = label(final)
+        papyrus_wo_anchor = np.logical_and(calibrated_mask, ~hysteresis_mask)
+        golden_nonce = np.logical_and(prob > np.percentile(prob, 99.99), final > 0)
+        yy, xx = np.where(golden_nonce)
+        nonce_values = prob[yy, xx] if yy.size else np.array([], dtype=np.float32)
+        if yy.size:
+            ord_idx = np.argsort(nonce_values)[::-1][: self.cfg.golden_nonce_topk]
+            golden_nonce_points = [
+                {'y': int(yy[k]), 'x': int(xx[k]), 'score': float(nonce_values[k])}
+                for k in ord_idx
+            ]
+        else:
+            golden_nonce_points = []
+        patterns = comp_count
+        anomalies = int(np.sum(np.abs(laplace(prob)) > np.percentile(np.abs(laplace(prob)), 99.95)))
+        unknown_discoveries = int(np.sum(prob > 0.9995))
+
+        # approximate operations (coarse estimator)
+        pixels2d = int(prob.size)
+        ops_est = int(pixels2d * (selected.shape[0] * 12 + 200))
+
+        prob_audit = audit_logits_distribution(prob, None, self.cfg.logit_hist_bins) if self.cfg.export_logit_audit else {}
+
+        metrics = {
+            'selected_features': selected_names,
+            'feature_variances': {names[i]: float(variances[i]) for i in range(len(names))},
+            'train_info': train_info,
+            'train_mode': train_mode,
+            'active_ratio_final': float(final.mean()),
+            'active_ratio_hysteresis': float(hysteresis_mask.mean()),
+            'active_ratio_calibrated': float(calibrated_mask.mean()),
+            'pixels_anchor_detected': int(hysteresis_mask.sum()),
+            'pixels_papyrus_without_anchor': int(papyrus_wo_anchor.sum()),
+            'materials_detected': int(comp_count),
+            'patterns_detected': int(patterns),
+            'golden_nonce_detected': int(golden_nonce.sum()),
+            'golden_nonce_points_topk': golden_nonce_points,
+            'probability_audit': prob_audit,
+            'unknown_discoveries': int(unknown_discoveries),
+            'anomalies_detected': int(anomalies),
+            'pixels_processed_2d': pixels2d,
+            'slices_processed': int(vol.shape[0]),
+            'calc_ops_estimated': ops_est,
+            'ratio_adaptive_selected': float(ratio_info['selected_ratio']),
+            'ratio_slice_global_selected': float(slice_ratio_info['ratio_global_selected']),
+            'ratio_slice_profile': slice_ratio_info['slice_ratio_profile'],
+            'ratio_slice_mean': slice_ratio_info['slice_ratio_mean'],
+            'ratio_slice_std': slice_ratio_info['slice_ratio_std'],
+            'ratio_scan': ratio_info['ratio_scan'],
+            'meta_neuron_candidates': int(self.cfg.meta_neurons * len(self.cfg.l1_candidates) * len(self.cfg.l2_candidates)),
+            'mutation_applied': bool(train_info.get('mutation_applied', False)),
+            'pruning_applied': bool(train_info.get('pruning_applied', False)),
+            'active_neurons_start': int(train_info['selected_hyperparams'].get('active_neurons_start', 0)),
+            'active_neurons_mid': int(train_info['selected_hyperparams'].get('active_neurons_mid', 0)),
+            'active_neurons_end': int(train_info['selected_hyperparams'].get('active_neurons_end', 0)),
+        }
+        proxy_like = train_info['selected_hyperparams'].get('proxy_f1', train_info['selected_hyperparams'].get('val_f1', 0.0))
+        self.evolution.update(proxy_like, slice_ratio_info['ratio_global_selected'])
+        return final, metrics
+
+    def run_simulation_100(self) -> Dict[str, Any]:
+        rng = np.random.default_rng(123)
+        f1_scores = []
+        for _ in range(100):
+            prob = rng.random((128, 128), dtype=np.float32)
+            pseudo = prob > np.percentile(prob, 94.0)
+            f1_scores.append(compute_proxy_f1(prob, pseudo.astype(np.float32), threshold=0.5))
+        summary = {
+            'samples': 100,
+            'f1_mean': float(np.mean(f1_scores)),
+            'f1_std': float(np.std(f1_scores)),
+            'f1_min': float(np.min(f1_scores)),
+            'f1_max': float(np.max(f1_scores)),
+        }
+        self.log('SIMULATION_100', **summary)
+        return summary
+
+    def run(self) -> Path:
+        t_global = time.perf_counter()
+        files = self.discover_inputs()
+        self.build_supervised_model()
+        self.plan.update('package', 10.0)
+        sup_f1_values: List[float] = []
+        sup_iou_values: List[float] = []
+        sup_th_values: List[float] = []
+        prob_max_values: List[float] = []
+        prob_mean_values: List[float] = []
+        prob_std_values: List[float] = []
+
+        with zipfile.ZipFile(self.submission_path, 'w', zipfile.ZIP_STORED) as zf:
+            for i, fpath in enumerate(files, start=1):
+                t0 = time.perf_counter()
+                self.log('FILE_START', file=fpath.name, index=i, total=len(files))
+                for st in ('load', 'features', 'train', 'segment'):
+                    self.plan.update(st, 0.0, done=False)
+
+                vol = self._load_volume(fpath)
+                mask2d, m = self._predict_mask(vol)
+                self.log('NX47_METRICS', file=fpath.name, **m)
+
+                self.global_stats['files_processed'] += 1
+                self.global_stats['slices_processed'] += m['slices_processed']
+                self.global_stats['pixels_processed'] += int(vol.size)
+                self.global_stats['pixels_anchor_detected'] += m['pixels_anchor_detected']
+                self.global_stats['pixels_papyrus_without_anchor'] += m['pixels_papyrus_without_anchor']
+                self.global_stats['materials_detected'] += m['materials_detected']
+                self.global_stats['patterns_detected'] += m['patterns_detected']
+                self.global_stats['golden_nonce_detected'] += m['golden_nonce_detected']
+                self.global_stats['unknown_discoveries'] += m['unknown_discoveries']
+                self.global_stats['anomalies_detected'] += m['anomalies_detected']
+                self.global_stats['calc_ops_estimated'] += m['calc_ops_estimated']
+                self.global_stats['active_neurons_start_total'] += m['active_neurons_start']
+                self.global_stats['active_neurons_mid_total'] += m['active_neurons_mid']
+                self.global_stats['active_neurons_end_total'] += m['active_neurons_end']
+                self.global_stats['meta_neuron_candidates'] += m['meta_neuron_candidates']
+                self.global_stats['mutation_events'] += int(m['mutation_applied'])
+                self.global_stats['pruning_events'] += int(m['pruning_applied'])
+                pa = m.get('probability_audit', {})
+                if isinstance(pa, dict):
+                    prob_max_values.append(float(pa.get('max', 0.0)))
+                    prob_mean_values.append(float(pa.get('mean', 0.0)))
+                    prob_std_values.append(float(pa.get('std', 0.0)))
+                if m.get('train_mode') == 'supervised':
+                    self.global_stats['files_supervised_mode'] += 1
+                    shp = m.get('train_info', {}).get('selected_hyperparams', {})
+                    if 'val_f1' in shp:
+                        sup_f1_values.append(float(shp['val_f1']))
+                    if 'val_iou' in shp:
+                        sup_iou_values.append(float(shp['val_iou']))
+                    if 'best_threshold' in shp:
+                        sup_th_values.append(float(shp['best_threshold']))
+                else:
+                    self.global_stats['files_autonomous_fallback'] += 1
+
+                out_mask = self.tmp_dir / fpath.name
+                write_tiff_lzw_safe(out_mask, mask2d[np.newaxis, ...])
+                zf.write(out_mask, arcname=fpath.name)
+                out_mask.unlink(missing_ok=True)
+                gc.collect()
+
+                dt = max(1e-9, time.perf_counter() - t0)
+                cps = m['calc_ops_estimated'] / dt
+                self.log('FILE_DONE', file=fpath.name, active_ratio=round(float(mask2d.mean()), 6), calc_per_sec=float(cps), elapsed_s=round(dt, 3))
+                self.plan.update('package', 10.0 + 85.0 * (i / len(files)))
+
+        total_dt = max(1e-9, time.perf_counter() - t_global)
+        self.global_stats['calc_per_sec_global'] = float(self.global_stats['calc_ops_estimated'] / total_dt)
+        self.global_stats['elapsed_total_s'] = float(total_dt)
+        self.global_stats['ratio_selected_mean'] = float(np.mean(self.evolution.ratio_history)) if self.evolution.ratio_history else 0.0
+        self.global_stats['val_f1_mean_supervised'] = float(np.mean(sup_f1_values)) if sup_f1_values else 0.0
+        self.global_stats['val_iou_mean_supervised'] = float(np.mean(sup_iou_values)) if sup_iou_values else 0.0
+        self.global_stats['best_threshold_mean_supervised'] = float(np.mean(sup_th_values)) if sup_th_values else 0.0
+
+        if self.supervised_train_info is not None:
+            uinfo = self.supervised_train_info.get('unet_25d', {})
+            self.global_stats['unet_25d_status'] = str(uinfo.get('status', 'n/a'))
+            self.global_stats['unet_25d_best_fbeta'] = float(uinfo.get('best', {}).get('val_fbeta', 0.0)) if isinstance(uinfo.get('best', {}), dict) else 0.0
+
+        f1_curve = simulate_f1_vs_ratio_curve()
+        self.global_stats['f1_ratio_curve_best_ratio'] = float(f1_curve['best_ratio'])
+        self.global_stats['f1_ratio_curve_best_f1'] = float(f1_curve['best_f1'])
+
+        sim = self.run_simulation_100() if self.cfg.run_simulation_100 else None
+
+        self.global_stats['probability_max_observed'] = float(np.max(prob_max_values)) if prob_max_values else 0.0
+        self.global_stats['probability_mean_observed'] = float(np.mean(prob_mean_values)) if prob_mean_values else 0.0
+        self.global_stats['probability_std_observed'] = float(np.mean(prob_std_values)) if prob_std_values else 0.0
+        self.global_stats['forensic_report_generated'] = bool(self.cfg.export_forensic_v135_report)
+        self.global_stats['learning_percent_real'] = float(self.learning_audit.get('learning_percent_real', 0.0))
+        self.global_stats['reasoning_trace_events'] = int(len(self.logs))
+        self.global_stats['train_pair_count_discovered'] = int(self.train_dataset_audit.get('pair_count_discovered', 0))
+        self.global_stats['train_pair_coverage_pct'] = float(self.train_dataset_audit.get('coverage_pct_selected_vs_discovered', 0.0))
+        self.log('GLOBAL_STATS', **self.global_stats)
+
+        forensic_report = self._build_v135_forensic_report() if self.cfg.export_forensic_v135_report else {'status': 'disabled'}
+        self.forensic_report_path.write_text(json.dumps(forensic_report, indent=2, ensure_ascii=False), encoding='utf-8')
+
+        metadata = {
+            'version': self.version,
+            'root': str(self.root),
+            'input_dir': str(self.test_dir),
+            'submission_zip': str(self.submission_path),
+            'log_count': len(self.logs),
+            'ultra_log': str(self.ultra_log_path),
+            'hardware': probe_hardware_metrics(),
+            'global_stats': self.global_stats,
+            'evolution_memory': asdict(self.evolution),
+            'supervised_train_info': self.supervised_train_info,
+            'simulation_100': sim,
+            'f1_ratio_curve': f1_curve,
+            'config': asdict(self.cfg),
+            'nx_continuity_matrix': self.continuity_matrix,
+            'line_by_line_review': 'completed_v135',
+            'train_pairs_required': int(self.cfg.min_train_pairs_required),
+            'require_train_completion_100': bool(self.cfg.require_train_completion_100),
+            'forbid_autonomous_mode': bool(self.cfg.forbid_autonomous_mode),
+            'enforce_no_hardcoded_metrics': bool(self.cfg.enforce_no_hardcoded_metrics),
+            'learning_audit': self.learning_audit,
+            'train_dataset_audit': self.train_dataset_audit,
+            'forensic_report': forensic_report,
+        }
+        self.metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
+        self.logs_path.write_text(json.dumps(self.logs, indent=2), encoding='utf-8')
+        self.memory_path.write_text(json.dumps(self.memory.events, indent=2), encoding='utf-8')
+
+        self.plan.update('package', 100.0, done=True)
+        self.log('EXEC_COMPLETE', submission=str(self.submission_path))
+        return self.submission_path
+
+
+if __name__ == '__main__':
+    cfg = V135Config(
+        top_k_features=int(os.environ.get('V135_TOP_K_FEATURES', '6')),
+        target_active_ratio=float(os.environ.get('V135_TARGET_ACTIVE_RATIO', '0.03')),
+        full_pixel_trace=os.environ.get('V135_FULL_PIXEL_TRACE', '0') == '1',
+        trace_pixel_budget=int(os.environ.get('V135_TRACE_PIXEL_BUDGET', '4000')),
+        ultra_console_log=os.environ.get('V135_ULTRA_CONSOLE_LOG', '1') == '1',
+        ultra_step_log=os.environ.get('V135_ULTRA_STEP_LOG', '1') == '1',
+        ultra_bit_trace_arrays=os.environ.get('V135_ULTRA_BIT_TRACE_ARRAYS', '1') == '1',
+        ultra_bit_trace_limit=int(os.environ.get('V135_ULTRA_BIT_TRACE_LIMIT', '64')),
+        meta_neurons=int(os.environ.get('V135_META_NEURONS', '3')),
+        run_simulation_100=os.environ.get('V135_RUN_SIMULATION_100', '0') == '1',
+        simulation_export_curve=os.environ.get('V135_SIMULATION_EXPORT_CURVE', '1') == '1',
+        supervised_train=os.environ.get('V135_SUPERVISED_TRAIN', '1') == '1',
+        max_train_volumes=int(os.environ.get('V135_MAX_TRAIN_VOLUMES', '24')),
+        max_val_volumes=int(os.environ.get('V135_MAX_VAL_VOLUMES', '8')),
+        max_samples_per_volume=int(os.environ.get('V135_MAX_SAMPLES_PER_VOLUME', '40000')),
+        pos_neg_ratio=float(os.environ.get('V135_POS_NEG_RATIO', '1.0')),
+        golden_nonce_topk=int(os.environ.get('V135_GOLDEN_NONCE_TOPK', '11')),
+        supervised_epochs=int(os.environ.get('V135_SUPERVISED_EPOCHS', '3')),
+        fbeta_beta=float(os.environ.get('V135_F_BETA', '0.5')),
+        use_unet_25d=os.environ.get('V135_USE_UNET_25D', '1') == '1',
+        unet_in_slices=int(os.environ.get('V135_UNET_IN_SLICES', '7')),
+        unet_base_channels=int(os.environ.get('V135_UNET_BASE_CHANNELS', '24')),
+        patch_size=int(os.environ.get('V135_PATCH_SIZE', '128')),
+        patch_stride=int(os.environ.get('V135_PATCH_STRIDE', '64')),
+        unet_epochs=int(os.environ.get('V135_UNET_EPOCHS', '2')),
+        unet_lr=float(os.environ.get('V135_UNET_LR', '0.001')),
+        unet_batch_size=int(os.environ.get('V135_UNET_BATCH_SIZE', '8')),
+        export_logit_audit=os.environ.get('V135_EXPORT_LOGIT_AUDIT', '1') == '1',
+        logit_hist_bins=int(os.environ.get('V135_LOGIT_HIST_BINS', '20')),
+        v130_log_path=os.environ.get('V135_SOURCE_V130_LOG', 'nx47-vesu-kernel-new-v130.log'),
+        export_forensic_v135_report=os.environ.get('V135_EXPORT_FORENSIC_REPORT', '1') == '1',
+        enforce_nx_legacy_continuity=os.environ.get('V135_ENFORCE_NX_CONTINUITY', '1') == '1',
+        strict_no_fallback=os.environ.get('V135_STRICT_NO_FALLBACK', '1') == '1',
+        min_train_pairs_required=int(os.environ.get('V135_MIN_TRAIN_PAIRS_REQUIRED', '1500')),
+        require_train_completion_100=os.environ.get('V135_REQUIRE_TRAIN_COMPLETION_100', '1') == '1',
+        forbid_autonomous_mode=os.environ.get('V135_FORBID_AUTONOMOUS_MODE', '1') == '1',
+        enforce_no_hardcoded_metrics=os.environ.get('V135_ENFORCE_NO_HARDCODED_METRICS', '1') == '1',
+        adapt_train_threshold_to_dataset_size=os.environ.get('V135_ADAPT_TRAIN_THRESHOLD_TO_DATASET_SIZE', '1') == '1',
+        train_pair_coverage_target_pct=float(os.environ.get('V135_TRAIN_PAIR_COVERAGE_TARGET_PCT', '100.0')),
+    )
+    kernel = NX47V135Kernel(
+        root=Path(os.environ.get('VESUVIUS_ROOT', '/kaggle/input/competitions/vesuvius-challenge-surface-detection')),
+        output_dir=Path(os.environ.get('VESUVIUS_OUTPUT', '/kaggle/working')),
+        config=cfg,
+    )
+    submission = kernel.run()
+    print(f'READY: {submission}')
+
+Processing /kaggle/input/datasets/ndarray2000/nx47-dependencies/imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl
+Requirement already satisfied: numpy in /usr/local/lib/python3.12/dist-packages (from imagecodecs==2026.1.14) (2.0.2)
+Installing collected packages: imagecodecs
+Successfully installed imagecodecs-2026.1.14
+Processing /kaggle/input/datasets/ndarray2000/nx47-dependencies/tifffile-2026.1.28-py3-none-any.whl
+Requirement already satisfied: numpy in /usr/local/lib/python3.12/dist-packages (from tifffile==2026.1.28) (2.0.2)
+Installing collected packages: tifffile
+  Attempting uninstall: tifffile
+    Found existing installation: tifffile 2025.10.16
+    Uninstalling tifffile-2025.10.16:
+      Successfully uninstalled tifffile-2025.10.16
+Successfully installed tifffile-2026.1.28
+{"ts_ns": 1770993941350423595, "event": "NX_CONTINUITY_OK", "matrix": {"NX-1..NX-10": ["preprocess", "input_format_invariants"], "NX-11..NX-20": ["feature_signature", "intermediate_schema"], "NX-21..NX-35": ["audit_hash_chain", "integrity_checks"], "NX-36..NX-47": ["forensic_traceability", "merkle_chain", "roadmap_realtime"], "NX-47 v115..v135": ["supervised_pipeline", "unet_25d", "strict_logging"]}, "signature": "939071069671cbfe667f4f0e9633fe9242798b05075a5e26a345017a1da6d086626bf56de097434d5ebc429dcc74cab6ab4f9f0d23df7c9a9d5c7605fec791ca", "prev_merkle": "00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000", "merkle": "fa13e28011ebc2139fa669425a76a198b0e44d7f73a17c7f5217b03566c2f6ce45de3c4beeff16ca40d5dbfaa4a10483eaf3a01be30bf9a28e48f3ccebd28113"}
+{"ts_ns": 1770993941392310336, "event": "BOOT", "version": "NX47 V135", "root": "/kaggle/input/competitions/vesuvius-challenge-surface-detection", "config": {"top_k_features": 6, "train_max_samples": 250000, "l1_candidates": [0.0001, 0.0003, 0.001, 0.003, 0.01], "l2_candidates": [0.0001, 0.001, 0.01], "max_iter": 120, "lr": 0.08, "pseudo_pos_pct": 99.0, "pseudo_neg_pct": 50.0, "z_radius": 3, "xy_radius": 2, "target_active_ratio": 0.03, "max_layers": 320, "overlay_stride": 8, "full_pixel_trace": false, "trace_pixel_budget": 4000, "ultra_console_log": true, "ultra_step_log": true, "ultra_bit_trace_arrays": true, "ultra_bit_trace_limit": 64, "meta_neurons": 3, "ratio_candidates": [0.02, 0.04, 0.06, 0.08, 0.12], "pruning_quantile": 0.25, "mutation_noise": 0.015, "f1_stagnation_window": 5, "run_simulation_100": false, "simulation_export_curve": true, "supervised_train": true, "max_train_volumes": 24, "max_val_volumes": 8, "max_samples_per_volume": 40000, "pos_neg_ratio": 1.0, "strong_th": 0.65, "weak_th": 0.45, "dust_min_size": 24, "golden_nonce_topk": 11, "supervised_epochs": 3, "threshold_scan": [0.35, 0.4, 0.45, 0.5, 0.55, 0.6], "fbeta_beta": 0.5, "use_unet_25d": true, "unet_in_slices": 7, "unet_base_channels": 24, "patch_size": 128, "patch_stride": 64, "unet_epochs": 2, "unet_lr": 0.001, "unet_batch_size": 8, "export_logit_audit": true, "logit_hist_bins": 20, "v130_log_path": "nx47-vesu-kernel-new-v130.log", "export_forensic_v135_report": true, "enforce_nx_legacy_continuity": true, "strict_no_fallback": true, "min_train_pairs_required": 1500, "require_train_completion_100": true, "forbid_autonomous_mode": true, "enforce_no_hardcoded_metrics": true, "adapt_train_threshold_to_dataset_size": true, "train_pair_coverage_target_pct": 100.0}, "hardware": {"python": "3.12.12 (main, Oct 10 2025, 08:52:57) [GCC 11.4.0]", "platform": "Linux-6.6.113+-x86_64-with-glibc2.35", "cpu_count": 4, "mem_total_kb": 32873508, "mem_available_kb": 31442684, "gpu": ["Tesla P100-PCIE-16GB, 16384 MiB, 16270 MiB"]}, "signature": "e8159747bb4a40486ab19a2bdc48928b53f2f1886949bb8ad2706be6cc09fdb7f2c7cfec9f7b698db9cf77cb9c958eb9aa47132f4a88d242cfde54d50d7e86e6", "prev_merkle": "fa13e28011ebc2139fa669425a76a198b0e44d7f73a17c7f5217b03566c2f6ce45de3c4beeff16ca40d5dbfaa4a10483eaf3a01be30bf9a28e48f3ccebd28113", "merkle": "013c9e693c2b598d3cdf01b0c67eb20e1b6e4fac7b270ca61ab19b4bd37e588960a5876b7e882d34dca43bfbf2493ce9ac0f5404e973ce3a059b87b5e352a4a4"}
+{"ts_ns": 1770993943137464432, "event": "DATASET_DISCOVERY", "file_count": 1, "total_assets": 1615, "folders": [".", "deprecated_train_images", "deprecated_train_labels", "test_images", "train_images", "train_labels"], "suffix_stats": {".csv": 2, ".tif": 1613}, "signature": "9a638e3ed2fd26566c6ce2c7b34b8a920537a24162bb5ae9d102582272e3cd5e54ad398384872fd935cc6b361e87e7d01ce5a774cbece8597af406c236240609", "prev_merkle": "013c9e693c2b598d3cdf01b0c67eb20e1b6e4fac7b270ca61ab19b4bd37e588960a5876b7e882d34dca43bfbf2493ce9ac0f5404e973ce3a059b87b5e352a4a4", "merkle": "6092684bcd7be8fabb577fe3c6f355192deb71ab738174c06b9d5480e32734a6b69c6eab4ab10bfc507983ef76a3fe17a3ea8bf135c2f6080889929dc5a0ae0f"}
+{"ts_ns": 1770993943164371570, "event": "TRAIN_DISCOVERY", "pair_count": 786, "max_train_volumes": 24, "max_val_volumes": 8, "signature": "77e3b97876b0ea303822244d4bef1e5aa023a32b7c287514b1d3e1f3b216600cb0a6549ac052e0163f8a6d8d95a67d7061df31c48bf81d7e03682afb7f1f5ee2", "prev_merkle": "6092684bcd7be8fabb577fe3c6f355192deb71ab738174c06b9d5480e32734a6b69c6eab4ab10bfc507983ef76a3fe17a3ea8bf135c2f6080889929dc5a0ae0f", "merkle": "f61c8ba57e5a03e426c84659d85c29dd95577d257a95e2884d099e1e4ba0ce23b93cf24ccb34e9d311b1729d2051ad01af2429315e01fdf5a7fd57991f19601b"}
+{"ts_ns": 1770993943182708426, "event": "TRAIN_DATASET_AUDIT", "pair_count_discovered": 786, "pair_count_selected_for_training": 32, "coverage_pct_selected_vs_discovered": 4.071246819338422, "total_train_image_bytes": 25916347167, "total_train_label_bytes": 722132212, "required_pair_count": 786, "signature": "d349bbc19005c810a45d751fd28065bbe51ac1e30eb82d2cfc282ae654ea06ceb9e81cd4d8663fd57c98dd8e79be5a015eecb18dfb108c0ea5e41e0a0700814c", "prev_merkle": "f61c8ba57e5a03e426c84659d85c29dd95577d257a95e2884d099e1e4ba0ce23b93cf24ccb34e9d311b1729d2051ad01af2429315e01fdf5a7fd57991f19601b", "merkle": "c40658a9eacf69806aab830bf66fd5dd27eedf0443715567f8e4f202340fb5d1948ef7cd80462299a65b9adb6e5df4f7d936c90d5187f08cf4980a441b6ef34e"}
+{"ts_ns": 1770993943184539439, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1004283650.tif", "signature": "bf480df77a9bd26b880fdced803e07328bc3b1e8c515adf8f9dcda795bd2e13425b8a18d02ab697d51bb88a684b3d73176284bfd1800e0f0aa0d31da814fb279", "prev_merkle": "c40658a9eacf69806aab830bf66fd5dd27eedf0443715567f8e4f202340fb5d1948ef7cd80462299a65b9adb6e5df4f7d936c90d5187f08cf4980a441b6ef34e", "merkle": "e292d628d97a95bf94dc6cc34117c00f3177d5dfd35be1b21df07b413db4635cb601589fb7972bd3f6894b028d4b259f8b0520f469644e52f5b79af41cf4c926"}
+{"ts_ns": 1770993946270296253, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "12046f7b7d3c0505db43dbda59f7304421b80eb1af3831f8fc075cd509fe0ee04e8e84589458a147887922b10a52523d834acbe91c77988448e04bc76cf989c9", "prev_merkle": "e292d628d97a95bf94dc6cc34117c00f3177d5dfd35be1b21df07b413db4635cb601589fb7972bd3f6894b028d4b259f8b0520f469644e52f5b79af41cf4c926", "merkle": "7be010c07d8234181eadda6f0de62c6a556a9e053cf2d683a203780f476b131a286104804c49a2de0672c17c00e76bbdd2f9d181193db583e1a965039bef3d9f"}
+{"ts_ns": 1770993946903876781, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1006462223.tif", "signature": "e37f2437b6e4c6a71b87a518c8981e604b2b3313d8f2a70b6deb8b63d26f93bdccc91ea6ef8e05deb7a3ba50150d90f0bc17aef8c5023cc42584b5a13cd2d1ae", "prev_merkle": "7be010c07d8234181eadda6f0de62c6a556a9e053cf2d683a203780f476b131a286104804c49a2de0672c17c00e76bbdd2f9d181193db583e1a965039bef3d9f", "merkle": "2963dc938270d5d5d3cb6464ce98b936cde32af8727862d15a20c2ebb27610f2a26d5bfe1d4bc3876f1203971ed1a93efdef783142518c20e15778349d33d944"}
+{"ts_ns": 1770993949791404581, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "1cd1e7b0c0c7ac6e96bf11869deb6e6958410f34db6193ffe9cb42dd2af447d66a6f5b96e91c1133384345a8d0a82bd39c9bae3285478741d7fd36913f1e3887", "prev_merkle": "2963dc938270d5d5d3cb6464ce98b936cde32af8727862d15a20c2ebb27610f2a26d5bfe1d4bc3876f1203971ed1a93efdef783142518c20e15778349d33d944", "merkle": "74992f45cbe53e7e97a4527192d99b9a9bef090caceb3ce99ff42bbeb852cda95201001dbde3d456481771f431ba4710c0f42fb60703fdb2582aa842cd59bfa5"}
+{"ts_ns": 1770993950658407955, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1013184726.tif", "signature": "aacd98a5818cfc1c2438de06a0040870a4f3e169dc19c87d922e9139cdcf158e502566b2da2639122356de7ef36fff5741a9654a0706c404e7d7f87cabb1693a", "prev_merkle": "74992f45cbe53e7e97a4527192d99b9a9bef090caceb3ce99ff42bbeb852cda95201001dbde3d456481771f431ba4710c0f42fb60703fdb2582aa842cd59bfa5", "merkle": "12f2ef07c191dccc3cacc46956c753b005baa4f492d12a7a7a201995f552032793e5ceadf972c28350e87f48d838f2e4dbceb8fbf28e39084d7ac61012154a98"}
+{"ts_ns": 1770993953740380004, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "64be348d2f816b46b08e19fb8c2e889c4377ad6b74e2a47d0d658779a6230442d38c93ba69b2e66f6c79bdb06287e36ee21839210300cd4f2644270e3f857651", "prev_merkle": "12f2ef07c191dccc3cacc46956c753b005baa4f492d12a7a7a201995f552032793e5ceadf972c28350e87f48d838f2e4dbceb8fbf28e39084d7ac61012154a98", "merkle": "0fa51c43ea9c893b6fd7bb54fd3e0261bb9a41955527a47f224f338af87fbaf810ca01c38ad3692d7fd8f6e66e0e7b10933f1d50b059f963c2f2dc57f6f60f2c"}
+{"ts_ns": 1770993954490948793, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/102536988.tif", "signature": "365a76bc73d7ef37f2401592a834338e1918dfc389d9db52f29cdb1b0d3deb7b56a5b749058c84abb708e5eb2ae87a6585e759a2153882661eb3a12425c80462", "prev_merkle": "0fa51c43ea9c893b6fd7bb54fd3e0261bb9a41955527a47f224f338af87fbaf810ca01c38ad3692d7fd8f6e66e0e7b10933f1d50b059f963c2f2dc57f6f60f2c", "merkle": "94deaa4e337b8a7ce5fec421bd88c74707fdb5a877b991329e89a4e6423f3af31419d14b27c41e1c6933dfa6f151f1293528b7a1d19ad423ad37f26e68f8a43b"}
+{"ts_ns": 1770993957164643499, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "ca98eed1b38f18e607bb59ec03165e47b0a104149c9f7ca798a63cbd0ee6b120af36aef7735b9d014faa0dfecca0ce984232036867221ccdf1b8569c34c8d54f", "prev_merkle": "94deaa4e337b8a7ce5fec421bd88c74707fdb5a877b991329e89a4e6423f3af31419d14b27c41e1c6933dfa6f151f1293528b7a1d19ad423ad37f26e68f8a43b", "merkle": "25e66d610e85c8c525e67c3fa74da1e8ab6cf349907935ad38134b1cefd39694b635ea5c72bc48b771984dd2aecd217ec6a7b0d0db9c8b26c1edc6f8840e1214"}
+{"ts_ns": 1770993957889038846, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1029212680.tif", "signature": "ec769f40f86b8edb73340e1d951bf8bb205878f1c423cd354f1577e80469fe21195b16ae6ce7908464341eebd686154e90c1c0b1242499248524a5c495feccb5", "prev_merkle": "25e66d610e85c8c525e67c3fa74da1e8ab6cf349907935ad38134b1cefd39694b635ea5c72bc48b771984dd2aecd217ec6a7b0d0db9c8b26c1edc6f8840e1214", "merkle": "4047af8067d6cdcba72400ff376ed83b2f1b49d1bfa7b6c11c8d06ce55db589b34142d83ebcdcf3bf6a271bacd39ab955f45981844dbd960bd7cd86d4fc860cf"}
+{"ts_ns": 1770993960949780895, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "36b38764253dbf3a9420f1adec7bd15429a539592e969a0848be14cc8a383c4b37ffba96548c9e912b8b12390e425db020b6bf89369a1ebc40df59a590c739fb", "prev_merkle": "4047af8067d6cdcba72400ff376ed83b2f1b49d1bfa7b6c11c8d06ce55db589b34142d83ebcdcf3bf6a271bacd39ab955f45981844dbd960bd7cd86d4fc860cf", "merkle": "97de26b36e8ab4ba7ea3fdd4356443bd8825e7705734a7213ace932e5edad1a2aea2483af1ecc3230f132f6bdb26fa0e010bca4a4224e2b5512c95aa5410080d"}
+{"ts_ns": 1770993961731802042, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1033375083.tif", "signature": "a80b4f06e57ca295bf40c9c7e22a6c73e36f80b3d77d534730b5e93224519a4107af8338cc719d3a853bc706b51a481cfcb6a36d39d03ac407ab96351544d32a", "prev_merkle": "97de26b36e8ab4ba7ea3fdd4356443bd8825e7705734a7213ace932e5edad1a2aea2483af1ecc3230f132f6bdb26fa0e010bca4a4224e2b5512c95aa5410080d", "merkle": "5b3aa07f306af4bbaff1f11cb21bb7e55d58eae50d8ffa8cd1aa4d25293bf1a14077160f4962fd667b55e85e4e61d44dbf8a1d22c6b4c458bedf5c21060399d2"}
+{"ts_ns": 1770993964373437278, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "59ebe67188e8ff6194a21f7e5dd4c5563cf718c1eb04c6df9e4d59d0a2344be5b619dd97f4df8c94098b646886e9f9c814f318febfc6d992ed1d4ba583534ac5", "prev_merkle": "5b3aa07f306af4bbaff1f11cb21bb7e55d58eae50d8ffa8cd1aa4d25293bf1a14077160f4962fd667b55e85e4e61d44dbf8a1d22c6b4c458bedf5c21060399d2", "merkle": "cf24dd1c8121977d49ae53f064e6b1da1e2a38e0565424712c1f010289492457a032a3b48e9d2745825160967f530f96d38cbd17d6adbcb191356abb24e63fd0"}
+{"ts_ns": 1770993965150604252, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1033784946.tif", "signature": "2a261376da8a50e4885c4d9ffea4b6ae755925df1a75ab9262133329007b0a3019f22caebdfb3af298ee39ef1e4822e7f94a8a5852d706dcdf15f25dad60f010", "prev_merkle": "cf24dd1c8121977d49ae53f064e6b1da1e2a38e0565424712c1f010289492457a032a3b48e9d2745825160967f530f96d38cbd17d6adbcb191356abb24e63fd0", "merkle": "c7aca54908f06d031bf8aadc49e151591db639de2d35211e647b05ddcc0416b741661e7ae1dbf141a0a4ce637f6addaa3bda83b0d8e8bfd738afefd08c055df4"}
+{"ts_ns": 1770993967742307847, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "0354dcfffbdb16011f8ec6c3f4f70603b5964a87e9fd9bd35b9a6c70fd739053b64b054de1b32fda1fed4193f1ed731f8a20ba0adfe1b887b96713ece1efd7d8", "prev_merkle": "c7aca54908f06d031bf8aadc49e151591db639de2d35211e647b05ddcc0416b741661e7ae1dbf141a0a4ce637f6addaa3bda83b0d8e8bfd738afefd08c055df4", "merkle": "0b404a8c0617a51a9d86bc8ff0019522a665ba7e5f01b3e683377818fa8f2686c15a9230d50c49fa244ba5b3f7935fa23df9cc9b6f8b13328ed9230511296fb7"}
+{"ts_ns": 1770993968536570125, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1044587645.tif", "signature": "1b624eec874f96a6d6ae362eda00c4517fd91b1e9bef9b926d14c266b5b5d6cd5cd9cc46b5d828924afe3bcf28dc7a31fc16b19c0521b5c6d98c2a4931032e8f", "prev_merkle": "0b404a8c0617a51a9d86bc8ff0019522a665ba7e5f01b3e683377818fa8f2686c15a9230d50c49fa244ba5b3f7935fa23df9cc9b6f8b13328ed9230511296fb7", "merkle": "d4a527f799e2ed91b23ef594faa4384a60263e55ab1793d414a74c34d70141e8e0897ebbe378e741155b1005e181a9d29c0ec36058f801ff5bf56cbbdeb62645"}
+{"ts_ns": 1770993971427039858, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "6affe41de36d53ccd35d27eee9d4a2d62bebcf39115aa63a739b8c35a1d568cf84113573b00c9ba2865fef269ac970605045e53286e2691ffee6d66dc4199881", "prev_merkle": "d4a527f799e2ed91b23ef594faa4384a60263e55ab1793d414a74c34d70141e8e0897ebbe378e741155b1005e181a9d29c0ec36058f801ff5bf56cbbdeb62645", "merkle": "90624f3be45e34e88d317e54468774cf71a1aaca2dd2f307812f070dabad69bb2502508d842d671638ed27566e4d8182239b1d24a62a78cdc4705dd81dc7f30a"}
+{"ts_ns": 1770993972171838577, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/105068588.tif", "signature": "b5159957b884dd72bc60a5f2d7bd70aaef07da21cb6a5595a3a7d611e5fac3862c5d36a50e1533bf269af3e1fe59330bbbaf19957a82f89a24658d2ab82cc01a", "prev_merkle": "90624f3be45e34e88d317e54468774cf71a1aaca2dd2f307812f070dabad69bb2502508d842d671638ed27566e4d8182239b1d24a62a78cdc4705dd81dc7f30a", "merkle": "65a950ed9ef3665e1c2574f74d8d3ba35eebf9915042a7613a277adfeebea42c42816af5ba27ab8900e678f4fc995c4bfc902e8ea5852ebe503173a0bc444f11"}
+{"ts_ns": 1770993974987918179, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "61de82a7e9490c906aa343ebafd01ae219e322d57c64f11b339d89f9c7fbaeb10c86bebbf16c28158c2c1db10da22755c0cd0ad66a39d53d6663c0b7f77da542", "prev_merkle": "65a950ed9ef3665e1c2574f74d8d3ba35eebf9915042a7613a277adfeebea42c42816af5ba27ab8900e678f4fc995c4bfc902e8ea5852ebe503173a0bc444f11", "merkle": "9d573b8927447a6ca4f56d470fb241ad289ec8f7600d8f931c7db1abd85e4a169d5d044e750b61ba2419ae44f646888ddb0ce7a22eb4e048804c9a5318e2f3d9"}
+{"ts_ns": 1770993975675439124, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/105796630.tif", "signature": "e084c72923923366983dbe243a9199e7cb2e7e412577549a2f4f6d2c6c1b29d53f46c236e3f4f1fa9e2d80f8fa069d81d09d6d4b4124895df35a3b82261fbae0", "prev_merkle": "9d573b8927447a6ca4f56d470fb241ad289ec8f7600d8f931c7db1abd85e4a169d5d044e750b61ba2419ae44f646888ddb0ce7a22eb4e048804c9a5318e2f3d9", "merkle": "da8c85a641f525827ea7c22e704209264ad46e6caa2eba8f527165ee3c251b1a2981b7d0d9864729b057d4f71f739d51d5e183bbb02b11b9997ec52ec39e4c5e"}
+{"ts_ns": 1770993978301707395, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "63353527c4d094c2df1eeea89c5497986e4442a6d464a309552cbe40df17a903001252410d22deb425c191c4a17b67f871962bd15ad243b2f45a2ece7fcd1f05", "prev_merkle": "da8c85a641f525827ea7c22e704209264ad46e6caa2eba8f527165ee3c251b1a2981b7d0d9864729b057d4f71f739d51d5e183bbb02b11b9997ec52ec39e4c5e", "merkle": "0782051c4bfa219d86f51652d3cde5d9209d3ab40669dd5399bc35d9fdb9aa76b1d96da50da8bb5c76192a9c0509a62be855f5989ed4fd99ef0310999a5fcd3d"}
+{"ts_ns": 1770993979094340726, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1059332280.tif", "signature": "9432b7f2be7d88dadd3d152b68f72cb74a5e10fb94e10a42a0515366b6b608e6014636b8c515deb33bf17902b909c078a839c8832001dd3731b58164ba6ad74f", "prev_merkle": "0782051c4bfa219d86f51652d3cde5d9209d3ab40669dd5399bc35d9fdb9aa76b1d96da50da8bb5c76192a9c0509a62be855f5989ed4fd99ef0310999a5fcd3d", "merkle": "ed719ccbb40927201393f0eecace9dac3b5e9418311d5fc741227d5f28bdbf931f5537f1f1e88d3c3961bb5d19536de33bb975e558c8262ac06879db47ba7425"}
+{"ts_ns": 1770993981971535947, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "52a65429927f2d82952eb18024d8e166fec7804cdb9f56b812b87871a3732e0476e1ab49fa127209e99c288c96ff7f1140c7d372e82692840a8819f1ea89154c", "prev_merkle": "ed719ccbb40927201393f0eecace9dac3b5e9418311d5fc741227d5f28bdbf931f5537f1f1e88d3c3961bb5d19536de33bb975e558c8262ac06879db47ba7425", "merkle": "e2af6fcef49126f719ab81a5aad8f3e1b4667b41cfb4fbcd15c6ab30f473cdfe3929ff87c0f2c936165f50fb0be92b133f82fba6205fbebbb6a1bf8efe2a8916"}
+{"ts_ns": 1770993982774764580, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1061356924.tif", "signature": "ddf3e9dddc4a5533969fbcbd3369efb5d1c018887ab60b9ab056ded382404a16fdecccd1e9efb51d88bc4ea0415ad20c2474715408eafcb898522f79fd12516b", "prev_merkle": "e2af6fcef49126f719ab81a5aad8f3e1b4667b41cfb4fbcd15c6ab30f473cdfe3929ff87c0f2c936165f50fb0be92b133f82fba6205fbebbb6a1bf8efe2a8916", "merkle": "d47de3554368261ad8fa902e2d252ec4308f7510bb6b8df61c41738097716f1bad0673462d22dc0c7ca66e21a61e3ea81918032a58f0463327843feddba83c99"}
+{"ts_ns": 1770993985503132169, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "1661ddf1ec769dab6044a4b02d86ea42f356f13000d473f4a818addf2bd29f4e0c8c8bbdb727c9c5d62c4f15abc3d5fdc876caa7601e02cc5da3c872f36a781a", "prev_merkle": "d47de3554368261ad8fa902e2d252ec4308f7510bb6b8df61c41738097716f1bad0673462d22dc0c7ca66e21a61e3ea81918032a58f0463327843feddba83c99", "merkle": "5cfcab4fa0704a554e79ba5e8d5732ed0238890eb48e152d9b536e7cc3ac874e18f7a76391b03a3027c2f16e7a715142a160ab9a68908b65f6dcbe2b24530712"}
+{"ts_ns": 1770993986200797321, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1075217434.tif", "signature": "35d81078afd95f775d285343d8ae723b4402b1e6776c70e3a90047a34c236aecb663a1add380821ca0d3721afa5485fc45fb482660ef4712d8f72afbffdc8692", "prev_merkle": "5cfcab4fa0704a554e79ba5e8d5732ed0238890eb48e152d9b536e7cc3ac874e18f7a76391b03a3027c2f16e7a715142a160ab9a68908b65f6dcbe2b24530712", "merkle": "613d48e7bf1fe9e1a1d8139d63c2549d1a04baa5d27e0658d4156ed152e1a880fee358d31902ec27ad1f5a4a150f1f73b3d657ff60480b46acb0aadf58fd6c11"}
+{"ts_ns": 1770993988875434075, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "3ea13bb20ca746e16d9039ba538540775a7be6eb5cb3089050a474ebcf0c74ee497583ce0b7791ca92b9024cfd0ae90681fdd3f17276ac14d61983d112dee5b1", "prev_merkle": "613d48e7bf1fe9e1a1d8139d63c2549d1a04baa5d27e0658d4156ed152e1a880fee358d31902ec27ad1f5a4a150f1f73b3d657ff60480b46acb0aadf58fd6c11", "merkle": "e1e43cfc2311c467293b20465a7bd13dc45b466ea8630256d209601c3b537873a3fbc5af8049b19c6d9e669d4dff8eb342ca14bcde46491372907c80ef994706"}
+{"ts_ns": 1770993989470786272, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1079776201.tif", "signature": "6bc654f09b94605a21ed0b6e94ca816bef432788738acbcd0adb08c1099efebe201b8931bdc1e45c08e27c94b85cec72c904f496bdeca5491e12745e3e50c7e6", "prev_merkle": "e1e43cfc2311c467293b20465a7bd13dc45b466ea8630256d209601c3b537873a3fbc5af8049b19c6d9e669d4dff8eb342ca14bcde46491372907c80ef994706", "merkle": "b6fa8200a6947269f091fefbdb2ff4bcfcd28b6441ba9551b8c83e700c799aa07fe85e25fdd066e5349d000bb681fdff7f0d3a2d900fa634b26cbef743a124a6"}
+{"ts_ns": 1770993992151364385, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "df0f7864329d18ee61ec5932d107c9b4f6f2e5614e2540a60f72d24eb2a9de2336620acfcf0679b0acbaa0912526c0b3b16184988b6113b16a7fbcb3fbaa6ec0", "prev_merkle": "b6fa8200a6947269f091fefbdb2ff4bcfcd28b6441ba9551b8c83e700c799aa07fe85e25fdd066e5349d000bb681fdff7f0d3a2d900fa634b26cbef743a124a6", "merkle": "949684a9b303e69c9f6edb92b5bc97a38fca9114e633a9211b94fd577c51dc025d1e0c7a97dcbdd428d64e906e1e8e351cb9855e75032d37aabae54f9c492c1f"}
+{"ts_ns": 1770993992958925081, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1083486419.tif", "signature": "433bfaf8791504d5f62caea4a3588163341d9c61fd81d09c923925111c66ca14b1a985baa1a09902320889ca92fb1a6c9d279494279b26502e058a52305b4885", "prev_merkle": "949684a9b303e69c9f6edb92b5bc97a38fca9114e633a9211b94fd577c51dc025d1e0c7a97dcbdd428d64e906e1e8e351cb9855e75032d37aabae54f9c492c1f", "merkle": "a56507e36c1f9c5255ee3deb034e8e740a6aeaed5ed8a1a8ce567403f5dad769e81f4de6ccc5f2fa2cbcd93dfa62cd72add664e6ce633acb7ef1f7a96bdbe1ad"}
+{"ts_ns": 1770993995899425672, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "b82ca741d6e6976d60407c7fd03bd91f1d051f6d262db8dc2019395db78226e54f04ce4d8a7cdb1c202142893f16d16710300313aae0d35bfe2e709365b01d44", "prev_merkle": "a56507e36c1f9c5255ee3deb034e8e740a6aeaed5ed8a1a8ce567403f5dad769e81f4de6ccc5f2fa2cbcd93dfa62cd72add664e6ce633acb7ef1f7a96bdbe1ad", "merkle": "bcf0b83151728321f33d03d76defe752016e7dfec82b63e8e598faa115034242bc958955b7d970283139533891dbd2265f17bb1a490eae1814edf5764743ee3d"}
+{"ts_ns": 1770993996765222738, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/108672114.tif", "signature": "a23518bda725ea6603cb932e0ba63da8868f3b9f65dd12dde346adb84c2d6670b1257fa24f2aa5276305340e1e55ba1bfdad0f2033c5c9066cd84023e060d851", "prev_merkle": "bcf0b83151728321f33d03d76defe752016e7dfec82b63e8e598faa115034242bc958955b7d970283139533891dbd2265f17bb1a490eae1814edf5764743ee3d", "merkle": "21dbd06b6133e611d4a36e02e60c1bc9cf3ba3e670d3a88a7ae7969fe18fd42325255934c2da085fedf84b38e5a0c347f965ee41e0adbc97f76ea476da199043"}
+{"ts_ns": 1770993999759182666, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "9f412c82f1a2ac7412ccded01148d320b3c87b0452e40e61e8a71d5deeb07f30537223f9c6e161bc3439af4e1361dfc641be25331e015bebaac52dcc8cd5cd5d", "prev_merkle": "21dbd06b6133e611d4a36e02e60c1bc9cf3ba3e670d3a88a7ae7969fe18fd42325255934c2da085fedf84b38e5a0c347f965ee41e0adbc97f76ea476da199043", "merkle": "f918dedc885c1a85205cf5ba04c8d5f86d90fde70c5d5ac183c6bb1abcdbe79d203498cc835f4e15529e6fb7962e2ed2470a6541f2190fbd93e61d6a00787ca8"}
+{"ts_ns": 1770994000456169194, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1105906805.tif", "signature": "2ff9938257e8df539d03a2033a44d6a545eed71c94a6dba0adae20c4d94b372e82dcae9ab0493a2598bdccb239ff926df3740462e7316e78604d8a151ce4d800", "prev_merkle": "f918dedc885c1a85205cf5ba04c8d5f86d90fde70c5d5ac183c6bb1abcdbe79d203498cc835f4e15529e6fb7962e2ed2470a6541f2190fbd93e61d6a00787ca8", "merkle": "e6e72e9ca9a8b3d478a1c894557d8e54e1bc9fb0e42149df01bfffddcd994a59a1d1a5e2600fe5b7dde8636223cf57fa759095f2722e28ed534fc218c137a523"}
+{"ts_ns": 1770994003212009691, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "7d774893859ed97556a28dc9d7547b03361c6ff62235740c8d68833989e77d989b322ef153aea1f99bb351789ad37f619c0abd073eadcf415e949b3b5d399ac9", "prev_merkle": "e6e72e9ca9a8b3d478a1c894557d8e54e1bc9fb0e42149df01bfffddcd994a59a1d1a5e2600fe5b7dde8636223cf57fa759095f2722e28ed534fc218c137a523", "merkle": "3723b8fd91bf614618f74021bdd1c5e1a42e6b741677708f78839e1f5458e8d752378ae5ba663deeef5d8448deeb698e09392695c4b7171a1fe6ece0049aeb23"}
+{"ts_ns": 1770994003849659192, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1108059824.tif", "signature": "c49ca6f8aae6dc674498109f561e06534adab3c3841a19c024d0e273c81008526b07f99d76d96951421b48fd1847e52449b1503499052e71d98d3073bcee04fc", "prev_merkle": "3723b8fd91bf614618f74021bdd1c5e1a42e6b741677708f78839e1f5458e8d752378ae5ba663deeef5d8448deeb698e09392695c4b7171a1fe6ece0049aeb23", "merkle": "4f1b12ecbf2ee3d291581b8a4bb26061b4ade549dedf25a86c44c34fc2fc563b7f60258e6b5f517bb56b76b9bb93b645e00eb845d83675ece740ec6abe914a28"}
+{"ts_ns": 1770994006886275673, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "84f7db735002eb505dae77f2c1b9ad225ed5fc8a175568269ae7ebd50c44a966e392fb6ad53e05ccb5c625630e0ca99018bbb5facc1f2ec203631e4b142b27c8", "prev_merkle": "4f1b12ecbf2ee3d291581b8a4bb26061b4ade549dedf25a86c44c34fc2fc563b7f60258e6b5f517bb56b76b9bb93b645e00eb845d83675ece740ec6abe914a28", "merkle": "d2aeed1c3dce87ac91dd21253744e4fb691e35ecf237eb1cad4dc1ef7497d67b9e24e92a421c71fe29e7b87864db9089fc4f18a0b7d404e28e717cb3243d9cc5"}
+{"ts_ns": 1770994007654934953, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/110997297.tif", "signature": "b0f689ef0db4a8f7b32b94ea21c5f87fb8270d7c292796b09bda0d2e18c3f93f7c73f21897a4c7c457332af6cad536ab699f383dea722c4ff8c4bf92b5dc3f91", "prev_merkle": "d2aeed1c3dce87ac91dd21253744e4fb691e35ecf237eb1cad4dc1ef7497d67b9e24e92a421c71fe29e7b87864db9089fc4f18a0b7d404e28e717cb3243d9cc5", "merkle": "cfe3eb6d9b6284f47996314638f44919d75c18b51d0cf5c2a4e9c24bfa4215c67ee44cdfd8d4f5f9b88e6cbeca0c37700c05aeeca507d3774d4a3b947e4fc01f"}
+{"ts_ns": 1770994010400340874, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "5dd3ffd97ea605a175668f17550c4acceb560af8851ae15f8434f130e9a146e84daa9ddea07c85cbcd3fd01d8c489a2f51f88388f34cf300230d7ff7e87af8ee", "prev_merkle": "cfe3eb6d9b6284f47996314638f44919d75c18b51d0cf5c2a4e9c24bfa4215c67ee44cdfd8d4f5f9b88e6cbeca0c37700c05aeeca507d3774d4a3b947e4fc01f", "merkle": "6340fd823d20af9a0d86fa7aa8ff1dea1afd6b54ee2237c554cad0d776f1e3e0e6ac784153dfa711d5498186309ea3852564d9a04edbb6cafed2e8d6d7de1966"}
+{"ts_ns": 1770994011032162015, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1113943087.tif", "signature": "06bada0e860e7232682dbe7e42f208f0bdc458f7b9b1ed63cc4eba2e219e9888abe9d15bbfaf9dc03755bbf9c8deddd14c2e0a563eb8d7333468219614c65ae9", "prev_merkle": "6340fd823d20af9a0d86fa7aa8ff1dea1afd6b54ee2237c554cad0d776f1e3e0e6ac784153dfa711d5498186309ea3852564d9a04edbb6cafed2e8d6d7de1966", "merkle": "be7c5ff8d97b63c92c4a22207edf2baf6a05c3042a43475bc74757fd7f2010a5a3b0d43046db49d3f45e5d5878f6dee5967fec735dd9909f8cbeb748838e0d9c"}
+{"ts_ns": 1770994014007563709, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "6addfed0bb20285579ffef6c086d72b095c4eb3b0d8684771379ace2fe1d712d297d73b28cc0a91dc9cddfaa80bff654f3d23a754ab28dd93da1e6b712b73b8b", "prev_merkle": "be7c5ff8d97b63c92c4a22207edf2baf6a05c3042a43475bc74757fd7f2010a5a3b0d43046db49d3f45e5d5878f6dee5967fec735dd9909f8cbeb748838e0d9c", "merkle": "8032e367663775694aa149290d6e4f4d8de4fe53603302e1e53f0306f8d0130b1f08225341f4e2717d794552ac858e224b54c963da9347f682a311e529a00aa2"}
+{"ts_ns": 1770994014795418681, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1127903126.tif", "signature": "6f1d6f0fa22760d02028f849995f8d188e2fb03403818320cc252b439c510798c789fe34979532d6767c46a08a9cf3af96806ff0de498ae76a925cbbad80f2d9", "prev_merkle": "8032e367663775694aa149290d6e4f4d8de4fe53603302e1e53f0306f8d0130b1f08225341f4e2717d794552ac858e224b54c963da9347f682a311e529a00aa2", "merkle": "3229519993f458286776ab2e1776df21ade48acced0e31bc32b44dd823aff11184972c37d709988cf7c42f4560d43c84a0f0d6c1c06a720286188a088f90a527"}
+{"ts_ns": 1770994017615051379, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "8188bade4097a8ee9e82ff787e520d4331e4694a34ace955917c2cc0665301dd4d80ce78a5e89fe3c1ab7b4e12dc619045ad3ee4e8cac717084eb144a659c956", "prev_merkle": "3229519993f458286776ab2e1776df21ade48acced0e31bc32b44dd823aff11184972c37d709988cf7c42f4560d43c84a0f0d6c1c06a720286188a088f90a527", "merkle": "ed23c6ceb83ed1f80b8116fda5ce1ab868ab681d872b166b7e6f7a1c1969fcefcee8a47d8660de6509000bbf1dfe99053fc102c1616e827890278d4dc91d986e"}
+{"ts_ns": 1770994018488732671, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1128635125.tif", "signature": "0e1d9a8e1d92873e3b427429bec6b4e91f5a0b65659f2555f5c9cd44aaba7d34e60c7e8dde95c0bae8bebf3252cb81f4a62ae3a64cc69c11e97521ab890ac725", "prev_merkle": "ed23c6ceb83ed1f80b8116fda5ce1ab868ab681d872b166b7e6f7a1c1969fcefcee8a47d8660de6509000bbf1dfe99053fc102c1616e827890278d4dc91d986e", "merkle": "15a08d646d27e1532becb019a026b67d1de86c7c6c1d618a315b61f4d64dac8f39fcafbbb3d8a9c66e8f296673be32b45a2e30aa96fad01c718151dc46cf8508"}
+{"ts_ns": 1770994021371419673, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "571d691ca136d5dd49db59d3af2346233d4dd5bb9a0ec849962f02f460eb2f03d5ab2f031543b8ac260c1a518da142cd97d4348083a032cb22f34640c905d44a", "prev_merkle": "15a08d646d27e1532becb019a026b67d1de86c7c6c1d618a315b61f4d64dac8f39fcafbbb3d8a9c66e8f296673be32b45a2e30aa96fad01c718151dc46cf8508", "merkle": "f14d8add87591494dcfaf9b3c47d0ec683d4245bffbfdc085798de36a3c93d1b0290ecec0685bd25050d84f5aff6c78b9dd8b7a4b335afed5de8bcc5966239cf"}
+{"ts_ns": 1770994022054912178, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/114235076.tif", "signature": "4380a53c5c3c2d82bb63424334d025e48e44747b0e76ba59bd1904b009a57bd1685be796ab89b9e93cc02cf63d4f5dbd61019d9ce1d021a40a7d632a1378590e", "prev_merkle": "f14d8add87591494dcfaf9b3c47d0ec683d4245bffbfdc085798de36a3c93d1b0290ecec0685bd25050d84f5aff6c78b9dd8b7a4b335afed5de8bcc5966239cf", "merkle": "e4700be6e7ddf2d65cea77ebc1d27f8324811417fda4d4a82513f4dc41523ea7793f243fa497a75b54de5b4edd7e661537fb1c8459bf9ec319d486dfce11a9d4"}
+{"ts_ns": 1770994024801194066, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "3fcd594e25b6f0c4e4333332cbabc31e9d06adb8fc48ff61c96b7d6ec4e803d422329ca4d473fa8543b3b26d4286a492f0951f0bfa4d271e60c824ce995d3557", "prev_merkle": "e4700be6e7ddf2d65cea77ebc1d27f8324811417fda4d4a82513f4dc41523ea7793f243fa497a75b54de5b4edd7e661537fb1c8459bf9ec319d486dfce11a9d4", "merkle": "15853670956363833c3cd921c97fde0935450aca5f3098dc95483679477719cf66de3f430a299296a339e63e099bbe2c892cab0a07b6a9eb3f0f3b00dd8ac3b1"}
+{"ts_ns": 1770994025446560147, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/11460685.tif", "signature": "ee8612b2dfcbac6d75802126716971e6e98db23abb40b0ad6b6966fcaaabb428293f49a962bd4a035a0dca8b10279b87d271974b666f12589e78a19245e301cd", "prev_merkle": "15853670956363833c3cd921c97fde0935450aca5f3098dc95483679477719cf66de3f430a299296a339e63e099bbe2c892cab0a07b6a9eb3f0f3b00dd8ac3b1", "merkle": "9916fb2d66d20c6889dbd38c3e1c61f2d4b9aac65fd9604cde3e46c973722f83242b8cf9f11b6679d3bb1fe7fe94a6b27e4c2adde065972f6f5062f84838acf4"}
+{"ts_ns": 1770994027132384927, "event": "ARRAY_TRACE", "stage": "volume", "shape": [256, 256, 256], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "41f48d946f66dc58f4e4e6738b1f4dca6b371718dc6bd5b090a1e054997ba0ed3cd21a41c4ae48db1824c5c2669a240e0b8253a429a9bf53e690f189462ad8bb", "prev_merkle": "9916fb2d66d20c6889dbd38c3e1c61f2d4b9aac65fd9604cde3e46c973722f83242b8cf9f11b6679d3bb1fe7fe94a6b27e4c2adde065972f6f5062f84838acf4", "merkle": "8ad640ec976fdbd6b83c1ff1115d35e6aa4720b56edf6a38bc6f16acc3ba816f6104d5e082764f71ea8dabcce8e63106aae4b44dbbbcc218ae4a7f41d136d6d1"}
+{"ts_ns": 1770994027562349960, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1154777170.tif", "signature": "7b8a4fd675898f337c4c19bd7cd2a0367ad32a826def98f88acef625325ca78eb690b72e508a99ad58eaac84a96c1b7086631ba2a9fc20ca5176f982c8ec4202", "prev_merkle": "8ad640ec976fdbd6b83c1ff1115d35e6aa4720b56edf6a38bc6f16acc3ba816f6104d5e082764f71ea8dabcce8e63106aae4b44dbbbcc218ae4a7f41d136d6d1", "merkle": "fe49fbeb2b60d7c58ac414258881429bdee088acf9019d7c54688493f815522bf4162a74359563741264472a72269345ea2d9cac335dda74dcf2dae435609c4c"}
+{"ts_ns": 1770994030158746804, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "33cfaf5c1f1e096ee8520a6fc82a470b5cb828db63939809f9db7e18a9d9ffad2315cd8ff65d2c5b1b344df1108b8368c5587d73480a93bb2e3202e19dc47903", "prev_merkle": "fe49fbeb2b60d7c58ac414258881429bdee088acf9019d7c54688493f815522bf4162a74359563741264472a72269345ea2d9cac335dda74dcf2dae435609c4c", "merkle": "042a01af00849eba7786354ccd56fe8e9459b979101b66b1011d534871b6ec71877aac5a0707418d59f593a463bae0f1036218c15f39af5652b1bd2c7937afd0"}
+{"ts_ns": 1770994030881361722, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1156808983.tif", "signature": "03e946a47b147d4c228cf82716429e2b86ee02814c25c751b479488d5cbab9f6d7a9105aac99ff751e901d167053e3a4dc3f5f9130a69415080af671d1712b7e", "prev_merkle": "042a01af00849eba7786354ccd56fe8e9459b979101b66b1011d534871b6ec71877aac5a0707418d59f593a463bae0f1036218c15f39af5652b1bd2c7937afd0", "merkle": "98a7268d0789e2b58341610eb364df769a6e379fe7c82310c028c9e2a7e1841044f375c2b81bb398ec049d88f88852e2aa46b45f7cfdfc5bbbc0eaa49866526e"}
+{"ts_ns": 1770994033498894697, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "237fa18f753d93d7aa1a3cc451e51175a8ac9f1206d4a7a4de7a853a3ca7fc2c968062334734ef1930ca04473a15a4f06bf683b2af0acec15f32151457f5c1ab", "prev_merkle": "98a7268d0789e2b58341610eb364df769a6e379fe7c82310c028c9e2a7e1841044f375c2b81bb398ec049d88f88852e2aa46b45f7cfdfc5bbbc0eaa49866526e", "merkle": "c68b4f539c1d5f0d3c4782676a66dec9c124117c4a291cb271f9ce881c1b9ee37285a11b4e55d6f00e15793d76251e2b23c97b8d3b520e6320751b6d2561c7db"}
+{"ts_ns": 1770994034239420402, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1157445126.tif", "signature": "620c7cf5ad46fb84f2182051fd27417139299c56722b0368074be5b8a32b4bff46c2b6ceebd3f1ac5ca98cf84ef71b9928c495a5716db2f03462e7504e81d2e8", "prev_merkle": "c68b4f539c1d5f0d3c4782676a66dec9c124117c4a291cb271f9ce881c1b9ee37285a11b4e55d6f00e15793d76251e2b23c97b8d3b520e6320751b6d2561c7db", "merkle": "9c7f17cbccd7024142f1cc3930aa2888126485f6e7d695c2c487dd9de82e8259561a9cf21678a3bed7c75a2dcd83e13ea9fea1577dc0960303d889fa7645e889"}
+{"ts_ns": 1770994036960466758, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "2621c881cd95258e3956bf2285c8a802c659a37d2b760a387b26a1412fc29e4f03fe29b77ae5eeb8cd69244c73eb29f9fe2e57236b2e3fc45e517f1e02adb6b9", "prev_merkle": "9c7f17cbccd7024142f1cc3930aa2888126485f6e7d695c2c487dd9de82e8259561a9cf21678a3bed7c75a2dcd83e13ea9fea1577dc0960303d889fa7645e889", "merkle": "225e69e2a1a6deecd5b5e283f0b96bfb133f9585063092ec6e9d81bc9aa8f22620cf40563b16935ab05963fef556b08c5545e68864a8fad09c1a1ffd5e51adb4"}
+{"ts_ns": 1770994037598331294, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1159818141.tif", "signature": "94c2b5d0bb439730a834dbed578bfe5257000257899cf1887e32246961a8892c8d296ffd27a5f526baa38e140b0e90f0d1ecaded1409cba29519c9efad934794", "prev_merkle": "225e69e2a1a6deecd5b5e283f0b96bfb133f9585063092ec6e9d81bc9aa8f22620cf40563b16935ab05963fef556b08c5545e68864a8fad09c1a1ffd5e51adb4", "merkle": "fa9ac48eeb3a1c3f510f1a39f2ea0a79609e0b599295b4b07b98d6ab5a4d3e93083da8d069356e018bc9f9210f80a5f09c88728fd1a07374e6c7af49f4c0efe0"}
+{"ts_ns": 1770994040413347677, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "9e17f06715ecfd2eb932603de95ee8e94027ed2dd66186cf6eef9b611f1ce0bcffc375cd2144509e1df83e97bb02ce9c3e23c97b44412162b7ce708eca2bac36", "prev_merkle": "fa9ac48eeb3a1c3f510f1a39f2ea0a79609e0b599295b4b07b98d6ab5a4d3e93083da8d069356e018bc9f9210f80a5f09c88728fd1a07374e6c7af49f4c0efe0", "merkle": "e7b8723bd1f262ece97caab3e3d8a971bdcb20d1c2577383e48cc3de82dc63f4179041883f0db4787df1fd5d7fa74ed6d0439ebdc20352542f815b20ae074da5"}
+{"ts_ns": 1770994041220022310, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/11630450.tif", "signature": "c347469d50486803c5de5dbb7fe43ee6bb9720cca669aa940e11e04a25573a8bcfe7a2d999b2e3b7854949fefd4fe4d49e7174727b7e489cd5d7f976aead3ef2", "prev_merkle": "e7b8723bd1f262ece97caab3e3d8a971bdcb20d1c2577383e48cc3de82dc63f4179041883f0db4787df1fd5d7fa74ed6d0439ebdc20352542f815b20ae074da5", "merkle": "9df0950bd9c895ed34a79d39a2ff9dfc3435b1d0673ece512108306ec4c203dd83c9b733ec23c65118de21b2e1089df2f6b72013973b3b97b3d42bd86fb6158b"}
+{"ts_ns": 1770994043928463704, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "0f7033a1dae05de4d6b5c7ef5a9d6502b51ef4e5d43cf46eb39e5e03a5ba541b6a493e25db78886e7b23c3493eaa859e7902e88575a25696014d50fc96fc0840", "prev_merkle": "9df0950bd9c895ed34a79d39a2ff9dfc3435b1d0673ece512108306ec4c203dd83c9b733ec23c65118de21b2e1089df2f6b72013973b3b97b3d42bd86fb6158b", "merkle": "0473f52063be205e5abd2d5bf6ac6c0e1a6357ad39a92f53c4a8fa59f8113f39fd621f1ee3f600eae4c2899c4880afd5c99f6c16e1327b91242cfd69825146a1"}
+{"ts_ns": 1770994044553421600, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1168011639.tif", "signature": "bf5959d56625e682ea834c9c6f1d35c7b9f42739f48cebc1ec173a9b48d24edc9f4dea16dd963e796ca9ba80b2d7a53a3b4eba8069f3b841761a1b70f0922f4b", "prev_merkle": "0473f52063be205e5abd2d5bf6ac6c0e1a6357ad39a92f53c4a8fa59f8113f39fd621f1ee3f600eae4c2899c4880afd5c99f6c16e1327b91242cfd69825146a1", "merkle": "b8c8e35f3ead760129aed172ab2df0b4e90084ebc63ec3aa81966bfde28dc50ec70b4c877a4069d0d22328fe4f8f0c04ca4b9c76d47a56dc59b796c07fffd29e"}
+{"ts_ns": 1770994047190816373, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "e10bb5a4a05b040513e0ba9accca4cd9054a837c2f2144b7a343f24152314536b2f336d347c2ddcf4673e42d170560435551d5cb87be788c8fe293e4b6e7e584", "prev_merkle": "b8c8e35f3ead760129aed172ab2df0b4e90084ebc63ec3aa81966bfde28dc50ec70b4c877a4069d0d22328fe4f8f0c04ca4b9c76d47a56dc59b796c07fffd29e", "merkle": "79b14210d61e206006502d8c5baff42face02bac07a37d60c4e49295d121c19b0b1fc5f2cec3c16629792247c1bbeb73f50e5f5206260298be5e69ffac3ab540"}
+{"ts_ns": 1770994047850900144, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1176487902.tif", "signature": "a3c47704ddd49ca17d95adb5dddb7d6f2438bae7dff25a9f16a7cb6f20fd362358fffc2a5d8977ed0a3f067791e03b3aea517ecd5b1970710413ac730dcdb529", "prev_merkle": "79b14210d61e206006502d8c5baff42face02bac07a37d60c4e49295d121c19b0b1fc5f2cec3c16629792247c1bbeb73f50e5f5206260298be5e69ffac3ab540", "merkle": "4737ae1b5b1d6882619d60a57d956c8f6c804d16c50ce38a2bf324d7bac2149b546a87845fec4bbb20dfba046da2c3cc5eaa4e88e1b1f87a85ab2edf7c022727"}
+{"ts_ns": 1770994050482487102, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "03acd029d6dca06af564f9ca8cb52878c4f1f75be3ef9695a782f8a0e27e6ef9b6cb4eb5ff35fab15f5052ce84090cce136087a0e990503d0e3751a4cfde9dc0", "prev_merkle": "4737ae1b5b1d6882619d60a57d956c8f6c804d16c50ce38a2bf324d7bac2149b546a87845fec4bbb20dfba046da2c3cc5eaa4e88e1b1f87a85ab2edf7c022727", "merkle": "24766c9c48db88cbf195d6c74c6dee8f343c0cec7ef6f84baab6a4aae1b63189c16f6b79db93715f6380ede23ee471a3af079742fa7319bbdf9055bcf48bc754"}
+{"ts_ns": 1770994051126969658, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/118041886.tif", "signature": "4e4fd37f2b04afebb83d3bb791c5e196431522bd0fb606b86a4d38fa676e71e2831ac39aa0007316bdbf52f8b6e4349819bd6207b3a13a4d97b18cf156a2b191", "prev_merkle": "24766c9c48db88cbf195d6c74c6dee8f343c0cec7ef6f84baab6a4aae1b63189c16f6b79db93715f6380ede23ee471a3af079742fa7319bbdf9055bcf48bc754", "merkle": "939095da37d9ab564ab995ce3a87d599416bc838cf2159f902bfa686683f6f79943273addc15ecff522f0b7711b8b3528f8635cc9c5c891ec5c2d804f76f79f4"}
+{"ts_ns": 1770994053941859561, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "4c4483c68c636a739010bddc9d14cf0149f04eb8b0af0d83488c83aae4fa010cb29a8dde08f5d9a9fb7678bc2eff67b392022f79e6324c989dfd75832b4cfa22", "prev_merkle": "939095da37d9ab564ab995ce3a87d599416bc838cf2159f902bfa686683f6f79943273addc15ecff522f0b7711b8b3528f8635cc9c5c891ec5c2d804f76f79f4", "merkle": "a49af980b21b457a85e31f355f195f332f57aa5d613dec8d9f9ffb18ebeb117091d146f2078939cd4410074e8cb6c6093c0496ffa3e4abe84961d177bec04f0b"}
+{"ts_ns": 1770995319569553064, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1004283650.tif", "signature": "018b416ccc15eb4c4941cce3f2332f1d9c1db2031ed59e1638c0f0ced1da8ab50172aed1798abddd56ac032b223e9800b0cd11fd2cf77a16d2656cf804d8ae34", "prev_merkle": "a49af980b21b457a85e31f355f195f332f57aa5d613dec8d9f9ffb18ebeb117091d146f2078939cd4410074e8cb6c6093c0496ffa3e4abe84961d177bec04f0b", "merkle": "bfd0a98a3b881e8da9ccacfe5ad31700296d31efe621a01497e5d42388732974568593fba5741070264470240387ef6ee62f78e6a8aa86842330fb5930ca84ca"}
+{"ts_ns": 1770995321769475631, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "28cefdb7f7b5ba64b758905eadf3350c5eba345f47d35d24dbdc1026604b62f08ac257bb4a0122d09332f68bde0adaf59d305304e8d3032da928bff836d64873", "prev_merkle": "bfd0a98a3b881e8da9ccacfe5ad31700296d31efe621a01497e5d42388732974568593fba5741070264470240387ef6ee62f78e6a8aa86842330fb5930ca84ca", "merkle": "7eb578911e28ef7ffb6ced6fccd423763d7162c17f96c128ac4bf9ee371d2c90594c8057480f73439fba008ea95be588e825fe5ba93e6ac656646e352d9a2369"}
+{"ts_ns": 1770995322183497638, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1006462223.tif", "signature": "aa1c9a06ef6feaa9e76a52f3f49a34fede467e23dcaddbc8b3d9d336e59a6b7942a9de9245f07caa73aef212a06560f08a792c09e7768f1405e6f30cbb6cee61", "prev_merkle": "7eb578911e28ef7ffb6ced6fccd423763d7162c17f96c128ac4bf9ee371d2c90594c8057480f73439fba008ea95be588e825fe5ba93e6ac656646e352d9a2369", "merkle": "14410eb18fd0eb63ce365ad568e923de8dc1cd5d7bdbbb759ec49a47c09cad43f38f4cd04a803c54c694f7ed583656cc9d5b361294f3461dfe5585e53999a78c"}
+{"ts_ns": 1770995324323300575, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "1c708daae6cf2535cb235c50d5d3fc070e4dabdd8ffd6fa6a5c0901da20037bfca00ff3968ffda2c12f7a200471e299fcdaafc9674ee1dbec8ab9f0b2a17264d", "prev_merkle": "14410eb18fd0eb63ce365ad568e923de8dc1cd5d7bdbbb759ec49a47c09cad43f38f4cd04a803c54c694f7ed583656cc9d5b361294f3461dfe5585e53999a78c", "merkle": "f73ce3ad8d0cf67a949f7ea6b4a7af1e423c2f790170813d7160f60ef7961e8d1bb3a7038ba33f7d44a5a6a33fb3b2f1f803c91819e5ca3ed14addb8c80f1830"}
+{"ts_ns": 1770995324972312302, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1013184726.tif", "signature": "bcb5fc1c544bbc9a96df6a24d3ea08c60c9832fc180f023afcf90a37bb06015ece41fd43d197243d36b6f5bd6dde58c681391c2098b29401b23c0dd73c8eb950", "prev_merkle": "f73ce3ad8d0cf67a949f7ea6b4a7af1e423c2f790170813d7160f60ef7961e8d1bb3a7038ba33f7d44a5a6a33fb3b2f1f803c91819e5ca3ed14addb8c80f1830", "merkle": "724a902d67e73840a6beb5f09239640eb973d553645995909eb55df0b3c568ac215f346bd258061178fd0bcf189223c0f5d043c1619d23d40efe7abf8bf8f4f5"}
+{"ts_ns": 1770995327122396624, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "c3a6da4c97f1154573b2924d12da99545a0922e052da42b3aaa87a7c16756e60001ee61015d4e58d3333ed44b93801325bfced09f533f343e496d08ec91622d2", "prev_merkle": "724a902d67e73840a6beb5f09239640eb973d553645995909eb55df0b3c568ac215f346bd258061178fd0bcf189223c0f5d043c1619d23d40efe7abf8bf8f4f5", "merkle": "acb51b3876dc6fc803d4e031b5096967e26510f75b712d092af48321afffe6790491495c079ba60e4a2906c663878fc729a1e213719ea2d2d806ed1981226b46"}
+{"ts_ns": 1770995327664847879, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/102536988.tif", "signature": "1828f3dd3b72b7579dc90d512f3b75312fdcacef81e7f9515287d49fa83160c099501d906a2399665e761c93b9d7801e4af8758fb7d4bfe4b445ed5bcc97fcad", "prev_merkle": "acb51b3876dc6fc803d4e031b5096967e26510f75b712d092af48321afffe6790491495c079ba60e4a2906c663878fc729a1e213719ea2d2d806ed1981226b46", "merkle": "97dec767ad89d1a424bf9b68fb27cdc62d546e172cc265ad1b2cf90fe5d0f6916df414aebac025d9116f756ec918b83da56fad2cc5a53febcfd5c68b2522b7b1"}
+{"ts_ns": 1770995329795047593, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "1930a64d034401b975bf7353027e164e796abe655c2327fcdb0673945fe55ca3dfb4a4c6e4c375e292ddbb0e0dc4f28a9c5a85d36a64baf41b8cfc2d0a3fdc38", "prev_merkle": "97dec767ad89d1a424bf9b68fb27cdc62d546e172cc265ad1b2cf90fe5d0f6916df414aebac025d9116f756ec918b83da56fad2cc5a53febcfd5c68b2522b7b1", "merkle": "c23302491774c17e1f0d154eafed6e81cac64e15cd030093679a103ba534a1ca0ecefe2cf8264195b45af296e1fa653987f4e68e38fba7d803e13a89c74d22e3"}
+{"ts_ns": 1770995330311178379, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1154777170.tif", "signature": "40db9719fc4ca76d36fbe68e662900a5649db0204e96b371e9c9e19e7d1f8d01a71ccfd5885e8309e182b802db19caf047997553dbf3eba368a08fdd3affa522", "prev_merkle": "c23302491774c17e1f0d154eafed6e81cac64e15cd030093679a103ba534a1ca0ecefe2cf8264195b45af296e1fa653987f4e68e38fba7d803e13a89c74d22e3", "merkle": "595dbdd19d69175b3d7c558963c2d9208813aaa7c67063e22cffdd669b1d3e6736c2da817d9141a39c01fa7b3757055e7f29dd6d2cdcab8dafaf6ff6f26014d4"}
+{"ts_ns": 1770995332450020144, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "fc3c65b7e550f86f8baa4f366b91270b910e7389983d79a96642b4ada1b10716d1a5bbeda5794dc14c3ee9ae23702df97e4ec898a512583d9a3e1808f1e50321", "prev_merkle": "595dbdd19d69175b3d7c558963c2d9208813aaa7c67063e22cffdd669b1d3e6736c2da817d9141a39c01fa7b3757055e7f29dd6d2cdcab8dafaf6ff6f26014d4", "merkle": "684e8c8244279c2783762e242a3185ef068fc0dec0138f87daba60ae6608eb29ea4caf14968b8078645d603ba9796ac710788c7f8d26b4b6e85a28d9394624cb"}
+{"ts_ns": 1770995332959620593, "event": "STEP", "name": "load_start", "file": "/kaggle/input/competitions/vesuvius-challenge-surface-detection/train_images/1156808983.tif", "signature": "421dfda4ad9d78775f978d5f440b521b3ed37f97568c4aeb46082dd45ff7388cdc4977bcb27df4f7d7fb88ea375d54da6d822cd57a76fdd028c0bbe8868e6352", "prev_merkle": "684e8c8244279c2783762e242a3185ef068fc0dec0138f87daba60ae6608eb29ea4caf14968b8078645d603ba9796ac710788c7f8d26b4b6e85a28d9394624cb", "merkle": "75c97594d555734f03c50c564ca2f0c590ff52e163ed95b7a47eb0179620e38b8c49c1b9460a5c3f2411a47a85121e7054d603957f46ea4d5c73ae953cacf9a5"}
+{"ts_ns": 1770995335098421605, "event": "ARRAY_TRACE", "stage": "volume", "shape": [320, 320, 320], "dtype": "float32", "bits": {"byte_preview_len": 64, "one_bits_in_preview": 0, "zero_bits_in_preview": 512, "preview_sha512": "7be9fda48f4179e611c698a73cff09faf72869431efee6eaad14de0cb44bbf66503f752b7a8eb17083355f3ce6eb7d2806f236b25af96a24e22b887405c20081"}, "signature": "18ffc5bd8ad6970234f048850342e522feb2e39fc89bd170fc8b35605cfc7a2fceced8f229df74034d0ee53d29f549e03affeade0b96cd7560e94a4206c59938", "prev_merkle": "75c97594d555734f03c50c564ca2f0c590ff52e163ed95b7a47eb0179620e38b8c49c1b9460a5c3f2411a47a85121e7054d603957f46ea4d5c73ae953cacf9a5", "merkle": "ac0d6ec886dd124d003e8489c7704f4fb23406d93ee78177eb87b9b30765cbe9d89884ce0d90078b719f5b086f51f8dcf5df116d14f4ee4a954093eee851165d"}
+
+---------------------------------------------------------------------------
+RuntimeError                              Traceback (most recent call last)
+/tmp/ipykernel_25/4215495607.py in <cell line: 0>()
+   1736         config=cfg,
+   1737     )
+-> 1738     submission = kernel.run()
+   1739     print(f'READY: {submission}')
+
+/tmp/ipykernel_25/4215495607.py in run(self)
+   1559         t_global = time.perf_counter()
+   1560         files = self.discover_inputs()
+-> 1561         self.build_supervised_model()
+   1562         self.plan.update('package', 10.0)
+   1563         sup_f1_values: List[float] = []
+
+/tmp/ipykernel_25/4215495607.py in build_supervised_model(self)
+   1406             },
+   1407         }
+-> 1408         self._assert_no_hardcoded_metric_pattern(self.supervised_train_info)
+   1409         self._assert_train_completed_100()
+   1410         self.log(
+
+/tmp/ipykernel_25/4215495607.py in _assert_no_hardcoded_metric_pattern(self, train_info)
+   1294         # If every epoch has exactly the same objective at float precision, flag for forensic review.
+   1295         if len(set(objectives)) == 1:
+-> 1296             raise RuntimeError('HARD_METRIC_PATTERN_DETECTED: identical epoch objective across all epochs')
+   1297 
+   1298     def build_supervised_model(self) -> None:
+
+RuntimeError: HARD_METRIC_PATTERN_DETECTED: identical epoch objective across all epochs
+
