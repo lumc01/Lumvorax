@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include "core/time_ns.c"
+#include "core/time_ns.h"
 #include "physics/kerr_metric.h"
 
 int main() {

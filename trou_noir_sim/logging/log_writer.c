@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include "time_ns.h"
+#include "core/time_ns.h"
 
 /**
  * log_writer_entry

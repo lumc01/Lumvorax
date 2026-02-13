@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include "physics/kerr_metric.h"
-#include "logging/log_writer.c"
+#include "logging/log_writer.h"
 
 void test_kerr_init() {
     kerr_metric_t m;
