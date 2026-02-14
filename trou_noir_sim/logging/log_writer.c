@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <time.h>
+#include <sys/stat.h>
 
 static inline uint64_t get_nanos() {
     struct timespec ts;
@@ -9,11 +10,27 @@ static inline uint64_t get_nanos() {
     return (uint64_t)ts.tv_sec * 1000000000ULL + ts.tv_nsec;
 }
 
+static char current_session_dir[256] = {0};
+
+void log_init_session() {
+    time_t now = time(NULL);
+    struct tm *t = localtime(&now);
+    snprintf(current_session_dir, sizeof(current_session_dir), "trou_noir_sim/logs/session_%04d%02d%02d_%02d%02d%02d",
+             t->tm_year + 1900, t->tm_mon + 1, t->tm_mday, t->tm_hour, t->tm_min, t->tm_sec);
+    mkdir("trou_noir_sim/logs", 0777);
+    mkdir(current_session_dir, 0777);
+}
+
 void log_writer_entry(const char* module, const char* event, uint64_t value) {
+    if (current_session_dir[0] == 0) log_init_session();
     uint64_t ts = get_nanos();
     
-    // Log binaire (raw_data.bin)
-    FILE* fb = fopen("trou_noir_sim/logs/raw_data.bin", "ab");
+    char path_bin[512], path_csv[512], path_json[512];
+    snprintf(path_bin, sizeof(path_bin), "%s/raw_data.bin", current_session_dir);
+    snprintf(path_csv, sizeof(path_csv), "%s/timeline.csv", current_session_dir);
+    snprintf(path_json, sizeof(path_json), "%s/index.json", current_session_dir);
+
+    FILE* fb = fopen(path_bin, "ab");
     if (fb) {
         fwrite(&ts, sizeof(uint64_t), 1, fb);
         char mod[8] = {0}; strncpy(mod, module, 7);
@@ -24,15 +41,13 @@ void log_writer_entry(const char* module, const char* event, uint64_t value) {
         fclose(fb);
     }
 
-    // Timeline CSV
-    FILE* ft = fopen("trou_noir_sim/logs/timeline.csv", "a");
+    FILE* ft = fopen(path_csv, "a");
     if (ft) {
         fprintf(ft, "%lu,%s,%s,%lx\n", ts, module, event, value);
         fclose(ft);
     }
 
-    // Index JSON
-    FILE* fj = fopen("trou_noir_sim/logs/index.json", "a");
+    FILE* fj = fopen(path_json, "a");
     if (fj) {
         fprintf(fj, "{\"ts\":%lu, \"mod\":\"%s\", \"ev\":\"%s\", \"val\":\"%lx\"}\n", ts, module, event, value);
         fclose(fj);
