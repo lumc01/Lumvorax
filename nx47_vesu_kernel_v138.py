@@ -1873,12 +1873,12 @@ class NX47V138Kernel:
             'forensic_report': forensic_report,
             'competition_rules_validation': rules_validation,
         }
+        self.plan.update('package', 100.0, done=True)
+        self.log('EXEC_COMPLETE', submission=str(self.submission_path))
+
         self.metadata_path.write_text(json.dumps(metadata, indent=2), encoding='utf-8')
         self.logs_path.write_text(json.dumps(self.logs, indent=2), encoding='utf-8')
         self.memory_path.write_text(json.dumps(self.memory.events, indent=2), encoding='utf-8')
-
-        self.plan.update('package', 100.0, done=True)
-        self.log('EXEC_COMPLETE', submission=str(self.submission_path))
         return self.submission_path
 
 

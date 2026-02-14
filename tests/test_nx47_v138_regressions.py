@@ -60,3 +60,12 @@ def test_v138_supervised_progress_callback_receives_events():
 
     _model, _info = train_nx47_supervised(x_train, y_train, x_val, y_val, cfg, rng, memory, progress_cb=cb)
     assert any(e == "hyperparam_search" for e in events)
+
+
+def test_v138_exec_complete_logged_before_log_dump():
+    from pathlib import Path
+
+    src = Path("nx47_vesu_kernel_v138.py").read_text(encoding="utf-8")
+    i_exec = src.find("self.log('EXEC_COMPLETE'")
+    i_dump = src.find("self.logs_path.write_text")
+    assert i_exec != -1 and i_dump != -1 and i_exec < i_dump
