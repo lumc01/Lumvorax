@@ -1,6 +1,5 @@
 import numpy as np
-import pandas as pd
-import time
+import csv
 import hashlib
 from datetime import datetime
 
@@ -12,8 +11,6 @@ class KerrSpacetimeSimulatorV4:
     def __init__(self, a=0.9999, M=1.0):
         self.a = a  # Paramètre de rotation (0 <= a < 1)
         self.M = M  # Masse du trou noir
-        self.precision = np.float64
-        self.logs = []
         self.timestamp = datetime.now().isoformat()
 
     def get_metric(self, r, theta):
@@ -38,12 +35,11 @@ class KerrSpacetimeSimulatorV4:
         for step in range(100):
             g_tt, g_t_phi, g_rr, g_theta_theta, g_phi_phi = self.get_metric(r, theta)
             
-            # Simulation simplifiée de l'évolution (pour démonstration de la structure de log)
-            # Dans une version complète, on résoudrait les équations géodésiques.
-            r -= 0.001 * (1.0 / (g_rr + 1e-15)) # Attraction gravitationnelle
+            # Simulation simplifiée de l'évolution
+            r -= 0.001 * (1.0 / (g_rr + 1e-15)) 
             
             # Capture de la preuve bit-exact (hexadécimal)
-            r_hex = r.hex()
+            r_hex = float(r).hex()
             
             log_entry = {
                 "step": step,
@@ -54,24 +50,31 @@ class KerrSpacetimeSimulatorV4:
             }
             results.append(log_entry)
             
-        df = pd.DataFrame(results)
         filename_csv = f"LOG_RUN_{scenario_name}_{self.timestamp.replace(':', '-')}.csv"
-        df.to_csv(filename_csv, index=False)
         
-        # Calcul du checksum pour la preuve d'immuabilité
-        checksum = hashlib.sha256(df.to_csv().encode()).hexdigest()
+        # Écriture manuelle sans pandas pour éviter les dépendances manquantes
+        keys = results[0].keys()
+        with open(filename_csv, 'w', newline='') as output_file:
+            dict_writer = csv.DictWriter(output_file, fieldnames=keys)
+            dict_writer.writeheader()
+            dict_writer.writerows(results)
+        
+        # Calcul du checksum
+        with open(filename_csv, 'rb') as f:
+            checksum = hashlib.sha256(f.read()).hexdigest()
+            
         print(f"✅ Scénario {scenario_name} terminé. Checksum: {checksum}")
         return filename_csv, checksum
 
 if __name__ == "__main__":
     # Test 1: EXTREMAL_STABILITY (a -> 1)
     sim_extremal = KerrSpacetimeSimulatorV4(a=0.99999)
-    sim_extremal.run_scenario("EXTREMAL_STABILITY", (2.5, np.pi/2, 0, 0))
+    sim_extremal.run_scenario("EXTREMAL_STABILITY", (2.5, 1.57, 0, 0))
     
     # Test 2: COUNTER_ROTATION_DRAG
     sim_drag = KerrSpacetimeSimulatorV4(a=0.9)
-    sim_drag.run_scenario("COUNTER_ROTATION_DRAG", (3.0, np.pi/2, 0.5, 0))
+    sim_drag.run_scenario("COUNTER_ROTATION_DRAG", (3.0, 1.57, 0.5, 0))
     
     # Test 3: PENROSE_CANDIDATE (Ergosphère)
     sim_penrose = KerrSpacetimeSimulatorV4(a=0.95)
-    sim_penrose.run_scenario("PENROSE_CANDIDATE", (1.5, np.pi/2, 0, 0))
+    sim_penrose.run_scenario("PENROSE_CANDIDATE", (1.5, 1.57, 0, 0))
