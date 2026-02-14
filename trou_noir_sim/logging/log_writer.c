@@ -1,17 +1,25 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
-#include "core/time_ns.h"
+#include <time.h>
+
+static inline uint64_t get_nanos() {
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    return (uint64_t)ts.tv_sec * 1000000000ULL + ts.tv_nsec;
+}
 
 void log_writer_entry(const char* module, const char* event, uint64_t value) {
-    uint64_t ts = time_ns_get_absolute();
+    uint64_t ts = get_nanos();
     
     // Log binaire (raw_data.bin)
     FILE* fb = fopen("trou_noir_sim/logs/raw_data.bin", "ab");
     if (fb) {
         fwrite(&ts, sizeof(uint64_t), 1, fb);
-        fwrite(module, 1, 8, fb); // Tronqué à 8 char pour la structure
-        fwrite(event, 1, 16, fb); // Tronqué à 16 char
+        char mod[8] = {0}; strncpy(mod, module, 7);
+        char ev[16] = {0}; strncpy(ev, event, 15);
+        fwrite(mod, 1, 8, fb);
+        fwrite(ev, 1, 16, fb);
         fwrite(&value, sizeof(uint64_t), 1, fb);
         fclose(fb);
     }
@@ -23,7 +31,7 @@ void log_writer_entry(const char* module, const char* event, uint64_t value) {
         fclose(ft);
     }
 
-    // Index JSON (Append mode is tricky for JSON, but let's simulate entries)
+    // Index JSON
     FILE* fj = fopen("trou_noir_sim/logs/index.json", "a");
     if (fj) {
         fprintf(fj, "{\"ts\":%lu, \"mod\":\"%s\", \"ev\":\"%s\", \"val\":\"%lx\"}\n", ts, module, event, value);
