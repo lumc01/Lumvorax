@@ -24,7 +24,8 @@ Le système a détecté :
 - **Volume** : 27.32 GB de données traitées en batch.
 
 ## 4. Reconstruction du Papyrus (Rendu Réel)
-L'image de rendu exact de ce qui a été découvert est : **attached_assets/vesuvius_detection_results.png**
+L'image de rendu exact de ce qui a été découvert est : 
+
 
 ---
 **SIGNATURE : SYSTÈME LUM/VORAX - CERTIFIÉ CONFORME (SANS FALSIFICATION)**
