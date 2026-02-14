@@ -29,7 +29,7 @@ Après audit des logs et des rapports (V1-V6), il apparaît que la V6 a marqué 
 
 ## 4. Anomalies & Découvertes Implicites
 1. **Couplage Métrique-Performance** : La géométrie de l'espace-temps agit comme une charge de travail variable pour le processeur.
-2. **Tunneling Numérique** : Le rebond observé à l'horizon est une inversion de signe due à l'accumulation d'erreurs, simulant une stabilité topologique.
+2. **Tunneling Numérique** : Le rebond observé à l'horizon est une inversion de signe due à l'accumulation d'erreurs, simulant unep stabilité topologique.
 
 ## 5. Autocrtitique & Perspectives
 Le modèle actuel atteint ses limites structurelles avec la précision 64-bit. Un passage en 128-bit (V8) est impératif pour séparer le bruit numérique de la dynamique physique réelle.
