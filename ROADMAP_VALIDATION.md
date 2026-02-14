@@ -1,17 +1,17 @@
 # FEUILLE DE ROUTE DE VALIDATION SCIENTIFIQUE (100% EXIGENCES V27/AUDIT)
 
 ## I. VALIDITÉ ET ROBUSTESSE NUMÉRIQUE
-- [ ] **T21.1 : Étude Multi-Solveur**
+- [x] **T21.1 : Étude Multi-Solveur**
   - Comparaison : RK4 vs Symplectique vs Implicite.
   - Courbes $\Delta C(t)$ (erreur de Carter) sur échelle log.
   - Stabilité sous variation de pas : $h \to h/32$.
-- [ ] **T21.2 : Indépendance**
+- [x] **T21.2 : Indépendance**
   - Tableau de dépendance au pas temporel.
   - Test de convergence d'ordre post-T21.
   - Comparaison Double vs Quad vs Multi-Précision.
 
 ## II. RÉGIME QUASI-EXTRÉMAL & SCALING
-- [ ] **T22.1 : Analyse Statistique du Scaling**
+- [x] **T22.1 : Analyse Statistique du Scaling**
   - Fit de l'exposant avec calcul du $R^2$.
   - Intervalle de confiance sur l'exposant $n$.
   - Nombre de points > 50 dans l'intervalle $a \in [0.9, 0.999999]$.
@@ -20,7 +20,7 @@
   - Comparaison FFT avant/après passage en Kerr-Schild.
 
 ## III. CHAOS ET DYNAMIQUE INTERNE
-- [ ] **T24.1 : Spectre de Lyapunov Complet**
+- [x] **T24.1 : Spectre de Lyapunov Complet**
   - Calcul de tous les exposants (méthode de Benettin/Gram-Schmidt).
   - Test de convergence $\lambda(h)$ et $\lambda(\text{bits})$.
   - Dépendance de $\lambda$ en fonction du paramètre de spin $a$.
@@ -30,7 +30,7 @@
   - Preuve topologique de l'attracteur étrange.
 
 ## IV. COUPLAGE MHD & LIMITE INFORMATIONNELLE
-- [ ] **T27.1 : Analyse Tensorielle MHD**
+- [x] **T27.1 : Analyse Tensorielle MHD**
   - Calcul des invariants du tenseur EM ($F_{\mu\nu}F^{\mu\nu}$).
   - Vérification de la divergence physique vs artefact de coordonnée à $r^*$.
   - Dépendance de $r^*$ vis-à-vis de la densité du plasma.
