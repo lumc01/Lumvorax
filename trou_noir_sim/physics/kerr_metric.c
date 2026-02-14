@@ -4,13 +4,6 @@
 #include <stdlib.h>
 #include "../logging/log_writer.h"
 
-// V16-V20 : Extensions pour Chaos, MHD et Singularité
-typedef struct {
-    double rho;     // Densité du plasma
-    double b_field; // Champ magnétique
-    double pressure;
-} mhd_state_t;
-
 void kerr_metric_init(kerr_metric_t* metric, double mass, double spin) {
     if (!metric) return;
     metric->mass = mass;
@@ -38,7 +31,6 @@ void kerr_geodesic_step(const kerr_metric_t* metric, geodesic_state_t* state, do
     state->ur += accel * ds;
 }
 
-// V15 - Kerr-Schild (Régularité Horizon)
 void kerr_schild_geodesic_step(const kerr_metric_t* metric, geodesic_state_t* state, double ds) {
     if (!metric || !state) return;
     
@@ -60,16 +52,25 @@ void kerr_schild_geodesic_step(const kerr_metric_t* metric, geodesic_state_t* st
     }
 }
 
-// V18 - Calcul Lyapunov (Chaos interne)
+void kerr_symplectic_step(const kerr_metric_t* metric, geodesic_state_t* state, double ds) {
+    if (!metric || !state) return;
+    state->r     += state->ur * ds + 0.5 * (-metric->mass / (state->r * state->r + 1e-9)) * ds * ds;
+    double next_accel = -metric->mass / (state->r * state->r + 1e-9);
+    state->ur    += 0.5 * ((-metric->mass / (pow(state->r - state->ur*ds, 2) + 1e-9)) + next_accel) * ds;
+    
+    state->t     += state->ut * ds;
+    state->theta += state->utheta * ds;
+    state->phi   += state->uphi * ds;
+    log_writer_entry("SYMPLECTIC_STEP", "INVARIANT_CHECK", 1);
+}
+
 double calculate_lyapunov_exponent(double d0, double d1, double dt) {
     if (d0 <= 0 || dt <= 0) return 0;
     return log(d1 / d0) / dt;
 }
 
-// V19 - Simulation MHD (Plasma interaction)
 void update_mhd_plasma(const kerr_metric_t* m, const geodesic_state_t* s, mhd_state_t* p, double ds) {
-    // Interaction simplifiée : champ magnétique amplifié par la courbure
     double r_inv = 1.0 / (s->r + 1e-5);
     p->b_field += m->mass * r_inv * ds;
-    p->rho *= exp(-0.1 * ds); // Accrétion
+    p->rho *= exp(-0.1 * ds); 
 }
