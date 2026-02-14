@@ -36,3 +36,27 @@ def test_v138_plantracker_overall_progress_method(tmp_path):
     tracker.update("a", 20.0)
     tracker.update("b", 60.0)
     assert abs(tracker.overall_progress() - 40.0) < 1e-9
+
+
+
+def test_v138_defaults_match_v136_coverage_mode():
+    cfg = V138Config()
+    assert cfg.max_train_volumes == 24
+    assert cfg.max_val_volumes == 8
+
+
+def test_v138_supervised_progress_callback_receives_events():
+    rng = np.random.default_rng(1)
+    x_train = rng.normal(size=(24, 6)).astype(np.float32)
+    y_train = (rng.random(24) > 0.5).astype(np.float32)
+    x_val = rng.normal(size=(12, 6)).astype(np.float32)
+    y_val = (rng.random(12) > 0.5).astype(np.float32)
+    cfg = V138Config(supervised_epochs=1, use_unet_25d=False, max_iter=6)
+    memory = NX47EvolutionMemory()
+    events = []
+
+    def cb(**kwargs):
+        events.append(kwargs.get("substage"))
+
+    _model, _info = train_nx47_supervised(x_train, y_train, x_val, y_val, cfg, rng, memory, progress_cb=cb)
+    assert any(e == "hyperparam_search" for e in events)

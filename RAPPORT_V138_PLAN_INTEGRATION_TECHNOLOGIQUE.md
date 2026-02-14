@@ -577,3 +577,29 @@ Objectif: éviter de découvrir des erreurs bloquantes après plusieurs heures d
 - P0 (bloquant): `overall_progress` manquant -> **corrigé**.
 - P1 (qualité run): réduire duplications pip.
 - P2 (hygiène notebooks): nettoyage options nbconvert/traitlets pour logs plus propres.
+
+---
+
+## 29) Mise à jour corrective demandée — retour couverture v136 + progression complète
+
+Suite à la lecture des logs `nx47-vesu-kernel-new-v138.log` et `nx47-vesu-kernel-new-v138.1.log`:
+
+- retour config par défaut V138 sur la stratégie v136:
+  - `max_train_volumes=24`
+  - `max_val_volumes=8`
+- objectif attendu avec 786 paires:
+  - `coverage_pct_selected_vs_discovered ≈ 4.07%` (32/786)
+
+Renforcement de la progression en temps réel:
+
+- progression par étapes/sous-étapes/fichiers/global,
+- progression dans les boucles de chargement train/val,
+- progression dans la recherche hyperparamètres supervisée,
+- progression dans les itérations internes de `fit_prox`,
+- heartbeat explicite pour distinguer “calcul long actif” vs blocage.
+
+Justification:
+
+- les runs précédents pouvaient paraître figés en UI Kaggle mobile,
+- alors que le calcul était encore en cours,
+- jusqu’à atteindre la limite d’exécution Kaggle (9h).

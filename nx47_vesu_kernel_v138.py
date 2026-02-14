@@ -17,7 +17,7 @@ import zipfile
 from dataclasses import asdict, dataclass, field
 from hashlib import sha512
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Callable, Dict, List, Tuple
 
 import numpy as np
 from scipy.ndimage import (
@@ -88,8 +88,8 @@ class V138Config:
 
     # V125 supervised mode
     supervised_train: bool = True
-    max_train_volumes: int = 0
-    max_val_volumes: int = 0
+    max_train_volumes: int = 24
+    max_val_volumes: int = 8
     max_samples_per_volume: int = 40_000
     pos_neg_ratio: float = 1.0
     strong_th: float = 0.65
@@ -141,6 +141,7 @@ class V138Config:
     preflight_train_pct: float = 5.0
     preflight_test_pct: float = 5.0
     progress_bar_width: int = 24
+    heartbeat_interval_s: float = 30.0
 
 
 @dataclass
@@ -360,7 +361,7 @@ class NX47AtomNeuron:
         z = x @ self.w + (x * x) @ self.alpha + gx @ self.beta + self.b
         return self._sigmoid(z)
 
-    def fit_prox(self, x: np.ndarray, y: np.ndarray, lr: float, max_iter: int, l1: float, l2: float) -> Dict[str, float]:
+    def fit_prox(self, x: np.ndarray, y: np.ndarray, lr: float, max_iter: int, l1: float, l2: float, progress_cb: Callable[..., None] | None = None, progress_prefix: Dict[str, Any] | None = None) -> Dict[str, float]:
         n = max(1, x.shape[0])
         gx = np.gradient(x, axis=0)
         active_start = int(np.sum((np.abs(self.w) + np.abs(self.alpha) + np.abs(self.beta)) > 1e-8))
@@ -372,6 +373,10 @@ class NX47AtomNeuron:
             grad_alpha = ((x * x).T @ err) / n + l2 * self.alpha
             grad_beta = (gx.T @ err) / n + l2 * self.beta
             grad_b = float(np.mean(err))
+            if progress_cb is not None and ((it + 1) % 10 == 0 or it == 0 or (it + 1) == max_iter):
+                payload = dict(progress_prefix or {})
+                payload.update({'substage': 'fit_prox_iter', 'iter': int(it + 1), 'max_iter': int(max_iter), 'iter_progress_percent': float(100.0 * (it + 1) / max(1, max_iter))})
+                progress_cb(**payload)
 
             w_temp = self.w - lr * grad_w
             a_temp = self.alpha - lr * grad_alpha
@@ -771,6 +776,7 @@ def train_nx47_supervised(
     cfg: V138Config,
     rng: np.random.Generator,
     memory: NX47EvolutionMemory,
+    progress_cb: Callable[..., None] | None = None,
 ) -> Tuple[NX47AtomNeuron, Dict[str, Any]]:
     best, best_state = None, None
     leaderboard: List[Dict[str, Any]] = []
@@ -782,11 +788,27 @@ def train_nx47_supervised(
     best_obj_seen = None
     stagnation = 0
     while True:
+        total_candidates = max(1, max(1, cfg.meta_neurons) * len(cfg.l1_candidates) * len(cfg.l2_candidates))
+        candidate_idx = 0
         for neuron_id in range(max(1, cfg.meta_neurons)):
             for l1 in cfg.l1_candidates:
                 for l2 in cfg.l2_candidates:
+                    candidate_idx += 1
+                    if progress_cb is not None and (candidate_idx == 1 or candidate_idx % 3 == 0 or candidate_idx == total_candidates):
+                        progress_cb(
+                            stage='train_supervised',
+                            pct=100.0 * candidate_idx / total_candidates,
+                            substage='hyperparam_search',
+                            file_name='',
+                            index=candidate_idx,
+                            total=total_candidates,
+                            epoch=int(epoch),
+                            neuron_id=int(neuron_id),
+                            l1=float(l1),
+                            l2=float(l2),
+                        )
                     m = NX47AtomNeuron(n_features=x_train.shape[1])
-                    tr = m.fit_prox(x_train, y_train, lr=adaptive_lr, max_iter=cfg.max_iter, l1=float(l1), l2=float(l2))
+                    tr = m.fit_prox(x_train, y_train, lr=adaptive_lr, max_iter=cfg.max_iter, l1=float(l1), l2=float(l2), progress_cb=progress_cb, progress_prefix={'stage': 'train_supervised', 'pct': 100.0 * candidate_idx / total_candidates, 'index': candidate_idx, 'total': total_candidates, 'epoch': int(epoch), 'neuron_id': int(neuron_id), 'l1': float(l1), 'l2': float(l2)})
                     p = m.predict_proba(x_val, grad_x_val)
                     ce = -float(np.mean(y_val * np.log(p + 1e-9) + (1.0 - y_val) * np.log(1.0 - p + 1e-9)))
                     threshold_info = calibrate_thresholds(y_val, p, cfg.threshold_scan, cfg.fbeta_beta)
@@ -826,6 +848,17 @@ def train_nx47_supervised(
             'best_fbeta': float(epoch_best['val_fbeta']),
             'best_threshold': float(epoch_best['best_threshold']),
         })
+        if progress_cb is not None:
+            progress_cb(
+                stage='train_supervised',
+                pct=100.0,
+                substage='epoch_done',
+                file_name='',
+                index=int(epoch + 1),
+                total=max(1, int(cfg.supervised_epochs) if int(cfg.supervised_epochs) > 0 else int(epoch + 1)),
+                epoch_best=float(epoch_best['objective']),
+                epoch_f1=float(epoch_best['val_f1']),
+            )
         if best_obj_seen is None or (best_obj_seen - float(epoch_best['objective'])) > float(cfg.convergence_min_delta):
             best_obj_seen = float(epoch_best['objective'])
             stagnation = 0
@@ -1152,7 +1185,7 @@ class NX47V138Kernel:
         filled = int(round(width * clamped / 100.0))
         return '[' + ('#' * filled) + ('-' * (width - filled)) + ']'
 
-    def _log_progress(self, stage: str, pct: float, *, substage: str = '', file_name: str = '', index: int = 0, total: int = 0) -> None:
+    def _log_progress(self, stage: str, pct: float, *, substage: str = '', file_name: str = '', index: int = 0, total: int = 0, **extra: Any) -> None:
         self.log(
             'PROGRESS_UPDATE',
             stage=stage,
@@ -1162,6 +1195,19 @@ class NX47V138Kernel:
             total=int(total),
             progress_percent=float(np.clip(pct, 0.0, 100.0)),
             progress_bar=self._build_progress_bar(pct),
+            global_progress_percent=float(self.plan.overall_progress()),
+            global_progress_bar=self._build_progress_bar(self.plan.overall_progress()),
+            **extra,
+        )
+
+    def _log_heartbeat(self, stage: str, *, file_name: str = '', note: str = '', index: int = 0, total: int = 0) -> None:
+        self.log(
+            'HEARTBEAT',
+            stage=stage,
+            file=file_name or None,
+            index=int(index),
+            total=int(total),
+            note=note,
             global_progress_percent=float(self.plan.overall_progress()),
             global_progress_bar=self._build_progress_bar(self.plan.overall_progress()),
         )
@@ -1422,7 +1468,8 @@ class NX47V138Kernel:
         x_val_chunks: List[np.ndarray] = []
         y_val_chunks: List[np.ndarray] = []
 
-        for img_path, lbl_path in train_pairs:
+        for k, (img_path, lbl_path) in enumerate(train_pairs, start=1):
+            self._log_progress('train_data', 100.0 * k / max(1, len(train_pairs)), substage='load_train_pair', file_name=img_path.name, index=k, total=len(train_pairs))
             vol = self._load_volume(img_path)
             feats, names = extract_multi_features(vol)
             selected, _, _ = auto_select_features(feats, names, self.cfg.top_k_features)
@@ -1434,7 +1481,8 @@ class NX47V138Kernel:
             x_train_chunks.append(x[idx])
             y_train_chunks.append(y[idx])
 
-        for img_path, lbl_path in val_pairs:
+        for k, (img_path, lbl_path) in enumerate(val_pairs, start=1):
+            self._log_progress('val_data', 100.0 * k / max(1, len(val_pairs)), substage='load_val_pair', file_name=img_path.name, index=k, total=len(val_pairs))
             vol = self._load_volume(img_path)
             feats, names = extract_multi_features(vol)
             selected, _, _ = auto_select_features(feats, names, self.cfg.top_k_features)
@@ -1457,7 +1505,7 @@ class NX47V138Kernel:
         x_val = np.concatenate(x_val_chunks, axis=0)
         y_val = np.concatenate(y_val_chunks, axis=0)
 
-        model, info = train_nx47_supervised(x_train, y_train, x_val, y_val, self.cfg, rng, self.evolution)
+        model, info = train_nx47_supervised(x_train, y_train, x_val, y_val, self.cfg, rng, self.evolution, progress_cb=self._log_progress)
         self.supervised_model = model
 
         # Optional competitive 2.5D U-Net branch for logit/threshold audit and potential scoring uplift
@@ -1466,14 +1514,16 @@ class NX47V138Kernel:
             try:
                 train_patch_x, train_patch_y = [], []
                 val_patch_x, val_patch_y = [], []
-                for img_path, lbl_path in train_pairs[: min(4, len(train_pairs))]:
+                for u, (img_path, lbl_path) in enumerate(train_pairs[: min(4, len(train_pairs))], start=1):
+                    self._log_progress('unet_patches', 100.0 * u / max(1, min(4, len(train_pairs))), substage='extract_train_patch', file_name=img_path.name, index=u, total=max(1, min(4, len(train_pairs))))
                     vol = self._load_volume(img_path)
                     lbl = self._load_label_2d(lbl_path)
                     px, py = _extract_2p5d_patches(vol, lbl, self.cfg, rng)
                     if px.shape[0] > 0:
                         train_patch_x.append(px)
                         train_patch_y.append(py)
-                for img_path, lbl_path in val_pairs[: min(2, len(val_pairs))]:
+                for u, (img_path, lbl_path) in enumerate(val_pairs[: min(2, len(val_pairs))], start=1):
+                    self._log_progress('unet_patches_val', 100.0 * u / max(1, min(2, len(val_pairs))), substage='extract_val_patch', file_name=img_path.name, index=u, total=max(1, min(2, len(val_pairs))))
                     vol = self._load_volume(img_path)
                     lbl = self._load_label_2d(lbl_path)
                     px, py = _extract_2p5d_patches(vol, lbl, self.cfg, rng)
@@ -1522,6 +1572,7 @@ class NX47V138Kernel:
 
     def _load_volume(self, path: Path) -> np.ndarray:
         self.plan.update('load', 25.0)
+        self._log_progress('load', 25.0, substage='start_load', file_name=path.name)
         if self.cfg.ultra_step_log:
             self.log('STEP', name='load_start', file=str(path))
         vol = read_tiff_lzw_safe(path).astype(np.float32)
@@ -1532,18 +1583,22 @@ class NX47V138Kernel:
         vol = (vol - float(vol.min())) / (float(vol.max()) - float(vol.min()) + 1e-6)
         self._log_array_ultra('volume', vol)
         self.plan.update('load', 100.0, done=True)
+        self._log_progress('load', 100.0, substage='done_load', file_name=path.name)
         return vol
 
     def _predict_mask(self, vol: np.ndarray) -> Tuple[np.ndarray, Dict[str, Any]]:
         self.plan.update('features', 10.0)
+        self._log_progress('features', 10.0, substage='start_extract')
         if self.cfg.ultra_step_log:
             self.log('STEP', name='features_extract_start')
         features, names = extract_multi_features(vol)
         selected, selected_names, variances = auto_select_features(features, names, self.cfg.top_k_features)
         self._log_array_ultra('features_selected', selected)
         self.plan.update('features', 100.0, done=True)
+        self._log_progress('features', 100.0, substage='features_ready')
 
         self.plan.update('train', 15.0)
+        self._log_progress('train', 15.0, substage='predict_train_path')
         if self.cfg.ultra_step_log:
             self.log('STEP', name='train_start')
         if self.supervised_model is not None and self.supervised_train_info is not None:
@@ -1559,8 +1614,10 @@ class NX47V138Kernel:
             model, train_info = train_nx47_autonomous(selected, self.cfg, rng, self.evolution)
             train_mode = 'autonomous_fallback'
         self.plan.update('train', 100.0, done=True)
+        self._log_progress('train', 100.0, substage='train_done')
 
         self.plan.update('segment', 20.0)
+        self._log_progress('segment', 20.0, substage='segment_start')
         if self.cfg.ultra_step_log:
             self.log('STEP', name='segment_start')
         x_full = selected.reshape(selected.shape[0], -1).T.astype(np.float64)
@@ -1573,6 +1630,7 @@ class NX47V138Kernel:
         slice_ratio_info = choose_slicewise_adaptive_ratio(vol, prob, self.cfg.ratio_candidates)
         calibrated_mask = np.logical_or(calibrated_mask_scan, slice_ratio_info['mask_global'])
         final = (hysteresis_mask | calibrated_mask).astype(np.uint8)
+        self._log_progress('segment', 75.0, substage='masks_combined')
 
         self._log_array_ultra('mask_hysteresis', hysteresis_mask.astype(np.uint8))
         self._log_array_ultra('mask_calibrated', calibrated_mask.astype(np.uint8))
@@ -1601,6 +1659,7 @@ class NX47V138Kernel:
 
         prob_audit = audit_logits_distribution(prob, None, self.cfg.logit_hist_bins) if self.cfg.export_logit_audit else {}
 
+        self._log_progress('segment', 100.0, substage='segment_done')
         metrics = {
             'selected_features': selected_names,
             'feature_variances': {names[i]: float(variances[i]) for i in range(len(names))},
@@ -1700,8 +1759,10 @@ class NX47V138Kernel:
                 for st in ('load', 'features', 'train', 'segment'):
                     self.plan.update(st, 0.0, done=False)
 
+                self._log_heartbeat('file_processing', file_name=fpath.name, note='start_file_compute', index=i, total=len(files))
                 vol = self._load_volume(fpath)
                 mask2d, m = self._predict_mask(vol)
+                self._log_heartbeat('file_processing', file_name=fpath.name, note='end_file_compute', index=i, total=len(files))
                 self.log('NX47_METRICS', file=fpath.name, **m)
 
                 self.global_stats['files_processed'] += 1
@@ -1835,8 +1896,8 @@ if __name__ == '__main__':
         run_simulation_100=os.environ.get('V138_RUN_SIMULATION_100', '0') == '1',
         simulation_export_curve=os.environ.get('V138_SIMULATION_EXPORT_CURVE', '1') == '1',
         supervised_train=os.environ.get('V138_SUPERVISED_TRAIN', '1') == '1',
-        max_train_volumes=int(os.environ.get('V138_MAX_TRAIN_VOLUMES', '0')),
-        max_val_volumes=int(os.environ.get('V138_MAX_VAL_VOLUMES', '0')),
+        max_train_volumes=int(os.environ.get('V138_MAX_TRAIN_VOLUMES', '24')),
+        max_val_volumes=int(os.environ.get('V138_MAX_VAL_VOLUMES', '8')),
         max_samples_per_volume=int(os.environ.get('V138_MAX_SAMPLES_PER_VOLUME', '40000')),
         pos_neg_ratio=float(os.environ.get('V138_POS_NEG_RATIO', '1.0')),
         golden_nonce_topk=int(os.environ.get('V138_GOLDEN_NONCE_TOPK', '11')),
@@ -1874,6 +1935,7 @@ if __name__ == '__main__':
         preflight_train_pct=float(os.environ.get('V138_PREFLIGHT_TRAIN_PCT', '5.0')),
         preflight_test_pct=float(os.environ.get('V138_PREFLIGHT_TEST_PCT', '5.0')),
         progress_bar_width=int(os.environ.get('V138_PROGRESS_BAR_WIDTH', '24')),
+        heartbeat_interval_s=float(os.environ.get('V138_HEARTBEAT_INTERVAL_S', '30.0')),
     )
     kernel = NX47V138Kernel(
         root=Path(os.environ.get('VESUVIUS_ROOT', '/kaggle/input/competitions/vesuvius-challenge-surface-detection')),
