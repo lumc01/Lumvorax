@@ -474,3 +474,71 @@ V138 devra livrer:
 - `RUNTIME_EVIDENCE` (compteurs symboles, timings, checksums),
 - `RESULT_LINKAGE` (traçabilité sortie <- code exécuté),
 - `NO_SHORTCUT_DECLARATION` (aucun stub/fallback masqué).
+
+---
+
+## 26) Analyse du dernier log GitHub `nx47-vesu-kernel-new-v137.log` (récupération + diagnostic)
+
+### 26.1 Résultat de récupération
+
+- Log récupéré depuis GitHub: `nx47-vesu-kernel-new-v137.log`.
+- Taille observée: 3454 lignes.
+
+### 26.2 Faits observés dans le run V137
+
+- `TRAIN_DISCOVERY`: `pair_count=786`.
+- `TRAIN_DATASET_AUDIT`:
+  - `pair_count_discovered=786`
+  - `pair_count_selected_for_training=786`
+  - `coverage_pct_selected_vs_discovered=100.0`
+  - `train_image_files_found=786`
+  - `train_label_files_found=786`
+- Le run n’a pas émis de `GLOBAL_STATS` final ni `EXEC_COMPLETE`.
+- Le run s’arrête sur exception:
+  - `KeyError: 'best_objective'`
+  - source: boucle convergence supervisée, référence à une clé absente dans `epoch_best`.
+
+### 26.3 Cause racine
+
+- Incohérence de clé interne dans l’entraînement supervisé:
+  - `epoch_best` contient `objective` (et non `best_objective`).
+  - l’algorithme tentait de lire `epoch_best['best_objective']` pour la logique de stagnation.
+
+### 26.4 Correctif V138 associé
+
+- Correctif de robustesse appliqué dans le noyau V138:
+  - utilisation cohérente de `epoch_best['objective']` pour `best_obj_seen`.
+- Effet attendu:
+  - suppression du `KeyError`,
+  - poursuite normale de la boucle train/val,
+  - émission des artefacts finaux (`GLOBAL_STATS`, `EXEC_COMPLETE`) si aucune autre erreur.
+
+---
+
+## 27) Exigences opérationnelles ajoutées V138 (demandes run-safe)
+
+### 27.1 Progression détaillée en temps réel
+
+V138 doit journaliser des progressions:
+
+- par étape,
+- par sous-étape,
+- par fichier individuel,
+- et progression globale.
+
+Format attendu: `% + barre de progression` dans les événements `PROGRESS_UPDATE`.
+
+### 27.2 Pré-vol « 5% » avant run complet (>3h)
+
+Avant l’exécution complète, V138 doit lancer un pré-contrôle rapide:
+
+- charger/valider **5% train**,
+- charger/valider **5% test**,
+- échouer tôt en cas d’erreur d’I/O, format, shape ou intégrité.
+
+Objectif: éviter de découvrir des erreurs bloquantes après plusieurs heures de calcul.
+
+### 27.3 Contrainte maintenue sur composants natifs
+
+- Les composants LUM/VORAX C/C++ sont fournis directement dans les cellules du notebook Kaggle (sans dépendance dataset attaché).
+- Build/chargement local uniquement, sans internet.
