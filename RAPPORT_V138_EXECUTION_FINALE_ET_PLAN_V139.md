@@ -252,3 +252,14 @@ Sans ces 5 preuves, on ne peut pas affirmer scientifiquement que le modèle "app
 - Les preuves `GLOBAL_STATS` + `EXEC_COMPLETE` + `submission.zip` sont-elles toujours co-présentes?
 
 Ces questions doivent être intégrées en check-list Go/No-Go pour V139.
+
+## 12) Démarrage immédiat V139 (implémenté)
+
+Actions exécutées immédiatement pour enclencher V139:
+
+1. Nouveau kernel dédié `nx47_vesu_kernel_v139.py` créé à partir de V138, avec versionnement/artefacts V139 (`NX47 V139`, `v139_execution_logs.json`, `v139_execution_metadata.json`, etc.).
+2. Garde-fou d'observabilité ajouté: `stage_stall_alert_s` (défaut 180s) + émission `STALL_ALERT` si l'intervalle entre deux `PROGRESS_UPDATE` dépasse ce seuil.
+3. `PROGRESS_UPDATE` enrichi avec `elapsed_s_since_last` pour objectiver les phases lentes (et distinguer "lent" vs "bloqué").
+4. Contrats Kaggle conservés pour sécurité d'exécution: couverture 24/8, pré-vol 5% train/test, et persistance `EXEC_COMPLETE` avant dump des logs.
+
+Objectif V139 immédiat: améliorer la lisibilité temps-réel sans rompre la robustesse validée en V138.
