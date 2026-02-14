@@ -24,3 +24,15 @@ def test_v138_progress_bar_format():
     bar = NX47V138Kernel._build_progress_bar(k, 50.0)
     assert bar.startswith('[') and bar.endswith(']')
     assert len(bar) == 12
+
+
+
+def test_v138_plantracker_overall_progress_method(tmp_path):
+    from nx47_vesu_kernel_v138 import PlanTracker
+
+    tracker = PlanTracker(output_path=tmp_path / "roadmap.json")
+    tracker.add_step("a", "A")
+    tracker.add_step("b", "B")
+    tracker.update("a", 20.0)
+    tracker.update("b", 60.0)
+    assert abs(tracker.overall_progress() - 40.0) < 1e-9

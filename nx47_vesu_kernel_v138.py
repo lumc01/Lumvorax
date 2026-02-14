@@ -167,6 +167,9 @@ class PlanTracker:
                 break
         self._write()
 
+    def overall_progress(self) -> float:
+        return float(np.mean([s.progress for s in self.steps])) if self.steps else 0.0
+
     def _write(self) -> None:
         payload = {
             "generated_at_ns": time.time_ns(),
@@ -179,7 +182,7 @@ class PlanTracker:
                 }
                 for s in self.steps
             ],
-            "overall_progress_percent": round(float(np.mean([s.progress for s in self.steps])) if self.steps else 0.0, 2),
+            "overall_progress_percent": round(self.overall_progress(), 2),
         }
         self.output_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 

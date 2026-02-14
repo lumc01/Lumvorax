@@ -542,3 +542,38 @@ Objectif: éviter de découvrir des erreurs bloquantes après plusieurs heures d
 
 - Les composants LUM/VORAX C/C++ sont fournis directement dans les cellules du notebook Kaggle (sans dépendance dataset attaché).
 - Build/chargement local uniquement, sans internet.
+
+---
+
+## 28) Analyse des erreurs/warnings Papermill sur run V138 et correctif direct
+
+### 28.1 Erreur bloquante observée
+
+- Exception: `AttributeError: 'PlanTracker' object has no attribute 'overall_progress'`.
+- Contexte: la nouvelle journalisation `PROGRESS_UPDATE` appelait `self.plan.overall_progress()` alors que la méthode n'était pas implémentée dans `PlanTracker`.
+- Impact: crash immédiat au début de `discover_inputs()`, avant le traitement principal.
+
+### 28.2 Correctif appliqué dans V138
+
+- Ajout de `PlanTracker.overall_progress()` (moyenne des pourcentages d'étapes).
+- Harmonisation de `_write()` pour utiliser `self.overall_progress()` (source unique de vérité).
+- Effet attendu: la journalisation de progression ne peut plus déclencher cette `AttributeError`.
+
+### 28.3 Warnings non bloquants vus dans le log
+
+1. **Debugger frozen modules warning**
+   - Message: `-Xfrozen_modules=off` recommandé.
+   - Nature: warning d'environnement debug, **non bloquant** pour le pipeline Kaggle de soumission.
+
+2. **Pip duplicate install lines** (`imagecodecs`, `tifffile`)
+   - Nature: redondance d'installation/logging, **non bloquante**.
+   - Action recommandée V138+: verrouiller une seule routine d'installation par dépendance pour réduire bruit et temps.
+
+3. **FutureWarning traitlets/nbconvert**
+   - Nature: dépréciations de paramètres CLI, **non bloquantes** pour le calcul modèle.
+
+### 28.4 Priorité de correction
+
+- P0 (bloquant): `overall_progress` manquant -> **corrigé**.
+- P1 (qualité run): réduire duplications pip.
+- P2 (hygiène notebooks): nettoyage options nbconvert/traitlets pour logs plus propres.
