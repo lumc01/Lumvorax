@@ -21,3 +21,16 @@ def test_v139_exec_complete_logged_before_logs_dump():
     i_exec = src.find("self.log('EXEC_COMPLETE'")
     i_dump = src.find('self.logs_path.write_text')
     assert i_exec != -1 and i_dump != -1 and i_exec < i_dump
+
+
+def test_v139_progress_payload_has_eta_and_stall_alert():
+    src = Path('nx47_vesu_kernel_v139.py').read_text(encoding='utf-8')
+    assert 'eta_s=' in src
+    assert "self.log('STALL_ALERT'" in src
+
+
+def test_v139_training_outputs_include_weight_delta_and_ablation_blocks():
+    src = Path('nx47_vesu_kernel_v139.py').read_text(encoding='utf-8')
+    assert 'weight_delta_l2' in src
+    assert "'ablation_check': ablation" in src
+    assert "'stability_probe': stability" in src

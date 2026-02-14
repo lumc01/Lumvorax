@@ -263,3 +263,21 @@ Actions exécutées immédiatement pour enclencher V139:
 4. Contrats Kaggle conservés pour sécurité d'exécution: couverture 24/8, pré-vol 5% train/test, et persistance `EXEC_COMPLETE` avant dump des logs.
 
 Objectif V139 immédiat: améliorer la lisibilité temps-réel sans rompre la robustesse validée en V138.
+
+## 13) Vérification explicite de l'intégration des points 10/11 dans V139
+
+État d'intégration technique (code V139):
+
+- [x] **Signal d'entraînement (labels réels)**: apprentissage supervisé construit sur `train_labels` + audits de présence/volumétrie.
+- [x] **Évolution des poids**: deltas L2 (`weight_delta_l2`, `alpha_delta_l2`, `beta_delta_l2`) exportés dans les hyperparamètres sélectionnés.
+- [x] **Amélioration objective**: `epoch_history` avec `best_objective`, `best_f1`, `best_iou`, `best_fbeta`.
+- [x] **Ablation**: contrôle d'ablation intégré (`ablation_check`) via neutralisation d'une feature et mesure `delta_f1_vs_full`.
+- [~] **Stabilité inter-run**: cadre ajouté (`stability_probe` + paramètres config), exécution multi-seed complète planifiée V139.x.
+
+- [~] **Preuve code exécuté = code versionné**: hashes/log signatures présents; ajout recommandé d'un hash notebook exporté dans metadata finale V139.x.
+- [~] **Preuve C/C++ local offline**: politique offline documentée; preuve exécutable par symbol table + logs de compilation à finaliser dans V139.x.
+- [x] **Heartbeat + progression détaillée**: heartbeat, progress bars, ETA (`eta_s`) et alertes de stall (`STALL_ALERT`).
+- [x] **Arrêts explicites**: fail-fast data/rules + erreurs explicites déjà en place.
+- [x] **Co-présence GLOBAL_STATS + EXEC_COMPLETE + submission.zip**: contrat renforcé et `proof_bundle` ajouté dans metadata.
+
+Conclusion: les points critiques demandés sont maintenant intégrés dans V139 côté noyau; les preuves avancées de reproductibilité investisseur (hash notebook signé, preuve C/C++ exécutable détaillée) sont verrouillées pour le prochain incrément V139.x.
