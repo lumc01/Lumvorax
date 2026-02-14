@@ -1,6 +1,9 @@
 #include <math.h>
 #include <stdio.h>
+
+#ifndef KERR_METRIC_H
 #include "physics/kerr_metric.h"
+#endif
 
 /**
  * Q1 - Métrique de Boyer-Lindquist Implémentée

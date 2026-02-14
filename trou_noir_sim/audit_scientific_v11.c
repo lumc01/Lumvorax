@@ -2,7 +2,10 @@
 #include <stdio.h>
 #include <stdint.h>
 #include "physics/kerr_metric.h"
-#include "physics/validation_math.c"
+
+// Déclaration des fonctions de validation pour éviter les inclusions multiples
+double measure_hamiltonian_constraint(const kerr_metric_t* m, const geodesic_state_t* s);
+
 #include "core/time_ns.h"
 #include "logging/log_writer.h"
 
