@@ -1,6 +1,6 @@
 # RAPPORT D'EXPERTISE SCIENTIFIQUE FINALE (T21-T27) - V27
 
-## 1. Résultats Réels des Tests T21-T27
+## 1. Résultats Réels des Tests  T21-T27
 Suite à l'exécution de la suite scientifique ultra-résolue :
 
 ### T21 — Stabilité Symplectique (Quad Precision)
