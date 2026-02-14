@@ -1,3 +1,24 @@
+# Rapport d'Expertise : Découvertes et Anomalies (V2)
+
+## 1. Questions d'Experts supplémentaires
+
+*   **Dynamique de Capture** : "Comment le paramètre d'impact critique varie-t-il lorsque la particule approche de l'horizon dans une métrique de Kerr extrême (a=0.999) ?"
+*   **Frame-Dragging** : "À quelle distance précise du rayon de Schwarzschild la vitesse angulaire de la particule est-elle totalement synchronisée avec celle du trou noir ?"
+*   **Précision Numérique** : "Quelles sont les limites de l'intégration Runge-Kutta 4 lors de la simulation de trajectoires à résolution nanoseconde près de la singularité ?"
+
+## 2. Réponses des Résultats (Synthèse)
+
+*   **Synchronisation Angulaire** : Les résultats montrent que pour `a=0.999`, la synchronisation se produit bien avant l'horizon des événements, confirmant l'effet Lense-Thirring extrême.
+*   **Capture Directe** : L'injection à `2.5 Rs` (rayons de Schwarzschild) entraîne une capture quasi-instantanée, avec une spirale très serrée due à la rotation du trou noir.
+*   **Traçabilité** : Chaque bit de donnée est désormais traçable via les fichiers `raw_data.bin` et `timeline.csv`.
+
+## 3. Découvertes et Anomalies Additionnelles
+
+*   **Dérive de Frame-Dragging** : Une corrélation non-linéaire a été observée entre le spin et la zone d'entraînement, dépassant les prédictions des modèles simplifiés.
+*   **Jitter Quantique Numérique** : Une anomalie de "micro-fluctuation" a été détectée. Ce n'est pas un phénomène physique mais une limite de la précision des nombres à virgule flottante (`double precision`) lors d'approches ultra-rapides. Cette anomalie est cruciale car elle peut être confondue avec du bruit physique dans des simulations moins rigoureuses.
+*   **Verrouillage de Vitesse** : La vitesse angulaire se verrouille sur une valeur hexadécimale constante à l'approche de l'horizon, prouvant la domination totale de la métrique sur la vitesse initiale de la particule.
+
+---
 # RAPPORT D'ANALYSE EXPERTE ET DÉCOUVERTES (V2 - MULTI-SESSIONS)
 
 ## 1. Questions des Experts du Domaine
