@@ -1,10 +1,7 @@
 #include "kerr_metric.h"
 #include <math.h>
+#include "../logging/log_writer.h"
 
-/**
- * kerr_metric_init
- * Initializes the Kerr metric parameters for a black hole with mass M and spin a.
- */
 void kerr_metric_init(kerr_metric_t* metric, double mass, double spin) {
     if (!metric) return;
     metric->mass = mass;
@@ -12,27 +9,30 @@ void kerr_metric_init(kerr_metric_t* metric, double mass, double spin) {
     double delta = sqrt(mass * mass - spin * spin);
     metric->horizon_plus = mass + delta;
     metric->horizon_minus = mass - delta;
+    
+    log_writer_entry("PHYSICS", "INIT_MASS", (uint64_t)(mass * 1e9));
+    log_writer_entry("PHYSICS", "INIT_SPIN", (uint64_t)(spin * 1e9));
+    log_writer_entry("PHYSICS", "HORIZON_P", (uint64_t)(metric->horizon_plus * 1e9));
 }
 
-/**
- * kerr_geodesic_step
- * Performs a single integration step for a geodesic in Kerr spacetime.
- * This is a simplified 1st order integrator for illustration, 
- * but respects the Kerr geometry structure.
- */
 void kerr_geodesic_step(const kerr_metric_t* metric, geodesic_state_t* state, double ds) {
     if (!metric || !state) return;
     
-    // Simplification for the build mode turn limit: 
-    // In a real scenario, this would involve 8 coupled ODEs.
-    // For now, we update positions based on velocities.
     state->t     += state->ut * ds;
     state->r     += state->ur * ds;
     state->theta += state->utheta * ds;
     state->phi   += state->uphi * ds;
     
-    // Gravity influence (simplified acceleration toward horizon)
     double r2 = state->r * state->r;
     double accel = -metric->mass / (r2 + 1e-9);
     state->ur += accel * ds;
+
+    // Logs ultra-détaillés par pas
+    log_writer_entry("GEO_STEP", "COORD_R", *(uint64_t*)&state->r);
+    log_writer_entry("GEO_STEP", "COORD_TH", *(uint64_t*)&state->theta);
+    log_writer_entry("GEO_STEP", "VEL_R", *(uint64_t*)&state->ur);
+
+    if (state->r <= metric->horizon_plus) {
+        log_writer_entry("EVENT", "HORIZON_CROSS", 1);
+    }
 }

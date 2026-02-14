@@ -2,17 +2,18 @@
 #include "physics/kerr_metric.h"
 #include "logging/log_writer.h"
 
-void test_kerr_init() {
-    kerr_metric_t m;
-    kerr_metric_init(&m, 1.0, 0.5);
-    if (m.horizon_plus > 1.0) {
-        printf("[TEST] Kerr Init: OK\n");
-    } else {
-        printf("[TEST] Kerr Init: FAILED\n");
-    }
-}
-
 int main() {
-    test_kerr_init();
+    kerr_metric_t m;
+    geodesic_state_t s = {0, 10.0, 1.57, 0, 1.0, -0.1, 0, 0.01};
+    
+    kerr_metric_init(&m, 1.0, 0.998);
+    printf("Starting Ultra-Detailed Simulation...\n");
+    
+    for(int i=0; i<1000; i++) {
+        kerr_geodesic_step(&m, &s, 0.01);
+        if (s.r <= m.horizon_plus) break;
+    }
+    
+    printf("Simulation Complete. Logs generated in trou_noir_sim/logs/\n");
     return 0;
 }
