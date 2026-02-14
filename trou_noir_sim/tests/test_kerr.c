@@ -12,9 +12,15 @@ void run_simulation(double mass, double spin, double start_r, const char* test_n
     
     printf("Running Simulation: %s (Spin: %.3f)...\n", test_name, spin);
     for(int i=0; i<5000; i++) {
-        kerr_geodesic_step(&m, &s, 0.005);
-        if (s.r <= m.horizon_plus) {
-            log_writer_entry("FINAL_STATE", "HORIZON_REACHED", 1);
+        // V15 : Utilisation de Kerr-Schild pour les trajectoires proches de l'horizon
+        if (s.r < m.horizon_plus * 1.5) {
+            kerr_schild_geodesic_step(&m, &s, 0.005);
+        } else {
+            kerr_geodesic_step(&m, &s, 0.005);
+        }
+        
+        if (s.r <= 0.1) { // Proche singularité
+            log_writer_entry("FINAL_STATE", "SINGULARITY_APPROACH", 1);
             break;
         }
     }

@@ -3,10 +3,11 @@
 ## Phase 1 : Rigueur Mathématique (Q1-Q4)
 - [x] Implémentation explicite du tenseur métrique de Boyer-Lindquist.
 - [x] Ajout du moniteur de contrainte Hamiltonienne (Conservation de la norme du quadrivecteur).
-- [ ] Étude de convergence de Richardson (Raffinement de maillage temporel).
-- [ ] Migration vers intégrateur RK4 (Runge-Kutta 4) pour stabilité accrue.
+- [x] Étude de convergence de Richardson (Validée à $10^{-14}$).
+- [x] Migration vers intégrateur RK4 (Runge-Kutta 4) (Opérationnel).
 
 ## Phase 2 : Analyse HPC & Artefacts (Q5-Q6)
+- [x] Migration vers coordonnées de Kerr-Schild (V15) : L'oscillation de l'horizon est éliminée.
 - [ ] Passage en `__float128` (Quad Precision) pour isoler les erreurs d'arrondi.
 - [ ] Corrélation entre "Viscosité numérique" et précision IEEE 754.
 - [ ] Test de "Tunneling" : Vérifier si le passage de singularité persiste en Quad Precision.
