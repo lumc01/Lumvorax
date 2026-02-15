@@ -1113,7 +1113,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python main.py"
+args = "make all && echo \"Build successful!\""
 
 [[workflows.workflow]]
 name = "VALIDATION COMPLETE LOGS REELS"
@@ -1253,7 +1253,7 @@ task = "shell.exec"
 args = "echo \"🔒 VALIDATION COMPLÈTE TERMINÉE\""
 
 [nix]
-packages = ["arrow-cpp", "clang", "file", "gcc", "gdb", "glib", "glibcLocales", "gnumake", "kaggle", "nano", "openssh", "pkg-config", "tree", "vim-full", "zlib"]
+packages = ["arrow-cpp", "cairo", "clang", "ffmpeg-full", "file", "freetype", "gcc", "gdb", "ghostscript", "glib", "glibc", "glibcLocales", "gnumake", "gobject-introspection", "gtk3", "kaggle", "libxcrypt", "nano", "openssh", "pkg-config", "qhull", "tcl", "tk", "tree", "vim-full", "xsimd", "zlib"]
 channel = "stable-25_05"
 
 [deployment]
@@ -1264,6 +1264,7 @@ build = ["make", "clean", "all"]
 [userenv]
 
 [userenv.shared]
-KAGGLE_API_TOKEN = "KGAT_622e28b5346139b10b2e23432fee61ec"
-KAGGLE_USERNAME = "einann"
+KAGGLE_API_TOKEN = "KGAT_7680d61c0924571a6f22205bb9401330"
+KAGGLE_USERNAME = "viniciushreimann"
 ARISTOTLE_API_KEY = "arstl_YykBEXr6oNR5R9toq_wI1wTtyfVrj5eUZfgpe_BlgYo"
+KAGGLE_CONFIG_DIR = "/home/runner/.kaggle"

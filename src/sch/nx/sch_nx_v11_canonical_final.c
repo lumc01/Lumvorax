@@ -4,6 +4,7 @@
 #include <time.h>
 #include <math.h>
 #include <string.h>
+#include "../../crypto/crypto_validator.h"
 
 /*
  * PROJECT: NX-11 (CANONICAL FORENSIC LOGGER)
@@ -26,13 +27,13 @@ typedef struct {
     double hysteresis_trace;
 } NX11_Neuron;
 
-void sha256_real_mock(const void* data, size_t len, char* out) {
-    uint64_t h[4] = {0x6a09e667f3bcc908, 0xbb67ae8584caa73b, 0x3c6ef372fe94f82b, 0xa54ff53a5f1d36f1};
-    const uint8_t* p = (const uint8_t*)data;
-    for(size_t i=0; i<len; i++) {
-        h[i%4] = (h[i%4] ^ p[i]) * 0x100000001b3;
+static void sha256_real_hex(const void* data, size_t len, char* out) {
+    uint8_t digest[32];
+    sha256_hash((const uint8_t*)data, len, digest);
+    for (size_t i = 0; i < sizeof(digest); i++) {
+        sprintf(out + (i * 2), "%02x", digest[i]);
     }
-    sprintf(out, "%016lx%016lx%016lx%016lx", h[0], h[1], h[2], h[3]);
+    out[64] = '\0';
 }
 
 uint64_t get_utc_nanos() {
@@ -51,7 +52,7 @@ void log_nx11_canonical(uint64_t event_id, uint64_t parent_id, const char* unit_
             ts, event_id, parent_id, unit_id, domain, type, bit_trace, h_before, h_after, e_delta, e_total, inv_density, regime, phase_flags, prev_line_hash);
     
     char current_hash[65];
-    sha256_real_mock(base_line, strlen(base_line), current_hash);
+    sha256_real_hex(base_line, strlen(base_line), current_hash);
     
     printf("%s\nLINE_HASH_SHA256=%s\n", base_line, current_hash);
     
@@ -83,7 +84,7 @@ int main() {
     uint64_t event_id = 1;
 
     for(int i=0; i<5; i++) {
-        sha256_real_mock(n.atoms, sizeof(NX11_Atom)*NX11_NUM_ATOMS, h_before);
+        sha256_real_hex(n.atoms, sizeof(NX11_Atom)*NX11_NUM_ATOMS, h_before);
         
         double e_start = n.atp;
         for(int j=0; j<NX11_NUM_ATOMS; j++) {
@@ -93,7 +94,7 @@ int main() {
         double dissipation = 1.0 + ((double)rand()/RAND_MAX * 2.0);
         n.atp -= dissipation;
         
-        sha256_real_mock(n.atoms, sizeof(NX11_Atom)*NX11_NUM_ATOMS, h_after);
+        sha256_real_hex(n.atoms, sizeof(NX11_Atom)*NX11_NUM_ATOMS, h_after);
 
         char bit_trace[128];
         sprintf(bit_trace, "bit:%d:%d->%d", rand()%NX11_NUM_ATOMS, rand()%2, rand()%2);

@@ -8,11 +8,14 @@ dependencies = [
     "aristotlelib>=0.6.0",
     "bitstring>=4.3.1",
     "kaggle>=1.8.3",
+    "matplotlib>=3.10.8",
     "numpy==1.26.4",
     "pandas>=2.2.0",
     "psutil>=7.2.1",
     "pyarrow>=23.0.0",
     "requests>=2.32.5",
+    "scipy>=1.17.0",
+    "tifffile>=2026.1.28",
 ]
 
 [[tool.uv.index]]

@@ -11,13 +11,19 @@
 #include <map>
 #include <algorithm>
 #include <sstream>
+extern "C" {
+#include "../crypto/crypto_validator.h"
+}
 
-// MOTEUR SHA-256 SIMPLIFIÉ POUR CERTIFICATION NX-25-HFBL-360
-std::string sha256_mock(const std::string& str) {
-    unsigned long hash = 5381;
-    for (char c : str) hash = ((hash << 5) + hash) + c;
-    std::stringstream ss;
-    ss << std::hex << std::setw(64) << std::setfill('0') << hash;
+// MOTEUR SHA-256 RÉEL POUR CERTIFICATION NX-25-HFBL-360
+static std::string sha256_real_hex(const std::string& str) {
+    uint8_t digest[32];
+    sha256_hash(reinterpret_cast<const uint8_t*>(str.data()), str.size(), digest);
+    std::ostringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (const auto byte : digest) {
+        ss << std::setw(2) << static_cast<unsigned>(byte);
+    }
     return ss.str();
 }
 
@@ -76,7 +82,7 @@ private:
             n.e += 0.01;
             if (config.use_merkle) {
                 std::string state = std::to_string(n.e) + std::to_string(n.i);
-                prev_merkle_root = sha256_mock(state + prev_merkle_root);
+                prev_merkle_root = sha256_real_hex(state + prev_merkle_root);
             }
         }
         if (config.use_logs) {
@@ -89,7 +95,7 @@ private:
         auto ns = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::high_resolution_clock::now().time_since_epoch()).count();
         std::ofstream f("logs_AIMO3/nx/NX-25/" + filename, std::ios::app);
         std::string line = std::to_string(ns) + entity + event + std::to_string(value);
-        std::string current_hash = config.use_merkle ? sha256_mock(line + prev_merkle_root) : "DISABLED";
+        std::string current_hash = config.use_merkle ? sha256_real_hex(line + prev_merkle_root) : "DISABLED";
         f << "[" << ns << "][" << ++event_id << "][" << entity << "][" << event << "][" << value << "]" << std::endl;
         f << "[" << prev_merkle_root << "][" << current_hash << "][CRC32]" << std::endl;
         prev_merkle_root = current_hash;

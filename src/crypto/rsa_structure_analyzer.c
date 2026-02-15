@@ -10,8 +10,7 @@ local_observable_t calculate_local_observable(uint64_t n, double scale) {
     local_observable_t obs = {0};
     obs.scale = scale;
     
-    // Simulate local arithmetic transform (mocked for the architecture phase)
-    // In a real scenario, this would involve modular residue patterns
+    // Calcul local basé sur des résidus modulaires réels (fenêtre de petits nombres premiers)
     uint64_t window = (uint64_t)(n * scale);
     if (window == 0) window = 100;
     
@@ -24,7 +23,19 @@ local_observable_t calculate_local_observable(uint64_t n, double scale) {
     }
     
     obs.coprimality_density = (double)coprime_count / 100.0;
-    obs.residual_variance = (double)(n % 97) / 97.0; // Placeholder for residue patterns
+    static const uint32_t primes[] = {97, 89, 83, 79, 73, 71, 67, 61, 59, 53};
+    double residue_sum = 0.0;
+    double residue_sq_sum = 0.0;
+    const size_t prime_count = sizeof(primes) / sizeof(primes[0]);
+
+    for (size_t i = 0; i < prime_count; i++) {
+        double residue = (double)(n % primes[i]) / (double)primes[i];
+        residue_sum += residue;
+        residue_sq_sum += residue * residue;
+    }
+
+    double residue_mean = residue_sum / (double)prime_count;
+    obs.residual_variance = (residue_sq_sum / (double)prime_count) - (residue_mean * residue_mean);
     obs.spectral_signature = (obs.coprimality_density) + (obs.residual_variance) * I;
     obs.local_fluctuation = fabs(obs.coprimality_density - 0.6); // 0.6 is avg density for random
     

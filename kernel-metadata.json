@@ -1,14 +1,13 @@
 {
-  "id": "KAGGLE_USERNAME/nx47-arc-kernel",
-  "title": "NX-47 ARC Kernel",
-  "code_file": "nx47_arc_kernel.ipynb",
+  "id": "lumc01/nx47-vesu-kernel",
+  "title": "nx47-vesu-kernel",
+  "code_file": "nx47_vesu_kernel_final.py",
   "language": "python",
-  "kernel_type": "notebook",
+  "kernel_type": "script",
   "is_private": "true",
   "enable_gpu": "true",
-  "enable_tpu": "false",
   "enable_internet": "true",
-  "dataset_sources": ["competitions/arc-prize-2025"],
-  "competition_sources": ["arc-prize-2025"],
+  "dataset_sources": ["lumc01/vesuvius-challenge-ink-detection"],
+  "competition_sources": ["vesuvius-challenge-ink-detection"],
   "kernel_sources": []
 }
