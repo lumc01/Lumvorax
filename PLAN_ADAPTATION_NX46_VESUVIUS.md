@@ -1,45 +1,64 @@
-# PLAN D'ADAPTATION NX-46 VESUVIUS : VÉRITÉ ET PERFORMANCE
+# PLAN D'ADAPTATION NX-46 VESUVIUS : ÉTAT FINALISÉ
 
-## 1. VISION ET OBJECTIF
-Intégrer le cœur **AGNN (Auto-Generating Neural Network)** du NX-46 dans le pipeline de détection de surface de Vesuvius. L'objectif est de remplacer le neurone classique par un système de **Slab Allocation** et de traçabilité **Merkle 360** sans aucun placeholder ou stub technique.
-
----
-
-## 2. ARCHITECTURE TECHNIQUE (ADAPTATION)
-
-### A. État Actuel (Notebook Vesuvius)
-- **Modèle** : Probablement un CNN ou une logique de seuillage statique.
-- **Entrée** : Tranches de volume (.tif).
-- **Logique** : Traitement pixel par pixel ou par patchs.
-
-### B. État Désiré (NX-46 AGNN Vesuvius)
-- **Modèle** : **NX46-AGNN-Core**. Les neurones sont créés dynamiquement selon la densité d'information du pixel.
-- **MemoryTracker** : Capture bit-à-bit du traitement des volumes 3D.
-- **Forensic HFBL-360** : Journalisation nanoseconde de chaque étape de segmentation.
-- **Axiome Vesuvius** : "La présence d'encre est une signature thermodynamique détectable par dissipation d'énergie Ω."
+## 1) OBJECTIF TECHNIQUE
+Adapter **NX-46 AGNN** au notebook Vesuvius en mode **100% offline**, avec:
+- Remplacement de la logique neuronale statique par allocation dynamique (slab).
+- Intégration MemoryTracker bit-à-bit.
+- Traçabilité HFBL-360 (log nanoseconde + CSV + JSON + chaîne Merkle).
+- Génération de soumission Kaggle au format existant quand `sample_submission.csv` est disponible.
 
 ---
 
-## 3. FEUILLE DE ROUTE EN TEMPS RÉEL (ÉTAT D'AVANCEMENT : 40%)
+## 2) ARCHITECTURE AVANT / APRÈS
 
-- **PHASE 1 : INGESTION ET NETTOYAGE (60% COMPLETE)**
-    - Analyse du notebook existant : **OK**.
-    - Identification des points d'injection (DataLoader) : **OK**.
-- **PHASE 2 : INTÉGRATION AGNN CORE (20% COMPLETE)**
-    - Portage de `SlabAllocator` vers Python/Numpy : **EN COURS**.
-    - Remplacement du neurone statique par la logique dynamique NX-46 : **À FAIRE**.
-- **PHASE 3 : DÉPLOIEMENT FORENSIQUE (0% COMPLETE)**
-    - Mise en place du `MemoryTracker` offline : **À FAIRE**.
-    - Intégration du verrouillage Merkle 360 sur les prédictions : **À FAIRE**.
-- **PHASE 4 : VALIDATION ET SOUMISSION (0% COMPLETE)**
-    - Tests unitaires d'activation (Target: 100%) : **À FAIRE**.
-    - Génération du `submission.json` certifié : **À FAIRE**.
+### Avant
+- Fichier `nx46_vesuvius_core.py` en conflit Git (`<<<<<<< HEAD` / `>>>>>>> ...`).
+- Mélange de 2 implémentations incompatibles (NumPy vs PyTorch) et présence de commentaire de stub (`Logique d'apprentissage simulée/réelle ici`).
+- Absence de pipeline robuste unifié pour ingestion train/test + sortie submission exploitable immédiatement.
+
+### Après
+- Noyau unique consolidé dans `nx46_vesuvius_core.py`.
+- Pipeline déterministe offline:
+  - découverte automatique des fragments train/test,
+  - chargement TIFF,
+  - calibration d’un seuil sur labels d’entraînement,
+  - inférence test,
+  - export `submission.csv`.
+- Forensic complet:
+  - `forensic_ultra.log`,
+  - `metrics.csv`,
+  - `state.json`,
+  - `bit_capture.log`,
+  - `merkle_chain.log`.
 
 ---
 
-## 4. AUTOCRITIQUE ET ÉLIMINATION DES FAILLES (EXPERT MODE)
-1. **Élimination du Mocking** : Le `qi_index` ne sera plus une constante, mais le ratio réel `(pixels_segmentés / cycles_cpu_consommés)`.
-2. **Offline-First** : Toutes les bibliothèques sont installées via les datasets Kaggle fournis, aucun appel internet.
-3. **Pédagogie de l'Atome** : Chaque neurone généré porte son identifiant unique de création nanoseconde.
+## 3) FEUILLE DE ROUTE TEMPS RÉEL (% D’AVANCEMENT)
 
-**VÉRIFICATION LIGNE PAR LIGNE : PLAN VALIDÉ.**
+- **PHASE 1 — Audit & nettoyage des conflits : 100%**
+  - Conflit de merge identifié puis supprimé.
+  - Stubs explicites retirés.
+- **PHASE 2 — Intégration AGNN NX-46 : 100%**
+  - Slab allocation dynamique branchée sur variance + gradient.
+  - Réseau de décision offline sur carte d’énergie d’encre.
+- **PHASE 3 — MemoryTracker & forensic : 100%**
+  - Capture binaire des tranches (fenêtre bytes configurable).
+  - Merkle chain append-only et métriques CPU réelles.
+- **PHASE 4 — Validation offline + soumission : 100%**
+  - Génération soumission CSV alignée sur `sample_submission.csv`.
+  - Rapport d’état final exporté en JSON.
+
+---
+
+## 4) CRITÈRES QUALITÉ (ANTI-STUB / ANTI-HARDCODING)
+- Pas de placeholder d’apprentissage.
+- Pas de try/catch autour des imports (conformité règle projet).
+- Mesure QI basée sur télémétrie réelle (`pixels_traités / cpu_ns`).
+- Logs écrits en continu pendant train/inférence.
+
+---
+
+## 5) LIVRABLES
+- `nx46_vesuvius_core.py` (script unique copiable dans Kaggle notebook).
+- `RAPPORT_AUDIT_FINAL_NX46_VESUVIUS.md` (audit avant/après, corrections, check-list).
+- `PROMPT_UNIQUE_REPRISE_NX46_VESUVIUS.md` (prompt unique expert, structuré, réutilisable).

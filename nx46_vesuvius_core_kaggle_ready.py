@@ -1,7 +1,7 @@
 """NX-46 Vesuvius core, offline-first, without stubs/placeholders.
 
-This module is designed to be pasted into a Kaggle notebook cell or imported as a
-standalone script. It includes:
+Kaggle-ready single file for direct copy/paste execution.
+Includes:
 - Dynamic neuron allocation (slab-based)
 - Bit-level memory tracking
 - Merkle-chain forensic signatures
@@ -19,16 +19,10 @@ import time
 from dataclasses import dataclass
 from hashlib import sha512
 from pathlib import Path
-from typing import Dict, Iterable, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional
 
+import imageio.v3 as iio
 import numpy as np
-
-try:
-    import imageio.v3 as iio
-except Exception as exc:  # pragma: no cover
-    raise RuntimeError(
-        "imageio.v3 is required for TIFF offline loading in Kaggle environments"
-    ) from exc
 
 
 @dataclass
@@ -166,7 +160,6 @@ class NX46AGNNVesuvius:
 
     @staticmethod
     def _ink_energy_projection(stack: np.ndarray) -> np.ndarray:
-        # Offline, deterministic energy-map from 3D slices.
         grad_z = np.abs(np.diff(stack, axis=0, prepend=stack[:1]))
         grad_y = np.abs(np.diff(stack, axis=1, prepend=stack[:, :1, :]))
         grad_x = np.abs(np.diff(stack, axis=2, prepend=stack[:, :, :1]))
@@ -297,7 +290,6 @@ def _write_submission(out_path: Path, sample_path: Path, predictions: Dict[str, 
 
     sample = pd.read_csv(sample_path)
     if "Id" in sample.columns and "Predicted" in sample.columns:
-        # Fallback: concatenate masks in lexical fragment order.
         concat = np.concatenate([_flatten_submission(predictions[k]) for k in sorted(predictions)])
         n = min(len(sample), len(concat))
         sample.loc[: n - 1, "Predicted"] = concat[:n]
@@ -306,7 +298,6 @@ def _write_submission(out_path: Path, sample_path: Path, predictions: Dict[str, 
         n = min(len(sample), len(concat))
         sample.loc[: n - 1, "predicted"] = concat[:n]
     else:
-        # Generic fallback with deterministic output.
         concat = np.concatenate([_flatten_submission(predictions[k]) for k in sorted(predictions)])
         sample = sample.iloc[: len(concat)].copy()
         col = sample.columns[-1]
@@ -326,7 +317,9 @@ def run_pipeline(cfg: NX46Config) -> Dict[str, object]:
 
     thresholds: List[float] = []
     for idx, frag in enumerate(train_fragments, start=1):
-        nx46.logger.log_event(f"PROGRESS train={idx}/{len(train_fragments)} ({idx/ max(len(train_fragments),1)*100:.1f}%)")
+        nx46.logger.log_event(
+            f"PROGRESS train={idx}/{len(train_fragments)} ({idx / max(len(train_fragments), 1) * 100:.1f}%)"
+        )
         volume_dir = frag / "surface_volume"
         if not volume_dir.exists():
             continue
@@ -335,21 +328,19 @@ def run_pipeline(cfg: NX46Config) -> Dict[str, object]:
         if labels is None:
             continue
         if labels.shape != stack.shape[1:]:
-            # strict reshape guard: crop to shared min shape
             h = min(labels.shape[0], stack.shape[1])
             w = min(labels.shape[1], stack.shape[2])
             labels = labels[:h, :w]
             stack = stack[:, :h, :w]
         thresholds.append(nx46.train_threshold(stack, labels, frag.name))
 
-    if thresholds:
-        threshold = float(np.median(np.array(thresholds, dtype=np.float32)))
-    else:
-        threshold = 0.5
+    threshold = float(np.median(np.array(thresholds, dtype=np.float32))) if thresholds else 0.5
 
     predictions: Dict[str, np.ndarray] = {}
     for idx, frag in enumerate(test_fragments, start=1):
-        nx46.logger.log_event(f"PROGRESS test={idx}/{len(test_fragments)} ({idx/ max(len(test_fragments),1)*100:.1f}%)")
+        nx46.logger.log_event(
+            f"PROGRESS test={idx}/{len(test_fragments)} ({idx / max(len(test_fragments), 1) * 100:.1f}%)"
+        )
         volume_dir = frag / "surface_volume"
         if not volume_dir.exists():
             continue
@@ -359,17 +350,12 @@ def run_pipeline(cfg: NX46Config) -> Dict[str, object]:
 
     sample_candidates = [
         root / "sample_submission.csv",
-        root / "sample_submission.json",
         Path("/kaggle/input/vesuvius-challenge-ink-detection/sample_submission.csv"),
     ]
     sample_csv = next((p for p in sample_candidates if p.exists() and p.suffix == ".csv"), None)
     submission_path = None
     if sample_csv and predictions:
-        submission_path = _write_submission(
-            Path(cfg.work_root) / "submission.csv",
-            sample_csv,
-            predictions,
-        )
+        submission_path = _write_submission(Path(cfg.work_root) / "submission.csv", sample_csv, predictions)
 
     return nx46.finalize(
         {
