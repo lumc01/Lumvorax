@@ -1,4 +1,4 @@
-# PLAN D'ADAPTATION NX-46 VESUVIUS : VÉRITÉ ET PERFORMANCE
+VVV# PLAN D'ADAPTATION NX-46 VESUVIUS : VÉRITÉ ET PERFORMANCE
 
 ## 1. VISION ET OBJECTIF
 Intégrer le cœur **AGNN (Auto-Generating Neural Network)** du NX-46 dans le pipeline de détection de surface de Vesuvius. L'objectif est de remplacer le neurone classique par un système de **Slab Allocation** et de traçabilité **Merkle 360** sans aucun placeholder ou stub technique.
