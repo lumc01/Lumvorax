@@ -1,31 +1,53 @@
-# RAPPORT — Tentative de récupération GitHub (V6)
+# RAPPORT — Recommence récupération GitHub (V6)
 
-## Résultat
+## Contexte
 
-- Tentative de clone GitHub effectuée:
-  - `git clone --depth 1 https://github.com/lumc01/Lumvorax.git /workspace/Lumvorax_remote_copy`
-- Échec réseau dans cet environnement:
-  - `fatal: unable to access 'https://github.com/lumc01/Lumvorax.git/': CONNECT tunnel failed, response 403`
+Tu as demandé de recommencer après déblocage internet pour récupérer/pull depuis le dépôt distant.
 
-## Conséquence
+## Tentatives exécutées immédiatement
 
-- Impossible de récupérer directement depuis GitHub les artefacts demandés (`v5-outlput-logs--...`) dans cette session.
-- Fallback appliqué:
-  1. extraction et analyse des artefacts V4 disponibles localement,
-  2. reconstruction locale du plan V4 expert à partir de l'historique de session,
-  3. maintien d'un plan V6 orienté intégration A→Z.
+1. Ajout du remote + fetch:
+   - `git remote add origin https://github.com/lumc01/Lumvorax.git`
+   - `git fetch origin --prune`
+   - Résultat: `fatal: unable to access ... CONNECT tunnel failed, response 403`
 
-## Actions réalisées malgré le blocage
+2. Vérification HTTP directe GitHub:
+   - `curl -I https://github.com/lumc01/Lumvorax`
+   - Résultat: `HTTP/1.1 403 Forbidden` + `CONNECT tunnel failed, response 403`
 
-- Création/reconstruction du fichier:
-  - `RAPPORT-VESUVIUS/output_logs_vesuvius/v4-outlput-logs--nx46-vesuvius-core-kaggle-ready/PLAN_FEUILLE_DE_ROUTE_V4_REPONSES_EXPERTES.md`
-- Conservation des rapports V6:
-  - `RAPPORT-VESUVIUS/PLAN_FEUILLE_DE_ROUTE_V6_REPONSES_EXPERTES.md`
-  - `RAPPORT-VESUVIUS/RAPPORT_ANALYSE_PROFONDE_V5_EXECUTION.md`
+3. Vérification raw GitHub:
+   - `curl -I https://raw.githubusercontent.com/lumc01/Lumvorax/main/README.md`
+   - Résultat: `HTTP/1.1 403 Forbidden` + `CONNECT tunnel failed, response 403`
 
-## Recommandation immédiate
+## Conclusion factuelle
 
-Dès qu'un accès GitHub est disponible, exécuter:
-1. clone/fetch du dépôt source,
-2. copie des artefacts `v5-outlput-logs--nx46-vesuvius-core-kaggle-ready`,
-3. rerun du rapport d'analyse profonde V5 avec preuves runtime complètes.
+Dans cet environnement d’exécution, l’accès sortant GitHub reste bloqué par le tunnel/proxy (403), même après nouvelle tentative complète.
+
+## Impact
+
+- Impossible de faire `pull`/`fetch` distant dans cette session.
+- Impossible de récupérer automatiquement le dossier `v5-outlput-logs--nx46-vesuvius-core-kaggle-ready` depuis GitHub ici.
+
+## Action de continuité (déjà prête)
+
+Dès que la route réseau est réellement ouverte, exécuter les commandes ci-dessous pour finaliser la récupération:
+
+```bash
+git remote remove origin 2>/dev/null || true
+git remote add origin https://github.com/lumc01/Lumvorax.git
+git fetch origin --prune
+git checkout work
+git pull --rebase origin main
+```
+
+Puis synchroniser les artefacts:
+
+```bash
+rsync -av --ignore-existing \
+  RAPPORT-VESUVIUS/output_logs_vesuvius/v5-outlput-logs--nx46-vesuvius-core-kaggle-ready/ \
+  /workspace/Lumvorax/RAPPORT-VESUVIUS/output_logs_vesuvius/v5-outlput-logs--nx46-vesuvius-core-kaggle-ready/
+```
+
+## Transparence
+
+Ce rapport remplace la version précédente avec les nouvelles tentatives effectuées **maintenant** et leurs preuves d’échec réseau.
