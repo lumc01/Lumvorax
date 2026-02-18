@@ -1,27 +1,7 @@
 
 
-# === NX-46 ENGINE INITIALIZATION ===
-import os, subprocess, time
-print("[NX-46] Activating HFBL-360 Forensic System...")
-os.makedirs("logs_AIMO3/nx/NX46", exist_ok=True)
-
-# Vérification réelle de l'environnement Kaggle
-is_kaggle = os.path.exists("/kaggle/input")
-print(f"[NX-46] Environment: {'Kaggle' if is_kaggle else 'Local'}")
-
-# Initialisation du logger forensique réel
-audit_file = "logs_AIMO3/nx/NX46/audit.log"
-with open(audit_file, "a") as f:
-    f.write(f"[{time.ctime()}] NX-46 Engine Started\n")
-
-print("[NX-46] Status: 100% Operational (Verified)")
-
-[NX-46] Activating HFBL-360 Forensic System...
-[NX-46] Environment: Kaggle
-[NX-46] Status: 100% Operational (Verified)
-
 # ================================================================
-# 01) NX47-Vesuvius Challenge - Surface Detection
+# 01) NX47 V140 Kernel
 # 02) Kaggle Vesuvius pipeline: discovery -> load -> features -> segment -> overlay -> package
 # 03) Robust offline dependencies + LZW-safe TIFF I/O + slice-wise adaptive fusion
 # ================================================================
@@ -267,22 +247,31 @@ class UltraAuthentic360Merkle:
             print(line, flush=True)
 
 
+def _is_pkg_available(package_name: str) -> bool:
+    try:
+        importlib.import_module(package_name)
+        return True
+    except Exception:
+        return False
+
+
 def install_offline(package_name: str) -> None:
+    if _is_pkg_available(package_name):
+        return
+
     exact_wheel_dir = Path("/kaggle/input/datasets/ndarray2000/nx47-dependencies")
     fallback_wheel_dir = Path("/kaggle/input/nx47-dependencies")
+    extra_dirs = [
+        Path("/kaggle/input/nx47-deps"),
+        Path("/kaggle/input/vesuvius-nx47-dependencies"),
+        Path("/kaggle/input/datasets/ndarray2000"),
+    ]
 
     exact_wheels = {
         "imagecodecs": exact_wheel_dir / "imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
         "numpy": exact_wheel_dir / "numpy-2.4.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
         "tifffile": exact_wheel_dir / "tifffile-2026.1.28-py3-none-any.whl",
     }
-
-    if package_name == "numpy":
-        try:
-            import numpy as _np  # noqa
-            return
-        except Exception:
-            pass
 
     if package_name in exact_wheels and exact_wheels[package_name].exists():
         try:
@@ -291,10 +280,13 @@ def install_offline(package_name: str) -> None:
         except subprocess.CalledProcessError:
             pass
 
-    for wheel_dir in (exact_wheel_dir, fallback_wheel_dir):
+    for wheel_dir in (exact_wheel_dir, fallback_wheel_dir, *extra_dirs):
         if wheel_dir.exists():
-            subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-index", f"--find-links={wheel_dir}", package_name])
-            return
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-index", f"--find-links={wheel_dir}", package_name])
+                return
+            except subprocess.CalledProcessError:
+                continue
 
     raise RuntimeError(f"Offline dependency directory not found for {package_name}")
 
@@ -1171,7 +1163,7 @@ class NX47V139Kernel:
 
         bootstrap_dependencies_fail_fast()
         if not ensure_imagecodecs():
-            raise RuntimeError('imagecodecs is mandatory for LZW TIFF I/O')
+            self.log('WARN_IMAGECODECS_MISSING', message='imagecodecs unavailable; relying on Pillow/tifffile fallbacks')
 
         self.tmp_dir.mkdir(parents=True, exist_ok=True)
         self.overlay_dir.mkdir(parents=True, exist_ok=True)
@@ -1818,7 +1810,7 @@ class NX47V139Kernel:
         prob_mean_values: List[float] = []
         prob_std_values: List[float] = []
 
-        with zipfile.ZipFile(self.submission_path, 'w', zipfile.ZIP_STORED) as zf:
+        with zipfile.ZipFile(self.submission_path, 'w', zipfile.ZIP_DEFLATED) as zf:
             for i, fpath in enumerate(files, start=1):
                 t0 = time.perf_counter()
                 self.log('FILE_START', file=fpath.name, index=i, total=len(files))
@@ -1867,7 +1859,9 @@ class NX47V139Kernel:
                     self.global_stats['files_autonomous_fallback'] += 1
 
                 out_mask = self.tmp_dir / fpath.name
-                write_tiff_lzw_safe(out_mask, mask2d[np.newaxis, ...])
+                mask2d_u8 = (np.asarray(mask2d, dtype=np.uint8) > 0).astype(np.uint8) * 255
+                submission_volume = np.repeat(mask2d_u8[np.newaxis, ...], vol.shape[0], axis=0)
+                write_tiff_lzw_safe(out_mask, submission_volume)
                 zf.write(out_mask, arcname=fpath.name)
                 out_mask.unlink(missing_ok=True)
                 gc.collect()
