@@ -284,5 +284,22 @@
       "b_on_a_recall": 0.32874518185732593,
       "identical": false
     }
+  },
+  "observed_public_scores": {
+    "NX47_V61_1": {
+      "public_score": 0.387,
+      "source": "user-provided Kaggle screenshot in chat",
+      "notes": "Shown as NX47-VESU-KERNEL NEW V61.1 public score 0.387"
+    },
+    "NX46_V7_3": {
+      "public_score": 0.303,
+      "source": "user-provided Kaggle screenshot in chat",
+      "notes": "Shown as nx46_vesuvius_core_kaggle_ready public score 0.303"
+    }
+  },
+  "score_density_bridge": {
+    "score_delta_nx47_minus_nx46": 0.084,
+    "density_delta_nx47_minus_nx46": 0.099146575928,
+    "interpretation": "Higher score for NX47 here coexists with higher density; therefore density alone is not causal."
   }
 }

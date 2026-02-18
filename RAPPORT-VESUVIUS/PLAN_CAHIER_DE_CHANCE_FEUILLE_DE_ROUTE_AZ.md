@@ -365,3 +365,54 @@ En bref: ce n’est pas un oubli “simple”, c’est une différence d’éche
 1. Ne pas renommer tout de suite le pipeline “atomique” côté production.
 2. Lancer immédiatement l’Étape A (gains rapides et mesurables).
 3. Ouvrir un chantier R&D séparé pour Étapes B/C avec protocole de preuve.
+
+---
+
+## 16) Ajustement du plan avec vos scores réels Kaggle (preuves screenshot)
+
+### 16.1 Données nouvelles intégrées
+Vous avez fourni les scores publics suivants:
+- **NX47 v61.1 = 0.387**
+- **NX46 v7.3 = 0.303**
+
+Je les ai intégrés explicitement dans l’analyse consolidée (`analysis_submission_masks_metrics.json`) pour relier densité ↔ score sans ambiguïté.
+
+### 16.2 Ce que cela démontre immédiatement (point scientifique clé)
+- Densité NX47 v61.1 ≈ **12.2565%** avec score **0.387**.
+- Densité NX46 v7.3 ≈ **2.3418%** avec score **0.303**.
+
+👉 Ici, la version **plus dense (NX47)** a un **meilleur score** que la version très sparse (NX46).
+
+**Donc preuve directe**: “moins de densité = meilleur score” est faux comme règle générale.
+
+### 16.3 Cours pédagogique: c’est-à-dire / donc / conclusion
+- **C’est-à-dire**: réduire fortement la densité peut supprimer du bruit, mais aussi supprimer de l’encre utile.
+- **Donc**: si on coupe trop, on augmente les faux négatifs et le score peut baisser (cas v7.3 vs v61.1).
+- **Conclusion**: il faut optimiser un compromis, pas viser “le plus noir possible”.
+
+### 16.4 Pourquoi NX46 v7.3 peut être derrière malgré robustesse format
+Le pipeline v7.3 est très propre côté format/validation, mais son réglage de décision peut être trop strict:
+1. quantile de seuil élevé (`threshold_quantile=0.985`) peut sous-détecter,
+2. blend 3D calibré conservateur,
+3. logique “safe” excellente pour conformité, mais pas encore optimale pour rappel d’encre.
+
+### 16.5 Questions que des experts poseraient maintenant
+1. Quel est le recall d’encre estimé par fragment pour v7.3 vs v61.1 ?
+2. Combien de composantes “petites mais vraies” sont perdues par v7.3 ?
+3. Une baisse de quantile (ex 0.985→0.975) remonte-t-elle le score sans exploser le bruit ?
+4. Quel est l’impact d’un seuil adaptatif par slice (au lieu global) ?
+5. Où sont les zones où v61.1 gagne et v7.3 échoue (heatmap XOR orientée erreurs) ?
+
+### 16.6 Mise à jour opérationnelle immédiate (sans casser la conformité)
+1. Garder v7.3 comme base **format robuste**.
+2. Lancer une mini-grille de calibration v7.3:
+   - `threshold_quantile`: [0.970, 0.975, 0.980, 0.985]
+   - `score_blend_3d_weight`: [0.65, 0.72, 0.78, 0.85]
+   - option seuil adaptatif par tranche z.
+3. Ajouter garde-fou densité cible réaliste (ex 6–12%) pour éviter l’extrême sous-détection.
+4. Conserver la validation 3D/0-255/shape exacte inchangée.
+
+### 16.7 Autocritique (mise à jour)
+1. Avant, l’analyse était correcte conceptuellement, mais moins ancrée sur les **scores Kaggle réels** que vous venez d’apporter.
+2. Maintenant, le plan est corrigé avec une preuve comparative concrète: **v61.1 (0.387) > v7.3 (0.303)** malgré densité plus élevée.
+3. Cela renforce la stratégie: pilotage multi-métriques (score + densité + rappel spatial), jamais densité seule.
