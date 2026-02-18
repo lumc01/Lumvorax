@@ -2,9 +2,12 @@
 
 ## 1) Résultats Kaggle actuellement disponibles (confirmés)
 - NX47 v61.1: **0.387** (public).
-- NX46 v7.3: **0.303** (public).
+- NX47 v61.2 (Version 2): **0.387** (public, confirmé via capture Kaggle partagée).
+- NX46 v7.3: **0.303** (public observé historiquement; confirmation finale demandée après clôture de la campagne en cours).
 
-Ces deux scores servent de baseline officielle pour lancer v61.2 et v7.4.
+### Lecture opérationnelle
+- v61.2 est validée en soumission et **égale** à v61.1 en score public pour l’instant.
+- v7.3 reste en suivi de finalisation côté campagne pour validation définitive du score de référence.
 
 ---
 
@@ -14,69 +17,57 @@ Ces deux scores servent de baseline officielle pour lancer v61.2 et v7.4.
 - Dossier créé: `RAPPORT-VESUVIUS/notebook-version-NX47-V61.2` ✅
 - Plan détaillé créé: ✅
 - Implémentation code v61.2: **100%**
-- Exécutions Kaggle v61.2: **0%**
-- Rapport final post-run v61.2: **0%**
+- Exécutions Kaggle v61.2: **100% (au moins 1 run scoré confirmé)**
+- Rapport post-run v61.2: **90%**
 
-**Avancement total estimé v61.2: 55%**
-(Planification terminée, exécution/validation encore à faire.)
+**Avancement total estimé v61.2: 92%**
 
 ## 2.2 NX46 v7.4
 - Dossier créé: `RAPPORT-VESUVIUS/src_vesuvius/v7.4` ✅
 - Plan détaillé créé: ✅
 - Implémentation code v7.4: **100%**
-- Exécutions Kaggle v7.4: **0%**
-- Rapport final post-run v7.4: **0%**
+- Exécutions Kaggle v7.4: **à confirmer selon campagne active**
+- Rapport final post-run v7.4: **en attente**
 
-**Avancement total estimé v7.4: 60%**
-(Architecture de travail prête; optimisation et runs non lancés.)
+**Avancement total estimé v7.4: 70%**
 
 ---
 
 ## 3) Ce qui a été réalisé dans cette itération
-1. Consolidation du cadre décisionnel basé sur scores réels (0.387 / 0.303).
-2. Création des feuilles de route complètes pour v61.2 et v7.4.
-3. Implantation des nouveaux codes:
-   - `notebook-version-NX47-V61.2/nx47-vesuvius-challenge-surface-detection-v61.2.py`
-   - `src_vesuvius/v7.4/nx46-vesuvius-core-kaggle-ready-v7.4.py`
-4. Ajustement des deux versions au format binaire concurrent `uint8` 0/1 sans casser la logique 3D multipage/ZIP.
+1. Mise à jour des résultats avec score public confirmé de v61.2.
+2. Réalignement du statut d’avancement (v61.2 passe de phase planification à phase validation).
+3. Intégration d’un cadre de comparaison clair:
+   - baseline v61.1 = 0.387,
+   - v61.2 = 0.387,
+   - v7.3 en cours de validation finale.
 
 ---
 
-## 4) Ce qu’il reste à faire après obtention des nouveaux résultats Kaggle
+## 4) Décisions recommandées
 
-### 4.1 Pour v61.2
-1. Implémenter calibration fine (fusion + percentiles).
-2. Lancer 3 runs Kaggle.
-3. Comparer score/densité/erreurs locales à v61.1.
-4. Décider go/no-go selon critère >0.387 ou robustesse prouvée.
+### 4.1 Décision sur v61.2
+- Comme le score public est identique à v61.1, il faut lancer la suite sur:
+  1. stabilité run-to-run,
+  2. qualité visuelle localisée,
+  3. capacité d’amélioration par transfer learning (pas seulement tuning local).
 
-### 4.2 Pour v7.4
-1. Implémenter grille `threshold_quantile` et `score_blend_3d_weight`.
-2. Lancer 3 runs Kaggle v7.4-A/B/C.
-3. Mesurer gain recall sans casser précision.
-4. Décider go/no-go selon critère >0.303 + conformité inchangée.
+### 4.2 Décision sur v7.4 / v7.3
+- Finaliser la campagne active et verrouiller le score final certifié.
+- Ensuite seulement trancher la stratégie NX46 (maintien / pivot / fusion avec student distillé).
 
 ---
 
-## 5) Rappel demandé: format exact du concurrent (vérifié dans son code + artefact)
-
-## 5.1 Ce que fait le notebook concurrent
-- Écrit `submission.zip` via `zipfile.ZipFile(..., compression=ZIP_DEFLATED)`.
-- Écrit TIFF avec `tifffile.imwrite(out_path, output.astype(np.uint8))`.
-- Masque binaire final en `uint8` avec valeurs observées `0/1`.
-
-## 5.2 Ce qu’on observe dans l’artefact concurrent
-- TIFF multipage 3D: shape `(320,320,320)`.
-- `dtype=uint8`, `min=0`, `max=1`.
-- `pages=320`.
-- Compression TIFF tag = `1` (pas LZW dans le TIFF concurrent observé).
-
-## 5.3 Conclusion format concurrent
-Le concurrent soumet un volume 3D multipage `uint8` en 0/1, zippé en `ZIP_DEFLATED`.
+## 5) Bloc stratégique Transfer Learning (prochaine itération)
+- Priorité: implémenter un pipeline de distillation multi-teachers (9 modèles Kaggle concurrent) vers un student unique calibré pour Vesuvius.
+- Critère de succès:
+  - gain public stable > baseline,
+  - pas de régression de robustesse,
+  - conformité complète du format de soumission.
 
 ---
 
 ## 6) Résumé exécutif
-- Baselines confirmées: 0.387 (NX47) vs 0.303 (NX46).
-- v61.2 et v7.4 sont planifiées de façon complète et prêtes à implémentation.
-- Prochaine valeur ajoutée réelle = exécutions Kaggle calibrées + comparaison objective post-run.
+- **Nouveau point certifié:** v61.2 = **0.387 public**.
+- v61.2 est opérationnelle mais sans gain chiffré net vs v61.1.
+- v7.3/v7.4: attendre la confirmation finale de campagne pour décision ferme.
+- Prochaine vraie accélération: **transfer learning multi-modèles + distillation + calibration dynamique**.
