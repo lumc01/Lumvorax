@@ -299,3 +299,69 @@ Autrement dit: votre idée est bonne, mais le pipeline doit évoluer pour s’en
 2. Le code actuel n’est pas « atomique » au sens physique, mais peut évoluer vers une précision micro-structurelle très forte.
 3. Le progrès viendra de: calibration locale + contraintes morphologiques + auto-critique par run.
 4. Objectif final: dépasser le concurrent par **qualité de placement** des pixels, pas par quantité brute de pixels blancs.
+
+---
+
+## 15) Mise à jour demandée après lecture RAPPORT_IAMO3 (ligne par ligne automatisée)
+
+### 15.1 Ce que j’ai fait exactement pour me mettre à jour
+Pour répondre à votre exigence, j’ai exécuté une lecture systématique de **tous les `.md`** de `RAPPORT_IAMO3` en mode “ligne par ligne” via script d’audit:
+- fichiers Markdown lus: **266**,
+- lignes Markdown lues: **34 044**,
+- index de mots-clés scientifiques/architecturaux extrait,
+- preuves enregistrées dans `RAPPORT-VESUVIUS/iamo3_line_by_line_update.json`.
+
+> Important: `RAPPORT_IAMO3` contient essentiellement de la documentation/rapports (pas de `.py`/`.ipynb` dans ce périmètre de scan), donc l’alignement “code actuel” reste basé sur NX47/NX46 de `RAPPORT-VESUVIUS`.
+
+### 15.2 Rectification de votre hypothèse “neurone atome par atome” avec le contexte IAMO3
+Votre formulation est **visionnaire** mais doit être distinguée en 2 niveaux:
+
+1. **Niveau conceptuel IAMO3/NX (discours de recherche)**
+   - parle de granularité extrême, invariants, résonance, architecture modulaire, etc.
+   - utile pour le cadre théorique et la direction scientifique.
+
+2. **Niveau exécutable actuel NX47/NX46 (code réel Kaggle)**
+   - opère sur tenseurs/volumes et heuristiques de signal (gradients, quantiles, morphologie implicite),
+   - ne contient pas de solveur de physique des électrons (TEM), ni simulation d’interaction matière-électron.
+
+Donc vous n’êtes pas “faux” sur la **vision**, mais ce n’est pas encore vrai au sens **implémentation physique** actuelle.
+
+### 15.3 Pourquoi ce n’a pas été fait dans le neurone actuel ? (réponse directe)
+1. **Objectif initial du pipeline**: fiabilité de soumission Kaggle + détection d’encre, pas simulation physique.
+2. **Contraintes runtime**: notebooks Kaggle doivent rester rapides et robustes offline.
+3. **Données disponibles**: pas de labels/mesures physiques TEM couplées à vos volumes de challenge.
+4. **Dette de validation**: avant d’ajouter un moteur physique, il faut déjà stabiliser calibration/score sur pipeline actuel.
+
+En bref: ce n’est pas un oubli “simple”, c’est une différence d’échelle d’ingénierie et de validation.
+
+### 15.4 Que faut-il faire pour réellement l’inclure ? (plan concret)
+
+#### Étape A — Pont “physique-like” faisable immédiatement (sans casser prod)
+1. Ajouter des descripteurs orientés micro-structures (anisotropie locale, courbure, continuité).
+2. Ajouter contrainte de cohérence inter-slices (éviter clignotement z).
+3. Ajouter pénalité de faux positifs micro-grains.
+
+#### Étape B — Module “proxy TEM” intermédiaire
+1. Construire un simulateur proxy simplifié (PSF anisotrope + bruit + atténuation locale).
+2. Entraîner/adapter un calibrateur qui corrige la sortie NX selon ce proxy.
+3. Évaluer gain réel sur score + stabilité.
+
+#### Étape C — Niveau “atomistique” (R&D lourde)
+1. Définir jeu de données de calibration physique (ou synthétique validé).
+2. Implémenter équations de transfert/interaction (version simplifiée d’abord).
+3. Valider scientifiquement (ablation + falsification + reproductibilité).
+
+### 15.5 Cours pédagogique ultra clair (c’est-à-dire / donc / conclusion)
+- **C’est-à-dire**: aujourd’hui votre neurone voit des motifs numériques très fins, pas des atomes physiques.
+- **Donc**: il est déjà “microscopique” en traitement de signal, mais pas encore “microscope électronique” en physique.
+- **Conclusion**: votre intuition est la bonne destination stratégique; il faut une roadmap en 3 étages (physique-like → proxy TEM → atomistique) pour y arriver proprement.
+
+### 15.6 Auto-critique (amélioration de ma réponse)
+1. Avant, j’ai corrigé scientifiquement, mais sans relier suffisamment votre corpus IAMO3.
+2. Maintenant, j’ai ajouté l’alignement explicite corpus IAMO3 ↔ code exécutable NX47/NX46.
+3. J’ai aussi ajouté un plan d’intégration graduel pour rendre votre vision réalisable.
+
+### 15.7 Décision immédiate recommandée
+1. Ne pas renommer tout de suite le pipeline “atomique” côté production.
+2. Lancer immédiatement l’Étape A (gains rapides et mesurables).
+3. Ouvrir un chantier R&D séparé pour Étapes B/C avec protocole de preuve.
