@@ -1,0 +1,383 @@
+{
+  "missing_dirs": [
+    "RAPPORT-VESUVIUS/notebook-version-NX47-V140.1",
+    "RAPPORT-VESUVIUS/notebook-version-NX47-V144.1"
+  ],
+  "datasets": {
+    "RAPPORT-VESUVIUS/notebook-version-NX47-V140": {
+      "files": [
+        {
+          "name": "nx47-vesu-kernel-new-v140.ipynb",
+          "size": 4440884
+        },
+        {
+          "name": "nx47-vesu-kernel-new-v140.py",
+          "size": 97717
+        },
+        {
+          "name": "qFu5IalT.txt",
+          "size": 4087652
+        },
+        {
+          "name": "results.zip",
+          "size": 2327166
+        }
+      ],
+      "zips": {
+        "results.zip": {
+          "member_count": 7,
+          "members": [
+            "submission.zip",
+            "v139_execution_logs.json",
+            "v139_execution_metadata.json",
+            "v139_forensic_analysis_report.json",
+            "v139_memory_tracker.json",
+            "v139_roadmap_realtime.json",
+            "v139_ultra_authentic_360_merkle.jsonl"
+          ],
+          "tif_count": 0,
+          "tif_meta": [],
+          "nested_submission": {
+            "name": "submission.zip",
+            "member_count": 1,
+            "tif_count": 1,
+            "tifs": [
+              "1407735.tif"
+            ],
+            "sample": {
+              "name": "1407735.tif",
+              "shape": [
+                320,
+                320
+              ],
+              "dtype": "uint8",
+              "min": 0,
+              "max": 1,
+              "nonzero": 6144
+            }
+          }
+        }
+      },
+      "log_summary": {
+        "qFu5IalT.txt": {
+          "traceback": 0,
+          "runtime_error": 0,
+          "exec_complete": 1,
+          "ready_submission": 1,
+          "rules_validation_failed": 0,
+          "competition_validation_ok": 1
+        }
+      }
+    },
+    "RAPPORT-VESUVIUS/notebook-version-NX47-V144": {
+      "files": [
+        {
+          "name": "XIZfXSQO.txt",
+          "size": 4302
+        },
+        {
+          "name": "nx47-vesu-kernel-new-v144.ipynb",
+          "size": 123940
+        },
+        {
+          "name": "nx47-vesu-kernel-new-v144.log",
+          "size": 4302
+        },
+        {
+          "name": "nx47-vesu-kernel-new-v144.py",
+          "size": 97717
+        },
+        {
+          "name": "results.zip",
+          "size": 370
+        }
+      ],
+      "zips": {
+        "results.zip": {
+          "member_count": 2,
+          "members": [
+            "logs_AIMO3/nx/NX46/audit.log",
+            "v139_ultra_authentic_360_merkle.jsonl"
+          ],
+          "tif_count": 0,
+          "tif_meta": []
+        }
+      },
+      "log_summary": {
+        "XIZfXSQO.txt": {
+          "traceback": 2,
+          "runtime_error": 4,
+          "exec_complete": 0,
+          "ready_submission": 0,
+          "rules_validation_failed": 0,
+          "competition_validation_ok": 0
+        },
+        "nx47-vesu-kernel-new-v144.log": {
+          "traceback": 2,
+          "runtime_error": 4,
+          "exec_complete": 0,
+          "ready_submission": 0,
+          "rules_validation_failed": 0,
+          "competition_validation_ok": 0
+        }
+      }
+    },
+    "RAPPORT-VESUVIUS/notebook-version-NX47-V61.2": {
+      "files": [
+        {
+          "name": "BRzSoZeY.txt",
+          "size": 6984
+        },
+        {
+          "name": "PLAN_V61_2_FEUILLE_DE_ROUTE_COMPLETE.md",
+          "size": 2578
+        },
+        {
+          "name": "nx47-vesu-kernel-new-v61-2.ipynb",
+          "size": 18268
+        },
+        {
+          "name": "nx47-vesu-kernel-new-v61-2.log",
+          "size": 6984
+        },
+        {
+          "name": "nx47-vesuvius-challenge-surface-detection-v61.2.py",
+          "size": 8949
+        },
+        {
+          "name": "results.zip",
+          "size": 4703302
+        }
+      ],
+      "zips": {
+        "results.zip": {
+          "member_count": 5,
+          "members": [
+            "final_logs/forensic_audit_1771420660.log",
+            "nx47_vesuvius/submission.zip",
+            "submission.zip",
+            "v28_forensic_logs/forensic_v28_cdffa7284d7d4c78.log",
+            "v28_forensic_logs/wal_v28_cdffa7284d7d4c78.bin"
+          ],
+          "tif_count": 0,
+          "tif_meta": [],
+          "nested_submission": {
+            "name": "nx47_vesuvius/submission.zip",
+            "member_count": 1,
+            "tif_count": 1,
+            "tifs": [
+              "1407735.tif"
+            ],
+            "sample": {
+              "name": "1407735.tif",
+              "shape": [
+                320,
+                320,
+                320
+              ],
+              "dtype": "uint8",
+              "min": 0,
+              "max": 1,
+              "nonzero": 4016195
+            }
+          }
+        }
+      },
+      "log_summary": {
+        "BRzSoZeY.txt": {
+          "traceback": 0,
+          "runtime_error": 0,
+          "exec_complete": 1,
+          "ready_submission": 1,
+          "rules_validation_failed": 0,
+          "competition_validation_ok": 0
+        },
+        "nx47-vesu-kernel-new-v61-2.log": {
+          "traceback": 0,
+          "runtime_error": 0,
+          "exec_complete": 1,
+          "ready_submission": 1,
+          "rules_validation_failed": 0,
+          "competition_validation_ok": 0
+        }
+      }
+    },
+    "RAPPORT-VESUVIUS/notebook-version-NX47-V61.3/output_logs_vesuvius/v7.4-outlput-logs--nx46-vesuvius-core-kaggle-ready": {
+      "files": [
+        {
+          "name": "nx46-vesuvius-core-kaggle-ready.ipynb",
+          "size": 105461
+        },
+        {
+          "name": "results.zip",
+          "size": 345193
+        }
+      ],
+      "zips": {
+        "results.zip": {
+          "member_count": 15,
+          "members": [
+            "nx46_vesuvius/logs/RkF4XakI.txt",
+            "nx46_vesuvius/logs/UJxLRsEE.txt",
+            "nx46_vesuvius/logs/bit_capture.log",
+            "nx46_vesuvius/logs/dataset_discovery_inventory.json",
+            "nx46_vesuvius/logs/forensic_ultra.log",
+            "nx46_vesuvius/logs/merkle_chain.log",
+            "nx46_vesuvius/logs/metrics.csv",
+            "nx46_vesuvius/logs/nx-46-vesuvius-core.log",
+            "nx46_vesuvius/logs/nx46-vesuvius-core-kaggle-ready.log",
+            "nx46_vesuvius/logs/state.json",
+            "nx46_vesuvius/material_maps/1407735.tif",
+            "nx46_vesuvius/native_training_manifest.json",
+            "nx46_vesuvius/submission.zip",
+            "submission.zip",
+            "submission_masks/1407735.tif"
+          ],
+          "tif_count": 2,
+          "tif_meta": [
+            {
+              "name": "nx46_vesuvius/material_maps/1407735.tif",
+              "shape": [
+                1,
+                320,
+                320
+              ],
+              "dtype": "uint8",
+              "min": 0,
+              "max": 3,
+              "nonzero": 66783
+            },
+            {
+              "name": "submission_masks/1407735.tif",
+              "shape": [
+                320,
+                320,
+                320
+              ],
+              "dtype": "uint8",
+              "min": 0,
+              "max": 1,
+              "nonzero": 767360
+            }
+          ],
+          "nested_submission": {
+            "name": "nx46_vesuvius/submission.zip",
+            "member_count": 1,
+            "tif_count": 1,
+            "tifs": [
+              "1407735.tif"
+            ],
+            "sample": {
+              "name": "1407735.tif",
+              "shape": [
+                320,
+                320,
+                320
+              ],
+              "dtype": "uint8",
+              "min": 0,
+              "max": 1,
+              "nonzero": 767360
+            }
+          }
+        }
+      },
+      "log_summary": {}
+    },
+    "RAPPORT-VESUVIUS/notebook-version-NX47-V61.3/output_logs_vesuvius/v7.5-outlput-logs--nx46-vesuvius-core-kaggle-ready": {
+      "files": [
+        {
+          "name": "AdmY-IOr.txt",
+          "size": 54070
+        },
+        {
+          "name": "nx46-vesuvius-core-kaggle-ready.ipynb",
+          "size": 106924
+        },
+        {
+          "name": "results.zip",
+          "size": 345131
+        }
+      ],
+      "zips": {
+        "results.zip": {
+          "member_count": 15,
+          "members": [
+            "nx46_vesuvius/logs/RkF4XakI.txt",
+            "nx46_vesuvius/logs/UJxLRsEE.txt",
+            "nx46_vesuvius/logs/bit_capture.log",
+            "nx46_vesuvius/logs/dataset_discovery_inventory.json",
+            "nx46_vesuvius/logs/forensic_ultra.log",
+            "nx46_vesuvius/logs/merkle_chain.log",
+            "nx46_vesuvius/logs/metrics.csv",
+            "nx46_vesuvius/logs/nx-46-vesuvius-core.log",
+            "nx46_vesuvius/logs/nx46-vesuvius-core-kaggle-ready.log",
+            "nx46_vesuvius/logs/state.json",
+            "nx46_vesuvius/material_maps/1407735.tif",
+            "nx46_vesuvius/native_training_manifest.json",
+            "nx46_vesuvius/submission.zip",
+            "submission.zip",
+            "submission_masks/1407735.tif"
+          ],
+          "tif_count": 2,
+          "tif_meta": [
+            {
+              "name": "nx46_vesuvius/material_maps/1407735.tif",
+              "shape": [
+                1,
+                320,
+                320
+              ],
+              "dtype": "uint8",
+              "min": 0,
+              "max": 3,
+              "nonzero": 66783
+            },
+            {
+              "name": "submission_masks/1407735.tif",
+              "shape": [
+                320,
+                320,
+                320
+              ],
+              "dtype": "uint8",
+              "min": 0,
+              "max": 1,
+              "nonzero": 767360
+            }
+          ],
+          "nested_submission": {
+            "name": "nx46_vesuvius/submission.zip",
+            "member_count": 1,
+            "tif_count": 1,
+            "tifs": [
+              "1407735.tif"
+            ],
+            "sample": {
+              "name": "1407735.tif",
+              "shape": [
+                320,
+                320,
+                320
+              ],
+              "dtype": "uint8",
+              "min": 0,
+              "max": 1,
+              "nonzero": 767360
+            }
+          }
+        }
+      },
+      "log_summary": {
+        "AdmY-IOr.txt": {
+          "traceback": 0,
+          "runtime_error": 0,
+          "exec_complete": 0,
+          "ready_submission": 1,
+          "rules_validation_failed": 0,
+          "competition_validation_ok": 0
+        }
+      }
+    }
+  }
+}
