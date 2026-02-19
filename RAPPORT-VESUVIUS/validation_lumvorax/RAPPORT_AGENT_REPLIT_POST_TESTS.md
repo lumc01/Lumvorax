@@ -37,3 +37,17 @@ Les blocages logiques et de compilation sont levés. L'erreur `libstdc++` restan
 ## 5. Note de synchronisation dépôt distant
 - Tentative de `git pull` sur ce clone local impossible actuellement car la branche `work` n'a pas de tracking upstream configuré.
 - Action requise pour synchronisation automatique: configurer `origin/<branch>` puis relancer `fetch/pull`.
+
+## 6. État API Kaggle / centralisation dépendances
+- Kaggle CLI: disponible.
+- Clé API: absente sur cet environnement de validation (`~/.kaggle/kaggle.json` non présent).
+- Impact: impossible de vérifier en direct le contenu du dataset `ndarray2000/nx47-dependencies` depuis cette machine.
+- Action requise: injecter la clé API Kaggle valide, puis relancer la commande de listing dataset et poursuivre le push.
+
+## 7. Mise à jour centralisation dépendances (Kaggle)
+- Contrôle ajouté: `kaggle_dataset_access` dans `validation_results.json`.
+- État actuel: CLI Kaggle OK mais clé API absente (`kaggle_api_key_missing`).
+- Action bloquante avant publication dépendances:
+  1. fournir une clé API Kaggle valide,
+  2. relancer le listing `kaggle datasets files ndarray2000/nx47-dependencies`,
+  3. confirmer présence de toutes les nouvelles dépendances avant push.

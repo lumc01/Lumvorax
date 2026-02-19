@@ -117,3 +117,14 @@ Après validation GO, exécute cette séquence **sans omission**:
      - checksums,
      - preuves d’activation sur chaque version,
      - problèmes rencontrés + contournements.
+
+## Vérification Kaggle API + dataset centralisé (nouvelle étape bloquante)
+Avant push des dépendances, exécuter:
+1. `kaggle --version`
+2. `test -f ~/.kaggle/kaggle.json`
+3. `kaggle datasets files ndarray2000/nx47-dependencies`
+
+Critères:
+- si la clé API Kaggle est absente/invalidée => **NO-GO** et demander nouvelle clé API.
+- si le dataset n'est pas accessible => **NO-GO** (ne pas pousser en aveugle).
+- si accès OK, vérifier que toutes dépendances requises sont listées avant upload des nouvelles versions.

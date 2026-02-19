@@ -107,6 +107,40 @@ def run_replit_root_file_execution(tmp_root: Path):
         'artifacts_exist': {k: v.exists() for k, v in expected.items()},
     }
 
+
+def check_kaggle_dataset_access():
+    kaggle_json = Path.home() / '.kaggle' / 'kaggle.json'
+    has_key = kaggle_json.exists()
+    cli_ok = True
+    try:
+        v = subprocess.run(['kaggle', '--version'], capture_output=True, text=True)
+        cli_ok = (v.returncode == 0)
+    except FileNotFoundError:
+        cli_ok = False
+
+    out = {
+        'cli_available': cli_ok,
+        'kaggle_json_present': has_key,
+        'dataset_ref': 'ndarray2000/nx47-dependencies',
+    }
+
+    if not cli_ok:
+        out['ok'] = False
+        out['error'] = 'kaggle_cli_missing'
+        return out
+    if not has_key:
+        out['ok'] = False
+        out['error'] = 'kaggle_api_key_missing'
+        return out
+
+    cmd = ['kaggle', 'datasets', 'files', 'ndarray2000/nx47-dependencies']
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    out['returncode'] = proc.returncode
+    out['stdout_tail'] = proc.stdout[-2000:]
+    out['stderr_tail'] = proc.stderr[-2000:]
+    out['ok'] = proc.returncode == 0
+    return out
+
 def run_lum_roundtrip_unit():
     node = NX47_VESU_Production(input_dir='/tmp/no_dataset', output_dir='/tmp/no_out')
     vol = (np.random.default_rng(7).random((4, 12, 10)) * 100).astype('float32')
@@ -136,6 +170,7 @@ def main():
         result['checks']['source_indentation'] = {'ok': False, 'error': str(e)}
 
     result['checks']['native_sources'] = check_native_3d_sources()
+    result['checks']['kaggle_dataset_access'] = check_kaggle_dataset_access()
 
     try:
         bootstrap = _load_bootstrap_module()
