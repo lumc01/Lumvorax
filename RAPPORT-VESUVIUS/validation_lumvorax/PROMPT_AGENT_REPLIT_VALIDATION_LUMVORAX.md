@@ -72,3 +72,48 @@ Puis ajoute dans le rapport final un tableau **GO/NO-GO**:
 - Exécution racine Replit
 - Roundtrip `.lum`
 - Détection modules manquants (si un module requis manque => NO-GO)
+
+## Prompt final — Push dataset dépendances + activation versions (obligatoire)
+Après validation GO, exécute cette séquence **sans omission**:
+
+1. **Build dépendances LUMVORAX**
+   - compiler la lib native (`liblumvorax_replit.so`) avec tous modules requis:
+     - `src/vorax/vorax_operations.c`
+     - `src/vorax/vorax_3d_volume.c`
+     - `src/lum/lum_core.c`
+     - `src/logger/lum_logger.c`
+     - `src/debug/forensic_logger.c`
+   - préparer les wheels Python/offline dans un dossier `lum-vorax-dependencies/`.
+
+2. **Validation pré-push dataset (GO/NO-GO)**
+   - relancer:
+     - `python3 RAPPORT-VESUVIUS/validation_lumvorax/verify_nx47_source_integrity.py`
+     - `python3 RAPPORT-VESUVIUS/validation_lumvorax/test_vorax_3d_volume_ctypes.py`
+     - `python3 RAPPORT-VESUVIUS/validation_lumvorax/run_lumvorax_validation.py`
+   - vérifier dans `validation_results.json`:
+     - `native_3d_c_sources_present == true`
+     - `native_compile_attempt.ok == true`
+     - `replit_root_file_execution.ok == true`
+   - si un critère échoue: **NO-GO dataset push**.
+
+3. **Push dataset Kaggle dépendances**
+   - publier `lum-vorax-dependencies` (wheels + `.so` + manifeste versions/checksum SHA256).
+   - documenter l’ID/version dataset publié dans le rapport final.
+
+4. **Activation sur les versions en cours**
+   - vérifier/activer chargement dépendances LUMVORAX pour:
+     - `nx47_vesu_kernel_v2.py`
+     - `RAPPORT-VESUVIUS/notebook-version-NX47-V61.2/nx47-vesuvius-challenge-surface-detection-v61.2.py`
+     - `RAPPORT-VESUVIUS/notebook-version-NX47-V61.3/nx47-vesu-kernel-new-v61-3.ipynb`
+     - `RAPPORT-VESUVIUS/notebook-version-NX47-V144.1/nx47-vesu-kernel-new-v144-1.ipynb`
+     - `RAPPORT-VESUVIUS/src_vesuvius/v7.5/nx46-vesuvius-core-kaggle-ready-v7.5.py`
+   - confirmer `NX*_BINARY_MODE` et chemins dataset dépendances.
+
+5. **Rapport final obligatoire**
+   - générer `RAPPORT-VESUVIUS/validation_lumvorax/RAPPORT_AGENT_REPLIT_PUSH_DATASET.md`
+   - inclure:
+     - tableau GO/NO-GO,
+     - version dataset poussée,
+     - checksums,
+     - preuves d’activation sur chaque version,
+     - problèmes rencontrés + contournements.
