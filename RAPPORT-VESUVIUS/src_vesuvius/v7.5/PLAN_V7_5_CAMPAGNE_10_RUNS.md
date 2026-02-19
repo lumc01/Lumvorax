@@ -58,3 +58,23 @@ Exécuter 10 variantes de calibrage seuil/poids 3D pour améliorer le rappel san
 ### Étape 3 — Go/No-Go
 - **GO** si score > 0.303 ET conformité zip/tiff inchangée.
 - **NO-GO** sinon; conserver la meilleure config scorée.
+
+
+---
+
+## Extension demandée — Intégration LUM/VORAX + multi-seuil progressif
+
+### Stratégie technique
+1. Exécuter une cascade de seuils (`t_low -> t_mid -> t_high`) au lieu d’un seuil unique.
+2. Nettoyer à chaque étage (morphologie/consensus z-wise) puis accumuler les couches 3D.
+3. Contraindre la sortie finale dans une plage densité cible pilotée par benchmark.
+
+### Intégration `.lum` (Kaggle exécutable)
+- Étape 1 (immédiate): format `.lum` Python canonique pour tous calculs intermédiaires.
+- Étape 2 (optionnelle): appel C/C++ `lum/vorax` via `ctypes` si compilation `.so` disponible.
+- Fallback obligatoire Python pur si interop C indisponible.
+
+### Questions d’implémentation
+- Quel gain réel score/runtime du mode multi-seuil vs seuil unique ?
+- Quelle plage densité cible maximise score sur v7.5 sans casser la précision ?
+- Quel coût `tif -> lum -> tif` et quel ratio coût/bénéfice sur Kaggle ?
