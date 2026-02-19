@@ -87,6 +87,8 @@ class NX47_VESU_Production:
         self.audit_log: List[Dict] = []
         self.start_time = time.time_ns()
         self.input_dir = input_dir or "/kaggle/input/vesuvius-challenge-surface-detection"
+        self.effective_input_root = self.input_dir
+        self.discovery_attempts: List[Dict[str, object]] = []
         self.output_dir = output_dir or "/kaggle/working"
         self.processed_pixels = 0
         self.ink_detected = 0
@@ -145,19 +147,36 @@ class NX47_VESU_Production:
         if self._is_pkg_available(package_name):
             return
 
-        wheel_roots = [
-            Path("/kaggle/input/datasets/ndarray2000/nx47-dependencies"),
-            Path("/kaggle/input/nx47-dependencies"),
-            Path("/kaggle/input/lum-vorax-dependencies"),
-            Path("/kaggle/input/lumvorax-dependencies"),
-        ]
-        for root in wheel_roots:
-            if root.exists():
-                subprocess.check_call(
-                    [sys.executable, "-m", "pip", "install", "--no-index", f"--find-links={root}", package_name]
-                )
+        exact_wheel_dir = Path("/kaggle/input/datasets/ndarray2000/nx47-dependencies")
+        fallback_wheel_dir = Path("/kaggle/input/nx47-dependencies")
+        lum_wheel_dir = Path("/kaggle/input/lum-vorax-dependencies")
+        lum_wheel_dir_alt = Path("/kaggle/input/lumvorax-dependencies")
+
+        exact_wheels = {
+            "imagecodecs": exact_wheel_dir / "imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+            "numpy": exact_wheel_dir / "numpy-2.4.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+            "tifffile": exact_wheel_dir / "tifffile-2026.1.28-py3-none-any.whl",
+        }
+
+        if package_name in exact_wheels and exact_wheels[package_name].exists():
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-index", str(exact_wheels[package_name])])
                 if self._is_pkg_available(package_name):
                     return
+            except subprocess.CalledProcessError:
+                pass
+
+        wheel_roots = [exact_wheel_dir, fallback_wheel_dir, lum_wheel_dir, lum_wheel_dir_alt]
+        for root in wheel_roots:
+            if root.exists():
+                try:
+                    subprocess.check_call(
+                        [sys.executable, "-m", "pip", "install", "--no-index", f"--find-links={root}", package_name]
+                    )
+                    if self._is_pkg_available(package_name):
+                        return
+                except Exception:
+                    continue
 
         raise FatalPipelineError(
             f"OFFLINE_DEPENDENCY_MISSING: {package_name} not found in known wheel directories."
@@ -208,33 +227,54 @@ class NX47_VESU_Production:
         with open(self.roadmap_path, "w", encoding="utf-8") as f:
             json.dump(roadmap, f, indent=2)
 
+    def _candidate_roots(self) -> List[Path]:
+        configured = Path(self.input_dir)
+        candidates = [
+            configured,
+            Path("/kaggle/input/vesuvius-challenge-surface-detection"),
+            Path("/kaggle/input/competitions/vesuvius-challenge-surface-detection"),
+            Path("/kaggle/input/vesuvius-challenge-ink-detection"),
+        ]
+        uniq: List[Path] = []
+        seen = set()
+        for c in candidates:
+            k = str(c)
+            if k not in seen:
+                uniq.append(c)
+                seen.add(k)
+        return uniq
+
+    def _resolve_input_root(self) -> Path:
+        for root in self._candidate_roots():
+            has_test = (root / "test").exists() or any(root.glob("**/test"))
+            self.discovery_attempts.append({"root": str(root), "exists": root.exists(), "has_test": bool(has_test)})
+            if root.exists() and has_test:
+                return root
+        raise FatalPipelineError(
+            f"INPUT_STRUCTURE_INVALID: no usable dataset root found. attempts={self.discovery_attempts}"
+        )
+
     def _validate_input_structure(self):
-        if not os.path.isdir(self.input_dir):
-            raise FatalPipelineError(f"INPUT_ROOT_INVALID: missing directory {self.input_dir}")
+        resolved = self._resolve_input_root()
+        self.effective_input_root = str(resolved)
 
     def _collect_test_fragments(self) -> List[str]:
+        root = Path(self.effective_input_root)
         candidates = []
         patterns = [
-            f"{self.input_dir}/test/*.tif",
-            f"{self.input_dir}/test/*.tiff",
-            f"{self.input_dir}/test/**/**/*.tif",
-            f"{self.input_dir}/test/**/**/*.tiff",
+            str(root / "test" / "*.tif"),
+            str(root / "test" / "*.tiff"),
+            str(root / "test" / "**" / "*.tif"),
+            str(root / "test" / "**" / "*.tiff"),
+            str(root / "**" / "test" / "*.tif"),
+            str(root / "**" / "test" / "*.tiff"),
         ]
         for pattern in patterns:
             candidates.extend(glob.glob(pattern, recursive=True))
 
-        # competition fallback structure
-        if not candidates:
-            patterns = [
-                f"{self.input_dir}/**/test/*.tif",
-                f"{self.input_dir}/**/test/*.tiff",
-            ]
-            for pattern in patterns:
-                candidates.extend(glob.glob(pattern, recursive=True))
-
         uniq = sorted({str(Path(p)) for p in candidates})
         if not uniq:
-            raise FatalPipelineError(f"NO_TEST_FRAGMENTS_FOUND in {self.input_dir}")
+            raise FatalPipelineError(f"NO_TEST_FRAGMENTS_FOUND in {root}")
         return uniq
 
     def _validate_compatibility_chain(self):
@@ -449,6 +489,8 @@ class NX47_VESU_Production:
             "submission_zip": self.submission_zip_path,
             "submission_parquet": self.submission_parquet_path,
             "binary_mode": self.binary_mode,
+            "effective_input_root": self.effective_input_root,
+            "discovery_attempts": self.discovery_attempts,
         }
         with open(self.metadata_path, "w", encoding="utf-8") as f:
             json.dump(metadata, f, indent=2)
@@ -471,7 +513,7 @@ class NX47_VESU_Production:
         self._update_roadmap("data_validation", "in_progress")
         self._validate_input_structure()
         test_fragments = self._collect_test_fragments()
-        self.log_event("TEST_FRAGMENT_DISCOVERY", {"count": len(test_fragments)})
+        self.log_event("TEST_FRAGMENT_DISCOVERY", {"count": len(test_fragments), "effective_root": self.effective_input_root, "attempts": self.discovery_attempts})
         self._update_roadmap("data_validation", "done")
 
         self._update_roadmap("feature_extraction", "in_progress")

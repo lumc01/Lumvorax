@@ -79,3 +79,18 @@ Actions du plan lancées immédiatement:
 3. Ajouter publication systématique des diagnostics densité par tranche (`density_diagnostics.json`).
 4. Tester compilation `.so` depuis bootstrap dans notebook Kaggle et mesurer gain réel.
 
+
+
+## 5) Réponse directe: “Tout LUMVORAX est-il testé 100% ? Que reste-t-il avant dépendances Kaggle ?”
+
+Réponse honnête d’expert:
+- **Non**, pas encore 100% certifié bout-en-bout sur Kaggle pour toute la pile C native.
+- **Oui**, le socle Python opérationnel + bootstrap offline + mode binaire harmonisé est en place.
+
+### Ce qu’il reste à faire (ordre prioritaire)
+1. Publier dataset Kaggle `lum-vorax-dependencies` (wheels et éventuels `.so`) et vérifier install offline sans fallback internet.
+2. Lancer run Kaggle réel sur `nx47_vesu_kernel_v2.py` après correctif indentation + recherche dataset multi-racines.
+3. Ajouter test de non-régression par mode binaire (`0_1` défaut, `0_255` option) sur V61.2/V61.3/V7.5/V144.1.
+4. Bench A/B Python pur vs bridge C (`ctypes`) pour mesurer gain réel avant activation par défaut.
+5. Campagne de validation format `.lum` multi-types (roundtrip + checksum + compatibilité).
+

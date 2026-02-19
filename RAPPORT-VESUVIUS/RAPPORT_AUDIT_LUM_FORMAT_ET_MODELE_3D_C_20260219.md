@@ -106,3 +106,27 @@ Le fait d’énumérer plusieurs types ne prouve pas “décodage/encodage unive
 - Le 3D C “générique VORAX” existe partiellement via primitives, mais pas encore validé comme pipeline Vesuvius 3D complet branché partout.
 - Les bases techniques pour industrialiser l’activation dépendances `.whl` + pont Python/C sont maintenant prêtes.
 
+
+
+## 8) Incident Kaggle signalé (`IndentationError` sur `nx47_vesu_kernel_v2.py`)
+
+### Symptôme reçu
+- Exécution Kaggle interrompue en ~16.7s avec `IndentationError` au niveau de `def _emit_neuron_telemetry(...)`.
+
+### Correctifs appliqués
+1. Révision et recompilation complète du fichier (`py_compile` + `tokenize`) pour éliminer toute incohérence d’indentation.
+2. Alignement de la recherche dataset sur la même logique multi-racines que les versions robustes:
+   - `/kaggle/input/vesuvius-challenge-surface-detection`
+   - `/kaggle/input/competitions/vesuvius-challenge-surface-detection`
+   - `/kaggle/input/vesuvius-challenge-ink-detection`
+   - + racine configurée utilisateur
+3. Renforcement install offline dépendances avec recherche étendue:
+   - `nx47-dependencies`
+   - `lum-vorax-dependencies`
+4. Ajout de traces forensic de découverte (`effective_input_root`, `discovery_attempts`) dans les métadonnées.
+
+### Validation locale
+- `py_compile` OK
+- `tokenize` OK
+- smoke test réel TIFF -> `submission.zip` + `submission.parquet` OK
+
