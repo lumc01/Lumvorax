@@ -32,9 +32,11 @@ def _load_bootstrap_module():
 def check_native_3d_sources():
     candidates = [
         Path('/kaggle/working/src/vorax/vorax_operations.c'),
+        Path('/kaggle/working/src/vorax/vorax_3d_volume.c'),
         Path('/kaggle/working/src/lum/lum_core.c'),
         Path('/kaggle/working/src/logger/lum_logger.c'),
         Path('src/vorax/vorax_operations.c'),
+        Path('src/vorax/vorax_3d_volume.c'),
         Path('src/lum/lum_core.c'),
         Path('src/logger/lum_logger.c'),
     ]
@@ -42,7 +44,7 @@ def check_native_3d_sources():
     return {
         'c_candidates_checked': [str(p) for p in candidates],
         'c_sources_found': existing,
-        'native_3d_c_sources_present': len(existing) > 0,
+        'native_3d_c_sources_present': any('vorax_3d_volume.c' in x for x in existing),
     }
 
 

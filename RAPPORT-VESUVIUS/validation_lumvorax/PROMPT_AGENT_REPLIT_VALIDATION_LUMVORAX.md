@@ -49,3 +49,10 @@ Tu dois valider **depuis la racine Replit** l'exécution du fichier source (pas 
 2. `python3 RAPPORT-VESUVIUS/validation_lumvorax/run_lumvorax_validation.py`
 3. Vérifier dans `validation_results.json` que `replit_root_file_execution.ok == true`.
 4. Si ce gate est faux, il est **interdit** de pousser les dépendances LUMVORAX sur dataset.
+
+## Vérification structure code C (obligatoire)
+- Confirmer explicitement dans le rapport final:
+  1. si le module 3D C existe (`OUI/NON`),
+  2. les chemins exacts (attendu: `src/vorax/vorax_3d_volume.c` + `.h`),
+  3. le résultat de compilation locale,
+  4. la conclusion GO/NO-GO pour push dataset dépendances.
