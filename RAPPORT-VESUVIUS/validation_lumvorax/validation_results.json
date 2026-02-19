@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-19 18:48:53",
+  "timestamp": "2026-02-19 19:02:21",
   "checks": {
     "source_indentation": {
       "ok": true
@@ -36,34 +36,10 @@
       "payload_sha512_prefix": "b73a033f5092362549475f67"
     },
     "python_integration_smoke": {
-      "ok": true,
-      "stats": {
-        "files_processed": 1,
-        "pixels_processed": 4608,
-        "ink_detected": 552,
-        "mean_density": 0.11979166666666667,
-        "active_neurons_start_total": 4608,
-        "active_neurons_mid_total": 1613,
-        "active_neurons_end_total": 950,
-        "mutation_events": 0,
-        "pruning_events": 1,
-        "files_autonomous_fallback": 0,
-        "lum_bridge_enabled": false
-      },
-      "artifacts": {
-        "submission_zip": "/tmp/tmpz3l4az08/out/submission.zip",
-        "submission_parquet": "/tmp/tmpz3l4az08/out/submission.parquet",
-        "metadata": "/tmp/tmpz3l4az08/out/v134_execution_metadata.json",
-        "roadmap": "/tmp/tmpz3l4az08/out/v134_roadmap_realtime.json"
-      },
-      "artifacts_exist": {
-        "submission_zip": true,
-        "submission_parquet": true,
-        "metadata": true,
-        "roadmap": true
-      }
+      "ok": false,
+      "error": "libstdc++.so.6: cannot open shared object file: No such file or directory"
     }
   },
   "errors": [],
-  "duration_s": 0.6036
+  "duration_s": 2.0497
 }
