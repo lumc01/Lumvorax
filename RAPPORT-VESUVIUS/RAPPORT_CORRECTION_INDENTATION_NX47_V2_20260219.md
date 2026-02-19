@@ -44,3 +44,13 @@
 2. La parité de sortie Python vs natif est-elle stricte au bit près sur un sous-ensemble de fragments de référence ?
 3. Le mode `0_1` améliore-t-il réellement la métrique finale sur toutes versions, ou seulement sur certains profils de densité ?
 4. Quel seuil multi-couche maximise le compromis précision/rappel en restant dans la densité cible concurrente ?
+
+## Mise à jour tests LUM/VORAX exécutés localement (preuves ajoutées)
+- ✅ Script de validation produit: `RAPPORT-VESUVIUS/validation_lumvorax/run_lumvorax_validation.py`.
+- ✅ Résultats machine générés: `RAPPORT-VESUVIUS/validation_lumvorax/validation_results.json`.
+- ✅ Rapport synthèse auto-généré: `RAPPORT-VESUVIUS/validation_lumvorax/VALIDATION_LUMVORAX_SYSTEME_COMPLET_20260219.md`.
+- ✅ Prompt opérationnel créé pour un agent Replit: `RAPPORT-VESUVIUS/validation_lumvorax/PROMPT_AGENT_REPLIT_VALIDATION_LUMVORAX.md`.
+
+### Statut après exécution locale
+- Pipeline Python 3D + format `.lum` : **confirmé**.
+- Compilation/activation moteur C natif 3D : **en attente** (sources/artefacts natifs absents dans cet environnement).
