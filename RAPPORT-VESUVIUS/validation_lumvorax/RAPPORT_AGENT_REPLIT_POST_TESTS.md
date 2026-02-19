@@ -51,3 +51,12 @@ Les blocages logiques et de compilation sont levés. L'erreur `libstdc++` restan
   1. fournir une clé API Kaggle valide,
   2. relancer le listing `kaggle datasets files ndarray2000/nx47-dependencies`,
   3. confirmer présence de toutes les nouvelles dépendances avant push.
+
+## 8. Correctif V2.1 demandé (IndentationError Kaggle)
+- Fichier ajouté: `nx47_vesu_kernel_v2.1.py` (version interne V136) avec indentation normalisée.
+- Test smoke local exécuté en mode fichier source avec variables `NX47_INPUT_DIR`, `NX47_OUTPUT_DIR`, `NX47_SKIP_OFFLINE_BOOTSTRAP=1`.
+- Résultat: exécution OK (`returncode=0`) + artefacts générés:
+  - `v136_execution_metadata.json`
+  - `v136_roadmap_realtime.json`
+  - `submission.zip`
+  - `submission.parquet`

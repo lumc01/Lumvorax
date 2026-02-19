@@ -21,3 +21,9 @@
 - Vérification API Kaggle effectuée via `kaggle_dataset_access`.
 - Résultat actuel: `kaggle_api_key_missing` (clé absente), donc la vérification de contenu du dataset `ndarray2000/nx47-dependencies` est bloquée dans cet environnement.
 - Décision: **NO-GO push dataset** tant que la clé API n'est pas fournie/validée ici.
+
+## Addendum NX47 V2.1 (V136) — correction `IndentationError` Kaggle
+- Nouveau fichier livré: `nx47_vesu_kernel_v2.1.py`.
+- Objectif: fournir une version réémise à indentation normalisée (espaces uniquement) et conserver toutes les fonctionnalités de `v2`.
+- Statut: compilation syntaxique OK en local; exécution smoke locale OK avec artefacts `v136_*`.
+- Recommandation Kaggle: exécuter prioritairement `nx47_vesu_kernel_v2.1.py` depuis fichier source (pas de collage cellule).

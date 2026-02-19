@@ -128,3 +128,11 @@ Critères:
 - si la clé API Kaggle est absente/invalidée => **NO-GO** et demander nouvelle clé API.
 - si le dataset n'est pas accessible => **NO-GO** (ne pas pousser en aveugle).
 - si accès OK, vérifier que toutes dépendances requises sont listées avant upload des nouvelles versions.
+
+## Priorité exécution kernel corrigé
+Utiliser en priorité le nouveau fichier corrigé:
+- `python3 nx47_vesu_kernel_v2.1.py`
+
+Vérifier ensuite:
+- présence de `v136_execution_metadata.json` et `v136_roadmap_realtime.json`,
+- absence d'`IndentationError` en exécution fichier source.
