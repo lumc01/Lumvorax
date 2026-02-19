@@ -94,3 +94,25 @@ Réponse honnête d’expert:
 4. Bench A/B Python pur vs bridge C (`ctypes`) pour mesurer gain réel avant activation par défaut.
 5. Campagne de validation format `.lum` multi-types (roundtrip + checksum + compatibilité).
 
+
+## 6) Mise à jour consolidée (confirmations / attentes) — ajoutée sans supprimer l'historique
+
+### 6.1 Confirmations de réalisation (fait)
+- ✅ NX47 v2 corrigé en **V134** avec garde anti-indentation/syntaxe exécutée au démarrage.
+- ✅ Découverte dataset Kaggle robuste maintenue (racines candidates + tentatives journalisées).
+- ✅ Traitement TIFF réel 2D/3D + roundtrip `.lum` actif + checksum.
+- ✅ Harmonisation binaire configurable maintenue (`0_1` par défaut, `0_255` option).
+- ✅ Export de soumission validé (`submission.parquet` + `submission.zip`).
+
+### 6.2 Attentes / dépendances externes (non bloquantes code local)
+- ⏳ Publication et versionning du dataset Kaggle `lum-vorax-dependencies` avec wheels/`.so` finalisés.
+- ⏳ Validation benchmark natif C activé (`ctypes`) vs Python pur sur mêmes fragments/seed.
+- ⏳ Campagne score complète demandée (v61.2, v61.3, v7.5, v144.1) en exécution Kaggle réelle.
+
+### 6.3 Suivi de contrôle qualité (avant/après)
+- **Avant**: risque de divergence entre script local et notebook exporté (erreur indentation détectée tard).
+- **Après**: validation de source ajoutée pour échouer tôt avec message explicite + traçabilité V134.
+
+### 6.4 Blocages rencontrés depuis cette mise à jour
+- Le clone local ne possède pas de remote Git configuré, donc impossible de faire `git pull` depuis ce checkout précis.
+- Les validations Kaggle "GPU + dataset compétition" ne sont pas reproductibles totalement hors plateforme sans dataset attaché.

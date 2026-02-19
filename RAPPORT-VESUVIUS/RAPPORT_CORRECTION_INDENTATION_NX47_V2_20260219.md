@@ -24,3 +24,23 @@
 ## Problèmes rencontrés pendant cette correction
 - Le dépôt local n'a pas de remote Git configuré (`git remote` vide), donc impossible de faire un `git pull` automatique depuis ce clone local.
 - L'erreur Kaggle provenait probablement d'une version/notebook exportée différente de la version locale compilable; correction défensive ajoutée pour bloquer ce cas à la source.
+
+## Mise à jour suivi d'avancement (historique conservé, sans suppression)
+
+| Élément | Statut | Preuve / commentaire |
+|---|---|---|
+| Correctif indentation V134 livré | ✅ Confirmé | `validate_source_indentation()` actif au démarrage (`__main__`). |
+| Pipeline `.lum` Python (encode/decode/roundtrip) | ✅ Confirmé | Roundtrip + checksum implémentés et utilisés pendant `process_fragments()`. |
+| Découverte dataset robuste (multi-racines) | ✅ Confirmé | `_candidate_roots`, `_resolve_input_root`, `discovery_attempts` toujours présents. |
+| Harmonisation binaire configurable (`0_1` défaut, `0_255` option) | ✅ Confirmé | `NX47_BINARY_MODE` validé fail-fast et conversion appliquée avant export TIFF. |
+| Export soumission double format | ✅ Confirmé | `submission.parquet` + `submission.zip` (TIFF multipage). |
+| Vérification anti-régression locale (compile + smoke) | ✅ Confirmé | py_compile + run local temporaire effectués. |
+| Publication dataset Kaggle `lum-vorax-dependencies` (wheels + `.so`) | ⏳ En attente | Dépend d'un upload dataset/versionning externe Kaggle. |
+| Bridge C natif activé par défaut en prod | ⏳ En attente | À activer après bench stabilité/parité Python vs natif. |
+| Campagne A/B complète v61.2 / v61.3 / v7.5 / v144.1 | ⏳ En attente | Prévue, nécessite exécution Kaggle et collecte des scores. |
+
+### Questions expertes encore ouvertes (à traiter)
+1. Le runtime Kaggle final charge-t-il bien une `.so` compatible ABI (`glibc`, `libstdc++`) sans crash intermittent ?
+2. La parité de sortie Python vs natif est-elle stricte au bit près sur un sous-ensemble de fragments de référence ?
+3. Le mode `0_1` améliore-t-il réellement la métrique finale sur toutes versions, ou seulement sur certains profils de densité ?
+4. Quel seuil multi-couche maximise le compromis précision/rappel en restant dans la densité cible concurrente ?
