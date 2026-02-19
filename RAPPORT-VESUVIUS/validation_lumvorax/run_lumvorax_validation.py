@@ -1,5 +1,6 @@
 import json
 import os
+import subprocess
 import sys
 import tempfile
 import time
@@ -61,8 +62,8 @@ def run_python_integration_smoke(tmp_root: Path):
     expected = {
         'submission_zip': output_root / 'submission.zip',
         'submission_parquet': output_root / 'submission.parquet',
-        'metadata': output_root / 'v134_execution_metadata.json',
-        'roadmap': output_root / 'v134_roadmap_realtime.json',
+        'metadata': output_root / 'v135_execution_metadata.json',
+        'roadmap': output_root / 'v135_roadmap_realtime.json',
     }
     out = {
         'stats': stats,
@@ -71,6 +72,38 @@ def run_python_integration_smoke(tmp_root: Path):
     }
     return out
 
+
+
+def run_replit_root_file_execution(tmp_root: Path):
+    input_root = tmp_root / 'replit_root' / 'test'
+    output_root = tmp_root / 'replit_out'
+    input_root.mkdir(parents=True, exist_ok=True)
+
+    vol = (np.random.default_rng(123).random((4, 16, 16)) * 255).astype('uint8')
+    tifffile.imwrite(input_root / 'frag_replit.tif', vol)
+
+    env = os.environ.copy()
+    env['NX47_INPUT_DIR'] = str(tmp_root / 'replit_root')
+    env['NX47_OUTPUT_DIR'] = str(output_root)
+    env['NX47_SKIP_OFFLINE_BOOTSTRAP'] = '1'
+
+    cmd = [sys.executable, 'nx47_vesu_kernel_v2.py']
+    proc = subprocess.run(cmd, cwd=REPO_ROOT, env=env, capture_output=True, text=True)
+
+    expected = {
+        'submission_zip': output_root / 'submission.zip',
+        'submission_parquet': output_root / 'submission.parquet',
+        'metadata': output_root / 'v135_execution_metadata.json',
+        'roadmap': output_root / 'v135_roadmap_realtime.json',
+    }
+
+    return {
+        'returncode': proc.returncode,
+        'stdout_tail': proc.stdout[-1000:],
+        'stderr_tail': proc.stderr[-1000:],
+        'artifacts': {k: str(v) for k, v in expected.items()},
+        'artifacts_exist': {k: v.exists() for k, v in expected.items()},
+    }
 
 def run_lum_roundtrip_unit():
     node = NX47_VESU_Production(input_dir='/tmp/no_dataset', output_dir='/tmp/no_out')
@@ -120,6 +153,14 @@ def main():
         result['checks']['python_integration_smoke'] = {'ok': True, **smoke}
     except Exception as e:
         result['checks']['python_integration_smoke'] = {'ok': False, 'error': str(e)}
+
+    try:
+        with tempfile.TemporaryDirectory() as td:
+            root_exec = run_replit_root_file_execution(Path(td))
+        ok = root_exec.get('returncode') == 0 and all(root_exec.get('artifacts_exist', {}).values())
+        result['checks']['replit_root_file_execution'] = {'ok': ok, **root_exec}
+    except Exception as e:
+        result['checks']['replit_root_file_execution'] = {'ok': False, 'error': str(e)}
 
     result['duration_s'] = round(time.time() - start, 4)
 

@@ -84,19 +84,21 @@ class NX47_VESU_Production:
     LUM_MAGIC = b"LUMV1\x00\x00\x00"
 
     def __init__(self, input_dir=None, output_dir=None):
-        self.version = "NX-47 VESU PROD V134-REAL-PY"
+        self.version = "NX-47 VESU PROD V135-REAL-PY"
         self.audit_log: List[Dict] = []
         self.start_time = time.time_ns()
-        self.input_dir = input_dir or "/kaggle/input/vesuvius-challenge-surface-detection"
+        env_input = os.environ.get("NX47_INPUT_DIR")
+        self.input_dir = input_dir or env_input or "/kaggle/input/vesuvius-challenge-surface-detection"
         self.effective_input_root = self.input_dir
         self.discovery_attempts: List[Dict[str, object]] = []
-        self.output_dir = output_dir or "/kaggle/working"
+        env_output = os.environ.get("NX47_OUTPUT_DIR")
+        self.output_dir = output_dir or env_output or "/kaggle/working"
         self.processed_pixels = 0
         self.ink_detected = 0
         self.fallback_disabled = True
-        self.roadmap_path = os.path.join(self.output_dir, "v134_roadmap_realtime.json")
-        self.execution_log_path = os.path.join(self.output_dir, "v134_execution_logs.json")
-        self.metadata_path = os.path.join(self.output_dir, "v134_execution_metadata.json")
+        self.roadmap_path = os.path.join(self.output_dir, "v135_roadmap_realtime.json")
+        self.execution_log_path = os.path.join(self.output_dir, "v135_execution_logs.json")
+        self.metadata_path = os.path.join(self.output_dir, "v135_execution_metadata.json")
         self.submission_zip_path = os.path.join(self.output_dir, "submission.zip")
         self.submission_parquet_path = os.path.join(self.output_dir, "submission.parquet")
         self.lum_work_dir = os.path.join(self.output_dir, "lum_cache")
@@ -130,7 +132,7 @@ class NX47_VESU_Production:
                 ["forensic_traceability", "merkle_ready_events", "realtime_roadmap", "dynamic_neuron_telemetry"],
             ),
             CompatibilityLayer(
-                "NX-47 v115..v134",
+                "NX-47 v115..v135",
                 ["strict_train_evidence_gate", "adaptive_thresholding", "realtime_roadmap", "lum_encode_decode"],
             ),
         ]
@@ -184,6 +186,11 @@ class NX47_VESU_Production:
         )
 
     def bootstrap_dependencies_fail_fast(self) -> None:
+        # Optional bypass for local/Replit root validation preflight.
+        if os.environ.get("NX47_SKIP_OFFLINE_BOOTSTRAP", "0").strip().lower() in {"1", "true", "yes"}:
+            self.log_event("BOOTSTRAP_SKIPPED", {"reason": "NX47_SKIP_OFFLINE_BOOTSTRAP"})
+            return
+
         # pandas/pyarrow required for parquet output path.
         for pkg in ("numpy", "pandas", "tifffile", "imagecodecs", "pyarrow"):
             self.install_offline(pkg)

@@ -42,3 +42,10 @@ Après les étapes ci-dessus, vérifie explicitement la correction notebook-safe
 3. Sur Kaggle, privilégier l'exécution du fichier source (pas de collage de tout le code en cellule):
    - `!python /kaggle/working/nx47_vesu_kernel_v2.py`
 4. Dans le rapport final, joindre la sortie intégrale de l'étape intégrité (`sha256`, `tabs`, `ast_ok`).
+
+## Gate obligatoire avant push dataset dépendances LUMVORAX
+Tu dois valider **depuis la racine Replit** l'exécution du fichier source (pas notebook/copie cellule):
+1. `python3 RAPPORT-VESUVIUS/validation_lumvorax/verify_nx47_source_integrity.py`
+2. `python3 RAPPORT-VESUVIUS/validation_lumvorax/run_lumvorax_validation.py`
+3. Vérifier dans `validation_results.json` que `replit_root_file_execution.ok == true`.
+4. Si ce gate est faux, il est **interdit** de pousser les dépendances LUMVORAX sur dataset.
