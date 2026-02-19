@@ -1,47 +1,17 @@
 # Validation système LUM/VORAX — exécution locale
 
-- Timestamp: 2026-02-19 19:37:10
-- Durée: 3.164 s
+- Timestamp: 2026-02-19 19:46:42
+- Durée: 3.2877 s
 
 ## Résumé
 - ✅ **source_indentation**: {"ok": true}
 - ⏳ **native_sources**: {"c_candidates_checked": ["/kaggle/working/src/vorax/vorax_operations.c", "/kaggle/working/src/vorax/vorax_3d_volume.c", "/kaggle/working/src/lum/lum_core.c", "/kaggle/working/src/logger/lum_logger.c", "src/vorax/vorax_operations.c", "src/vorax/vorax_3d_volume.c", "src/lum/lum_core.c", "src/logger/lum_logger.c"], "c_sources_found": ["src/vorax/vorax_operations.c", "src/vorax/vorax_3d_volume.c", "src/lum/lum_core.c", "src/logger/lum_logger.c"], "native_3d_c_sources_present": true}
 - ✅ **native_compile_attempt**: {"ok": true, "output": "/tmp/liblumvorax_validation.so", "reason_if_empty": "missing /kaggle/working sources or gcc failure"}
 - ✅ **lum_roundtrip_unit**: {"ok": true, "shape": [4, 12, 10], "dtype": "float32", "payload_sha512_prefix": "b73a033f5092362549475f67"}
-- ✅ **python_integration_smoke**: {"ok": true, "stats": {"files_processed": 1, "pixels_processed": 4608, "ink_detected": 552, "mean_density": 0.11979166666666667, "active_neurons_start_total": 4608, "active_neurons_mid_total": 1613, "active_neurons_end_total": 950, "mutation_events": 0, "pruning_events": 1, "files_autonomous_fallback": 0, "lum_bridge_enabled": false}, "artifacts": {"submission_zip": "/tmp/tmpdipt2y1v/out/submission.zip", "submission_parquet": "/tmp/tmpdipt2y1v/out/submission.parquet", "metadata": "/tmp/tmpdipt2y1v/out/v135_execution_metadata.json", "roadmap": "/tmp/tmpdipt2y1v/out/v135_roadmap_realtime.json"}, "artifacts_exist": {"submission_zip": true, "submission_parquet": true, "metadata": true, "roadmap": true}}
-- ✅ **replit_root_file_execution**: {"ok": true, "returncode": 0, "stdout_tail": "[NX-47 VESU PROD V135-REAL-PY] System Initialized. Real TIFF processing + `.lum` roundtrip + fail-fast active.\n[NX-47 VESU PROD V135-REAL-PY] Execution Complete.\n", "stderr_tail": "", "artifacts": {"submission_zip": "/tmp/tmp1qojtz6_/replit_out/submission.zip", "submission_parquet": "/tmp/tmp1qojtz6_/replit_out/submission.parquet", "metadata": "/tmp/tmp1qojtz6_/replit_out/v135_execution_metadata.json", "roadmap": "/tmp/tmp1qojtz6_/replit_out/v135_roadmap_realtime.json"}, "artifacts_exist": {"submission_zip": true, "submission_parquet": true, "metadata": true, "roadmap": true}}
+- ✅ **python_integration_smoke**: {"ok": true, "stats": {"files_processed": 1, "pixels_processed": 4608, "ink_detected": 552, "mean_density": 0.11979166666666667, "active_neurons_start_total": 4608, "active_neurons_mid_total": 1613, "active_neurons_end_total": 950, "mutation_events": 0, "pruning_events": 1, "files_autonomous_fallback": 0, "lum_bridge_enabled": false}, "artifacts": {"submission_zip": "/tmp/tmprk4umm8y/out/submission.zip", "submission_parquet": "/tmp/tmprk4umm8y/out/submission.parquet", "metadata": "/tmp/tmprk4umm8y/out/v135_execution_metadata.json", "roadmap": "/tmp/tmprk4umm8y/out/v135_roadmap_realtime.json"}, "artifacts_exist": {"submission_zip": true, "submission_parquet": true, "metadata": true, "roadmap": true}}
+- ✅ **replit_root_file_execution**: {"ok": true, "returncode": 0, "stdout_tail": "[NX-47 VESU PROD V135-REAL-PY] System Initialized. Real TIFF processing + `.lum` roundtrip + fail-fast active.\n[NX-47 VESU PROD V135-REAL-PY] Execution Complete.\n", "stderr_tail": "", "artifacts": {"submission_zip": "/tmp/tmpsdtu0jud/replit_out/submission.zip", "submission_parquet": "/tmp/tmpsdtu0jud/replit_out/submission.parquet", "metadata": "/tmp/tmpsdtu0jud/replit_out/v135_execution_metadata.json", "roadmap": "/tmp/tmpsdtu0jud/replit_out/v135_roadmap_realtime.json"}, "artifacts_exist": {"submission_zip": true, "submission_parquet": true, "metadata": true, "roadmap": true}}
 
 ## Conclusion experte
 - Le pipeline Python 3D + format `.lum` est validé localement.
 - Le moteur C 3D natif n'est pas confirmé à 100% dans cet environnement tant que les sources `.c` et/ou `.so` ne sont pas disponibles et compilables.
 - Les artefacts de preuve machine sont dans `validation_results.json`.
-
-## Lecture pédagogique (mode cours) — résultat agent Replit
-
-### 1) Synchronisation GitHub distant
-- Tentative effectuée (`git fetch`/`git pull`) mais ce clone local n'a pas de branche upstream configurée.
-- Conséquence: impossible de "pull" automatiquement ici sans config remote/upstream.
-
-### 2) Module 3D LUM/VORAX en C: développé ou non ?
-- **Réponse courte: OUI**.
-- Module 3D ajouté dans le dossier standard `src/vorax/`:
-  - `src/vorax/vorax_3d_volume.h`
-  - `src/vorax/vorax_3d_volume.c`
-- Fonctions livrées:
-  - validation volumique (`vorax_volume3d_validate`),
-  - normalisation 3D (`vorax_volume3d_normalize`),
-  - seuillage voxel (`vorax_volume3d_threshold`).
-
-### 3) Ce que les checks Replit prouvent concrètement
-- `source_indentation.ok = true`: le fichier Python NX47 n'est pas corrompu côté indentation.
-- `native_3d_c_sources_present = true`: les sources C 3D sont bien présentes dans `src/`.
-- `native_compile_attempt.ok = true`: la compilation locale de la librairie partagée a réussi.
-- `replit_root_file_execution.ok = true`: exécution réelle du fichier source depuis la racine (pas un collage de cellule), avec artefacts de sortie générés.
-
-### 4) Pourquoi c'est important avant push dataset dépendances
-- Ce gate évite de publier des dépendances non testées.
-- Il confirme la chaîne minimale complète:
-  1. source valide,
-  2. module C 3D présent,
-  3. compilation native possible,
-  4. pipeline NX47 exécutable depuis la racine Replit.

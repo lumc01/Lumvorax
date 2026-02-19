@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-19 19:37:10",
+  "timestamp": "2026-02-19 19:46:42",
   "checks": {
     "source_indentation": {
       "ok": true
@@ -54,10 +54,10 @@
         "lum_bridge_enabled": false
       },
       "artifacts": {
-        "submission_zip": "/tmp/tmpdipt2y1v/out/submission.zip",
-        "submission_parquet": "/tmp/tmpdipt2y1v/out/submission.parquet",
-        "metadata": "/tmp/tmpdipt2y1v/out/v135_execution_metadata.json",
-        "roadmap": "/tmp/tmpdipt2y1v/out/v135_roadmap_realtime.json"
+        "submission_zip": "/tmp/tmprk4umm8y/out/submission.zip",
+        "submission_parquet": "/tmp/tmprk4umm8y/out/submission.parquet",
+        "metadata": "/tmp/tmprk4umm8y/out/v135_execution_metadata.json",
+        "roadmap": "/tmp/tmprk4umm8y/out/v135_roadmap_realtime.json"
       },
       "artifacts_exist": {
         "submission_zip": true,
@@ -72,10 +72,10 @@
       "stdout_tail": "[NX-47 VESU PROD V135-REAL-PY] System Initialized. Real TIFF processing + `.lum` roundtrip + fail-fast active.\n[NX-47 VESU PROD V135-REAL-PY] Execution Complete.\n",
       "stderr_tail": "",
       "artifacts": {
-        "submission_zip": "/tmp/tmp1qojtz6_/replit_out/submission.zip",
-        "submission_parquet": "/tmp/tmp1qojtz6_/replit_out/submission.parquet",
-        "metadata": "/tmp/tmp1qojtz6_/replit_out/v135_execution_metadata.json",
-        "roadmap": "/tmp/tmp1qojtz6_/replit_out/v135_roadmap_realtime.json"
+        "submission_zip": "/tmp/tmpsdtu0jud/replit_out/submission.zip",
+        "submission_parquet": "/tmp/tmpsdtu0jud/replit_out/submission.parquet",
+        "metadata": "/tmp/tmpsdtu0jud/replit_out/v135_execution_metadata.json",
+        "roadmap": "/tmp/tmpsdtu0jud/replit_out/v135_roadmap_realtime.json"
       },
       "artifacts_exist": {
         "submission_zip": true,
@@ -86,5 +86,5 @@
     }
   },
   "errors": [],
-  "duration_s": 3.164
+  "duration_s": 3.2877
 }

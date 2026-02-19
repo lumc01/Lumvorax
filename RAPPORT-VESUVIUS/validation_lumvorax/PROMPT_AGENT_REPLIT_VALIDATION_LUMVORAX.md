@@ -56,3 +56,19 @@ Tu dois valider **depuis la racine Replit** l'exécution du fichier source (pas 
   2. les chemins exacts (attendu: `src/vorax/vorax_3d_volume.c` + `.h`),
   3. le résultat de compilation locale,
   4. la conclusion GO/NO-GO pour push dataset dépendances.
+
+## Validation complète "aucun module manquant" (obligatoire)
+Exécute aussi:
+1. `python3 RAPPORT-VESUVIUS/validation_lumvorax/test_vorax_3d_volume_ctypes.py`
+2. `python3 RAPPORT-VESUVIUS/validation_lumvorax/run_lumvorax_validation.py`
+3. Vérifie dans `validation_results.json`:
+   - `native_3d_c_sources_present == true`
+   - `native_compile_attempt.ok == true`
+   - `replit_root_file_execution.ok == true`
+
+Puis ajoute dans le rapport final un tableau **GO/NO-GO**:
+- Module 3D C présent au bon emplacement (`src/vorax/vorax_3d_volume.c/.h`)
+- Compilation native `.so`
+- Exécution racine Replit
+- Roundtrip `.lum`
+- Détection modules manquants (si un module requis manque => NO-GO)
