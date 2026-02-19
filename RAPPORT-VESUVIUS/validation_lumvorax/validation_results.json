@@ -1,29 +1,27 @@
 {
-  "timestamp": "2026-02-19 19:53:34",
+  "timestamp": "2026-02-19 19:58:27",
   "checks": {
     "source_indentation": {
       "ok": true
     },
     "native_sources": {
       "c_candidates_checked": [
-        "/kaggle/working/src/vorax/vorax_operations.c",
-        "/kaggle/working/src/lum/lum_core.c",
-        "/kaggle/working/src/logger/lum_logger.c",
         "src/vorax/vorax_operations.c",
         "src/lum/lum_core.c",
-        "src/logger/lum_logger.c"
+        "src/logger/lum_logger.c",
+        "src/debug/forensic_logger.c"
       ],
       "c_sources_found": [
         "src/vorax/vorax_operations.c",
         "src/lum/lum_core.c",
-        "src/logger/lum_logger.c"
+        "src/logger/lum_logger.c",
+        "src/debug/forensic_logger.c"
       ],
       "native_3d_c_sources_present": true
     },
     "native_compile_attempt": {
-      "ok": false,
-      "output": "",
-      "reason_if_empty": "missing /kaggle/working sources or gcc failure"
+      "ok": true,
+      "path": "/tmp/liblumvorax_replit.so"
     },
     "lum_roundtrip_unit": {
       "ok": true,
@@ -31,9 +29,7 @@
         4,
         12,
         10
-      ],
-      "dtype": "float32",
-      "payload_sha512_prefix": "b73a033f5092362549475f67"
+      ]
     },
     "python_integration_smoke": {
       "ok": false,
@@ -41,5 +37,5 @@
     }
   },
   "errors": [],
-  "duration_s": 3.7225
+  "duration_s": 4.1328
 }
