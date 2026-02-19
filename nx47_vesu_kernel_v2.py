@@ -1,4 +1,5 @@
 import ctypes
+import ast
 import glob
 import importlib
 import io
@@ -83,7 +84,7 @@ class NX47_VESU_Production:
     LUM_MAGIC = b"LUMV1\x00\x00\x00"
 
     def __init__(self, input_dir=None, output_dir=None):
-        self.version = "NX-47 VESU PROD V133-REAL-PY"
+        self.version = "NX-47 VESU PROD V134-REAL-PY"
         self.audit_log: List[Dict] = []
         self.start_time = time.time_ns()
         self.input_dir = input_dir or "/kaggle/input/vesuvius-challenge-surface-detection"
@@ -93,9 +94,9 @@ class NX47_VESU_Production:
         self.processed_pixels = 0
         self.ink_detected = 0
         self.fallback_disabled = True
-        self.roadmap_path = os.path.join(self.output_dir, "v133_roadmap_realtime.json")
-        self.execution_log_path = os.path.join(self.output_dir, "v133_execution_logs.json")
-        self.metadata_path = os.path.join(self.output_dir, "v133_execution_metadata.json")
+        self.roadmap_path = os.path.join(self.output_dir, "v134_roadmap_realtime.json")
+        self.execution_log_path = os.path.join(self.output_dir, "v134_execution_logs.json")
+        self.metadata_path = os.path.join(self.output_dir, "v134_execution_metadata.json")
         self.submission_zip_path = os.path.join(self.output_dir, "submission.zip")
         self.submission_parquet_path = os.path.join(self.output_dir, "submission.parquet")
         self.lum_work_dir = os.path.join(self.output_dir, "lum_cache")
@@ -129,7 +130,7 @@ class NX47_VESU_Production:
                 ["forensic_traceability", "merkle_ready_events", "realtime_roadmap", "dynamic_neuron_telemetry"],
             ),
             CompatibilityLayer(
-                "NX-47 v115..v133",
+                "NX-47 v115..v134",
                 ["strict_train_evidence_gate", "adaptive_thresholding", "realtime_roadmap", "lum_encode_decode"],
             ),
         ]
@@ -186,6 +187,21 @@ class NX47_VESU_Production:
         # pandas/pyarrow required for parquet output path.
         for pkg in ("numpy", "pandas", "tifffile", "imagecodecs", "pyarrow"):
             self.install_offline(pkg)
+
+    @staticmethod
+    def validate_source_indentation(source_path: Optional[str] = None) -> None:
+        """Fail fast if source has indentation corruption (tabs/mixed blocks/syntax)."""
+        target = source_path or __file__
+        with open(target, "r", encoding="utf-8") as f:
+            content = f.read()
+        if "\t" in content:
+            raise FatalPipelineError(f"SOURCE_INDENTATION_INVALID: tab characters found in {target}")
+        try:
+            ast.parse(content)
+        except IndentationError as e:
+            raise FatalPipelineError(f"SOURCE_INDENTATION_INVALID: {e}") from e
+        except SyntaxError as e:
+            raise FatalPipelineError(f"SOURCE_SYNTAX_INVALID: {e}") from e
 
     def log_event(self, event_type, details, severity="INFO"):
         ts = time.time_ns()
@@ -579,5 +595,6 @@ class NX47_VESU_Production:
 
 
 if __name__ == "__main__":
+    NX47_VESU_Production.validate_source_indentation()
     node = NX47_VESU_Production()
     node.process_fragments()
