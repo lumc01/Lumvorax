@@ -60,3 +60,11 @@ Les blocages logiques et de compilation sont levés. L'erreur `libstdc++` restan
   - `v136_roadmap_realtime.json`
   - `submission.zip`
   - `submission.parquet`
+
+## 9. Correctif V2.2 (V137) — explication pédagogique du bug Kaggle
+- **Erreur observée**: `OFFLINE_DEPENDENCY_MISSING: imagecodecs`.
+- **Pourquoi ça cassait ?** Le code forçait un package optionnel comme obligatoire.
+- **Pourquoi la v2.2 corrige ?**
+  - bootstrap séparé en dépendances obligatoires vs optionnelles,
+  - fallback d'écriture TIFF sans compression LZW si `imagecodecs` absent.
+- **Résultat attendu sur Kaggle**: exécution continue, même sans wheel `imagecodecs` dans le dataset centralisé.

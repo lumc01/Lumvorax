@@ -136,3 +136,7 @@ Utiliser en priorité le nouveau fichier corrigé:
 Vérifier ensuite:
 - présence de `v136_execution_metadata.json` et `v136_roadmap_realtime.json`,
 - absence d'`IndentationError` en exécution fichier source.
+
+## Kernel de référence à copier sur Kaggle (mis à jour)
+- Utiliser `nx47_vesu_kernel_v2.2.py` (V137) comme source principale.
+- Cette version intègre la correction du crash bootstrap `imagecodecs` manquant.

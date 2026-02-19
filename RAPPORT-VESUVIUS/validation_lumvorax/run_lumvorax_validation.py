@@ -13,10 +13,21 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from nx47_vesu_kernel_v2 import NX47_VESU_Production
-
-
 import importlib.util
+
+
+def _load_nx47_v22_class():
+    module_path = Path('nx47_vesu_kernel_v2.2.py')
+    spec = importlib.util.spec_from_file_location('nx47_vesu_kernel_v2_2', module_path)
+    if spec is None or spec.loader is None:
+        raise RuntimeError(f'Cannot load module from {module_path}')
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod.NX47_VESU_Production
+
+
+NX47_VESU_Production = _load_nx47_v22_class()
+
 
 
 def _load_bootstrap_module():
@@ -64,8 +75,8 @@ def run_python_integration_smoke(tmp_root: Path):
     expected = {
         'submission_zip': output_root / 'submission.zip',
         'submission_parquet': output_root / 'submission.parquet',
-        'metadata': output_root / 'v135_execution_metadata.json',
-        'roadmap': output_root / 'v135_roadmap_realtime.json',
+        'metadata': output_root / 'v137_execution_metadata.json',
+        'roadmap': output_root / 'v137_roadmap_realtime.json',
     }
     out = {
         'stats': stats,
@@ -89,14 +100,14 @@ def run_replit_root_file_execution(tmp_root: Path):
     env['NX47_OUTPUT_DIR'] = str(output_root)
     env['NX47_SKIP_OFFLINE_BOOTSTRAP'] = '1'
 
-    cmd = [sys.executable, 'nx47_vesu_kernel_v2.py']
+    cmd = [sys.executable, 'nx47_vesu_kernel_v2.2.py']
     proc = subprocess.run(cmd, cwd=REPO_ROOT, env=env, capture_output=True, text=True)
 
     expected = {
         'submission_zip': output_root / 'submission.zip',
         'submission_parquet': output_root / 'submission.parquet',
-        'metadata': output_root / 'v135_execution_metadata.json',
-        'roadmap': output_root / 'v135_roadmap_realtime.json',
+        'metadata': output_root / 'v137_execution_metadata.json',
+        'roadmap': output_root / 'v137_roadmap_realtime.json',
     }
 
     return {

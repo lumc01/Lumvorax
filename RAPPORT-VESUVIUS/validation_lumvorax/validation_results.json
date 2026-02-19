@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-02-19 20:17:02",
+  "timestamp": "2026-02-19 21:29:58",
   "checks": {
     "source_indentation": {
       "ok": true
@@ -61,10 +61,10 @@
         "lum_bridge_enabled": false
       },
       "artifacts": {
-        "submission_zip": "/tmp/tmpammgn3pv/out/submission.zip",
-        "submission_parquet": "/tmp/tmpammgn3pv/out/submission.parquet",
-        "metadata": "/tmp/tmpammgn3pv/out/v135_execution_metadata.json",
-        "roadmap": "/tmp/tmpammgn3pv/out/v135_roadmap_realtime.json"
+        "submission_zip": "/tmp/tmp47c_2wxe/out/submission.zip",
+        "submission_parquet": "/tmp/tmp47c_2wxe/out/submission.parquet",
+        "metadata": "/tmp/tmp47c_2wxe/out/v137_execution_metadata.json",
+        "roadmap": "/tmp/tmp47c_2wxe/out/v137_roadmap_realtime.json"
       },
       "artifacts_exist": {
         "submission_zip": true,
@@ -76,13 +76,13 @@
     "replit_root_file_execution": {
       "ok": true,
       "returncode": 0,
-      "stdout_tail": "[NX-47 VESU PROD V135-REAL-PY] System Initialized. Real TIFF processing + `.lum` roundtrip + fail-fast active.\n[NX-47 VESU PROD V135-REAL-PY] Execution Complete.\n",
+      "stdout_tail": "[NX-47 VESU PROD V137-REAL-PY] System Initialized. Real TIFF processing + `.lum` roundtrip + fail-fast active.\n[NX-47 VESU PROD V137-REAL-PY] Execution Complete.\n",
       "stderr_tail": "",
       "artifacts": {
-        "submission_zip": "/tmp/tmp8hds9dns/replit_out/submission.zip",
-        "submission_parquet": "/tmp/tmp8hds9dns/replit_out/submission.parquet",
-        "metadata": "/tmp/tmp8hds9dns/replit_out/v135_execution_metadata.json",
-        "roadmap": "/tmp/tmp8hds9dns/replit_out/v135_roadmap_realtime.json"
+        "submission_zip": "/tmp/tmpjuqgtfwr/replit_out/submission.zip",
+        "submission_parquet": "/tmp/tmpjuqgtfwr/replit_out/submission.parquet",
+        "metadata": "/tmp/tmpjuqgtfwr/replit_out/v137_execution_metadata.json",
+        "roadmap": "/tmp/tmpjuqgtfwr/replit_out/v137_roadmap_realtime.json"
       },
       "artifacts_exist": {
         "submission_zip": true,
@@ -93,5 +93,5 @@
     }
   },
   "errors": [],
-  "duration_s": 4.7133
+  "duration_s": 4.5955
 }
