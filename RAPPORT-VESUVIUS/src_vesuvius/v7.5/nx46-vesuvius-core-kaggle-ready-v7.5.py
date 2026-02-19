@@ -149,6 +149,7 @@ class NX46Config:
     score_blend_3d_weight: float = 0.78
     z_smoothing_radius: int = 2
     write_submission_csv: bool = False
+    binary_mode: str = "0_1"
     run_tag: str = "v7.5-default"
 
 
@@ -625,10 +626,21 @@ def _write_submission_csv(out_csv: Path, sample_csv: Path, predictions: Dict[str
     return str(out_csv)
 
 
+
+def _apply_binary_mode(mask: np.ndarray, binary_mode: str = "0_1") -> np.ndarray:
+    m01 = (np.asarray(mask) > 0).astype(np.uint8)
+    if binary_mode == "0_255":
+        return (m01 * 255).astype(np.uint8)
+    if binary_mode == "0_1":
+        return m01
+    raise RuntimeError(f"Invalid binary_mode: {binary_mode}")
+
+
 def _write_submission_zip(
     out_zip: Path,
     predictions: Dict[str, np.ndarray],
     expected_meta: Optional[Dict[str, Tuple[int, int, int]]] = None,
+    binary_mode: str = "0_1",
 ) -> str:
     out_zip.parent.mkdir(parents=True, exist_ok=True)
     tmp_dir = out_zip.parent / "submission_masks"
@@ -636,8 +648,8 @@ def _write_submission_zip(
 
     names: List[str] = []
     for tif_name, mask in predictions.items():
-        # Competitor-aligned binary mask encoded as uint8 0/1.
-        mask_bin = (mask > 0).astype(np.uint8)
+        # Canonical binary domain with configurable output encoding.
+        mask_bin = _apply_binary_mode(mask, binary_mode=binary_mode)
         if expected_meta and tif_name in expected_meta:
             ez, eh, ew = expected_meta[tif_name]
             if mask_bin.ndim == 2:
@@ -665,6 +677,7 @@ def _write_submission_zip(
 def _validate_zip_content_binary_01(
     out_zip: Path,
     expected_meta: Dict[str, Tuple[int, int, int]],
+    allowed_values: Tuple[int, ...] = (0, 1),
 ) -> Dict[str, object]:
     issues: List[str] = []
     with zipfile.ZipFile(out_zip, "r") as zf:
@@ -690,7 +703,7 @@ def _validate_zip_content_binary_01(
                 issues.append(f"shape_mismatch:{base}:{arr.shape}!={expected_meta[base]}")
 
             uniq = np.unique(arr)
-            if not set(int(x) for x in uniq.tolist()).issubset({0, 1}):
+            if not set(int(x) for x in uniq.tolist()).issubset(set(allowed_values)):
                 issues.append(f"invalid_values:{base}:{uniq[:8].tolist()}")
 
     return {"status": "ok" if not issues else "invalid", "issues": issues}
@@ -931,11 +944,13 @@ def run_pipeline(cfg: NX46Config) -> Dict[str, object]:
     if cfg.write_submission_csv and sample_csv is not None:
         submission_csv = _write_submission_csv(work / "submission.csv", sample_csv, predictions)
 
+    binary_mode = cfg.binary_mode if cfg.binary_mode in {"0_1", "0_255"} else "0_1"
     primary_zip = Path(cfg.kaggle_submission_root) / "submission.zip"
-    submission_zip = _write_submission_zip(primary_zip, predictions, expected_meta=expected_meta)
+    submission_zip = _write_submission_zip(primary_zip, predictions, expected_meta=expected_meta, binary_mode=binary_mode)
     submission_zip_aliases = _publish_submission_aliases(Path(submission_zip), work)
     validation = _validate_zip(Path(submission_zip), expected_names)
-    content_validation = _validate_zip_content_binary_01(Path(submission_zip), expected_meta)
+    allowed_values = (0, 1) if binary_mode == "0_1" else (0, 255)
+    content_validation = _validate_zip_content_binary_01(Path(submission_zip), expected_meta, allowed_values=allowed_values)
     nx46.logger.log_event("COMPETITION_RULES_VALIDATION", **validation)
     nx46.logger.log_event("SUBMISSION_CONTENT_VALIDATION", **content_validation)
     nx46.logger.log_event("SUBMISSION_PATHS_PUBLISHED", primary=submission_zip, aliases=submission_zip_aliases)
@@ -973,7 +988,8 @@ def run_pipeline(cfg: NX46Config) -> Dict[str, object]:
             "zip_extra": validation["unexpected"],
             "competition_rules_validation": validation,
             "submission_content_validation": content_validation,
-            "submission_format_profile": "kaggle_v8_5_style_zip_lzw_3d_uint8_0_1",
+            "submission_format_profile": f"kaggle_v8_5_style_zip_lzw_3d_uint8_{binary_mode}",
+            "binary_mode": binary_mode,
             "material_head_enabled": cfg.enable_material_head,
             "material_outputs_files": len(material_maps),
             "native_training_manifest": str(work / "native_training_manifest.json") if material_manifest else None,
@@ -1005,6 +1021,7 @@ if __name__ == "__main__":
         score_blend_3d_weight=float(os.environ.get("NX46_SCORE_BLEND_3D_WEIGHT", str(NX46Config.score_blend_3d_weight))),
         z_smoothing_radius=int(os.environ.get("NX46_Z_SMOOTHING_RADIUS", str(NX46Config.z_smoothing_radius))),
         write_submission_csv=os.environ.get("NX46_WRITE_SUBMISSION_CSV", "0") == "1",
+        binary_mode=os.environ.get("NX46_BINARY_MODE", "0_1").strip().lower(),
         run_tag=os.environ.get("NX46_RUN_TAG", NX46Config.run_tag),
     )
     out = run_pipeline(config)
