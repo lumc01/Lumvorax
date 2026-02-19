@@ -7,11 +7,20 @@
 # ---------------------- INSTALL (OFFLINE SAFE) ----------------------
 import sys, subprocess, os
 def install_offline(package_name):
-    try:
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-index", "--find-links=/kaggle/input/nx47-dependencies", package_name])
-    except:
-        print(f"Offline install failed for {package_name}, attempting standard install...")
-        subprocess.check_call([sys.executable, "-m", "pip", "install", "--quiet", package_name])
+    roots = [
+        "/kaggle/input/nx47-dependencies",
+        "/kaggle/input/lum-vorax-dependencies",
+        "/kaggle/input/lumvorax-dependencies",
+    ]
+    for root in roots:
+        if os.path.exists(root):
+            try:
+                subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-index", f"--find-links={root}", package_name])
+                return
+            except Exception:
+                pass
+    print(f"Offline install failed for {package_name}, attempting standard install...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "--quiet", package_name])
 
 install_offline("imagecodecs")
 install_offline("tifffile")
@@ -24,6 +33,9 @@ import pandas as pd
 
 # ---------------------- GPU STRICT ----------------------
 GPU_STRICT = True
+BINARY_MODE = os.environ.get("NX47_BINARY_MODE", "0_1").strip().lower()
+if BINARY_MODE not in {"0_1", "0_255"}:
+    raise RuntimeError(f"Invalid NX47_BINARY_MODE: {BINARY_MODE}")
 try:
     import cupy as cp
     cp.cuda.runtime.getDeviceCount()
@@ -200,7 +212,8 @@ def process_file(path, ablation=None, ultra_aggressive=True):
     logger.log("FILE_DONE", {"file": path.name, "checksum": checksum, "slices": Z})
 
         # NX47 v61.2: align to competitor-like binary uint8 domain (0/1) while preserving 3D multipage TIFF.
-    return xp.asnumpy(mask).astype(np.uint8)
+    m01 = xp.asnumpy(mask).astype(np.uint8)
+    return (m01 * 255).astype(np.uint8) if BINARY_MODE == "0_255" else m01
 
 # ---------------------- RUN ALL ----------------------
 FILES = sorted(TEST_DIR.rglob("*.tif"))
