@@ -42,6 +42,8 @@ if DRY_RUN_FLAG and __name__ == "__main__":
 def install_offline(package_name: str) -> None:
     exact_wheel_dir = Path("/kaggle/input/datasets/ndarray2000/nx47-dependencies")
     fallback_wheel_dir = Path("/kaggle/input/nx47-dependencies")
+    lum_wheel_dir = Path("/kaggle/input/lum-vorax-dependencies")
+    lum_wheel_dir_alt = Path("/kaggle/input/lumvorax-dependencies")
 
     exact_wheels = {
         "imagecodecs": exact_wheel_dir / "imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
@@ -59,7 +61,7 @@ def install_offline(package_name: str) -> None:
         except subprocess.CalledProcessError:
             pass
 
-    for wheel_dir in (exact_wheel_dir, fallback_wheel_dir):
+    for wheel_dir in (exact_wheel_dir, fallback_wheel_dir, lum_wheel_dir, lum_wheel_dir_alt):
         if wheel_dir.exists():
             subprocess.check_call(
                 [sys.executable, "-m", "pip", "install", "--no-index", f"--find-links={wheel_dir}", package_name]
