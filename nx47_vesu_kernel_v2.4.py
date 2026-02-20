@@ -92,7 +92,7 @@ class NX47_VESU_Production:
     LUM_MAGIC = b"LUMV1\x00\x00\x00"
 
     def __init__(self, input_dir=None, output_dir=None):
-        self.version = "NX-47 VESU PROD V139-REAL-PY"
+        self.version = "NX-47 VESU PROD V140-REAL-PY"
         self.audit_log: List[Dict] = []
         self.start_time = time.time_ns()
         env_input = os.environ.get("NX47_INPUT_DIR")
@@ -104,9 +104,9 @@ class NX47_VESU_Production:
         self.processed_pixels = 0
         self.ink_detected = 0
         self.fallback_disabled = True
-        self.roadmap_path = os.path.join(self.output_dir, "v139_roadmap_realtime.json")
-        self.execution_log_path = os.path.join(self.output_dir, "v139_execution_logs.json")
-        self.metadata_path = os.path.join(self.output_dir, "v139_execution_metadata.json")
+        self.roadmap_path = os.path.join(self.output_dir, "v140_roadmap_realtime.json")
+        self.execution_log_path = os.path.join(self.output_dir, "v140_execution_logs.json")
+        self.metadata_path = os.path.join(self.output_dir, "v140_execution_metadata.json")
         self.submission_zip_path = os.path.join(self.output_dir, "submission.zip")
         self.submission_parquet_path = os.path.join(self.output_dir, "submission.parquet")
         self.lum_work_dir = os.path.join(self.output_dir, "lum_cache")
@@ -140,7 +140,7 @@ class NX47_VESU_Production:
                 ["forensic_traceability", "merkle_ready_events", "realtime_roadmap", "dynamic_neuron_telemetry"],
             ),
             CompatibilityLayer(
-                "NX-47 v115..v139",
+                "NX-47 v115..v140",
                 ["strict_train_evidence_gate", "adaptive_thresholding", "realtime_roadmap", "lum_encode_decode"],
             ),
         ]
@@ -159,6 +159,16 @@ class NX47_VESU_Production:
                 continue
             matches.extend(sorted(root.glob(f"{package_name}-*.whl")))
         return matches
+
+    def _run_pip_install(self, args: List[str], package_name: str) -> None:
+        import subprocess
+
+        timeout_s = int(os.environ.get("NX47_PIP_TIMEOUT_S", "180"))
+        print(f"[{self.version}] PIP_INSTALL_START package={package_name} cmd={' ' .join(args)} timeout={timeout_s}s", flush=True)
+        completed = subprocess.run(args, check=False, timeout=timeout_s)
+        if completed.returncode != 0:
+            raise subprocess.CalledProcessError(completed.returncode, args)
+        print(f"[{self.version}] PIP_INSTALL_DONE package={package_name}", flush=True)
 
     def install_offline(self, package_name: str, required: bool = True) -> bool:
         import subprocess
@@ -180,7 +190,7 @@ class NX47_VESU_Production:
 
         if package_name in exact_wheels and exact_wheels[package_name].exists():
             try:
-                subprocess.check_call([sys.executable, "-m", "pip", "install", "--no-index", str(exact_wheels[package_name])])
+                self._run_pip_install([sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "--no-index", str(exact_wheels[package_name])], package_name)
                 if self._is_pkg_available(package_name):
                     return True
             except subprocess.CalledProcessError:
@@ -196,8 +206,9 @@ class NX47_VESU_Production:
         for root in wheel_roots:
             if root.exists():
                 try:
-                    subprocess.check_call(
-                        [sys.executable, "-m", "pip", "install", "--no-index", f"--find-links={root}", package_name]
+                    self._run_pip_install(
+                        [sys.executable, "-m", "pip", "install", "--disable-pip-version-check", "--no-index", f"--find-links={root}", package_name],
+                        package_name,
                     )
                     if self._is_pkg_available(package_name):
                         return True
@@ -611,21 +622,25 @@ class NX47_VESU_Production:
 
         self._update_roadmap("bootstrap", "in_progress")
         self.log_event("PIPELINE_START", "Beginning fragment processing")
+        print(f"[{self.version}] STAGE bootstrap:start", flush=True)
         self.bootstrap_dependencies_fail_fast()
         os.makedirs(self.lum_work_dir, exist_ok=True)
 
         self._strict_training_evidence_gate()
         self._update_roadmap("bootstrap", "done")
+        print(f"[{self.version}] STAGE bootstrap:done", flush=True)
 
         self._update_roadmap("compatibility_check", "in_progress")
         self._validate_compatibility_chain()
         self._update_roadmap("compatibility_check", "done")
+        print(f"[{self.version}] STAGE compatibility_check:done", flush=True)
 
         self._update_roadmap("data_validation", "in_progress")
         self._validate_input_structure()
         test_fragments = self._collect_test_fragments()
         self.log_event("TEST_FRAGMENT_DISCOVERY", {"count": len(test_fragments), "effective_root": self.effective_input_root, "attempts": self.discovery_attempts})
         self._update_roadmap("data_validation", "done")
+        print(f"[{self.version}] STAGE data_validation:done fragments={len(test_fragments)}", flush=True)
 
         self._update_roadmap("feature_extraction", "in_progress")
         results = []
@@ -638,9 +653,12 @@ class NX47_VESU_Production:
         }
         masks_for_zip: Dict[str, "np.ndarray"] = {}
 
-        for frag in test_fragments:
+        total_frags = len(test_fragments)
+        for idx, frag in enumerate(test_fragments, start=1):
             frag_id = os.path.splitext(os.path.basename(frag))[0]
             self.log_event("FRAGMENT_PROCESSING", {"fragment": frag_id, "path": frag})
+            if idx == 1 or idx % 5 == 0 or idx == total_frags:
+                print(f"[{self.version}] FRAGMENT_PROGRESS {idx}/{total_frags} id={frag_id}", flush=True)
 
             volume = self._read_tiff_volume(frag)
             lum_info = self._roundtrip_lum(volume)
@@ -661,6 +679,7 @@ class NX47_VESU_Production:
                 telemetry[k] += int(t.get(k, 0))
 
         self._update_roadmap("feature_extraction", "done")
+        print(f"[{self.version}] STAGE feature_extraction:done", flush=True)
 
         self._update_roadmap("inference", "in_progress")
         submission_df = pd.DataFrame(results)
@@ -670,6 +689,7 @@ class NX47_VESU_Production:
         self._write_submission_zip(masks_for_zip)
         self.log_event("SUBMISSION_GENERATED", {"shape": submission_df.shape, "zip": self.submission_zip_path})
         self._update_roadmap("inference", "done")
+        print(f"[{self.version}] STAGE inference:done", flush=True)
 
         self._update_roadmap("forensic_export", "in_progress")
         stats = {
@@ -683,6 +703,7 @@ class NX47_VESU_Production:
         }
         self._export_forensic(stats)
         self._update_roadmap("forensic_export", "done")
+        print(f"[{self.version}] STAGE forensic_export:done", flush=True)
 
         self._update_roadmap("finalize", "done")
         print(f"[{self.version}] Execution Complete.")
