@@ -1,29 +1,41 @@
-import os
 import ast
 import hashlib
+from pathlib import Path
 
-def verify():
-    path = 'nx47_vesu_kernel_v2.py'
-    if not os.path.exists(path):
-        print(f"Error: {path} not found")
-        return
-    
-    with open(path, 'rb') as f:
-        content_bin = f.read()
-    
-    content_str = content_bin.decode('utf-8')
-    sha256 = hashlib.sha256(content_bin).hexdigest()
-    tabs = content_str.count('\t')
-    
-    try:
-        ast.parse(content_str)
-        ast_ok = True
-    except SyntaxError:
-        ast_ok = False
-        
-    print(f"sha256: {sha256}")
-    print(f"tabs: {tabs}")
-    print(f"ast_ok: {ast_ok}")
+TARGET = Path('nx47_vesu_kernel_v2.py')
 
-if __name__ == "__main__":
-    verify()
+
+def main() -> int:
+        if not TARGET.exists():
+            print(f'ERROR: missing {TARGET}')
+            return 2
+
+        raw = TARGET.read_bytes()
+        text = raw.decode('utf-8')
+        tabs = text.count('\t')
+        lines = text.splitlines()
+        fingerprint = hashlib.sha256(raw).hexdigest()
+
+        try:
+            ast.parse(text)
+            ast_ok = True
+            ast_error = ''
+        except SyntaxError as e:
+            ast_ok = False
+            ast_error = f'{type(e).__name__}: {e}'
+
+        print('NX47_SOURCE_INTEGRITY')
+        print(f'path={TARGET}')
+        print(f'bytes={len(raw)}')
+        print(f'lines={len(lines)}')
+        print(f'tabs={tabs}')
+        print(f'sha256={fingerprint}')
+        print(f'ast_ok={ast_ok}')
+        if ast_error:
+            print(f'ast_error={ast_error}')
+
+        return 0 if ast_ok and tabs == 0 else 1
+
+
+if __name__ == '__main__':
+        raise SystemExit(main())
