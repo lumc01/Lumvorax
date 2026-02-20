@@ -245,3 +245,16 @@ Contre-mesures recommandées:
   3. nettoyer `nx47_vesu_kernel_v2.py` (retirer artefacts de diff) ou bannir son usage au profit d'une version propre;
   4. récupérer les artefacts exacts de la Version 18 pour post-mortem OOM complet.
 
+
+---
+
+## Addendum 2026-02-20 (vérification demandée forensic 360°)
+
+- Confirmation: le run pré-exécution V2.4 (`nx47_vesu_kernel_v2.4.py`) est cohérent avec `Execution Complete` avant le cas Kaggle séparé `Version 18` OOM.
+- Clarification forensic:
+  - V2.4 = hybride (Python forensic + `.lum` + bridge natif potentiel).
+  - V7.6/V144.2 = forensic Python moderne + dépendances dataset V3 utilisées.
+  - V61.4 = forensic Python plus ancien + fallback dépendances.
+- Plan d’alignement global ajouté dans:
+  - `RAPPORT-VESUVIUS/RAPPORT_VERIFICATION_FORENSIC360_LUMVORAX_PAR_VERSION_20260220.md`
+  - `RAPPORT-VESUVIUS/PLAN_CONCLUSION_V615_V1443_V77_V76_20260220.md`

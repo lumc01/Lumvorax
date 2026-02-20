@@ -187,3 +187,18 @@ Non encore prouvé exhaustivement:
   4. prouver usage natif `.so` sur run de référence,
   5. exécuter matrice tests TIFF/3D et publier résultats signés.
 
+
+---
+
+## Addendum 2026-02-20 — réponse à la demande "ancien Python vs nouveau LUMVORAX"
+
+Verdict consolidé:
+- Les systèmes forensic 360° ne sont pas tous au même niveau d’intégration native.
+- L’usage des nouvelles dépendances dataset est confirmé sur V2.4/V7.6/V144.2 (et fallback sur V61.4).
+- Le moteur forensic est principalement Python instrumenté selon la version; V2.4 est le plus avancé vers LUMVORAX hybride.
+
+Actions décidées:
+1. Standardiser un runtime forensic unique cross-versions.
+2. Forcer un manifest dépendances + hash.
+3. Ajouter preuve explicite d’activation bridge natif `.so`.
+4. Déployer plan de convergence versions V61.5/V144.3/V7.7/V7.6.
