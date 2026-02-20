@@ -56,8 +56,13 @@ def compile_optional_lum_vorax_so(output_path: str = "/kaggle/working/liblumvora
 
     src_candidates = [
         "/kaggle/working/src/vorax/vorax_operations.c",
+        "/kaggle/working/src/vorax/vorax_3d_volume.c",
         "/kaggle/working/src/lum/lum_core.c",
         "/kaggle/working/src/logger/lum_logger.c",
+        "src/vorax/vorax_operations.c",
+        "src/vorax/vorax_3d_volume.c",
+        "src/lum/lum_core.c",
+        "src/logger/lum_logger.c",
     ]
 
     available = [p for p in src_candidates if os.path.exists(p)]
