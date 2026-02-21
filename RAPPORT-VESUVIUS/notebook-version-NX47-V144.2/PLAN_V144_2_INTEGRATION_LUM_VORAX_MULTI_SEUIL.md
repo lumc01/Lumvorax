@@ -27,3 +27,16 @@ Corriger la baisse score V144.2 par calibration multi-seuil, normalisation de so
 - GO si score > 0.269 et format submission conforme.
 - NO-GO sinon et rollback sur meilleure config scorée.
 
+
+---
+
+## MISE À JOUR 2026-02-20 — Vérification forensic 360 + dépendances
+- Vérification code/log: V144.2 utilise bien le dataset dépendances (installation `imagecodecs` observée dans logs).
+- Forensic 360 est très riche (Merkle JSON, GLOBAL_STATS, EXEC_COMPLETE).
+- Pas de preuve d’appel direct bridge natif `.so` dans ce run; forensic reste pipeline Python instrumenté.
+
+### Actions restantes prioritaires
+1. Ajouter preuve explicite `NATIVE_BRIDGE_ENABLED/NATIVE_BRIDGE_DISABLED` dans logs.
+2. Ajouter KPI `% opérations natif vs python`.
+3. Renforcer anti-OOM (RAM guard + downgrade auto).
+4. Converger couverture train (`train_pair_coverage_pct`) vers cible réaliste de production.
