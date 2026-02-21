@@ -137,3 +137,17 @@ Manque principal:
 - L’intégration `.lum` est faisable et utile pour stabiliser les conversions, à condition de commencer par un standard Python exécutable partout.
 - Les plans versions doivent explicitement inclure: `density target`, `z-wise diagnostics`, `fallback Python`, `interop C optional`.
 
+
+---
+
+## 11) MISE À JOUR COMPLÉMENTAIRE 2026-02-20 (forensic 360° + dépendances)
+
+### Synthèse de vérification code/log (versions récentes)
+- V2.4: intégration la plus avancée (bootstrap strict dataset V3 + roundtrip `.lum` + bridge natif optionnel + forensic/merkle).
+- V7.6: dépendances dataset V3 utilisées, forensic Python robuste mais non encore harmonisé au bundle JSON signé V144.2.
+- V144.2: forensic 360 JSON/Merkle très complet + dépendances dataset V3 confirmées.
+- V61.4: dépendances partiellement via fallback et forensic plus ancien; correction notebook requise.
+
+### Décision stratégique mise à jour
+- Priorité immédiate: unifier le runtime forensic/dépendances sur un standard unique transversal.
+- Objectif: éviter les écarts de traçabilité et réduire les risques OOM/qualité au moment de la soumission.

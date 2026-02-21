@@ -25,3 +25,16 @@ Transformer V61.4 en pipeline calibrable par couches de seuil et prêt pour flux
 - Sur-segmentation si accumulation non contrainte.
 - Coût CPU en hausse (acceptable à ce stade).
 
+
+---
+
+## MISE À JOUR 2026-02-20 — État forensic 360 + dépendances
+- Vérification code/log: V61.4 utilise `imagecodecs/tifffile` via fallback `/kaggle/input/nx47-dependencies`.
+- Le système forensic reste majoritairement style Python legacy (pas de bridge natif LUM/VORAX observé).
+- La pré-exécution produit `SUBMISSION_READY` puis `EXEC_COMPLETE`, mais le notebook casse ensuite sur `NameError: false`.
+
+### Actions restantes prioritaires
+1. Unifier bootstrap dépendances vers dataset V3 principal (`/kaggle/input/datasets/ndarray2000/nx47-dependencies`).
+2. Migrer forensic vers schéma JSON signé + Merkle standard.
+3. Corriger cellule notebook invalide (`false` -> `False`).
+4. Ajouter roundtrip `.lum` minimal et diagnostics densité par tranche.
