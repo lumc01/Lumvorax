@@ -78,3 +78,16 @@ Exécuter 10 variantes de calibrage seuil/poids 3D pour améliorer le rappel san
 - Quel gain réel score/runtime du mode multi-seuil vs seuil unique ?
 - Quelle plage densité cible maximise score sur v7.6 sans casser la précision ?
 - Quel coût `tif -> lum -> tif` et quel ratio coût/bénéfice sur Kaggle ?
+
+---
+
+## MISE À JOUR 2026-02-20 — Vérification forensic 360 + dépendances
+- V7.6 utilise les dépendances du dataset V3 (`imagecodecs`, `tifffile`), confirmé par logs.
+- Forensic 360 actif mais principalement texte/log Python (`forensic_ultra.log`, `merkle_chain.log`) plutôt que bundle JSON signé standardisé.
+- Conformité submission confirmée, mais densité faible (~2.34%) reste un axe score critique.
+
+### Actions restantes prioritaires
+1. Migrer forensic V7.6 vers format JSON signé unifié cross-versions.
+2. Ajouter manifest wheel+hash des dépendances réellement chargées.
+3. Exécuter A/B/C multi-seuil + densité pilotée pour dépasser score 0.303.
+4. Ajouter OOM guard standard même si run actuel passe.
