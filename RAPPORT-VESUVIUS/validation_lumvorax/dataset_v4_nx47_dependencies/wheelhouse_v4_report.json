@@ -1,0 +1,116 @@
+{
+  "ts_ns": 1771704862662337966,
+  "output": "/home/runner/workspace/RAPPORT-VESUVIUS/validation_lumvorax/dataset_v4_nx47_dependencies/wheelhouse_v4",
+  "downloads": [
+    {
+      "name": "numpy",
+      "version": "2.4.2",
+      "returncode": 0,
+      "elapsed_ns": 4229680598,
+      "stdout_head": "Collecting numpy==2.4.2\n  Downloading numpy-2.4.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (6.6 kB)\nDownloading numpy-2.4.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (16.9 MB)\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 16.9/16.9 MB 41.4 MB/s eta 0:00:00\nSaved ./wheelhouse_v4/numpy-2.4.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl\nSuccessfully downloaded numpy\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "imagecodecs",
+      "version": "2026.1.14",
+      "returncode": 0,
+      "elapsed_ns": 2674732196,
+      "stdout_head": "Collecting imagecodecs==2026.1.14\n  Downloading imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (20 kB)\nDownloading imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (24.7 MB)\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 24.7/24.7 MB 80.2 MB/s eta 0:00:00\nSaved ./wheelhouse_v4/imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl\nSuccessfully downloaded imagecodecs\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "imageio",
+      "version": "2.37.2",
+      "returncode": 0,
+      "elapsed_ns": 2105784296,
+      "stdout_head": "Collecting imageio==2.37.2\n  Downloading imageio-2.37.2-py3-none-any.whl.metadata (9.7 kB)\nDownloading imageio-2.37.2-py3-none-any.whl (317 kB)\nSaved ./wheelhouse_v4/imageio-2.37.2-py3-none-any.whl\nSuccessfully downloaded imageio\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "lazy_loader",
+      "version": "0.4",
+      "returncode": 0,
+      "elapsed_ns": 2023652077,
+      "stdout_head": "Collecting lazy_loader==0.4\n  Downloading lazy_loader-0.4-py3-none-any.whl.metadata (7.6 kB)\nDownloading lazy_loader-0.4-py3-none-any.whl (12 kB)\nSaved ./wheelhouse_v4/lazy_loader-0.4-py3-none-any.whl\nSuccessfully downloaded lazy_loader\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "networkx",
+      "version": "3.6.1",
+      "returncode": 0,
+      "elapsed_ns": 2079082333,
+      "stdout_head": "Collecting networkx==3.6.1\n  Downloading networkx-3.6.1-py3-none-any.whl.metadata (6.8 kB)\nDownloading networkx-3.6.1-py3-none-any.whl (2.1 MB)\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 2.1/2.1 MB 42.3 MB/s eta 0:00:00\nSaved ./wheelhouse_v4/networkx-3.6.1-py3-none-any.whl\nSuccessfully downloaded networkx\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "opencv_python",
+      "version": "4.13.0.92",
+      "returncode": 0,
+      "elapsed_ns": 3026083223,
+      "stdout_head": "Collecting opencv_python==4.13.0.92\n  Downloading opencv_python-4.13.0.92-cp37-abi3-manylinux_2_28_x86_64.whl.metadata (19 kB)\nDownloading opencv_python-4.13.0.92-cp37-abi3-manylinux_2_28_x86_64.whl (72.9 MB)\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 72.9/72.9 MB 95.4 MB/s eta 0:00:00\nSaved ./wheelhouse_v4/opencv_python-4.13.0.92-cp37-abi3-manylinux_2_28_x86_64.whl\nSuccessfully downloaded opencv_python\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "packaging",
+      "version": "26.0",
+      "returncode": 0,
+      "elapsed_ns": 2216651402,
+      "stdout_head": "Collecting packaging==26.0\n  Downloading packaging-26.0-py3-none-any.whl.metadata (3.3 kB)\nDownloading packaging-26.0-py3-none-any.whl (74 kB)\nSaved ./wheelhouse_v4/packaging-26.0-py3-none-any.whl\nSuccessfully downloaded packaging\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "pillow",
+      "version": "12.1.1",
+      "returncode": 0,
+      "elapsed_ns": 2276436971,
+      "stdout_head": "Collecting pillow==12.1.1\n  Downloading pillow-12.1.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (8.8 kB)\nDownloading pillow-12.1.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (7.0 MB)\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 7.0/7.0 MB 76.8 MB/s eta 0:00:00\nSaved ./wheelhouse_v4/pillow-12.1.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl\nSuccessfully downloaded pillow\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "scikit_image",
+      "version": "0.26.0",
+      "returncode": 0,
+      "elapsed_ns": 2754417914,
+      "stdout_head": "Collecting scikit_image==0.26.0\n  Downloading scikit_image-0.26.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl.metadata (15 kB)\nDownloading scikit_image-0.26.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl (13.7 MB)\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 13.7/13.7 MB 23.4 MB/s eta 0:00:00\nSaved ./wheelhouse_v4/scikit_image-0.26.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl\nSuccessfully downloaded scikit_image\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "scipy",
+      "version": "1.17.0",
+      "returncode": 0,
+      "elapsed_ns": 2685304651,
+      "stdout_head": "Collecting scipy==1.17.0\n  Downloading scipy-1.17.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl.metadata (62 kB)\nDownloading scipy-1.17.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl (35.1 MB)\n   \u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501\u2501 35.1/35.1 MB 88.1 MB/s eta 0:00:00\nSaved ./wheelhouse_v4/scipy-1.17.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl\nSuccessfully downloaded scipy\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "tifffile",
+      "version": "2026.1.28",
+      "returncode": 0,
+      "elapsed_ns": 2096652898,
+      "stdout_head": "Collecting tifffile==2026.1.28\n  Downloading tifffile-2026.1.28-py3-none-any.whl.metadata (30 kB)\nDownloading tifffile-2026.1.28-py3-none-any.whl (233 kB)\nSaved ./wheelhouse_v4/tifffile-2026.1.28-py3-none-any.whl\nSuccessfully downloaded tifffile\n",
+      "stderr_head": ""
+    },
+    {
+      "name": "tifffile",
+      "version": "2026.2.16",
+      "returncode": 0,
+      "elapsed_ns": 2108699654,
+      "stdout_head": "Collecting tifffile==2026.2.16\n  Downloading tifffile-2026.2.16-py3-none-any.whl.metadata (30 kB)\nDownloading tifffile-2026.2.16-py3-none-any.whl (233 kB)\nSaved ./wheelhouse_v4/tifffile-2026.2.16-py3-none-any.whl\nSuccessfully downloaded tifffile\n",
+      "stderr_head": ""
+    }
+  ],
+  "files": [
+    "imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+    "imageio-2.37.2-py3-none-any.whl",
+    "lazy_loader-0.4-py3-none-any.whl",
+    "networkx-3.6.1-py3-none-any.whl",
+    "numpy-2.4.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+    "opencv_python-4.13.0.92-cp37-abi3-manylinux_2_28_x86_64.whl",
+    "packaging-26.0-py3-none-any.whl",
+    "pillow-12.1.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+    "scikit_image-0.26.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl",
+    "scipy-1.17.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl",
+    "tifffile-2026.1.28-py3-none-any.whl",
+    "tifffile-2026.2.16-py3-none-any.whl"
+  ]
+}
