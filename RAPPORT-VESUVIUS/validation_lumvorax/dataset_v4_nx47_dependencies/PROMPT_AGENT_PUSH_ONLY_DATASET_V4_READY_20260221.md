@@ -1,9 +1,6 @@
 # PROMPT AGENT — PUSH ONLY dataset NX47 dépendances V4 + update kernel test360
 
 Tu ne dois **PAS** reconstruire le bundle V4. Il est prêt.
-# PROMPT AGENT — PUSH ONLY dataset NX47 dépendances V4 (bundle déjà produit)
-
-Tu ne dois **PAS** reconstruire. Le bundle V4 est déjà préparé localement.
 
 ## 1) Chemins exacts
 - Bundle prêt: `RAPPORT-VESUVIUS/validation_lumvorax/dataset_v4_nx47_dependencies/bundle`

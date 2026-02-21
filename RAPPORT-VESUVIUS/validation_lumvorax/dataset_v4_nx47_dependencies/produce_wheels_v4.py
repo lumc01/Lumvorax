@@ -38,6 +38,7 @@ def main() -> int:
             "--python-version", "311",
             "--implementation", "cp",
             "--abi", "cp311",
+            "--no-deps",
         ]
         t0 = time.time_ns()
         p = subprocess.run(cmd, capture_output=True, text=True)

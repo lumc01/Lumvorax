@@ -63,12 +63,38 @@ def find_file(name: str, roots: List[Path]) -> Path | None:
         p = r / name
         if p.exists():
             return p
+    for r in roots:
+        for p in r.rglob(name):
+            if p.is_file():
+                return p
     return None
 
 
 def now_ns() -> int:
     return time.time_ns()
 
+
+
+
+def ensure_python_pkg(pkg: str) -> None:
+    try:
+        __import__(pkg)
+        return
+    except Exception:
+        subprocess.check_call(["python3", "-m", "pip", "install", "--disable-pip-version-check", pkg])
+
+
+def expand_wheel_roots(roots: List[Path]) -> List[Path]:
+    out: List[Path] = []
+    seen = set()
+    for r in roots:
+        for cand in [r, r / "wheelhouse_v4", r / "bundle"]:
+            if cand.exists() and cand.is_dir():
+                key = str(cand.resolve())
+                if key not in seen:
+                    seen.add(key)
+                    out.append(cand)
+    return out
 
 def find_competitor_tiff_from_results_zip(results_zip: Path) -> tuple[str, bytes]:
     with zipfile.ZipFile(results_zip) as outer:
@@ -109,7 +135,7 @@ def main() -> int:
 
     repo = Path(args.repo_root).resolve()
     out = Path(args.output_dir).resolve()
-    wheel_roots = [Path(x).resolve() for x in args.wheel_source]
+    wheel_roots = expand_wheel_roots([Path(x).resolve() for x in args.wheel_source])
 
     if not args.dry_run:
         out.mkdir(parents=True, exist_ok=True)
@@ -206,6 +232,8 @@ def main() -> int:
 
             # Optional conversion to LUM container for teacher signal
             try:
+                ensure_python_pkg("numpy")
+                ensure_python_pkg("tifffile")
                 lum_bytes = convert_tiff_bytes_to_lum_bytes(tif_bytes)
                 dst_lum = out / "competitor_teacher_1407735.lum"
                 if not args.dry_run:
