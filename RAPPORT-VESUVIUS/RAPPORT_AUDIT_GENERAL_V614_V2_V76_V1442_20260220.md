@@ -1,4 +1,90 @@
+# RAPPORT GÉNÉRAL D'AUDIT (mode cours) — V61.4, NX47_v2, V7.6, V144.2
 
+Date: 2026-02-20  
+Auteur: Codex (audit technique + forensic logs + inspection ZIP)
+
+---
+
+## 0) Mise à jour dépôt distant GitHub (demande "pull")
+
+### Statut observé
+- Tentative `git pull --ff-only` effectuée immédiatement.
+- **Problème rencontré et notifié**: la branche locale `work` n'a **pas d'upstream tracking** configuré, donc pull impossible sans `remote/branch` explicite.
+- Message Git: "There is no tracking information for the current branch".
+
+### Impact
+- Impossible de garantir une synchro distante automatique tant que l'upstream n'est pas défini.
+- L'audit local a été poursuivi sans bloquer l'analyse technique.
+
+---
+
+## 1) Lecture de contexte (session précédente)
+
+Fichier lu en premier (exigence utilisateur):
+- `RAPPORT-VESUVIUS/chat-session-precedente/20_02_26-chat-3-session precedente-de-tout-ce-qui-a-deja-ete-fais .md`
+
+### Ce que j'en retiens (pour éviter répétition des erreurs)
+1. Exiger une synchro GitHub explicite au début de session.
+2. Vérifier en profondeur les `results.zip` + logs + JSON de forensic.
+3. Notifier les problèmes sans omission.
+4. Comparer les versions entre elles et expliquer les anomalies/patterns.
+5. Vérifier que le pipeline est réel (pas placeholders/hardcoding), ou signaler précisément où ils existent.
+
+---
+
+## 2) Périmètre audité demandé
+
+- `RAPPORT-VESUVIUS/notebook-version-NX47-V61.4`
+- `RAPPORT-VESUVIUS/src_vesuvius/nx47_vesu_kernel_v2`
+- `RAPPORT-VESUVIUS/src_vesuvius/v7.6`
+- `RAPPORT-VESUVIUS/notebook-version-NX47-V144.2`
+
+Actions réalisées:
+1. Inventaire de tous les fichiers.
+2. Extraction de chaque `results.zip`.
+3. Extraction des `submission.zip` imbriqués.
+4. Lecture des logs/JSON/TXT/CSV majeurs.
+5. Contrôle type de fichier (texte vs image), et inspection TIFF (forme, dtype, min/max).
+
+---
+
+## 3) Résultats globaux (vue d'ensemble)
+
+## 3.1 Inventaire rapide
+- V61.4: 6 fichiers source + 1 zip de résultats (5 membres).
+- NX47_v2: 761 fichiers (très volumineux, dont 746 TIFF de soumission).
+- V7.6: 6 fichiers source + 1 zip de résultats (15 membres).
+- V144.2: 6 fichiers source + 1 zip de résultats (7 membres).
+
+## 3.2 Types de fichiers rencontrés
+- **Texte/structuré**: `.md`, `.py`, `.ipynb`, `.log`, `.txt`, `.json`, `.jsonl`, `.csv`.
+- **Binaire image**: `.tif` (volumes 3D principalement).
+- **Archivage**: `.zip`, `.bin`, `.parquet`.
+
+## 3.3 Contrôle TIFF (échantillon significatif)
+- V61.4 (après extraction soumission): 2 TIFF, shape `(320,320,320)`, `uint8`, plage `0..1`.
+- NX47_v2: 746 TIFF, majoritairement `(320,320,320)`, quelques `(256,256,256)`, `uint8`, plage `0..1`.
+- V7.6: TIFF en `(320,320,320)` + 1 map matériau `(1,320,320)` avec plage `0..3`.
+- V144.2 (après extraction soumission): 1 TIFF `(320,320,320)`, `uint8`, `0..1`.
+
+Conclusion: harmonisation binaire **0/1** visible en sortie de soumission pour les versions auditées.
+
+---
+
+## 4) Détail par version (fichier par fichier critique)
+
+## 4.1 V61.4 — `RAPPORT-VESUVIUS/notebook-version-NX47-V61.4`
+
+### Fichiers clés
+- `nx47-vesu-kernel-new-v61-4.py` (pipeline python)
+- `nx47-vesu-kernel-new-v61-4.log` + `5mHvflKe.txt` (journal exécution)
+- `results.zip` (forensic + soumission)
+- `PLAN_V61_4_INTEGRATION_LUM_VORAX_MULTI_SEUIL.md`
+
+### Lecture logs (points importants)
+- Le pipeline atteint `SUBMISSION_READY` puis `EXEC_COMPLETE`.
+- Ensuite, échec papermill **post-exécution métier**:
+  - `NameError: name 'false' is not defined`
 - Interprétation: la soumission est produite, mais une cellule notebook mélange du pseudo-JSON (`false`) dans un contexte Python, ce qui casse la finalisation notebook/export.
 
 ### ZIP extrait
