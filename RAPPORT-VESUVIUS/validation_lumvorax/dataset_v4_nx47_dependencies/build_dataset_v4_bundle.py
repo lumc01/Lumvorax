@@ -253,12 +253,16 @@ def main() -> int:
             competitor["extract_error"] = str(exc)
             event("competitor_tiff_extract_failed", error=str(exc))
 
-    # 4) Header inventory
+    # 4) Header collection
     headers = []
+    event("collect_headers_start", patterns=HEADER_GLOBS)
     for g in HEADER_GLOBS:
-        for h in sorted(repo.glob(g)):
-            headers.append(str(h.relative_to(repo)))
-    event("headers_inventory", count=len(headers))
+        for src_h in repo.glob(g):
+            dst_h = out / src_h.name
+            if not args.dry_run:
+                shutil.copy2(src_h, dst_h)
+            headers.append(str(src_h.relative_to(repo)))
+            event("header_copied", name=src_h.name, source=str(src_h))
 
     # 5) Manifest
     files = []
