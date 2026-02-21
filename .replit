@@ -1264,7 +1264,7 @@ build = ["make", "clean", "all"]
 [userenv]
 
 [userenv.shared]
-KAGGLE_API_TOKEN = "KGAT_e5045d33af6e4771c782f67e6a0e8f92"
+KAGGLE_API_TOKEN = "KGAT_a28c81c39f3e39f396761475cf29e300"
 KAGGLE_USERNAME = "ndarray2000"
 ARISTOTLE_API_KEY = "arstl_YykBEXr6oNR5R9toq_wI1wTtyfVrj5eUZfgpe_BlgYo"
 KAGGLE_CONFIG_DIR = "/home/runner/.kaggle"
