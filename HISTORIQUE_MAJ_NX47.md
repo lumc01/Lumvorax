@@ -11,5 +11,6 @@
 - Inclusion de liblumvorax.so (Certification V7).
 - Inclusion des 12 wheels requis.
 - Inclusion de la matrice de tests (3600 tests validés).
-- Publication de la version V7 sur Kaggle (lumc01/nx47-dependencies).
-- Mise à jour du notebook de test effectuée (V6_BINARY).
+- Tentative de publication de la version V7 sur Kaggle (lumc01/nx47-dependencies).
+- Création du notebook de test local `notebook_test_v7.py` basé sur V6_BINARY.
+- Note: Erreur 403 rencontrée lors du push Kaggle, probablement liée aux permissions du token ou au quota. Les fichiers sont prêts localement dans `build_kaggle/bundle`.
