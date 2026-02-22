@@ -20,3 +20,4 @@ Scientific computing / mathematical research project (LUM/VORAX). Python-based w
 
 ## Recent Changes
 - 2026-02-22: Initial import to Replit environment. Installed all Python dependencies via uv.
+- 2026-02-22: Compiled `liblumvorax.so` with high compatibility (GLIBC 2.2.5). Generated authentic test matrix for 3600 tests. Created V7 Certification Report.
