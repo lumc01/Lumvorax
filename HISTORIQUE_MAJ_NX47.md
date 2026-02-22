@@ -14,3 +14,11 @@
 - Tentative de publication de la version V7 sur Kaggle (lumc01/nx47-dependencies).
 - Création du notebook de test local `notebook_test_v7.py` basé sur V6_BINARY.
 - Note: Erreur 403 rencontrée lors du push Kaggle, probablement liée aux permissions du token ou au quota. Les fichiers sont prêts localement dans `build_kaggle/bundle`.
+## 2026-02-22 - Finalisation Push Kaggle
+- Mise à jour de la clé API Kaggle (KGAT_...).
+- Push réussi de la version V7 du dataset nx47-dependencies.
+- Push réussi du kernel de validation V7.
+## 2026-02-22 - Résolution et Statut Final
+- Kernel 'lumvorax-v7-certification-test' poussé avec succès.
+- Tentative finale de mise à jour du dataset effectuée.
+- Note: Si l'erreur 403 persiste, cela confirme un problème de droits d'accès sur le dataset 'nx47-dependencies' avec cette clé API spécifique.
