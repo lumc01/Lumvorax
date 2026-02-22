@@ -22,3 +22,8 @@
 - Kernel 'lumvorax-v7-certification-test' poussé avec succès.
 - Tentative finale de mise à jour du dataset effectuée.
 - Note: Si l'erreur 403 persiste, cela confirme un problème de droits d'accès sur le dataset 'nx47-dependencies' avec cette clé API spécifique.
+## 2026-02-22 - Correction Logique et Push Réussi
+- Identification du propriétaire correct du dataset : ndarray2000.
+- Mise à jour du metadata : ndarray2000/nx47-dependencies.
+- Push de la version V7 du dataset réussi.
+- Push du kernel ndarray2000/lumvorax-v7-certification-test réussi.
