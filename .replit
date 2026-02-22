@@ -1,4 +1,4 @@
-modules = ["bash", "python-3.11"]
+modules = ["python-3.12"]
 [agent]
 expertMode = true
 
@@ -23,7 +23,7 @@ outputType = "console"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd /home/runner/workspace && make all 2>&1 && echo 'Build succeeded' || echo 'Build had issues'"
+args = "python main.py"
 
 [nix]
 packages = ["arrow-cpp", "cairo", "clang", "ffmpeg-full", "file", "freetype", "gcc", "gdb", "ghostscript", "glib", "glibc", "glibcLocales", "gnumake", "gobject-introspection", "gtk3", "kaggle", "lcms2", "libGL", "libGLU", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "nano", "openjpeg", "openssh", "pkg-config", "qhull", "tcl", "tk", "tree", "vim-full", "xsimd", "zlib"]
@@ -37,8 +37,8 @@ build = ["make", "clean", "all"]
 [userenv]
 
 [userenv.shared]
-KAGGLE_API_TOKEN = "KGAT_80bf2ece13f644b7aeb5829ab812e527"
+KAGGLE_API_TOKEN = "KGAT_3cad8adae512fb631171760aaefdda93"
 KAGGLE_USERNAME = "ndarray2000"
 ARISTOTLE_API_KEY = "arstl_YykBEXr6oNR5R9toq_wI1wTtyfVrj5eUZfgpe_BlgYo"
 KAGGLE_CONFIG_DIR = "/home/runner/.kaggle"
-KAGGLE_KEY = "80bf2ece13f644b7aeb5829ab812e527"
+KAGGLE_KEY = "3cad8adae512fb631171760aaefdda93"
