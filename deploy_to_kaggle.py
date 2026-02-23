@@ -17,7 +17,7 @@ def deploy_to_kaggle():
     os.makedirs(kaggle_dir, exist_ok=True)
     
     # Le token fourni par l'utilisateur
-    new_token = "5e613d55a27157980e18e2d0ab171e6a"
+    new_token = "KGAT_8906f9555e5e4519081a9c6a45c360ea"
     os.environ['KAGGLE_API_TOKEN'] = new_token
     
     # On cree le dossier .kaggle si necessaire
@@ -29,7 +29,7 @@ def deploy_to_kaggle():
     
     # 3. Preparation des Metadatas pour le Kernel
     metadata = {
-        "id": "gabrielchavesreinann/nx47-vesu-kernel",
+        "id": "ndarray2000/nx47-vesu-kernel",
         "title": "nx47-vesu-kernel",
         "code_file": kernel_file,
         "language": "python",
