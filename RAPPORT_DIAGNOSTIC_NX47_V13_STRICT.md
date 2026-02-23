@@ -1,60 +1,71 @@
 # Diagnostic total Lumvorax ↔ Kaggle (NX47 Dependencies V13)
 
 ## Contexte
-Le rapport `lumvorax_360_validation_report_v6_binary.json` montre un statut `ok_with_warnings`, non conforme à l'objectif "zéro warning".
+Le rapport historique `lumvorax_360_validation_report_v6_binary.json` montrait `ok_with_warnings`, ce qui viole la certification "zéro warning".
 
-## Problèmes identifiés
+## Problèmes racines confirmés
 
-1. **Chargement natif `.so` échoué**
-   - Erreur: `undefined symbol: neural_config_create_default`
-   - Cause: la librairie `liblumvorax.so` exportée dans le dataset dépend d'un symbole absent au runtime Kaggle.
+1. **Échec de chargement natif `.so`**
+   - Erreur observée: `undefined symbol: neural_config_create_default`.
+   - Impact: la dépendance native n'est pas réellement utilisable même si le fichier est présent.
 
-2. **Roundtrip TIFF LZW non strictement garanti**
-   - Erreur constatée: `"<COMPRESSION.LZW: 5> requires the 'imagecodecs' package"`.
-   - Cause probable: incohérence ABI/runtime entre environnements Python Kaggle et wheel `imagecodecs` du dataset.
+2. **LZW non garanti au runtime Kaggle**
+   - Erreur observée: `"<COMPRESSION.LZW: 5> requires the 'imagecodecs' package"`.
+   - Cause typique: mismatch de wheel/tags Python runtime (ex: wheel non compatible runtime effectif).
 
-3. **Validation trop permissive dans le validateur V6**
-   - Le validateur pouvait produire `ok_with_warnings`.
-   - Le chargement `.so` n'était pas bloquant (`enforce_so_load=false` par défaut).
-   - Le roundtrip pouvait fallback vers `ADOBE_DEFLATE`/`NONE`, masquant les incompatibilités LZW.
+3. **Validation précédente trop permissive**
+   - Acceptait des warnings au lieu d'un échec bloquant.
+   - Autres compressions (fallback) pouvaient masquer le vrai défaut LZW.
 
-4. **Alignement de version incomplet**
-   - Métadonnées dataset/kernel encore marquées V7 alors que la cible opérationnelle est V13.
+4. **Synchronisation versionnelle incomplète**
+   - Le branding test/dataset était encore en V7.
 
-## Correctifs appliqués
+## Correctifs appliqués (V13 strict réel)
 
-1. **Mode strict V13 implémenté dans le validateur Kaggle**
-   - Nouveau report name: `lumvorax_dependency_360_kaggle_single_cell_v13_strict`.
-   - Fichier de sortie report migré vers `lumvorax_360_validation_report_v13_strict.json`.
+1. **Validation par packages requis + compatibilité tags runtime**
+   - Le validateur vérifie chaque package requis (`imagecodecs`, `numpy`, `tifffile`, etc.).
+   - Chaque package doit avoir **au moins une wheel compatible** avec `packaging.tags.sys_tags()`.
+   - Toute absence/incompatibilité requise déclenche `status=fail`.
 
-2. **`so_load` rendu bloquant en mode strict**
-   - Si le `.so` ne charge pas, la validation échoue immédiatement (`RuntimeError`).
-   - `ENFORCE_SO_LOAD` activé par défaut si `STRICT_NO_FALLBACK=1`.
+2. **Installation offline sélectionnée sur wheel compatible**
+   - La sélection n'est plus figée sur un seul nom de wheel.
+   - Le validateur choisit automatiquement la meilleure wheel compatible trouvée dans le dataset.
 
-3. **Compression TIFF durcie (zéro fallback)**
-   - Plan de compression limité à LZW uniquement.
-   - Si backend LZW indisponible (`imagecodecs.lzw_encode` absent), échec immédiat.
-   - Si `tifffile.imwrite(..., compression="LZW")` échoue, échec immédiat.
+3. **LZW durci sans fallback**
+   - Vérifie explicitement `imagecodecs.lzw_encode` et `imagecodecs.lzw_decode`.
+   - Si indisponible: échec immédiat.
+   - `tifffile.imwrite(..., compression='LZW')` doit fonctionner réellement.
 
-4. **Scanner de compatibilité wheel/runtime ajouté**
-   - Vérification de compatibilité des tags wheel via `packaging.tags.sys_tags` + `parse_wheel_filename`.
-   - Toute wheel incompatible avec le runtime Kaggle force l'état `dataset_artifacts.status = fail`.
+4. **`so_load` bloquant en strict**
+   - `liblumvorax.so` doit se charger via `ctypes.CDLL`.
+   - Sinon échec immédiat, aucun pass "avec warnings".
 
-5. **Versions Kaggle synchronisées en V13**
-   - Kernel metadata: `LUMVORAX V13 Certification Test`.
-   - Dataset metadata: `NX47 Dependencies V13`.
+5. **Synchronisation V7 → V13 mise à jour**
+   - Test kernel Kaggle renommé en `LUMVORAX V13 Certification Test`.
+   - Dataset metadata renommée en `NX47 Dependencies V13`.
 
-## Recommandations opérationnelles pour publier la vraie V13 dataset
+## Versions compatibles LZW / imagecodecs (règle fiable)
 
-1. **Rebuilder et republier `liblumvorax.so`** avec dépendances complètes, sans symbole non résolu (`neural_config_create_default`).
-2. **Publier des wheels compatibles runtime Kaggle cible** (tags réellement matchés par `sys_tags()` du notebook final).
-3. **N'inclure qu'une seule version de `tifffile`** pour éviter ambiguïté d'installation.
-4. **Exécuter le validateur V13 strict dans Kaggle** et n'accepter que `status="ok"` avec `warnings=[]`.
+> Ce n'est pas un simple "nom de version" fixe: la compatibilité dépend du triplet **Python ABI + plateforme + manylinux tag**.
 
-## Critère d'acceptation final (zéro warning)
+- `imagecodecs` doit être compatible avec les tags runtime Kaggle exposés par `sys_tags()`.
+- Pour Python 3.12 Kaggle, préférer:
+  - wheels `cp312-*` (ou `abi3` réellement supporté),
+  - manylinux compatible avec l'image Kaggle utilisée.
+- Même logique pour `numpy`, `pillow`, `scipy`, `scikit-image`.
+
+## Critère d'acceptation final (zéro warning, zéro erreur)
 
 - `status == "ok"`
 - `warnings_count == 0`
 - `so_load_status == "ok"`
 - `roundtrip_status == "ok"`
-- `dataset_artifacts.wheel_compatibility.incompatible_wheels == []`
+- `missing_required_packages == []`
+- `incompatible_required_packages == []`
+
+## Plan de publication recommandé
+
+1. Rebuild `liblumvorax.so` (sans symbole non résolu).
+2. Publier dataset V13 avec wheels réellement compatibles tags Kaggle runtime.
+3. Garder une seule version par package critique (éviter ambiguïtés).
+4. Lancer le validateur V13 strict dans Kaggle et publier uniquement si verdict final est `ok` sans warning.
