@@ -228,21 +228,8 @@ def inspect_dataset_artifacts(root: Optional[Path], report: Dict[str, Any]) -> D
     incompatible_required_packages: List[str] = []
     selected_compatible_wheels: Dict[str, str] = {}
 
-    pkg_map = {
-        'opencv-python': 'cv2',
-        'scikit-image': 'skimage',
-        'pillow': 'PIL',
-    }
-
     for pkg in REQUIRED_PACKAGES:
         canon = canonicalize_name(pkg)
-        import_name = pkg_map.get(canon, canon)
-        
-        # Check if package is ALREADY installed in the environment (e.g. Kaggle default)
-        if pkg_available(import_name):
-            selected_compatible_wheels[canon] = "pre-installed"
-            continue
-
         pkg_entries = wheel_index.get(canon, [])
         if not pkg_entries:
             missing_required_packages.append(canon)
@@ -312,6 +299,31 @@ def check_native_load(lib_path: Optional[str], report: Dict[str, Any]) -> Dict[s
         if ENFORCE_SO_LOAD:
             raise RuntimeError(f'native_so_load_enforced_failed: {err}')
         return diag
+
+
+def preload_companion_shared_objects(dataset_root: Optional[Path], report: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """Preload sidecar .so files with RTLD_GLOBAL to satisfy transitive symbols.
+
+    This is critical for failures like:
+      undefined symbol: neural_config_create_default
+    where the symbol can be exported by a companion library in the same dataset.
+    """
+    if dataset_root is None or not dataset_root.exists():
+        return []
+
+    loaded: List[Dict[str, Any]] = []
+    for so_path in sorted(dataset_root.glob('*.so')):
+        if so_path.name == EXPECTED_NATIVE_LIB:
+            continue
+        try:
+            ctypes.CDLL(str(so_path), mode=ctypes.RTLD_GLOBAL)
+            loaded.append({'library': so_path.name, 'status': 'loaded'})
+        except Exception as exc:
+            loaded.append({'library': so_path.name, 'status': 'failed', 'error': str(exc)})
+
+    if loaded:
+        log_event(report, 'companion_so_preload', attempted=len(loaded), loaded=sum(1 for x in loaded if x['status'] == 'loaded'))
+    return loaded
 
 
 def inspect_so_symbols(lib_path: Optional[str], report: Dict[str, Any]) -> Dict[str, Any]:
@@ -525,6 +537,7 @@ def main() -> None:
         report['imports'] = {p: pkg_available(p) for p in ('numpy', 'tifffile', 'imagecodecs', 'pyarrow')}
 
         report['dataset_artifacts'] = inspect_dataset_artifacts(dataset_root, report)
+        report['companion_so_preload'] = preload_companion_shared_objects(dataset_root, report)
         if report['dataset_artifacts'].get('status') != 'ok':
             if REQUIRE_DATASET:
                 raise RuntimeError('dataset_artifacts_incomplete')
@@ -535,6 +548,18 @@ def main() -> None:
             native_lib = report['dataset_artifacts'].get('native_lib')
             report['so_symbol_inventory'] = inspect_so_symbols(native_lib, report)
             report['so_load_check'] = check_native_load(native_lib, report)
+            if report['so_load_check'].get('status') != 'ok':
+                preload_ok = [x for x in report.get('companion_so_preload', []) if x.get('status') == 'loaded']
+                if preload_ok:
+                    log_event(report, 'native_load_retry_after_preload', lib=native_lib, preload_loaded=len(preload_ok))
+                    report['so_load_check_retry'] = check_native_load(native_lib, report)
+                    if report['so_load_check_retry'].get('status') == 'ok':
+                        report['so_load_check'] = report['so_load_check_retry']
+
+            if report['so_symbol_inventory'].get('module_inventory_missing_modules'):
+                raise RuntimeError(
+                    f"module_inventory_missing: {report['so_symbol_inventory'].get('module_inventory_missing_modules')}"
+                )
 
             if report['so_symbol_inventory'].get('module_inventory_missing_modules'):
                 raise RuntimeError(
