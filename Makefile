@@ -67,6 +67,7 @@ OBJECTS = $(SOURCES:.c=.o)
 # Exécutables
 MAIN_EXECUTABLE = $(BIN_DIR)/lum_vorax_complete
 TEST_PROGRESSIVE = $(BIN_DIR)/test_progressive_all_modules
+LIB_LUMVORAX = liblumvorax.so
 
 # Tests forensiques conformes prompt.txt
 TEST_EXECUTABLES = \
@@ -74,9 +75,9 @@ TEST_EXECUTABLES = \
 	$(BIN_DIR)/test_integration_complete_39_modules \
 	$(BIN_DIR)/test_quantum
 
-.PHONY: all clean test test-progressive test-stress test-forensic rsa_test science_test
+.PHONY: all clean test test-progressive test-stress test-forensic rsa_test science_test liblumvorax.so
 
-all: directories $(MAIN_EXECUTABLE) $(TEST_EXECUTABLES)
+all: directories $(MAIN_EXECUTABLE) $(TEST_EXECUTABLES) $(LIB_LUMVORAX)
 
 directories:
 	mkdir -p $(BIN_DIR) $(LOG_DIR)/forensic $(LOG_DIR)/execution $(LOG_DIR)/tests $(LOG_DIR)/console
@@ -84,6 +85,10 @@ directories:
 # Compilation objets
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
+
+# Shared Library
+$(LIB_LUMVORAX): $(OBJECTS)
+	$(CC) $(CFLAGS) -shared $(OBJECTS) -o $@ $(LDFLAGS)
 
 # Exécutable principal avec TOUS les modules
 $(MAIN_EXECUTABLE): $(OBJECTS)

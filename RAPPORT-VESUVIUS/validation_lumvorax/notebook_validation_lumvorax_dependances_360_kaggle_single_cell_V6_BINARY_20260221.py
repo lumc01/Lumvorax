@@ -326,7 +326,7 @@ def tiff_lum_roundtrip_test(report: Dict[str, Any]) -> Dict[str, Any]:
 def main() -> None:
     t0 = now_ns()
     report: Dict[str, Any] = {
-        'report_name': 'lumvorax_dependency_360_kaggle_single_cell_v6_binary',
+        'report_name': 'lumvorax_dependency_360_kaggle_single_cell_v13_strict',
         'timestamp_ns': now_ns(),
         'runtime': {
             'python': sys.version,
@@ -391,9 +391,9 @@ def main() -> None:
     report['elapsed_ns'] = now_ns() - t0
     report['elapsed_s'] = report['elapsed_ns'] / 1_000_000_000
 
-    out = Path('/kaggle/working/lumvorax_360_validation_report_v6_binary.json')
+    out = Path('/kaggle/working/lumvorax_360_validation_report_v13_strict.json')
     if not out.parent.exists():
-        out = Path('lumvorax_360_validation_report_v6_binary.json')
+        out = Path('lumvorax_360_validation_report_v13_strict.json')
     out.write_text(json.dumps(report, indent=2), encoding='utf-8')
 
     print(json.dumps({
