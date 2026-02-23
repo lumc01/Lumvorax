@@ -1,23 +1,30 @@
-# LUM/VORAX System
+# REPL-NIX-WORKSPACE
 
 ## Overview
-Scientific computing / mathematical research project (LUM/VORAX). Python-based with dependencies including NumPy, SciPy, PyTorch (CPU), Matplotlib, Pandas, scikit-image, and more.
+A Python-based scientific computing and research project involving mathematical olympiad problems (AIMO), Kaggle competitions, and various computational simulations (black hole simulations, cryptographic analysis, etc.).
 
 ## Project Architecture
-- **Entry point**: `main.py`
 - **Language**: Python 3.12
-- **Package manager**: uv (pyproject.toml)
-- **Key dependencies**: numpy 1.26.4, scipy, torch (CPU), matplotlib, pandas, scikit-image, opencv-python, aiohttp, pillow, tifffile, imagecodecs, pyarrow, psutil, requests, bitstring, aristotlelib, kaggle
+- **Package Manager**: uv
+- **Entry Point**: `main.py`
+- **Dependencies**: numpy, scipy, torch (CPU), scikit-image, pandas, matplotlib, opencv-python, pillow, requests, kaggle, and more (see `pyproject.toml`)
 
-## Structure
-- Root contains many Python scripts, analysis markdown files, validation scripts, and supporting data files
-- `tests/` - test files
-- `tools/` - utility tools
-- `archive/` - archived files
+## Key Directories
+- `trou_noir_sim/` - Black hole simulation code
+- `tools/` - Utility scripts
+- `v44v1/` - Version 44 implementation
+- `DATASET/` - Data files
+- `PREUVE_IAMO/` - IAMO proof artifacts
+- `RAPPORT-VESUVIUS/` - Vesuvius project reports
+- `RAPPORT_IAMO3/` - IAMO3 forensic reports
+- `archive/` - Archived files
 
-## Workflows
-- **LUM/VORAX System**: `python main.py` (console output)
+## Running the Project
+- Workflow "Run Python" executes `uv run python main.py`
+- Various standalone scripts can be run individually
 
 ## Recent Changes
-- 2026-02-22: Initial import to Replit environment. Installed all Python dependencies via uv.
-- 2026-02-22: Compiled `liblumvorax.so` with high compatibility (GLIBC 2.2.5). Generated authentic test matrix for 3600 tests. Created V7 Certification Report.
+- 2026-02-23: Migrated project to Replit environment, installed all dependencies with uv, configured workflow
+
+## User Preferences
+- (To be updated as preferences are expressed)
