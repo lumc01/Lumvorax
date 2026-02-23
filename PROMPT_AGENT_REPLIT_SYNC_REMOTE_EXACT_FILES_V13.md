@@ -103,7 +103,11 @@ Tu modifies **uniquement** ces fichiers cibles (sauf nécessité prouvée):
   - check symboles obligatoires module par module.
 - Bloquant si symbole requis absent (ex: `neural_config_create_default`).
 - Vérifier explicitement les 42 modules du contrat `MODULE_SYMBOL_REQUIREMENTS` dans `build_kaggle/kernel/main.py`.
-- Exporter une table finale `module | symbole_requis | présent/absent`.
+- **En plus**, vérifier l’inventaire complet réel des modules/sous-modules trouvés dans les sources (objectif: >75 modules).
+- Exporter deux tables finales:
+  - `module_42 | symbole_requis | présent/absent`
+  - `module_source | fichier(s) | présent/absent_dans_so | remarque`
+- Bloquant si l’inventaire source total est `< 75 modules` (tant que les sources sont accessibles).
 
 ### 3.3 TIFF LZW
 - Vérifier backend réel `imagecodecs` (`lzw_encode`, `lzw_decode`).
@@ -138,4 +142,4 @@ Puis exécution Kaggle réelle (dataset monté) jusqu’au résultat:
 - `roundtrip_status == "ok"`
 
 ## 6) CONDITION DE FIN
-Tu ne t’arrêtes que lorsque notebook + dataset nx47 sont validés sans erreur ni warning, avec preuves Kaggle et journal append-only complet.
+Tu ne t’arrêtes que lorsque notebook + dataset nx47 sont validés sans erreur ni warning, avec preuves Kaggle, journal append-only complet, et inventaire source complet (>75 modules) vérifié.

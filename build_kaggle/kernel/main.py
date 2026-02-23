@@ -386,6 +386,51 @@ def inspect_so_symbols(lib_path: Optional[str], report: Dict[str, Any]) -> Dict[
         return {'status': 'fail', 'error': str(exc), 'cmd': cmd}
 
 
+
+
+def discover_source_module_inventory(report: Dict[str, Any]) -> Dict[str, Any]:
+    """Discover Lumvorax modules from repository source trees (not only fixed 42-contract)."""
+    candidate_roots = [
+        Path('src'),
+        Path('RAPPORT-VESUVIUS/validation_lumvorax/dataset_v4_nx47_dependencies/bundle/src'),
+        Path('RAPPORT-VESUVIUS/validation_lumvorax/LUMVORAX_V4_CERTIFIED_FINAL_GO/src'),
+    ]
+
+    discovered_files: List[str] = []
+    module_names: set[str] = set()
+    roots_used: List[str] = []
+
+    for root in candidate_roots:
+        if not root.exists() or not root.is_dir():
+            continue
+        roots_used.append(str(root))
+        for ext in ('*.c', '*.h'):
+            for fp in sorted(root.rglob(ext)):
+                rel = str(fp)
+                discovered_files.append(rel)
+                parent = fp.parent.name
+                stem = fp.stem
+                module_names.add(f'{parent}/{stem}')
+
+    modules_sorted = sorted(module_names)
+    out: Dict[str, Any] = {
+        'status': 'ok' if modules_sorted else 'missing',
+        'roots_used': roots_used,
+        'module_count': len(modules_sorted),
+        'module_head': modules_sorted[:250],
+        'source_file_count': len(discovered_files),
+        'source_file_head': discovered_files[:250],
+    }
+    if len(modules_sorted) >= 75:
+        out['coverage_expectation'] = '>=75_modules_confirmed'
+    elif modules_sorted:
+        out['coverage_expectation'] = 'below_75_modules'
+    else:
+        out['coverage_expectation'] = 'no_sources_found'
+
+    log_event(report, 'source_module_inventory_scanned', roots=len(roots_used), modules=len(modules_sorted), files=len(discovered_files))
+    return out
+
 def normalize_volume(arr):
     import numpy as np
 
@@ -527,6 +572,12 @@ def main() -> None:
     }
 
     try:
+        report['source_module_inventory'] = discover_source_module_inventory(report)
+        if report['source_module_inventory'].get('status') == 'ok' and report['source_module_inventory'].get('module_count', 0) < 75:
+            raise RuntimeError(
+                f"insufficient_source_module_coverage: {report['source_module_inventory'].get('module_count')} < 75"
+            )
+
         dataset_root = detect_dataset_root(report)
         report['dataset_root'] = str(dataset_root) if dataset_root else None
 
@@ -555,11 +606,6 @@ def main() -> None:
                     report['so_load_check_retry'] = check_native_load(native_lib, report)
                     if report['so_load_check_retry'].get('status') == 'ok':
                         report['so_load_check'] = report['so_load_check_retry']
-
-            if report['so_symbol_inventory'].get('module_inventory_missing_modules'):
-                raise RuntimeError(
-                    f"module_inventory_missing: {report['so_symbol_inventory'].get('module_inventory_missing_modules')}"
-                )
 
             if report['so_symbol_inventory'].get('module_inventory_missing_modules'):
                 raise RuntimeError(
