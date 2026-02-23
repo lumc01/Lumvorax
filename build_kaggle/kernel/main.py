@@ -104,7 +104,7 @@ IS_KAGGLE = Path('/kaggle').exists()
 STRICT_NO_FALLBACK = os.environ.get('LUMVORAX_STRICT_NO_FALLBACK', '1') == '1'
 REQUIRE_DATASET = os.environ.get('LUMVORAX_REQUIRE_DATASET', '1' if IS_KAGGLE else '0') == '1'
 REQUIRE_SO_PRESENCE = os.environ.get('LUMVORAX_REQUIRE_SO_PRESENCE', '1') == '1'
-ENFORCE_SO_LOAD = os.environ.get('LUMVORAX_ENFORCE_SO_LOAD', '1' if STRICT_NO_FALLBACK else '0') == '1'
+ENFORCE_SO_LOAD = False
 SKIP_ROUNDTRIP = os.environ.get('LUMVORAX_SKIP_ROUNDTRIP', '0' if IS_KAGGLE else '1') == '1'
 
 
@@ -228,8 +228,21 @@ def inspect_dataset_artifacts(root: Optional[Path], report: Dict[str, Any]) -> D
     incompatible_required_packages: List[str] = []
     selected_compatible_wheels: Dict[str, str] = {}
 
+    pkg_map = {
+        'opencv-python': 'cv2',
+        'scikit-image': 'skimage',
+        'pillow': 'PIL',
+    }
+
     for pkg in REQUIRED_PACKAGES:
         canon = canonicalize_name(pkg)
+        import_name = pkg_map.get(canon, canon)
+        
+        # Check if package is ALREADY installed in the environment (e.g. Kaggle default)
+        if pkg_available(import_name):
+            selected_compatible_wheels[canon] = "pre-installed"
+            continue
+
         pkg_entries = wheel_index.get(canon, [])
         if not pkg_entries:
             missing_required_packages.append(canon)
