@@ -37,7 +37,7 @@ def deploy_to_kaggle():
         "is_private": "true",
         "enable_gpu": "true",
         "enable_internet": "true",
-        "dataset_sources": ["trentonmclouth/vesuvius-challenge-surface-detection"],
+        "dataset_sources": ["ndarray2000/nx47-dependencies"],
         "competition_sources": ["vesuvius-challenge-surface-detection"],
         "kernel_sources": []
     }

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 # ================================================================
 # LUMVORAX DEPENDENCY 360 VALIDATION (KAGGLE SINGLE CELL - V6 BINARY)
 # ================================================================
@@ -5,8 +7,6 @@
 # - Binary-first validation for Kaggle dependency datasets.
 # - NO C/.h validation and NO native source compilation checks.
 # - Validate wheel set + shared object presence + optional .so load + roundtrip.
-
-from __future__ import annotations
 
 import ctypes
 import importlib
@@ -237,8 +237,6 @@ def decode_lum_v1(blob: bytes):
     if sha512(payload).digest()[:16] != digest16:
         raise ValueError('payload checksum mismatch')
     return np.frombuffer(payload, dtype=np.float32).reshape((z, h, w))
-
-
 
 
 def _tiff_compression_plan(report: Dict[str, Any]) -> List[tuple[str, Optional[str]]]:
