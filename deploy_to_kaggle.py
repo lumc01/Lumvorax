@@ -17,7 +17,7 @@ def deploy_to_kaggle():
     os.makedirs(kaggle_dir, exist_ok=True)
     
     # Le token fourni par l'utilisateur
-    new_token = "KGAT_963a6523998973dcf500139b4647e83a"
+    new_token = "KGAT_2d315a7c48c0eaa0b68a7eafd26c448c"
     os.environ['KAGGLE_API_TOKEN'] = new_token
     
     # On cree le dossier .kaggle si necessaire
