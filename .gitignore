@@ -1,47 +1,14 @@
-# Binaires compilés
-bin/
-*.o
-*.out
-*.exe
-
-# Logs (préservés localement, pas dans git)
-logs/
-/tmp/logs/
-*.log
-
-# Fichiers temporaires
-*.tmp
-*.swp
-*~
-.DS_Store
-
-# Base de données de test
-test_persistence.db/
-*.db
-*.sqlite
-
-# Fichiers de build
-*.a
-*.so
-*.dylib
-
-# Répertoires de cache
-.cache/
 __pycache__/
-
-# Fichiers d'éditeur
-.vscode/
-.idea/
-*.sublime-*
-
-# Fichiers système
-.replit
-replit.nix
-
-# Evidence et checksum (peuvent être regénérés)
-evidence/checksums_*.txt
-evidence/all_forensic_evidence_*.txt
-
-# Benchmarks et métriques temporaires
-benchmark_results.txt
-*.benchmark
+*.py[cod]
+*$py.class
+*.so
+.pythonlibs/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.env
+.venv/
+venv/
+*.whl

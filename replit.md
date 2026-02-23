@@ -1,30 +1,23 @@
-# LUM/VORAX System - Architecture V32
+# LUM/VORAX System
 
 ## Overview
-LUM/VORAX est un système de calcul haute performance avec 45+ modules intégrés, optimisé pour AVX2 et le multi-threading massif.
+Scientific computing / mathematical research project (LUM/VORAX). Python-based with dependencies including NumPy, SciPy, PyTorch (CPU), Matplotlib, Pandas, scikit-image, and more.
 
-## Project Structure (Updated V32)
-- `src/` - Source code for all modules
-  - `optimization/` - **[V32]** Async Logging, Slab Allocator, SIMD Batch, Lock-free Queue, LZ4, MMap.
-  - `security/` - **[V32]** Audit & Hardening.
-  - `monitoring/` - **[V32]** Resource Monitoring & Alerting.
-  - `distributed/` - **[V32]** Cluster Computing Node.
-  - `wasm/` - **[V32]** WASM Export Module.
-  - `versioning/` - **[V32]** Version Manager & API Contract.
-  - `cicd/` - **[V32]** Benchmark Runner & Regression Detector.
-  - `lum/` - Core LUM functionality.
-  - `vorax/` - VORAX operations.
-- `reports/` - Generated reports (including `FINAL_VALIDATION_REPORT_V32.md`).
+## Project Architecture
+- **Entry point**: `main.py`
+- **Language**: Python 3.12
+- **Package manager**: uv (pyproject.toml)
+- **Key dependencies**: numpy 1.26.4, scipy, torch (CPU), matplotlib, pandas, scikit-image, opencv-python, aiohttp, pillow, tifffile, imagecodecs, pyarrow, psutil, requests, bitstring, aristotlelib, kaggle
 
-## Building & Testing
-```bash
-make all
-./v32_test
-```
+## Structure
+- Root contains many Python scripts, analysis markdown files, validation scripts, and supporting data files
+- `tests/` - test files
+- `tools/` - utility tools
+- `archive/` - archived files
+
+## Workflows
+- **LUM/VORAX System**: `python main.py` (console output)
 
 ## Recent Changes
-- **January 30, 2026**: Lancement NX-38. Cahier des charges pour la validation 100% (NX-38_CAHIER_DE_CHARGES.md).
-- **Push NX-38**: Traduction Ultra Pure Core soumise pour certification finale.
-- **Push Logs**: 5 unités de preuve récupérées et analysées (RAPPORT_EXHAUSTIF_ARISTOTLE_PUSH_LOGS.md).
-- **Validation**: 100% des barrières syntaxiques levées sur la version Pure Core.
-- **NX-37**: Introduction de la métrique de Lyapunov Φ pour la convergence ultra-rapide.
+- 2026-02-22: Initial import to Replit environment. Installed all Python dependencies via uv.
+- 2026-02-22: Compiled `liblumvorax.so` with high compatibility (GLIBC 2.2.5). Generated authentic test matrix for 3600 tests. Created V7 Certification Report.

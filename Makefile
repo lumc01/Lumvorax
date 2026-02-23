@@ -56,7 +56,10 @@ SOURCES = \
 	$(SRC_DIR)/file_formats/lum_native_universal_format.c \
 	$(SRC_DIR)/spatial/lum_instant_displacement.c \
 	$(SRC_DIR)/network/hostinger_resource_limiter.c \
-	$(SRC_DIR)/advanced_calculations/quantum_simulator.c
+	$(SRC_DIR)/advanced_calculations/quantum_simulator.c \
+	$(SRC_DIR)/physics/kerr_metric.c \
+	$(SRC_DIR)/logging/log_writer.c \
+	$(SRC_DIR)/common/time_ns.c
 
 # Objets
 OBJECTS = $(SOURCES:.c=.o)
