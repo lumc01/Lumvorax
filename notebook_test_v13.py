@@ -134,20 +134,30 @@ def inspect_dataset_artifacts(root: Optional[Path], report: Dict[str, Any]) -> D
     
     # Check if they are already installed in the system
     missing_wheels = []
+    # Package mapping for wheel names to import names
+    pkg_map = {
+        'opencv_python': 'cv2',
+        'scikit_image': 'skimage',
+        'pillow': 'PIL',
+        'imagecodecs': 'imagecodecs',
+        'numpy': 'numpy',
+        'scipy': 'scipy',
+        'networkx': 'networkx',
+        'imageio': 'imageio',
+        'lazy_loader': 'lazy_loader',
+        'packaging': 'packaging',
+        'tifffile': 'tifffile'
+    }
+
     for w in EXPECTED_WHEELS:
-        pkg_name = w.split('-')[0].split('_')[0] # simplistic extraction
-        # Special cases for mapping wheel names to import names
-        pkg_map = {
-            'opencv_python': 'cv2',
-            'scikit_image': 'skimage',
-            'pillow': 'PIL'
-        }
+        # Extract package name from wheel filename (e.g., opencv_python-4.13.0...)
+        pkg_name = w.split('-')[0].replace('-', '_')
         import_name = pkg_map.get(pkg_name, pkg_name)
         
         if w not in files and not pkg_available(import_name):
             missing_wheels.append(w)
 
-    present_wheels = [w for w in EXPECTED_WHEELS if w in files or pkg_available(pkg_map.get(w.split('-')[0].split('_')[0], w.split('-')[0].split('_')[0]))]
+    present_wheels = [w for w in EXPECTED_WHEELS if w in files or pkg_available(pkg_map.get(w.split('-')[0].replace('-', '_'), w.split('-')[0].replace('-', '_')))]
     native = files.get(EXPECTED_NATIVE_LIB)
 
     out = {

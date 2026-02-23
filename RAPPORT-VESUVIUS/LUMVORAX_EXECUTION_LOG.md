@@ -124,3 +124,12 @@
 - **Decision**: Redeploying to Kaggle for version 10.
 - **Status**: SUCCESS. Kernel version 10 pushed.
 
+## [2026-02-23 18:55 UTC] Refined Package Mapping and Validation
+- **Objective**: Final resolution of `dataset_artifacts_incomplete`.
+- **Action**: 
+    - Refined package name extraction from wheel files (handling hyphens and underscores).
+    - Expanded `pkg_map` to include all expected dependencies.
+    - Ensured `opencv_python` maps correctly to `cv2` and `scikit_image` to `skimage`.
+- **Decision**: Redeploying to Kaggle for version 11.
+- **Status**: SUCCESS. Kernel version 11 pushed.
+
