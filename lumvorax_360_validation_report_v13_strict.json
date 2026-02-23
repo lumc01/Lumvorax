@@ -1,0 +1,100 @@
+{
+  "report_name": "lumvorax_dependency_360_kaggle_single_cell_v13_strict",
+  "timestamp_ns": 1771871557981464826,
+  "runtime": {
+    "python": "3.12.11 (main, Jun  3 2025, 15:41:47) [GCC 14.2.1 20250322]",
+    "platform": "Linux-6.14.11-x86_64-with-glibc2.40",
+    "cwd": "/home/runner/workspace",
+    "is_kaggle": false
+  },
+  "policy": {
+    "strict_no_fallback": true,
+    "require_dataset": false,
+    "require_so_presence": true,
+    "enforce_so_load": true,
+    "skip_roundtrip": true,
+    "source_header_validation_enabled": false,
+    "c_syntax_smoke_enabled": false
+  },
+  "dataset_expected": {
+    "native_lib": "liblumvorax.so",
+    "required_packages": [
+      "imagecodecs",
+      "imageio",
+      "lazy-loader",
+      "networkx",
+      "numpy",
+      "opencv-python",
+      "packaging",
+      "pillow",
+      "scikit-image",
+      "scipy",
+      "tifffile"
+    ]
+  },
+  "events": [
+    {
+      "ts_ns": 1771871558008648144,
+      "step": "dataset_root_missing",
+      "tried": [
+        "/kaggle/input/datasets/ndarray2000/nx47-dependencies",
+        "/kaggle/input/nx47-dependencies",
+        "/kaggle/input/lum-vorax-dependencies",
+        "/kaggle/input/lumvorax-dependencies"
+      ]
+    }
+  ],
+  "warnings": [],
+  "dataset_root": null,
+  "install_report": [
+    {
+      "package": "numpy",
+      "status": "missing",
+      "error": "no_compatible_wheel_found"
+    },
+    {
+      "package": "tifffile",
+      "status": "missing",
+      "error": "no_compatible_wheel_found"
+    },
+    {
+      "package": "imagecodecs",
+      "status": "missing",
+      "error": "no_compatible_wheel_found"
+    }
+  ],
+  "imports": {
+    "numpy": false,
+    "tifffile": false,
+    "imagecodecs": false,
+    "pyarrow": false
+  },
+  "dataset_artifacts": {
+    "status": "missing",
+    "reason": "dataset_root_not_found"
+  },
+  "notes": [
+    {
+      "type": "dataset",
+      "detail": {
+        "status": "missing",
+        "reason": "dataset_root_not_found"
+      }
+    }
+  ],
+  "so_symbol_inventory": {
+    "status": "skipped",
+    "reason": "dataset_artifacts_not_ok"
+  },
+  "so_load_check": {
+    "status": "skipped",
+    "reason": "dataset_artifacts_not_ok"
+  },
+  "tiff_lum_roundtrip_test": {
+    "status": "skipped",
+    "reason": "LUMVORAX_SKIP_ROUNDTRIP=1"
+  },
+  "status": "ok",
+  "elapsed_ns": 32547265,
+  "elapsed_s": 0.032547265
+}

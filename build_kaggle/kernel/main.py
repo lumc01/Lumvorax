@@ -561,6 +561,11 @@ def main() -> None:
                     f"module_inventory_missing: {report['so_symbol_inventory'].get('module_inventory_missing_modules')}"
                 )
 
+            if report['so_symbol_inventory'].get('module_inventory_missing_modules'):
+                raise RuntimeError(
+                    f"module_inventory_missing: {report['so_symbol_inventory'].get('module_inventory_missing_modules')}"
+                )
+
             if report['so_load_check'].get('status') != 'ok':
                 raise RuntimeError(f"native_so_load_failed: {report['so_load_check']}")
 
