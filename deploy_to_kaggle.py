@@ -17,24 +17,27 @@ def deploy_to_kaggle():
     os.makedirs(kaggle_dir, exist_ok=True)
     
     # Le token fourni par l'utilisateur
-    new_token = "KGAT_147c649a54eb31af840fcdfdf2d85c1b"
+    new_token = "KGAT_2d315a7c48c0eaa0b68a7eafd26c448c"
     os.environ['KAGGLE_API_TOKEN'] = new_token
     
-    # Pour s'assurer que le CLI utilise ce token, on peut aussi l'ecrire dans kaggle.json 
-    # mais KGAT est souvent utilise directement comme env var ou via config set.
-    # On va essayer de configurer le username si on le trouve dans le token ou via une commande.
+    # On cree le dossier .kaggle si necessaire
+    kaggle_dir = os.path.expanduser("~/.kaggle")
+    os.makedirs(kaggle_dir, exist_ok=True)
+    with open(os.path.join(kaggle_dir, "kaggle.json"), "w") as f:
+        json.dump({"username":"ndarray2000","key":new_token}, f)
+    os.chmod(os.path.join(kaggle_dir, "kaggle.json"), 0o600)
     
     # 3. Preparation des Metadatas pour le Kernel
     metadata = {
-        "id": "gabrielchavesreinann/nx47-vesu-kernel",
-        "title": "nx47-vesu-kernel",
+        "id": "ndarray2000/lumvorax-v7-certification-test",
+        "title": "lumvorax-v7-certification-test",
         "code_file": kernel_file,
         "language": "python",
         "kernel_type": "script",
         "is_private": "true",
         "enable_gpu": "true",
         "enable_internet": "true",
-        "dataset_sources": ["trentonmclouth/vesuvius-challenge-surface-detection"],
+        "dataset_sources": ["ndarray2000/nx47-dependencies"],
         "competition_sources": ["vesuvius-challenge-surface-detection"],
         "kernel_sources": []
     }

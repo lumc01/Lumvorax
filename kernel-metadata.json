@@ -1,18 +1,17 @@
 {
-  "id": "ndarray2000/nx46-vesuvius-challenge-surface-detection",
-  "title": "NX46 Vesuvius Challenge - Surface Detection",
-  "code_file": "nx46-vesuvius-challenge-surface-detection.ipynb",
-  "language": "python",
-  "kernel_type": "notebook",
-  "is_private": true,
-  "enable_gpu": true,
-  "enable_tpu": false,
-  "enable_internet": false,
-  "dataset_sources": [
-    "ndarray2000/vesuvius-challenge-surface-detection-data"
-  ],
-  "competition_sources": [
-    "vesuvius-challenge-surface-detection"
-  ],
-  "kernel_sources": []
+    "id": "ndarray2000/lumvorax-v7-certification-test",
+    "title": "lumvorax-v7-certification-test",
+    "code_file": "nx47_vesu_kernel.py",
+    "language": "python",
+    "kernel_type": "script",
+    "is_private": "true",
+    "enable_gpu": "true",
+    "enable_internet": "true",
+    "dataset_sources": [
+        "ndarray2000/nx47-dependencies"
+    ],
+    "competition_sources": [
+        "vesuvius-challenge-surface-detection"
+    ],
+    "kernel_sources": []
 }
