@@ -30,7 +30,7 @@ def deploy_to_kaggle():
     # 3. Preparation des Metadatas pour le Kernel
     metadata = {
         "id": "ndarray2000/lumvorax-v7-certification-test",
-        "title": "lumvorax-v7-certification-test",
+        "title": "LUMVORAX V13 Certification Test",
         "code_file": kernel_file,
         "language": "python",
         "kernel_type": "script",
