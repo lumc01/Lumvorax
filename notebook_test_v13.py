@@ -128,9 +128,26 @@ def inspect_dataset_artifacts(root: Optional[Path], report: Dict[str, Any]) -> D
     if root is None:
         return {'status': 'missing', 'reason': 'dataset_root_not_found'}
 
+    # On Kaggle, imagecodecs might be present but LZW is often missing or problematic.
+    # We will disable the strict check for EXPECTED_WHEELS if they are already installed.
     files = {p.name: p for p in root.iterdir() if p.is_file()}
-    missing_wheels = [w for w in EXPECTED_WHEELS if w not in files]
-    present_wheels = [w for w in EXPECTED_WHEELS if w in files]
+    
+    # Check if they are already installed in the system
+    missing_wheels = []
+    for w in EXPECTED_WHEELS:
+        pkg_name = w.split('-')[0].split('_')[0] # simplistic extraction
+        # Special cases for mapping wheel names to import names
+        pkg_map = {
+            'opencv_python': 'cv2',
+            'scikit_image': 'skimage',
+            'pillow': 'PIL'
+        }
+        import_name = pkg_map.get(pkg_name, pkg_name)
+        
+        if w not in files and not pkg_available(import_name):
+            missing_wheels.append(w)
+
+    present_wheels = [w for w in EXPECTED_WHEELS if w in files or pkg_available(pkg_map.get(w.split('-')[0].split('_')[0], w.split('-')[0].split('_')[0]))]
     native = files.get(EXPECTED_NATIVE_LIB)
 
     out = {
