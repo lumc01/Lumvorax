@@ -17,12 +17,15 @@ def deploy_to_kaggle():
     os.makedirs(kaggle_dir, exist_ok=True)
     
     # Le token fourni par l'utilisateur
-    new_token = "KGAT_fe7a9eb20892c8007e500f27afc1d0a3"
+    new_token = "5e613d55a27157980e18e2d0ab171e6a"
     os.environ['KAGGLE_API_TOKEN'] = new_token
     
-    # Pour s'assurer que le CLI utilise ce token, on peut aussi l'ecrire dans kaggle.json 
-    # mais KGAT est souvent utilise directement comme env var ou via config set.
-    # On va essayer de configurer le username si on le trouve dans le token ou via une commande.
+    # On cree le dossier .kaggle si necessaire
+    kaggle_dir = os.path.expanduser("~/.kaggle")
+    os.makedirs(kaggle_dir, exist_ok=True)
+    with open(os.path.join(kaggle_dir, "kaggle.json"), "w") as f:
+        json.dump({"username":"ndarray2000","key":new_token}, f)
+    os.chmod(os.path.join(kaggle_dir, "kaggle.json"), 0o600)
     
     # 3. Preparation des Metadatas pour le Kernel
     metadata = {

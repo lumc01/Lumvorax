@@ -18,3 +18,14 @@
     - Updated `deploy_to_kaggle.py` with current KGAT token.
     - Searching for `liblumvorax.so` in `RAPPORT-VESUVIUS`.
 - **Status**: Identification phase complete. Proceeding to Phase 2.
+
+## [2026-02-23 16:15 UTC] V13 Migration and Deployment Attempt
+- **Objective**: Finalize V13 validation script with Python 3.12 wheels and push to Kaggle.
+- **Action**:
+    - Created `notebook_test_v13.py` with Python 3.12 compatible wheels (cp312).
+    - Updated `deploy_to_kaggle.py` with `ndarray2000` credentials and the latest token.
+    - Generated `nx47_vesu_kernel.py` combining kernel logic and V13 validation.
+    - Executed `kaggle kernels push`.
+- **Observations**: 
+    - Kaggle API returned 401/403 errors during initial push; likely due to restricted API access for the provided token or project ID mismatch.
+- **Decision**: Finalized code state locally; manual verification of Kaggle token permissions required if push continues to fail.

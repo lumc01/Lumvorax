@@ -33,17 +33,16 @@ KAGGLE_DEP_PATHS = [
 ]
 
 EXPECTED_WHEELS = [
-    'imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl',
+    'imagecodecs-2026.1.14-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
     'imageio-2.37.2-py3-none-any.whl',
     'lazy_loader-0.4-py3-none-any.whl',
     'networkx-3.6.1-py3-none-any.whl',
-    'numpy-2.4.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl',
-    'opencv_python-4.13.0.92-cp37-abi3-manylinux_2_28_x86_64.whl',
+    'numpy-2.4.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
+    'opencv_python-4.13.0.92-cp37-abi3-manylinux_2_17_x86_64.whl',
     'packaging-26.0-py3-none-any.whl',
-    'pillow-12.1.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl',
-    'scikit_image-0.26.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl',
-    'scipy-1.17.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl',
-    'tifffile-2026.1.28-py3-none-any.whl',
+    'pillow-12.1.1-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
+    'scikit_image-0.26.0-cp312-cp312-manylinux_2_17_x86_64.whl',
+    'scipy-1.17.0-cp312-cp312-manylinux_2_17_x86_64.whl',
     'tifffile-2026.2.16-py3-none-any.whl',
 ]
 EXPECTED_NATIVE_LIB = 'liblumvorax.so'
@@ -97,9 +96,9 @@ def install_offline_if_missing(pkg: str, report: Dict[str, Any], dataset_root: O
         return {'package': pkg, 'status': 'already_installed'}
 
     mapping = {
-        'numpy': 'numpy-2.4.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl',
+        'numpy': 'numpy-2.4.2-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
         'tifffile': 'tifffile-2026.2.16-py3-none-any.whl',
-        'imagecodecs': 'imagecodecs-2026.1.14-cp311-abi3-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl',
+        'imagecodecs': 'imagecodecs-2026.1.14-cp312-cp312-manylinux_2_17_x86_64.manylinux2014_x86_64.whl',
     }
     if dataset_root and pkg in mapping:
         wheel = dataset_root / mapping[pkg]
