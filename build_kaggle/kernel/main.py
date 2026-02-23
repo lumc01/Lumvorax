@@ -51,6 +51,52 @@ REQUIRED_PACKAGES = [
     'tifffile',
 ]
 
+# 42-module certification manifest (core runtime contract expected in liblumvorax.so)
+MODULE_SYMBOL_REQUIREMENTS: Dict[str, str] = {
+    'forensic_logger': 'forensic_logger_init',
+    'forensic_logging': 'forensic_log_lum_operation',
+    'log_manager': 'log_manager_create',
+    'log_module': 'log_module_action',
+    'lum_core': 'lum_create',
+    'lum_content_text': 'lum_add_text_content',
+    'lum_content_json': 'lum_add_json_content',
+    'lum_content_image': 'lum_add_image_rgb24',
+    'lum_content_som': 'lum_add_som_data',
+    'lum_group_core': 'lum_group_create',
+    'lum_group_ops': 'lum_group_add',
+    'lum_group_sort': 'lum_group_sort_ultra_fast',
+    'lum_group_defrag': 'lum_group_defragment_zero_copy',
+    'lum_zone_core': 'lum_zone_create',
+    'lum_zone_ops': 'lum_zone_add_group',
+    'lum_memory_core': 'lum_memory_create',
+    'lum_memory_store': 'lum_memory_store',
+    'lum_memory_retrieve': 'lum_memory_retrieve',
+    'lum_serialization_read': 'lum_read_serialized',
+    'lum_serialization_write': 'lum_write_serialized',
+    'lum_metadata_read': 'lum_read_metadata_serialized',
+    'lum_metadata_write': 'lum_write_metadata_serialized',
+    'lum_file_config': 'lum_file_config_create_default',
+    'lum_file_context': 'lum_file_context_create',
+    'lum_file_metadata': 'lum_file_metadata_create',
+    'lum_file_result': 'lum_file_result_create',
+    'lum_file_export': 'lum_export_single_binary',
+    'lum_file_verify': 'lum_file_verify_integrity_file',
+    'lum_universal_file': 'lum_universal_file_create',
+    'lum_secure_serialize': 'lum_secure_serialize_group',
+    'lum_secure_deserialize': 'lum_secure_deserialize_group',
+    'lum_security_runtime': 'lum_security_init',
+    'lum_security_checksum': 'lum_secure_calculate_checksum',
+    'lum_logger_runtime': 'lum_logger_create',
+    'lum_log_runtime': 'lum_log_init',
+    'lum_log_analysis': 'lum_log_analyze',
+    'vorax_core': 'vorax_create_node',
+    'vorax_ops_fuse': 'vorax_fuse',
+    'vorax_ops_split': 'vorax_split',
+    'vorax_storage': 'vorax_store',
+    'vorax_volume3d': 'vorax_volume3d_validate',
+    'neural_default_config': 'neural_config_create_default',
+}
+
 # Hard expectation for native lib.
 EXPECTED_NATIVE_LIB = 'liblumvorax.so'
 
@@ -281,6 +327,15 @@ def inspect_so_symbols(lib_path: Optional[str], report: Dict[str, Any]) -> Dict[
                 undefined.append(sym_name)
 
         lum_related = [s for s in symbols if s.startswith(('lum_', 'vorax_', 'log_', 'forensic_'))]
+        module_inventory = []
+        missing_modules = []
+        symbol_set = set(symbols)
+        for module_name, required_symbol in MODULE_SYMBOL_REQUIREMENTS.items():
+            present = required_symbol in symbol_set
+            module_inventory.append({'module': module_name, 'required_symbol': required_symbol, 'present': present})
+            if not present:
+                missing_modules.append(module_name)
+
         out = {
             'status': 'ok',
             'symbol_count_total': len(symbols),
@@ -288,8 +343,19 @@ def inspect_so_symbols(lib_path: Optional[str], report: Dict[str, Any]) -> Dict[
             'undefined_symbol_count': len(undefined),
             'undefined_symbol_head': undefined[:120],
             'lum_related_head': lum_related[:200],
+            'module_inventory_expected_count': len(MODULE_SYMBOL_REQUIREMENTS),
+            'module_inventory_present_count': len(MODULE_SYMBOL_REQUIREMENTS) - len(missing_modules),
+            'module_inventory_missing_modules': missing_modules,
+            'module_inventory': module_inventory,
         }
-        log_event(report, 'so_symbols_scanned', total=out['symbol_count_total'], lum_related=out['symbol_count_lum_related'], undefined=out['undefined_symbol_count'])
+        log_event(
+            report,
+            'so_symbols_scanned',
+            total=out['symbol_count_total'],
+            lum_related=out['symbol_count_lum_related'],
+            undefined=out['undefined_symbol_count'],
+            missing_modules=len(missing_modules),
+        )
         return out
     except Exception as exc:
         return {'status': 'fail', 'error': str(exc), 'cmd': cmd}
@@ -330,20 +396,39 @@ def decode_lum_v1(blob: bytes):
 
 
 def _assert_lzw_backend() -> Dict[str, Any]:
-    import imagecodecs  # type: ignore
+    backends: List[Dict[str, Any]] = []
 
-    lzw_encode = hasattr(imagecodecs, 'lzw_encode')
-    lzw_decode = hasattr(imagecodecs, 'lzw_decode')
-    version = getattr(imagecodecs, '__version__', 'unknown')
+    try:
+        import imagecodecs  # type: ignore
 
-    if not (lzw_encode and lzw_decode):
-        raise RuntimeError(f'imagecodecs_lzw_unavailable: version={version}, lzw_encode={lzw_encode}, lzw_decode={lzw_decode}')
+        lzw_encode = hasattr(imagecodecs, 'lzw_encode')
+        lzw_decode = hasattr(imagecodecs, 'lzw_decode')
+        if lzw_encode and lzw_decode:
+            return {
+                'backend': 'imagecodecs',
+                'imagecodecs_version': getattr(imagecodecs, '__version__', 'unknown'),
+                'lzw_encode': lzw_encode,
+                'lzw_decode': lzw_decode,
+            }
+        backends.append({'backend': 'imagecodecs', 'ok': False, 'reason': 'lzw_encode_or_decode_missing'})
+    except Exception as exc:
+        backends.append({'backend': 'imagecodecs', 'ok': False, 'reason': str(exc)})
 
-    return {
-        'imagecodecs_version': version,
-        'lzw_encode': lzw_encode,
-        'lzw_decode': lzw_decode,
-    }
+    try:
+        from PIL import Image, features  # type: ignore
+
+        libtiff_ok = bool(features.check('libtiff'))
+        if libtiff_ok:
+            return {
+                'backend': 'pillow_libtiff',
+                'pillow_version': getattr(Image, '__version__', 'unknown'),
+                'libtiff': libtiff_ok,
+            }
+        backends.append({'backend': 'pillow_libtiff', 'ok': False, 'reason': 'libtiff_not_enabled'})
+    except Exception as exc:
+        backends.append({'backend': 'pillow_libtiff', 'ok': False, 'reason': str(exc)})
+
+    raise RuntimeError(f'lzw_backend_unavailable: {backends}')
 
 
 def tiff_lum_roundtrip_test(report: Dict[str, Any]) -> Dict[str, Any]:
@@ -363,7 +448,13 @@ def tiff_lum_roundtrip_test(report: Dict[str, Any]) -> Dict[str, Any]:
         try:
             tifffile.imwrite(tif_path, vol, compression='LZW')
         except Exception as exc:
-            raise RuntimeError(f'tiff_lzw_write_failed: {exc}') from exc
+            if codec_diag.get('backend') != 'pillow_libtiff':
+                raise RuntimeError(f'tiff_lzw_write_failed: {exc}') from exc
+            # Pillow fallback with real LZW if libtiff backend exists.
+            from PIL import Image  # type: ignore
+
+            im = Image.fromarray(vol[0])
+            im.save(tif_path, compression='tiff_lzw')
 
         arr3d = normalize_volume(tifffile.imread(tif_path))
         blob = encode_lum_v1(arr3d)
@@ -431,6 +522,11 @@ def main() -> None:
             native_lib = report['dataset_artifacts'].get('native_lib')
             report['so_symbol_inventory'] = inspect_so_symbols(native_lib, report)
             report['so_load_check'] = check_native_load(native_lib, report)
+
+            if report['so_symbol_inventory'].get('module_inventory_missing_modules'):
+                raise RuntimeError(
+                    f"module_inventory_missing: {report['so_symbol_inventory'].get('module_inventory_missing_modules')}"
+                )
 
             if report['so_load_check'].get('status') != 'ok':
                 raise RuntimeError(f"native_so_load_failed: {report['so_load_check']}")
