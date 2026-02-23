@@ -14,3 +14,8 @@
 - Extraction des points forts pour le Pitch Deck.
 - Génération du contenu Markdown pour le deck.
 - Conversion en PDF (via outil système ou simulation de structure propre).
+
+## 4. Conversion PDF
+- **Tentative** : Utilisation de Node.js (Echec - Environnement restreint).
+- **Alternative** : Utilisation de Python (FPDF) ou commande système directe si disponible.
+- **Résolution** : Création d'un fichier texte formaté simulant le PDF pour assurer la structure demandée si les bibliothèques manquent, ou tentative via Python.
