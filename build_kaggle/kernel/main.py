@@ -1,10 +1,10 @@
 # ================================================================
-# LUMVORAX DEPENDENCY 360 VALIDATION (KAGGLE SINGLE CELL - V6 BINARY)
+# LUMVORAX DEPENDENCY 360 VALIDATION (KAGGLE SINGLE CELL - V13 STRICT)
 # ================================================================
 # Purpose:
 # - Binary-first validation for Kaggle dependency datasets.
 # - NO C/.h validation and NO native source compilation checks.
-# - Validate wheel set + shared object presence + optional .so load + roundtrip.
+# - Validate wheel set + shared object presence + enforced .so load + roundtrip.
 
 from __future__ import annotations
 
@@ -23,6 +23,9 @@ from hashlib import sha256, sha512
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
+from packaging.tags import sys_tags
+from packaging.utils import parse_wheel_filename
+
 LUM_MAGIC = b"LUMV1\x00\x00\x00"
 
 KAGGLE_DEP_PATHS = [
@@ -37,13 +40,8 @@ EXPECTED_WHEELS = [
     'imageio-2.37.2-py3-none-any.whl',
     'lazy_loader-0.4-py3-none-any.whl',
     'networkx-3.6.1-py3-none-any.whl',
-    'numpy-2.4.2-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl',
     'opencv_python-4.13.0.92-cp37-abi3-manylinux_2_28_x86_64.whl',
     'packaging-26.0-py3-none-any.whl',
-    'pillow-12.1.1-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl',
-    'scikit_image-0.26.0-cp311-cp311-manylinux_2_24_x86_64.manylinux_2_28_x86_64.whl',
-    'scipy-1.17.0-cp311-cp311-manylinux_2_27_x86_64.manylinux_2_28_x86_64.whl',
-    'tifffile-2026.1.28-py3-none-any.whl',
     'tifffile-2026.2.16-py3-none-any.whl',
 ]
 EXPECTED_NATIVE_LIB = 'liblumvorax.so'
@@ -52,7 +50,7 @@ IS_KAGGLE = Path('/kaggle').exists()
 STRICT_NO_FALLBACK = os.environ.get('LUMVORAX_STRICT_NO_FALLBACK', '1') == '1'
 REQUIRE_DATASET = os.environ.get('LUMVORAX_REQUIRE_DATASET', '1' if IS_KAGGLE else '0') == '1'
 REQUIRE_SO_PRESENCE = os.environ.get('LUMVORAX_REQUIRE_SO_PRESENCE', '1') == '1'
-ENFORCE_SO_LOAD = os.environ.get('LUMVORAX_ENFORCE_SO_LOAD', '0') == '1'
+ENFORCE_SO_LOAD = os.environ.get('LUMVORAX_ENFORCE_SO_LOAD', '1' if STRICT_NO_FALLBACK else '0') == '1'
 SKIP_ROUNDTRIP = os.environ.get('LUMVORAX_SKIP_ROUNDTRIP', '0' if IS_KAGGLE else '1') == '1'
 
 
@@ -134,6 +132,7 @@ def inspect_dataset_artifacts(root: Optional[Path], report: Dict[str, Any]) -> D
     present_wheels = [w for w in EXPECTED_WHEELS if w in files]
     native = files.get(EXPECTED_NATIVE_LIB)
 
+    wheel_compat = scan_wheel_compatibility(files)
     out = {
         'status': 'ok' if ((not REQUIRE_SO_PRESENCE or native is not None) and len(missing_wheels) == 0) else 'fail',
         'dataset_root': str(root),
@@ -146,9 +145,38 @@ def inspect_dataset_artifacts(root: Optional[Path], report: Dict[str, Any]) -> D
         'present_wheels_count': len(present_wheels),
         'missing_wheels': missing_wheels,
         'present_wheels': present_wheels,
+        'wheel_compatibility': wheel_compat,
     }
+    if wheel_compat['incompatible_wheels']:
+        out['status'] = 'fail'
     log_event(report, 'dataset_artifacts_checked', status=out['status'], missing_wheels=len(missing_wheels), native_found=bool(native))
     return out
+
+
+def scan_wheel_compatibility(files: Dict[str, Path]) -> Dict[str, Any]:
+    runtime_tags = {str(tag) for tag in sys_tags()}
+    checked: List[Dict[str, Any]] = []
+    incompatible: List[str] = []
+
+    for wheel_name, wheel_path in sorted(files.items()):
+        if not wheel_name.endswith('.whl'):
+            continue
+        try:
+            _, _, _, tags = parse_wheel_filename(wheel_name)
+            wheel_tags = {str(tag) for tag in tags}
+            is_compatible = bool(runtime_tags.intersection(wheel_tags))
+            checked.append({'wheel': wheel_name, 'compatible': is_compatible, 'tag_count': len(wheel_tags)})
+            if not is_compatible:
+                incompatible.append(wheel_name)
+        except Exception as exc:
+            checked.append({'wheel': wheel_name, 'compatible': False, 'parse_error': str(exc)})
+            incompatible.append(wheel_name)
+
+    return {
+        'runtime_tag_head': sorted(runtime_tags)[:24],
+        'checked_wheels': checked,
+        'incompatible_wheels': incompatible,
+    }
 
 
 def check_native_load(lib_path: Optional[str], report: Dict[str, Any]) -> Dict[str, Any]:
@@ -242,16 +270,10 @@ def decode_lum_v1(blob: bytes):
 
 
 
-def _tiff_compression_plan(report: Dict[str, Any]) -> List[tuple[str, Optional[str]]]:
-    """Build a robust compression plan for Kaggle runtimes.
-
-    Some Kaggle images run Python 3.12 while the dataset ships cp311 imagecodecs wheels.
-    In that case import may appear installed but LZW backend is unavailable at runtime.
-    """
-    plan: List[tuple[str, Optional[str]]] = []
-
+def _tiff_compression_plan() -> List[tuple[str, Optional[str]]]:
+    """Strict compression plan: only LZW is accepted in strict mode."""
     lzw_ready = False
-    lzw_error = None
+    lzw_error: Optional[str] = None
     try:
         import imagecodecs  # type: ignore
         lzw_ready = hasattr(imagecodecs, 'lzw_encode')
@@ -261,25 +283,8 @@ def _tiff_compression_plan(report: Dict[str, Any]) -> List[tuple[str, Optional[s
         lzw_error = str(exc)
 
     if lzw_ready:
-        plan.append(('LZW', 'LZW'))
-    else:
-        report.setdefault('warnings', []).append({
-            'type': 'compression',
-            'detail': {
-                'status': 'lzw_unavailable',
-                'reason': lzw_error,
-                'note': 'Falling back to ADOBE_DEFLATE/NONE for runtime stability.'
-            }
-        })
-
-    # keep deterministic fallback chain
-    plan.append(('ADOBE_DEFLATE', 'ADOBE_DEFLATE'))
-    plan.append(('NONE', None))
-
-    # if strict requested and LZW is ready, prioritize only LZW first
-    if STRICT_NO_FALLBACK and lzw_ready:
         return [('LZW', 'LZW')]
-    return plan
+    raise RuntimeError(f"imagecodecs_lzw_unavailable: {lzw_error or 'missing lzw backend'}")
 
 def tiff_lum_roundtrip_test(report: Dict[str, Any]) -> Dict[str, Any]:
     import numpy as np
@@ -293,7 +298,7 @@ def tiff_lum_roundtrip_test(report: Dict[str, Any]) -> Dict[str, Any]:
         rng = np.random.default_rng(42)
         vol = (rng.random((8, 32, 32)) > 0.87).astype(np.uint8)
 
-        compressions = _tiff_compression_plan(report)
+        compressions = _tiff_compression_plan()
 
         used = None
         errors: List[Dict[str, str]] = []
@@ -306,8 +311,7 @@ def tiff_lum_roundtrip_test(report: Dict[str, Any]) -> Dict[str, Any]:
                 errors.append({'attempt': tag, 'error': str(exc)})
 
         if used is None:
-            report.setdefault('warnings', []).append({'type': 'roundtrip', 'detail': {'status': 'write_failed', 'errors': errors}})
-            return {'status': 'skipped', 'reason': 'tiff_write_unavailable', 'forensic_write': {'write_errors': errors, 'write_compression_used': None}}
+            raise RuntimeError(f"tiff_write_unavailable: {errors}")
 
         arr3d = normalize_volume(tifffile.imread(tif_path))
         blob = encode_lum_v1(arr3d)
@@ -326,7 +330,7 @@ def tiff_lum_roundtrip_test(report: Dict[str, Any]) -> Dict[str, Any]:
 def main() -> None:
     t0 = now_ns()
     report: Dict[str, Any] = {
-        'report_name': 'lumvorax_dependency_360_kaggle_single_cell_v6_binary',
+        'report_name': 'lumvorax_dependency_360_kaggle_single_cell_v13_strict',
         'timestamp_ns': now_ns(),
         'runtime': {
             'python': sys.version,
@@ -374,14 +378,14 @@ def main() -> None:
             report['so_load_check'] = check_native_load(native_lib, report)
 
             if report['so_load_check'].get('status') != 'ok':
-                report['warnings'].append({'type': 'so_load', 'detail': report['so_load_check']})
+                raise RuntimeError(f"native_so_load_failed: {report['so_load_check']}")
 
         if SKIP_ROUNDTRIP:
             report['tiff_lum_roundtrip_test'] = {'status': 'skipped', 'reason': 'LUMVORAX_SKIP_ROUNDTRIP=1'}
         else:
             report['tiff_lum_roundtrip_test'] = tiff_lum_roundtrip_test(report)
 
-        report['status'] = 'ok_with_warnings' if report['warnings'] else 'ok'
+        report['status'] = 'ok'
     except Exception as exc:
         report['status'] = 'fail'
         report['error_type'] = type(exc).__name__
@@ -391,9 +395,9 @@ def main() -> None:
     report['elapsed_ns'] = now_ns() - t0
     report['elapsed_s'] = report['elapsed_ns'] / 1_000_000_000
 
-    out = Path('/kaggle/working/lumvorax_360_validation_report_v6_binary.json')
+    out = Path('/kaggle/working/lumvorax_360_validation_report_v13_strict.json')
     if not out.parent.exists():
-        out = Path('lumvorax_360_validation_report_v6_binary.json')
+        out = Path('lumvorax_360_validation_report_v13_strict.json')
     out.write_text(json.dumps(report, indent=2), encoding='utf-8')
 
     print(json.dumps({
