@@ -1,4 +1,4 @@
-modules = ["bash", "python-3.11"]
+modules = ["python-3.12"]
 [agent]
 expertMode = true
 
@@ -37,7 +37,7 @@ build = ["make", "clean", "all"]
 [userenv]
 
 [userenv.shared]
-KAGGLE_API_TOKEN = "KGAT_d6554d46db780dc852b7ef3efacd7820"
+KAGGLE_API_TOKEN = "KGAT_70588db986fc95324344ea777d9d287b"
 KAGGLE_USERNAME = "ndarray2000"
 ARISTOTLE_API_KEY = "arstl_YykBEXr6oNR5R9toq_wI1wTtyfVrj5eUZfgpe_BlgYo"
 KAGGLE_CONFIG_DIR = "/home/runner/.kaggle"
