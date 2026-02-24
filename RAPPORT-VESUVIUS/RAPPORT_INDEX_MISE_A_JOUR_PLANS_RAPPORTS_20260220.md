@@ -63,3 +63,18 @@
 - • RAPPORT-VESUVIUS/validation_lumvorax/RAPPORT_RELEASE_V7_6_V61_4_V144_2_ET_FIX_V2_4_20260219.md
 - • RAPPORT-VESUVIUS/validation_lumvorax/RAPPORT_STRICT_DEPENDENCY_POLICY_V140_20260219.md
 - • RAPPORT-VESUVIUS/validation_lumvorax/VALIDATION_LUMVORAX_SYSTEME_COMPLET_20260219.md
+
+---
+
+## Mise à jour complémentaire — 2026-02-24 (NX46 VX)
+- Fichiers `.md` détectés sous `RAPPORT-VESUVIUS`: **110**
+- Nouveau dossier version: `RAPPORT-VESUVIUS/NX46-VX/`
+- Nouveaux livrables:
+  - `RAPPORT-VESUVIUS/NX46-VX/ROADMAP_NX46_VX_20260224.md`
+  - `RAPPORT-VESUVIUS/NX46-VX/HISTORIQUE_PROCESSUS_NX46_VX_20260224.md`
+- Contrainte explicitement actée:
+  - exclusion de l’activation runtime du **Bridge natif C/.so** pour le sprint compétition J-3.
+- Extension NX46 VX (2026-02-24):
+  - `RAPPORT-VESUVIUS/NX46-VX/nx46-vx-unified-kaggle.ipynb`
+  - `RAPPORT-VESUVIUS/NX46-VX/INTEGRATION_FONCTIONS_NX46_VX_20260224.md`
+  - `RAPPORT-VESUVIUS/NX46-VX/PLAN_EXECUTION_IMMEDIATE_NX46_VX.md`
