@@ -46,3 +46,7 @@ Date: 2026-02-24
 16. Audit ligne par ligne du notebook concurrent pour extraction exacte des chemins de modèles.
 17. Mise à jour de `nx46-vx-unified-kaggle-V1.ipynb` avec `COMPETITOR_MODELS_FOUND_EXACT` + registre 9 teachers verrouillé.
 18. Rapport d’extraction exacte produit: `RAPPORT_EXTRACTION_MODELES_CONCURRENT_EXACTE_20260224.md`.
+19. Intégration des 9 chemins modèles fournis utilisateur dans `nx46-vx-unified-kaggle-V1.ipynb` (`USER_PROVIDED_MODEL_INPUT_PATHS` + `TEACHER_MODELS_REGISTRY`).
+20. Ajout du chemin installer offline `vsdetection-packages-offline-installer-only` dans la cellule de registre V1.
+21. Ajout de la découverte automatique `discover_teacher_model_paths(...)` pour retrouver ces inputs en runtime.
+22. Rapport dédié ajouté: `RAPPORT_INTEGRATION_INPUT_MODELES_9_20260224.md`.
