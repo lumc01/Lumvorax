@@ -32,3 +32,9 @@ Date: 2026-02-24
 - Documentation: nouveau plan stratégique opérationnel disponible.
 - Décision technique: bridge C/.so gardé hors-scope exécution compétition pour éviter retard.
 
+
+## Extension exécution immédiate (itération correctrice)
+7. Génération du notebook unifié `nx46-vx-unified-kaggle.ipynb` depuis 4 versions de base (V61.5, V144.2, V7.7, V7.6).
+8. Génération de l’audit d’intégration fonctions `INTEGRATION_FONCTIONS_NX46_VX_20260224.md`.
+9. Vérification automatisée: correspondance complète des fonctions des 4 bases vers le notebook unifié (0 manquante).
+10. Publication d’un plan d’exécution immédiate sans phasage long: `PLAN_EXECUTION_IMMEDIATE_NX46_VX.md`.

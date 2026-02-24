@@ -74,3 +74,7 @@
   - `RAPPORT-VESUVIUS/NX46-VX/HISTORIQUE_PROCESSUS_NX46_VX_20260224.md`
 - Contrainte explicitement actée:
   - exclusion de l’activation runtime du **Bridge natif C/.so** pour le sprint compétition J-3.
+- Extension NX46 VX (2026-02-24):
+  - `RAPPORT-VESUVIUS/NX46-VX/nx46-vx-unified-kaggle.ipynb`
+  - `RAPPORT-VESUVIUS/NX46-VX/INTEGRATION_FONCTIONS_NX46_VX_20260224.md`
+  - `RAPPORT-VESUVIUS/NX46-VX/PLAN_EXECUTION_IMMEDIATE_NX46_VX.md`
