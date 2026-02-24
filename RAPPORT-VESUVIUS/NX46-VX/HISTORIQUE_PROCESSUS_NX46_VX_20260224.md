@@ -38,3 +38,11 @@ Date: 2026-02-24
 8. Génération de l’audit d’intégration fonctions `INTEGRATION_FONCTIONS_NX46_VX_20260224.md`.
 9. Vérification automatisée: correspondance complète des fonctions des 4 bases vers le notebook unifié (0 manquante).
 10. Publication d’un plan d’exécution immédiate sans phasage long: `PLAN_EXECUTION_IMMEDIATE_NX46_VX.md`.
+11. Production d’un cours ultra-pédagogique détaillé demandé utilisateur: `COURS_ULTRA_PEDAGOGIQUE_NX46_VX_20260224.md`.
+12. Intégration de la règle de verrou soumission: no submission tant que pré-exécution < référence TIFF concurrent.
+13. Vérification ciblée du notebook concurrent `vesuvius-0-552.ipynb` pour inventaire des modèles enseignants.
+14. Création d’un nouveau notebook isolé `nx46-vx-unified-kaggle-V1.ipynb` (sans modifier l’original) avec registre `TEACHER_MODELS_REGISTRY` (9 slots) + garde `assert_9_teacher_models_ready`.
+15. Production du rapport de vérification: `RAPPORT_VERIFICATION_9_MODELES_CONCURRENT_NX46_VX_V1_20260224.md`.
+16. Audit ligne par ligne du notebook concurrent pour extraction exacte des chemins de modèles.
+17. Mise à jour de `nx46-vx-unified-kaggle-V1.ipynb` avec `COMPETITOR_MODELS_FOUND_EXACT` + registre 9 teachers verrouillé.
+18. Rapport d’extraction exacte produit: `RAPPORT_EXTRACTION_MODELES_CONCURRENT_EXACTE_20260224.md`.
