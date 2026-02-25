@@ -1,156 +1,131 @@
-# RAPPORT EXPERT — NX46-VX V2 (analyse profonde, A→Z)
+# RAPPORT EXPERT — NX46-VX V2 (analyse corrective suite commentaires)
 
 Date: 2026-02-25
 
-## 1) Mise à jour dépôt distant (GitHub)
+## 1) Correction majeure: `golden_nonce_topk` (fixe) ≠ `golden_nonce_detected` (runtime)
 
-- Remote `origin` configuré vers `https://github.com/lumc01/Lumvorax.git`.
-- `git fetch --prune` exécuté avec succès (branches distantes récupérées).
+Tu as raison de demander la distinction exacte.
 
-## 2) Artefacts V2 réellement présents
+- `golden_nonce_topk = 11` = **paramètre BOOT** (combien de meilleurs points on garde).
+- `golden_nonce_detected = 11` = **résultat runtime** (combien de points effectivement sortis).
 
-Le dossier demandé existe localement et contient un paquet complet de pré-exécution:
+Donc le nombre de points trouvés est un résultat d’exécution, mais limité/filtré par `topk`.
 
-- `results.zip`
-- notebook `nx46-vx-unified-kaggle-v2.ipynb`
-- log brut `nx46-vx-unified-kaggle-v1.log`
-- artefacts extraits: `nx46vx_v2_execution_metadata.json`, `nx46vx_v2_execution_logs.json`, `submission.zip`, `submission_masks/1407735.tif`, etc.
+## 2) Où sont les 11 golden nonces et à quel moment ils sont trouvés ?
 
-Constat: la pré-exécution V2 est techniquement complète côté génération d’artefacts (`READY: /kaggle/working/submission.zip`).
+J’ai ajouté un export dédié:
 
-## 3) Est-ce que les « professeurs » ont enseigné le neurone ?
+- `RAPPORT-VESUVIUS/NX46-VX/result-nx46-vx-v2/GOLDEN_NONCE_TIMELINE_V2.md`
 
-### Réponse courte
-**Partiellement oui (au sens pipeline exécuté), mais pas au niveau d’un apprentissage validé par F1/IoU de validation.**
+Ce fichier donne:
+- timestamp BOOT,
+- timestamp `NX47_METRICS` (moment où la liste top-11 est publiée),
+- timestamp `GLOBAL_STATS`,
+- table complète des 11 points `(y, x, score)`.
 
-### Preuves internes
-- `learning_percent_real = 100.0`
-- `epochs_configured = 0`, `epochs_observed = 6`, `epochs_effective = 6`
-- `files_supervised_mode = 1`
-- mais `val_f1_mean_supervised = 0.0`, `val_iou_mean_supervised = 0.0`, `val_fbeta` de scan = 0.0
+Important: dans ce run, les logs publient les nonces **en bloc final** (`NX47_METRICS`) et non en 11 événements unitaires.
 
-Interprétation:
-- Le système **a bien déroulé** une procédure d’apprentissage (au moins en mode formel/forensic),
-- mais les métriques de validation supervisée restent nulles dans ce run (probable limite de protocole/échantillonnage/objectif défini pour la pré-exécution).
+## 3) Signification réelle des 11 golden nonces (dans ce run)
 
-## 4) Qu’a-t-on détecté exactement ?
+Les 11 golden nonces sont les **11 pixels candidats les plus scorés** au moment de la consolidation des métriques:
 
-`global_stats` V2 indique:
+- Rang 1: `(y=118, x=301, score=0.1458509862)`
+- …
+- Rang 11: `(y=264, x=227, score=0.1432795376)`
 
-- `materials_detected = 933`
-- `patterns_detected = 933`
-- `golden_nonce_detected = 11`
-- `anomalies_detected = 52`
-- `pixels_anchor_detected = 0`
-- `pixels_papyrus_without_anchor = 6144`
-- `f1_ratio_curve_best_f1 = 0.686275490593166` au ratio `0.20591836734693877`
+Interprétation pratique:
+- ce ne sont pas 11 “événements magiques” indépendants,
+- ce sont 11 maxima du champ de probabilité final (top-K), injectés dans le masque final selon la logique du pipeline.
 
-Important:
-- La courbe F1/ratio interne (optimisation de ratio) est bonne **dans son espace interne**,
-- mais cela ne garantit pas une hausse du score Kaggle externe.
+## 4) Pourquoi on ne voit pas « le moment exact » de chaque nonce ?
 
-## 5) Pourquoi `global_progress_percent = 33.333333333333336` semble bloqué ?
+Parce que la version V2 actuelle loggue:
+- la config initiale,
+- puis un snapshot final top-K.
 
-Ce n’est pas une preuve de freeze global; c’est surtout un **indicateur agrégé par macro-étapes** qui est réémis pendant des sous-étapes répétées.
+Elle ne loggue pas encore `NONCE_FOUND` point-par-point en streaming.
 
-Dans les logs, on observe des sauts typiques:
-- `4.1666666667` (≈ 1/24)
-- `16.6666666667` (≈ 4/24)
-- `20.8333333333` (≈ 5/24)
-- `33.3333333333` (≈ 8/24)
+➡️ C’est une vraie limitation d’observabilité. Elle est traitée dans le nouveau cahier des charges V3.
 
-Diagnostic:
-1. Le compteur global est **quantifié** (pondération fixe des macro-blocs).
-2. Pendant `preflight_train/load_pair`, la boucle réécrit souvent la même fraction globale.
-3. Le chiffre n’est donc pas “temps réel continu”, mais “jalon de bloc”.
+## 5) Tu as demandé auto-tuning dynamique: état réel actuel
 
-## 6) Pourquoi peu de neurones « activés » dans la phase LLLLL ?
+Tu as raison sur le besoin.
 
-Tu vois deux échelles différentes:
+### 5.1 Ce qui est dynamique aujourd’hui
+- sélection des meilleurs scores/ratios,
+- exécution de boucles internes d’optimisation,
+- choix d’un best ratio (`best_ratio ≈ 0.2059`).
 
-1. **Niveau méta/supervisé compact** (dans metadata):
-   - `active_neurons_start_total = 0`
-   - `active_neurons_mid_total = 6`
-   - `active_neurons_end_total = 6`
-   - `meta_neuron_candidates = 45`
+### 5.2 Ce qui reste statique aujourd’hui (et te gêne, à juste titre)
+- `dust_min_size`, `mutation_noise`, `convergence_patience`, `meta_neurons` sont chargés au BOOT.
+- Le code actuel les lit via config/env (pas de contrôleur auto-adaptatif robuste en cours de run).
 
-2. **Niveau moteur volumique** (forensic_ultra.log):
-   - `SLAB_ALLOCATION` affiche des millions de neurones dynamiques (ex: 3,098,856)
+### 5.3 Pourquoi `convergence_patience=5` est trop contraignant dans ta vision
+Tu demandes un comportement autonome et non plafonné. C’est cohérent si l’objectif est:
+- apprentissage prolongé,
+- exploration plus large,
+- adaptation à la difficulté réelle du fragment.
 
-Donc: ce n’est pas contradictoire. Le “6” concerne un sous-espace (neurones effectifs de la tête/optimisation), alors que le moteur volumique manipule un grand réservoir opérationnel.
+La V2 actuelle est orientée “run sûr / préflight borné”, pas “autonomie longue”.
 
-## 7) Pourquoi `meta_neurons: 3` ?
+## 6) Couverture entraînement: point bloquant confirmé
 
-`meta_neurons` est un **hyperparamètre de design** (petit nombre de contrôleurs méta) pour:
-- limiter la variance,
-- stabiliser les mises à jour,
-- éviter un surcoût en pré-exécution.
+Tu vises 100% (normal vu le mandat), mais le run V2 montre:
 
-Ce paramètre n’est pas censé varier “tout seul” dans un run si aucun mécanisme d’auto-expansion n’est activé.
-
-## 8) Pourquoi certaines valeurs restent constantes ?
-
-Tu as cité:
-- `dust_min_size: 24`
-- `mutation_noise: 0.015`
-- `golden_nonce_topk: 11`
-- `convergence_patience: 5`
-
-C’est normal: ce sont des **hyperparamètres de configuration (BOOT)**, pas des métriques dynamiques. Ils restent fixes tant qu’aucune logique d’auto-tuning ne les modifie en runtime.
-
-Sens fonctionnel:
-- `dust_min_size=24`: retire petits composants parasites (<24 px).
-- `mutation_noise=0.015`: amplitude de bruit d’exploration des poids.
-- `golden_nonce_topk=11`: nombre de candidats top conservés.
-- `convergence_patience=5`: nb d’itérations sans gain avant arrêt/convergence.
-
-## 9) Pourquoi le score Kaggle reste ~0.303 malgré run « propre » ?
-
-Faits disponibles:
-- V1/V6: score **0.303** (succès)
-- V2v4: **Submission Scoring Error** (non scoré)
-- masque final identique entre versions locales (`sha256` préfixe `92590f075047...`), et ZIP de même structure (1 fichier `1407735.tif`).
-
-Conclusion probable:
-1. Plateau de performance (masque très similaire entre runs scorés).
-2. L’erreur “Scoring Error” V2v4 est probablement un incident de soumission côté exécution spécifique (artefact/session Kaggle), plus qu’un changement de contenu masque.
-
-## 10) Point critique: couverture d’entraînement
-
-Dans `train_dataset_audit`:
 - paires découvertes: `786`
-- paires sélectionnées pour entraînement: `32`
-- couverture: `4.0712468193%`
+- paires sélectionnées: `32`
+- couverture effective: `4.0712468193%`
 
-Donc même si `learning_percent_real=100%` (processus exécuté), la **couverture effective** reste faible sur ce run de préflight.
+Donc le pipeline déclare une complétion de process, mais **pas une couverture data complète**.
 
-## 11) Décodage clair des champs BOOT (ceux que tu as fournis)
+## 7) Transfert des 9 professeurs: diagnostic sans ambiguïté
 
-- `target_active_ratio=0.03`: cible de sparsité/activation globale (3%).
-- `max_layers=320`: profondeur max de volume traité (slices z).
-- `overlay_stride=8`: pas d’échantillonnage spatial pour overlays/features.
-- `ratio_candidates=[...]`: grille testée pour ratio d’activation/post-seuil.
-- `pruning_quantile=0.25`: coupe bas 25% (faible importance).
-- `f1_stagnation_window=5`: fenêtre de stagnation F1.
-- `supervised_epochs=0`: config explicite; le moteur a néanmoins observé des étapes effectives via logique interne.
-- `auto_epoch_safety_cap=0`: pas de cap auto supplémentaire.
-- `threshold_scan=[0.35..0.6]`: grille de seuils évalués.
-- `use_unet_25d=true`, `unet_in_slices=7`, `unet_epochs=2`: chemin UNet 2.5D actif (léger).
-- `strict_no_fallback=true`: interdit des fallback “silencieux”.
-- `require_train_completion_100=true`: contrainte de complétion de process.
-- `adapt_train_threshold_to_dataset_size=true`: adaptation seuil selon taille dataset.
+Ce que j’ai vérifié:
+- Le notebook décrit bien le plan 4 phases (dont distillation des 9 teachers).
+- Les registries teachers existent.
+- Mais dans les logs runtime V2 (`nx46vx_v2_execution_logs.json`), on ne trouve pas d’événements explicites type:
+  - `TEACHER_DISTILLATION_START`
+  - `TEACHER_DISTILLATION_DONE`
+  - `TRANSFER_MEMORY_PERSISTED`
 
-## 12) Verdict expert (en profondeur)
+Conclusion: **la preuve forensic d’un transfert effectif teacher→student n’est pas matérialisée dans ce run**.
 
-1. **Pipeline V2 pré-exécution**: valide techniquement (artefacts + forensic + submission générée).
-2. **Apprentissage utile vers score public**: pas encore démontré (plateau 0.303, métriques val supervisées nulles dans ce run).
-3. **`global_progress_percent`**: comportement attendu d’un compteur par jalons, pas un vrai pourcentage continu de wall-time.
-4. **Constantes BOOT**: normal qu’elles ne bougent pas; ce sont des knobs de config.
-5. **Prochain levier majeur**: augmenter la couverture d’entraînement effective (32/786 → bien plus), sinon plateau probable.
+## 8) TIFF concurrent pour apprentissage: où est la phase ?
 
-## 13) Checklist d’experts à appliquer ensuite
+Le plan notebook mentionne une phase “test-guided ultra-finetune vs competitor_teacher_1407735.tif”.
 
-- Vérifier la soumission V2v4 qui a échoué avec le même script d’export, en comparant session Kaggle, logs stderr Kaggle et checksum du zip soumis.
-- Forcer un run avec couverture entraînement plus élevée (au moins >30% des paires), puis comparer densité masque + score.
-- Séparer clairement: métriques internes (forensic) vs score compétition final (leaderboard).
-- Ajouter un indicateur `global_progress_monotonic_stage` pour éviter la confusion du 33.333%. 
+Mais côté logs runtime V2 actuels, il manque des preuves explicites de passage effectif de cette phase avec métriques dédiées (ex: alignment gain before/after).
+
+➡️ Donc tu as raison: “annoncé dans le plan” ≠ “prouvé en exécution”.
+
+## 9) Pourquoi 1h30 de pré-exec + 7h submission sans gain de score visible ?
+
+Hypothèse principale étayée:
+1. couverture train trop basse (4.07%),
+2. absence de preuve de distillation teacher réellement appliquée,
+3. sortie masque quasi stable entre runs (plateau),
+4. observabilité incomplète sur phases critiques.
+
+## 10) Action immédiate livrée dans ce commit
+
+1. Script d’extraction timeline nonces ajouté:
+   - `RAPPORT-VESUVIUS/NX46-VX/tools/extract_golden_nonce_timeline.py`
+2. Rapport des 11 nonces généré:
+   - `RAPPORT-VESUVIUS/NX46-VX/result-nx46-vx-v2/GOLDEN_NONCE_TIMELINE_V2.md`
+3. Nouveau cahier des charges V3 (sans régression) ajouté:
+   - `RAPPORT-VESUVIUS/NX46-VX/CAHIER_DES_CHARGES_NX46_V3_TRANSFERT_AUTONOME.md`
+
+## 11) Réponse courte à tes questions (direct)
+
+- “golden nonce doit être résultat runtime ?” → **Oui**. Le `detected` est runtime; `topk` est la capacité/limite.
+- “où sont les 11 ?” → dans le fichier timeline ajouté (table complète).
+- “pourquoi pas moment exact de chaque nonce ?” → logging actuel en snapshot final; à corriger en V3.
+- “auto-tuning sur ces paramètres ?” → pas complet en V2; prévu explicitement en V3.
+- “phase transfert 9 modèles + TIFF concurrent ?” → planée mais preuve d’exécution insuffisante dans logs V2.
+
+## 12) Verdict
+
+Ton diagnostic de fond est pertinent:
+- il faut passer d’un pipeline “préflight/log-heavy” à un pipeline “apprentissage réellement traçable et démontrable”.
+
+Le cahier des charges V3 fourni cible exactement ça, **sans casser la V2** (activation progressive via flags et invariants de compatibilité).
