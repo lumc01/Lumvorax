@@ -4,6 +4,7 @@
 - Scan exhaustif des fichiers via index local (`docs/audit/file_inventory.tsv`).
 - Génération d'un arbre de répertoires de substitution (`tree_like_L2.txt` et `tree_like_L4.txt`) car la commande `tree` n'est pas disponible dans l'environnement.
 - Analyse ciblée du notebook de base V6: `RAPPORT-VESUVIUS/NX46-VX/result-nx46-vx-v6/nx46-vx-unified-kaggle-v6.ipynb`.
+- Révision des recommandations pour contrainte **intégration 100% Python** validable dans `RAPPORT-VESUVIUS/validation_lumvorax` (sans dépendance C/C++ custom à compiler dans Kaggle).
 
 ## Chiffres globaux (A→Z, sans exclusion)
 - Nombre total de fichiers: **33242**.
@@ -77,30 +78,73 @@
 - ✅ `tta`
 - ✅ `ensemble`
 
-## Gisements d'optimisation disponibles dans le repo mais non intégrés en V6
-1. **Pipeline mémoire/disque haute performance côté C**: `mmap_persistence`, `zero_copy_allocator`, `slab_allocator`, `lz4_compressor`, `lockfree_queue`, `simd_batch_processor` présents sous `src/optimization/` mais absents du notebook V6.
-2. **Optimisation PyTorch runtime**: absence de `torch.compile`, AMP (`autocast`/`GradScaler`), `channels_last`, et réglages DataLoader (`pin_memory`, `persistent_workers`, `prefetch_factor`).
-3. **Format de données orienté throughput**: absence de `memmap`/`zarr`/`parquet` détectée dans V6 alors que le repo contient des assets volumineux (`.tif`, `.blob`) qui bénéficieraient de streaming et de cache.
-4. **Compilation/export**: pas de `torch.jit`/ONNX/TensorRT détecté dans V6 (voie potentielle pour inférence Kaggle).
-5. **Vectorisation CPU/GPU**: présence de composants SIMD C mais pas de pont Python explicite dans V6.
+## Décision d'intégration V7 (contrainte: Python pur Kaggle)
+### Ce qui est écarté pour V7 (trop complexe / fragile en environnement Kaggle)
+1. Intégration directe des modules C/C++ custom de `src/optimization/*` (mmap C, lockfree C, simd C, lz4 C) via compilation runtime.
+2. Binding custom `ctypes/cffi/pybind11` à maintenir en notebook.
+3. Dépendances GPU avancées non garanties (`TensorRT`, `xformers`, `flash_attn`, `nvidia.dali`).
 
-## Plan V7 recommandé (priorité exécution Kaggle)
+### Ce qui est retenu pour V7 en Python pur
+1. **Optimisation PyTorch native**: `torch.compile` (fallback automatique), AMP (`torch.cuda.amp.autocast` + `GradScaler`), `channels_last`, `cudnn.benchmark`.
+2. **Data pipeline Python**: tuning DataLoader (`num_workers`, `pin_memory`, `persistent_workers`, `prefetch_factor`) et batching adaptatif selon VRAM.
+3. **I/O Python**: préprocessing en `numpy.memmap`, cache de features en `parquet/pyarrow` et/ou `zarr`.
+4. **Parallélisme Python contrôlé**: `concurrent.futures` / multiprocessing léger pour précompute CPU, sans cluster distribué imposé.
+5. **Profiling Python**: instrumentation simple (`time.perf_counter`, `torch.cuda.synchronize`, `psutil`) et tableau comparatif baseline vs optimisé.
+
+## Plan V7 recommandé (100% Python)
 ### P0 (impact immédiat)
-- Ajouter AMP + `torch.compile` (avec fallback) + `channels_last` sur les modèles CNN.
-- Revoir DataLoader (`num_workers`, `pin_memory`, `persistent_workers`, `prefetch_factor`) avec micro-benchmark intégré au notebook.
-- Introduire cache local `numpy.memmap` pour patches/tiles TIF prétraités.
+- Activer AMP + `torch.compile` + `channels_last` avec flags de fallback.
+- Tuner DataLoader avec mini benchmark local (3-5 configs) et garder la meilleure.
+- Ajouter cache `numpy.memmap` des patches TIF pour éviter les relectures complètes.
 
 ### P1 (impact fort, effort moyen)
-- Brancher `src/optimization/lz4_compression` + `mmap_io` pour sérialiser et relire rapidement features intermédiaires.
-- Intégrer un mode infer ONNX Runtime (CPU/GPU selon dispo) pour réduire latence prédictive.
-- Utiliser pipeline asynchrone (préfetch CPU + transfert GPU non bloquant).
+- Ajouter pipeline de features intermédiaires en `parquet` (pyarrow) avec versioning simple.
+- Ajouter option `zarr` pour accès chunké quand le dataset dépasse la RAM.
+- Mettre en place TTA/ensemble conditionnels (activés seulement si gain net mesuré).
 
-### P2 (R&D)
-- Créer bindings Python (ctypes/cffi/pybind11) pour exploiter `simd_optimizer` et `simd_batch_processor`.
-- Évaluer Dask/Ray seulement si charge multi-image massive (sinon overhead trop élevé en notebook Kaggle).
+### P2 (stabilisation)
+- Ajouter un script de benchmark reproductible (temps I/O, temps inférence, RAM/VRAM).
+- Ajouter garde-fous d'environnement Kaggle (désactiver automatiquement les options indisponibles).
+
+## Checklist d'intégration pour `validation_lumvorax`
+- [ ] Aucun build C/C++ requis.
+- [ ] Notebook exécutable de bout en bout avec dépendances Python existantes.
+- [ ] Fallback automatique CPU/GPU.
+- [ ] Temps d'exécution mesuré avant/après optimisation.
+- [ ] Export final de métriques dans un artefact `.json`.
+
+
+## Vérification dataset dépendances (`nx47-dependencies`)
+### État actuel connu
+Le contenu actuellement présent a été consigné dans `docs/audit/dependency_dataset_update/dataset_current_contents.md` pour éviter toute perte de l'existant.
+
+### Couverture vs besoins V7 Python pur
+Référence dépendances cibles: `docs/audit/dependency_dataset_update/requirements_v7_python_pure.txt`.
+Écart (manquants + transitifs conseillés): `docs/audit/dependency_dataset_update/missing_from_dataset.md`.
+
+### Liste à compléter pour V7 (priorité installation)
+- `aiohttp`
+- `aristotlelib`
+- `bitstring`
+- `kaggle`
+- `matplotlib`
+- `pandas`
+- `psutil`
+- `pyarrow`
+- `requests`
+- `torch`
+
+### Traçabilité et génération Replit
+Procédure prête à l'emploi: `docs/audit/dependency_dataset_update/update_commands.md`.
+Cette procédure crée un dossier versionnable `build_kaggle/dependency_bundle_v7/` contenant:
+- snapshot documentaire,
+- wheels téléchargés,
+- manifeste `MANIFEST_SHA256.json` (hash + taille),
+- base prête pour push Kaggle dataset (sans supprimer l'existant).
 
 ## Livrables générés
 - `docs/audit/file_inventory.tsv` (inventaire exhaustif fichier par fichier).
 - `docs/audit/md_inventory.txt` (liste exhaustive `.md`).
 - `docs/audit/tree_like_L2.txt` et `docs/audit/tree_like_L4.txt` (arborescences).
 - `docs/v7_audit_inventory.json` (statistiques structurées).
+- `docs/audit/dependency_dataset_update/` (kit de traçabilité + checklist + commandes de mise à jour dataset).
