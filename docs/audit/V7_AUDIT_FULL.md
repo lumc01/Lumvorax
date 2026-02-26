@@ -113,8 +113,38 @@
 - [ ] Temps d'exécution mesuré avant/après optimisation.
 - [ ] Export final de métriques dans un artefact `.json`.
 
+
+## Vérification dataset dépendances (`nx47-dependencies`)
+### État actuel connu
+Le contenu actuellement présent a été consigné dans `docs/audit/dependency_dataset_update/dataset_current_contents.md` pour éviter toute perte de l'existant.
+
+### Couverture vs besoins V7 Python pur
+Référence dépendances cibles: `docs/audit/dependency_dataset_update/requirements_v7_python_pure.txt`.
+Écart (manquants + transitifs conseillés): `docs/audit/dependency_dataset_update/missing_from_dataset.md`.
+
+### Liste à compléter pour V7 (priorité installation)
+- `aiohttp`
+- `aristotlelib`
+- `bitstring`
+- `kaggle`
+- `matplotlib`
+- `pandas`
+- `psutil`
+- `pyarrow`
+- `requests`
+- `torch`
+
+### Traçabilité et génération Replit
+Procédure prête à l'emploi: `docs/audit/dependency_dataset_update/update_commands.md`.
+Cette procédure crée un dossier versionnable `build_kaggle/dependency_bundle_v7/` contenant:
+- snapshot documentaire,
+- wheels téléchargés,
+- manifeste `MANIFEST_SHA256.json` (hash + taille),
+- base prête pour push Kaggle dataset (sans supprimer l'existant).
+
 ## Livrables générés
 - `docs/audit/file_inventory.tsv` (inventaire exhaustif fichier par fichier).
 - `docs/audit/md_inventory.txt` (liste exhaustive `.md`).
 - `docs/audit/tree_like_L2.txt` et `docs/audit/tree_like_L4.txt` (arborescences).
 - `docs/v7_audit_inventory.json` (statistiques structurées).
+- `docs/audit/dependency_dataset_update/` (kit de traçabilité + checklist + commandes de mise à jour dataset).
