@@ -148,3 +148,38 @@ Cette procédure crée un dossier versionnable `build_kaggle/dependency_bundle_v
 - `docs/audit/tree_like_L2.txt` et `docs/audit/tree_like_L4.txt` (arborescences).
 - `docs/v7_audit_inventory.json` (statistiques structurées).
 - `docs/audit/dependency_dataset_update/` (kit de traçabilité + checklist + commandes de mise à jour dataset).
+
+## Diagnostic complémentaire demandé — résultats V6 (`result-nx46-vx-v6`)
+
+### 1) Vérification de la source analysée
+- Source de référence confirmée: `RAPPORT-VESUVIUS/NX46-VX/result-nx46-vx-v6/nx46-vx-unified-kaggle-v6.ipynb`.
+- La version V5 demandée est également présente pour comparaison: `RAPPORT-VESUVIUS/NX46-VX/result-nx46-vx-v5/nx46-vx-unified-kaggle-v5.ipynb`.
+
+### 2) Conformité globale observée (par rapport aux analyses précédentes)
+- Le run V6 contient bien:
+  - pipeline de progression détaillé (`PROGRESS_UPDATE`),
+  - offline dependency manifest,
+  - génération `submission.zip`,
+  - chaîne forensic/Merkle.
+- Les marqueurs meta-neuronaux clés sont présents: `meta_neurons=3`, `ratio_candidates`, `threshold_scan`, `use_unet_25d`, et logs de calibration/entraînement.
+
+### 3) Pourquoi "ça redémarre à 1" vers `28880.0s` ?
+Interprétation technique la plus probable (et cohérente avec le code/logs V6):
+1. Le champ affiché "1" dans la vue console est un **compteur de ligne/stream d'affichage**, pas le `index` interne de progression métier.
+2. Dans les événements `PROGRESS_UPDATE`, les compteurs métier restent cohérents par sous-étape (`stage/substage`), et les reset sont normaux lorsqu'on change de boucle locale (ex: nouveau neurone, nouvelle sous-phase, nouveau mini-cycle de fit).
+3. Le `global_progress_percent` reste stable pendant des micro-boucles internes (ex: `train_supervised -> fit_kpi`), ce qui donne visuellement l'impression d'un "redémarrage" alors qu'il s'agit d'une sous-boucle.
+
+### 4) Ce qu'il faut ajouter dans l'audit V7 pour éviter cette confusion
+Ajouter explicitement dans V7:
+- un identifiant hiérarchique de progression: `global_step_id`, `stage_step_id`, `subloop_step_id`.
+- un compteur monotone unique pour l'UI: `ui_seq_monotonic`.
+- une section de logs "progress semantics" expliquant quels champs peuvent se réinitialiser (index local) et lesquels sont monotones (ts_ns, ui_seq_monotonic).
+- export `progress_timeline.parquet/jsonl` pour post-analyse (group by stage/substage/neuron/epoch).
+
+### 5) Delta V5→V6 à conserver pour V7 (constaté)
+- V6 ajoute un patch runtime GPU policy (sélection H100/P100 + variables d'environnement dédiées) tout en conservant le noyau meta-neuronal V5.
+- Conclusion: pour V7, conserver le noyau décisionnel V5/V6, et améliorer la lisibilité de télémétrie (pas seulement la performance brute).
+
+### 6) Limite de synchronisation dépôt distant
+- Tentative de mise à jour depuis `https://github.com/lumc01/Lumvorax.git` effectuée, mais impossible dans cet environnement (`CONNECT tunnel failed, response 403`).
+- Analyse réalisée sur l'état local présent dans la workspace.
