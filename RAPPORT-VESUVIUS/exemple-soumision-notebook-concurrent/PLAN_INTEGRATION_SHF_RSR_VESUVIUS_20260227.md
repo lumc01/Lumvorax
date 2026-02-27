@@ -103,3 +103,9 @@
   - `USE_LUM_RESONANCE=True` avec paramètres LUM synchronisés sur `CFG` concurrent,
   - `LUM_BLEND_ALPHA = CFG["overlap_base"]` (même référentiel que le concurrent),
   - `LUM_PRIOR_THRESHOLD = CFG["T_low"]` (seuil aligné au concurrent).
+
+
+## 8) Correctif robustesse exécution Kaggle (papermill/protobuf)
+- Symptôme analysé: échec papermill tardif `MessageFactory.GetPrototype` malgré génération de `submission.zip`.
+- Action: ajout d'un shim de compatibilité protobuf en préambule d'exécution (`GetPrototype` -> `GetMessageClass` si absent).
+- Impact: pas de changement sur le coeur concurrent (TransUNet/SWI/TTA/hysteresis), correction purement de compatibilité runtime.

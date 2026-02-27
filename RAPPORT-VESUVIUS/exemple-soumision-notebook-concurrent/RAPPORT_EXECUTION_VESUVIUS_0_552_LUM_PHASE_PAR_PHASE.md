@@ -192,3 +192,23 @@
    - positifs
    - stabilité du temps
    - qualité visuelle et score public/private
+
+
+## 6. Analyse incident run `f26d45` / `vesuvius-0-552.log`
+
+### 6.1 Constat observé
+- Le pipeline a produit la sortie métier (`submission.zip`) et la ligne finale de progression.
+- Le run a ensuite été marqué en échec par papermill avec:
+  - `AttributeError: 'MessageFactory' object has no attribute 'GetPrototype'`.
+
+### 6.2 Cause technique
+- Incompatibilité de version `protobuf` (API `MessageFactory.GetPrototype` supprimée dans versions récentes) avec une dépendance chargée dans l'environnement Kaggle.
+
+### 6.3 Correctif appliqué (sans casser le pipeline existant)
+1. Ajout d'un shim de compatibilité protobuf en tout début d'exécution (notebook + script `.py`).
+2. Si `GetPrototype` est absent, création d'un alias vers `GetMessageClass`.
+3. Aucune modification des paramètres de modèle/inférence/post-traitement concurrent.
+4. Nettoyage des outputs d'erreur persistés dans le notebook pour repartir d'un état propre.
+
+### 6.4 Effet attendu
+- Éviter l'échec tardif papermill tout en conservant le comportement de segmentation déjà validé.
