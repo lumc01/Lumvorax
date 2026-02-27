@@ -1564,15 +1564,15 @@ def main():
             problem_id = row.get("id", idx)
             problem_text = row.get("problem", "")
             result = solve_problem(problem_text)
-            answers.append({"id": problem_id, "prediction": int(result) if result else 0})
+            answers.append({"id": problem_id, "answer": int(result) if result else 0})
             logger.log(f"PROBLEM_{problem_id}_SOLVED: {result}")
     else:
-        answers = [{"id": 0, "prediction": 0}]
+        answers = [{"id": 0, "answer": 0}]
     
     # Export submission
     if HAS_PANDAS:
         submission_df = pd.DataFrame(answers)
-        submission_df.to_parquet("submission.parquet", index=False)
+        submission_df.to_csv("submission.csv", index=False)
         logger.log(f"SUBMISSION_EXPORTED: {len(answers)} problems")
     
     # Export des résultats complets
