@@ -24,6 +24,9 @@ except Exception:
 # protobuf stability (common Kaggle container mismatch)
 os.environ.setdefault("PROTOCOL_BUFFERS_PYTHON_IMPLEMENTATION", "python")
 os.environ["KERAS_BACKEND"] = "jax"
+# Force CPU-only execution for this fixed v2 variant (GPU disabled by request)
+os.environ["CUDA_VISIBLE_DEVICES"] = ""
+os.environ.setdefault("JAX_PLATFORMS", "cpu")
 os.environ.setdefault("OMP_NUM_THREADS", "4")
 os.environ.setdefault("MKL_NUM_THREADS", "4")
 os.environ.setdefault("OPENBLAS_NUM_THREADS", "4")
