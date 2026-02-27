@@ -1,6 +1,7 @@
 # %% [code]
 # %% [code]
 # %% [code]
+# %% [code]
 #!/usr/bin/env python3
 """
 ================================================================================
@@ -1573,7 +1574,7 @@ def main():
     # Export submission
     if HAS_PANDAS:
         submission_df = pd.DataFrame(answers)
-        submission_df.to_csv("submission.csv", index=False)
+        submission_df.to_parquet("submission.parquet", index=False)
         logger.log(f"SUBMISSION_EXPORTED: {len(answers)} problems")
     
     # Export des résultats complets
