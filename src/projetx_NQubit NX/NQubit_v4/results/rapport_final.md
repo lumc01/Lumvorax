@@ -1,8 +1,8 @@
 # Rapport final prototype NQubit NX - Version 2
 
 - Version: 0.1.0
-- CPU detectes: 3
-- RAM detectee (GB): 17.93
+- CPU detectes: 8
+- RAM detectee (GB): 62.80
 - Scenarios executes: 360
 - Victoires NX: 360
 - Taux de victoire NX: 1.0000
