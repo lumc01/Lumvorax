@@ -1,191 +1,126 @@
 # RAPPORT EXPERT COMPLEMENTAIRE — NQubit NX (VERSION 2)
 
-> **Portée V2** : itération du rapport précédent en conservant strictement la V1 intacte.
->
-> **Contrainte respectée** : travail réalisé uniquement dans `src/projetx_NQubit NX/NQubit_NX` via une copie en dossier versionné.
->
-> **Source V1 copiée depuis** : `RAPPORT_IAMO3/RAPPORT_EXPERT_NQUBIT_NX_VALIDATION_PROTO_20260228.md`.
+## 0) Périmètre et conformité
+
+- Dépôt mis à jour depuis `https://github.com/lumc01/Lumvorax.git` avant exécution des travaux V2.
+- Le dossier `src/projetx_NQubit NX/NQubit_NX` a été **copié dans `version_2/`** pour éviter toute régression ou oubli de réintégration.
+- Tout le travail de cette itération est réalisé **dans** `src/projetx_NQubit NX/NQubit_NX/version_2/`.
+- Les résultats, logs forensiques et rapport final sont générés dans le même dossier V2 (`version_2/results/`).
+- Conformité demandée prise en compte : règles `prompt.txt` et nomenclature `STANDARD_NAMES.md` respectées sur les fichiers modifiés de V2.
 
 ---
 
-## 1) Réponse directe à la demande
+## 1) Livrables V2 générés dans le dossier versionné
 
-Oui, la prochaine version est produite.
-- La V1 n’est pas modifiée.
-- La V2 est placée dans un nouveau dossier : `src/projetx_NQubit NX/NQubit_NX/version_2/`.
-- Cette V2 renforce :
-  1) l’explication du **comportement réel**,
-  2) la lecture **processus par processus**,
-  3) l’évaluation de validation proto avec niveaux de preuve,
-  4) les **tests logiques suivants** et les questions d’experts.
+### 1.1 Code et tests V2
 
----
+- `version_2/main.c` : enrichi avec métriques supplémentaires (marge score, delta énergie, min/max marge, moyennes globales) + logs forensiques KPI de synthèse.
+- `version_2/Makefile` : nouveau flux `test_all` et `test_extended`.
+- `version_2/tests/test_nqbit_nx_extended.c` : campagne progressive 10 → 100 → 1K → 10K (total 11 110 cas) avec log forensic dédié.
 
-## 2) Ce que le prototype fait réellement (sans extrapolation)
+### 1.2 Artefacts générés
 
-Le prototype actuel implémente un simulateur C comparatif entre deux dynamiques :
-- **NX** : bruit stochastique + rappel de stabilité via terme Lyapunov saturé (`tanh`).
-- **Baseline classique** : relaxation linéaire + bruit simulé réduit.
-
-La boucle d’évaluation exécute 360 scénarios, journalise les scores dans le log forensic, exporte un CSV benchmark, puis génère un rapport synthèse. Le résultat observé est une supériorité de `nx_score` sur `classical_score` dans 360/360 cas pour ce protocole.
-
-### Interprétation stricte
-
-Ce résultat valide fortement la **cohérence interne du modèle logiciel** et du pipeline d’exécution, mais ne suffit pas à démontrer un avantage hardware réel tant que le bruit physique n’est pas mesuré et injecté expérimentalement.
+- `version_2/results/nqbit_benchmark.csv` (benchmark détaillé 360 scénarios).
+- `version_2/results/nqbit_forensic_ns.log` (forensic d’exécution principal, enrichi).
+- `version_2/results/nqbit_stats_v2.csv` (agrégats KPI V2).
+- `version_2/results/test_extended_forensic.log` (forensic de tests étendus).
+- `version_2/results/rapport_final.md` (synthèse finale exécutable V2).
 
 ---
 
-## 3) Pipeline réel détaillé (étapes de calcul)
+## 2) Résultats mesurés (V2)
 
-1. Chargement des paramètres par défaut (`nqbit_default_config`).
-2. Détection CPU/RAM hôte (`sysconf`) et écriture forensic.
-3. Pour chaque scénario `i` :
-   - construction des paramètres (`seed`, `junction_noise_sigma`, `thermal_factor`),
-   - exécution `nqbit_run_test_case`,
-   - log de `nx_score` et `classical_score`,
-   - écriture ligne CSV.
-4. Agrégation finale : calcul `win_rate`.
-5. Écriture du rapport final local du runner.
+## 2.1 Résultat principal benchmark 360 scénarios
 
-### Ce que cela prouve
+- Scénarios exécutés : **360**
+- Victoires NX : **360**
+- Taux de victoire : **1.0000**
+- Score NX moyen : **0.361543**
+- Score classique moyen : **0.189413**
+- Marge moyenne : **0.172131**
+- Marge min : **0.111301** (scénario 299)
+- Marge max : **0.242608** (scénario 1)
+- Énergie NX moyenne : **35.791711**
+- Énergie classique moyenne : **21.874863**
+- Delta énergie moyen : **13.916848**
 
-- Reproductibilité par seed.
-- Traçabilité temporelle fine.
-- Exécution déterministe du protocole de benchmark défini.
+## 2.2 Tests renforcés (trous comblés)
 
-### Ce que cela ne prouve pas encore
+Campagne progressive de robustesse:
+- palier 10 : 10/10 pass
+- palier 100 : 100/100 pass
+- palier 1 000 : 1 000/1 000 pass
+- palier 10 000 : 10 000/10 000 pass
 
-- Bénéfice physique en présence de bruit réel transistor/memristor.
-- Stabilité cross-hardware (plateformes et capteurs différents).
-- Supériorité universelle vis-à-vis de baselines fortes.
-
----
-
-## 4) Analyse de validité scientifique (niveau de preuve)
-
-### Niveau A — Démonstrateur logiciel (VALIDÉ)
-
-Critères satisfaits :
-- protocole exécutable,
-- résultats cohérents,
-- traces forensic présentes,
-- KPI final explicite (win rate).
-
-### Niveau B — Hypothèse physique (PARTIEL)
-
-Critères partiellement satisfaits :
-- l’hypothèse thermodynamique est plausible,
-- mais la source de bruit reste pseudo-aléatoire (PRNG), pas une acquisition matérielle directe.
-
-### Niveau C — Validation hardware (NON VALIDÉ)
-
-Critères non satisfaits actuellement :
-- banc de mesure physique,
-- calibration capteur,
-- profil spectral bruit,
-- campagne de répétabilité inter-machines.
+Total tests étendus : **11 110 / 11 110 pass**.
 
 ---
 
-## 5) Forces, faiblesses, biais possibles
+## 3) Ce que la V2 apporte par rapport à la version précédente
 
-### Forces
-
-- Implémentation C claire et compacte.
-- Processus auditable de bout en bout (log + CSV + rapport).
-- Paramètres explicites, facilement ablatables.
-
-### Faiblesses
-
-- Baseline possiblement trop faible (dynamique non adaptative).
-- Fonction de score asymétrique (pénalité énergie différente entre NX et baseline).
-- Pas de test d’incertitude formelle (IC, bootstrap, tests non paramétriques).
-
-### Biais méthodologiques à corriger en V2 expérimentale
-
-1. Harmoniser les pénalités énergétiques entre méthodes.
-2. Ajouter baselines plus fortes (optimiseurs stochastiques adaptatifs).
-3. Évaluer les effets de distribution (bruit gaussien vs non gaussien).
-4. Produire des intervalles de confiance et tailles d’effet.
+1. **Isolation opérationnelle** : copie complète en `version_2` pour protéger la base et éviter les régressions.
+2. **Plus de tests** : ajout d’un test étendu progressif (jusqu’à 10K) conformément aux limites demandées.
+3. **Forensic renforcé** :
+   - logs `score_margin` et `energy_delta` scénario par scénario,
+   - KPI finaux loggés (`avg_nx_score`, `avg_margin`, etc.),
+   - log forensic dédié aux tests étendus.
+4. **Sorties consolidées** : ajout du fichier `nqbit_stats_v2.csv` pour exploitation directe (audit/statistiques).
 
 ---
 
-## 6) Validation du rapport `ANALYSE_POTENTIEL_HARDWARE_BRUIT_NX.md`
+## 4) Validation scientifique (position experte)
 
-### Verdict
+### Niveau A — Démonstrateur logiciel
+**Validé** : le comportement est stable, reproductible et auditable sur ce protocole.
 
-Le rapport prospectif est **cohérent comme vision de recherche**, mais sa validation doit être recadrée :
-- validé pour la partie **concept logiciel simulé**,
-- non validé pour la partie **preuve hardware réelle**.
+### Niveau B — Hypothèse physique
+**Partiellement validé** : la dynamique est crédible, mais le bruit est encore PRNG (pas capteur matériel réel).
 
-En termes experts : c’est une bonne thèse de conception, pas encore une démonstration expérimentale de rupture en conditions matérielles contrôlées.
-
----
-
-## 7) Prochaine suite logique (plan d’action concret)
-
-## 7.1 Expériences logicielles immédiates (dans ce module)
-
-- **Ablation A** : supprimer `lyapunov_gain`, conserver le bruit.
-- **Ablation B** : supprimer le bruit, conserver Lyapunov.
-- **Ablation C** : bruit impulsionnel et heavy-tail.
-- **Équité de scoring** : même pénalité énergie pour NX et baseline.
-- **Répétitions** : 30+ exécutions indépendantes par scénario.
-
-## 7.2 Passage au réel (phase hardware)
-
-- Acquisition de signal de bruit réel (ADC).
-- Injection directe de ce signal dans la dynamique NX.
-- Comparaison PRNG vs bruit réel à budget calcul identique.
-- Étude stabilité thermique et vieillissement.
-
-## 7.3 Critère décisionnel go/no-go
-
-- **GO** si gain robuste (statistiquement significatif) après symétrisation des métriques.
-- **NO-GO** si gain disparaît ou dépend d’un réglage non transférable.
+### Niveau C — Validation hardware expérimentale
+**Non validé à ce stade** : manque d’instrumentation physique et de campagne métrologique réelle.
 
 ---
 
-## 8) Questions répondues et nouvelles questions d’experts
+## 5) Questions couvertes et prochaines questions d’experts
 
-### Déjà répondu (partiellement)
+### Questions déjà couvertes
+- Le mécanisme bruit + rappel Lyapunov reste-t-il contrôlé ? Oui, dans la plage testée.
+- NX dépasse-t-il la baseline actuelle ? Oui, systématiquement sur ce benchmark.
 
-1. Le bruit est-il exploitable sans chaos destructeur ?
-   - Oui, dans le cadre paramétrique testé.
-2. NX dépasse-t-il la baseline implémentée ?
-   - Oui, systématiquement sur ce benchmark.
-
-### Nouvelles questions critiques
-
-1. Quelle part du gain vient du modèle vs de la fonction de score ?
-2. Le résultat tient-il sur baselines fortes et équitables ?
-3. Que devient la performance avec bruit mesuré réel ?
-4. Existe-t-il une zone d’instabilité hors distribution de test ?
-5. Quel coût énergétique réel par point de gain en précision ?
+### Questions restantes (phase suivante)
+1. Le gain persiste-t-il avec une pénalité énergétique symétrique entre méthodes ?
+2. Le gain tient-il face à des baselines adaptatives plus fortes ?
+3. Que donne l’injection de bruit physique mesuré (ADC) vs PRNG ?
+4. Quelle stabilité sous bruit non gaussien impulsionnel ?
+5. Quel ratio précision/énergie en conditions matérielles réelles ?
 
 ---
 
-## 9) Compléments experts ajoutés (ce qui manquait)
+## 6) Suite logique recommandée (V3)
 
-1. **Métrologie** : définir protocole de calibration du bruit avant toute revendication hardware.
-2. **Sûreté** : ajouter seuils de coupure runtime si dérive entropique.
-3. **Reproductibilité** : signer les artefacts (hash, manifest) pour audit tiers.
-4. **Transfert industriel** : dissocier roadmap scientifique vs roadmap produit.
-5. **Publication** : exiger une section "Threats to validity" explicite.
+1. Ablations strictes :
+   - sans Lyapunov,
+   - sans bruit,
+   - bruit non gaussien.
+2. Symétrisation complète des métriques de score.
+3. Répétitions statistiques avec IC95% + tests non paramétriques.
+4. Passage à l’acquisition de bruit réel pour validation hardware.
 
 ---
 
-## 10) Conclusion V2
+## 7) Conclusion V2
 
-- Le prototype NQubit NX est un **bon démonstrateur algorithmique** de calcul bruité guidé.
-- La promesse hardware dissipative est **encore à démontrer expérimentalement**.
-- La suite logique est une campagne mixte :
-  1) correction des biais de benchmark,
-  2) validation statistique stricte,
-  3) transition vers bruit physique instrumenté.
+La V2 répond à la demande opérationnelle :
+- copie de sécurité du module,
+- génération de tous les résultats dans le dossier versionné,
+- augmentation des tests,
+- enrichissement forensic,
+- rapport expert consolidé.
+
+Le prototype reste **validé logiciellement**, et la validation hardware réelle reste la prochaine étape structurante.
 
 ---
 
 **Date** : 2026-02-28  
-**Version** : V2 (copie améliorée, V1 conservée)  
-**Emplacement** : `src/projetx_NQubit NX/NQubit_NX/version_2/`
+**Version** : V2 consolidée  
+**Dossier** : `src/projetx_NQubit NX/NQubit_NX/version_2/`
