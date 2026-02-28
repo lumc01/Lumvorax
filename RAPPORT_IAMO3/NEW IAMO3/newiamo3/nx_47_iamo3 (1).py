@@ -2,9 +2,7 @@
 # %% [code]
 #!/usr/bin/env python3
 """
-================================================================================
 AIMO3 LUM/VORAX KERNEL V28 - PROOF OF PERFORMANCE EDITION
-================================================================================
 Kernel de validation scientifique implémentant les 6 blocs de preuve:
 - BLOC 1: Performance brute CPU/Mémoire
 - BLOC 2: Cache behavior & temporal locality
@@ -14,7 +12,6 @@ Kernel de validation scientifique implémentant les 6 blocs de preuve:
 - BLOC 6: Applicabilité industrielle
 
 Aucun stub, aucun placeholder, aucun hardcoding - mesures réelles uniquement.
-================================================================================
 """
 
 import time
