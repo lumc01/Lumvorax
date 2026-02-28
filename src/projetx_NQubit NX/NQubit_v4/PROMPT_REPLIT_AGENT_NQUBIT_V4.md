@@ -24,7 +24,7 @@ Tu dois exécuter **strictement** le module `src/projetx_NQubit NX/NQubit_v4` et
 
 ## Rapport attendu
 Créer `RAPPORT_REPLIT_EXECUTION_V4_FINAL.md` contenant:
-- Résumé KPI (benchmark, P0/P1, bruit hardware)
+- Résumé ET EXPLUQUE EN DETAIL KPI (benchmark, P0/P1, bruit hardware)
 - Différences en % vs V3 et V2
 - Analyse de stabilité sur 5 runs
 - Liste anomalies/écarts
