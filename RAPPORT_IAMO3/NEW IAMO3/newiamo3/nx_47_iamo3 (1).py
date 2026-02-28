@@ -31,6 +31,7 @@ from datetime import datetime, timezone
 from collections import deque
 from typing import List, Dict, Any, Tuple, Optional
 import traceback
+import subprocess
 
 # Imports conditionnels pour environnement Kaggle
 try:
@@ -1474,6 +1475,37 @@ def solve_problem(text: str) -> int:
         return 0
 
 
+def auto_configure_gpu() -> Dict[str, Any]:
+    """Active automatiquement un GPU P100/H100 quand il est détecté."""
+    gpu_info: Dict[str, Any] = {"enabled": False, "index": None, "name": None}
+    try:
+        query = subprocess.check_output(
+            ["nvidia-smi", "--query-gpu=index,name", "--format=csv,noheader"],
+            stderr=subprocess.STDOUT,
+            text=True,
+            timeout=5,
+        )
+        for raw_line in query.splitlines():
+            line = raw_line.strip()
+            if not line:
+                continue
+            idx, name = [x.strip() for x in line.split(",", 1)]
+            upper_name = name.upper()
+            if "P100" in upper_name or "H100" in upper_name:
+                os.environ["CUDA_VISIBLE_DEVICES"] = idx
+                gpu_info = {"enabled": True, "index": idx, "name": name}
+                break
+
+        if not gpu_info["enabled"] and query.splitlines():
+            idx, name = [x.strip() for x in query.splitlines()[0].split(",", 1)]
+            os.environ["CUDA_VISIBLE_DEVICES"] = idx
+            gpu_info = {"enabled": True, "index": idx, "name": name}
+    except Exception as exc:
+        gpu_info["error"] = str(exc)
+
+    return gpu_info
+
+
 # ============================================================================
 # MAIN EXECUTION
 # ============================================================================
@@ -1485,6 +1517,8 @@ def main():
     logger.log("=" * 60)
     
     all_results = {}
+    gpu_status = auto_configure_gpu()
+    logger.log("GPU_AUTO_CONFIG", data=gpu_status)
     
     # BLOC 1: Performance
     try:
@@ -1564,10 +1598,10 @@ def main():
             problem_id = row.get("id", idx)
             problem_text = row.get("problem", "")
             result = solve_problem(problem_text)
-            answers.append({"id": problem_id, "prediction": int(result) if result else 0})
+            answers.append({"id": str(problem_id), "answer": int(result) if result else 0})
             logger.log(f"PROBLEM_{problem_id}_SOLVED: {result}")
     else:
-        answers = [{"id": 0, "prediction": 0}]
+        answers = [{"id": "0", "answer": 0}]
     
     # Export submission
     if HAS_PANDAS:
