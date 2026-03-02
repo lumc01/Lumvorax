@@ -1,0 +1,27 @@
+7.1s 1 0.00s - Debugger warning: It seems that frozen modules are being used, which may
+7.1s 2 0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+7.1s 3 0.00s - to python to disable frozen modules.
+7.1s 4 0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+7.8s 5 0.00s - Debugger warning: It seems that frozen modules are being used, which may
+7.8s 6 0.00s - make the debugger miss breakpoints. Please pass -Xfrozen_modules=off
+7.8s 7 0.00s - to python to disable frozen modules.
+7.8s 8 0.00s - Note: Debugging will proceed. Set PYDEVD_DISABLE_FILE_VALIDATION=1 to disable this validation.
+23.1s 9 compute_mode=gpu gpu_available=True gpu_name=Tesla P100-PCIE-16GB
+23.1s 10 pipeline_ok=True steps=6
+23.1s 11 /usr/local/lib/python3.12/dist-packages/IPython/core/interactiveshell.py:3561: UserWarning: To exit: use 'exit', 'quit', or Ctrl-D.
+23.1s 12 warn("To exit: use 'exit', 'quit', or Ctrl-D.", stacklevel=1)
+23.1s 13 
+23.1s 14 /usr/local/lib/python3.12/dist-packages/IPython/core/interactiveshell.py:3561: UserWarning: To exit: use 'exit', 'quit', or Ctrl-D.
+23.1s 15 warn("To exit: use 'exit', 'quit', or Ctrl-D.", stacklevel=1)
+27.7s 16 /usr/local/lib/python3.12/dist-packages/mistune.py:435: SyntaxWarning: invalid escape sequence '\|'
+27.7s 17 cells[i][c] = re.sub('\\\\\|', '|', cell)
+27.9s 18 /usr/local/lib/python3.12/dist-packages/nbconvert/filters/filter_links.py:36: SyntaxWarning: invalid escape sequence '\_'
+27.9s 19 text = re.sub(r'_', '\_', text) # Escape underscores in display text
+28.5s 20 /usr/local/lib/python3.12/dist-packages/traitlets/traitlets.py:2915: FutureWarning: --Exporter.preprocessors=["remove_papermill_header.RemovePapermillHeader"] for containers is deprecated in traitlets 5.0. You can pass `--Exporter.preprocessors item` ... multiple times to add items to a list.
+28.5s 21 warn(
+28.5s 22 [NbConvertApp] Converting notebook __notebook__.ipynb to notebook
+28.8s 23 [NbConvertApp] Writing 21664 bytes to __notebook__.ipynb
+31.4s 24 /usr/local/lib/python3.12/dist-packages/traitlets/traitlets.py:2915: FutureWarning: --Exporter.preprocessors=["nbconvert.preprocessors.ExtractOutputPreprocessor"] for containers is deprecated in traitlets 5.0. You can pass `--Exporter.preprocessors item` ... multiple times to add items to a list.
+31.4s 25 warn(
+31.5s 26 [NbConvertApp] Converting notebook __notebook__.ipynb to html
+32.4s 27 [NbConvertApp] Writing 363812 bytes to __results__.html
