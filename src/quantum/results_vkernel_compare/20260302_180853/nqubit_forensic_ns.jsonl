@@ -1,0 +1,11 @@
+{"ts_ns":11418300654695,"delta_ns":239378,"event":"scenario_margin","value":0.012527362103}
+{"ts_ns":11418309528404,"delta_ns":9113087,"event":"scenario_margin","value":0.035334117815}
+{"ts_ns":11418317758297,"delta_ns":17342980,"event":"scenario_margin","value":0.045170837525}
+{"ts_ns":11418325889258,"delta_ns":25473941,"event":"scenario_margin","value":0.043836377600}
+{"ts_ns":11418334230547,"delta_ns":33815230,"event":"scenario_margin","value":0.047751538561}
+{"ts_ns":11418342365025,"delta_ns":41949708,"event":"scenario_margin","value":0.024460218611}
+{"ts_ns":11418350531721,"delta_ns":50116404,"event":"nqubit_avg_score","value":0.960970600076}
+{"ts_ns":11418350534281,"delta_ns":50118964,"event":"baseline_qubit_avg_score","value":0.940176696297}
+{"ts_ns":11418350535049,"delta_ns":50119732,"event":"nqubit_win_rate","value":0.652777777778}
+{"ts_ns":11418350535926,"delta_ns":50120609,"event":"nqubits_simulated","value":504000.000000000000}
+{"ts_ns":11418350538153,"delta_ns":50122836,"event":"qubits_simulated_equivalent","value":504000.000000000000}
