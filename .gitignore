@@ -13,3 +13,4 @@ build/
 venv/
 *.whl
 .local/state/replit/agent/
+.local/state/replit/agent/
