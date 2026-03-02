@@ -1,0 +1,14 @@
+metric,value
+scenarios,360
+wins,360
+win_rate,1.000000000000
+avg_nx_score,0.361543481940
+avg_classical_score,0.189412669968
+avg_margin,0.172130811972
+min_margin,0.111300922702
+min_margin_scenario,299
+max_margin,0.242608181587
+max_margin_scenario,1
+avg_nx_energy,35.791711377528
+avg_classical_energy,21.874863274250
+avg_energy_delta,13.916848103278

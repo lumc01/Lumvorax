@@ -1,0 +1,7 @@
+# EXTENDED TEST FORENSIC START
+tier=10 status=SUMMARY pass=10 total=10
+tier=100 status=SUMMARY pass=100 total=100
+tier=1000 status=SUMMARY pass=1000 total=1000
+tier=10000 status=SUMMARY pass=10000 total=10000
+summary pass=11110 total=11110
+# EXTENDED TEST FORENSIC END

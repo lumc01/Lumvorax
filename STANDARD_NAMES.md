@@ -609,4 +609,9 @@
 - Énumérations : `nom_e`
 - Fonctions : `module_action()`
 - Constantes : `MODULE_CONSTANT`
-- Variables : `snake_case`
+- Variables : `snake_case`2026-02-19 19:40 - vorax_volume3d_t + Structure canonique volume 3D VORAX (depth/height/width + data float)
+2026-02-19 19:40 - vorax_volume3d_validate + Validation intégrité dimensions/pointeur volume 3D
+2026-02-19 19:40 - vorax_volume3d_normalize + Normalisation min-max d'un volume 3D en [0,1]
+2026-02-19 19:40 - vorax_volume3d_threshold + Génération masque binaire voxel (seuil)
+2026-02-19 19:40 - vorax_3d_volume.c + Module C 3D VORAX centralisé dans src/vorax
+2026-02-19 19:40 - vorax_3d_volume.h + Header public du module C 3D VORAX

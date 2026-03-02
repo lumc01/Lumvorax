@@ -1,7 +1,3 @@
-Parfait — même règle que tout à l’heure ✅
-👉 **Je récupère uniquement les questions**, je les **corrige**, je les **réorganise**, **sans répondre**, **sans ajouter de contenu**, **sans plan**, **sans exécution**, **sans technique nouvelle**.
-
-Voici donc **l’extraction propre, exhaustive et structurée des questions** contenues (explicitement ou implicitement) dans ton texte.
 
 ---
 
@@ -10,7 +6,7 @@ Voici donc **l’extraction propre, exhaustive et structurée des questions** co
 1. Quels sont les composants réellement nécessaires du système actuel pour que cela fonctionne réellement ?
 2. L’architecture actuelle est-elle réellement capable d’atteindre l’objectif annoncé ?
 3. Quelle est l’architecture exacte avant l’état actuel du système ?
-4. Quelle est l’architecture exacte après la nouvelle version NX-47 ARC ?
+4. Quelle est l’architecture exacte après la nouvelle version NX-47 ... ?
 5. Quel est le résultat final désiré, mesurable et vérifiable ?
 6. Quelles failles possibles existent encore dans cette nouvelle version ?
 7. Quels éléments critiques ont pu être oubliés dans la conception actuelle ?
@@ -110,7 +106,7 @@ Voici donc **l’extraction propre, exhaustive et structurée des questions** co
 56. Les tests de démarrage sont-ils visibles en temps réel avec des pourcentages ?
 57. L’exécution complète est-elle traçable du début à la fin ?
 58. Les fichiers sont-ils bien écrits dans `/kaggle/working/` ?
-59. Le dataset ARC Prize 2025 est-il correctement chargé ?
+59. Le dataset vesus est-il correctement chargé ?
 60. Le GPU P100 est-il réellement activé ?
 61. Le kernel est-il exécuté dans une seule cellule ?
 62. Les logs sont-ils récupérables après 59 secondes ?
@@ -132,9 +128,9 @@ Voici donc **l’extraction propre, exhaustive et structurée des questions** co
 Si tu veux, **prochaine étape possible (au choix)** :
 
 * 🔹 transformer ces questions en **cahier des charges formel**
-* 🔹 les convertir en **check-list d’audit Kaggle / ARC**
+* 🔹 les convertir en **check-list d’audit Kaggle / **
 * 🔹 les mapper **question → preuve → log attendu**
-* 🔹 ou passer à la **phase “plan NX-47 ARC”** (mais uniquement quand tu dis GO)
+* 🔹 ou passer à la **phase “plan NX-47 ...”** (mais uniquement quand tu dis GO)
 
 Tu gardes le contrôle.
 Je précise d’abord un point important 👇
@@ -147,17 +143,17 @@ Voici la version propre et organisée des **questions implicites** du texte :
 
 ### Questions générales sur l’état du projet
 
-1. Quel est l’état d’avancement réel du projet NX-47 ARC ?
-2. Le système NX-47 ARC est-il pleinement opérationnel ?
+1. Quel est l’état d’avancement réel du projet NX-47 ... ?
+2. Le système NX-47 ... est-il pleinement opérationnel ?
 3. Tous les verrous technologiques ont-ils été levés ?
 4. Le système est-il prêt pour une soumission sur Kaggle ?
 
 ### Questions par couche (architecture)
 
-5. L’ingestion du dataset ARC-Prize 2025 est-elle totalement fonctionnelle ?
-6. Le problème lié à `libstdc++.so.6` a-t-il été définitivement résolu ?
+5. L’ingestion du dataset vesus 2026 est-elle totalement fonctionnelle ?
+6. Le problème lié à `au erreur et chemin dataset` a-t-il été définitivement résolu ?
 7. Le moteur de raisonnement visuel fonctionne-t-il correctement ?
-8. Le système est-il capable de raisonner sur un puzzle ARC de test ?
+8. Le système est-il capable de raisonner sur une image de test ?
 9. La capture bit-à-bit des grilles est-elle fiable et validée ?
 10. Les logs forensiques sont-ils générés de manière granulaire et exploitable ?
 11. Le déploiement Kaggle est-il totalement finalisé ?
@@ -180,10 +176,8 @@ Voici la version propre et organisée des **questions implicites** du texte :
 
 ---
 
-Si tu veux, je peux aussi :
+tu dois aussi :
 
 * 🔁 transformer ces questions en **check-list de validation**
 * 📋 les adapter en **questions d’audit / soutenance**
-* 🧠 les condenser en **questions critiques ARC/Kaggle**
-
-Dis-moi.
+* 🧠 les condenser en **questions critiques vesus/Kaggle**

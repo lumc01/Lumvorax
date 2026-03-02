@@ -1,30 +1,29 @@
-# LUM/VORAX System - Architecture V32
+# Project Overview
 
-## Overview
-LUM/VORAX est un système de calcul haute performance avec 45+ modules intégrés, optimisé pour AVX2 et le multi-threading massif.
+This is a research and computation project focused on mathematical optimization, physics simulations, and puzzle-solving algorithms (primarily for Kaggle competitions and related research).
 
-## Project Structure (Updated V32)
-- `src/` - Source code for all modules
-  - `optimization/` - **[V32]** Async Logging, Slab Allocator, SIMD Batch, Lock-free Queue, LZ4, MMap.
-  - `security/` - **[V32]** Audit & Hardening.
-  - `monitoring/` - **[V32]** Resource Monitoring & Alerting.
-  - `distributed/` - **[V32]** Cluster Computing Node.
-  - `wasm/` - **[V32]** WASM Export Module.
-  - `versioning/` - **[V32]** Version Manager & API Contract.
-  - `cicd/` - **[V32]** Benchmark Runner & Regression Detector.
-  - `lum/` - Core LUM functionality.
-  - `vorax/` - VORAX operations.
-- `reports/` - Generated reports (including `FINAL_VALIDATION_REPORT_V32.md`).
+## Entry Point
 
-## Building & Testing
-```bash
-make all
-./v32_test
-```
+- `main.py` — simple Python entry point (`python main.py`)
 
-## Recent Changes
-- **January 30, 2026**: Lancement NX-38. Cahier des charges pour la validation 100% (NX-38_CAHIER_DE_CHARGES.md).
-- **Push NX-38**: Traduction Ultra Pure Core soumise pour certification finale.
-- **Push Logs**: 5 unités de preuve récupérées et analysées (RAPPORT_EXHAUSTIF_ARISTOTLE_PUSH_LOGS.md).
-- **Validation**: 100% des barrières syntaxiques levées sur la version Pure Core.
-- **NX-37**: Introduction de la métrique de Lyapunov Φ pour la convergence ultra-rapide.
+## Key Scripts
+
+- `nx47_vesu_kernel_*.py` — various versions of the NX47/Vesuvius kernel for Kaggle
+- `aimo3_lum_*.py` — AIMO3 LUM computation kernels
+- `tools/` — utility scripts for log parsing and analysis
+
+## Environment Variables
+
+Secrets and API keys are stored securely in Replit's environment secrets (not in code):
+- `KAGGLE_USERNAME` — Kaggle account username
+- `KAGGLE_CONFIG_DIR` — Kaggle config directory path
+- `KAGGLE_API_TOKEN` — Kaggle API token (secret)
+- `ARISTOTLE_API_KEY` — Aristotle API key (secret)
+
+## Workflow
+
+- **Run Python**: `python main.py` (console output)
+
+## Security Notes
+
+- API keys and tokens are stored in Replit secrets, not hardcoded in `.replit` or source files
