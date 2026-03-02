@@ -61,9 +61,7 @@ def detect_runtime_environment():
 
 def write_json(path: Path, obj):
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(obj, indent=2)
-
-                    cd src/quantum/nqubit_v6_integration && make run_a_to_z compare_line_by_line test_all + '\n', encoding='utf-8')
+    path.write_text(json.dumps(obj, indent=2) + '\n', encoding='utf-8')
 
 
 def collect_system_metrics(results: Path):
