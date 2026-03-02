@@ -1,0 +1,53 @@
+{
+  "version": "v6",
+  "generated_at_utc": "2026-03-01T14:34:54Z",
+  "source_of_truth": "manifest_forensic_v6.json (signed)",
+  "hash_algo": "sha256",
+  "artifacts": [
+    {
+      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/ADC_REAL_HARDWARE_CAPTURE_V6.json",
+      "sha256": "9d13a7f7541e1ee7eab8a774ab38b2084a67b2135815a32520234db0f8236ee6",
+      "bytes": 1776
+    },
+    {
+      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/hardware_entropy_random_v6.bin",
+      "sha256": "65ebaa2627a423ea04cd9a3d089b13df3de7bca346d46c498c116734135dff84",
+      "bytes": 32768
+    },
+    {
+      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/hardware_entropy_urandom_v6.bin",
+      "sha256": "5a70f6a16bfaf2579e61ad1ee055f26aa4a4ab076f0db76694e089a21788439d",
+      "bytes": 32768
+    },
+    {
+      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/hardware_jitter_samples_v6.csv",
+      "sha256": "0f5929725ba75aac9658e01afe16e37d3e98019eb464e4c46a86d1e2613053b7",
+      "bytes": 489460
+    },
+    {
+      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/kernel_env_detect_v6.json",
+      "sha256": "9c633586b3c9e11da0d51ece5dac840132bdf10b7a8806c6a4c92d2772a201ac",
+      "bytes": 433
+    },
+    {
+      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/kernel_final_state_v6.json",
+      "sha256": "6f08a40ba02a3e891691002b1ec7cc28cfb5bdf202196762a0f7d9b9958ff2a7",
+      "bytes": 2403
+    },
+    {
+      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/kernel_run_summary_v6.json",
+      "sha256": "41958a48eae54643b1c5f077a97da3274cd7584ed54e919138360f05cf8e1f62",
+      "bytes": 1761
+    },
+    {
+      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/stress_telemetry_v6.log",
+      "sha256": "0417e70a53fd6c275698229b6251d891fa840c30434ed50ca9facf989c9cc9b4",
+      "bytes": 140
+    },
+    {
+      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/system_metrics_v6.json",
+      "sha256": "c247ba956f7d8b633a00e3dd42eb99a0ef72f9a9a70b8100bc03a0245bb05cf5",
+      "bytes": 6458
+    }
+  ]
+}

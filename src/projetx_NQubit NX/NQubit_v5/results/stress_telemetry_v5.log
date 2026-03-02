@@ -1,0 +1,7 @@
+# V5 STRESS TELEMETRY
+workers=64
+duration_s=3
+cpu_pressure_estimated_pct=100.00
+memory_peak_pct=3.84
+target_pct=99.00
+status=TARGET_REACHED
