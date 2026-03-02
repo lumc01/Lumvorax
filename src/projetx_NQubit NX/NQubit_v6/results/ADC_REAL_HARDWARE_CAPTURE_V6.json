@@ -1,0 +1,57 @@
+{
+  "version": "v6",
+  "timestamp_utc": "2026-03-01T14:34:42Z",
+  "goal": "real_hardware_capture_on_replit",
+  "sources": [
+    {
+      "source": "/dev/hwrng",
+      "output_file": null,
+      "error": "[Errno 2] No such file or directory: '/dev/hwrng'",
+      "read_elapsed_s": null,
+      "bytes_per_sec": null,
+      "size": 0,
+      "sha256": null,
+      "mean": null,
+      "stddev": null,
+      "min": null,
+      "max": null
+    },
+    {
+      "source": "/dev/random",
+      "output_file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/hardware_entropy_random_v6.bin",
+      "error": null,
+      "read_elapsed_s": 0.00023873400004958967,
+      "bytes_per_sec": 137257365.91014877,
+      "size": 32768,
+      "sha256": "65ebaa2627a423ea04cd9a3d089b13df3de7bca346d46c498c116734135dff84",
+      "mean": 127.45108032226562,
+      "stddev": 74.14383546085001,
+      "min": 0,
+      "max": 255
+    },
+    {
+      "source": "/dev/urandom",
+      "output_file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/hardware_entropy_urandom_v6.bin",
+      "error": null,
+      "read_elapsed_s": 0.000245641999754298,
+      "bytes_per_sec": 133397383.31708747,
+      "size": 32768,
+      "sha256": "5a70f6a16bfaf2579e61ad1ee055f26aa4a4ab076f0db76694e089a21788439d",
+      "mean": 127.32196044921875,
+      "stddev": 74.37362486362929,
+      "min": 0,
+      "max": 255
+    }
+  ],
+  "jitter": {
+    "samples": 50000,
+    "elapsed_s": 0.021633696000208147,
+    "ops_per_sec": 2311209.3282404877,
+    "nqubit_per_sec_proxy": 2311209.3282404877,
+    "mean_ns": 432.74296,
+    "stddev_ns": 8503.185822561472,
+    "min_ns": 214,
+    "max_ns": 1872839,
+    "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/hardware_jitter_samples_v6.csv"
+  }
+}
