@@ -1,53 +1,48 @@
 {
   "version": "v6",
-  "generated_at_utc": "2026-03-01T14:34:54Z",
+  "generated_at_utc": "2026-03-02T14:16:47.666337+00:00",
   "source_of_truth": "manifest_forensic_v6.json (signed)",
   "hash_algo": "sha256",
   "artifacts": [
     {
-      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/ADC_REAL_HARDWARE_CAPTURE_V6.json",
-      "sha256": "9d13a7f7541e1ee7eab8a774ab38b2084a67b2135815a32520234db0f8236ee6",
-      "bytes": 1776
+      "file": "/home/runner/workspace/src/projetx_NQubit NX/NQubit_v5/results/ADC_REAL_VALIDATION_V5.json",
+      "sha256": "164d1047023a51ec64df5ae6f5599659b305e36356067f3fbe370e17fce328a1",
+      "bytes": 301
     },
     {
-      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/hardware_entropy_random_v6.bin",
-      "sha256": "65ebaa2627a423ea04cd9a3d089b13df3de7bca346d46c498c116734135dff84",
-      "bytes": 32768
+      "file": "/home/runner/workspace/src/projetx_NQubit NX/NQubit_v5/results/ADC_REAL_VALIDATION_V5_1772319442.json",
+      "sha256": "45220e831e7055ab8b9948ba4c1fad8792cb9d660a8cc3004d20f5b5953fba68",
+      "bytes": 301
     },
     {
-      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/hardware_entropy_urandom_v6.bin",
-      "sha256": "5a70f6a16bfaf2579e61ad1ee055f26aa4a4ab076f0db76694e089a21788439d",
-      "bytes": 32768
+      "file": "/home/runner/workspace/src/projetx_NQubit NX/NQubit_v5/results/manifest_forensic_v5.json",
+      "sha256": "c7aea847ae37aac79dc81dffba421145281b762285a8e75acff0f0839132522c",
+      "bytes": 3016
     },
     {
-      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/hardware_jitter_samples_v6.csv",
-      "sha256": "0f5929725ba75aac9658e01afe16e37d3e98019eb464e4c46a86d1e2613053b7",
-      "bytes": 489460
+      "file": "/home/runner/workspace/src/projetx_NQubit NX/NQubit_v5/results/manifest_forensic_v5.json.sig",
+      "sha256": "3f43fac518f42d394435110f9ad697056a68e8880432f19330fe0dfe03f3d710",
+      "bytes": 256
     },
     {
-      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/kernel_env_detect_v6.json",
-      "sha256": "9c633586b3c9e11da0d51ece5dac840132bdf10b7a8806c6a4c92d2772a201ac",
-      "bytes": 433
+      "file": "/home/runner/workspace/src/projetx_NQubit NX/NQubit_v5/results/manifest_forensic_v5_1772319442.json",
+      "sha256": "ac9a39406598cb6b1e202af2b9620736f8d8ab7b53eee0c4ce5f17e7e7171d17",
+      "bytes": 3055
     },
     {
-      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/kernel_final_state_v6.json",
-      "sha256": "6f08a40ba02a3e891691002b1ec7cc28cfb5bdf202196762a0f7d9b9958ff2a7",
-      "bytes": 2403
+      "file": "/home/runner/workspace/src/projetx_NQubit NX/NQubit_v5/results/replit_env_info_v5.txt",
+      "sha256": "2181a5e48099de33d761f9a6132e1e958ed81ef9a11fbfdd7934e934e82e201e",
+      "bytes": 1689
     },
     {
-      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/kernel_run_summary_v6.json",
-      "sha256": "41958a48eae54643b1c5f077a97da3274cd7584ed54e919138360f05cf8e1f62",
-      "bytes": 1761
-    },
-    {
-      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/stress_telemetry_v6.log",
-      "sha256": "0417e70a53fd6c275698229b6251d891fa840c30434ed50ca9facf989c9cc9b4",
+      "file": "/home/runner/workspace/src/projetx_NQubit NX/NQubit_v5/results/stress_telemetry_v5.log",
+      "sha256": "afc6e253f0e3f9ead3bc46af228a4b3d30a3c3e09223d47f962528a0d5ec0ced",
       "bytes": 140
     },
     {
-      "file": "/workspace/Lumvorax/src/projetx_NQubit NX/NQubit_v6/results/system_metrics_v6.json",
-      "sha256": "c247ba956f7d8b633a00e3dd42eb99a0ef72f9a9a70b8100bc03a0245bb05cf5",
-      "bytes": 6458
+      "file": "/home/runner/workspace/src/projetx_NQubit NX/NQubit_v5/results/v5_line_counts.txt",
+      "sha256": "59e395cad99c17f9195fb786e2a02ce7eb70a28fc524a0b61839952eab65ffdd",
+      "bytes": 243
     }
   ]
 }
