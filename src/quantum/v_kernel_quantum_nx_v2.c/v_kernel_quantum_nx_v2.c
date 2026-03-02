@@ -17,7 +17,7 @@ static uint64_t prng_step(uint64_t *state) {
     x ^= x >> 7;
     x ^= x << 17;
     *state = x;
-    return x;
+    return x;git status
 }
 
 static double uniform01(uint64_t *state) {
