@@ -16,4 +16,5 @@ venv/
 .local/state/replit/agent/
 
 # Generated benchmark artifacts
-# src/advanced_calculations/quantum_simulator_v3_staging/results/
+src/advanced_calculations/quantum_simulator_v3_staging/results/
+src/advanced_calculations/quantum_simulator_v4_staging_next/results/
