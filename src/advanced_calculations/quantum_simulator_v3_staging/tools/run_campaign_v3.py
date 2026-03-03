@@ -3,6 +3,7 @@ import argparse
 import csv
 import json
 import os
+import math
 import statistics
 import subprocess
 from collections import Counter, defaultdict
@@ -34,11 +35,24 @@ def stdev(v):
     return statistics.pstdev(v) if len(v) > 1 else 0.0
 
 
+def ci95(v):
+    if not v:
+        return {"mean": 0.0, "lower": 0.0, "upper": 0.0, "n": 0}
+    m = mean(v)
+    if len(v) == 1:
+        return {"mean": m, "lower": m, "upper": m, "n": 1}
+    # normal approximation; sufficient for campaign-level health checks
+    margin = 1.96 * (statistics.pstdev(v) / math.sqrt(len(v)))
+    return {"mean": m, "lower": m - margin, "upper": m + margin, "n": len(v)}
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument('--runs-per-mode', type=int, default=30)
     ap.add_argument('--scenarios', type=int, default=360)
     ap.add_argument('--steps', type=int, default=1400)
+    ap.add_argument('--max-latency-p95-ns', type=float, default=300000.0)
+    ap.add_argument('--max-latency-p99-ns', type=float, default=900000.0)
     args = ap.parse_args()
 
     run_id = datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')
@@ -148,10 +162,12 @@ def main():
     by_mode = {}
     for mode in modes:
         rs = [r for r in ok_rows if r['mode'] == mode]
+        w = [r['win_rate'] for r in rs]
         by_mode[mode] = {
             'count': len(rs),
-            'win_rate_mean': mean([r['win_rate'] for r in rs]),
-            'win_rate_std': stdev([r['win_rate'] for r in rs]),
+            'win_rate_mean': mean(w),
+            'win_rate_std': stdev(w),
+            'win_rate_ci95': ci95(w),
             'throughput_mean': mean([r['nqubits_per_sec'] for r in rs]),
             'latency_p95_mean_ns': mean([r['latency_p95_ns'] for r in rs]),
             'latency_p99_mean_ns': mean([r['latency_p99_ns'] for r in rs]),
@@ -160,6 +176,8 @@ def main():
     gate = {
         'min_win_rate_mean': 0.60,
         'max_win_rate_std': 0.05,
+        'max_latency_p95_ns': args.max_latency_p95_ns,
+        'max_latency_p99_ns': args.max_latency_p99_ns,
         'integrity_required': True,
     }
 
@@ -180,8 +198,27 @@ def main():
         and by_mode['deterministic_seeded']['win_rate_mean'] >= gate['min_win_rate_mean']
         and by_mode['hardware_preferred']['win_rate_std'] <= gate['max_win_rate_std']
         and by_mode['deterministic_seeded']['win_rate_std'] <= gate['max_win_rate_std']
+        and by_mode['hardware_preferred']['latency_p95_mean_ns'] <= gate['max_latency_p95_ns']
+        and by_mode['deterministic_seeded']['latency_p95_mean_ns'] <= gate['max_latency_p95_ns']
+        and by_mode['hardware_preferred']['latency_p99_mean_ns'] <= gate['max_latency_p99_ns']
+        and by_mode['deterministic_seeded']['latency_p99_mean_ns'] <= gate['max_latency_p99_ns']
         and integrity_ok
     )
+
+
+    watchlist = [74, 117, 133]
+    watchlist_loss = {
+        mode: {
+            str(sid): loss_freq_by_mode[mode][sid] / args.runs_per_mode if args.runs_per_mode else 0.0
+            for sid in watchlist
+        }
+        for mode in modes
+    }
+    throughput_gap = 0.0
+    hp_thr = by_mode['hardware_preferred']['throughput_mean']
+    ds_thr = by_mode['deterministic_seeded']['throughput_mean']
+    if hp_thr:
+        throughput_gap = (hp_thr - ds_thr) / hp_thr
 
     report = {
         'run_id': run_id,
@@ -196,9 +233,12 @@ def main():
             'manifest_path': str(out / 'manifest_forensic_v3.json'),
             'signature_path': str(out / 'manifest_forensic_v3.json.sig')
         },
+        'watchlist_scenarios': watchlist,
+        'watchlist_loss_frequency_by_mode': watchlist_loss,
         'notes': {
             'baseline_bias_hypothesis': 'baseline uses sigma*0.7 and linear drift 0.03; this may simplify baseline dynamics and bias margin distribution.',
-            'fragility_explanation': 'losses vary by seed/context because noise realization changes trajectory crossing around target in stochastic regime.'
+            'fragility_explanation': 'losses vary by seed/context because noise realization changes trajectory crossing around target in stochastic regime.',
+            'throughput_gap_hardware_vs_deterministic': throughput_gap
         }
     }
 
@@ -216,6 +256,8 @@ def main():
         '## A/B officiel vs staging',
         f'- officiel smoke rc: `{rc}`',
         f'- staging fusion gate pass: `{gate_status}`',
+        f'- gate latency p95 max ns: `{gate["max_latency_p95_ns"]}`',
+        f'- gate latency p99 max ns: `{gate["max_latency_p99_ns"]}`',
         '',
         '## Modes',
     ]
@@ -225,6 +267,7 @@ def main():
             f'- count: {d["count"]}',
             f'- win_rate_mean: {d["win_rate_mean"]:.6f}',
             f'- win_rate_std: {d["win_rate_std"]:.6f}',
+            f'- win_rate_ci95: [{d["win_rate_ci95"]["lower"]:.6f}, {d["win_rate_ci95"]["upper"]:.6f}]',
             f'- throughput_mean: {d["throughput_mean"]:.3f}',
             f'- latency_p95_mean_ns: {d["latency_p95_mean_ns"]:.1f}',
             f'- latency_p99_mean_ns: {d["latency_p99_mean_ns"]:.1f}',
@@ -242,6 +285,9 @@ def main():
         '- failure_reasons_frequency.csv',
         '- campaign_summary.json',
         '- manifest_forensic_v3.json + .sig',
+        '',
+        '## Watchlist scénarios fragiles',
+        '- watchlist: 74, 117, 133',
     ]
     md.write_text('\n'.join(lines), encoding='utf-8')
     print(str(out))
