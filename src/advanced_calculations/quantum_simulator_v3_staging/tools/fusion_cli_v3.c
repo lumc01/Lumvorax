@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "../quantum_simulator_fusion_v3.h"
+#include "quantum_simulator_fusion_v3.h"
 
 int main(int argc, char** argv) {
     if (argc < 7) {

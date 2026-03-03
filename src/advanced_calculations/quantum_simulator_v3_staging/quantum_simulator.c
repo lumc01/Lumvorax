@@ -10,8 +10,8 @@
 #include <immintrin.h>
 
 #include "quantum_simulator.h"
-#include "../debug/memory_tracker.h"
-#include "../debug/forensic_logger.h"
+#include "memory_tracker.h"
+#include "forensic_logger.h"
 
 #ifdef MODULES_QUANTIQUES_ACTIFS
 

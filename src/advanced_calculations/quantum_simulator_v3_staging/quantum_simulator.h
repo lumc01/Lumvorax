@@ -6,8 +6,8 @@
 #include <complex.h>
 #include <stddef.h>
 
-#include "../common/common_types.h"
-#include "../lum/lum_core.h"
+#include "common_types.h"
+#include "lum_core.h"
 
 // Module Simulateur Quantique pour LUM/VORAX
 // Conforme prompt.txt - nouveau module calculs avancés
