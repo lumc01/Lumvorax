@@ -240,3 +240,21 @@ Ce que nous avons produit concrètement:
 En bref:
 - **Succès technique** sur la partie forensic + intégrité + pilotage.
 - **Travail restant critique** sur la stabilité performance et la comparabilité externe scientifique.
+
+
+---
+
+## 13) Statut d'implémentation immédiate (cette itération)
+
+Suite à cette analyse, les points suivants sont maintenant intégrés dans le staging V3:
+1. Gate étendu avec seuils latence `p95/p99` (en plus du win_rate/std + intégrité).
+2. Calcul automatique d'IC95 (`win_rate_ci95`) par mode pour réduire les conclusions biaisées sur un seul run.
+3. Watchlist de régression scénarios fragiles (`74/117/133`) exportée dans `campaign_summary.json`.
+4. Protocole benchmark unifié **10 concurrents** ajouté pour préparer les comparaisons équitables.
+5. Test unitaire prioritaire ajouté pour garantir la conformité du protocole 10 concurrents.
+6. Analyse exhaustive `logs_AIMO3/NX` automatisée et consolidée dans un rapport d'intégration V3.
+
+Points restant à implémenter dans un prochain lot:
+- mode `baseline_neutralized` (code de simulation),
+- alerte CI de dérive throughput inter-lots (pipeline CI),
+- banc concurrent exécuté réellement sur infra harmonisée.
