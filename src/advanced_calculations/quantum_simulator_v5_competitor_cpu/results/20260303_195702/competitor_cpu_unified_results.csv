@@ -1,0 +1,206 @@
+name,participant_type,circuit,qubits,shots,gate_count,ok,time_s,shots_per_s,gates_per_s,cpu_user_s,cpu_sys_s,cpu_total_s,cpu_util_pct_of_1core,child_maxrss_mb,child_minflt,child_majflt,child_inblock,child_oublock,child_nvcsw,child_nivcsw,child_nsignals,child_nswap,child_msgsnd,child_msgrcv,host_cpu_jiffies_total_delta,host_cpu_jiffies_busy_delta,host_vmstat_delta_pgfault,host_vmstat_delta_pgmajfault,host_vmstat_delta_pswpin,host_vmstat_delta_pswpout,host_vmstat_delta_pgscan_kswapd,host_vmstat_delta_pgsteal_kswapd,host_vmstat_delta_pgscan_direct,host_vmstat_delta_pgsteal_direct,error
+Lumvorax V5 Reference,our_simulator,ghz,4,16384,4,False,0.124901,131175.651,32.025,0.017776,0.029982,0.047758,38.237,52.496,1381,0,0,0,3569,0,0,0,0,0,98,19,0,0,0,0,0,0,0,0,"Traceback (most recent call last):
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 24, in <module>
+    from . import multiarray
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/multiarray.py"", line 11, in <module>
+    from . import _multiarray_umath, overrides
+ImportError: libstdc++.so.6: cannot open shared object file: No such file or directory
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""<string>"", line 2, in <module>
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__init__.py"", line 112, in <module>
+    from numpy.__config__ import show_config
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__config__.py"", line 4, in <module>
+    from numpy._core._multiarray_umath import (
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 85, in <module>
+    raise ImportError(msg) from exc
+ImportError: 
+
+IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+
+Importing the numpy C-extensions failed. This error can happen for
+many reasons, often due to issues with your setup or how NumPy was
+installed.
+
+We have compiled some common reasons and troubleshooting tips at:
+
+    https://numpy.org/devdocs/user/troubleshooting-importerror.html
+
+Please note and check the following:
+
+  * The Python version is: Python 3.12 from ""/nix/store/h097imm3w6dpx10qynrd2sz9fks2wbq8-python3-3.12.11/bin/python3""
+  * The NumPy version is: ""2.4.2""
+
+and make sure that they are the versions you expect.
+
+Please carefully study the information and documentation linked above.
+This is unlikely to be a NumPy issue but will be caused by a bad install
+or environment on your machine.
+
+Original error was: libstdc++.so.6: cannot open shared object file: No such file or directory"
+Lumvorax V5 Reference,our_simulator,ghz,9,16384,9,False,0.122466,133784.159,73.49,0.021389,0.025764,0.047153,38.503,52.496,1386,0,0,0,3569,3,0,0,0,0,93,14,0,0,0,0,0,0,0,0,"Traceback (most recent call last):
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 24, in <module>
+    from . import multiarray
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/multiarray.py"", line 11, in <module>
+    from . import _multiarray_umath, overrides
+ImportError: libstdc++.so.6: cannot open shared object file: No such file or directory
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""<string>"", line 2, in <module>
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__init__.py"", line 112, in <module>
+    from numpy.__config__ import show_config
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__config__.py"", line 4, in <module>
+    from numpy._core._multiarray_umath import (
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 85, in <module>
+    raise ImportError(msg) from exc
+ImportError: 
+
+IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+
+Importing the numpy C-extensions failed. This error can happen for
+many reasons, often due to issues with your setup or how NumPy was
+installed.
+
+We have compiled some common reasons and troubleshooting tips at:
+
+    https://numpy.org/devdocs/user/troubleshooting-importerror.html
+
+Please note and check the following:
+
+  * The Python version is: Python 3.12 from ""/nix/store/h097imm3w6dpx10qynrd2sz9fks2wbq8-python3-3.12.11/bin/python3""
+  * The NumPy version is: ""2.4.2""
+
+and make sure that they are the versions you expect.
+
+Please carefully study the information and documentation linked above.
+This is unlikely to be a NumPy issue but will be caused by a bad install
+or environment on your machine.
+
+Original error was: libstdc++.so.6: cannot open shared object file: No such file or directory"
+Lumvorax V5 Reference,our_simulator,ghz,14,16384,14,False,0.144134,113671.764,97.132,0.024876,0.029685,0.054561,37.854,52.496,1383,0,0,0,3569,20,0,0,0,0,109,46,0,0,0,0,0,0,0,0,"Traceback (most recent call last):
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 24, in <module>
+    from . import multiarray
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/multiarray.py"", line 11, in <module>
+    from . import _multiarray_umath, overrides
+ImportError: libstdc++.so.6: cannot open shared object file: No such file or directory
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""<string>"", line 2, in <module>
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__init__.py"", line 112, in <module>
+    from numpy.__config__ import show_config
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__config__.py"", line 4, in <module>
+    from numpy._core._multiarray_umath import (
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 85, in <module>
+    raise ImportError(msg) from exc
+ImportError: 
+
+IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+
+Importing the numpy C-extensions failed. This error can happen for
+many reasons, often due to issues with your setup or how NumPy was
+installed.
+
+We have compiled some common reasons and troubleshooting tips at:
+
+    https://numpy.org/devdocs/user/troubleshooting-importerror.html
+
+Please note and check the following:
+
+  * The Python version is: Python 3.12 from ""/nix/store/h097imm3w6dpx10qynrd2sz9fks2wbq8-python3-3.12.11/bin/python3""
+  * The NumPy version is: ""2.4.2""
+
+and make sure that they are the versions you expect.
+
+Please carefully study the information and documentation linked above.
+This is unlikely to be a NumPy issue but will be caused by a bad install
+or environment on your machine.
+
+Original error was: libstdc++.so.6: cannot open shared object file: No such file or directory"
+Lumvorax V5 Reference,our_simulator,ghz,19,16384,19,False,0.148302,110477.449,128.117,0.019516,0.034629,0.054145,36.51,52.496,1381,0,0,0,3569,25,0,0,0,0,112,44,0,0,0,0,0,0,0,0,"Traceback (most recent call last):
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 24, in <module>
+    from . import multiarray
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/multiarray.py"", line 11, in <module>
+    from . import _multiarray_umath, overrides
+ImportError: libstdc++.so.6: cannot open shared object file: No such file or directory
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""<string>"", line 2, in <module>
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__init__.py"", line 112, in <module>
+    from numpy.__config__ import show_config
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__config__.py"", line 4, in <module>
+    from numpy._core._multiarray_umath import (
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 85, in <module>
+    raise ImportError(msg) from exc
+ImportError: 
+
+IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+
+Importing the numpy C-extensions failed. This error can happen for
+many reasons, often due to issues with your setup or how NumPy was
+installed.
+
+We have compiled some common reasons and troubleshooting tips at:
+
+    https://numpy.org/devdocs/user/troubleshooting-importerror.html
+
+Please note and check the following:
+
+  * The Python version is: Python 3.12 from ""/nix/store/h097imm3w6dpx10qynrd2sz9fks2wbq8-python3-3.12.11/bin/python3""
+  * The NumPy version is: ""2.4.2""
+
+and make sure that they are the versions you expect.
+
+Please carefully study the information and documentation linked above.
+This is unlikely to be a NumPy issue but will be caused by a bad install
+or environment on your machine.
+
+Original error was: libstdc++.so.6: cannot open shared object file: No such file or directory"
+Lumvorax V5 Reference,our_simulator,ghz,24,16384,24,False,0.12866,127342.941,186.538,0.020595,0.028414,0.049009,38.092,52.496,1385,0,0,0,3569,1,0,0,0,0,99,22,0,0,0,0,0,0,0,0,"Traceback (most recent call last):
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 24, in <module>
+    from . import multiarray
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/multiarray.py"", line 11, in <module>
+    from . import _multiarray_umath, overrides
+ImportError: libstdc++.so.6: cannot open shared object file: No such file or directory
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""<string>"", line 2, in <module>
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__init__.py"", line 112, in <module>
+    from numpy.__config__ import show_config
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__config__.py"", line 4, in <module>
+    from numpy._core._multiarray_umath import (
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 85, in <module>
+    raise ImportError(msg) from exc
+ImportError: 
+
+IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+
+Importing the numpy C-extensions failed. This error can happen for
+many reasons, often due to issues with your setup or how NumPy was
+installed.
+
+We have compiled some common reasons and troubleshooting tips at:
+
+    https://numpy.org/devdocs/user/troubleshooting-importerror.html
+
+Please note and check the following:
+
+  * The Python version is: Python 3.12 from ""/nix/store/h097imm3w6dpx10qynrd2sz9fks2wbq8-python3-3.12.11/bin/python3""
+  * The NumPy version is: ""2.4.2""
+
+and make sure that they are the versions you expect.
+
+Please carefully study the information and documentation linked above.
+This is unlikely to be a NumPy issue but will be caused by a bad install
+or environment on your machine.
+
+Original error was: libstdc++.so.6: cannot open shared object file: No such file or directory"
