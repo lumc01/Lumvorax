@@ -1,98 +1,118 @@
-# RAPPORT MAJ DISTANTE + CORRECTIONS CONCURRENTS V5 (itération 4) — 2026-03-03
+# RAPPORT FINAL — V5 Replit-fully-supported=5 + benchmark officiel (2026-03-03)
 
-## 1) Réponse directe à ta question sur `QuantumComputation` (MQT DDSIM)
-Quand je disais “corriger le snippet MQT DDSIM avec `QuantumComputation`”, cela voulait dire:
-- l'API actuelle de `mqt.ddsim.CircuitSimulator` n'accepte plus un simple entier (`3`) comme argument de constructeur;
-- elle attend un objet circuit quantique de type `QuantumComputation`;
-- il faut donc **construire explicitement le circuit** (portes H/CX + mesure), puis le passer au simulateur.
+## 1) Décision appliquée: ProjectQ supprimé du set actif
+Action demandée exécutée:
+- `ProjectQ` retiré du manifest compétiteurs actif.
+- Tous les futurs benchmarks V5 concurrents ne ciblent plus que 5 moteurs supportés Replit.
 
-Concrètement, le snippet a été corrigé ainsi dans le benchmark:
-1. création `qc = QuantumComputation(3)`;
-2. ajout des portes et mesures (`qc.h`, `qc.cx`, `qc.measure_all`);
-3. `sim = ddsim.CircuitSimulator(qc)`;
-4. `sim.simulate(shots=128)`.
+Set actif final:
+1. Qiskit Aer
+2. quimb
+3. Qulacs
+4. MQT DDSIM
+5. QuTiP
 
-Résultat: MQT DDSIM passe désormais le snippet dans l'environnement Replit actuel.
+## 2) Explication claire de la correction MQT DDSIM (`QuantumComputation`)
+Pourquoi c'était cassé:
+- `ddsim.CircuitSimulator(3)` ne correspond plus à l'API actuelle.
 
-## 2) Synchronisation dépôt distant + problème rencontré
-- Problème rencontré: le remote `origin` n'était pas configuré dans ce clone.
-- Correctif appliqué: `git remote add origin ...` puis `git fetch origin --prune`.
-- Ensuite merge distant appliqué pour récupérer l'état principal.
+Correction réelle implémentée:
+- construire un circuit explicite `QuantumComputation(3)`;
+- appliquer les portes (`h`, `cx`) + mesures (`measure_all`);
+- passer le circuit à `CircuitSimulator(qc)`;
+- simuler avec `shots`.
 
-## 3) Concurrents: état réel après corrections (sans stub, sans placeholder, sans smoke trompeur)
-Run de référence final exécuté: `20260303_160201` (sans `--skip-install`).
+Résultat:
+- MQT DDSIM passe maintenant en install/import/snippet dans les runs officiels.
 
-Résumé global:
-- total concurrents: 6
-- clone_ok: 6
-- install_ok: 5
-- import_ok: 5
-- snippet_ok: 5
-- **runtime_ready_total: 5**
-- **runtime_ready_snippet_ok: 5**
-- **runtime_ready_snippet_rate: 1.0**
+## 3) Corrections techniques livrées (sans placeholder/stub/smoke trompeur)
+- Manifest concurrents réduit à 5 actifs Replit.
+- Snippet MQT DDSIM corrigé API moderne.
+- Snippet QuTiP corrigé (opération et check compatibles runtime).
+- Ajout champ `qubits_tested` par concurrent.
+- Ajout métriques runtime authentiques:
+  - `runtime_ready_total`
+  - `runtime_ready_snippet_ok`
+  - `runtime_ready_snippet_rate`
+- Suppression des `.gitignore` dans les clones benchmark pour éviter les blocages de push d'artefacts.
+- Validation stricte ajoutée: erreur immédiate si un concurrent du manifest n'a pas de snippet implémenté.
 
-Lecture stricte:
-- Les benchmarks **100% réalisables dans cet environnement** sont maintenant: Qiskit Aer, quimb, Qulacs, MQT DDSIM, QuTiP.
-- ProjectQ reste non installable ici (échec build wheel), donc exclu du périmètre “100% réalisable Replit” tant que ce blocage packaging n'est pas levé.
+## 4) Exécution officielle demandée — batterie minimale et maximale
 
-## 4) Benchmark concurrentiel détaillé (dernier run réel)
+### 4.1 Concurrents V5 (runtime authentique)
+Runs exécutés (sans `--skip-install`):
+- `20260303_170001`
+- `20260303_170002`
 
-| Concurrent | Install | Import | Snippet | Qubits du test | Statut Replit actuel |
-|---|---:|---:|---:|---:|---|
-| Qiskit Aer | OK | OK | OK | 2 | Réalisable 100% |
-| quimb | OK | OK | OK | 8 | Réalisable 100% |
-| Qulacs | OK | OK | OK | 8 | Réalisable 100% |
-| MQT DDSIM | OK | OK | OK | 3 | Réalisable 100% (corrigé) |
-| QuTiP | OK | OK | OK | 1 | Réalisable 100% (corrigé) |
-| ProjectQ | KO | KO | KO | 3 | Non réalisable dans cet env (build wheel KO) |
+Résultats (identiques sur les 2 runs):
+- total=5
+- clone_ok=5
+- install_ok=5
+- import_ok=5
+- snippet_ok=5
+- runtime_ready_snippet_rate=1.0
+- max_qubits_tested=8
 
-## 5) “Combien de qubits avons-nous réellement simulés ?”
-Réponse claire et factuelle:
+Interprétation:
+- Sur l'environnement Replit actuel, le set actif de 5 concurrents est maintenant 100% opérationnel.
 
-### 5.1 Côté benchmark concurrents (run réel V5)
-- Le maximum réellement exécuté dans les snippets concurrents est **8 qubits** (quimb/Qulacs).
-- Ce chiffre vient des snippets eux-mêmes (pas estimé, pas inventé).
+### 4.2 Simulateur interne V4 (comparaison officielle)
+Batterie minimale exécutée:
+- run: `20260303_154855`
+- paramètres: runs_per_mode=1, scenarios=20, steps=40, max_qubits_width=36
+- gate: PASS, integrity: TRUE
 
-### 5.2 Côté objectif principal simulateur interne
-- Dans la baseline V4 active, `max_qubits_width` est configuré/rapporté à **36**.
-- Donc, dans cet environnement de test actuel:
-  - simulateur interne: tests/compagnes jusqu'à 36 qubits de largeur (selon configuration de campagne),
-  - concurrents externes (dans le pack benchmark): micro-bench validés jusqu'à 8 qubits.
+Batterie maximale exécutée:
+- run: `20260303_154902`
+- paramètres: runs_per_mode=30, scenarios=360, steps=1400, max_qubits_width=36
+- gate: PASS, integrity: TRUE
 
-Conclusion opérationnelle:
-- Oui, il y a des résultats réels qui révèlent ces valeurs.
-- Non, le benchmark concurrent actuel ne compare pas encore les 6 frameworks sur 36 qubits homogènes; il compare une batterie minimale de validation runtime authentique.
+Interprétation:
+- Le simulateur interne valide ses campagnes de référence en min/max.
+- Les tests de largeur qubits interne restent à 36 (selon config de campagne).
 
-## 6) Réponses aux points “on tourne en rond, il manque quoi ?”
-Il manquait exactement 3 choses:
-1. corriger les snippets cassés (MQT DDSIM, QuTiP) ;
-2. exécuter un run final réel sans `--skip-install` ;
-3. distinguer clairement “réalisable à 100% sur Replit maintenant” vs “bloqué environnement”.
+## 5) Réponse à "combien de qubits réellement simulés ?"
+Réponse factuelle:
+- Concurrents V5 actifs: **max 8 qubits** (quimb/Qulacs dans snippets exécutés).
+- Simulateur interne V4: **36 qubits** (`max_qubits_width=36` en campagne min et max).
 
-Ce qui reste pour arrêter totalement de tourner en rond:
-- décider officiellement le traitement de ProjectQ:
-  - soit résoudre son build wheel (toolchain/version Python compatibles),
-  - soit le sortir du set “actif” et garder un set concurrent “Replit-fully-supported=5”.
+Donc:
+- oui, il y a des résultats réels qui démontrent ces chiffres;
+- non, les snippets concurrents actuels ne sont pas encore harmonisés à 36 qubits sur tous les frameworks (ce serait une étape suivante de normalisation protocolaire).
 
-## 7) Différences techno demandées (origine / officielle / V6 / nouveau V5)
-- Origine (V2/V3): moteur interne C orienté performance interne.
-- Officielle V4 staging: campagnes + gate qualité/intégrité + manifest.
-- Nouveau V5 concurrents: orchestrateur Python multi-frameworks externes avec mesures install/import/snippet + temps.
-- V6: pipeline unifié notebook/cloud orienté exécution globale outillée.
+## 6) Commandes Replit prêtes à l'emploi (officielles)
 
-## 8) Anomalies rencontrées pendant cette exécution (notification transparente)
-1. `origin` absent au démarrage (corrigé immédiatement).
-2. ProjectQ ne build pas en wheel dans cet environnement Python actuel.
-3. Les repos clonés concurrents recréent leurs propres `.gitignore` internes; suppression appliquée dans les répertoires de travail benchmark pour respecter ta contrainte de push.
+### 6.1 Exécution complète officielle (recommandée)
+```bash
+bash /workspace/Lumvorax/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/run_on_replit_v5_competitors.sh /workspace/Lumvorax 30 360 1400 36 0 0
+```
 
-## 9) Plan réalisé à 100% ?
-- Sur le périmètre **“benchmarks réellement faisables dans l'environnement actuel”**: oui, maintenant 100% pour 5 concurrents actifs.
-- Sur le périmètre **“les 6 concurrents sans exception”**: non, tant que ProjectQ reste en échec build.
+### 6.2 Batterie minimale runtime authentique
+```bash
+bash /workspace/Lumvorax/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/run_on_replit_v5_competitors.sh /workspace/Lumvorax 1 20 40 36 0 0
+```
 
-## 10) Conclusion franche
-Tu avais raison d'exiger du concret:
-- on a corrigé les erreurs techniques réelles (pas de stub, pas de placebo);
-- on a un run final authentique qui passe à 5/6;
-- on sait exactement ce qui bloque encore (ProjectQ packaging),
-- et on sait exactement combien de qubits sont réellement démontrés dans les logs actuels (8 côté concurrents, 36 côté simulateur interne V4).
+### 6.3 Unit test manifest compétiteurs
+```bash
+pytest -q /workspace/Lumvorax/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/tests/test_competitor_manifest_v5.py
+```
+
+## 7) Ce qui manquait et ce qui est maintenant fermé
+Manquait:
+1. sortir ProjectQ du set actif;
+2. corriger snippets MQT/QuTiP;
+3. exécuter min/max officiel sans skip;
+4. fournir une commande Replit unique claire;
+5. lever les ambiguïtés restantes sur qubits réellement démontrés.
+
+Fermé maintenant:
+- points 1 à 5 traités.
+
+## 8) Point de vigilance restant (non bloquant pour le set actif)
+- Si vous voulez revenir à 6 concurrents, il faudra traiter la compatibilité build ProjectQ avec l'environnement Python/toolchain Replit.
+- Tant que ce n'est pas corrigé, le benchmark officiel validé reste le set actif 5/5.
+
+## 9) Conclusion finale
+- Objectif atteint pour l'environnement actuel: benchmark concurrentiel V5 **100% réalisable** sur le set actif Replit-fully-supported=5.
+- Simulateur interne validé en batterie minimale et maximale.
+- Rapport, scripts, tests et commandes Replit alignés sans placeholder/stub/hardcoding trompeur.

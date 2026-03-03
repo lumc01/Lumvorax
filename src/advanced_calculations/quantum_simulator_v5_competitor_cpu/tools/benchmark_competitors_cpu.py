@@ -2,7 +2,6 @@
 import argparse
 import csv
 import json
-import os
 import pathlib
 import resource
 import subprocess
@@ -61,17 +60,6 @@ sim = ddsim.CircuitSimulator(qc)
 counts = sim.simulate(shots=128)
 assert counts
 """,
-    "ProjectQ": """
-from projectq import MainEngine
-from projectq.ops import H, CNOT, Measure, All
-eng = MainEngine()
-q = eng.allocate_qureg(3)
-H | q[0]
-CNOT | (q[0], q[1])
-CNOT | (q[1], q[2])
-All(Measure) | q
-eng.flush()
-""",
     "QuTiP": """
 import qutip as qt
 psi0 = qt.basis(2, 0)
@@ -86,13 +74,9 @@ BENCH_QUBITS = {
     "quimb": 8,
     "Qulacs": 8,
     "MQT DDSIM": 3,
-    "ProjectQ": 3,
     "QuTiP": 1,
 }
 
-
-def sh(cmd, cwd=None, check=True):
-    return subprocess.run(cmd, cwd=cwd, check=check, text=True, capture_output=True)
 
 
 def run_import(import_name):
@@ -135,6 +119,9 @@ def main():
     args = ap.parse_args()
 
     data = json.loads(MANIFEST_PATH.read_text())
+    for competitor in data.get("competitors", []):
+        if competitor["name"] not in BENCH_SNIPPETS:
+            raise ValueError(f"Missing benchmark snippet for competitor: {competitor['name']}")
     out_dir = ROOT / "results" / args.run_id
     out_dir.mkdir(parents=True, exist_ok=True)
     clone_dir = out_dir / "clones"

@@ -1,6 +1,6 @@
 {
   "version": "v5-cpu-1",
-  "description": "CPU-first competitor integration set for immediate local/Replit execution.",
+  "description": "CPU-first competitor integration set for immediate local/Replit execution (Replit-fully-supported=5).",
   "competitors": [
     {
       "name": "Qiskit Aer",
@@ -25,12 +25,6 @@
       "repo": "https://github.com/cda-tum/mqt-ddsim.git",
       "pip_package": "mqt.ddsim",
       "import_name": "mqt.ddsim"
-    },
-    {
-      "name": "ProjectQ",
-      "repo": "https://github.com/ProjectQ-Framework/ProjectQ.git",
-      "pip_package": "projectq",
-      "import_name": "projectq"
     },
     {
       "name": "QuTiP",

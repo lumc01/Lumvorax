@@ -16,7 +16,7 @@ cd "$REPO_ROOT"
 bash src/advanced_calculations/quantum_simulator_v4_staging_next/run_on_replit_v4_next.sh \
   "$ROOT" "$RUNS" "$SCENARIOS" "$STEPS" "$MAX_QUBITS_WIDTH"
 
-# 2) Run competitor CPU integration pack (6 competitors).
+# 2) Run competitor CPU integration pack (Replit-fully-supported=5 competitors).
 ARGS=()
 if [[ "$PLAN_ONLY" == "1" ]]; then
   ARGS+=(--plan-only)

@@ -1,17 +1,18 @@
 # Quantum Simulator V5 Competitor CPU Pack
 
-Nouvelle copie isolée pour intégrer les 6 concurrents CPU immédiatement exploitables,
+Nouvelle copie isolée pour intégrer les **5 concurrents CPU pleinement supportés sur Replit**,
 sans toucher aux versions V2/V3/V4 existantes.
 
-## Concurrents intégrés (CPU)
+## Concurrents actifs (Replit-fully-supported=5)
 1. Qiskit Aer
 2. quimb (Tensor Network MPS)
 3. Qulacs
 4. MQT DDSIM
-5. ProjectQ
-6. QuTiP
+5. QuTiP
 
-## Exécution Replit exacte
+> Note: ProjectQ est retiré du set actif car l'installation wheel échoue dans l'environnement Replit actuel.
+
+## Exécution Replit exacte (officielle)
 ```bash
 bash /workspace/Lumvorax/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/run_on_replit_v5_competitors.sh /workspace/Lumvorax 30 360 1400 36 0 0
 ```
@@ -25,9 +26,14 @@ Paramètres:
 6. `PLAN_ONLY` (`1` = clone + plan sans benchmark snippet)
 7. `SKIP_INSTALL` (`1` = n'installe pas pip)
 
-## Mode rapide de validation (sans install)
+## Batterie minimale de validation runtime authentique
 ```bash
-bash /workspace/Lumvorax/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/run_on_replit_v5_competitors.sh /workspace/Lumvorax 1 20 40 36 1 1
+bash /workspace/Lumvorax/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/run_on_replit_v5_competitors.sh /workspace/Lumvorax 1 20 40 36 0 0
+```
+
+## Batterie maximale recommandée (benchmark officiel)
+```bash
+bash /workspace/Lumvorax/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/run_on_replit_v5_competitors.sh /workspace/Lumvorax 30 360 1400 36 0 0
 ```
 
 ## Artefacts générés
