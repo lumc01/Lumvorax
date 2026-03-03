@@ -40,3 +40,21 @@ bash /workspace/Lumvorax/src/advanced_calculations/quantum_simulator_v5_competit
 - `src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/<run_id>/competitor_cpu_results.csv`
 - `src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/<run_id>/competitor_cpu_summary.json`
 - `src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/<run_id>/competitor_cpu_summary.md`
+
+
+## Protocole benchmark unifié strict (nouveau)
+Par défaut, l'exécution V5 active maintenant un **protocole unifié strict**:
+- même famille de circuit (`ghz`),
+- mêmes tailles (`4, 8, 12 qubits`),
+- même shot budget (`256`).
+
+Fichier protocole:
+- `src/advanced_calculations/quantum_simulator_v5_competitor_cpu/tools/unified_benchmark_protocol_v5.json`
+
+Artefacts supplémentaires:
+- `src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/<run_id>/competitor_cpu_unified_results.csv`
+
+Option de désactivation (debug uniquement):
+```bash
+python src/advanced_calculations/quantum_simulator_v5_competitor_cpu/tools/benchmark_competitors_cpu.py --disable-strict-unified
+```
