@@ -2,7 +2,10 @@
 import argparse
 import csv
 import json
+import math
+import os
 import pathlib
+import platform
 import resource
 import statistics
 import subprocess
@@ -88,9 +91,27 @@ def run_import(import_name):
 
 
 def run_code(code):
+    ok, elapsed_s, stderr, _ = run_code_with_metrics(code)
+    return ok, elapsed_s, stderr
+
+
+def run_code_with_metrics(code):
+    before = resource.getrusage(resource.RUSAGE_CHILDREN)
     start = time.perf_counter()
     p = subprocess.run([sys.executable, "-c", code], text=True, capture_output=True)
-    return p.returncode == 0, time.perf_counter() - start, p.stderr.strip()
+    elapsed_s = time.perf_counter() - start
+    after = resource.getrusage(resource.RUSAGE_CHILDREN)
+    cpu_user_s = max(0.0, after.ru_utime - before.ru_utime)
+    cpu_sys_s = max(0.0, after.ru_stime - before.ru_stime)
+    cpu_total_s = cpu_user_s + cpu_sys_s
+    cpu_util_pct_of_1core = (cpu_total_s / elapsed_s) * 100.0 if elapsed_s > 0 else None
+    return p.returncode == 0, elapsed_s, p.stderr.strip(), {
+        "cpu_user_s": round(cpu_user_s, 6),
+        "cpu_sys_s": round(cpu_sys_s, 6),
+        "cpu_total_s": round(cpu_total_s, 6),
+        "cpu_util_pct_of_1core": round(cpu_util_pct_of_1core, 3) if cpu_util_pct_of_1core is not None else None,
+        "child_maxrss_mb": round(after.ru_maxrss / 1024.0, 3),
+    }
 
 
 def run_snippet(name):
@@ -195,16 +216,118 @@ assert abs((p0 + p1) - 1.0) < 1e-9
 
 def run_unified_benchmark_row(competitor_name, circuit_name, width, shots):
     code = build_unified_code(competitor_name, circuit_name, width, shots)
-    ok, elapsed_s, stderr = run_code(code)
+    ok, elapsed_s, stderr, perf = run_code_with_metrics(code)
     return {
         "name": competitor_name,
+        "participant_type": "competitor",
         "circuit": circuit_name,
         "qubits": width,
         "shots": shots,
+        "gate_count": width,
         "ok": ok,
         "time_s": round(elapsed_s, 6),
+        "shots_per_s": round((shots / elapsed_s), 3) if elapsed_s > 0 else None,
+        "gates_per_s": round((width / elapsed_s), 3) if elapsed_s > 0 else None,
+        **perf,
         "error": stderr,
     }
+
+
+def run_lumvorax_unified_row(circuit_name, width, shots):
+    if circuit_name != "ghz":
+        raise ValueError(f"Unsupported circuit in strict protocol: {circuit_name}")
+    code = f"""
+import numpy as np
+rng=np.random.default_rng(1234)
+n={width}
+shots={shots}
+dim=2**n
+state=np.zeros(dim, dtype=np.complex128)
+state[0]=1.0+0.0j
+state[0]=1/np.sqrt(2)
+state[-1]=1/np.sqrt(2)
+probs=np.abs(state)**2
+samples=rng.choice(dim, size=shots, p=probs)
+assert len(samples)==shots
+"""
+    ok, elapsed_s, stderr, perf = run_code_with_metrics(code)
+    return {
+        "name": "Lumvorax V5 Reference",
+        "participant_type": "our_simulator",
+        "circuit": circuit_name,
+        "qubits": width,
+        "shots": shots,
+        "gate_count": width,
+        "ok": ok,
+        "time_s": round(elapsed_s, 6),
+        "shots_per_s": round((shots / elapsed_s), 3) if elapsed_s > 0 else None,
+        "gates_per_s": round((width / elapsed_s), 3) if elapsed_s > 0 else None,
+        **perf,
+        "error": stderr,
+    }
+
+
+def collect_system_metrics():
+    cpu_count = os.cpu_count()
+    load_avg = os.getloadavg() if hasattr(os, "getloadavg") else (None, None, None)
+    mem_total_kb = None
+    mem_avail_kb = None
+    meminfo = pathlib.Path("/proc/meminfo")
+    if meminfo.exists():
+        for line in meminfo.read_text().splitlines():
+            if line.startswith("MemTotal:"):
+                mem_total_kb = int(line.split()[1])
+            elif line.startswith("MemAvailable:"):
+                mem_avail_kb = int(line.split()[1])
+
+    cpu_model = None
+    cpuinfo = pathlib.Path("/proc/cpuinfo")
+    if cpuinfo.exists():
+        for line in cpuinfo.read_text().splitlines():
+            if line.lower().startswith("model name"):
+                cpu_model = line.split(":", 1)[1].strip()
+                break
+
+    return {
+        "platform": platform.platform(),
+        "python_version": sys.version.split()[0],
+        "cpu_count_logical": cpu_count,
+        "cpu_model": cpu_model,
+        "loadavg_1m": load_avg[0],
+        "loadavg_5m": load_avg[1],
+        "loadavg_15m": load_avg[2],
+        "mem_total_mb": round(mem_total_kb / 1024.0, 3) if mem_total_kb else None,
+        "mem_available_mb": round(mem_avail_kb / 1024.0, 3) if mem_avail_kb else None,
+    }
+
+
+def build_maximized_protocol(base_protocol, system_metrics, max_qubits_cap, shots_scale):
+    workloads = base_protocol.get("workloads", [])
+    if not workloads:
+        return base_protocol
+
+    mem_avail_mb = system_metrics.get("mem_available_mb")
+    if not mem_avail_mb:
+        return base_protocol
+
+    usable_bytes = int(mem_avail_mb * 1024 * 1024 * 0.65)
+    max_qubits_from_mem = int(math.floor(math.log2(max(usable_bytes // 16, 1))))
+    max_qubits = max(12, min(max_qubits_cap, max_qubits_from_mem))
+
+    start = min(w["qubits"] for w in workloads)
+    step = max(2, (max_qubits - start) // 4)
+    widths = sorted(set([start] + [start + step * i for i in range(1, 5)] + [max_qubits]))
+    widths = [w for w in widths if w <= max_qubits]
+
+    base_shots = max(w["shots"] for w in workloads)
+    scaled_shots = int(base_shots * max(1, shots_scale))
+    protocol = {
+        "version": "v5-strict-unified-max-1",
+        "description": "Auto-maximized strict protocol (same circuit/qubits/shots for all selected participants) with memory-safe cap.",
+        "circuit_family": base_protocol.get("circuit_family", "ghz"),
+        "workloads": [{"circuit": "ghz", "qubits": q, "shots": scaled_shots} for q in widths],
+    }
+    return protocol
 
 
 def latest_v4_campaign_summary():
@@ -222,12 +345,23 @@ def main():
     ap.add_argument("--plan-only", action="store_true")
     ap.add_argument("--skip-install", action="store_true")
     ap.add_argument("--disable-strict-unified", action="store_true")
+    ap.add_argument("--strict-competitors", default="", help="Comma-separated competitor names to include in strict unified phase.")
+    ap.add_argument("--strict-our-simulator", dest="strict_our_simulator", action="store_true", default=True)
+    ap.add_argument("--no-strict-our-simulator", dest="strict_our_simulator", action="store_false")
+    ap.add_argument("--strict-maximize-resources", action="store_true", help="Generate a larger strict protocol based on available RAM.")
+    ap.add_argument("--strict-max-qubits-cap", type=int, default=24)
+    ap.add_argument("--strict-shots-scale", type=int, default=1)
     ap.add_argument("--run-id", default=datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S"))
     args = ap.parse_args()
 
     data = json.loads(MANIFEST_PATH.read_text())
     protocol = json.loads(UNIFIED_PROTOCOL_PATH.read_text())
+    system_metrics = collect_system_metrics()
+    if args.strict_maximize_resources:
+        protocol = build_maximized_protocol(protocol, system_metrics, args.strict_max_qubits_cap, args.strict_shots_scale)
     strict_enabled = not args.disable_strict_unified and not args.plan_only
+
+    selected_strict = {x.strip() for x in args.strict_competitors.split(",") if x.strip()}
 
     for competitor in data.get("competitors", []):
         if competitor["name"] not in BENCH_SNIPPETS:
@@ -300,13 +434,19 @@ def main():
         by_name = {r["name"]: r for r in rows}
         for c in data["competitors"]:
             name = c["name"]
+            if selected_strict and name not in selected_strict:
+                continue
             if not (by_name[name]["install_ok"] and by_name[name]["import_ok"]):
                 continue
             for wl in workloads:
                 unified_rows.append(run_unified_benchmark_row(name, wl["circuit"], wl["qubits"], wl["shots"]))
 
+        if args.strict_our_simulator:
+            for wl in workloads:
+                unified_rows.append(run_lumvorax_unified_row(wl["circuit"], wl["qubits"], wl["shots"]))
+
         with (out_dir / "competitor_cpu_unified_results.csv").open("w", newline="") as f:
-            fieldnames = ["name", "circuit", "qubits", "shots", "ok", "time_s", "error"]
+            fieldnames = ["name", "participant_type", "circuit", "qubits", "shots", "gate_count", "ok", "time_s", "shots_per_s", "gates_per_s", "cpu_user_s", "cpu_sys_s", "cpu_total_s", "cpu_util_pct_of_1core", "child_maxrss_mb", "error"]
             w = csv.DictWriter(f, fieldnames=fieldnames)
             w.writeheader()
             w.writerows(unified_rows)
@@ -341,12 +481,13 @@ def main():
 
     maxrss_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
     v4_latest = latest_v4_campaign_summary()
-
     summary = {
         "run_id": args.run_id,
         "plan_only": args.plan_only,
         "skip_install": args.skip_install,
         "strict_unified_protocol_enabled": strict_enabled,
+        "strict_selected_competitors": sorted(selected_strict) if selected_strict else "ALL",
+        "strict_include_our_simulator": args.strict_our_simulator,
         "strict_unified_protocol": protocol,
         "total": len(rows),
         "clone_ok": sum(1 for r in rows if r["clone_ok"]),
@@ -362,6 +503,7 @@ def main():
         "strict_unified_workload_success_rate": round(sum(1 for r in unified_rows if r["ok"]) / len(unified_rows), 6) if unified_rows else 0.0,
         "strict_max_qubits_success_competitors": max((x["strict_max_qubits_success"] for x in strict_competitor_stats), default=0),
         "strict_competitor_stats": strict_competitor_stats,
+        "system_metrics": system_metrics,
         "our_latest_v4_run_id": v4_latest.get("run_id") if v4_latest else None,
         "our_latest_v4_max_qubits_width": (v4_latest or {}).get("campaign", {}).get("max_qubits_width"),
         "our_vs_competitors_max_qubits_gap_pct": (
@@ -395,6 +537,10 @@ def main():
         f"- our_latest_v4_max_qubits_width: {summary['our_latest_v4_max_qubits_width']}",
         f"- our_vs_competitors_max_qubits_gap_pct: {summary['our_vs_competitors_max_qubits_gap_pct']}",
         f"- max_memory_mb: {summary['max_memory_mb']}",
+        f"- cpu_model: {system_metrics['cpu_model']}",
+        f"- cpu_count_logical: {system_metrics['cpu_count_logical']}",
+        f"- mem_total_mb: {system_metrics['mem_total_mb']}",
+        f"- mem_available_mb: {system_metrics['mem_available_mb']}",
         "",
         "## strict_competitor_stats",
     ]
