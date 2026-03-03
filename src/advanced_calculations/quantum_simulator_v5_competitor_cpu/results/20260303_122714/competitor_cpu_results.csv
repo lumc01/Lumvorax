@@ -1,0 +1,705 @@
+name,repo,pip_package,import_name,clone_ok,install_ok,import_ok,snippet_ok,import_time_s,snippet_time_s,notes
+Qiskit Aer,https://github.com/Qiskit/qiskit-aer.git,qiskit-aer,qiskit_aer,True,True,False,False,0.344131,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_122714/clones/qiskit_aer'... | import: Traceback (most recent call last):
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 24, in <module>
+    from . import multiarray
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/multiarray.py"", line 11, in <module>
+    from . import _multiarray_umath, overrides
+ImportError: libstdc++.so.6: cannot open shared object file: No such file or directory
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""<string>"", line 1, in <module>
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/qiskit_aer/__init__.py"", line 69, in <module>
+    from qiskit_aer.aerprovider import AerProvider
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/qiskit_aer/aerprovider.py"", line 17, in <module>
+    from qiskit.providers import QiskitBackendNotFoundError
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/qiskit/__init__.py"", line 48, in <module>
+    import qiskit._numpy_compat
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/qiskit/_numpy_compat.py"", line 19, in <module>
+    import numpy as np
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__init__.py"", line 112, in <module>
+    from numpy.__config__ import show_config
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__config__.py"", line 4, in <module>
+    from numpy._core._multiarray_umath import (
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 85, in <module>
+    raise ImportError(msg) from exc
+ImportError: 
+
+IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+
+Importing the numpy C-extensions failed. This error can happen for
+many reasons, often due to issues with your setup or how NumPy was
+installed.
+
+We have compiled some common reasons and troubleshooting tips at:
+
+    https://numpy.org/devdocs/user/troubleshooting-importerror.html
+
+Please note and check the following:
+
+  * The Python version is: Python 3.12 from ""/nix/store/h097imm3w6dpx10qynrd2sz9fks2wbq8-python3-3.12.11/bin/python""
+  * The NumPy version is: ""2.4.2""
+
+and make sure that they are the versions you expect.
+
+Please carefully study the information and documentation linked above.
+This is unlikely to be a NumPy issue but will be caused by a bad install
+or environment on your machine.
+
+Original error was: libstdc++.so.6: cannot open shared object file: No such file or directory"
+quimb,https://github.com/jcmgray/quimb.git,quimb,quimb,True,True,False,False,0.127063,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_122714/clones/quimb'... | import: Traceback (most recent call last):
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 24, in <module>
+    from . import multiarray
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/multiarray.py"", line 11, in <module>
+    from . import _multiarray_umath, overrides
+ImportError: libstdc++.so.6: cannot open shared object file: No such file or directory
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""<string>"", line 1, in <module>
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/quimb/__init__.py"", line 27, in <module>
+    from .calc import (
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/quimb/calc.py"", line 11, in <module>
+    import numpy as np
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__init__.py"", line 112, in <module>
+    from numpy.__config__ import show_config
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__config__.py"", line 4, in <module>
+    from numpy._core._multiarray_umath import (
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 85, in <module>
+    raise ImportError(msg) from exc
+ImportError: 
+
+IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+
+Importing the numpy C-extensions failed. This error can happen for
+many reasons, often due to issues with your setup or how NumPy was
+installed.
+
+We have compiled some common reasons and troubleshooting tips at:
+
+    https://numpy.org/devdocs/user/troubleshooting-importerror.html
+
+Please note and check the following:
+
+  * The Python version is: Python 3.12 from ""/nix/store/h097imm3w6dpx10qynrd2sz9fks2wbq8-python3-3.12.11/bin/python""
+  * The NumPy version is: ""2.4.2""
+
+and make sure that they are the versions you expect.
+
+Please carefully study the information and documentation linked above.
+This is unlikely to be a NumPy issue but will be caused by a bad install
+or environment on your machine.
+
+Original error was: libstdc++.so.6: cannot open shared object file: No such file or directory"
+Qulacs,https://github.com/qulacs/qulacs.git,qulacs,qulacs,True,True,False,False,0.088673,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_122714/clones/qulacs'... | import: Traceback (most recent call last):
+  File ""<string>"", line 1, in <module>
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/qulacs/__init__.py"", line 1, in <module>
+    from qulacs_core import *
+ImportError: libstdc++.so.6: cannot open shared object file: No such file or directory"
+MQT DDSIM,https://github.com/cda-tum/mqt-ddsim.git,mqt.ddsim,mqt.ddsim,True,True,False,False,0.353652,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_122714/clones/mqt_ddsim'... | import: Traceback (most recent call last):
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 24, in <module>
+    from . import multiarray
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/multiarray.py"", line 11, in <module>
+    from . import _multiarray_umath, overrides
+ImportError: libstdc++.so.6: cannot open shared object file: No such file or directory
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""<string>"", line 1, in <module>
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/mqt/ddsim/__init__.py"", line 32, in <module>
+    from .provider import DDSIMProvider
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/mqt/ddsim/provider.py"", line 15, in <module>
+    from qiskit.providers.exceptions import QiskitBackendNotFoundError
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/qiskit/__init__.py"", line 48, in <module>
+    import qiskit._numpy_compat
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/qiskit/_numpy_compat.py"", line 19, in <module>
+    import numpy as np
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__init__.py"", line 112, in <module>
+    from numpy.__config__ import show_config
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__config__.py"", line 4, in <module>
+    from numpy._core._multiarray_umath import (
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 85, in <module>
+    raise ImportError(msg) from exc
+ImportError: 
+
+IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+
+Importing the numpy C-extensions failed. This error can happen for
+many reasons, often due to issues with your setup or how NumPy was
+installed.
+
+We have compiled some common reasons and troubleshooting tips at:
+
+    https://numpy.org/devdocs/user/troubleshooting-importerror.html
+
+Please note and check the following:
+
+  * The Python version is: Python 3.12 from ""/nix/store/h097imm3w6dpx10qynrd2sz9fks2wbq8-python3-3.12.11/bin/python""
+  * The NumPy version is: ""2.4.2""
+
+and make sure that they are the versions you expect.
+
+Please carefully study the information and documentation linked above.
+This is unlikely to be a NumPy issue but will be caused by a bad install
+or environment on your machine.
+
+Original error was: libstdc++.so.6: cannot open shared object file: No such file or directory"
+ProjectQ,https://github.com/ProjectQ-Framework/ProjectQ.git,projectq,projectq,True,False,False,False,0.0,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_122714/clones/projectq'... | error: subprocess-exited-with-error
+  
+  × Building wheel for projectq (pyproject.toml) did not run successfully.
+  │ exit code: 1
+  ╰─> [501 lines of output]
+      /tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:82: SetuptoolsDeprecationWarning: `project.license` as a TOML table is deprecated
+      !!
+      
+              ********************************************************************************
+              Please use a simple string containing a SPDX expression for `project.license`. You can also use `project.license-files`. (Both options available on setuptools>=77.0.0).
+      
+              By 2027-Feb-18, you need to update your project and remove deprecated calls
+              or your builds will no longer be supported.
+      
+              See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+              ********************************************************************************
+      
+      !!
+        corresp(dist, value, root_dir)
+      /tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/config/_apply_pyprojecttoml.py:61: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+      !!
+      
+              ********************************************************************************
+              Please consider removing the following classifiers in favor of a SPDX license expression:
+      
+              License :: OSI Approved :: Apache Software License
+      
+              See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+              ********************************************************************************
+      
+      !!
+        dist._finalize_license_expression()
+      /tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/dist.py:765: SetuptoolsDeprecationWarning: License classifiers are deprecated.
+      !!
+      
+              ********************************************************************************
+              Please consider removing the following classifiers in favor of a SPDX license expression:
+      
+              License :: OSI Approved :: Apache Software License
+      
+              See https://packaging.python.org/en/latest/guides/writing-pyproject-toml/#license for details.
+              ********************************************************************************
+      
+      !!
+        self._finalize_license_expression()
+      running bdist_wheel
+      running build
+      running build_py
+      creating build/lib.linux-x86_64-cpython-312/projectq
+      copying projectq/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends
+      copying projectq/backends/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/backends
+      copying projectq/backends/_exceptions.py -> build/lib.linux-x86_64-cpython-312/projectq/backends
+      copying projectq/backends/_printer.py -> build/lib.linux-x86_64-cpython-312/projectq/backends
+      copying projectq/backends/_printer_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends
+      copying projectq/backends/_resource.py -> build/lib.linux-x86_64-cpython-312/projectq/backends
+      copying projectq/backends/_resource_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends
+      copying projectq/backends/_unitary.py -> build/lib.linux-x86_64-cpython-312/projectq/backends
+      copying projectq/backends/_unitary_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends
+      copying projectq/backends/_utils.py -> build/lib.linux-x86_64-cpython-312/projectq/backends
+      copying projectq/backends/_utils_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends
+      creating build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_basicmapper.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_basicmapper_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_basics.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_basics_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_cmdmodifier.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_cmdmodifier_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_ibm5qubitmapper.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_ibm5qubitmapper_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_linearmapper.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_linearmapper_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_main.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_main_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_manualmapper.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_manualmapper_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_optimize.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_optimize_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_swapandcnotflipper.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_swapandcnotflipper_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_tagremover.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_tagremover_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_testengine.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_testengine_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_twodmapper.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      copying projectq/cengines/_twodmapper_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines
+      creating build/lib.linux-x86_64-cpython-312/projectq/libs
+      copying projectq/libs/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/libs
+      creating build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_compute.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_compute_test.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_control.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_control_test.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_dagger.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_dagger_test.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_dirtyqubit.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_dirtyqubit_test.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_exceptions.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_logicalqubit.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_logicalqubit_test.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_loop.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_loop_test.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_util.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      copying projectq/meta/_util_test.py -> build/lib.linux-x86_64-cpython-312/projectq/meta
+      creating build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_basics.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_basics_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_command.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_command_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_gates.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_gates_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_metagates.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_metagates_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_qaagate.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_qaagate_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_qftgate.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_qftgate_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_qpegate.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_qpegate_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_qubit_operator.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_qubit_operator_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_shortcuts.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_shortcuts_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_state_prep.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_state_prep_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_time_evolution.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_time_evolution_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_uniformly_controlled_rotation.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      copying projectq/ops/_uniformly_controlled_rotation_test.py -> build/lib.linux-x86_64-cpython-312/projectq/ops
+      creating build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/_utils.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/aqt.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/aqt_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/awsbraket.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/awsbraket_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/default.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/grid.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/grid_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/ibm.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/ibm_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/ionq.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/ionq_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/linear.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/linear_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/restrictedgateset.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/restrictedgateset_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/trapped_ion_decomposer.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      copying projectq/setups/trapped_ion_decomposer_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups
+      creating build/lib.linux-x86_64-cpython-312/projectq/tests
+      copying projectq/tests/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/tests
+      copying projectq/tests/_factoring_test.py -> build/lib.linux-x86_64-cpython-312/projectq/tests
+      creating build/lib.linux-x86_64-cpython-312/projectq/types
+      copying projectq/types/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/types
+      copying projectq/types/_qubit.py -> build/lib.linux-x86_64-cpython-312/projectq/types
+      copying projectq/types/_qubit_test.py -> build/lib.linux-x86_64-cpython-312/projectq/types
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends/_aqt
+      copying projectq/backends/_aqt/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_aqt
+      copying projectq/backends/_aqt/_aqt.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_aqt
+      copying projectq/backends/_aqt/_aqt_http_client.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_aqt
+      copying projectq/backends/_aqt/_aqt_http_client_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_aqt
+      copying projectq/backends/_aqt/_aqt_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_aqt
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends/_awsbraket
+      copying projectq/backends/_awsbraket/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_awsbraket
+      copying projectq/backends/_awsbraket/_awsbraket.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_awsbraket
+      copying projectq/backends/_awsbraket/_awsbraket_boto3_client.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_awsbraket
+      copying projectq/backends/_awsbraket/_awsbraket_boto3_client_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_awsbraket
+      copying projectq/backends/_awsbraket/_awsbraket_boto3_client_test_fixtures.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_awsbraket
+      copying projectq/backends/_awsbraket/_awsbraket_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_awsbraket
+      copying projectq/backends/_awsbraket/_awsbraket_test_fixtures.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_awsbraket
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends/_azure
+      copying projectq/backends/_azure/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_azure
+      copying projectq/backends/_azure/_azure_quantum.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_azure
+      copying projectq/backends/_azure/_azure_quantum_client.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_azure
+      copying projectq/backends/_azure/_azure_quantum_client_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_azure
+      copying projectq/backends/_azure/_azure_quantum_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_azure
+      copying projectq/backends/_azure/_exceptions.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_azure
+      copying projectq/backends/_azure/_utils.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_azure
+      copying projectq/backends/_azure/_utils_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_azure
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends/_circuits
+      copying projectq/backends/_circuits/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_circuits
+      copying projectq/backends/_circuits/_drawer.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_circuits
+      copying projectq/backends/_circuits/_drawer_matplotlib.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_circuits
+      copying projectq/backends/_circuits/_drawer_matplotlib_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_circuits
+      copying projectq/backends/_circuits/_drawer_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_circuits
+      copying projectq/backends/_circuits/_plot.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_circuits
+      copying projectq/backends/_circuits/_plot_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_circuits
+      copying projectq/backends/_circuits/_to_latex.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_circuits
+      copying projectq/backends/_circuits/_to_latex_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_circuits
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends/_ibm
+      copying projectq/backends/_ibm/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ibm
+      copying projectq/backends/_ibm/_ibm.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ibm
+      copying projectq/backends/_ibm/_ibm_http_client.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ibm
+      copying projectq/backends/_ibm/_ibm_http_client_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ibm
+      copying projectq/backends/_ibm/_ibm_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ibm
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends/_ionq
+      copying projectq/backends/_ionq/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ionq
+      copying projectq/backends/_ionq/_ionq.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ionq
+      copying projectq/backends/_ionq/_ionq_http_client.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ionq
+      copying projectq/backends/_ionq/_ionq_http_client_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ionq
+      copying projectq/backends/_ionq/_ionq_mapper.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ionq
+      copying projectq/backends/_ionq/_ionq_mapper_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ionq
+      copying projectq/backends/_ionq/_ionq_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_ionq
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends/_sim
+      copying projectq/backends/_sim/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim
+      copying projectq/backends/_sim/_classical_simulator.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim
+      copying projectq/backends/_sim/_classical_simulator_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim
+      copying projectq/backends/_sim/_pysim.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim
+      copying projectq/backends/_sim/_simulator.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim
+      copying projectq/backends/_sim/_simulator_test.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim
+      copying projectq/backends/_sim/_simulator_test_fixtures.py -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim
+      creating build/lib.linux-x86_64-cpython-312/projectq/cengines/_replacer
+      copying projectq/cengines/_replacer/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines/_replacer
+      copying projectq/cengines/_replacer/_decomposition_rule.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines/_replacer
+      copying projectq/cengines/_replacer/_decomposition_rule_set.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines/_replacer
+      copying projectq/cengines/_replacer/_decomposition_rule_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines/_replacer
+      copying projectq/cengines/_replacer/_replacer.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines/_replacer
+      copying projectq/cengines/_replacer/_replacer_test.py -> build/lib.linux-x86_64-cpython-312/projectq/cengines/_replacer
+      creating build/lib.linux-x86_64-cpython-312/projectq/libs/hist
+      copying projectq/libs/hist/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/hist
+      copying projectq/libs/hist/_histogram.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/hist
+      copying projectq/libs/hist/_histogram_test.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/hist
+      creating build/lib.linux-x86_64-cpython-312/projectq/libs/math
+      copying projectq/libs/math/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/math
+      copying projectq/libs/math/_constantmath.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/math
+      copying projectq/libs/math/_constantmath_test.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/math
+      copying projectq/libs/math/_default_rules.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/math
+      copying projectq/libs/math/_gates.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/math
+      copying projectq/libs/math/_gates_math_test.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/math
+      copying projectq/libs/math/_gates_test.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/math
+      copying projectq/libs/math/_quantummath.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/math
+      copying projectq/libs/math/_quantummath_test.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/math
+      creating build/lib.linux-x86_64-cpython-312/projectq/libs/revkit
+      copying projectq/libs/revkit/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/revkit
+      copying projectq/libs/revkit/_control_function.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/revkit
+      copying projectq/libs/revkit/_control_function_test.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/revkit
+      copying projectq/libs/revkit/_permutation.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/revkit
+      copying projectq/libs/revkit/_permutation_test.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/revkit
+      copying projectq/libs/revkit/_phase.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/revkit
+      copying projectq/libs/revkit/_phase_test.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/revkit
+      copying projectq/libs/revkit/_utils.py -> build/lib.linux-x86_64-cpython-312/projectq/libs/revkit
+      creating build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/__init__.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/_gates_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/amplitudeamplification.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/amplitudeamplification_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/arb1qubit2rzandry.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/arb1qubit2rzandry_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/barrier.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/barrier_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/carb1qubit2cnotrzandry.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/carb1qubit2cnotrzandry_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/cnot2cz.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/cnot2cz_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/cnot2rxx.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/cnot2rxx_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/cnu2toffoliandcu.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/cnu2toffoliandcu_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/controlstate.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/controlstate_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/crz2cxandrz.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/entangle.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/globalphase.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/h2rx.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/h2rx_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/ph2r.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/phaseestimation.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/phaseestimation_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/qft2crandhadamard.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/qubitop2onequbit.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/qubitop2onequbit_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/r2rzandph.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/rx2rz.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/rx2rz_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/ry2rz.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/ry2rz_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/rz2rx.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/rz2rx_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/sqrtswap2cnot.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/sqrtswap2cnot_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/stateprep2cnot.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/stateprep2cnot_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/swap2cnot.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/time_evolution.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/time_evolution_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/toffoli2cnotandtgate.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/uniformlycontrolledr2cnot.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      copying projectq/setups/decompositions/uniformlycontrolledr2cnot_test.py -> build/lib.linux-x86_64-cpython-312/projectq/setups/decompositions
+      running egg_info
+      writing projectq.egg-info/PKG-INFO
+      writing dependency_links to projectq.egg-info/dependency_links.txt
+      writing requirements to projectq.egg-info/requires.txt
+      writing top-level names to projectq.egg-info/top_level.txt
+      listing git files failed - pretending there aren't any
+      reading manifest file 'projectq.egg-info/SOURCES.txt'
+      reading manifest template 'MANIFEST.in'
+      adding license file 'LICENSE'
+      adding license file 'NOTICE'
+      writing manifest file 'projectq.egg-info/SOURCES.txt'
+      /tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/command/build_py.py:215: _Warning: Package 'projectq.backends._sim._cppkernels' is absent from the `packages` configuration.
+      !!
+      
+              ********************************************************************************
+              ############################
+              # Package would be ignored #
+              ############################
+              Python recognizes 'projectq.backends._sim._cppkernels' as an importable package[^1],
+              but it is absent from setuptools' `packages` configuration.
+      
+              This leads to an ambiguous overall configuration. If you want to distribute this
+              package, please make sure that 'projectq.backends._sim._cppkernels' is explicitly added
+              to the `packages` configuration field.
+      
+              Alternatively, you can also rely on setuptools' discovery methods
+              (for example by using `find_namespace_packages(...)`/`find_namespace:`
+              instead of `find_packages(...)`/`find:`).
+      
+              You can read more about ""package discovery"" on setuptools documentation page:
+      
+              - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+      
+              If you don't want 'projectq.backends._sim._cppkernels' to be distributed and are
+              already explicitly excluding 'projectq.backends._sim._cppkernels' via
+              `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
+              you can try to use `exclude_package_data`, or `include-package-data=False` in
+              combination with a more fine grained `package-data` configuration.
+      
+              You can read more about ""package data files"" on setuptools documentation page:
+      
+              - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
+      
+      
+              [^1]: For Python, any directory (with suitable naming) can be imported,
+                    even if it does not contain any `.py` files.
+                    On the other hand, currently there is no concept of package data
+                    directory, all directories are treated like packages.
+              ********************************************************************************
+      
+      !!
+        check.warn(importable)
+      /tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/command/build_py.py:215: _Warning: Package 'projectq.backends._sim._cppkernels.intrin' is absent from the `packages` configuration.
+      !!
+      
+              ********************************************************************************
+              ############################
+              # Package would be ignored #
+              ############################
+              Python recognizes 'projectq.backends._sim._cppkernels.intrin' as an importable package[^1],
+              but it is absent from setuptools' `packages` configuration.
+      
+              This leads to an ambiguous overall configuration. If you want to distribute this
+              package, please make sure that 'projectq.backends._sim._cppkernels.intrin' is explicitly added
+              to the `packages` configuration field.
+      
+              Alternatively, you can also rely on setuptools' discovery methods
+              (for example by using `find_namespace_packages(...)`/`find_namespace:`
+              instead of `find_packages(...)`/`find:`).
+      
+              You can read more about ""package discovery"" on setuptools documentation page:
+      
+              - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+      
+              If you don't want 'projectq.backends._sim._cppkernels.intrin' to be distributed and are
+              already explicitly excluding 'projectq.backends._sim._cppkernels.intrin' via
+              `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
+              you can try to use `exclude_package_data`, or `include-package-data=False` in
+              combination with a more fine grained `package-data` configuration.
+      
+              You can read more about ""package data files"" on setuptools documentation page:
+      
+              - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
+      
+      
+              [^1]: For Python, any directory (with suitable naming) can be imported,
+                    even if it does not contain any `.py` files.
+                    On the other hand, currently there is no concept of package data
+                    directory, all directories are treated like packages.
+              ********************************************************************************
+      
+      !!
+        check.warn(importable)
+      /tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/command/build_py.py:215: _Warning: Package 'projectq.backends._sim._cppkernels.nointrin' is absent from the `packages` configuration.
+      !!
+      
+              ********************************************************************************
+              ############################
+              # Package would be ignored #
+              ############################
+              Python recognizes 'projectq.backends._sim._cppkernels.nointrin' as an importable package[^1],
+              but it is absent from setuptools' `packages` configuration.
+      
+              This leads to an ambiguous overall configuration. If you want to distribute this
+              package, please make sure that 'projectq.backends._sim._cppkernels.nointrin' is explicitly added
+              to the `packages` configuration field.
+      
+              Alternatively, you can also rely on setuptools' discovery methods
+              (for example by using `find_namespace_packages(...)`/`find_namespace:`
+              instead of `find_packages(...)`/`find:`).
+      
+              You can read more about ""package discovery"" on setuptools documentation page:
+      
+              - https://setuptools.pypa.io/en/latest/userguide/package_discovery.html
+      
+              If you don't want 'projectq.backends._sim._cppkernels.nointrin' to be distributed and are
+              already explicitly excluding 'projectq.backends._sim._cppkernels.nointrin' via
+              `find_namespace_packages(...)/find_namespace` or `find_packages(...)/find`,
+              you can try to use `exclude_package_data`, or `include-package-data=False` in
+              combination with a more fine grained `package-data` configuration.
+      
+              You can read more about ""package data files"" on setuptools documentation page:
+      
+              - https://setuptools.pypa.io/en/latest/userguide/datafiles.html
+      
+      
+              [^1]: For Python, any directory (with suitable naming) can be imported,
+                    even if it does not contain any `.py` files.
+                    On the other hand, currently there is no concept of package data
+                    directory, all directories are treated like packages.
+              ********************************************************************************
+      
+      !!
+        check.warn(importable)
+      copying projectq/backends/_sim/.gitignore -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim
+      copying projectq/backends/_sim/_cppsim.cpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels
+      copying projectq/backends/_sim/_cppkernels/fusion.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels
+      copying projectq/backends/_sim/_cppkernels/simulator.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/intrin
+      copying projectq/backends/_sim/_cppkernels/intrin/alignedallocator.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/intrin
+      copying projectq/backends/_sim/_cppkernels/intrin/cintrin.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/intrin
+      copying projectq/backends/_sim/_cppkernels/intrin/kernel1.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/intrin
+      copying projectq/backends/_sim/_cppkernels/intrin/kernel2.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/intrin
+      copying projectq/backends/_sim/_cppkernels/intrin/kernel3.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/intrin
+      copying projectq/backends/_sim/_cppkernels/intrin/kernel4.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/intrin
+      copying projectq/backends/_sim/_cppkernels/intrin/kernel5.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/intrin
+      copying projectq/backends/_sim/_cppkernels/intrin/kernels.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/intrin
+      creating build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/nointrin
+      copying projectq/backends/_sim/_cppkernels/nointrin/kernel1.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/nointrin
+      copying projectq/backends/_sim/_cppkernels/nointrin/kernel2.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/nointrin
+      copying projectq/backends/_sim/_cppkernels/nointrin/kernel3.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/nointrin
+      copying projectq/backends/_sim/_cppkernels/nointrin/kernel4.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/nointrin
+      copying projectq/backends/_sim/_cppkernels/nointrin/kernel5.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/nointrin
+      copying projectq/backends/_sim/_cppkernels/nointrin/kernels.hpp -> build/lib.linux-x86_64-cpython-312/projectq/backends/_sim/_cppkernels/nointrin
+      running build_ext
+      Traceback (most recent call last):
+        File ""/nix/store/sqs1z4grvym0nv6r3ksdc990m8sr5wgx-python3.11-pip-25.0.1/lib/python3.11/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py"", line 389, in <module>
+          main()
+        File ""/nix/store/sqs1z4grvym0nv6r3ksdc990m8sr5wgx-python3.11-pip-25.0.1/lib/python3.11/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py"", line 373, in main
+          json_out[""return_val""] = hook(**hook_input[""kwargs""])
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File ""/nix/store/sqs1z4grvym0nv6r3ksdc990m8sr5wgx-python3.11-pip-25.0.1/lib/python3.11/site-packages/pip/_vendor/pyproject_hooks/_in_process/_in_process.py"", line 280, in build_wheel
+          return _build_backend().build_wheel(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/build_meta.py"", line 441, in build_wheel
+          return _build(['bdist_wheel', '--dist-info-dir', str(metadata_directory)])
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/build_meta.py"", line 429, in _build
+          return self._build_with_temp_dir(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/build_meta.py"", line 410, in _build_with_temp_dir
+          self.run_setup()
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/build_meta.py"", line 317, in run_setup
+          exec(code, locals())
+        File ""<string>"", line 775, in <module>
+        File ""<string>"", line 747, in run_setup
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/__init__.py"", line 117, in setup
+          return distutils.core.setup(**attrs)  # type: ignore[return-value]
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/_distutils/core.py"", line 186, in setup
+          return run_commands(dist)
+                 ^^^^^^^^^^^^^^^^^^
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/_distutils/core.py"", line 202, in run_commands
+          dist.run_commands()
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/_distutils/dist.py"", line 1000, in run_commands
+          self.run_command(cmd)
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/dist.py"", line 1107, in run_command
+          super().run_command(command)
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/_distutils/dist.py"", line 1019, in run_command
+          cmd_obj.run()
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/command/bdist_wheel.py"", line 370, in run
+          self.run_command(""build"")
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/_distutils/cmd.py"", line 341, in run_command
+          self.distribution.run_command(command)
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/dist.py"", line 1107, in run_command
+          super().run_command(command)
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/_distutils/dist.py"", line 1019, in run_command
+          cmd_obj.run()
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/_distutils/command/build.py"", line 135, in run
+          self.run_command(cmd_name)
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/_distutils/cmd.py"", line 341, in run_command
+          self.distribution.run_command(command)
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/dist.py"", line 1107, in run_command
+          super().run_command(command)
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/_distutils/dist.py"", line 1019, in run_command
+          cmd_obj.run()
+        File ""<string>"", line 336, in run
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/command/build_ext.py"", line 97, in run
+          _build_ext.run(self)
+        File ""/tmp/pip-build-env-cs7u7wei/overlay/lib/python3.12/site-packages/setuptools/_distutils/command/build_ext.py"", line 367, in run
+          self.build_extensions()
+        File ""<string>"", line 342, in build_extensions
+        File ""<string>"", line 415, in _configure_compiler
+      AttributeError: 'Compiler' object has no attribute 'dry_run'
+      [end of output]
+  
+  note: This error originates from a subprocess, and is likely not a problem with pip.
+  ERROR: Failed building wheel for projectq
+ERROR: Failed to build installable wheels for some pyproject.toml based projects (projectq)"
+QuTiP,https://github.com/qutip/qutip.git,qutip,qutip,True,True,False,False,0.156076,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_122714/clones/qutip'... | import: Traceback (most recent call last):
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 24, in <module>
+    from . import multiarray
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/multiarray.py"", line 11, in <module>
+    from . import _multiarray_umath, overrides
+ImportError: libstdc++.so.6: cannot open shared object file: No such file or directory
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File ""<string>"", line 1, in <module>
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/qutip/__init__.py"", line 4, in <module>
+    import qutip.settings
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/qutip/settings.py"", line 10, in <module>
+    import numpy as np
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__init__.py"", line 112, in <module>
+    from numpy.__config__ import show_config
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/__config__.py"", line 4, in <module>
+    from numpy._core._multiarray_umath import (
+  File ""/home/runner/workspace/.pythonlibs/lib/python3.12/site-packages/numpy/_core/__init__.py"", line 85, in <module>
+    raise ImportError(msg) from exc
+ImportError: 
+
+IMPORTANT: PLEASE READ THIS FOR ADVICE ON HOW TO SOLVE THIS ISSUE!
+
+Importing the numpy C-extensions failed. This error can happen for
+many reasons, often due to issues with your setup or how NumPy was
+installed.
+
+We have compiled some common reasons and troubleshooting tips at:
+
+    https://numpy.org/devdocs/user/troubleshooting-importerror.html
+
+Please note and check the following:
+
+  * The Python version is: Python 3.12 from ""/nix/store/h097imm3w6dpx10qynrd2sz9fks2wbq8-python3-3.12.11/bin/python""
+  * The NumPy version is: ""2.4.2""
+
+and make sure that they are the versions you expect.
+
+Please carefully study the information and documentation linked above.
+This is unlikely to be a NumPy issue but will be caused by a bad install
+or environment on your machine.
+
+Original error was: libstdc++.so.6: cannot open shared object file: No such file or directory"
