@@ -1,0 +1,16 @@
+name,participant_type,circuit,qubits,shots,gate_count,ok,time_s,shots_per_s,gates_per_s,cpu_user_s,cpu_sys_s,cpu_total_s,cpu_util_pct_of_1core,child_maxrss_mb,child_minflt,child_majflt,child_inblock,child_oublock,child_nvcsw,child_nivcsw,child_nsignals,child_nswap,child_msgsnd,child_msgrcv,host_cpu_jiffies_total_delta,host_cpu_jiffies_busy_delta,host_vmstat_delta_pgfault,host_vmstat_delta_pgmajfault,host_vmstat_delta_pswpin,host_vmstat_delta_pswpout,host_vmstat_delta_pgscan_kswapd,host_vmstat_delta_pgsteal_kswapd,host_vmstat_delta_pgscan_direct,host_vmstat_delta_pgsteal_direct,error
+Lumvorax V5 Reference,our_simulator,ghz,4,16384,4,False,0.065569,249874.106,61.004,0.012494,0.013182,0.025676,39.159,22.016,1096,0,0,0,1212,20,0,0,0,0,55,30,0,0,0,0,0,0,0,0,"Traceback (most recent call last):
+  File ""<string>"", line 2, in <module>
+ModuleNotFoundError: No module named 'numpy'"
+Lumvorax V5 Reference,our_simulator,ghz,9,16384,9,False,0.062462,262302.263,144.087,0.014126,0.012882,0.027008,43.239,22.016,1097,0,0,0,1213,15,0,0,0,0,50,25,0,0,0,0,0,0,0,0,"Traceback (most recent call last):
+  File ""<string>"", line 2, in <module>
+ModuleNotFoundError: No module named 'numpy'"
+Lumvorax V5 Reference,our_simulator,ghz,14,16384,14,False,0.067215,243754.574,208.286,0.012579,0.0156,0.028179,41.924,22.016,1094,0,0,0,1211,37,0,0,0,0,54,28,0,0,0,0,0,0,0,0,"Traceback (most recent call last):
+  File ""<string>"", line 2, in <module>
+ModuleNotFoundError: No module named 'numpy'"
+Lumvorax V5 Reference,our_simulator,ghz,19,16384,19,False,0.055883,293182.242,339.994,0.010686,0.014288,0.024974,44.69,22.016,1096,0,0,0,1213,6,0,0,0,0,45,16,0,0,0,0,0,0,0,0,"Traceback (most recent call last):
+  File ""<string>"", line 2, in <module>
+ModuleNotFoundError: No module named 'numpy'"
+Lumvorax V5 Reference,our_simulator,ghz,24,16384,24,False,0.056923,287826.561,421.621,0.015,0.011399,0.026399,46.377,22.016,1097,0,0,0,1213,20,0,0,0,0,46,17,0,0,0,0,0,0,0,0,"Traceback (most recent call last):
+  File ""<string>"", line 2, in <module>
+ModuleNotFoundError: No module named 'numpy'"

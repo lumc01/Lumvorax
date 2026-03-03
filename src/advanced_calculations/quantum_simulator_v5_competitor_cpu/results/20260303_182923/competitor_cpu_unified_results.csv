@@ -1,0 +1,4 @@
+name,participant_type,circuit,qubits,shots,gate_count,ok,time_s,shots_per_s,gates_per_s,error
+Lumvorax V5 Reference,our_simulator,ghz,4,256,4,True,0.203246,1259.555,19.681,
+Lumvorax V5 Reference,our_simulator,ghz,8,256,8,True,0.188588,1357.458,42.421,
+Lumvorax V5 Reference,our_simulator,ghz,12,256,12,True,0.193222,1324.902,62.105,
