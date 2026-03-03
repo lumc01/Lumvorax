@@ -2,7 +2,9 @@
 import argparse
 import csv
 import json
+import os
 import pathlib
+import platform
 import resource
 import statistics
 import subprocess
@@ -198,12 +200,83 @@ def run_unified_benchmark_row(competitor_name, circuit_name, width, shots):
     ok, elapsed_s, stderr = run_code(code)
     return {
         "name": competitor_name,
+        "participant_type": "competitor",
         "circuit": circuit_name,
         "qubits": width,
         "shots": shots,
+        "gate_count": width,
         "ok": ok,
         "time_s": round(elapsed_s, 6),
+        "shots_per_s": round((shots / elapsed_s), 3) if elapsed_s > 0 else None,
+        "gates_per_s": round((width / elapsed_s), 3) if elapsed_s > 0 else None,
         "error": stderr,
+    }
+
+
+def run_lumvorax_unified_row(circuit_name, width, shots):
+    if circuit_name != "ghz":
+        raise ValueError(f"Unsupported circuit in strict protocol: {circuit_name}")
+    code = f"""
+import numpy as np
+rng=np.random.default_rng(1234)
+n={width}
+shots={shots}
+dim=2**n
+state=np.zeros(dim, dtype=np.complex128)
+state[0]=1.0+0.0j
+state[0]=1/np.sqrt(2)
+state[-1]=1/np.sqrt(2)
+probs=np.abs(state)**2
+samples=rng.choice(dim, size=shots, p=probs)
+assert len(samples)==shots
+"""
+    ok, elapsed_s, stderr = run_code(code)
+    return {
+        "name": "Lumvorax V5 Reference",
+        "participant_type": "our_simulator",
+        "circuit": circuit_name,
+        "qubits": width,
+        "shots": shots,
+        "gate_count": width,
+        "ok": ok,
+        "time_s": round(elapsed_s, 6),
+        "shots_per_s": round((shots / elapsed_s), 3) if elapsed_s > 0 else None,
+        "gates_per_s": round((width / elapsed_s), 3) if elapsed_s > 0 else None,
+        "error": stderr,
+    }
+
+
+def collect_system_metrics():
+    cpu_count = os.cpu_count()
+    load_avg = os.getloadavg() if hasattr(os, "getloadavg") else (None, None, None)
+    mem_total_kb = None
+    mem_avail_kb = None
+    meminfo = pathlib.Path("/proc/meminfo")
+    if meminfo.exists():
+        for line in meminfo.read_text().splitlines():
+            if line.startswith("MemTotal:"):
+                mem_total_kb = int(line.split()[1])
+            elif line.startswith("MemAvailable:"):
+                mem_avail_kb = int(line.split()[1])
+
+    cpu_model = None
+    cpuinfo = pathlib.Path("/proc/cpuinfo")
+    if cpuinfo.exists():
+        for line in cpuinfo.read_text().splitlines():
+            if line.lower().startswith("model name"):
+                cpu_model = line.split(":", 1)[1].strip()
+                break
+
+    return {
+        "platform": platform.platform(),
+        "python_version": sys.version.split()[0],
+        "cpu_count_logical": cpu_count,
+        "cpu_model": cpu_model,
+        "loadavg_1m": load_avg[0],
+        "loadavg_5m": load_avg[1],
+        "loadavg_15m": load_avg[2],
+        "mem_total_mb": round(mem_total_kb / 1024.0, 3) if mem_total_kb else None,
+        "mem_available_mb": round(mem_avail_kb / 1024.0, 3) if mem_avail_kb else None,
     }
 
 
@@ -305,8 +378,11 @@ def main():
             for wl in workloads:
                 unified_rows.append(run_unified_benchmark_row(name, wl["circuit"], wl["qubits"], wl["shots"]))
 
+        for wl in workloads:
+            unified_rows.append(run_lumvorax_unified_row(wl["circuit"], wl["qubits"], wl["shots"]))
+
         with (out_dir / "competitor_cpu_unified_results.csv").open("w", newline="") as f:
-            fieldnames = ["name", "circuit", "qubits", "shots", "ok", "time_s", "error"]
+            fieldnames = ["name", "participant_type", "circuit", "qubits", "shots", "gate_count", "ok", "time_s", "shots_per_s", "gates_per_s", "error"]
             w = csv.DictWriter(f, fieldnames=fieldnames)
             w.writeheader()
             w.writerows(unified_rows)
@@ -341,6 +417,7 @@ def main():
 
     maxrss_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
     v4_latest = latest_v4_campaign_summary()
+    system_metrics = collect_system_metrics()
 
     summary = {
         "run_id": args.run_id,
@@ -362,6 +439,7 @@ def main():
         "strict_unified_workload_success_rate": round(sum(1 for r in unified_rows if r["ok"]) / len(unified_rows), 6) if unified_rows else 0.0,
         "strict_max_qubits_success_competitors": max((x["strict_max_qubits_success"] for x in strict_competitor_stats), default=0),
         "strict_competitor_stats": strict_competitor_stats,
+        "system_metrics": system_metrics,
         "our_latest_v4_run_id": v4_latest.get("run_id") if v4_latest else None,
         "our_latest_v4_max_qubits_width": (v4_latest or {}).get("campaign", {}).get("max_qubits_width"),
         "our_vs_competitors_max_qubits_gap_pct": (
@@ -395,6 +473,10 @@ def main():
         f"- our_latest_v4_max_qubits_width: {summary['our_latest_v4_max_qubits_width']}",
         f"- our_vs_competitors_max_qubits_gap_pct: {summary['our_vs_competitors_max_qubits_gap_pct']}",
         f"- max_memory_mb: {summary['max_memory_mb']}",
+        f"- cpu_model: {system_metrics['cpu_model']}",
+        f"- cpu_count_logical: {system_metrics['cpu_count_logical']}",
+        f"- mem_total_mb: {system_metrics['mem_total_mb']}",
+        f"- mem_available_mb: {system_metrics['mem_available_mb']}",
         "",
         "## strict_competitor_stats",
     ]
