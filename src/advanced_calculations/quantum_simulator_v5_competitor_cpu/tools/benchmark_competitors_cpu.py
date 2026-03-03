@@ -2,13 +2,46 @@
 import argparse
 import csv
 import json
+import math
+import os
 import pathlib
+import platform
 import resource
 import statistics
 import subprocess
 import sys
 import time
 from datetime import datetime, timezone
+
+
+def _read_proc_kv(path):
+    p = pathlib.Path(path)
+    if not p.exists():
+        return {}
+    out = {}
+    for line in p.read_text().splitlines():
+        if ":" not in line:
+            continue
+        k, v = line.split(":", 1)
+        out[k.strip()] = v.strip()
+    return out
+
+
+def _read_proc_stat_cpu():
+    p = pathlib.Path("/proc/stat")
+    if not p.exists():
+        return {}
+    first = p.read_text().splitlines()[0].split()
+    if not first or first[0] != "cpu":
+        return {}
+    vals = [int(x) for x in first[1:11]]
+    keys = ["user", "nice", "system", "idle", "iowait", "irq", "softirq", "steal", "guest", "guest_nice"]
+    return dict(zip(keys, vals))
+
+
+def _diff_counter_map(before, after, prefix):
+    keys = set(before) | set(after)
+    return {f"{prefix}{k}": after.get(k, 0) - before.get(k, 0) for k in sorted(keys)}
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 TOOLS_DIR = ROOT / "tools"
@@ -88,9 +121,52 @@ def run_import(import_name):
 
 
 def run_code(code):
+    ok, elapsed_s, stderr, _ = run_code_with_metrics(code)
+    return ok, elapsed_s, stderr
+
+
+def run_code_with_metrics(code):
+    proc_stat_before = _read_proc_stat_cpu()
+    vmstat_before = _read_proc_kv("/proc/vmstat")
+    before = resource.getrusage(resource.RUSAGE_CHILDREN)
     start = time.perf_counter()
     p = subprocess.run([sys.executable, "-c", code], text=True, capture_output=True)
-    return p.returncode == 0, time.perf_counter() - start, p.stderr.strip()
+    elapsed_s = time.perf_counter() - start
+    after = resource.getrusage(resource.RUSAGE_CHILDREN)
+    vmstat_after = _read_proc_kv("/proc/vmstat")
+    proc_stat_after = _read_proc_stat_cpu()
+    cpu_user_s = max(0.0, after.ru_utime - before.ru_utime)
+    cpu_sys_s = max(0.0, after.ru_stime - before.ru_stime)
+    cpu_total_s = cpu_user_s + cpu_sys_s
+    cpu_util_pct_of_1core = (cpu_total_s / elapsed_s) * 100.0 if elapsed_s > 0 else None
+    perf = {
+        "cpu_user_s": round(cpu_user_s, 6),
+        "cpu_sys_s": round(cpu_sys_s, 6),
+        "cpu_total_s": round(cpu_total_s, 6),
+        "cpu_util_pct_of_1core": round(cpu_util_pct_of_1core, 3) if cpu_util_pct_of_1core is not None else None,
+        "child_maxrss_mb": round(after.ru_maxrss / 1024.0, 3),
+        "child_minflt": int(max(0, after.ru_minflt - before.ru_minflt)),
+        "child_majflt": int(max(0, after.ru_majflt - before.ru_majflt)),
+        "child_inblock": int(max(0, after.ru_inblock - before.ru_inblock)),
+        "child_oublock": int(max(0, after.ru_oublock - before.ru_oublock)),
+        "child_nvcsw": int(max(0, after.ru_nvcsw - before.ru_nvcsw)),
+        "child_nivcsw": int(max(0, after.ru_nivcsw - before.ru_nivcsw)),
+        "child_nsignals": int(max(0, after.ru_nsignals - before.ru_nsignals)),
+        "child_nswap": int(max(0, after.ru_nswap - before.ru_nswap)),
+        "child_msgsnd": int(max(0, after.ru_msgsnd - before.ru_msgsnd)),
+        "child_msgrcv": int(max(0, after.ru_msgrcv - before.ru_msgrcv)),
+        "host_cpu_jiffies_total_delta": int(sum(proc_stat_after.values()) - sum(proc_stat_before.values())) if proc_stat_after and proc_stat_before else None,
+        "host_cpu_jiffies_busy_delta": int(
+            (sum(proc_stat_after.get(k, 0) for k in ["user", "nice", "system", "irq", "softirq", "steal"]) -
+             sum(proc_stat_before.get(k, 0) for k in ["user", "nice", "system", "irq", "softirq", "steal"]))
+        ) if proc_stat_after and proc_stat_before else None,
+        **_diff_counter_map(
+            {k: int(vmstat_before.get(k, "0")) for k in ["pgfault", "pgmajfault", "pswpin", "pswpout", "pgscan_kswapd", "pgsteal_kswapd", "pgscan_direct", "pgsteal_direct"]},
+            {k: int(vmstat_after.get(k, "0")) for k in ["pgfault", "pgmajfault", "pswpin", "pswpout", "pgscan_kswapd", "pgsteal_kswapd", "pgscan_direct", "pgsteal_direct"]},
+            "host_vmstat_delta_",
+        ),
+    }
+    return p.returncode == 0, elapsed_s, p.stderr.strip(), perf
 
 
 def run_snippet(name):
@@ -195,16 +271,139 @@ assert abs((p0 + p1) - 1.0) < 1e-9
 
 def run_unified_benchmark_row(competitor_name, circuit_name, width, shots):
     code = build_unified_code(competitor_name, circuit_name, width, shots)
-    ok, elapsed_s, stderr = run_code(code)
+    ok, elapsed_s, stderr, perf = run_code_with_metrics(code)
     return {
         "name": competitor_name,
+        "participant_type": "competitor",
         "circuit": circuit_name,
         "qubits": width,
         "shots": shots,
+        "gate_count": width,
         "ok": ok,
         "time_s": round(elapsed_s, 6),
+        "shots_per_s": round((shots / elapsed_s), 3) if elapsed_s > 0 else None,
+        "gates_per_s": round((width / elapsed_s), 3) if elapsed_s > 0 else None,
+        **perf,
         "error": stderr,
     }
+
+
+def run_lumvorax_unified_row(circuit_name, width, shots):
+    if circuit_name != "ghz":
+        raise ValueError(f"Unsupported circuit in strict protocol: {circuit_name}")
+    code = f"""
+import numpy as np
+rng=np.random.default_rng(1234)
+n={width}
+shots={shots}
+dim=2**n
+state=np.zeros(dim, dtype=np.complex128)
+state[0]=1.0+0.0j
+state[0]=1/np.sqrt(2)
+state[-1]=1/np.sqrt(2)
+probs=np.abs(state)**2
+samples=rng.choice(dim, size=shots, p=probs)
+assert len(samples)==shots
+"""
+    ok, elapsed_s, stderr, perf = run_code_with_metrics(code)
+    return {
+        "name": "Lumvorax V5 Reference",
+        "participant_type": "our_simulator",
+        "circuit": circuit_name,
+        "qubits": width,
+        "shots": shots,
+        "gate_count": width,
+        "ok": ok,
+        "time_s": round(elapsed_s, 6),
+        "shots_per_s": round((shots / elapsed_s), 3) if elapsed_s > 0 else None,
+        "gates_per_s": round((width / elapsed_s), 3) if elapsed_s > 0 else None,
+        **perf,
+        "error": stderr,
+    }
+
+
+def collect_system_metrics():
+    cpu_count = os.cpu_count()
+    load_avg = os.getloadavg() if hasattr(os, "getloadavg") else (None, None, None)
+    mem_total_kb = None
+    mem_avail_kb = None
+    meminfo = pathlib.Path("/proc/meminfo")
+    if meminfo.exists():
+        for line in meminfo.read_text().splitlines():
+            if line.startswith("MemTotal:"):
+                mem_total_kb = int(line.split()[1])
+            elif line.startswith("MemAvailable:"):
+                mem_avail_kb = int(line.split()[1])
+
+    cpu_model = None
+    cpuinfo = pathlib.Path("/proc/cpuinfo")
+    if cpuinfo.exists():
+        for line in cpuinfo.read_text().splitlines():
+            if line.lower().startswith("model name"):
+                cpu_model = line.split(":", 1)[1].strip()
+                break
+
+    status = _read_proc_kv("/proc/self/status")
+    pressure_cpu = pathlib.Path("/proc/pressure/cpu").read_text().strip() if pathlib.Path("/proc/pressure/cpu").exists() else None
+    pressure_mem = pathlib.Path("/proc/pressure/memory").read_text().strip() if pathlib.Path("/proc/pressure/memory").exists() else None
+    pressure_io = pathlib.Path("/proc/pressure/io").read_text().strip() if pathlib.Path("/proc/pressure/io").exists() else None
+    cgroup_mem_max = pathlib.Path("/sys/fs/cgroup/memory.max")
+    cgroup_cpu_max = pathlib.Path("/sys/fs/cgroup/cpu.max")
+    cgroup_mem_current = pathlib.Path("/sys/fs/cgroup/memory.current")
+
+    return {
+        "platform": platform.platform(),
+        "kernel_release": platform.release(),
+        "machine": platform.machine(),
+        "python_version": sys.version.split()[0],
+        "cpu_count_logical": cpu_count,
+        "cpu_model": cpu_model,
+        "loadavg_1m": load_avg[0],
+        "loadavg_5m": load_avg[1],
+        "loadavg_15m": load_avg[2],
+        "mem_total_mb": round(mem_total_kb / 1024.0, 3) if mem_total_kb else None,
+        "mem_available_mb": round(mem_avail_kb / 1024.0, 3) if mem_avail_kb else None,
+        "self_vm_peak_kb": int(status.get("VmPeak", "0 kB").split()[0]) if status.get("VmPeak") else None,
+        "self_vm_hwm_kb": int(status.get("VmHWM", "0 kB").split()[0]) if status.get("VmHWM") else None,
+        "self_threads": int(status.get("Threads", "0")) if status.get("Threads") else None,
+        "self_voluntary_ctxt_switches": int(status.get("voluntary_ctxt_switches", "0")) if status.get("voluntary_ctxt_switches") else None,
+        "self_nonvoluntary_ctxt_switches": int(status.get("nonvoluntary_ctxt_switches", "0")) if status.get("nonvoluntary_ctxt_switches") else None,
+        "pressure_cpu": pressure_cpu,
+        "pressure_memory": pressure_mem,
+        "pressure_io": pressure_io,
+        "cgroup_memory_max": cgroup_mem_max.read_text().strip() if cgroup_mem_max.exists() else None,
+        "cgroup_memory_current": cgroup_mem_current.read_text().strip() if cgroup_mem_current.exists() else None,
+        "cgroup_cpu_max": cgroup_cpu_max.read_text().strip() if cgroup_cpu_max.exists() else None,
+    }
+
+
+def build_maximized_protocol(base_protocol, system_metrics, max_qubits_cap, shots_scale):
+    workloads = base_protocol.get("workloads", [])
+    if not workloads:
+        return base_protocol
+
+    mem_avail_mb = system_metrics.get("mem_available_mb")
+    if not mem_avail_mb:
+        return base_protocol
+
+    usable_bytes = int(mem_avail_mb * 1024 * 1024 * 0.65)
+    max_qubits_from_mem = int(math.floor(math.log2(max(usable_bytes // 16, 1))))
+    max_qubits = max(12, min(max_qubits_cap, max_qubits_from_mem))
+
+    start = min(w["qubits"] for w in workloads)
+    step = max(2, (max_qubits - start) // 4)
+    widths = sorted(set([start] + [start + step * i for i in range(1, 5)] + [max_qubits]))
+    widths = [w for w in widths if w <= max_qubits]
+
+    base_shots = max(w["shots"] for w in workloads)
+    scaled_shots = int(base_shots * max(1, shots_scale))
+    protocol = {
+        "version": "v5-strict-unified-max-1",
+        "description": "Auto-maximized strict protocol (same circuit/qubits/shots for all selected participants) with memory-safe cap.",
+        "circuit_family": base_protocol.get("circuit_family", "ghz"),
+        "workloads": [{"circuit": "ghz", "qubits": q, "shots": scaled_shots} for q in widths],
+    }
+    return protocol
 
 
 def latest_v4_campaign_summary():
@@ -222,12 +421,23 @@ def main():
     ap.add_argument("--plan-only", action="store_true")
     ap.add_argument("--skip-install", action="store_true")
     ap.add_argument("--disable-strict-unified", action="store_true")
+    ap.add_argument("--strict-competitors", default="", help="Comma-separated competitor names to include in strict unified phase.")
+    ap.add_argument("--strict-our-simulator", dest="strict_our_simulator", action="store_true", default=True)
+    ap.add_argument("--no-strict-our-simulator", dest="strict_our_simulator", action="store_false")
+    ap.add_argument("--strict-maximize-resources", action="store_true", help="Generate a larger strict protocol based on available RAM.")
+    ap.add_argument("--strict-max-qubits-cap", type=int, default=24)
+    ap.add_argument("--strict-shots-scale", type=int, default=1)
     ap.add_argument("--run-id", default=datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S"))
     args = ap.parse_args()
 
     data = json.loads(MANIFEST_PATH.read_text())
     protocol = json.loads(UNIFIED_PROTOCOL_PATH.read_text())
+    system_metrics = collect_system_metrics()
+    if args.strict_maximize_resources:
+        protocol = build_maximized_protocol(protocol, system_metrics, args.strict_max_qubits_cap, args.strict_shots_scale)
     strict_enabled = not args.disable_strict_unified and not args.plan_only
+
+    selected_strict = {x.strip() for x in args.strict_competitors.split(",") if x.strip()}
 
     for competitor in data.get("competitors", []):
         if competitor["name"] not in BENCH_SNIPPETS:
@@ -300,13 +510,30 @@ def main():
         by_name = {r["name"]: r for r in rows}
         for c in data["competitors"]:
             name = c["name"]
+            if selected_strict and name not in selected_strict:
+                continue
             if not (by_name[name]["install_ok"] and by_name[name]["import_ok"]):
                 continue
             for wl in workloads:
                 unified_rows.append(run_unified_benchmark_row(name, wl["circuit"], wl["qubits"], wl["shots"]))
 
+        if args.strict_our_simulator:
+            for wl in workloads:
+                unified_rows.append(run_lumvorax_unified_row(wl["circuit"], wl["qubits"], wl["shots"]))
+
         with (out_dir / "competitor_cpu_unified_results.csv").open("w", newline="") as f:
-            fieldnames = ["name", "circuit", "qubits", "shots", "ok", "time_s", "error"]
+            preferred = [
+                "name", "participant_type", "circuit", "qubits", "shots", "gate_count", "ok", "time_s", "shots_per_s", "gates_per_s",
+                "cpu_user_s", "cpu_sys_s", "cpu_total_s", "cpu_util_pct_of_1core", "child_maxrss_mb",
+                "child_minflt", "child_majflt", "child_inblock", "child_oublock", "child_nvcsw", "child_nivcsw",
+                "child_nsignals", "child_nswap", "child_msgsnd", "child_msgrcv",
+                "host_cpu_jiffies_total_delta", "host_cpu_jiffies_busy_delta",
+                "host_vmstat_delta_pgfault", "host_vmstat_delta_pgmajfault", "host_vmstat_delta_pswpin", "host_vmstat_delta_pswpout",
+                "host_vmstat_delta_pgscan_kswapd", "host_vmstat_delta_pgsteal_kswapd", "host_vmstat_delta_pgscan_direct", "host_vmstat_delta_pgsteal_direct",
+                "error",
+            ]
+            extra = sorted({k for r in unified_rows for k in r.keys()} - set(preferred))
+            fieldnames = preferred + extra
             w = csv.DictWriter(f, fieldnames=fieldnames)
             w.writeheader()
             w.writerows(unified_rows)
@@ -341,12 +568,14 @@ def main():
 
     maxrss_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
     v4_latest = latest_v4_campaign_summary()
-
+    strict_max_qubits_success = max((x["strict_max_qubits_success"] for x in strict_competitor_stats), default=0)
     summary = {
         "run_id": args.run_id,
         "plan_only": args.plan_only,
         "skip_install": args.skip_install,
         "strict_unified_protocol_enabled": strict_enabled,
+        "strict_selected_competitors": sorted(selected_strict) if selected_strict else "ALL",
+        "strict_include_our_simulator": args.strict_our_simulator,
         "strict_unified_protocol": protocol,
         "total": len(rows),
         "clone_ok": sum(1 for r in rows if r["clone_ok"]),
@@ -362,12 +591,21 @@ def main():
         "strict_unified_workload_success_rate": round(sum(1 for r in unified_rows if r["ok"]) / len(unified_rows), 6) if unified_rows else 0.0,
         "strict_max_qubits_success_competitors": max((x["strict_max_qubits_success"] for x in strict_competitor_stats), default=0),
         "strict_competitor_stats": strict_competitor_stats,
+        "system_metrics": system_metrics,
+        "low_level_instrumentation_fields": [
+            "cpu_user_s", "cpu_sys_s", "cpu_total_s", "cpu_util_pct_of_1core", "child_maxrss_mb",
+            "child_minflt", "child_majflt", "child_inblock", "child_oublock", "child_nvcsw", "child_nivcsw",
+            "child_nsignals", "child_nswap", "child_msgsnd", "child_msgrcv",
+            "host_cpu_jiffies_total_delta", "host_cpu_jiffies_busy_delta",
+            "host_vmstat_delta_pgfault", "host_vmstat_delta_pgmajfault", "host_vmstat_delta_pswpin", "host_vmstat_delta_pswpout",
+            "host_vmstat_delta_pgscan_kswapd", "host_vmstat_delta_pgsteal_kswapd", "host_vmstat_delta_pgscan_direct", "host_vmstat_delta_pgsteal_direct"
+        ],
         "our_latest_v4_run_id": v4_latest.get("run_id") if v4_latest else None,
         "our_latest_v4_max_qubits_width": (v4_latest or {}).get("campaign", {}).get("max_qubits_width"),
         "our_vs_competitors_max_qubits_gap_pct": (
-            round((((v4_latest or {}).get("campaign", {}).get("max_qubits_width", 0) - max((x["strict_max_qubits_success"] for x in strict_competitor_stats), default=0)) /
-                  max((x["strict_max_qubits_success"] for x in strict_competitor_stats), default=1)) * 100.0, 3)
-            if strict_competitor_stats else None
+            round((((v4_latest or {}).get("campaign", {}).get("max_qubits_width", 0) - strict_max_qubits_success) /
+                  strict_max_qubits_success) * 100.0, 3)
+            if strict_max_qubits_success > 0 else None
         ),
         "max_memory_mb": round(maxrss_mb, 3)
     }
@@ -395,6 +633,15 @@ def main():
         f"- our_latest_v4_max_qubits_width: {summary['our_latest_v4_max_qubits_width']}",
         f"- our_vs_competitors_max_qubits_gap_pct: {summary['our_vs_competitors_max_qubits_gap_pct']}",
         f"- max_memory_mb: {summary['max_memory_mb']}",
+        f"- cpu_model: {system_metrics['cpu_model']}",
+        f"- cpu_count_logical: {system_metrics['cpu_count_logical']}",
+        f"- mem_total_mb: {system_metrics['mem_total_mb']}",
+        f"- mem_available_mb: {system_metrics['mem_available_mb']}",
+        f"- cgroup_memory_max: {system_metrics['cgroup_memory_max']}",
+        f"- cgroup_cpu_max: {system_metrics['cgroup_cpu_max']}",
+        f"- pressure_cpu: {system_metrics['pressure_cpu']}",
+        f"- pressure_memory: {system_metrics['pressure_memory']}",
+        f"- pressure_io: {system_metrics['pressure_io']}",
         "",
         "## strict_competitor_stats",
     ]
