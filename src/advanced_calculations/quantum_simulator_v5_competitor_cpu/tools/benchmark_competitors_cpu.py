@@ -568,6 +568,7 @@ def main():
 
     maxrss_mb = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024.0
     v4_latest = latest_v4_campaign_summary()
+    strict_max_qubits_success = max((x["strict_max_qubits_success"] for x in strict_competitor_stats), default=0)
     summary = {
         "run_id": args.run_id,
         "plan_only": args.plan_only,
@@ -602,9 +603,9 @@ def main():
         "our_latest_v4_run_id": v4_latest.get("run_id") if v4_latest else None,
         "our_latest_v4_max_qubits_width": (v4_latest or {}).get("campaign", {}).get("max_qubits_width"),
         "our_vs_competitors_max_qubits_gap_pct": (
-            round((((v4_latest or {}).get("campaign", {}).get("max_qubits_width", 0) - max((x["strict_max_qubits_success"] for x in strict_competitor_stats), default=0)) /
-                  max((x["strict_max_qubits_success"] for x in strict_competitor_stats), default=1)) * 100.0, 3)
-            if strict_competitor_stats else None
+            round((((v4_latest or {}).get("campaign", {}).get("max_qubits_width", 0) - strict_max_qubits_success) /
+                  strict_max_qubits_success) * 100.0, 3)
+            if strict_max_qubits_success > 0 else None
         ),
         "max_memory_mb": round(maxrss_mb, 3)
     }

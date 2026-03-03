@@ -1,0 +1,22 @@
+name,participant_type,circuit,qubits,shots,gate_count,ok,time_s,shots_per_s,gates_per_s,cpu_user_s,cpu_sys_s,cpu_total_s,cpu_util_pct_of_1core,child_maxrss_mb,child_minflt,child_majflt,child_inblock,child_oublock,child_nvcsw,child_nivcsw,child_nsignals,child_nswap,child_msgsnd,child_msgrcv,host_cpu_jiffies_total_delta,host_cpu_jiffies_busy_delta,host_vmstat_delta_pgfault,host_vmstat_delta_pgmajfault,host_vmstat_delta_pswpin,host_vmstat_delta_pswpout,host_vmstat_delta_pgscan_kswapd,host_vmstat_delta_pgsteal_kswapd,host_vmstat_delta_pgscan_direct,host_vmstat_delta_pgsteal_direct,error
+Qiskit Aer,competitor,ghz,4,256,4,True,0.900732,284.213,4.441,0.906545,0.210611,1.117156,124.028,337.215,12096,0,0,8,11,94,0,0,0,0,270,113,0,0,0,0,0,0,0,0,
+Qiskit Aer,competitor,ghz,8,256,8,True,0.862327,296.871,9.277,0.841492,0.198442,1.039934,120.596,337.215,12100,0,0,8,12,22,0,0,0,0,259,105,0,0,0,0,0,0,0,0,
+Qiskit Aer,competitor,ghz,12,256,12,True,0.88415,289.543,13.572,0.781255,0.226057,1.007312,113.93,337.215,12106,0,0,8,17,85,0,0,0,0,265,102,0,0,0,0,0,0,0,0,
+quimb,competitor,ghz,4,256,4,True,8.737326,29.3,0.458,7.862484,1.207813,9.070297,103.811,337.215,57806,0,0,880,7,152,0,0,0,0,2617,912,0,0,0,0,0,0,0,0,
+quimb,competitor,ghz,8,256,8,True,2.746342,93.215,2.913,2.567098,0.480753,3.047851,110.979,337.215,29601,0,0,0,7,80,0,0,0,0,822,304,0,0,0,0,0,0,0,0,
+quimb,competitor,ghz,12,256,12,True,2.641436,96.917,4.543,2.626423,0.35678,2.983203,112.939,337.215,29595,0,0,0,7,52,0,0,0,0,790,299,0,0,0,0,0,0,0,0,
+Qulacs,competitor,ghz,4,256,4,True,0.255092,1003.558,15.681,0.329723,0.066741,0.396464,155.42,337.215,3789,0,0,0,4,18,0,0,0,0,78,41,0,0,0,0,0,0,0,0,
+Qulacs,competitor,ghz,8,256,8,True,0.285236,897.502,28.047,0.385923,0.078777,0.4647,162.918,337.215,3792,0,0,0,4,22,0,0,0,0,86,47,0,0,0,0,0,0,0,0,
+Qulacs,competitor,ghz,12,256,12,True,0.26189,977.511,45.821,0.377955,0.075901,0.453856,173.3,337.215,3813,0,0,0,4,18,0,0,0,0,78,45,0,0,0,0,0,0,0,0,
+MQT DDSIM,competitor,ghz,4,256,4,True,0.936198,273.447,4.273,0.857012,0.247199,1.104211,117.946,337.215,18006,0,0,8,4,28,0,0,0,0,281,112,0,0,0,0,0,0,0,0,
+MQT DDSIM,competitor,ghz,8,256,8,True,0.960298,266.584,8.331,0.908615,0.251094,1.159709,120.765,337.215,18004,0,0,8,4,29,0,0,0,0,287,117,0,0,0,0,0,0,0,0,
+MQT DDSIM,competitor,ghz,12,256,12,True,0.975422,262.451,12.302,0.883669,0.262921,1.14659,117.548,337.215,18015,0,0,8,4,29,0,0,0,0,292,117,0,0,0,0,0,0,0,0,
+QuTiP,competitor,ghz,4,256,4,True,1.350447,189.567,2.962,1.343658,0.277484,1.621142,120.045,337.215,16297,0,0,0,7,57,0,0,0,0,406,164,0,0,0,0,0,0,0,0,"/root/.pyenv/versions/3.12.12/lib/python3.12/site-packages/qutip/__init__.py:24: UserWarning: matplotlib not found: Graphics will not work.
+  warnings.warn(""matplotlib not found: Graphics will not work."")"
+QuTiP,competitor,ghz,8,256,8,True,1.361549,188.021,5.876,1.468468,0.251466,1.719934,126.322,337.215,16420,0,0,0,7,57,0,0,0,0,407,172,0,0,0,0,0,0,0,0,"/root/.pyenv/versions/3.12.12/lib/python3.12/site-packages/qutip/__init__.py:24: UserWarning: matplotlib not found: Graphics will not work.
+  warnings.warn(""matplotlib not found: Graphics will not work."")"
+QuTiP,competitor,ghz,12,256,12,True,1.378758,185.674,8.703,1.3284,0.318209,1.646609,119.427,337.215,16492,0,0,0,7,55,0,0,0,0,414,166,0,0,0,0,0,0,0,0,"/root/.pyenv/versions/3.12.12/lib/python3.12/site-packages/qutip/__init__.py:24: UserWarning: matplotlib not found: Graphics will not work.
+  warnings.warn(""matplotlib not found: Graphics will not work."")"
+Lumvorax V5 Reference,our_simulator,ghz,4,256,4,True,0.290276,881.918,13.78,0.37238,0.070566,0.442946,152.595,337.215,4250,0,0,0,4,20,0,0,0,0,88,46,0,0,0,0,0,0,0,0,
+Lumvorax V5 Reference,our_simulator,ghz,8,256,8,True,0.276168,926.973,28.968,0.380449,0.07926,0.459709,166.46,337.215,4247,0,0,0,4,22,0,0,0,0,84,47,0,0,0,0,0,0,0,0,
+Lumvorax V5 Reference,our_simulator,ghz,12,256,12,True,0.273956,934.455,43.803,0.414322,0.063122,0.477444,174.277,337.215,4250,0,0,0,4,20,0,0,0,0,82,48,0,0,0,0,0,0,0,0,
