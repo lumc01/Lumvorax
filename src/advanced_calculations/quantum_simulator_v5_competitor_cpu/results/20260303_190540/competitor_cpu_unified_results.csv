@@ -1,0 +1,11 @@
+name,participant_type,circuit,qubits,shots,gate_count,ok,time_s,shots_per_s,gates_per_s,cpu_user_s,cpu_sys_s,cpu_total_s,cpu_util_pct_of_1core,child_maxrss_mb,child_minflt,child_majflt,child_inblock,child_oublock,child_nvcsw,child_nivcsw,child_nsignals,child_nswap,child_msgsnd,child_msgrcv,host_cpu_jiffies_total_delta,host_cpu_jiffies_busy_delta,host_vmstat_delta_pgfault,host_vmstat_delta_pgmajfault,host_vmstat_delta_pswpin,host_vmstat_delta_pswpout,host_vmstat_delta_pgscan_kswapd,host_vmstat_delta_pgsteal_kswapd,host_vmstat_delta_pgscan_direct,host_vmstat_delta_pgsteal_direct,error
+Qulacs,competitor,ghz,4,2048,4,True,0.24532,8348.286,16.305,0.303912,0.084605,0.388517,158.372,337.145,3789,0,0,0,4,17,0,0,0,0,74,40,0,0,0,0,0,0,0,0,
+Qulacs,competitor,ghz,9,2048,9,True,0.234775,8723.256,38.335,0.355348,0.056537,0.411885,175.438,337.145,3796,0,0,0,4,19,0,0,0,0,70,41,0,0,0,0,0,0,0,0,
+Qulacs,competitor,ghz,14,2048,14,True,0.255839,8005.036,54.722,0.319205,0.061533,0.380738,148.819,337.145,3923,0,0,0,7,19,0,0,0,0,79,40,0,0,0,0,0,0,0,0,
+Qulacs,competitor,ghz,19,2048,19,True,0.297749,6878.274,63.812,0.360288,0.081359,0.441647,148.329,337.145,7898,0,0,0,6,15,0,0,0,0,90,46,0,0,0,0,0,0,0,0,
+Qulacs,competitor,ghz,24,2048,24,True,2.736845,748.307,8.769,1.751059,2.146027,3.897086,142.393,540.742,134875,0,0,0,10,83,0,0,0,0,824,393,0,0,0,0,0,0,0,0,
+Lumvorax V5 Reference,our_simulator,ghz,4,2048,4,True,0.282225,7256.614,14.173,0.357203,0.047109,0.404312,143.259,540.742,4244,0,0,0,4,17,0,0,0,0,84,41,0,0,0,0,0,0,0,0,
+Lumvorax V5 Reference,our_simulator,ghz,9,2048,9,True,0.28081,7293.18,32.05,0.386499,0.055791,0.44229,157.505,540.742,4246,0,0,0,4,35,0,0,0,0,84,44,0,0,0,0,0,0,0,0,
+Lumvorax V5 Reference,our_simulator,ghz,14,2048,14,True,0.245989,8325.581,56.913,0.353396,0.079423,0.432819,175.951,540.742,4363,0,0,0,4,20,0,0,0,0,74,44,0,0,0,0,0,0,0,0,
+Lumvorax V5 Reference,our_simulator,ghz,19,2048,19,True,0.3486,5874.926,54.504,0.378547,0.090692,0.469239,134.607,540.742,8477,0,0,0,4,16,0,0,0,0,106,48,0,0,0,0,0,0,0,0,
+Lumvorax V5 Reference,our_simulator,ghz,24,2048,24,True,2.457094,833.505,9.768,1.650121,0.987783,2.637904,107.359,540.742,139418,0,0,0,4,30,0,0,0,0,736,265,0,0,0,0,0,0,0,0,
