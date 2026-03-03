@@ -1,29 +1,24 @@
 # Project Overview
 
-This is a research and computation project focused on mathematical optimization, physics simulations, and puzzle-solving algorithms (primarily for Kaggle competitions and related research).
+This is a Python 3.11 workspace containing various research and analysis scripts, primarily related to the AI Mathematical Olympiad (AIMO) competition and related mathematical/algorithmic work.
 
-## Entry Point
+## Structure
 
-- `main.py` — simple Python entry point (`python main.py`)
+- `main.py` - Entry point (simple hello world placeholder)
+- `aimo3_*.py` - AIMO competition kernel scripts
+- `*.md` - Analysis and research documentation files
+- Various Python scripts for report generation, PDF creation, and Kaggle integration
 
-## Key Scripts
+## Running
 
-- `nx47_vesu_kernel_*.py` — various versions of the NX47/Vesuvius kernel for Kaggle
-- `aimo3_lum_*.py` — AIMO3 LUM computation kernels
-- `tools/` — utility scripts for log parsing and analysis
+The project runs via the "Run Python" workflow which executes `main.py`.
 
-## Environment Variables
+## Environment
 
-Secrets and API keys are stored securely in Replit's environment secrets (not in code):
-- `KAGGLE_USERNAME` — Kaggle account username
-- `KAGGLE_CONFIG_DIR` — Kaggle config directory path
-- `KAGGLE_API_TOKEN` — Kaggle API token (secret)
-- `ARISTOTLE_API_KEY` — Aristotle API key (secret)
-
-## Workflow
-
-- **Run Python**: `python main.py` (console output)
+- **Runtime**: Python 3.11
+- **Key packages**: kaggle, gcc, clang, ffmpeg, and many scientific/graphics libraries via Nix
 
 ## Security Notes
 
-- API keys and tokens are stored in Replit secrets, not hardcoded in `.replit` or source files
+- `KAGGLE_USERNAME` and `KAGGLE_CONFIG_DIR` are stored as non-sensitive env vars
+- API tokens (KAGGLE_API_TOKEN, ARISTOTLE_API_KEY) should be stored as secrets via the Replit Secrets panel, not in `.replit`
