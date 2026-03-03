@@ -1,7 +1,7 @@
 {
-  "id": "ndarray2000/INSERT_KERNEL_SLUG_HERE",
-  "title": "quantum-simulator-v3-execution",
-  "code_file": "quantum_v3_kaggle.ipynb",
+  "id": "ndarray2000/quantum-v3-final-clean",
+  "title": "Quantum V3 Final Clean",
+  "code_file": "quantum_v3_kaggle_absolute_final.ipynb",
   "language": "python",
   "kernel_type": "notebook",
   "is_private": "true",
