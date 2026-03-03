@@ -1,0 +1,16 @@
+name,repo,pip_package,import_name,clone_ok,install_ok,import_ok,snippet_ok,qubits_tested,import_time_s,snippet_time_s,notes
+Qiskit Aer,https://github.com/Qiskit/qiskit-aer.git,qiskit-aer,qiskit_aer,True,True,False,False,2,0.051119,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_195544/clones/qiskit_aer'... | import: Traceback (most recent call last):
+  File ""<string>"", line 1, in <module>
+ModuleNotFoundError: No module named 'qiskit_aer'"
+quimb,https://github.com/jcmgray/quimb.git,quimb,quimb,True,True,False,False,8,0.063898,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_195544/clones/quimb'... | import: Traceback (most recent call last):
+  File ""<string>"", line 1, in <module>
+ModuleNotFoundError: No module named 'quimb'"
+Qulacs,https://github.com/qulacs/qulacs.git,qulacs,qulacs,True,True,False,False,8,0.061847,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_195544/clones/qulacs'... | import: Traceback (most recent call last):
+  File ""<string>"", line 1, in <module>
+ModuleNotFoundError: No module named 'qulacs'"
+MQT DDSIM,https://github.com/cda-tum/mqt-ddsim.git,mqt.ddsim,mqt.ddsim,True,True,False,False,3,0.053865,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_195544/clones/mqt_ddsim'... | import: Traceback (most recent call last):
+  File ""<string>"", line 1, in <module>
+ModuleNotFoundError: No module named 'mqt'"
+QuTiP,https://github.com/qutip/qutip.git,qutip,qutip,True,True,False,False,1,0.068044,0.0,"Cloning into '/home/runner/workspace/src/advanced_calculations/quantum_simulator_v5_competitor_cpu/results/20260303_195544/clones/qutip'... | import: Traceback (most recent call last):
+  File ""<string>"", line 1, in <module>
+ModuleNotFoundError: No module named 'qutip'"
