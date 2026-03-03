@@ -2,7 +2,6 @@
 import argparse
 import csv
 import json
-import os
 import pathlib
 import resource
 import subprocess
@@ -50,37 +49,34 @@ for i in range(n - 1):
 circuit.update_quantum_state(state)
 """,
     "MQT DDSIM": """
+from mqt.core.ir import QuantumComputation
 from mqt import ddsim
-sim = ddsim.CircuitSimulator(3)
-sim.h(0)
-sim.cx(0, 1)
-sim.cx(1, 2)
+qc = QuantumComputation(3)
+qc.h(0)
+qc.cx(0, 1)
+qc.cx(1, 2)
+qc.measure_all()
+sim = ddsim.CircuitSimulator(qc)
 counts = sim.simulate(shots=128)
 assert counts
-""",
-    "ProjectQ": """
-from projectq import MainEngine
-from projectq.ops import H, CNOT, Measure, All
-eng = MainEngine()
-q = eng.allocate_qureg(3)
-H | q[0]
-CNOT | (q[0], q[1])
-CNOT | (q[1], q[2])
-All(Measure) | q
-eng.flush()
 """,
     "QuTiP": """
 import qutip as qt
 psi0 = qt.basis(2, 0)
-H = qt.hadamard_transform()
-psi = H * psi0
-assert psi is not None
+psi = qt.sigmax() * psi0
+prob_0 = qt.expect(psi0 * psi0.dag(), psi)
+assert abs(prob_0) < 1e-12
 """,
 }
 
+BENCH_QUBITS = {
+    "Qiskit Aer": 2,
+    "quimb": 8,
+    "Qulacs": 8,
+    "MQT DDSIM": 3,
+    "QuTiP": 1,
+}
 
-def sh(cmd, cwd=None, check=True):
-    return subprocess.run(cmd, cwd=cwd, check=check, text=True, capture_output=True)
 
 
 def run_import(import_name):
@@ -103,6 +99,11 @@ def ensure_clone(repo_url, dst):
     return p.returncode == 0, (p.stderr.strip() or p.stdout.strip())
 
 
+def remove_gitignore_files(directory):
+    for p in directory.rglob(".gitignore"):
+        p.unlink(missing_ok=True)
+
+
 def ensure_pip(pkg, skip_install):
     if skip_install:
         return True, "skip-install"
@@ -118,6 +119,9 @@ def main():
     args = ap.parse_args()
 
     data = json.loads(MANIFEST_PATH.read_text())
+    for competitor in data.get("competitors", []):
+        if competitor["name"] not in BENCH_SNIPPETS:
+            raise ValueError(f"Missing benchmark snippet for competitor: {competitor['name']}")
     out_dir = ROOT / "results" / args.run_id
     out_dir.mkdir(parents=True, exist_ok=True)
     clone_dir = out_dir / "clones"
@@ -135,13 +139,17 @@ def main():
             "install_ok": False,
             "import_ok": False,
             "snippet_ok": False,
+            "qubits_tested": BENCH_QUBITS.get(name, 0),
             "import_time_s": 0.0,
             "snippet_time_s": 0.0,
             "notes": ""
         }
-        ok_clone, note_clone = ensure_clone(c["repo"], clone_dir / name.lower().replace(" ", "_"))
+        clone_target = clone_dir / name.lower().replace(" ", "_")
+        ok_clone, note_clone = ensure_clone(c["repo"], clone_target)
         row["clone_ok"] = ok_clone
         row["notes"] = note_clone
+        if ok_clone:
+            remove_gitignore_files(clone_target)
 
         if args.plan_only:
             rows.append(row)
@@ -177,6 +185,9 @@ def main():
         w.writeheader()
         w.writerows(rows)
 
+    runtime_ready_total = sum(1 for r in rows if r["install_ok"])
+    runtime_ready_snippet_ok = sum(1 for r in rows if r["install_ok"] and r["snippet_ok"])
+
     summary = {
         "run_id": args.run_id,
         "plan_only": args.plan_only,
@@ -186,6 +197,10 @@ def main():
         "install_ok": sum(1 for r in rows if r["install_ok"]),
         "import_ok": sum(1 for r in rows if r["import_ok"]),
         "snippet_ok": sum(1 for r in rows if r["snippet_ok"]),
+        "runtime_ready_total": runtime_ready_total,
+        "runtime_ready_snippet_ok": runtime_ready_snippet_ok,
+        "runtime_ready_snippet_rate": round(runtime_ready_snippet_ok / runtime_ready_total, 6) if runtime_ready_total else 0.0,
+        "max_qubits_tested": max((r["qubits_tested"] for r in rows), default=0),
         "max_memory_mb": round(maxrss_mb, 3)
     }
     (out_dir / "competitor_cpu_summary.json").write_text(json.dumps(summary, indent=2))
@@ -199,6 +214,10 @@ def main():
         f"- install_ok: {summary['install_ok']}",
         f"- import_ok: {summary['import_ok']}",
         f"- snippet_ok: {summary['snippet_ok']}",
+        f"- runtime_ready_total: {summary['runtime_ready_total']}",
+        f"- runtime_ready_snippet_ok: {summary['runtime_ready_snippet_ok']}",
+        f"- runtime_ready_snippet_rate: {summary['runtime_ready_snippet_rate']}",
+        f"- max_qubits_tested: {summary['max_qubits_tested']}",
         f"- max_memory_mb: {summary['max_memory_mb']}",
         "",
         "Artifacts:",
