@@ -1,0 +1,4 @@
+timestamp_utc=2026-03-04T04:08:08.774699+00:00
+script=nx48_unified_ultra.py
+python=3.10.19
+cwd=/workspace/Lumvorax/src/nx_versions/nx48_unified_ultra

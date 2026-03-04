@@ -1,0 +1,4 @@
+type,file,evidence,hypothesis
+high_log_density,nx_versions/nx11_logger_engine.py,log_markers=33,Strong forensic orientation; verify log rotation policy.
+high_theorem_density,nx_versions/nx39_theoreme_gouffre.lean,theorem_markers=9,Formal proof focus likely concentrated in specific Lean versions.
+open_point,hubbard_hts,Needs direct benchmark against published QMC/DMRG tables,"Potential literature gap, not yet numerically bound."

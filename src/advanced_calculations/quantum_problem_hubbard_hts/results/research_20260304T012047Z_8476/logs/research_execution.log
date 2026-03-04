@@ -1,0 +1,17 @@
+000001 | START run_id=research_20260304T012047Z_8476 utc=2026-03-04T01:20:47Z
+000002 | ISOLATION run_dir_preexisting=NO
+000003 | BASELINE latest_classic_run=1772585474_4175
+000004 | BASE_RESULT problem=hubbard_hts_core energy=11287.196377 pairing=0.888405 sign=-0.002528 cpu_peak=2.03 mem_peak=3.43 elapsed_ns=437890453
+000005 | BASE_RESULT problem=qcd_lattice_proxy energy=7741.663068 pairing=0.865788 sign=0.001273 cpu_peak=2.04 mem_peak=3.43 elapsed_ns=364623701
+000006 | BASE_RESULT problem=quantum_field_noneq energy=-7541.941861 pairing=0.835671 sign=-0.006765 cpu_peak=2.04 mem_peak=3.43 elapsed_ns=340852200
+000007 | BASE_RESULT problem=dense_nuclear_proxy energy=18541.862685 pairing=0.911657 sign=0.000168 cpu_peak=2.05 mem_peak=3.43 elapsed_ns=343390214
+000008 | BASE_RESULT problem=quantum_chemistry_proxy energy=-8304.908399 pairing=0.935041 sign=0.000356 cpu_peak=2.05 mem_peak=3.43 elapsed_ns=365013026
+000009 | TEST reproducibility delta_same=0.00000000000000 delta_diff=1537.86573730008377
+000010 | TEST convergence steps=400 pairing=0.9464246417 finite=yes
+000011 | TEST convergence steps=800 pairing=0.9325737192 finite=yes
+000012 | TEST convergence steps=1600 pairing=0.9083589502 finite=yes
+000013 | TEST convergence steps=3200 pairing=0.8720857728 finite=yes
+000014 | TEST independent_verification delta=0.0000000000
+000015 | RUSAGE maxrss_kb=2344 user=17.658254 sys=0.012005
+000016 | SCORE iso=100 trace=100 repr=100 robust=100 phys=100 expert=100
+000017 | END report=/workspace/Lumvorax/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260304T012047Z_8476/reports/RAPPORT_RECHERCHE_CYCLE_02.md
