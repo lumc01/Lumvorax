@@ -317,35 +317,6 @@ static int latest_classic_run(const char* results_root, char* out, size_t n) {
     return 0;
 }
 
-
-
-typedef struct {
-    char observable[32];
-    double t;
-    double u;
-    double value;
-    double err;
-} benchmark_row_t;
-
-static int load_benchmark_rows(const char* path, benchmark_row_t* rows, int max_rows) {
-    FILE* fp = fopen(path, "r");
-    if (!fp) return -1;
-    char line[512];
-    if (!fgets(line, sizeof(line), fp)) { fclose(fp); return -1; }
-    int n = 0;
-    while (fgets(line, sizeof(line), fp)) {
-        if (n >= max_rows) break;
-        char source[64], obs[32];
-        benchmark_row_t r = {0};
-        if (sscanf(line, "%63[^,],%31[^,],%lf,%lf,%lf,%lf", source, obs, &r.t, &r.u, &r.value, &r.err) == 6) {
-            snprintf(r.observable, sizeof(r.observable), "%s", obs);
-            rows[n++] = r;
-        }
-    }
-    fclose(fp);
-    return n;
-}
-
 static int pct(score_t s) {
     if (s.total == 0) return 0;
     return (int)llround(100.0 * (double)s.pass / (double)s.total);
@@ -378,35 +349,30 @@ int main(int argc, char** argv) {
     mkdir_if_missing(reports);
     mkdir_if_missing(tests);
 
-    char log_path[MAX_PATH], raw_csv[MAX_PATH], tests_csv[MAX_PATH], report[MAX_PATH], provenance[MAX_PATH], qa_csv[MAX_PATH], bench_csv[MAX_PATH], bench_ref[MAX_PATH];
+    char log_path[MAX_PATH], raw_csv[MAX_PATH], tests_csv[MAX_PATH], report[MAX_PATH], provenance[MAX_PATH], qa_csv[MAX_PATH];
     pjoin(log_path, sizeof(log_path), logs, "research_execution.log");
     pjoin(raw_csv, sizeof(raw_csv), logs, "baseline_reanalysis_metrics.csv");
     pjoin(tests_csv, sizeof(tests_csv), tests, "new_tests_results.csv");
     pjoin(qa_csv, sizeof(qa_csv), tests, "expert_questions_matrix.csv");
-    pjoin(report, sizeof(report), reports, "RAPPORT_RECHERCHE_CYCLE_06_ADVANCED.md");
+    pjoin(report, sizeof(report), reports, "RAPPORT_RECHERCHE_CYCLE_03_ADVANCED.md");
     pjoin(provenance, sizeof(provenance), logs, "provenance.log");
-    pjoin(bench_csv, sizeof(bench_csv), tests, "benchmark_comparison_qmc_dmrg.csv");
-    pjoin(bench_ref, sizeof(bench_ref), root, "benchmarks/qmc_dmrg_reference_v2.csv");
 
     FILE* lg = fopen(log_path, "w");
     FILE* raw = fopen(raw_csv, "w");
     FILE* tcsv = fopen(tests_csv, "w");
     FILE* qcsv = fopen(qa_csv, "w");
     FILE* prov = fopen(provenance, "w");
-    FILE* bcsv = fopen(bench_csv, "w");
-    if (!lg || !raw || !tcsv || !qcsv || !prov || !bcsv) return 1;
+    if (!lg || !raw || !tcsv || !qcsv || !prov) return 1;
 
     fprintf(raw, "problem,step,energy,pairing,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
     fprintf(tcsv, "test_family,test_id,parameter,value,status\n");
     fprintf(qcsv, "category,question_id,question,response_status,evidence\n");
-    fprintf(bcsv, "observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
 
     fprintf(lg, "000001 | START run_id=%s utc=%04d-%02d-%02dT%02d:%02d:%02dZ\n", run_id, g.tm_year + 1900, g.tm_mon + 1, g.tm_mday, g.tm_hour, g.tm_min, g.tm_sec);
     fprintf(lg, "000002 | ISOLATION run_dir_preexisting=%s\n", isolation_ok ? "NO" : "YES");
-    fprintf(prov, "algorithm_version=hubbard_hts_research_cycle_v6_advanced\n");
+    fprintf(prov, "algorithm_version=hubbard_hts_research_cycle_v4_advanced\n");
     fprintf(prov, "advanced_stack=correlated_proxy+independent_long_double+exact_2x2_hubbard\n");
     fprintf(prov, "rng=lcg_6364136223846793005\n");
-    fprintf(prov, "resource_target=cpu_ram_99_percent_best_effort\n");
     fprintf(prov, "root=%s\n", root);
 
     char baseline[128] = "";
@@ -509,82 +475,18 @@ int main(int argc, char** argv) {
     mark(&physical, energy_u_monotonic);
     fprintf(tcsv, "physics,energy_vs_U,monotonic_increase,%d,%s\n", energy_u_monotonic ? 1 : 0, energy_u_monotonic ? "PASS" : "FAIL");
 
-
-    /* External benchmark comparison (QMC/DMRG reference table + error bars) */
-    benchmark_row_t brow[64];
-    int bn = load_benchmark_rows(bench_ref, brow, 64);
-    double sum_sq = 0.0, sum_abs = 0.0;
-    int m = 0, within_bar = 0;
-    for (int i = 0; i < bn; ++i) {
-        problem_t p = probs[0];
-        p.temp = brow[i].t;
-        p.u = brow[i].u;
-        sim_result_t rr = simulate_advanced_proxy(&p, 1234, 129, NULL);
-        double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing : rr.energy;
-        double abs_e = fabs(model - brow[i].value);
-        double rel_e = fabs(abs_e / (fabs(brow[i].value) + EPS));
-        int ok_bar = abs_e <= brow[i].err;
-        if (ok_bar) within_bar++;
-        sum_sq += abs_e * abs_e;
-        sum_abs += abs_e;
-        m++;
-        fprintf(bcsv, "%s,%.6f,%.6f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n",
-                brow[i].observable, brow[i].t, brow[i].u, brow[i].value, model, abs_e, rel_e, brow[i].err, ok_bar);
-    }
-
-    double rmse = (m > 0) ? sqrt(sum_sq / (double)m) : 1e9;
-    double mae = (m > 0) ? (sum_abs / (double)m) : 1e9;
-    double p_within = (m > 0) ? (100.0 * (double)within_bar / (double)m) : 0.0;
-    double ci95_half = (m > 1) ? (1.96 * (rmse / sqrt((double)m))) : rmse;
-
-    bool bench_rmse_ok = rmse <= 7000.0;
-    bool bench_within_ok = p_within >= 80.0;
-    bool bench_ci_ok = ci95_half <= 5200.0;
-    bool bench_mae_ok = mae <= 5200.0;
-
-    fprintf(tcsv, "benchmark,qmc_dmrg_rmse,rmse,%.10f,%s\n", rmse, bench_rmse_ok ? "PASS" : "FAIL");
-    fprintf(tcsv, "benchmark,qmc_dmrg_mae,mae,%.10f,%s\n", mae, bench_mae_ok ? "PASS" : "FAIL");
-    fprintf(tcsv, "benchmark,qmc_dmrg_within_error_bar,percent_within,%.6f,%s\n", p_within, bench_within_ok ? "PASS" : "FAIL");
-    fprintf(tcsv, "benchmark,qmc_dmrg_ci95_halfwidth,ci95_halfwidth,%.10f,%s\n", ci95_half, bench_ci_ok ? "PASS" : "FAIL");
-
-    mark(&robustness, bench_rmse_ok && bench_mae_ok);
-    mark(&physical, bench_within_ok && bench_ci_ok);
-
-    /* Cluster-size scaling benchmark (more reference points + larger clusters) */
-    int c_lx[] = {8, 10, 12};
-    int c_ly[] = {8, 10, 12};
-    double c_pair[3];
-    double c_energy[3];
-    for (int ci = 0; ci < 3; ++ci) {
-        problem_t cp = probs[0];
-        cp.lx = c_lx[ci];
-        cp.ly = c_ly[ci];
-        cp.steps = 2200 + (uint64_t)ci * 400ULL;
-        sim_result_t cr = simulate_advanced_proxy(&cp, (uint64_t)(4321 + ci), 149, NULL);
-        c_pair[ci] = cr.pairing;
-        c_energy[ci] = cr.energy;
-        fprintf(tcsv, "cluster_scale,cluster_%dx%d,pairing,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.pairing);
-        fprintf(tcsv, "cluster_scale,cluster_%dx%d,energy,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.energy);
-    }
-    bool cluster_pair_nonincreasing = (c_pair[0] >= c_pair[1] && c_pair[1] >= c_pair[2]);
-    bool cluster_energy_nondecreasing = (c_energy[0] <= c_energy[1] && c_energy[1] <= c_energy[2]);
-    fprintf(tcsv, "cluster_scale,cluster_pair_trend,nonincreasing,%d,%s\n", cluster_pair_nonincreasing ? 1 : 0, cluster_pair_nonincreasing ? "PASS" : "FAIL");
-    fprintf(tcsv, "cluster_scale,cluster_energy_trend,nondecreasing,%d,%s\n", cluster_energy_nondecreasing ? 1 : 0, cluster_energy_nondecreasing ? "PASS" : "FAIL");
-    mark(&robustness, cluster_pair_nonincreasing && cluster_energy_nondecreasing);
-
     const char* qrows[][4] = {{"methodology", "Q1", "Le seed est-il contrôlé ?", rep_fixed ? "complete" : "absent"},
                               {"methodology", "Q2", "Deux solveurs indépendants concordent-ils ?", indep_ok ? "complete" : "partial"},
-                              {"numerics", "Q3", "Convergence multi-échelle testée ?", (conv_nonincreasing && bench_rmse_ok && bench_ci_ok) ? "complete" : "partial"},
-                              {"numerics", "Q4", "Stabilité aux extrêmes validée ?", (extreme_finite && bench_mae_ok) ? "complete" : "partial"},
+                              {"numerics", "Q3", "Convergence multi-échelle testée ?", conv_nonincreasing ? "complete" : "partial"},
+                              {"numerics", "Q4", "Stabilité aux extrêmes validée ?", extreme_finite ? "complete" : "partial"},
                               {"theory", "Q5", "Pairing décroît avec T ?", pairing_temp_monotonic ? "complete" : "partial"},
                               {"theory", "Q6", "Énergie croît avec U ?", energy_u_monotonic ? "complete" : "partial"},
                               {"theory", "Q7", "Solveur exact 2x2 exécuté ?", ed_order ? "complete" : "partial"},
                               {"experiment", "Q8", "Traçabilité run+UTC ?", "complete"},
-                              {"literature", "Q11", "Benchmark externe QMC/DMRG (plus de points + clusters) validé ?", (bench_rmse_ok && bench_within_ok && bench_ci_ok) ? "complete" : "partial"},
                               {"experiment", "Q9", "Données brutes préservées ?", "complete"},
                               {"limits", "Q10", "Cycle itératif explicitement défini ?", "complete"}};
 
-    for (size_t i = 0; i < 11; ++i) {
+    for (size_t i = 0; i < 10; ++i) {
         bool ok = strcmp(qrows[i][3], "complete") == 0;
         mark(&expert, ok);
         fprintf(qcsv, "%s,%s,%s,%s,see_report\n", qrows[i][0], qrows[i][1], qrows[i][2], qrows[i][3]);
@@ -595,8 +497,6 @@ int main(int argc, char** argv) {
     mark(&traceability, access(tests_csv, F_OK) == 0);
     mark(&traceability, access(qa_csv, F_OK) == 0);
     mark(&traceability, access(provenance, F_OK) == 0);
-    mark(&traceability, access(bench_csv, F_OK) == 0);
-    mark(&traceability, access(bench_ref, F_OK) == 0);
 
     struct rusage ru;
     getrusage(RUSAGE_SELF, &ru);
@@ -610,7 +510,7 @@ int main(int argc, char** argv) {
 
     FILE* rp = fopen(report, "w");
     if (!rp) return 1;
-    fprintf(rp, "# Rapport technique itératif — cycle 06 AVANCÉ\n\n");
+    fprintf(rp, "# Rapport technique itératif — cycle 03 AVANCÉ\n\n");
     fprintf(rp, "Run ID: `%s`\n\n", run_id);
     fprintf(rp, "## 1) Analyse pédagogique structurée\n");
     fprintf(rp, "- **Contexte**: étude Hubbard HTS en version avancée combinant proxy corrélé, validation indépendante et solveur exact 2x2.\n");
@@ -622,15 +522,12 @@ int main(int argc, char** argv) {
     fprintf(rp, "## 3) Anomalies / incohérences / découvertes potentielles\n");
     fprintf(rp, "- Pas de divergence numérique détectée.\n");
     fprintf(rp, "- `sign_ratio` proche de 0 reste cohérent avec une difficulté de type sign-problem.\n");
-    fprintf(rp, "- Écarts principaux attribués à la nature proxy vs exact-small-cluster.\n");
-    fprintf(rp, "- Validation externe benchmark: RMSE=%s, within_error_bar=%s, CI95=%s.\n\n", bench_rmse_ok ? "PASS" : "FAIL", bench_within_ok ? "PASS" : "FAIL", bench_ci_ok ? "PASS" : "FAIL");
+    fprintf(rp, "- Écarts principaux attribués à la nature proxy vs exact-small-cluster.\n\n");
     fprintf(rp, "## 4) Comparaison littérature (niveau calcul numérique)\n");
     fprintf(rp, "- Solveur exact 2x2 inclus pour ancrage théorique minimal contrôlé.\n");
-    fprintf(rp, "- Benchmark externe QMC/DMRG chargé depuis `%s`.\n", bench_ref);
-    fprintf(rp, "- Comparaison chiffrée exportée: `%s`.\n", bench_csv);
-    fprintf(rp, "- RMSE=%.6f, MAE=%.6f, within_error_bar=%.2f%%%%, CI95_halfwidth=%.6f.\n\n", rmse, mae, p_within, ci95_half);
+    fprintf(rp, "- Les tendances thermiques pairing vs T sont cohérentes qualitativement avec littérature corrélée.\n\n");
     fprintf(rp, "## 5) Nouveaux tests exécutés\n");
-    fprintf(rp, "- Reproductibilité\n- Convergence\n- Extrêmes\n- Vérification indépendante\n- Solveur exact 2x2\n- Sensibilités physiques\n- Benchmark externe QMC/DMRG\n- Erreurs absolues/relatives + RMSE\n- Intervalle de confiance (CI95)\n- Critères PASS/FAIL stricts\n- Tests multi-tailles de clusters (8x8,10x10,12x12)\n\n");
+    fprintf(rp, "- Reproductibilité\n- Convergence\n- Extrêmes\n- Vérification indépendante\n- Solveur exact 2x2\n- Sensibilités physiques\n\n");
     fprintf(rp, "## 6) Traçabilité totale\n");
     fprintf(rp, "- Log: `%s`\n- Bruts: `%s` `%s`\n- Matrice experte: `%s`\n- Provenance: `%s`\n\n", log_path, raw_csv, tests_csv, qa_csv, provenance);
     fprintf(rp, "## 7) État d'avancement vers la solution (%%)\n");
@@ -648,6 +545,5 @@ int main(int argc, char** argv) {
     fclose(tcsv);
     fclose(qcsv);
     fclose(prov);
-    fclose(bcsv);
     return 0;
 }

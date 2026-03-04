@@ -1,0 +1,4 @@
+hostname=2fe5d24fb137
+platform=Linux-6.12.47-x86_64-with-glibc2.39
+python=3.10.19
+gcc=gcc (Ubuntu 13.3.0-6ubuntu2~24.04) 13.3.0

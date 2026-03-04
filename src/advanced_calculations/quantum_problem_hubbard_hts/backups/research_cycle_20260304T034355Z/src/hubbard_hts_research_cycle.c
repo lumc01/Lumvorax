@@ -383,10 +383,10 @@ int main(int argc, char** argv) {
     pjoin(raw_csv, sizeof(raw_csv), logs, "baseline_reanalysis_metrics.csv");
     pjoin(tests_csv, sizeof(tests_csv), tests, "new_tests_results.csv");
     pjoin(qa_csv, sizeof(qa_csv), tests, "expert_questions_matrix.csv");
-    pjoin(report, sizeof(report), reports, "RAPPORT_RECHERCHE_CYCLE_06_ADVANCED.md");
+    pjoin(report, sizeof(report), reports, "RAPPORT_RECHERCHE_CYCLE_05_ADVANCED.md");
     pjoin(provenance, sizeof(provenance), logs, "provenance.log");
     pjoin(bench_csv, sizeof(bench_csv), tests, "benchmark_comparison_qmc_dmrg.csv");
-    pjoin(bench_ref, sizeof(bench_ref), root, "benchmarks/qmc_dmrg_reference_v2.csv");
+    pjoin(bench_ref, sizeof(bench_ref), root, "benchmarks/qmc_dmrg_reference_v1.csv");
 
     FILE* lg = fopen(log_path, "w");
     FILE* raw = fopen(raw_csv, "w");
@@ -403,10 +403,9 @@ int main(int argc, char** argv) {
 
     fprintf(lg, "000001 | START run_id=%s utc=%04d-%02d-%02dT%02d:%02d:%02dZ\n", run_id, g.tm_year + 1900, g.tm_mon + 1, g.tm_mday, g.tm_hour, g.tm_min, g.tm_sec);
     fprintf(lg, "000002 | ISOLATION run_dir_preexisting=%s\n", isolation_ok ? "NO" : "YES");
-    fprintf(prov, "algorithm_version=hubbard_hts_research_cycle_v6_advanced\n");
+    fprintf(prov, "algorithm_version=hubbard_hts_research_cycle_v5_advanced\n");
     fprintf(prov, "advanced_stack=correlated_proxy+independent_long_double+exact_2x2_hubbard\n");
     fprintf(prov, "rng=lcg_6364136223846793005\n");
-    fprintf(prov, "resource_target=cpu_ram_99_percent_best_effort\n");
     fprintf(prov, "root=%s\n", root);
 
     char baseline[128] = "";
@@ -519,7 +518,7 @@ int main(int argc, char** argv) {
         problem_t p = probs[0];
         p.temp = brow[i].t;
         p.u = brow[i].u;
-        sim_result_t rr = simulate_advanced_proxy(&p, 1234, 129, NULL);
+        sim_result_t rr = simulate_advanced_proxy(&p, 1234, 99, NULL);
         double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing : rr.energy;
         double abs_e = fabs(model - brow[i].value);
         double rel_e = fabs(abs_e / (fabs(brow[i].value) + EPS));
@@ -537,10 +536,10 @@ int main(int argc, char** argv) {
     double p_within = (m > 0) ? (100.0 * (double)within_bar / (double)m) : 0.0;
     double ci95_half = (m > 1) ? (1.96 * (rmse / sqrt((double)m))) : rmse;
 
-    bool bench_rmse_ok = rmse <= 7000.0;
-    bool bench_within_ok = p_within >= 80.0;
-    bool bench_ci_ok = ci95_half <= 5200.0;
-    bool bench_mae_ok = mae <= 5200.0;
+    bool bench_rmse_ok = rmse <= 4500.0;
+    bool bench_within_ok = p_within >= 75.0;
+    bool bench_ci_ok = ci95_half <= 3200.0;
+    bool bench_mae_ok = mae <= 3800.0;
 
     fprintf(tcsv, "benchmark,qmc_dmrg_rmse,rmse,%.10f,%s\n", rmse, bench_rmse_ok ? "PASS" : "FAIL");
     fprintf(tcsv, "benchmark,qmc_dmrg_mae,mae,%.10f,%s\n", mae, bench_mae_ok ? "PASS" : "FAIL");
@@ -550,28 +549,6 @@ int main(int argc, char** argv) {
     mark(&robustness, bench_rmse_ok && bench_mae_ok);
     mark(&physical, bench_within_ok && bench_ci_ok);
 
-    /* Cluster-size scaling benchmark (more reference points + larger clusters) */
-    int c_lx[] = {8, 10, 12};
-    int c_ly[] = {8, 10, 12};
-    double c_pair[3];
-    double c_energy[3];
-    for (int ci = 0; ci < 3; ++ci) {
-        problem_t cp = probs[0];
-        cp.lx = c_lx[ci];
-        cp.ly = c_ly[ci];
-        cp.steps = 2200 + (uint64_t)ci * 400ULL;
-        sim_result_t cr = simulate_advanced_proxy(&cp, (uint64_t)(4321 + ci), 149, NULL);
-        c_pair[ci] = cr.pairing;
-        c_energy[ci] = cr.energy;
-        fprintf(tcsv, "cluster_scale,cluster_%dx%d,pairing,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.pairing);
-        fprintf(tcsv, "cluster_scale,cluster_%dx%d,energy,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.energy);
-    }
-    bool cluster_pair_nonincreasing = (c_pair[0] >= c_pair[1] && c_pair[1] >= c_pair[2]);
-    bool cluster_energy_nondecreasing = (c_energy[0] <= c_energy[1] && c_energy[1] <= c_energy[2]);
-    fprintf(tcsv, "cluster_scale,cluster_pair_trend,nonincreasing,%d,%s\n", cluster_pair_nonincreasing ? 1 : 0, cluster_pair_nonincreasing ? "PASS" : "FAIL");
-    fprintf(tcsv, "cluster_scale,cluster_energy_trend,nondecreasing,%d,%s\n", cluster_energy_nondecreasing ? 1 : 0, cluster_energy_nondecreasing ? "PASS" : "FAIL");
-    mark(&robustness, cluster_pair_nonincreasing && cluster_energy_nondecreasing);
-
     const char* qrows[][4] = {{"methodology", "Q1", "Le seed est-il contrôlé ?", rep_fixed ? "complete" : "absent"},
                               {"methodology", "Q2", "Deux solveurs indépendants concordent-ils ?", indep_ok ? "complete" : "partial"},
                               {"numerics", "Q3", "Convergence multi-échelle testée ?", (conv_nonincreasing && bench_rmse_ok && bench_ci_ok) ? "complete" : "partial"},
@@ -580,7 +557,7 @@ int main(int argc, char** argv) {
                               {"theory", "Q6", "Énergie croît avec U ?", energy_u_monotonic ? "complete" : "partial"},
                               {"theory", "Q7", "Solveur exact 2x2 exécuté ?", ed_order ? "complete" : "partial"},
                               {"experiment", "Q8", "Traçabilité run+UTC ?", "complete"},
-                              {"literature", "Q11", "Benchmark externe QMC/DMRG (plus de points + clusters) validé ?", (bench_rmse_ok && bench_within_ok && bench_ci_ok) ? "complete" : "partial"},
+                              {"literature", "Q11", "Benchmark externe QMC/DMRG avec barres d'erreur validé ?", (bench_rmse_ok && bench_within_ok && bench_ci_ok) ? "complete" : "partial"},
                               {"experiment", "Q9", "Données brutes préservées ?", "complete"},
                               {"limits", "Q10", "Cycle itératif explicitement défini ?", "complete"}};
 
@@ -610,7 +587,7 @@ int main(int argc, char** argv) {
 
     FILE* rp = fopen(report, "w");
     if (!rp) return 1;
-    fprintf(rp, "# Rapport technique itératif — cycle 06 AVANCÉ\n\n");
+    fprintf(rp, "# Rapport technique itératif — cycle 05 AVANCÉ\n\n");
     fprintf(rp, "Run ID: `%s`\n\n", run_id);
     fprintf(rp, "## 1) Analyse pédagogique structurée\n");
     fprintf(rp, "- **Contexte**: étude Hubbard HTS en version avancée combinant proxy corrélé, validation indépendante et solveur exact 2x2.\n");
@@ -630,7 +607,7 @@ int main(int argc, char** argv) {
     fprintf(rp, "- Comparaison chiffrée exportée: `%s`.\n", bench_csv);
     fprintf(rp, "- RMSE=%.6f, MAE=%.6f, within_error_bar=%.2f%%%%, CI95_halfwidth=%.6f.\n\n", rmse, mae, p_within, ci95_half);
     fprintf(rp, "## 5) Nouveaux tests exécutés\n");
-    fprintf(rp, "- Reproductibilité\n- Convergence\n- Extrêmes\n- Vérification indépendante\n- Solveur exact 2x2\n- Sensibilités physiques\n- Benchmark externe QMC/DMRG\n- Erreurs absolues/relatives + RMSE\n- Intervalle de confiance (CI95)\n- Critères PASS/FAIL stricts\n- Tests multi-tailles de clusters (8x8,10x10,12x12)\n\n");
+    fprintf(rp, "- Reproductibilité\n- Convergence\n- Extrêmes\n- Vérification indépendante\n- Solveur exact 2x2\n- Sensibilités physiques\n- Benchmark externe QMC/DMRG\n- Erreurs absolues/relatives + RMSE\n- Intervalle de confiance (CI95)\n- Critères PASS/FAIL stricts\n\n");
     fprintf(rp, "## 6) Traçabilité totale\n");
     fprintf(rp, "- Log: `%s`\n- Bruts: `%s` `%s`\n- Matrice experte: `%s`\n- Provenance: `%s`\n\n", log_path, raw_csv, tests_csv, qa_csv, provenance);
     fprintf(rp, "## 7) État d'avancement vers la solution (%%)\n");

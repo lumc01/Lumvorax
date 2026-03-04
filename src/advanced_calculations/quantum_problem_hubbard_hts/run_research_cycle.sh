@@ -8,6 +8,7 @@ mkdir -p "$BACKUP_DIR"
 cp -a "$ROOT_DIR/include" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/src" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/Makefile" "$BACKUP_DIR/"
+cp -a "$ROOT_DIR/benchmarks" "$BACKUP_DIR/"
 
 make -C "$ROOT_DIR" clean all
 "$ROOT_DIR/hubbard_hts_research_runner" "$ROOT_DIR"
