@@ -1,0 +1,10 @@
+requirement_id,requirement,covered
+1,Explication pédagogique complète,YES
+2,Questions expertes + statut,YES
+3,Anomalies/incohérences/découvertes potentielles,YES
+4,Comparaison littérature/simulations existantes,YES
+5,Nouveaux tests définis + exécutés,YES
+6,Nouveau rapport sans modifier anciens logs,YES
+7,Traçabilité totale (UTC/preuves/brut),YES
+8,Cycle itératif explicité,YES
+9,Nom exact du nouveau rapport fourni,YES

@@ -1,0 +1,9 @@
+fail_or_risk,root_cause_hypothesis,fix,prevention,status_target
+1.B pairing interpretation invalid,observable not normalized/defined,define physics-consistent normalized pairing metrics,schema+unit enforcement,PASS
+1.C sign_ratio interpretation weak,insufficient statistical diagnostics,add ESS/iat/bootstrap/sign-vs-beta-L diagnostics,mandatory statistical checklist,PASS
+1.D complexity overclaim,runtime data too local,perform scaling sweep and exponent fitting,benchmark gate,PASS
+2 physical claims unsupported,missing physical metadata and references,attach full model metadata and analytical benchmarks,claim gate blocks unsupported conclusions,PASS
+3 ambiguity in instability source,no ablation protocol,factorial ablation + sensitivity analysis,nightly ablation smoke tests,PASS
+4 confusion engineering/science,no governance gate,dual gate TRL/Physics,automated report badge,PASS
+Malformed CSV row,non-atomic writer,transactional writer + checksum footer,integrity CI blocker,PASS
+Missing module coverage,run completion unchecked,completion manifest validation,coverage CI blocker,PASS

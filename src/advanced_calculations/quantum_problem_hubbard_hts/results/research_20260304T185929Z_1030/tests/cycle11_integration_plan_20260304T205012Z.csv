@@ -1,0 +1,12 @@
+domain,problem,integration_to_add,how_to_implement,acceptance_criteria,priority
+1.B pairing,Pairing non interprétable physiquement,"Define normalized order parameter: pairing_per_site, pairing_susceptibility, connected correlator C_ij","Add observable API + metadata(unit,normalization); output raw+normalized values",Reference toy-case within 2% analytical value; finite-size trend consistent,P0
+1.C sign_ratio,Conclusion sign-problem non démontrée,"Add Monte Carlo diagnostics: average sign vs beta,L; effective sample size; autocorrelation",Implement block averaging + bootstrap CI + integrated autocorrelation time,Detect exponential decay regime when present; CI width below threshold,P0
+1.D runtime,Complexity inference weak,"Add profiling counters: FLOPs proxy, memory bandwidth, O(N) scaling sweep","Run benchmark grid N={8,16,32,64}, fit scaling exponent",R^2>0.98 and stable exponent across runs,P1
+2 physical validation,"Technique validée, physique non validée","Add physics metadata schema: U/t, lattice size, BC, dt, Hamiltonian id, seed",Embed schema in every CSV row header + provenance file,No run accepted if schema fields missing,P0
+3 diagnostic ambiguity,Instability source not isolable,"Add ablation tests: dt sweep, integrator variants, normalization on/off, forcing on/off",Automate factorial experiment and rank influence via ANOVA/sensitivity indices,Top-3 instability drivers identified with confidence,P0
+4 interpretation clarity,Engineering vs discovery confusion,Add readiness gates: TRL-tech gate and Physics-claim gate,Publish gate status in report summary table,Physics claim blocked unless all physics gates pass,P0
+data integrity,Malformed CSV row in run B,Atomic write tmp->rename + row-count/footer checksum,Implement writer transaction with flush+fsync and footer hash,0 malformed rows in 100 repeated runs,P0
+coverage,Missing module in run B,Completion manifest requiring expected modules and steps,Fail run if module/step coverage incomplete,coverage=100% before report generation,P0
+uncertainty,No error bars,Add uncertainty propagation + CI95 for all key observables,Bootstrap/repeated seeds >=30; report mean±CI,CI reported for every claim,P0
+cross-validation,Single-model bias,"Add multi-model comparators: exact small cluster, DMRG/QMC proxy, surrogate baseline",Run cross-model consistency dashboard,Discrepancy bounds documented + justified,P1
+future-fail prevention,Regression risk,Add CI pipeline with blockers on integrity/coverage/metadata/tests,Pre-merge checks + nightly stress tests,No merge if blocker fails,P0
