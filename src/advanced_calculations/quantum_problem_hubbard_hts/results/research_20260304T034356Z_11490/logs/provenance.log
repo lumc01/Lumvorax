@@ -1,0 +1,4 @@
+algorithm_version=hubbard_hts_research_cycle_v5_advanced
+advanced_stack=correlated_proxy+independent_long_double+exact_2x2_hubbard
+rng=lcg_6364136223846793005
+root=/workspace/Lumvorax/src/advanced_calculations/quantum_problem_hubbard_hts

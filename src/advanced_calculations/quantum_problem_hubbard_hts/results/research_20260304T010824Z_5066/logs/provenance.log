@@ -1,0 +1,3 @@
+algorithm_version=hubbard_hts_research_cycle_v2
+compiler_assumption=gcc_c11
+root=/workspace/Lumvorax/src/advanced_calculations/quantum_problem_hubbard_hts

@@ -1,0 +1,23 @@
+000001 | START run_id=research_20260304T010824Z_5066 utc=2026-03-04T01:08:24Z
+000002 | BASELINE latest_classic_run=1772585474_4175
+000003 | BASE_RESULT problem=hubbard_hts_core energy=5601.450344 pairing=0.893907 sign=-0.002422 cpu_peak=2.31 mem_peak=3.44 elapsed_ns=422167286
+000004 | BASE_RESULT problem=qcd_lattice_proxy energy=3855.125736 pairing=0.873937 sign=0.000885 cpu_peak=2.32 mem_peak=3.44 elapsed_ns=329444131
+000005 | BASE_RESULT problem=quantum_field_noneq energy=-7835.838347 pairing=0.843686 sign=-0.004778 cpu_peak=2.32 mem_peak=3.44 elapsed_ns=305201182
+000006 | BASE_RESULT problem=dense_nuclear_proxy energy=12109.477426 pairing=0.917634 sign=0.000218 cpu_peak=2.33 mem_peak=3.44 elapsed_ns=311368571
+000007 | BASE_RESULT problem=quantum_chemistry_proxy energy=-7994.357859 pairing=0.937792 sign=0.000950 cpu_peak=2.34 mem_peak=3.44 elapsed_ns=345112129
+000008 | TEST reproducibility delta_same=0.000000000000 delta_diff=2067.241921182532
+000009 | TEST convergence steps=400 pairing=0.94642464 diff_prev=0.00000000
+000010 | TEST convergence steps=800 pairing=0.93257372 diff_prev=0.01385092
+000011 | TEST convergence steps=1600 pairing=0.90835895 diff_prev=0.02421477
+000012 | TEST convergence steps=3200 pairing=0.87208577 diff_prev=0.03627318
+000013 | TEST sensitivity parameter=U value=6.00 energy=-11128.35072287
+000014 | TEST sensitivity parameter=U value=8.00 energy=-4147.63933237
+000015 | TEST sensitivity parameter=U value=10.00 energy=2833.07205700
+000016 | TEST sensitivity parameter=T value=60.00 pairing=0.94091424
+000017 | TEST sensitivity parameter=T value=95.00 pairing=0.90921827
+000018 | TEST sensitivity parameter=T value=130.00 pairing=0.87935900
+000019 | TEST stress burn=60 elapsed_ns=246419525 cpu_peak=0.00 mem_peak=0.00
+000020 | TEST stress burn=99 elapsed_ns=406140035 cpu_peak=0.00 mem_peak=0.00
+000021 | TEST stress burn=140 elapsed_ns=576283511 cpu_peak=0.00 mem_peak=0.00
+000022 | RUSAGE maxrss_kb=2420 user=7.839847 sys=0.000000
+000023 | END report=/workspace/Lumvorax/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260304T010824Z_5066/reports/RAPPORT_RECHERCHE_CYCLE_01.md

@@ -1,0 +1,7 @@
+domain,question,status
+methodology,Est-ce que chaque version NX a une traçabilité vérifiable ligne-par-ligne ?,complete
+numerics,Observe-t-on des risques d'instabilité numérique ou de divergence ?,complete
+theory,"Les fichiers Lean couvrent-ils axiomes, lemmes et théorèmes explicitement ?",complete
+experiment,La reproductibilité est-elle testée avec seeds et stress tests ?,complete
+literature,L'écart avec la littérature HTS est-il quantifié numériquement ?,complete
+audit,Les checksums et versions environnement sont-ils archivés ?,complete

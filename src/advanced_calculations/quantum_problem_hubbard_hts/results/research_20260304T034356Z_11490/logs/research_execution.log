@@ -1,0 +1,12 @@
+000001 | START run_id=research_20260304T034356Z_11490 utc=2026-03-04T03:43:56Z
+000002 | ISOLATION run_dir_preexisting=NO
+000003 | BASELINE latest_classic_run=1772585474_4175
+000004 | BASE_RESULT problem=hubbard_hts_core energy=1348150.430490 pairing=0.705841 sign=-0.001307 cpu_peak=1.30 mem_peak=3.48 elapsed_ns=1343309196
+000005 | BASE_RESULT problem=qcd_lattice_proxy energy=805448.394365 pairing=0.651125 sign=0.001987 cpu_peak=1.31 mem_peak=3.49 elapsed_ns=1101655507
+000006 | BASE_RESULT problem=quantum_field_noneq energy=468862.944865 pairing=0.577139 sign=0.001131 cpu_peak=1.32 mem_peak=3.49 elapsed_ns=1030020392
+000007 | BASE_RESULT problem=dense_nuclear_proxy energy=833888.536859 pairing=0.772180 sign=-0.000238 cpu_peak=1.33 mem_peak=3.47 elapsed_ns=1025020365
+000008 | BASE_RESULT problem=quantum_chemistry_proxy energy=398652.985381 pairing=0.813810 sign=0.001688 cpu_peak=1.33 mem_peak=3.47 elapsed_ns=1092729760
+000009 | TEST exact_2x2 u4=-2.7205662327 u8=-1.5043157123 ordered=yes
+000010 | RUSAGE maxrss_kb=2404 user=62.179270 sys=0.020001
+000011 | SCORE iso=100 trace=100 repr=100 robust=100 phys=100 expert=100
+000012 | END report=/workspace/Lumvorax/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260304T034356Z_11490/reports/RAPPORT_RECHERCHE_CYCLE_05_ADVANCED.md
