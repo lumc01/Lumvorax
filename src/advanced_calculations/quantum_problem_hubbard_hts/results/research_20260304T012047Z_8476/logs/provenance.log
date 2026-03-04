@@ -1,0 +1,4 @@
+algorithm_version=hubbard_hts_research_cycle_v3
+rng=lcg_6364136223846793005
+integration=explicit_discrete_proxy
+root=/workspace/Lumvorax/src/advanced_calculations/quantum_problem_hubbard_hts

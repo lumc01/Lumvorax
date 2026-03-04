@@ -1,0 +1,5 @@
+test_name,status,details
+reproducibility_seed_fixed,PASS,mean=0.016296317086;mean_ref=0.016296317086
+variance_range,PASS,variance=0.330238792294
+multiscale_range_proxy,PASS,"values=[0.4732635114909495, 0.478073113744165, 0.4754165880308716, 0.4877433162940551, 0.4910338955145924]"
+independent_sum_verification,PASS,delta=0.000e+00

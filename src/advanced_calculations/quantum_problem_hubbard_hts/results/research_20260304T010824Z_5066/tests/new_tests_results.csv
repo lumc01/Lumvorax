@@ -1,0 +1,16 @@
+test_family,test_id,parameter,value,status
+reproducibility,rep_fixed_seed,delta_same_seed,0.000000000000,PASS
+reproducibility,rep_diff_seed,delta_diff_seed,2067.241921182532,PASS
+convergence,conv_400_steps,pairing,0.9464246417,PASS
+convergence,conv_800_steps,pairing,0.9325737192,PASS
+convergence,conv_1600_steps,pairing,0.9083589502,PASS
+convergence,conv_3200_steps,pairing,0.8720857728,WARN
+sensitivity,sens_u_6,energy,-11128.3507228739,OBSERVED
+sensitivity,sens_u_8,energy,-4147.6393323732,OBSERVED
+sensitivity,sens_u_10,energy,2833.0720570023,OBSERVED
+sensitivity,sens_T_60,pairing,0.9409142418,OBSERVED
+sensitivity,sens_T_95,pairing,0.9092182710,OBSERVED
+sensitivity,sens_T_130,pairing,0.8793590015,OBSERVED
+stress,stress_burn_60,elapsed_ns,246419525,PASS
+stress,stress_burn_99,elapsed_ns,406140035,PASS
+stress,stress_burn_140,elapsed_ns,576283511,PASS
