@@ -1,0 +1,8 @@
+priority,problem,symptom,probable_root_cause,solution_to_integrate,proof_required,status
+P0,CSV tronqué,"ligne incomplète ex: dense_nuclear_proxy,1600,453950",writer non atomique/flush incomplet,transactional writer + checksum footer,sha256 + row count match,OPEN
+P0,Couverture modules incomplète,quantum_chemistry_proxy absent runB,absence de manifest de complétude,manifest modules/steps + hard fail,coverage=100%,OPEN
+P0,Pairing non normalisé,valeur cumulative brute,définition observable insuffisante,pairing_per_site + chi_pair + Cij,erreur<2% cas jouet,OPEN
+P0,sign_ratio insuffisant pour conclusion,pas de CI/ESS/iat,pipeline stats incomplet,bootstrap+ESS+iat,CI publié,OPEN
+P1,Complexité sur-interprétée,profil local seulement,pas de scaling sweep,benchmark N-sweep + fit,R2>0.98,OPEN
+P0,Claims physiques prématurés,métadonnées absentes,pas de gate,Physics gate bloquant,gate PASS requis,OPEN
+P0,Régression future,retours de fail récurrents,CI non bloquante,CI blockers + nightly stress,0 merge with blocker fail,OPEN
