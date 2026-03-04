@@ -1,0 +1,14 @@
+000001 | Demarrage run_id=1772585474_4175
+000002 | Objectif CPU=99% RAM=99%
+000003 | START problem=hubbard_hts_core lattice=8x8 U=8.00 T=95.0K steps=3500
+000004 | END problem=hubbard_hts_core elapsed_ns=989223313 energy=49049.802992 pairing=0.869113 sign=-0.003304
+000005 | START problem=qcd_lattice_proxy lattice=8x6 U=9.00 T=140.0K steps=2500
+000006 | END problem=qcd_lattice_proxy elapsed_ns=722965665 energy=19709.285926 pairing=0.847580 sign=0.000283
+000007 | START problem=quantum_field_noneq lattice=6x6 U=7.00 T=180.0K steps=2100
+000008 | END problem=quantum_field_noneq elapsed_ns=605555000 energy=-721.431274 pairing=0.801240 sign=0.003624
+000009 | START problem=dense_nuclear_proxy lattice=7x7 U=11.00 T=80.0K steps=2200
+000010 | END problem=dense_nuclear_proxy elapsed_ns=620872196 energy=26026.306771 pairing=0.908758 sign=-0.005696
+000011 | START problem=quantum_chemistry_proxy lattice=5x5 U=6.50 T=60.0K steps=2400
+000012 | END problem=quantum_chemistry_proxy elapsed_ns=675565096 energy=-7064.925908 pairing=0.925048 sign=-0.008067
+000013 | RUSAGE maxrss_kb=2192 user_time=3.599798 sys_time=0.016000
+000014 | FIN run_id=1772585474_4175 report=/workspace/Lumvorax/src/advanced_calculations/quantum_problem_hubbard_hts/results/1772585474_4175/reports/rapport_pedagogique.md
