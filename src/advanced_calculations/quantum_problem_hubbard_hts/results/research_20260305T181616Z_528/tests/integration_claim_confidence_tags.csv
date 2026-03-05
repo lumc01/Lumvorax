@@ -1,0 +1,5 @@
+claim,confidence_tag,reason
+CSV integrity,certain_failure,Computed from column parse and malformed rows count
+Observable reproducibility vs previous run,probable,Upgraded to certain if point-to-point diffs are all zero
+Physical interpretation finality,unknown,Needs explicit metadata + physics gate criteria
+Performance drift interpretation,probable,elapsed_ns drift often infra-driven; verify with controlled benchmark

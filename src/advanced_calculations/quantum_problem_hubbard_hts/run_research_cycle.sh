@@ -23,11 +23,16 @@ RUN_DIR="$ROOT_DIR/results/$LATEST_RUN"
   echo "gcc_version=$(gcc --version | head -n 1)"
 } > "$RUN_DIR/logs/environment_versions.log"
 
-# Cycle 14 integrations: non-expert glossary, confidence tags,
-# absent metadata extractor, drift monitor and gate summary.
-python3 "$ROOT_DIR/tools/post_run_cycle_guard.py" "$ROOT_DIR" "$RUN_DIR"
+# Cycle integrations: metadata first, then guard/gates, then physics pack.
 python3 "$ROOT_DIR/tools/post_run_metadata_capture.py" "$RUN_DIR"
+python3 "$ROOT_DIR/tools/post_run_cycle_guard.py" "$ROOT_DIR" "$RUN_DIR"
 python3 "$ROOT_DIR/tools/post_run_physics_readiness_pack.py" "$RUN_DIR"
+python3 "$ROOT_DIR/tools/post_run_v4next_integration_status.py" "$RUN_DIR"
+ROLL_MODE="${LUMVORAX_ROLLOUT_MODE:-shadow}"
+python3 "$ROOT_DIR/tools/v4next_rollout_controller.py" "$RUN_DIR" "$ROLL_MODE"
+python3 "$ROOT_DIR/tools/post_run_v4next_rollout_progress.py" "$RUN_DIR"
+python3 "$ROOT_DIR/tools/post_run_v4next_realtime_evolution.py" "$ROOT_DIR" "$RUN_DIR"
+python3 "$ROOT_DIR/tools/post_run_chatgpt_critical_tests.py" "$RUN_DIR"
 python3 "$ROOT_DIR/tools/post_run_authenticity_audit.py" "$ROOT_DIR" "$RUN_DIR"
 
 (
