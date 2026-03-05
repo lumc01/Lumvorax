@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import csv
-import os
+import json
 import sys
 from pathlib import Path
 from statistics import mean
@@ -48,6 +48,19 @@ def load_metrics(path: Path):
     return rows, malformed
 
 
+def load_scalar_metadata(run_dir: Path):
+    meta_path = run_dir / "logs" / "model_metadata.json"
+    if not meta_path.exists():
+        return {}
+    try:
+        payload = json.loads(meta_path.read_text())
+        if isinstance(payload, dict):
+            return payload
+        return {}
+    except Exception:
+        return {}
+
+
 def write_csv(path: Path, header, rows):
     path.parent.mkdir(parents=True, exist_ok=True)
     with path.open("w", newline="") as f:
@@ -81,16 +94,11 @@ def main():
         return 3
 
     rows, malformed = load_metrics(baseline)
+    scalar_meta = load_scalar_metadata(run_dir)
 
-    # 1) non-expert glossary
     glossary_path = run_dir / "tests" / "integration_terms_glossary.csv"
-    write_csv(
-        glossary_path,
-        ["term", "simple_explanation", "how_to_read_value", "risk_of_misinterpretation"],
-        GLOSSARY_ROWS,
-    )
+    write_csv(glossary_path, ["term", "simple_explanation", "how_to_read_value", "risk_of_misinterpretation"], GLOSSARY_ROWS)
 
-    # 2) confidence tags on claims
     claims_path = run_dir / "tests" / "integration_claim_confidence_tags.csv"
     claims = [
         ("CSV integrity", "certain" if len(malformed) == 0 else "certain_failure", "Computed from column parse and malformed rows count"),
@@ -100,14 +108,19 @@ def main():
     ]
     write_csv(claims_path, ["claim", "confidence_tag", "reason"], claims)
 
-    # 3) absent metadata extractor
     absent_path = run_dir / "tests" / "integration_absent_metadata_fields.csv"
     absent_rows = []
-    for f in EXPECTED_METADATA_FIELDS:
-        absent_rows.append((f, "ABSENT", "Add to schema/header/provenance before physics-claim gate"))
+    missing_count = 0
+    for field in EXPECTED_METADATA_FIELDS:
+        value = scalar_meta.get(field, "")
+        is_missing = str(value).strip() in ("", "UNKNOWN", "None")
+        if is_missing:
+            missing_count += 1
+            absent_rows.append((field, "ABSENT", "Add to schema/header/provenance before physics-claim gate"))
+        else:
+            absent_rows.append((field, "PRESENT", f"value={value}"))
     write_csv(absent_path, ["field", "status", "action"], absent_rows)
 
-    # 4) manifest / completeness check
     modules = sorted({r["problem"] for r in rows})
     steps_by_module = {m: sorted([r["step"] for r in rows if r["problem"] == m]) for m in modules}
     manifest_rows = []
@@ -116,13 +129,8 @@ def main():
         monotonic = 1 if all(s[i] >= s[i - 1] for i in range(1, len(s))) else 0
         manifest_rows.append((m, len(s), s[0] if s else "", s[-1] if s else "", monotonic))
     manifest_path = run_dir / "tests" / "integration_manifest_check.csv"
-    write_csv(
-        manifest_path,
-        ["module", "row_count", "step_min", "step_max", "step_monotonic_non_decreasing"],
-        manifest_rows,
-    )
+    write_csv(manifest_path, ["module", "row_count", "step_min", "step_max", "step_monotonic_non_decreasing"], manifest_rows)
 
-    # 5) run-to-run drift monitor (against previous run if any)
     drift_path = run_dir / "tests" / "integration_run_drift_monitor.csv"
     prev_run = find_previous_run(results_dir, run_dir.name)
     drift_rows = []
@@ -141,20 +149,15 @@ def main():
     else:
         drift_rows.append(("info", 0, "", "no previous run", "", run_dir.name))
 
-    write_csv(
-        drift_path,
-        ["metric", "common_points", "max_abs_diff", "mean_abs_diff", "reference_run", "current_run"],
-        drift_rows,
-    )
+    write_csv(drift_path, ["metric", "common_points", "max_abs_diff", "mean_abs_diff", "reference_run", "current_run"], drift_rows)
 
-    # 6) gate summary
     gate_path = run_dir / "tests" / "integration_gate_summary.csv"
     gate_rows = [
         ("CSV_INTEGRITY_GATE", "PASS" if len(malformed) == 0 else "FAIL", f"malformed_rows={len(malformed)}"),
         ("MODULE_COVERAGE_GATE", "PASS" if len(modules) > 0 else "FAIL", f"module_count={len(modules)}"),
         ("GLOSSARY_GATE", "PASS", f"file={glossary_path.name}"),
         ("CONFIDENCE_TAG_GATE", "PASS", f"file={claims_path.name}"),
-        ("ABSENT_METADATA_EXTRACTOR_GATE", "PASS", f"missing_fields={len(EXPECTED_METADATA_FIELDS)}"),
+        ("ABSENT_METADATA_EXTRACTOR_GATE", "PASS" if missing_count == 0 else "FAIL", f"missing_fields={missing_count}"),
     ]
     write_csv(gate_path, ["gate", "status", "evidence"], gate_rows)
 
