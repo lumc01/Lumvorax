@@ -8,6 +8,13 @@
   "T": 80.0,
   "dt": 1.0,
   "method": "advanced_proxy_deterministic",
+  "model_id": "lumvorax_proxy_nuclear_v4next",
+  "hamiltonian_id": "dense_nuclear_proxy",
+  "schema_version": "2.0",
+  "u_over_t": 13.75,
+  "time_step": 1.0,
+  "seed": "deterministic_proxy_seed",
+  "solver_version": "hubbard_hts_research_runner_v4next",
   "per_problem": [
     {
       "problem": "dense_nuclear_proxy",
@@ -19,7 +26,15 @@
       "mu": 0.3,
       "T": 80.0,
       "dt": 1.0,
-      "method": "advanced_proxy_deterministic"
+      "method": "advanced_proxy_deterministic",
+      "model_id": "lumvorax_proxy_nuclear_v4next",
+      "hamiltonian_id": "dense_nuclear_proxy",
+      "seed": "deterministic_proxy_seed",
+      "solver_version": "hubbard_hts_research_runner_v4next",
+      "schema_version": "2.0",
+      "lattice_sites": 72,
+      "u_over_t": 13.75,
+      "time_step": 1.0
     },
     {
       "problem": "hubbard_hts_core",
@@ -31,7 +46,15 @@
       "mu": 0.2,
       "T": 95.0,
       "dt": 1.0,
-      "method": "advanced_proxy_deterministic"
+      "method": "advanced_proxy_deterministic",
+      "model_id": "lumvorax_proxy_hubbard_v4next",
+      "hamiltonian_id": "hubbard_2d_single_band",
+      "seed": "deterministic_proxy_seed",
+      "solver_version": "hubbard_hts_research_runner_v4next",
+      "schema_version": "2.0",
+      "lattice_sites": 100,
+      "u_over_t": 8.0,
+      "time_step": 1.0
     },
     {
       "problem": "qcd_lattice_proxy",
@@ -43,7 +66,15 @@
       "mu": 0.1,
       "T": 140.0,
       "dt": 1.0,
-      "method": "advanced_proxy_deterministic"
+      "method": "advanced_proxy_deterministic",
+      "model_id": "lumvorax_proxy_qcd_v4next",
+      "hamiltonian_id": "lattice_qcd_proxy",
+      "seed": "deterministic_proxy_seed",
+      "solver_version": "hubbard_hts_research_runner_v4next",
+      "schema_version": "2.0",
+      "lattice_sites": 81,
+      "u_over_t": 12.857142857142858,
+      "time_step": 1.0
     },
     {
       "problem": "quantum_chemistry_proxy",
@@ -55,7 +86,15 @@
       "mu": 0.4,
       "T": 60.0,
       "dt": 1.0,
-      "method": "advanced_proxy_deterministic"
+      "method": "advanced_proxy_deterministic",
+      "model_id": "lumvorax_proxy_qchem_v4next",
+      "hamiltonian_id": "electronic_structure_proxy",
+      "seed": "deterministic_proxy_seed",
+      "solver_version": "hubbard_hts_research_runner_v4next",
+      "schema_version": "2.0",
+      "lattice_sites": 56,
+      "u_over_t": 4.0625,
+      "time_step": 1.0
     },
     {
       "problem": "quantum_field_noneq",
@@ -67,8 +106,16 @@
       "mu": 0.05,
       "T": 180.0,
       "dt": 1.0,
-      "method": "advanced_proxy_deterministic"
+      "method": "advanced_proxy_deterministic",
+      "model_id": "lumvorax_proxy_qft_v4next",
+      "hamiltonian_id": "noneq_field_proxy",
+      "seed": "deterministic_proxy_seed",
+      "solver_version": "hubbard_hts_research_runner_v4next",
+      "schema_version": "2.0",
+      "lattice_sites": 64,
+      "u_over_t": 5.384615384615384,
+      "time_step": 1.0
     }
   ],
-  "source": "post_run_metadata_capture_v1"
+  "source": "post_run_metadata_capture_v2"
 }
