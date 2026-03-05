@@ -1,0 +1,10 @@
+field,status,why_needed
+lattice_size,MISSING,Required for physical interpretability and scaling diagnostics
+geometry,MISSING,Required for physical interpretability and scaling diagnostics
+boundary_conditions,MISSING,Required for physical interpretability and scaling diagnostics
+t,MISSING,Required for physical interpretability and scaling diagnostics
+U,MISSING,Required for physical interpretability and scaling diagnostics
+mu,MISSING,Required for physical interpretability and scaling diagnostics
+T,MISSING,Required for physical interpretability and scaling diagnostics
+dt,MISSING,Required for physical interpretability and scaling diagnostics
+method,MISSING,Required for physical interpretability and scaling diagnostics
