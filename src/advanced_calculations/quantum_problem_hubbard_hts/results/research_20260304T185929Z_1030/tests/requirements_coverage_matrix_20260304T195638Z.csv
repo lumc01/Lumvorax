@@ -1,0 +1,9 @@
+requirement_id,requirement,evidence
+R1,Explication pédagogique (contexte/hypothèses/méthode/résultats/interprétation),covered_in_report
+R2,Questions expertes méthodo/numérique/théorique/expérimental/limites,covered_in_report
+R3,Anomalies/incohérences/découvertes potentielles,covered_in_report
+R4,Comparaison littérature/benchmarks,covered_in_report
+R5,Définition + exécution de nouveaux tests,covered_by_iterative_test_plan_results_20260304T195638Z.csv
+R6,Nouveau rapport sans altérer anciens logs,covered_in_report
+R7,"Traçabilité: horodatage, preuves, valeurs brutes",covered_by_generated_artifacts
+R8,Nom exact du nouveau rapport,covered_in_report
