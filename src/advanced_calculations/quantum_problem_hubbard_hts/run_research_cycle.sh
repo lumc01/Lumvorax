@@ -26,6 +26,7 @@ RUN_DIR="$ROOT_DIR/results/$LATEST_RUN"
 # Cycle 14 integrations: non-expert glossary, confidence tags,
 # absent metadata extractor, drift monitor and gate summary.
 python3 "$ROOT_DIR/tools/post_run_cycle_guard.py" "$ROOT_DIR" "$RUN_DIR"
+python3 "$ROOT_DIR/tools/post_run_metadata_capture.py" "$RUN_DIR"
 python3 "$ROOT_DIR/tools/post_run_physics_readiness_pack.py" "$RUN_DIR"
 
 (
