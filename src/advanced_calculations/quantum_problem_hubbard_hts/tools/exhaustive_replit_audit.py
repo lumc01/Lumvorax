@@ -40,16 +40,31 @@ def run_health(run_dir: pathlib.Path):
     }
 
 
+def to_float_or_none(value):
+    try:
+        if value is None:
+            return None
+        return float(value)
+    except Exception:
+        return None
+
+
 def compare_runs(prev_rows, current_rows):
-    key = lambda r: (r['problem'], r['step'])
+    key = lambda r: (r.get('problem'), r.get('step'))
     prev_map = {key(r): r for r in prev_rows}
     common = [(r, prev_map[key(r)]) for r in current_rows if key(r) in prev_map]
     out = []
     for field in ['energy', 'pairing', 'sign_ratio', 'elapsed_ns', 'cpu_percent', 'mem_percent']:
-        diffs = [abs(float(a[field]) - float(b[field])) for a, b in common]
+        diffs = []
+        for a, b in common:
+            fa = to_float_or_none(a.get(field))
+            fb = to_float_or_none(b.get(field))
+            if fa is None or fb is None:
+                continue
+            diffs.append(abs(fa - fb))
         out.append({
             'metric': field,
-            'common_points': len(common),
+            'common_points': len(diffs),
             'max_abs_diff': max(diffs) if diffs else 0.0,
             'mean_abs_diff': (sum(diffs) / len(diffs)) if diffs else 0.0,
         })
