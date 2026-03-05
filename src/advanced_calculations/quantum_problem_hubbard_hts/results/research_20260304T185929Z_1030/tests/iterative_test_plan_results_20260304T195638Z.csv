@@ -1,0 +1,8 @@
+test_id,question,method,metric,result,status
+T1,CSV integrity run A,column-count validation,malformed_rows_a,0,PASS
+T2,CSV integrity run B,column-count validation,malformed_rows_b,1,FAIL
+T3_energy,Inter-run reproducibility on common points,point-to-point diff,max_abs_diff_energy,0,PASS
+T3_pairing,Inter-run reproducibility on common points,point-to-point diff,max_abs_diff_pairing,0,PASS
+T3_sign_ratio,Inter-run reproducibility on common points,point-to-point diff,max_abs_diff_sign_ratio,0,PASS
+T4,Coverage completeness,count only-in-runA points,only_a_points,27,FAIL
+T5,Pairing cumulative behavior (run A),monotonic scan per module,pairing_monotonic_modules,5/5,PASS

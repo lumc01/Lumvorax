@@ -1,0 +1,6 @@
+problem_id,problem,impact,solution,status
+P1,Remote origin absent locally,Could not sync latest Replit results,Configured origin and fetched remote branches,RESOLVED
+P2,Latest run folders missing in local checkout,Analysis would use stale data,Imported new run directories from origin/main,RESOLVED
+P3,Potential over-interpretation of pairing metric,Scientific claim risk,Keep confidence tags and require future pairing_normalized metadata,MITIGATED
+P4,Performance drift mixed with model drift,Risk of false regression alerts,Use integration_run_drift_monitor and separate elapsed_ns from physical observables,CONTROLLED
+P5,Missing domain-specific observables for strong physics claims,Validation incomplete,Plan CI-gated metadata completeness and add domain observables in next integration phase,OPEN

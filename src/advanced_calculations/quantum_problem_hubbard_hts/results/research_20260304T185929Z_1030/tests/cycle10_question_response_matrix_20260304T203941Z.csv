@@ -1,0 +1,16 @@
+question_or_critique,response,status
+Critique énergie instationnaire,Confirmée par données runA (négatif→positif puis croissance forte).,COMPLETE
+Critique pairing cumulatif,Confirmée: pairing monotone sur 5/5 modules runA.,COMPLETE
+Critique sign_ratio faible autour de 0,Globalement confirmée mais amplitude dépend module; pas preuve seule de sign-problem physique.,PARTIAL
+Validation technique vs physique,"Oui: technique partiellement validée, validation physique non démontrée avec ce seul CSV.",COMPLETE
+Question: taille lattice ?,Inconnue dans ce CSV et artefacts fournis.,ABSENT
+Question: U/t ?,Inconnu dans ce CSV et artefacts fournis.,ABSENT
+Question: conditions limites ?,Inconnues ici.,ABSENT
+Question: méthode intégration ?,"Non explicitée ici (peut exister dans code, pas dans résultats de ce fichier).",PARTIAL
+Question: définition pairing ?,Pas formalisée dans ce fichier de logs.,ABSENT
+Question: normalisation par site ?,Absente.,ABSENT
+Question QCD: groupe de jauge/action/beta/volume ?,Non fournis dans ce CSV.,ABSENT
+Question champ hors équilibre: type/discrétisation/conservation norme ?,Non fournis ici.,ABSENT
+Question stabilité: pas de temps / Von Neumann / conservation énergie ?,Pas de preuve directe dans ce CSV.,ABSENT
+Demande: nouveaux tests exécutés ?,"Oui, fichiers cycle10_* créés (preuves quantitatives + matrice réponses).",COMPLETE
+Demande: traçabilité UTC/hash/provenance,"Oui, provenance + checksums cycle10 créés.",COMPLETE
