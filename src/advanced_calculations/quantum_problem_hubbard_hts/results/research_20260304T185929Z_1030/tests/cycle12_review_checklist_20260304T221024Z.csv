@@ -1,0 +1,13 @@
+id,check,status
+R1,Nouvelle version créée sans toucher anciens fichiers,PASS
+R2,Nom exact du rapport explicite,PASS
+R3,Commande Replit fournie,PASS
+R4,Problème->solution notifié,PASS
+R5,1.B traité,PASS
+R6,1.C traité,PASS
+R7,1.D traité,PASS
+R8,2 traité,PASS
+R9,3 traité,PASS
+R10,4 traité,PASS
+R11,Prévention fail futur incluse,PASS
+R12,Traçabilité provenance+checksum,PASS

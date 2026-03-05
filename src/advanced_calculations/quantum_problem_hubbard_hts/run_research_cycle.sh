@@ -16,16 +16,20 @@ make -C "$ROOT_DIR" clean all
 LATEST_RUN="$(ls -1 "$ROOT_DIR/results" | rg '^research_' | tail -n 1)"
 RUN_DIR="$ROOT_DIR/results/$LATEST_RUN"
 
-(
-  cd "$RUN_DIR"
-  find . -type f | sort | xargs sha256sum > logs/checksums.sha256
-)
-
 {
   echo "timestamp_utc=$STAMP_UTC"
   echo "hostname=$(hostname)"
   echo "uname=$(uname -a)"
   echo "gcc_version=$(gcc --version | head -n 1)"
 } > "$RUN_DIR/logs/environment_versions.log"
+
+# Cycle 14 integrations: non-expert glossary, confidence tags,
+# absent metadata extractor, drift monitor and gate summary.
+python3 "$ROOT_DIR/tools/post_run_cycle_guard.py" "$ROOT_DIR" "$RUN_DIR"
+
+(
+  cd "$RUN_DIR"
+  find . -type f | sort | xargs sha256sum > logs/checksums.sha256
+)
 
 echo "Research cycle terminé: $RUN_DIR"

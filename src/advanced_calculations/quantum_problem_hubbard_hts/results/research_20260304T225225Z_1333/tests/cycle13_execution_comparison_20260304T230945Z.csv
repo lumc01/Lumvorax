@@ -1,0 +1,14 @@
+metric,value
+run_1,research_20260304T225101Z_1218
+run_2,research_20260304T225225Z_1333
+valid_rows_run1,114
+valid_rows_run2,114
+malformed_rows_run1,0
+malformed_rows_run2,0
+common_points,114
+only_run1_points,0
+only_run2_points,0
+max_abs_diff_energy,0.0
+max_abs_diff_pairing,0.0
+max_abs_diff_sign_ratio,0.0
+max_abs_diff_elapsed_ns,206191530.0

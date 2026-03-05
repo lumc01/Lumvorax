@@ -1,0 +1,7 @@
+utc_timestamp=20260304T194355Z
+input_a=src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260304T185430Z_173/logs/baseline_reanalysis_metrics.csv
+input_b=src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260304T185929Z_1030/logs/baseline_reanalysis_metrics.csv
+comparison_file=src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260304T185929Z_1030/tests/execution_comparison_20260304T194355Z.csv
+diagnostics_file=src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260304T185929Z_1030/tests/baseline_185430_diagnostics_20260304T194355Z.csv
+malformed_a=[]
+malformed_b=[(89, ['dense_nuclear_proxy', '1600', '453950'])]
