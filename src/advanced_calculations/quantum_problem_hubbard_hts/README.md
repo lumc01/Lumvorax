@@ -41,3 +41,17 @@ bash src/advanced_calculations/quantum_problem_hubbard_hts/run_research_cycle.sh
 
 ## Objectif v4 ultra-avancé
 Le cycle v3 ajoute une pile multi-méthodes avancée: proxy corrélé, vérification indépendante long double, solveur exact 2x2 Hubbard, puis scoring audité sur 6 axes.
+
+## Intégrations automatiques (nouveau)
+Après chaque `run_research_cycle.sh`, le pipeline génère automatiquement:
+- `tests/integration_terms_glossary.csv` (explications non-expert),
+- `tests/integration_claim_confidence_tags.csv` (certain/probable/unknown),
+- `tests/integration_absent_metadata_fields.csv` (métadonnées physiques manquantes),
+- `tests/integration_manifest_check.csv` (complétude modules/steps),
+- `tests/integration_run_drift_monitor.csv` (dérive run-to-run),
+- `tests/integration_gate_summary.csv` (gates de validation).
+
+Commande Replit à exécuter:
+```bash
+bash src/advanced_calculations/quantum_problem_hubbard_hts/run_research_cycle.sh
+```

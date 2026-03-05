@@ -1,0 +1,6 @@
+new_item,why_new_from_latest_runs,implementation_hint,acceptance_gate
+Dual-source result ingestion (origin/main + local),"Les nouveaux runs arrivent du distant, pas toujours localement",Ajouter job sync + import contrôlé des dossiers results,Import log signed + checksum
+Run-to-run drift monitor,Observables identiques mais temps elapsed diffèrent,Dashboard drift sur elapsed_ns et perf variabilité,Drift thresholds per module
+Terminology layer for non-experts,Demande explicite de clarté pédagogique,Générer glossaire automatique dans chaque rapport,Report rejected if glossary missing
+Evidence confidence tags,Besoin d’indiquer ce qui est sûr vs inconnu,Tag each claim: certain/probable/unknown,No untagged claim allowed
+Automated unknowns extractor,Questions expertes récurrentes sans réponse,Auto-list missing metadata fields after each run,Must output ABSENT fields list
