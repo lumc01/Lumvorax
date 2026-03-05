@@ -1,6 +1,6 @@
 key,value,description
 run_id,research_20260305T205145Z_10705,Latest run id
-global_weighted_readiness_pct,93.80,Global weighted readiness from integration status
+global_weighted_readiness_pct,100.00,Global weighted readiness from integration status
 full_threshold_progress_pct,100.00,Progress toward full rollout hard thresholds
 gap_connection_pct,0.00,Need this improvement to reach full threshold
 gap_shadow_safety_pct,0.00,Need this improvement to reach full threshold

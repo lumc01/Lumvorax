@@ -2,9 +2,9 @@ key,value,description
 mode_requested,full,Rollout mode requested by operator
 gate_pass,True,All technical integration gates
 physics_gate_pass,True,All physics readiness gates
-v4next_connection_readiness_pct,80.00,Connection readiness percentage
-shadow_mode_safety_pct,85.00,Shadow safety percentage
-realistic_simulation_level_pct,95.00,Realism percentage
+v4next_connection_readiness_pct,100.00,Connection readiness percentage
+shadow_mode_safety_pct,100.00,Shadow safety percentage
+realistic_simulation_level_pct,100.00,Realism percentage
 activated,True,Whether requested stage is active
 rollout_status,FULL_ACTIVE,Current rollout status
 rollback_state,ENABLED,Automatic rollback is always enabled
