@@ -1,0 +1,4 @@
+[2026-03-05T02:00:00Z] cycle=19
+action=immediate_AZ_integration_for_next_run
+new_tool=tools/post_run_physics_readiness_pack.py
+new_outputs=integration_physics_computed_observables,integration_physics_missing_inputs,integration_physics_enriched_test_matrix,integration_physics_gate_summary

@@ -1,0 +1,6 @@
+problem,lattice_size,geometry,boundary_conditions,t,U,mu,T,dt,method
+dense_nuclear_proxy,9x8,rectangular,periodic_proxy,0.8,11.0,0.3,80.0,1.0,advanced_proxy_deterministic
+hubbard_hts_core,10x10,square,periodic_proxy,1.0,8.0,0.2,95.0,1.0,advanced_proxy_deterministic
+qcd_lattice_proxy,9x9,square,periodic_proxy,0.7,9.0,0.1,140.0,1.0,advanced_proxy_deterministic
+quantum_chemistry_proxy,8x7,rectangular,periodic_proxy,1.6,6.5,0.4,60.0,1.0,advanced_proxy_deterministic
+quantum_field_noneq,8x8,square,periodic_proxy,1.3,7.0,0.05,180.0,1.0,advanced_proxy_deterministic

@@ -1,0 +1,5 @@
+[2026-03-05T01:30:00Z] cycle=17
+scope=analysis_rewrite_and_full_roadmap
+source_run=research_20260305T005741Z_2427
+reference_run=research_20260305T004031Z_1267
+artifacts=cycle17_report,critical_scaling_schema,comparative_summary,scaling_exponents,roadmap_a_z
