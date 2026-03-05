@@ -1,0 +1,6 @@
+proxy,criteria_passed,criteria_total,progress_percent
+dense_nuclear_proxy,7,10,70.0
+hubbard_hts_core,7,10,70.0
+qcd_lattice_proxy,7,10,70.0
+quantum_chemistry_proxy,7,10,70.0
+quantum_field_noneq,7,10,70.0
