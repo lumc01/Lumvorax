@@ -1,0 +1,9 @@
+field,status,action
+model_id,ABSENT,Add to schema/header/provenance before physics-claim gate
+hamiltonian_id,ABSENT,Add to schema/header/provenance before physics-claim gate
+lattice_size,ABSENT,Add to schema/header/provenance before physics-claim gate
+boundary_conditions,ABSENT,Add to schema/header/provenance before physics-claim gate
+u_over_t,ABSENT,Add to schema/header/provenance before physics-claim gate
+time_step,ABSENT,Add to schema/header/provenance before physics-claim gate
+seed,ABSENT,Add to schema/header/provenance before physics-claim gate
+solver_version,ABSENT,Add to schema/header/provenance before physics-claim gate

@@ -1,0 +1,11 @@
+check_id,requirement,status,source
+C1,Nouveau fichier sans modifier anciens rapports,PASS,report
+C2,Structure Introduction/Développement/Conclusion,PASS,report
+C3,Comparaison rigoureuse ancienne vs nouvelle,PASS,report
+C4,Réponses par domaine (Hubbard/QCD/QFT/Nuclear/Quantum chemistry),PASS,report
+C5,Distinction validé vs non validé à 100%,PASS,report
+C6,Commande Replit explicite,PASS,report
+C7,Schéma critical scaling quantitatif (CSV),PASS,report
+C8,Roadmap A→Z créée,PASS,roadmap
+C9,Gates bloquants explicités,PASS,roadmap
+C10,Critères d’acceptation finaux présents,PASS,roadmap

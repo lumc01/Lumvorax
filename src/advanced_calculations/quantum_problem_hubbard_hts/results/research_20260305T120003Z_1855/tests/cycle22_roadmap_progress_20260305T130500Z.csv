@@ -1,0 +1,11 @@
+task_id,task,done
+R1,Event alignment gate energy<->sign,0
+R2,Normalization gate energy_per_site/pairing_norm,0
+R3,dt sweep stability gate,0
+R4,Long-range correlation gate C(r),0
+R5,Spectral gate DOS/pseudogap,0
+R6,Authenticity audit gate,1
+R7,Questions traceability log,1
+R8,Metadata completeness gate,1
+R9,Reproducibility drift gate,1
+R10,Checksums/provenance gate,1

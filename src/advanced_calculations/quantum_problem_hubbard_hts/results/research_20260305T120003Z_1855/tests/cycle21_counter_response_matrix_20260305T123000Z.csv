@@ -1,0 +1,21 @@
+id,item,status,evidence
+Q1,Dynamique énergétique motif min-retournement-croissance,VALIDATED,integration_physics_computed_observables.csv
+Q2,Pairing non saturé/cumulatif,VALIDATED,integration_physics_computed_observables.csv
+Q3,sign_ratio faible amplitude,VALIDATED,integration_physics_computed_observables.csv
+Q4,Robustesse moteur CPU/RAM sans crash,VALIDATED,integration_physics_computed_observables.csv
+Q5,Reproductibilité inter-run (energy/pairing/sign_ratio),VALIDATED,integration_run_drift_monitor.csv
+Q6,Universalité inter-modules du motif,VALIDATED,integration_physics_computed_observables.csv
+Q7,Coïncidence minimum énergie et passage sign_ratio~0,PARTIAL,baseline_reanalysis_metrics.csv (analyse fine step-by-step à confirmer)
+M1,lattice_size présent,VALIDATED,logs/model_metadata.csv
+M2,geometry présent,VALIDATED,logs/model_metadata.csv
+M3,boundary_conditions présent,VALIDATED,logs/model_metadata.csv
+M4,"t,U,mu,T présents",VALIDATED,logs/model_metadata.csv
+M5,dt présent,VALIDATED,logs/model_metadata.csv
+M6,method présent,VALIDATED,logs/model_metadata.csv
+O1,Normalisation explicite E/N exportée,MISSING,pas de colonne energy_per_site
+O2,Normalisation pairing/N exportée,MISSING,pas de colonne pairing_norm
+O3,Norme d'état ||psi||² exportée,MISSING,pas de colonne norm_psi_squared
+O4,Corrélations longue distance C(r) exportées,MISSING,pas d'artefact C(r)
+O5,"Test Δt/2,Δt,2Δt exécuté",MISSING,pas de run dt sweep
+O6,Test conservation dE/dt avec seuil,PARTIAL,données présentes mais gate dédié absent
+O7,Densité d'états / pseudogap,MISSING,pas de DOS exportée
