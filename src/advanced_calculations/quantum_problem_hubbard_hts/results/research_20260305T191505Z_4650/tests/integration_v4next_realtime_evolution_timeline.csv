@@ -1,0 +1,5 @@
+run_id,mode_requested,rollout_status,connection_readiness_pct,shadow_safety_pct,realism_pct,global_weighted_readiness_pct
+research_20260305T160028Z_1208,unknown,unknown,68.00,84.00,47.00,86.80
+research_20260305T181842Z_2167,full,ROLLBACK_TRIGGERED,68.00,84.00,47.00,86.80
+research_20260305T190831Z_3632,shadow,SHADOW_ACTIVE,68.00,84.00,47.00,86.80
+research_20260305T191505Z_4650,canary,CANARY_ACTIVE,95.00,93.33,54.00,93.67
