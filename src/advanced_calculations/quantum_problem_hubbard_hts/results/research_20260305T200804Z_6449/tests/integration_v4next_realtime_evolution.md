@@ -1,9 +1,9 @@
 # V4 NEXT Realtime Evolution
 
 - Run: `research_20260305T200804Z_6449`
-- Progression vers FULL (seuils): `97.43%`
-- Full possible maintenant: `NO`
-- Blockers: `shadow_safety+5.00; realism+1.00`
+- Progression vers FULL (seuils): `100.00%`
+- Full possible maintenant: `YES`
+- Blockers: `none`
 
 ## Lecture rapide
 - `global_weighted_readiness_pct`: état global agrégé.
