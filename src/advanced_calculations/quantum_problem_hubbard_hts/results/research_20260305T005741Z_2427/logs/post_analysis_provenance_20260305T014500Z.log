@@ -1,0 +1,3 @@
+[2026-03-05T01:45:00Z] cycle=18
+action=line_by_line_verification
+artifacts=cycle18_report,cycle18_coverage_csv

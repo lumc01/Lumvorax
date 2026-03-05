@@ -1,0 +1,6 @@
+item,category,why_needed,priority
+Dual-source ingestion (remote+local),ops,avoid missing new Replit runs locally,P0
+Run-to-run elapsed drift monitor,performance,separate infra variability from physical signal,P1
+Auto glossary for non-experts,communication,improve readability and adoption,P0
+Claim confidence tags,methodology,distinguish certain/probable/unknown claims,P0
+Automatic ABSENT metadata extractor,audit,make unknowns explicit each cycle,P0

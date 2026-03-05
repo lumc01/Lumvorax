@@ -1,0 +1,8 @@
+category,question,answer_from_results,status
+METHODOLOGY,La reproductibilité inter-run est-elle démontrée ?,Oui sur 87 points communs (diffs nulles).,COMPLETE
+METHODOLOGY,Les logs sont-ils intègres sur les 2 runs ?,"Non, run B a 1 ligne malformée.",COMPLETE
+NUMERICAL,Convergence énergétique vers état stationnaire ?,Non observée dans run A (énergie traverse 0 puis croît fortement).,PARTIAL
+NUMERICAL,Stabilité temporelle algorithmique ?,"Temps par pas ~linéaire, pas d’explosion exponentielle.",COMPLETE
+THEORY,Cohérence physique forte validée (Hubbard/QCD) ?,"Absente sans unités, U/t, lattice, Hamiltonien explicite.",ABSENT
+EXPERIMENTAL,Conditions initiales/paramètres complètement tracés ?,"Partiellement: provenance locale ajoutée, mais pas tous paramètres physiques dans le CSV.",PARTIAL
+LIMITS,Biais/limites explicites documentés ?,Oui: module manquant run B + troncature CSV + limites physiques.,COMPLETE

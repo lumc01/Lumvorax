@@ -34,3 +34,18 @@ Par défaut: `false`.
 - Risque perf/mémoire: limiter `steps`, profiler, planifier hors pic.
 - Risque régression: shadow + canary + rollback.
 - Risque incohérence schéma: versionner format CSV et contrats d’API.
+
+## 7) Nouvelles intégrations (cycle 14 -> action immédiate)
+- **Ingestion duale remote/local**: support explicite des runs présents sur `origin/main` mais absents localement.
+- **Run drift monitor**: comparaison `elapsed_ns` entre run courant et run précédent pour séparer dérive infra vs signal modèle.
+- **Glossaire non-expert auto**: génération de `tests/integration_terms_glossary.csv` à chaque cycle.
+- **Confidence tags**: génération de `tests/integration_claim_confidence_tags.csv` (`certain/probable/unknown`).
+- **Extracteur ABSENT**: génération de `tests/integration_absent_metadata_fields.csv` listant les champs physiques manquants.
+- **Gate summary**: génération de `tests/integration_gate_summary.csv` pour bloquer les claims physiques si prérequis absents.
+
+## 8) Commande Replit recommandée
+```bash
+bash src/advanced_calculations/quantum_problem_hubbard_hts/run_research_cycle.sh
+```
+Cette commande exécute désormais automatiquement les intégrations cycle 14 via:
+`tools/post_run_cycle_guard.py`.
