@@ -1,0 +1,9 @@
+term,simple_explanation,how_to_read_value,risk_of_misinterpretation
+problem,Nom du module simulé,Chaque bloc de lignes = un module,Comparer modules sans normalisation peut être trompeur
+step,Indice d’avancement,+100 = incrément de simulation,step n’est pas forcément un temps physique réel
+energy,Mesure interne d’énergie du modèle,Valeur peut être négative ou positive,"Sans unités/normalisation, pas de claim physique fort"
+pairing,Observable de corrélation/couplage,Croissance ici surtout cumulative,Ne pas l’appeler ordre supraconducteur sans définition
+sign_ratio,Indicateur de signe statistique,Proche de 0 = mélange de signes,Ne prouve pas à lui seul l’absence de sign-problem
+cpu_percent,Charge CPU observée,Stable = perf stable,Pas une preuve de validité physique
+mem_percent,Usage mémoire observé,Stable = pas de fuite évidente,N’indique pas qualité scientifique
+elapsed_ns,Temps écoulé en ns,Croissance linéaire = coût local stable,Ne suffit pas pour conclure complexité asymptotique
