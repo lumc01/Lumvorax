@@ -1,33 +1,4 @@
 file,line,snippet,status
-chatconversationprecedente.md,4235,Que veux-tu dire par la clareme expliquer?  passer des tests d’observables avancés. Le blocage “métadonnées manquantes” est levé; la prochaine frontière est la **validation physique instrumentée*  Produits la plan d’implantation de tout ce ,REVIEW_REQUIRED
-chatconversationprecedente.md,4243,L’audit d’authenticité ajouté scanne le code (hors results/backups) pour TODO/FIXME/PLACEHOLDER/STUB/MOCK/HARDCODING et génère les artefacts de risques + journal de commandes + matrice de questions de traçabilité.,REVIEW_REQUIRED
-chatconversationprecedente.md,4249,Les risques de hardcoding sont explicitement tracés (notamment dans hubbard_hts_research_cycle.c et post_run_metadata_capture.py) pour traitement dans la prochaine phase vers 100% scientifique.,REVIEW_REQUIRED
-chatconversationprecedente.md,4269,"✅ nl -ba src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260305T120003Z_1855/tests/integration_hardcoding_risk_register.csv | sed -n '1,40p'",REVIEW_REQUIRED
-CONTRE_RAPPORT_REPLIT_MAJ_PLAN_V4NEXT_CYCLE17.md,86,2. **Risque de hardcoding (audit authenticité)**,REVIEW_REQUIRED
-CONTRE_RAPPORT_REPLIT_MAJ_PLAN_V4NEXT_CYCLE17.md,130,4. **Pack anti-hardcoding scientifique**,REVIEW_REQUIRED
-RAPPORT_EXHAUSTIF_SYNC_REPLIT_V4NEXT_CYCLE17_REV2.md,50,- Risque d’interprétation: certains paramètres sont signalés `REVIEW_REQUIRED` dans l’audit de hardcoding.,REVIEW_REQUIRED
-RAPPORT_EXHAUSTIF_SYNC_REPLIT_V4NEXT_CYCLE17_REV2.md,152,3. Hardcoding potentiellement excessif sur paramètres de certains modules/scripts.,REVIEW_REQUIRED
-analysechatgpt1.md,5457,"""boundary_conditions"": ""periodic_proxy"",",REVIEW_REQUIRED
-analysechatgpt1.md,5463,"""method"": ""advanced_proxy_deterministic"",",REVIEW_REQUIRED
-analysechatgpt1.md,5469,"""boundary_conditions"": ""periodic_proxy"",",REVIEW_REQUIRED
-analysechatgpt1.md,5475,"""method"": ""advanced_proxy_deterministic""",REVIEW_REQUIRED
-analysechatgpt1.md,5481,"""boundary_conditions"": ""periodic_proxy"",",REVIEW_REQUIRED
-analysechatgpt1.md,5487,"""method"": ""advanced_proxy_deterministic""",REVIEW_REQUIRED
-analysechatgpt1.md,5493,"""boundary_conditions"": ""periodic_proxy"",",REVIEW_REQUIRED
-analysechatgpt1.md,5499,"""method"": ""advanced_proxy_deterministic""",REVIEW_REQUIRED
-analysechatgpt1.md,5505,"""boundary_conditions"": ""periodic_proxy"",",REVIEW_REQUIRED
-analysechatgpt1.md,5511,"""method"": ""advanced_proxy_deterministic""",REVIEW_REQUIRED
-analysechatgpt1.md,5517,"""boundary_conditions"": ""periodic_proxy"",",REVIEW_REQUIRED
-analysechatgpt1.md,5523,"""method"": ""advanced_proxy_deterministic""",REVIEW_REQUIRED
-analysechatgpt1.md,5529,"dense_nuclear_proxy,9x8,rectangular,periodic_proxy,0.8,11.0,0.3,80.0,1.0,advanced_proxy_deterministic",REVIEW_REQUIRED
-analysechatgpt1.md,5530,"hubbard_hts_core,10x10,square,periodic_proxy,1.0,8.0,0.2,95.0,1.0,advanced_proxy_deterministic",REVIEW_REQUIRED
-analysechatgpt1.md,5531,"qcd_lattice_proxy,9x9,square,periodic_proxy,0.7,9.0,0.1,140.0,1.0,advanced_proxy_deterministic",REVIEW_REQUIRED
-analysechatgpt1.md,5532,"quantum_chemistry_proxy,8x7,rectangular,periodic_proxy,1.6,6.5,0.4,60.0,1.0,advanced_proxy_deterministic",REVIEW_REQUIRED
-analysechatgpt1.md,5533,"quantum_field_noneq,8x8,square,periodic_proxy,1.3,7.0,0.05,180.0,1.0,advanced_proxy_deterministic",REVIEW_REQUIRED
-analysechatgpt1.md,5733,"Quelle est la stabilité numérique des méthodes utilisées (dt=1, advanced_proxy_deterministic) ?",REVIEW_REQUIRED
-analysechatgpt1.md,8506,méthode advanced_proxy_deterministic,REVIEW_REQUIRED
-analysechatgpt1.md,8545,method = advanced_proxy_deterministic,REVIEW_REQUIRED
-analysechatgpt1.md,9165,method = advanced_proxy_deterministic,REVIEW_REQUIRED
 src/hubbard_hts_research_cycle.c,418,"problem_t probs[] = {{""hubbard_hts_core"", 10, 10, 1.0, 8.0, 0.2, 95.0, 2800},",REVIEW_REQUIRED
 tools/post_run_metadata_capture.py,9,"""hubbard_hts_core"": {""lattice_size"": ""10x10"", ""geometry"": ""square"", ""boundary_conditions"": ""periodic_proxy"", ""t"": 1.0, ""U"": 8.0, ""mu"": 0.2, ""T"": 95.0, ""dt"": 1.0, ""method"": ""advanced_proxy_deterministic"", ""model_id"": ""lumvorax_proxy_hubbard_",REVIEW_REQUIRED
 tools/post_run_metadata_capture.py,10,"""qcd_lattice_proxy"": {""lattice_size"": ""9x9"", ""geometry"": ""square"", ""boundary_conditions"": ""periodic_proxy"", ""t"": 0.7, ""U"": 9.0, ""mu"": 0.1, ""T"": 140.0, ""dt"": 1.0, ""method"": ""advanced_proxy_deterministic"", ""model_id"": ""lumvorax_proxy_qcd_v4ne",REVIEW_REQUIRED

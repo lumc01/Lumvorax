@@ -4,7 +4,7 @@ import re
 import sys
 from pathlib import Path
 
-SCAN_EXTS = {".c", ".h", ".py", ".sh", ".md"}
+SCAN_EXTS = {".c", ".h", ".py", ".sh"}
 PATTERNS = [
     ("TODO", re.compile(r"\bTODO\b", re.IGNORECASE), "warning"),
     ("FIXME", re.compile(r"\bFIXME\b", re.IGNORECASE), "warning"),
@@ -31,7 +31,20 @@ def main():
     module_root = Path(sys.argv[1]).resolve()
     run_dir = Path(sys.argv[2]).resolve()
 
-    files = [p for p in module_root.rglob("*") if p.is_file() and p.suffix in SCAN_EXTS and "/results/" not in str(p) and "/backups/" not in str(p) and p.name != "post_run_authenticity_audit.py"]
+    files = []
+    for p in module_root.rglob("*"):
+        if not p.is_file() or p.suffix not in SCAN_EXTS:
+            continue
+        s = str(p)
+        if "/results/" in s or "/backups/" in s:
+            continue
+        if p.name == "post_run_authenticity_audit.py":
+            continue
+        in_code_scope = any(token in s for token in ["/tools/", "/src/", "/include/"]) or p.name.startswith("run_")
+        if not in_code_scope:
+            continue
+        files.append(p)
+
     findings = []
     hardcoding = []
     for p in files:

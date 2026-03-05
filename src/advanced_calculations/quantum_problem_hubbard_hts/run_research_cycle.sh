@@ -32,7 +32,9 @@ ROLL_MODE="${LUMVORAX_ROLLOUT_MODE:-shadow}"
 python3 "$ROOT_DIR/tools/v4next_rollout_controller.py" "$RUN_DIR" "$ROLL_MODE"
 python3 "$ROOT_DIR/tools/post_run_v4next_rollout_progress.py" "$RUN_DIR"
 python3 "$ROOT_DIR/tools/post_run_v4next_realtime_evolution.py" "$ROOT_DIR" "$RUN_DIR"
+python3 "$ROOT_DIR/tools/post_run_low_level_telemetry.py" "$RUN_DIR"
 python3 "$ROOT_DIR/tools/post_run_chatgpt_critical_tests.py" "$RUN_DIR"
+python3 "$ROOT_DIR/tools/post_run_problem_solution_progress.py" "$RUN_DIR"
 python3 "$ROOT_DIR/tools/post_run_authenticity_audit.py" "$ROOT_DIR" "$RUN_DIR"
 
 (
