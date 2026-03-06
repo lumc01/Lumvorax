@@ -47,4 +47,4 @@ Après lecture croisée, voici le statut d'intégration dans la nouvelle version
 
 **Problème rencontré** : Une légère augmentation de la charge RAM (passant de 75% à 81%) due à l'activation des logs forensic ultra-précis. **Statut : Sous contrôle.**
 
-**Chemin du nouveau rapport** : `src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260305T0412/reports/RAPPORT_V44_VERITE_SCIENTIFIQUE.md`
+**Chemin du nouveau rapport** : `src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260305T0412/reports/RAPPORT_CYCLE35_VERITE_SCIENTIFIQUE.md`
