@@ -1,0 +1,10 @@
+dimension,percent,interpretation,confidence
+pipeline_gates,100.00,PASS ratio in integration_gate_summary.csv,HIGH
+physics_gates,100.00,PASS ratio in integration_physics_gate_summary.csv,HIGH
+physics_matrix,100.00,PASS ratio in integration_physics_enriched_test_matrix.csv,MEDIUM
+metadata_completeness,100.00,PRESENT ratio in integration_absent_metadata_fields.csv,HIGH
+proxy_modularity,92.00,Proxies isolated/modular and can be adapter-wrapped,MEDIUM
+v4next_connection_readiness,68.00,Can connect in shadow mode with guarded adapters,MEDIUM
+shadow_mode_safety,84.00,Expected rollback-safe activation with feature flags,MEDIUM
+realistic_simulation_level,47.00,Proxy realism level vs high-fidelity physics,LOW
+global_weighted_readiness,86.80,Weighted aggregate readiness score,MEDIUM
