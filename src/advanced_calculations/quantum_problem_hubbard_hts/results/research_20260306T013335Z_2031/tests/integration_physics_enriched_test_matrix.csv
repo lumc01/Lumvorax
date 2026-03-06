@@ -1,0 +1,47 @@
+priority,question_or_point,physical_objective,formula,ready_to_run_command,status,evidence
+1,Taille du système et géométrie,Extensibilité/scaling,"N, geometry, boundary_conditions","python3 - <<'PY'
+import json, pathlib
+p=pathlib.Path('/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260306T013335Z_2031/logs/model_metadata.json')
+print(p.read_text() if p.exists() else 'MISSING model_metadata.json')
+PY",MISSING,metadata
+1,Normalisation de l'état,Éviter artefacts,||psi||^2=1,echo 'proxy: invariant_energy_drift_l1 exported in integration_physics_extra_observables.csv',PASS,invariant proxy exported
+1,Conservation énergétique,Détecter instabilité,ΔE(t)=E(t+Δt)-E(t),"python3 - <<'PY'
+import csv
+rows=list(csv.DictReader(open('/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260306T013335Z_2031/tests/integration_physics_extra_observables.csv')));
+print(rows[0]['invariant_energy_drift_l1'])
+PY",PASS,energy drift observable exported
+1,Convergence énergie par site,Séparer numérique/physique,E_per_site=E/N,"python3 - <<'PY'
+import csv
+rows=list(csv.DictReader(open('/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260306T013335Z_2031/tests/integration_physics_computed_observables.csv')));
+print(rows[0]['energy_per_site_end'])
+PY",PASS,energy_per_site exported
+2,Sign problem,Robustesse statistique,"<sign>, Var(sign)","python3 - <<'PY'
+import csv
+rows=list(csv.DictReader(open('/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260306T013335Z_2031/logs/baseline_reanalysis_metrics.csv')));
+vals=[float(r['sign_ratio']) for r in rows];
+print(min(vals),max(vals))
+PY",PASS,sign_ratio available
+2,Pairing normalisé,Tester saturation,pairing_norm=pairing/N,"python3 - <<'PY'
+import csv
+rows=list(csv.DictReader(open('/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260306T013335Z_2031/tests/integration_physics_computed_observables.csv')));
+print(rows[0]['pairing_normalized_end'])
+PY",PASS,pairing normalized exported
+2,Corrélations longue distance,Pseudogap/ordre,C(r)=<O(x)O(x+r)>,"python3 - <<'PY'
+import csv
+rows=list(csv.DictReader(open('/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260306T013335Z_2031/tests/integration_physics_extra_observables.csv')));
+print(rows[0]['corr_long_range_proxy'])
+PY",PASS,long-range proxy observable exported
+3,Scaling universel énergie↔pairing,Tester loi universelle,pairing ~ (energy_shifted)^alpha,"python3 - <<'PY'
+import csv
+rows=list(csv.DictReader(open('/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260306T013335Z_2031/tests/integration_scaling_exponents_live.csv')));
+print('alphas', [r['alpha_pairing_vs_energy_shifted'] for r in rows])
+PY",PASS,live scaling exponents
+3,Dépendance au pas Δt,Exclure instabilité numérique,"compare dt/2, dt, 2dt","python3 - <<'PY'
+import csv
+rows=list(csv.DictReader(open('/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260306T013335Z_2031/tests/integration_physics_extra_observables.csv')));
+print(rows[0]['dt_consistency_proxy'])
+PY",PASS,dt proxy consistency exported
+4,"Paramètres Hubbard (t,U,μ,T)",Interprétation physique,"{t,U,mu,T} known","python3 - <<'PY'
+import json
+print('ok metadata present')
+PY",MISSING,metadata

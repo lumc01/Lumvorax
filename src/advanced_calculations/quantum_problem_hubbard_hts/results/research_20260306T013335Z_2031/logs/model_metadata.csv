@@ -1,0 +1,6 @@
+problem,model_id,hamiltonian_id,schema_version,lattice_size,lattice_sites,geometry,boundary_conditions,t,U,u_over_t,mu,T,dt,time_step,seed,solver_version,method
+dense_nuclear_pr,UNKNOWN,UNKNOWN,2.0,UNKNOWN,0,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN,UNKNOWN
+dense_nuclear_proxy,lumvorax_proxy_nuclear_v4next,dense_nuclear_proxy,2.0,9x8,72,rectangular,periodic_proxy,0.8,11.0,13.75,0.3,80.0,1.0,1.0,deterministic_proxy_seed,hubbard_hts_research_runner_v4next,advanced_proxy_deterministic
+hubbard_hts_core,lumvorax_proxy_hubbard_v4next,hubbard_2d_single_band,2.0,10x10,100,square,periodic_proxy,1.0,8.0,8.0,0.2,95.0,1.0,1.0,deterministic_proxy_seed,hubbard_hts_research_runner_v4next,advanced_proxy_deterministic
+qcd_lattice_proxy,lumvorax_proxy_qcd_v4next,lattice_qcd_proxy,2.0,9x9,81,square,periodic_proxy,0.7,9.0,12.857142857142858,0.1,140.0,1.0,1.0,deterministic_proxy_seed,hubbard_hts_research_runner_v4next,advanced_proxy_deterministic
+quantum_field_noneq,lumvorax_proxy_qft_v4next,noneq_field_proxy,2.0,8x8,64,square,periodic_proxy,1.3,7.0,5.384615384615384,0.05,180.0,1.0,1.0,deterministic_proxy_seed,hubbard_hts_research_runner_v4next,advanced_proxy_deterministic

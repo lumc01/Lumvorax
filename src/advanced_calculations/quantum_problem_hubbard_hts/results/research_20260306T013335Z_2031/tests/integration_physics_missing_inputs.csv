@@ -1,0 +1,16 @@
+field,status,why_needed
+model_id,MISSING,Required for physical interpretability and scaling diagnostics
+hamiltonian_id,MISSING,Required for physical interpretability and scaling diagnostics
+lattice_size,MISSING,Required for physical interpretability and scaling diagnostics
+geometry,MISSING,Required for physical interpretability and scaling diagnostics
+boundary_conditions,MISSING,Required for physical interpretability and scaling diagnostics
+t,MISSING,Required for physical interpretability and scaling diagnostics
+U,MISSING,Required for physical interpretability and scaling diagnostics
+u_over_t,MISSING,Required for physical interpretability and scaling diagnostics
+mu,MISSING,Required for physical interpretability and scaling diagnostics
+T,MISSING,Required for physical interpretability and scaling diagnostics
+dt,MISSING,Required for physical interpretability and scaling diagnostics
+time_step,MISSING,Required for physical interpretability and scaling diagnostics
+seed,MISSING,Required for physical interpretability and scaling diagnostics
+solver_version,MISSING,Required for physical interpretability and scaling diagnostics
+method,MISSING,Required for physical interpretability and scaling diagnostics

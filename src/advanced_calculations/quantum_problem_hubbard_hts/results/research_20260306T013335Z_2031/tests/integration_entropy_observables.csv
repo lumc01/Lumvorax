@@ -1,0 +1,6 @@
+problem,energy_entropy_bits,pairing_entropy_bits,sign_abs_entropy_bits,combined_entropy_bits,method
+dense_nuclear_pr,0.000000,0.000000,0.000000,0.000000,shannon_entropy_proxy_from_timeseries_distribution
+dense_nuclear_proxy,2.216917,3.875000,0.337290,3.045959,shannon_entropy_proxy_from_timeseries_distribution
+hubbard_hts_core,3.305435,3.923252,0.661055,3.614344,shannon_entropy_proxy_from_timeseries_distribution
+qcd_lattice_proxy,2.949464,3.879664,2.701657,3.414564,shannon_entropy_proxy_from_timeseries_distribution
+quantum_field_noneq,2.810447,3.784942,0.548954,3.297694,shannon_entropy_proxy_from_timeseries_distribution
