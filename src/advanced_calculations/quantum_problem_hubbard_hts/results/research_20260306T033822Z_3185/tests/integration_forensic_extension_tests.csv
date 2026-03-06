@@ -1,0 +1,25 @@
+test_family,test_id,parameter,value,status,details
+bootstrap_alpha,alpha_ci95_hubbard_hts_core,alpha_ci95_width,0.1916612974,PASS,"alpha=0.19052509;ci95=[0.08238917,0.27405047]"
+cross_validation,scaling_model_hubbard_hts_core,rmse_power_minus_linear,0.1974690837,OBSERVED,rmse_power=0.3266777182;rmse_linear=0.1292086345
+dynamic_diagnostics,lyapunov_proxy_hubbard_hts_core,lyapunov_proxy,0.1354186047,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_hubbard_hts_core,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_qcd_lattice_proxy,alpha_ci95_width,0.2049015738,OBSERVED,"alpha=0.16717102;ci95=[0.06934088,0.27424246]"
+cross_validation,scaling_model_qcd_lattice_proxy,rmse_power_minus_linear,0.2460501331,OBSERVED,rmse_power=0.4063158227;rmse_linear=0.1602656896
+dynamic_diagnostics,lyapunov_proxy_qcd_lattice_proxy,lyapunov_proxy,0.1989011015,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_qcd_lattice_proxy,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_quantum_field_noneq,alpha_ci95_width,0.1687315548,PASS,"alpha=0.12785813;ci95=[0.03675817,0.20548973]"
+cross_validation,scaling_model_quantum_field_noneq,rmse_power_minus_linear,0.2767453738,OBSERVED,rmse_power=0.4561921030;rmse_linear=0.1794467292
+dynamic_diagnostics,lyapunov_proxy_quantum_field_noneq,lyapunov_proxy,0.1623771059,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_quantum_field_noneq,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_dense_nuclear_proxy,alpha_ci95_width,0.2093236907,OBSERVED,"alpha=0.20182632;ci95=[0.08473020,0.29405389]"
+cross_validation,scaling_model_dense_nuclear_proxy,rmse_power_minus_linear,0.2010895883,OBSERVED,rmse_power=0.3459604925;rmse_linear=0.1448709042
+dynamic_diagnostics,lyapunov_proxy_dense_nuclear_proxy,lyapunov_proxy,0.2129073574,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_dense_nuclear_proxy,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_quantum_chemistry_proxy,alpha_ci95_width,0.1819900006,PASS,"alpha=0.14564858;ci95=[0.06303836,0.24502836]"
+cross_validation,scaling_model_quantum_chemistry_proxy,rmse_power_minus_linear,0.2766012668,OBSERVED,rmse_power=0.4087177759;rmse_linear=0.1321165091
+dynamic_diagnostics,lyapunov_proxy_quantum_chemistry_proxy,lyapunov_proxy,0.1361441135,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_quantum_chemistry_proxy,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+finite_size_scaling,energy_vs_size_exponent,slope_logE_logN,1.5842410499,PASS,intercept=6.6680060119
+finite_size_scaling,pairing_nonincreasing_with_size,bool,1,PASS,"[(64, 0.7312170109), (100, 0.7210615773), (144, 0.7002542424)]"
+multi_seed_sensitivity,rep_diff_seed_distribution_count,count,30,PASS,from historical new_tests_results.csv
+multi_seed_sensitivity,rep_diff_seed_distribution_mean,mean_delta,51504.2267032416,OBSERVED,min=1537.8657373001;max=55054.3461942416
