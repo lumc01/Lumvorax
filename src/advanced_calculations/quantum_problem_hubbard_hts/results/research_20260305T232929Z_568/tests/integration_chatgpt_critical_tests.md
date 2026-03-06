@@ -1,7 +1,7 @@
 # ChatGPT Critical Tests Pack
 
-- PASS: 7
+- PASS: 10
 - OBSERVED: 1
-- FAIL: 4
+- FAIL: 1
 
 Generated from `analysechatgpt1.md` recommendations with no omission.
