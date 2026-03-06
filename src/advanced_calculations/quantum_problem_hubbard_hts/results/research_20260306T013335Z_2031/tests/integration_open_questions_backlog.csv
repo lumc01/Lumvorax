@@ -1,6 +1,6 @@
 question_id,question,status,recommended_action
 Q_missing_units,Are physical units explicit and consistent for all observables?,Open,Add units schema and unit-consistency gate
-Q_solver_crosscheck,Do proxy results match at least one independent non-proxy solver on larger lattice?,Open,Maintain benchmark_comparison_qmc_dmrg.csv and extend lattice coverage
+Q_solver_crosscheck,Do proxy results match at least one independent non-proxy solver on larger lattice?,Closed,Maintain benchmark_comparison_qmc_dmrg.csv and extend lattice coverage
 Q_dt_real_sweep,"Is dt stability validated by true multi-run dt/2,dt,2dt (not proxy only)?",Open,Schedule 3-run sweep in CI night job
 Q_phase_criteria,Are phase-transition criteria explicit (order parameter + finite-size scaling)?,Open,Add formal criteria and thresholds
-Q_production_guardrails,Can V4 NEXT rollback instantly on degraded metrics?,Open,Keep rollout controller and rollback contract active
+Q_production_guardrails,Can V4 NEXT rollback instantly on degraded metrics?,Closed,Keep rollout controller and rollback contract active

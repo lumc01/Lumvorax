@@ -1,9 +1,9 @@
 # Low-level Telemetry (module/hardware/interoperability)
 
-- total_runtime_ns: `5047213732`
-- total_qubits_simulated_proxy: `317`
-- avg_cpu_percent_global: `15.38`
-- avg_mem_percent_global: `51.05`
+- total_runtime_ns: `6552919389`
+- total_qubits_simulated_proxy: `373`
+- avg_cpu_percent_global: `19.23`
+- avg_mem_percent_global: `63.79`
 
 ## Architecture (mode FULL V4 NEXT)
 ```mermaid
@@ -23,9 +23,9 @@ flowchart LR
 ## Module runtime share
 ```mermaid
 pie title Module runtime share (%)
-    "dense_nuclear_pr (0.00%)" : 0.00
-    "dense_nuclear_proxy (17.07%)" : 17.07
-    "hubbard_hts_core (31.83%)" : 31.83
-    "qcd_lattice_proxy (24.80%)" : 24.80
-    "quantum_field_noneq (26.30%)" : 26.30
+    "dense_nuclear_proxy (17.51%)" : 17.51
+    "hubbard_hts_core (24.52%)" : 24.52
+    "qcd_lattice_proxy (19.10%)" : 19.10
+    "quantum_chemistry_proxy (18.62%)" : 18.62
+    "quantum_field_noneq (20.26%)" : 20.26
 ```

@@ -1,8 +1,8 @@
 # V4 NEXT Rollout/Rollback Plan
 
 - Mode demandé: `shadow`
-- Statut: `SHADOW_BLOCKED`
-- Activated: `False`
+- Statut: `SHADOW_ACTIVE`
+- Activated: `True`
 - Rollback automatique: `ENABLED`
 
 ## Procédure automatique

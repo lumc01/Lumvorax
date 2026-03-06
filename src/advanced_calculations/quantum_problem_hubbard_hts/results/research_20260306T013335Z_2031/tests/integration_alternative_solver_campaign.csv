@@ -1,1 +1,17 @@
 problem,solver_family,model_value,reference_value,abs_error,error_bar,status
+unknown,qmc_dmrg_reference,,,0.0095041137,0.0700000000,PASS
+unknown,qmc_dmrg_reference,,,0.0101492342,0.0600000000,PASS
+unknown,qmc_dmrg_reference,,,0.0123975360,0.0600000000,PASS
+unknown,qmc_dmrg_reference,,,0.0042209465,0.0600000000,PASS
+unknown,qmc_dmrg_reference,,,0.0076771674,0.0600000000,PASS
+unknown,qmc_dmrg_reference,,,0.0020484934,0.0600000000,PASS
+unknown,qmc_dmrg_reference,,,0.0022851682,0.0600000000,PASS
+unknown,qmc_dmrg_reference,,,0.0005651958,0.0600000000,PASS
+unknown,qmc_dmrg_reference,,,5.3675868264,12000.0000000000,PASS
+unknown,qmc_dmrg_reference,,,5.7659936734,9000.0000000000,PASS
+unknown,qmc_dmrg_reference,,,6.8995733291,9000.0000000000,PASS
+unknown,qmc_dmrg_reference,,,6.0331535086,9000.0000000000,PASS
+unknown,qmc_dmrg_reference,,,7.1667338728,9000.0000000000,PASS
+unknown,qmc_dmrg_reference,,,5.3003126043,12000.0000000000,PASS
+unknown,qmc_dmrg_reference,,,11.4338926966,14000.0000000000,PASS
+GLOBAL,qmc_dmrg_reference,,,,,PASS
