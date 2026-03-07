@@ -1,0 +1,5 @@
+test_id,objective,status
+TRIPLE_EXECUTION_MATRIX,Tripler les tests standards et vérifier stabilité,executed
+PROBLEM_COUNT_GATE,Vérifier explicitement 5 simulations,executed
+PARAMETER_INFLUENCE_REALISM,Lister les paramètres de réalisme avec lignes de code,executed
+PARAMETER_INFLUENCE_SOLUTION,Lister les paramètres de solution% avec lignes de code,executed
