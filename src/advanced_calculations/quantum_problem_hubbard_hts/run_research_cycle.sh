@@ -10,7 +10,7 @@ cp -a "$ROOT_DIR/src" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/Makefile" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/benchmarks" "$BACKUP_DIR/"
 
-TOTAL_STEPS=17
+TOTAL_STEPS=18
 CURRENT_STEP=0
 print_progress() {
   CURRENT_STEP=$((CURRENT_STEP + 1))
@@ -78,5 +78,7 @@ print_progress "full-scope integration"
   find . -type f | sort | xargs sha256sum > logs/checksums.sha256
 )
 print_progress "checksums"
+python3 "$ROOT_DIR/tools/post_run_scientific_report_cycle.py" "$RUN_DIR"
+print_progress "scientific report"
 
 echo "Research cycle terminé: $RUN_DIR"
