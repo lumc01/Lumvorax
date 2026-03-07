@@ -1,6 +1,6 @@
 # RAPPORT_SYNC_REPLIT_CYCLE35_ULTRADETAIL
 
-Run analysé: `research_20260307T141121Z_3220`
+Run analysé: `research_20260307T144949Z_4453`
 
 ## Phase 1 — Synchronisation / intégrité
 - total_runs_audited: 35
@@ -43,11 +43,11 @@ Run analysé: `research_20260307T141121Z_3220`
 ## Phase 5 — Métriques bas niveau (runtime/hardware proxy)
 | Problème | Qubits proxy | Module % | CPU% | MEM% | calc/s | latence ns/step |
 |---|---:|---:|---:|---:|---:|---:|
-| dense_nuclear_proxy | 72 | 18.29 | 17.78 | 74.41 | 1692.06 | 56285246.38 |
-| hubbard_hts_core | 100 | 26.34 | 17.78 | 74.36 | 1585.85 | 60805611.54 |
-| qcd_lattice_proxy | 81 | 19.99 | 17.78 | 74.36 | 1625.38 | 58727369.14 |
-| quantum_chemistry_proxy | 56 | 17.85 | 17.78 | 74.39 | 1819.93 | 52449637.50 |
-| quantum_field_noneq | 64 | 17.53 | 17.78 | 74.34 | 1765.06 | 53957452.62 |
+| dense_nuclear_proxy | 72 | 18.14 | 18.61 | 75.68 | 1370.11 | 69511158.38 |
+| hubbard_hts_core | 100 | 25.33 | 18.61 | 75.67 | 1324.80 | 72787524.18 |
+| qcd_lattice_proxy | 81 | 19.20 | 18.61 | 75.69 | 1358.82 | 70248357.50 |
+| quantum_chemistry_proxy | 56 | 19.18 | 18.61 | 75.68 | 1360.74 | 70148811.59 |
+| quantum_field_noneq | 64 | 18.15 | 18.61 | 75.69 | 1368.95 | 69569959.33 |
 
 ## Phase 6 — Réponse point par point (question/analyse/réponse/solution)
 ### Q1. Où en est chaque problème précisément ?
