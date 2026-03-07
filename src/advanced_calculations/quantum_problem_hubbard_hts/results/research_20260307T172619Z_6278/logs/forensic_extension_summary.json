@@ -1,0 +1,45 @@
+{
+  "run_dir": "/workspace/Lumvorax/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260307T172619Z_6278",
+  "extension_tests_rows": 56,
+  "extension_pass": 10,
+  "extension_observed": 45,
+  "extension_fail": 1,
+  "coverage": [
+    {
+      "suite": "new_tests_results.csv",
+      "total": 80,
+      "pass": 21,
+      "observed": 49,
+      "fail": 10,
+      "pass_pct": 26.25,
+      "status": "OK"
+    },
+    {
+      "suite": "integration_chatgpt_critical_tests.csv",
+      "total": 12,
+      "pass": 8,
+      "observed": 1,
+      "fail": 3,
+      "pass_pct": 66.6667,
+      "status": "OK"
+    },
+    {
+      "suite": "integration_forensic_extension_tests.csv",
+      "total": 56,
+      "pass": 10,
+      "observed": 45,
+      "fail": 1,
+      "pass_pct": 17.8571,
+      "status": "OK"
+    },
+    {
+      "suite": "GLOBAL",
+      "total": 148,
+      "pass": 39,
+      "observed": 95,
+      "fail": 14,
+      "pass_pct": 26.3514,
+      "status": "OK"
+    }
+  ]
+}

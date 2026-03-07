@@ -1,0 +1,14 @@
+module,row_count,step_min,step_max,step_monotonic_non_decreasing
+bosonic_multimode_systems,22,0,2100,1
+correlated_fermions_non_hubbard,24,0,2300,1
+dense_nuclear_proxy,21,0,2000,1
+far_from_equilibrium_kinetic_lattices,24,0,2300,1
+hubbard_hts_core,28,0,2700,1
+multi_correlated_fermion_boson_networks,24,0,2300,1
+multi_state_excited_chemistry,23,0,2200,1
+multiscale_nonlinear_field_models,23,0,2200,1
+qcd_lattice_proxy,22,0,2100,1
+quantum_chemistry_proxy,22,0,2100,1
+quantum_field_noneq,21,0,2000,1
+spin_liquid_exotic,26,0,2500,1
+topological_correlated_materials,25,0,2400,1
