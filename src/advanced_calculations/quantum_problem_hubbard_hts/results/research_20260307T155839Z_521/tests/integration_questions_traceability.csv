@@ -1,0 +1,5 @@
+question_id,question,evidence_file,validation_mode
+Q1,Le résultat est-il reproductible inter-run ?,integration_run_drift_monitor.csv,AUTO
+Q2,Les métadonnées physiques sont-elles complètes ?,integration_physics_gate_summary.csv,AUTO
+Q3,Des placeholders/stubs/hardcoding compromettent-ils l'authenticité ?,integration_code_authenticity_audit.csv,AUTO
+Q4,Les observables avancées manquantes sont-elles tracées ?,cycle21_counter_response_matrix_*.csv,MANUAL_REVIEW
