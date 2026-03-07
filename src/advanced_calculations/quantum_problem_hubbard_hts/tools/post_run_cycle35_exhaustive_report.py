@@ -7,8 +7,22 @@ from pathlib import Path
 
 
 def read_csv(path: Path):
+    if not path.exists():
+        return []
     with path.open(newline='') as f:
         return list(csv.DictReader(f))
+
+
+def load_analysis_text(root: Path) -> str:
+    candidates = [
+        root / 'CHAT' / 'analysechatgpt2.md',
+        root / 'analysechatgpt2.md',
+        root / 'CHAT' / 'analysechatgpt3.md',
+    ]
+    for candidate in candidates:
+        if candidate.exists():
+            return candidate.read_text(errors='ignore')
+    return ''
 
 
 def pct(v):
@@ -32,7 +46,7 @@ def main():
     drift = read_csv(root / 'AUDIT_EXHAUSTIF_REPLIT_DRIFT.csv')
     runs = read_csv(root / 'AUDIT_EXHAUSTIF_REPLIT_RUNS.csv')
 
-    analyse2 = (root / 'analysechatgpt2.md').read_text(errors='ignore')
+    analyse2 = load_analysis_text(root)
     analyse_patterns = {
         'inverse_rg_flow': r'inverse RG flow|flux RG invers',
         'local_rebound': r'rebond',
