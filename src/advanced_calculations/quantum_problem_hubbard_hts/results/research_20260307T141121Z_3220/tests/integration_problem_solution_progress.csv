@@ -1,0 +1,6 @@
+problem,solution_progress_percent,evidence,constraints
+dense_nuclear_proxy,81.60,timeseries_present;metadata_present;energy_pairing_corr=0.874;benchmark_crosscheck;sign_watchdog;critical_window_off,-0 common_missing_tests
+hubbard_hts_core,93.03,timeseries_present;metadata_present;energy_pairing_corr=0.896;benchmark_crosscheck;sign_watchdog;critical_window_ok,-0 common_missing_tests
+qcd_lattice_proxy,79.41,timeseries_present;metadata_present;energy_pairing_corr=0.841;benchmark_crosscheck;sign_watchdog;critical_window_off,-0 common_missing_tests
+quantum_chemistry_proxy,92.91,timeseries_present;metadata_present;energy_pairing_corr=0.894;benchmark_crosscheck;sign_watchdog;critical_window_ok,-0 common_missing_tests
+quantum_field_noneq,86.43,timeseries_present;metadata_present;energy_pairing_corr=0.796;benchmark_crosscheck;sign_watchdog;critical_window_ok,-0 common_missing_tests
