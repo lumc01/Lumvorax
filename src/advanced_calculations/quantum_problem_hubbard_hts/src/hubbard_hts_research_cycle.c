@@ -792,16 +792,26 @@ int main(int argc, char** argv) {
 
     /* Numerical stability diagnostics: conservation, Von Neumann proxy, toy case */
     problem_t qf = probs[2];
-    qf.steps = 2200;
-    sim_result_t qf_a = simulate_advanced_proxy_controlled(&qf, 1701, 99, NULL, &ctl, NULL, 0, NULL);
-    qf.steps = 4400;
-    sim_result_t qf_b = simulate_advanced_proxy_controlled(&qf, 1701, 99, NULL, &ctl, NULL, 0, NULL);
-    double qf_energy_density_a = qf_a.energy / ((double)(probs[2].lx * probs[2].ly) * 2200.0 + EPS);
-    double qf_energy_density_b = qf_b.energy / ((double)(probs[2].lx * probs[2].ly) * 4400.0 + EPS);
-    double energy_drift = fabs(qf_energy_density_b - qf_energy_density_a);
-    bool energy_conservation_ok = energy_drift < 0.02;
-    fprintf(nstab, "energy_conservation,quantum_field_noneq,energy_density_drift,%.10f,%s,comparison_2200_vs_4400_steps\n",
-            energy_drift, energy_conservation_ok ? "PASS" : "FAIL");
+    const int qf_checkpoints[] = {2200, 4400, 6600, 8800};
+    const int qf_n_checkpoints = 4;
+    double qf_energy_density[4] = {0.0, 0.0, 0.0, 0.0};
+
+    for (int i = 0; i < qf_n_checkpoints; ++i) {
+        int steps = qf_checkpoints[i];
+        qf.steps = steps;
+        sim_result_t qf_r = simulate_advanced_proxy_controlled(&qf, 1701, 99, NULL, &ctl, NULL, 0, NULL);
+        qf_energy_density[i] = qf_r.energy / ((double)(probs[2].lx * probs[2].ly) * (double)steps + EPS);
+    }
+
+    double energy_drift_max = 0.0;
+    for (int i = 1; i < qf_n_checkpoints; ++i) {
+        double local_drift = fabs(qf_energy_density[i] - qf_energy_density[i - 1]);
+        if (local_drift > energy_drift_max) energy_drift_max = local_drift;
+    }
+
+    bool energy_conservation_ok = energy_drift_max < 0.02;
+    fprintf(nstab, "energy_conservation,quantum_field_noneq,energy_density_drift_max,%.10f,%s,comparison_2200_4400_6600_8800_steps\n",
+            energy_drift_max, energy_conservation_ok ? "PASS" : "FAIL");
 
     von_neumann_result_t vn = von_neumann_proxy(&probs[0], &ctl);
     fprintf(nstab, "von_neumann,hubbard_hts_core,spectral_radius,%.10f,%s,stability_if_leq_1\n",
@@ -1041,7 +1051,7 @@ int main(int argc, char** argv) {
         fprintf(cr, "## Différences quantitatives clés\n");
         fprintf(cr, "- FFT dominant_freq=%.10f, dominant_amp=%.10f.\n", fft_freq, fft_amp);
         fprintf(cr, "- Feedback energy_reduction_ratio=%.10f, pairing_gain=%.10f.\n", feedback_energy_reduction, feedback_pairing_gain);
-        fprintf(cr, "- Drift énergie QF=%.10f (%s).\n", energy_drift, energy_conservation_ok ? "PASS" : "FAIL");
+        fprintf(cr, "- Drift max énergie QF (2200/4400/6600/8800)=%.10f (%s).\n", energy_drift_max, energy_conservation_ok ? "PASS" : "FAIL");
         fprintf(cr, "- Rayon spectral Von Neumann=%.10f (%s).\n", vn.spectral_radius, vn.stable ? "PASS" : "FAIL");
         fprintf(cr, "- Cas jouet exp_decay abs_error=%.10f (%s).\n", toy_err, toy_ok ? "PASS" : "FAIL");
         fclose(cr);

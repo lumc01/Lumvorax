@@ -191,8 +191,8 @@ def main():
     summary_json.write_text(json.dumps(summary, indent=2, ensure_ascii=False), encoding="utf-8")
 
     checksum_lines = [
-        f"{sha256(report)}  {report.name}",
-        f"{sha256(summary_json)}  {summary_json.name}",
+        f"{sha256(report)}  ./reports/{report.name}",
+        f"{sha256(summary_json)}  ./logs/{summary_json.name}",
     ]
     checksum_file.write_text("\n".join(checksum_lines) + "\n", encoding="utf-8")
 
