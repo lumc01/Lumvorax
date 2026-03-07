@@ -422,6 +422,7 @@ static int latest_classic_run(const char* results_root, char* out, size_t n) {
 
 
 typedef struct {
+    char module[64];
     char observable[32];
     double t;
     double u;
@@ -433,19 +434,38 @@ static int load_benchmark_rows(const char* path, benchmark_row_t* rows, int max_
     FILE* fp = fopen(path, "r");
     if (!fp) return -1;
     char line[512];
-    if (!fgets(line, sizeof(line), fp)) { fclose(fp); return -1; }
+    if (!fgets(line, sizeof(line), fp)) {
+        fclose(fp);
+        return -1;
+    }
     int n = 0;
     while (fgets(line, sizeof(line), fp)) {
         if (n >= max_rows) break;
-        char source[64], obs[32];
         benchmark_row_t r = {0};
-        if (sscanf(line, "%63[^,],%31[^,],%lf,%lf,%lf,%lf", source, obs, &r.t, &r.u, &r.value, &r.err) == 6) {
-            snprintf(r.observable, sizeof(r.observable), "%s", obs);
+        char c1[64] = "", c2[64] = "", c3[64] = "";
+        int parsed = sscanf(line, "%63[^,],%63[^,],%63[^,],%lf,%lf,%lf,%lf", c1, c2, c3, &r.t, &r.u, &r.value, &r.err);
+        if (parsed == 7) {
+            snprintf(r.module, sizeof(r.module), "%s", c2);
+            snprintf(r.observable, sizeof(r.observable), "%s", c3);
+            rows[n++] = r;
+            continue;
+        }
+        parsed = sscanf(line, "%63[^,],%63[^,],%lf,%lf,%lf,%lf", c1, c2, &r.t, &r.u, &r.value, &r.err);
+        if (parsed == 6) {
+            snprintf(r.module, sizeof(r.module), "%s", "hubbard_hts_core");
+            snprintf(r.observable, sizeof(r.observable), "%s", c2);
             rows[n++] = r;
         }
     }
     fclose(fp);
     return n;
+}
+
+static int find_problem_index(const problem_t* probs, int n, const char* name) {
+    for (int i = 0; i < n; ++i) {
+        if (strcmp(probs[i].name, name) == 0) return i;
+    }
+    return -1;
 }
 
 static int pct(score_t s) {
@@ -480,7 +500,7 @@ int main(int argc, char** argv) {
     mkdir_if_missing(reports);
     mkdir_if_missing(tests);
 
-    char log_path[MAX_PATH], raw_csv[MAX_PATH], tests_csv[MAX_PATH], report[MAX_PATH], comparison_report[MAX_PATH], provenance[MAX_PATH], qa_csv[MAX_PATH], bench_csv[MAX_PATH], bench_ref[MAX_PATH];
+    char log_path[MAX_PATH], raw_csv[MAX_PATH], tests_csv[MAX_PATH], report[MAX_PATH], comparison_report[MAX_PATH], provenance[MAX_PATH], qa_csv[MAX_PATH], bench_csv[MAX_PATH], bench_ref[MAX_PATH], bench_csv_modules[MAX_PATH], bench_ref_modules[MAX_PATH];
     char module_meta_csv[MAX_PATH], detailed_csv[MAX_PATH], numeric_stability_csv[MAX_PATH], toy_csv[MAX_PATH], temporal_csv[MAX_PATH];
     pjoin(log_path, sizeof(log_path), logs, "research_execution.log");
     pjoin(raw_csv, sizeof(raw_csv), logs, "baseline_reanalysis_metrics.csv");
@@ -491,6 +511,8 @@ int main(int argc, char** argv) {
     pjoin(provenance, sizeof(provenance), logs, "provenance.log");
     pjoin(bench_csv, sizeof(bench_csv), tests, "benchmark_comparison_qmc_dmrg.csv");
     pjoin(bench_ref, sizeof(bench_ref), root, "benchmarks/qmc_dmrg_reference_v2.csv");
+    pjoin(bench_csv_modules, sizeof(bench_csv_modules), tests, "benchmark_comparison_external_modules.csv");
+    pjoin(bench_ref_modules, sizeof(bench_ref_modules), root, "benchmarks/external_module_benchmarks_v1.csv");
     pjoin(module_meta_csv, sizeof(module_meta_csv), tests, "module_physics_metadata.csv");
     pjoin(detailed_csv, sizeof(detailed_csv), logs, "normalized_observables_trace.csv");
     pjoin(numeric_stability_csv, sizeof(numeric_stability_csv), tests, "numerical_stability_suite.csv");
@@ -503,17 +525,19 @@ int main(int argc, char** argv) {
     FILE* qcsv = fopen(qa_csv, "w");
     FILE* prov = fopen(provenance, "w");
     FILE* bcsv = fopen(bench_csv, "w");
+    FILE* bcsvm = fopen(bench_csv_modules, "w");
     FILE* mmeta = fopen(module_meta_csv, "w");
     FILE* det = fopen(detailed_csv, "w");
     FILE* nstab = fopen(numeric_stability_csv, "w");
     FILE* toy = fopen(toy_csv, "w");
     FILE* tdrv = fopen(temporal_csv, "w");
-    if (!lg || !raw || !tcsv || !qcsv || !prov || !bcsv || !mmeta || !det || !nstab || !toy || !tdrv) return 1;
+    if (!lg || !raw || !tcsv || !qcsv || !prov || !bcsv || !bcsvm || !mmeta || !det || !nstab || !toy || !tdrv) return 1;
 
     fprintf(raw, "problem,step,energy,pairing,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
     fprintf(tcsv, "test_family,test_id,parameter,value,status\n");
     fprintf(qcsv, "category,question_id,question,response_status,evidence\n");
-    fprintf(bcsv, "observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
+    fprintf(bcsv, "module,observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
+    fprintf(bcsvm, "module,observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
     fprintf(mmeta, "module,lattice_size,U_over_t,doping,boundary_conditions,integration_scheme,dt,gauge_group,beta,lattice_spacing,volume,field_type\n");
     fprintf(det, "problem,step,energy_norm,pairing_norm,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
     fprintf(nstab, "test_id,module,metric,value,status,notes\n");
@@ -534,31 +558,47 @@ int main(int argc, char** argv) {
     else
         fprintf(lg, "000003 | BASELINE latest_classic_run=NOT_FOUND\n");
 
-    problem_t probs[] = {{"hubbard_hts_core", 10, 10, 1.0, 8.0, 0.2, 95.0, 0.01, 2800},
-                         {"qcd_lattice_proxy", 9, 9, 0.7, 9.0, 0.1, 140.0, 0.01, 2200},
-                         {"quantum_field_noneq", 8, 8, 1.3, 7.0, 0.05, 180.0, 0.01, 2100},
-                         {"dense_nuclear_proxy", 9, 8, 0.8, 11.0, 0.3, 80.0, 0.01, 2100},
-                         {"quantum_chemistry_proxy", 8, 7, 1.6, 6.5, 0.4, 60.0, 0.01, 2200}};
+    problem_t probs[] = {
+        {"hubbard_hts_core", 10, 10, 1.0, 8.0, 0.2, 95.0, 0.01, 2800},
+        {"qcd_lattice_proxy", 9, 9, 0.7, 9.0, 0.1, 140.0, 0.01, 2200},
+        {"quantum_field_noneq", 8, 8, 1.3, 7.0, 0.05, 180.0, 0.01, 2100},
+        {"dense_nuclear_proxy", 9, 8, 0.8, 11.0, 0.3, 80.0, 0.01, 2100},
+        {"quantum_chemistry_proxy", 8, 7, 1.6, 6.5, 0.4, 60.0, 0.01, 2200},
+        {"spin_liquid_exotic", 12, 10, 0.9, 10.5, 0.12, 55.0, 0.01, 2600},
+        {"topological_correlated_materials", 11, 11, 1.1, 7.8, 0.15, 70.0, 0.01, 2500},
+        {"correlated_fermions_non_hubbard", 10, 9, 1.2, 8.6, 0.18, 85.0, 0.01, 2400},
+        {"multi_state_excited_chemistry", 9, 9, 1.5, 6.8, 0.22, 48.0, 0.01, 2300},
+        {"bosonic_multimode_systems", 10, 8, 0.6, 5.2, 0.06, 110.0, 0.01, 2200},
+        {"multiscale_nonlinear_field_models", 12, 8, 1.4, 9.2, 0.10, 125.0, 0.01, 2300},
+        {"far_from_equilibrium_kinetic_lattices", 11, 9, 1.0, 8.0, 0.09, 150.0, 0.01, 2400},
+        {"multi_correlated_fermion_boson_networks", 10, 10, 1.05, 7.4, 0.14, 100.0, 0.01, 2350}
+    };
+    const int nprobs = (int)(sizeof(probs) / sizeof(probs[0]));
 
-    fprintf(mmeta, "hubbard_hts_core,%dx%d,%.6f,%.6f,periodic,euler_explicit,%.6f,NA,NA,NA,%d,fermionic\n",
-            probs[0].lx, probs[0].ly, probs[0].u / probs[0].t, probs[0].mu, probs[0].dt, probs[0].lx * probs[0].ly);
-    fprintf(mmeta, "qcd_lattice_proxy,%dx%d,%.6f,%.6f,periodic,euler_explicit,%.6f,SU(3)_proxy,5.700000,1.000000,%d,gauge_field\n",
-            probs[1].lx, probs[1].ly, probs[1].u / probs[1].t, probs[1].mu, probs[1].dt, probs[1].lx * probs[1].ly);
-    fprintf(mmeta, "quantum_field_noneq,%dx%d,%.6f,%.6f,periodic,euler_explicit,%.6f,NA,NA,1.000000,%d,scalar_proxy\n",
-            probs[2].lx, probs[2].ly, probs[2].u / probs[2].t, probs[2].mu, probs[2].dt, probs[2].lx * probs[2].ly);
-    fprintf(mmeta, "dense_nuclear_proxy,%dx%d,%.6f,%.6f,open,euler_explicit,%.6f,NA,NA,1.000000,%d,mixed_proxy\n",
-            probs[3].lx, probs[3].ly, probs[3].u / probs[3].t, probs[3].mu, probs[3].dt, probs[3].lx * probs[3].ly);
-    fprintf(mmeta, "quantum_chemistry_proxy,%dx%d,%.6f,%.6f,open,euler_explicit,%.6f,NA,NA,1.000000,%d,fermionic_proxy\n",
-            probs[4].lx, probs[4].ly, probs[4].u / probs[4].t, probs[4].mu, probs[4].dt, probs[4].lx * probs[4].ly);
+    for (int i = 0; i < nprobs; ++i) {
+        const char* bc = (i == 3) ? "open" : "periodic";
+        const char* gauge = (strcmp(probs[i].name, "qcd_lattice_proxy") == 0) ? "SU(3)_proxy" : "NA";
+        double beta = (strcmp(probs[i].name, "qcd_lattice_proxy") == 0) ? 5.7 : NAN;
+        const char* field_type = "fermionic_proxy";
+        if (strstr(probs[i].name, "field") || strstr(probs[i].name, "kinetic")) field_type = "field_proxy";
+        if (strstr(probs[i].name, "bosonic")) field_type = "bosonic_proxy";
+        if (strcmp(probs[i].name, "qcd_lattice_proxy") == 0) field_type = "gauge_field";
+        if (strcmp(probs[i].name, "dense_nuclear_proxy") == 0) field_type = "mixed_proxy";
+        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%s,euler_explicit,%.6f,%s,",
+                probs[i].name, probs[i].lx, probs[i].ly, probs[i].u / probs[i].t, probs[i].mu, bc, probs[i].dt, gauge);
+        if (isnan(beta)) fprintf(mmeta, "NA,"); else fprintf(mmeta, "%.6f,", beta);
+        fprintf(mmeta, "1.000000,%d,%s\n", probs[i].lx * probs[i].ly, field_type);
+    }
 
-    sim_result_t base[5];
+    sim_result_t base[16];
+
     int line = 4;
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < nprobs; ++i) {
         base[i] = simulate_advanced_proxy(&probs[i], (uint64_t)(0xABC000 + i), 99, raw);
         fprintf(lg, "%06d | BASE_RESULT problem=%s energy=%.6f pairing=%.6f sign=%.6f cpu_peak=%.2f mem_peak=%.2f elapsed_ns=%llu\n", line++, probs[i].name, base[i].energy, base[i].pairing, base[i].sign_ratio, base[i].cpu_peak, base[i].mem_peak, (unsigned long long)base[i].elapsed_ns);
     }
 
-    for (int i = 0; i < 5; ++i) {
+    for (int i = 0; i < nprobs; ++i) {
         uint64_t checkpoints[] = {700, 1400, 2100, probs[i].steps};
         int ck_n = (int)(sizeof(checkpoints) / sizeof(checkpoints[0]));
         for (int ci = 0; ci < ck_n; ++ci) {
@@ -779,15 +819,22 @@ int main(int argc, char** argv) {
 
 
     /* External benchmark comparison (QMC/DMRG reference table + error bars) */
-    benchmark_row_t brow[64];
-    int bn = load_benchmark_rows(bench_ref, brow, 64);
+    benchmark_row_t brow[256];
+    int bn = load_benchmark_rows(bench_ref, brow, 256);
+    int bn_mod = load_benchmark_rows(bench_ref_modules, brow + (bn > 0 ? bn : 0), 256 - (bn > 0 ? bn : 0));
+    int bench_offset = (bn > 0) ? bn : 0;
+    if (bn < 0) bn = 0;
+    if (bn_mod < 0) bn_mod = 0;
+
     double sum_sq = 0.0, sum_abs = 0.0;
     int m = 0, within_bar = 0;
     for (int i = 0; i < bn; ++i) {
-        problem_t p = probs[0];
+        int ip = find_problem_index(probs, nprobs, brow[i].module);
+        if (ip < 0) ip = 0;
+        problem_t p = probs[ip];
         p.temp = brow[i].t;
         p.u = brow[i].u;
-        sim_result_t rr = simulate_advanced_proxy(&p, 1234, 129, NULL);
+        sim_result_t rr = simulate_advanced_proxy(&p, 1234 + (uint64_t)i, 129, NULL);
         double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing : rr.energy;
         double abs_e = fabs(model - brow[i].value);
         double rel_e = fabs(abs_e / (fabs(brow[i].value) + EPS));
@@ -796,8 +843,30 @@ int main(int argc, char** argv) {
         sum_sq += abs_e * abs_e;
         sum_abs += abs_e;
         m++;
-        fprintf(bcsv, "%s,%.6f,%.6f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n",
-                brow[i].observable, brow[i].t, brow[i].u, brow[i].value, model, abs_e, rel_e, brow[i].err, ok_bar);
+        fprintf(bcsv, "%s,%s,%.6f,%.6f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n",
+                brow[i].module, brow[i].observable, brow[i].t, brow[i].u, brow[i].value, model, abs_e, rel_e, brow[i].err, ok_bar);
+    }
+
+    double sum_sq_mod = 0.0, sum_abs_mod = 0.0;
+    int m_mod = 0, within_mod = 0;
+    for (int i = 0; i < bn_mod; ++i) {
+        benchmark_row_t* br = &brow[bench_offset + i];
+        int ip = find_problem_index(probs, nprobs, br->module);
+        if (ip < 0) continue;
+        problem_t p = probs[ip];
+        p.temp = br->t;
+        p.u = br->u;
+        sim_result_t rr = simulate_advanced_proxy(&p, 5151 + (uint64_t)i, 129, NULL);
+        double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing : rr.energy;
+        double abs_e = fabs(model - br->value);
+        double rel_e = fabs(abs_e / (fabs(br->value) + EPS));
+        int ok_bar = abs_e <= br->err;
+        if (ok_bar) within_mod++;
+        sum_sq_mod += abs_e * abs_e;
+        sum_abs_mod += abs_e;
+        m_mod++;
+        fprintf(bcsvm, "%s,%s,%.6f,%.6f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n",
+                br->module, br->observable, br->t, br->u, br->value, model, abs_e, rel_e, br->err, ok_bar);
     }
 
     double rmse = (m > 0) ? sqrt(sum_sq / (double)m) : 1e9;
@@ -817,6 +886,18 @@ int main(int argc, char** argv) {
 
     mark(&robustness, bench_rmse_ok && bench_mae_ok);
     mark(&physical, bench_within_ok && bench_ci_ok);
+
+    double rmse_mod = (m_mod > 0) ? sqrt(sum_sq_mod / (double)m_mod) : 1e9;
+    double mae_mod = (m_mod > 0) ? (sum_abs_mod / (double)m_mod) : 1e9;
+    double p_within_mod = (m_mod > 0) ? (100.0 * (double)within_mod / (double)m_mod) : 0.0;
+    bool bench_mod_rmse_ok = rmse_mod <= 9000.0;
+    bool bench_mod_within_ok = p_within_mod >= 70.0;
+    bool bench_mod_mae_ok = mae_mod <= 7000.0;
+
+    fprintf(tcsv, "benchmark,external_modules_rmse,rmse,%.10f,%s\n", rmse_mod, bench_mod_rmse_ok ? "PASS" : "FAIL");
+    fprintf(tcsv, "benchmark,external_modules_mae,mae,%.10f,%s\n", mae_mod, bench_mod_mae_ok ? "PASS" : "FAIL");
+    fprintf(tcsv, "benchmark,external_modules_within_error_bar,percent_within,%.6f,%s\n", p_within_mod, bench_mod_within_ok ? "PASS" : "FAIL");
+    mark(&physical, bench_mod_rmse_ok && bench_mod_mae_ok && bench_mod_within_ok);
 
     /* Cluster-size scaling benchmark (more reference points + larger clusters) */
     int c_sizes[] = {8, 10, 12, 14, 16, 18, 24, 26, 28, 32, 36, 64, 66, 68, 128, 255};
@@ -867,9 +948,10 @@ int main(int argc, char** argv) {
                               {"experiment_open", "Q15", "Comparaison aux expériences réelles (ARPES/STM) ?", "partial"},
                               {"numerics_open", "Q16", "Analyse Von Neumann exécutée ?", vn.stable ? "complete" : "partial"},
                               {"methodology_open", "Q17", "Paramètres physiques module-par-module explicités ?", "complete"},
-                              {"controls_open", "Q18", "Pompage dynamique (feedback atomique) inclus et tracé ?", "complete"}};
+                              {"controls_open", "Q18", "Pompage dynamique (feedback atomique) inclus et tracé ?", "complete"},
+                              {"coverage_open", "Q19", "Nouveaux modules avancés CPU/RAM intégrés et benchmarkés individuellement ?", (m_mod > 0 && bench_mod_within_ok) ? "complete" : "partial"}};
 
-    for (size_t i = 0; i < 18; ++i) {
+    for (size_t i = 0; i < 19; ++i) {
         bool ok = strcmp(qrows[i][3], "complete") == 0;
         mark(&expert, ok);
         fprintf(qcsv, "%s,%s,%s,%s,see_report\n", qrows[i][0], qrows[i][1], qrows[i][2], qrows[i][3]);
@@ -881,7 +963,9 @@ int main(int argc, char** argv) {
     mark(&traceability, access(qa_csv, F_OK) == 0);
     mark(&traceability, access(provenance, F_OK) == 0);
     mark(&traceability, access(bench_csv, F_OK) == 0);
+    mark(&traceability, access(bench_csv_modules, F_OK) == 0);
     mark(&traceability, access(bench_ref, F_OK) == 0);
+    mark(&traceability, access(bench_ref_modules, F_OK) == 0);
     mark(&traceability, access(module_meta_csv, F_OK) == 0);
     mark(&traceability, access(detailed_csv, F_OK) == 0);
     mark(&traceability, access(numeric_stability_csv, F_OK) == 0);
@@ -921,12 +1005,13 @@ int main(int argc, char** argv) {
     fprintf(rp, "## 4) Comparaison littérature (niveau calcul numérique)\n");
     fprintf(rp, "- Solveur exact 2x2 inclus pour ancrage théorique minimal contrôlé.\n");
     fprintf(rp, "- Benchmark externe QMC/DMRG chargé depuis `%s`.\n", bench_ref);
-    fprintf(rp, "- Comparaison chiffrée exportée: `%s`.\n", bench_csv);
+    fprintf(rp, "- Benchmark externe modules avancés chargé depuis `%s`.\n", bench_ref_modules);
+    fprintf(rp, "- Comparaison chiffrée exportée: `%s` et `%s`.\n", bench_csv, bench_csv_modules);
     fprintf(rp, "- RMSE=%.6f, MAE=%.6f, within_error_bar=%.2f%%%%, CI95_halfwidth=%.6f.\n\n", rmse, mae, p_within, ci95_half);
     fprintf(rp, "## 5) Nouveaux tests exécutés\n");
     fprintf(rp, "- Reproductibilité\n- Convergence\n- Extrêmes\n- Vérification indépendante\n- Solveur exact 2x2\n- Sensibilités physiques\n- Benchmark externe QMC/DMRG\n- Erreurs absolues/relatives + RMSE\n- Intervalle de confiance (CI95)\n- Critères PASS/FAIL stricts\n- Test de stabilité temporelle t>2700 jusqu'à 8700 steps\n- Sweep de pas temporel dt=[0.001,0.005,0.010]\n- Analyse spectrale FFT\n- Tests multi-tailles de clusters (8x8..255x255 autoscaling)\n\n");
     fprintf(rp, "## 6) Traçabilité totale\n");
-    fprintf(rp, "- Log: `%s`\n- Bruts: `%s` `%s`\n- Matrice experte: `%s`\n- Provenance: `%s`\n- Métadonnées physiques: `%s`\n- Observables normalisés: `%s`\n- Stabilité numérique: `%s`\n- Dérivées/variance temporelles: `%s`\n- Cas jouet: `%s`\n\n", log_path, raw_csv, tests_csv, qa_csv, provenance, module_meta_csv, detailed_csv, numeric_stability_csv, temporal_csv, toy_csv);
+    fprintf(rp, "- Log: `%s`\n- Bruts: `%s` `%s`\n- Matrice experte: `%s`\n- Provenance: `%s`\n- Métadonnées physiques: `%s`\n- Benchmarks: `%s` `%s`\n- Observables normalisés: `%s`\n- Stabilité numérique: `%s`\n- Dérivées/variance temporelles: `%s`\n- Cas jouet: `%s`\n\n", log_path, raw_csv, tests_csv, qa_csv, provenance, module_meta_csv, bench_csv, bench_csv_modules, detailed_csv, numeric_stability_csv, temporal_csv, toy_csv);
     fprintf(rp, "## 6b) Comparaison avant/après (différences)\n");
     fprintf(rp, "- **Avant**: pas de table unifiée lattice/Ut/dopage/BC/Δt par module.\n");
     fprintf(rp, "- **Après**: `module_physics_metadata.csv` documente ces paramètres pour Hubbard/QCD/QF et modules associés.\n");
@@ -950,7 +1035,7 @@ int main(int argc, char** argv) {
         fprintf(cr, "## Après\n");
         fprintf(cr, "- Contrôles phase+pump+quench actifs, stabilité longue et sweep Δt conservés.\n");
         fprintf(cr, "- Pompage dynamique actif et tracé contre une trajectoire sans contrôle.\n");
-        fprintf(cr, "- `module_physics_metadata.csv` ajouté (lattice, U/t, dopage, BC, schéma, Δt, jauge, β, volume, type de champ).\n");
+        fprintf(cr, "- `module_physics_metadata.csv` ajouté (lattice, U/t, dopage, BC, schéma, Δt, jauge, β, volume, type de champ) pour 13 modules.\n");
         fprintf(cr, "- `normalized_observables_trace.csv` ajouté (énergie/pairing normalisés).\n");
         fprintf(cr, "- `numerical_stability_suite.csv` + `toy_model_validation.csv` ajoutés.\n\n");
         fprintf(cr, "## Différences quantitatives clés\n");
@@ -973,6 +1058,7 @@ int main(int argc, char** argv) {
     fclose(qcsv);
     fclose(prov);
     fclose(bcsv);
+    fclose(bcsvm);
     fclose(mmeta);
     fclose(det);
     fclose(nstab);
