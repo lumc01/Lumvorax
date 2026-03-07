@@ -1,0 +1,7 @@
+
+# build artifacts
+hubbard_hts_runner
+hubbard_hts_research_runner
+
+# prevent committing compiled extraction binary
+EXTRACTION_AGENT/hubbard_hts_research_runner

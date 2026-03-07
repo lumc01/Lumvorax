@@ -1,0 +1,131 @@
+{
+  "run": "research_20260307T163119Z_2209",
+  "generated_at_utc": "2026-03-07T16:33:39.936992+00:00",
+  "counts": {
+    "new_tests": 77,
+    "expert_questions": 18,
+    "module_metadata": 5,
+    "temporal_rows": 4092
+  },
+  "family_stats": {
+    "reproducibility": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "convergence": {
+      "percent": 100.0,
+      "pass": 5,
+      "total": 5
+    },
+    "stress": {
+      "percent": 100.0,
+      "pass": 1,
+      "total": 1
+    },
+    "verification": {
+      "percent": 100.0,
+      "pass": 1,
+      "total": 1
+    },
+    "exact_solver": {
+      "percent": 33.333333333333336,
+      "pass": 1,
+      "total": 3
+    },
+    "sensitivity": {
+      "percent": 0.0,
+      "pass": 0,
+      "total": 8
+    },
+    "physics": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "control": {
+      "percent": 100.0,
+      "pass": 3,
+      "total": 3
+    },
+    "stability": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "dynamic_pumping": {
+      "percent": 0.0,
+      "pass": 0,
+      "total": 4
+    },
+    "dt_sweep": {
+      "percent": 0.0,
+      "pass": 0,
+      "total": 4
+    },
+    "spectral": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "benchmark": {
+      "percent": 100.0,
+      "pass": 4,
+      "total": 4
+    },
+    "cluster_scale": {
+      "percent": 5.555555555555555,
+      "pass": 2,
+      "total": 36
+    }
+  },
+  "question_status": {
+    "complete": 14,
+    "partial": 4
+  },
+  "expert_complete_pct": 77.77777777777777,
+  "overall_progress_pct": 97.77777777777777,
+  "fails": {
+    "new_tests": [
+      {
+        "test_family": "dt_sweep",
+        "test_id": "dt_convergence",
+        "parameter": "delta_threshold",
+        "value": "0",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "cluster_scale",
+        "test_id": "cluster_pair_trend",
+        "parameter": "nonincreasing",
+        "value": "0",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "cluster_scale",
+        "test_id": "cluster_energy_trend",
+        "parameter": "nondecreasing",
+        "value": "0",
+        "status": "FAIL"
+      }
+    ],
+    "numerical_stability": [
+      {
+        "test_id": "energy_conservation",
+        "module": "quantum_field_noneq",
+        "metric": "energy_density_drift",
+        "value": "0.1590431937",
+        "status": "FAIL",
+        "notes": "comparison_2200_vs_4400_steps"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "hubbard_hts_core",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      }
+    ]
+  }
+}

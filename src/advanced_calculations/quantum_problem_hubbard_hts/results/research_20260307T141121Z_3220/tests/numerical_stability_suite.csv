@@ -1,0 +1,3 @@
+test_id,module,metric,value,status,notes
+energy_conservation,quantum_field_noneq,energy_density_drift,0.1590431937,FAIL,comparison_2200_vs_4400_steps
+von_neumann,hubbard_hts_core,spectral_radius,1.0002246148,FAIL,stability_if_leq_1
