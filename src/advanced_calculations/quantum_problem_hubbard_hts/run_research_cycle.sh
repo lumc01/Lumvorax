@@ -10,7 +10,7 @@ cp -a "$ROOT_DIR/src" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/Makefile" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/benchmarks" "$BACKUP_DIR/"
 
-TOTAL_STEPS=18
+TOTAL_STEPS=19
 CURRENT_STEP=0
 print_progress() {
   CURRENT_STEP=$((CURRENT_STEP + 1))
@@ -80,5 +80,7 @@ print_progress "full-scope integration"
 print_progress "checksums"
 python3 "$ROOT_DIR/tools/post_run_scientific_report_cycle.py" "$RUN_DIR"
 print_progress "scientific report"
+python3 "$ROOT_DIR/tools/post_run_independent_log_review.py" "$RUN_DIR"
+print_progress "independent review"
 
 echo "Research cycle terminé: $RUN_DIR"
