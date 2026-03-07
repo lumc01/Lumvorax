@@ -100,9 +100,8 @@ print_progress "full-scope integration"
 
 (
   cd "$RUN_DIR"
-  find . -type f | sort | xargs sha256sum > logs/checksums.sha256
+  rm -f logs/checksums.sha256
 )
-print_progress "checksums"
 
 python3 "$ROOT_DIR/tools/post_run_scientific_report_cycle.py" "$RUN_DIR"
 print_progress "scientific report"
@@ -115,5 +114,11 @@ print_progress "3d model export"
 
 python3 "$ROOT_DIR/tools/post_run_remote_depot_independent_analysis.py" "$ROOT_DIR" --run-dir "$RUN_DIR"
 print_progress "remote independent analysis"
+
+(
+  cd "$RUN_DIR"
+  find . -type f ! -path './logs/checksums.sha256' -print0 | sort -z | xargs -0 sha256sum > logs/checksums.sha256
+)
+print_progress "checksums"
 
 echo "Research cycle terminé: $RUN_DIR"
