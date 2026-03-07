@@ -1,0 +1,918 @@
+{
+  "run": "research_20260307T163119Z_2209",
+  "points": [
+    {
+      "x_step": 0,
+      "y_module": "hubbard_hts_core",
+      "z_energy": -25.3327027517,
+      "pairing": 99.7079476457,
+      "sign_ratio": -0.04,
+      "elapsed_ns": 659730.0
+    },
+    {
+      "x_step": 1,
+      "y_module": "hubbard_hts_core",
+      "z_energy": -2451.4123879353,
+      "pairing": 9934.2996379759,
+      "sign_ratio": 0.0081188119,
+      "elapsed_ns": 53885699.0
+    },
+    {
+      "x_step": 2,
+      "y_module": "hubbard_hts_core",
+      "z_energy": -4724.5076812523,
+      "pairing": 19659.1815747055,
+      "sign_ratio": 0.0046766169,
+      "elapsed_ns": 105018208.0
+    },
+    {
+      "x_step": 3,
+      "y_module": "hubbard_hts_core",
+      "z_energy": -6808.2110964872,
+      "pairing": 29302.6643065477,
+      "sign_ratio": -0.000730897,
+      "elapsed_ns": 156394777.0
+    },
+    {
+      "x_step": 4,
+      "y_module": "hubbard_hts_core",
+      "z_energy": -8530.9327066274,
+      "pairing": 38826.6333438222,
+      "sign_ratio": -0.0010972569,
+      "elapsed_ns": 207861417.0
+    },
+    {
+      "x_step": 5,
+      "y_module": "hubbard_hts_core",
+      "z_energy": -9785.9948651306,
+      "pairing": 48223.7610279538,
+      "sign_ratio": -0.0002794411,
+      "elapsed_ns": 260809546.0
+    },
+    {
+      "x_step": 6,
+      "y_module": "hubbard_hts_core",
+      "z_energy": -10161.9532435754,
+      "pairing": 57454.5108737258,
+      "sign_ratio": 0.0020299501,
+      "elapsed_ns": 312817415.0
+    },
+    {
+      "x_step": 7,
+      "y_module": "hubbard_hts_core",
+      "z_energy": -8399.7725360135,
+      "pairing": 66429.8916707475,
+      "sign_ratio": 0.0021968616,
+      "elapsed_ns": 366277295.0
+    },
+    {
+      "x_step": 8,
+      "y_module": "hubbard_hts_core",
+      "z_energy": -2332.7247023032,
+      "pairing": 75040.3018557645,
+      "sign_ratio": 0.0006991261,
+      "elapsed_ns": 419294984.0
+    },
+    {
+      "x_step": 9,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 11814.669040544,
+      "pairing": 83221.9392671542,
+      "sign_ratio": -0.0004661487,
+      "elapsed_ns": 472031283.0
+    },
+    {
+      "x_step": 10,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 36851.8126760151,
+      "pairing": 90973.9205415079,
+      "sign_ratio": -0.0011388611,
+      "elapsed_ns": 526439292.0
+    },
+    {
+      "x_step": 11,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 72291.8313531394,
+      "pairing": 98299.1524595576,
+      "sign_ratio": -0.0016893733,
+      "elapsed_ns": 576601892.0
+    },
+    {
+      "x_step": 12,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 117492.5124370022,
+      "pairing": 105231.4488643268,
+      "sign_ratio": -0.0023147377,
+      "elapsed_ns": 628332801.0
+    },
+    {
+      "x_step": 13,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 171059.7311766527,
+      "pairing": 111853.814730663,
+      "sign_ratio": -0.0026594927,
+      "elapsed_ns": 681452170.0
+    },
+    {
+      "x_step": 14,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 232362.2082232313,
+      "pairing": 118179.419989317,
+      "sign_ratio": -0.0026552463,
+      "elapsed_ns": 732615230.0
+    },
+    {
+      "x_step": 15,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 299221.7283896144,
+      "pairing": 124254.9600090182,
+      "sign_ratio": -0.0012791472,
+      "elapsed_ns": 782524589.0
+    },
+    {
+      "x_step": 16,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 372047.0811679452,
+      "pairing": 130128.8007914095,
+      "sign_ratio": -0.0007245472,
+      "elapsed_ns": 839173508.0
+    },
+    {
+      "x_step": 17,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 449428.9694101125,
+      "pairing": 135873.8776394879,
+      "sign_ratio": -0.0009876543,
+      "elapsed_ns": 909869937.0
+    },
+    {
+      "x_step": 18,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 529480.0676372427,
+      "pairing": 141543.133885158,
+      "sign_ratio": -0.0013659078,
+      "elapsed_ns": 966419227.0
+    },
+    {
+      "x_step": 19,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 610844.0390047064,
+      "pairing": 147173.5808651521,
+      "sign_ratio": -0.0011783272,
+      "elapsed_ns": 1017209916.0
+    },
+    {
+      "x_step": 20,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 692631.7203196476,
+      "pairing": 152787.753601725,
+      "sign_ratio": -0.0013093453,
+      "elapsed_ns": 1069280355.0
+    },
+    {
+      "x_step": 21,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 774576.8195894039,
+      "pairing": 158396.0984008047,
+      "sign_ratio": -0.0015801999,
+      "elapsed_ns": 1121704814.0
+    },
+    {
+      "x_step": 22,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 856623.489495596,
+      "pairing": 164004.9364296283,
+      "sign_ratio": -0.0011812812,
+      "elapsed_ns": 1175078844.0
+    },
+    {
+      "x_step": 23,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 938628.1993568778,
+      "pairing": 169622.9170062479,
+      "sign_ratio": -0.0008604954,
+      "elapsed_ns": 1227081773.0
+    },
+    {
+      "x_step": 24,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 1020588.3524773844,
+      "pairing": 175241.3776704389,
+      "sign_ratio": -0.0008579758,
+      "elapsed_ns": 1279781422.0
+    },
+    {
+      "x_step": 25,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 1102668.0031888464,
+      "pairing": 180854.0404636,
+      "sign_ratio": -0.0003198721,
+      "elapsed_ns": 1333331022.0
+    },
+    {
+      "x_step": 26,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 1184763.8047355812,
+      "pairing": 186466.3728712836,
+      "sign_ratio": -0.0006843522,
+      "elapsed_ns": 1400116231.0
+    },
+    {
+      "x_step": 27,
+      "y_module": "hubbard_hts_core",
+      "z_energy": 1266799.9854127853,
+      "pairing": 192079.9176118617,
+      "sign_ratio": -0.0010218438,
+      "elapsed_ns": 1452999270.0
+    },
+    {
+      "x_step": 28,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": -13.4302643999,
+      "pairing": 80.6743673463,
+      "sign_ratio": -0.012345679,
+      "elapsed_ns": 823450.0
+    },
+    {
+      "x_step": 29,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": -1342.5513610857,
+      "pairing": 7968.9418456287,
+      "sign_ratio": 0.0023224545,
+      "elapsed_ns": 67257199.0
+    },
+    {
+      "x_step": 30,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": -2504.1543443977,
+      "pairing": 15727.5448640154,
+      "sign_ratio": 0.0069406056,
+      "elapsed_ns": 133823038.0
+    },
+    {
+      "x_step": 31,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": -3507.4145767386,
+      "pairing": 23397.0520978553,
+      "sign_ratio": -0.0035683524,
+      "elapsed_ns": 199021808.0
+    },
+    {
+      "x_step": 32,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": -4151.9349054425,
+      "pairing": 30940.5767620948,
+      "sign_ratio": -0.0036021058,
+      "elapsed_ns": 258807037.0
+    },
+    {
+      "x_step": 33,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": -4182.2018802083,
+      "pairing": 38346.5291974189,
+      "sign_ratio": -0.0024888495,
+      "elapsed_ns": 315537496.0
+    },
+    {
+      "x_step": 34,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": -3143.2581045032,
+      "pairing": 45493.3302217902,
+      "sign_ratio": -0.0040878371,
+      "elapsed_ns": 372206645.0
+    },
+    {
+      "x_step": 35,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 134.8073673961,
+      "pairing": 52327.1105806181,
+      "sign_ratio": -0.0032933552,
+      "elapsed_ns": 429084144.0
+    },
+    {
+      "x_step": 36,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 8028.8624579713,
+      "pairing": 58711.5661253685,
+      "sign_ratio": -0.0023581634,
+      "elapsed_ns": 484196314.0
+    },
+    {
+      "x_step": 37,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 24998.1882587725,
+      "pairing": 64535.7048031954,
+      "sign_ratio": -6.8511e-05,
+      "elapsed_ns": 538287473.0
+    },
+    {
+      "x_step": 38,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 53530.4968357184,
+      "pairing": 69855.2645388427,
+      "sign_ratio": 0.0008263342,
+      "elapsed_ns": 589501592.0
+    },
+    {
+      "x_step": 39,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 93559.026174374,
+      "pairing": 74721.4726748191,
+      "sign_ratio": 0.0014240701,
+      "elapsed_ns": 641322522.0
+    },
+    {
+      "x_step": 40,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 142029.8238773366,
+      "pairing": 79227.5501443485,
+      "sign_ratio": 0.0015316454,
+      "elapsed_ns": 692594021.0
+    },
+    {
+      "x_step": 41,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 195663.7860853985,
+      "pairing": 83457.227735847,
+      "sign_ratio": 0.0011482146,
+      "elapsed_ns": 742110600.0
+    },
+    {
+      "x_step": 42,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 253925.9622932329,
+      "pairing": 87455.0021710732,
+      "sign_ratio": 0.0006785277,
+      "elapsed_ns": 796870019.0
+    },
+    {
+      "x_step": 43,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 316792.154695722,
+      "pairing": 91256.3831456642,
+      "sign_ratio": 0.0013077701,
+      "elapsed_ns": 854596479.0
+    },
+    {
+      "x_step": 44,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 383391.489355275,
+      "pairing": 94922.4183959933,
+      "sign_ratio": 0.0009176364,
+      "elapsed_ns": 906597088.0
+    },
+    {
+      "x_step": 45,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 452089.241499712,
+      "pairing": 98516.6905926123,
+      "sign_ratio": 0.0025475211,
+      "elapsed_ns": 959841057.0
+    },
+    {
+      "x_step": 46,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 522127.8135258561,
+      "pairing": 102053.9303223734,
+      "sign_ratio": 0.0024060707,
+      "elapsed_ns": 1011565607.0
+    },
+    {
+      "x_step": 47,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 592975.4984153743,
+      "pairing": 105565.5555872473,
+      "sign_ratio": 0.0012404128,
+      "elapsed_ns": 1062373506.0
+    },
+    {
+      "x_step": 48,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 664079.9767787742,
+      "pairing": 109065.9701310677,
+      "sign_ratio": 0.0015239294,
+      "elapsed_ns": 1118382605.0
+    },
+    {
+      "x_step": 49,
+      "y_module": "qcd_lattice_proxy",
+      "z_energy": 735070.0408036304,
+      "pairing": 112566.2483598313,
+      "sign_ratio": 0.0016276788,
+      "elapsed_ns": 1170245024.0
+    },
+    {
+      "x_step": 50,
+      "y_module": "quantum_field_noneq",
+      "z_energy": -18.0598910809,
+      "pairing": 63.6972204345,
+      "sign_ratio": -0.125,
+      "elapsed_ns": 611540.0
+    },
+    {
+      "x_step": 51,
+      "y_module": "quantum_field_noneq",
+      "z_energy": -2020.2454942677,
+      "pairing": 6233.9620520749,
+      "sign_ratio": -0.0126856436,
+      "elapsed_ns": 58860749.0
+    },
+    {
+      "x_step": 52,
+      "y_module": "quantum_field_noneq",
+      "z_energy": -4000.0916051784,
+      "pairing": 12325.0187002725,
+      "sign_ratio": -0.0020211443,
+      "elapsed_ns": 115719948.0
+    },
+    {
+      "x_step": 53,
+      "y_module": "quantum_field_noneq",
+      "z_energy": -5861.9630560513,
+      "pairing": 18320.2644239003,
+      "sign_ratio": -0.002076412,
+      "elapsed_ns": 168604847.0
+    },
+    {
+      "x_step": 54,
+      "y_module": "quantum_field_noneq",
+      "z_energy": -7520.7121781997,
+      "pairing": 24156.1845952361,
+      "sign_ratio": -0.0012468828,
+      "elapsed_ns": 223628427.0
+    },
+    {
+      "x_step": 55,
+      "y_module": "quantum_field_noneq",
+      "z_energy": -8725.861200343,
+      "pairing": 29753.2637047355,
+      "sign_ratio": -0.0016841317,
+      "elapsed_ns": 273259606.0
+    },
+    {
+      "x_step": 56,
+      "y_module": "quantum_field_noneq",
+      "z_energy": -9064.6413370327,
+      "pairing": 35067.5474781101,
+      "sign_ratio": -0.0020278702,
+      "elapsed_ns": 326155205.0
+    },
+    {
+      "x_step": 57,
+      "y_module": "quantum_field_noneq",
+      "z_energy": -7690.239235014,
+      "pairing": 40008.8849909592,
+      "sign_ratio": -0.0057061341,
+      "elapsed_ns": 378318915.0
+    },
+    {
+      "x_step": 58,
+      "y_module": "quantum_field_noneq",
+      "z_energy": -2869.1610235086,
+      "pairing": 44498.8707575835,
+      "sign_ratio": -0.0042134831,
+      "elapsed_ns": 431657844.0
+    },
+    {
+      "x_step": 59,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 8231.9865907649,
+      "pairing": 48470.6671399096,
+      "sign_ratio": -0.0054453385,
+      "elapsed_ns": 491589013.0
+    },
+    {
+      "x_step": 60,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 28388.3884154574,
+      "pairing": 51918.1422266795,
+      "sign_ratio": -0.0071178821,
+      "elapsed_ns": 544604782.0
+    },
+    {
+      "x_step": 61,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 56098.5033582184,
+      "pairing": 54940.0668969342,
+      "sign_ratio": -0.0068119891,
+      "elapsed_ns": 597159172.0
+    },
+    {
+      "x_step": 62,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 89023.3255162685,
+      "pairing": 57647.8397891297,
+      "sign_ratio": -0.0043973772,
+      "elapsed_ns": 653671841.0
+    },
+    {
+      "x_step": 63,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 125835.1475869047,
+      "pairing": 60125.2317653988,
+      "sign_ratio": -0.0036029977,
+      "elapsed_ns": 711821600.0
+    },
+    {
+      "x_step": 64,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 165719.5810176305,
+      "pairing": 62440.993419374,
+      "sign_ratio": -0.0025874375,
+      "elapsed_ns": 765424859.0
+    },
+    {
+      "x_step": 65,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 207712.060443004,
+      "pairing": 64650.2075685346,
+      "sign_ratio": -0.0023734177,
+      "elapsed_ns": 815556499.0
+    },
+    {
+      "x_step": 66,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 250889.0539643817,
+      "pairing": 66817.6731739472,
+      "sign_ratio": -0.0024594004,
+      "elapsed_ns": 870917958.0
+    },
+    {
+      "x_step": 67,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 294396.5912071934,
+      "pairing": 68979.6820018895,
+      "sign_ratio": -0.0015432099,
+      "elapsed_ns": 924900507.0
+    },
+    {
+      "x_step": 68,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 338095.7647421951,
+      "pairing": 71145.3264608656,
+      "sign_ratio": -0.001214603,
+      "elapsed_ns": 975230746.0
+    },
+    {
+      "x_step": 69,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 381789.1082115883,
+      "pairing": 73304.7803187163,
+      "sign_ratio": -0.0008876907,
+      "elapsed_ns": 1025432086.0
+    },
+    {
+      "x_step": 70,
+      "y_module": "quantum_field_noneq",
+      "z_energy": 425579.0607619419,
+      "pairing": 75452.169692348,
+      "sign_ratio": 0.0006871564,
+      "elapsed_ns": 1074742705.0
+    },
+    {
+      "x_step": 71,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": -14.7688562483,
+      "pairing": 71.8207761851,
+      "sign_ratio": 0.1111111111,
+      "elapsed_ns": 776890.0
+    },
+    {
+      "x_step": 72,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": -1352.388444666,
+      "pairing": 7161.1549629995,
+      "sign_ratio": -0.0019251925,
+      "elapsed_ns": 53323150.0
+    },
+    {
+      "x_step": 73,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": -2456.7500389369,
+      "pairing": 14156.8299958362,
+      "sign_ratio": 0.0042841349,
+      "elapsed_ns": 106794029.0
+    },
+    {
+      "x_step": 74,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": -3306.1145064668,
+      "pairing": 21083.4317267321,
+      "sign_ratio": 0.0029531192,
+      "elapsed_ns": 165186378.0
+    },
+    {
+      "x_step": 75,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": -3672.6239682377,
+      "pairing": 27917.3108005749,
+      "sign_ratio": 0.0052646162,
+      "elapsed_ns": 223800487.0
+    },
+    {
+      "x_step": 76,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": -3149.5405433738,
+      "pairing": 34645.4096688828,
+      "sign_ratio": 0.0068196939,
+      "elapsed_ns": 282746337.0
+    },
+    {
+      "x_step": 77,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": -1260.8877780095,
+      "pairing": 41238.8362269121,
+      "sign_ratio": 0.002449621,
+      "elapsed_ns": 336199786.0
+    },
+    {
+      "x_step": 78,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 3710.0841949007,
+      "pairing": 47621.962516628,
+      "sign_ratio": 0.0015057854,
+      "elapsed_ns": 386696605.0
+    },
+    {
+      "x_step": 79,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 14348.3468382441,
+      "pairing": 53762.7383480573,
+      "sign_ratio": 0.0021500902,
+      "elapsed_ns": 438435164.0
+    },
+    {
+      "x_step": 80,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 34190.3459470686,
+      "pairing": 59595.1078499447,
+      "sign_ratio": 0.0012640276,
+      "elapsed_ns": 490673724.0
+    },
+    {
+      "x_step": 81,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 66840.1267052912,
+      "pairing": 65103.8417709854,
+      "sign_ratio": 0.0001665002,
+      "elapsed_ns": 544125853.0
+    },
+    {
+      "x_step": 82,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 114529.1155586927,
+      "pairing": 70295.0359774016,
+      "sign_ratio": -0.0003279847,
+      "elapsed_ns": 601335382.0
+    },
+    {
+      "x_step": 83,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 172541.836972006,
+      "pairing": 75270.9173196333,
+      "sign_ratio": -0.0003006754,
+      "elapsed_ns": 657074572.0
+    },
+    {
+      "x_step": 84,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 236806.586438644,
+      "pairing": 80093.6085807632,
+      "sign_ratio": -0.0001494577,
+      "elapsed_ns": 714055351.0
+    },
+    {
+      "x_step": 85,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 305855.7591893841,
+      "pairing": 84799.8432389312,
+      "sign_ratio": 0.0010904909,
+      "elapsed_ns": 771510700.0
+    },
+    {
+      "x_step": 86,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 378455.8338230205,
+      "pairing": 89431.3402919353,
+      "sign_ratio": 0.0002960989,
+      "elapsed_ns": 828885589.0
+    },
+    {
+      "x_step": 87,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 453950.3020558951,
+      "pairing": 94007.5569700213,
+      "sign_ratio": 0.0002429037,
+      "elapsed_ns": 882895928.0
+    },
+    {
+      "x_step": 88,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 529776.7952500964,
+      "pairing": 98571.4214324041,
+      "sign_ratio": 0.0003266053,
+      "elapsed_ns": 935578208.0
+    },
+    {
+      "x_step": 89,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 605781.0424895976,
+      "pairing": 103134.7101854401,
+      "sign_ratio": 0.0001850824,
+      "elapsed_ns": 986976647.0
+    },
+    {
+      "x_step": 90,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 681905.4802449596,
+      "pairing": 107693.3584947739,
+      "sign_ratio": -0.0001315097,
+      "elapsed_ns": 1036652176.0
+    },
+    {
+      "x_step": 91,
+      "y_module": "dense_nuclear_proxy",
+      "z_energy": 758316.8419475855,
+      "pairing": 112246.5075584956,
+      "sign_ratio": -9.71736e-05,
+      "elapsed_ns": 1087294106.0
+    },
+    {
+      "x_step": 92,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": -25.1829470096,
+      "pairing": 55.8853476137,
+      "sign_ratio": -0.1428571429,
+      "elapsed_ns": 613090.0
+    },
+    {
+      "x_step": 93,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": -2202.9582960828,
+      "pairing": 5596.497361505,
+      "sign_ratio": 0.0222772277,
+      "elapsed_ns": 50344779.0
+    },
+    {
+      "x_step": 94,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": -4370.30511287,
+      "pairing": 11093.5129127422,
+      "sign_ratio": 0.0159914712,
+      "elapsed_ns": 103451769.0
+    },
+    {
+      "x_step": 95,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": -6371.5556341643,
+      "pairing": 16528.9794899902,
+      "sign_ratio": 0.0079496915,
+      "elapsed_ns": 160958698.0
+    },
+    {
+      "x_step": 96,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": -8064.5772827217,
+      "pairing": 21899.4092183043,
+      "sign_ratio": 0.00320627,
+      "elapsed_ns": 217055767.0
+    },
+    {
+      "x_step": 97,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": -9266.1324697096,
+      "pairing": 27197.427050893,
+      "sign_ratio": 0.003493014,
+      "elapsed_ns": 271229726.0
+    },
+    {
+      "x_step": 98,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": -9285.6031890364,
+      "pairing": 32382.5956008769,
+      "sign_ratio": 0.0013073449,
+      "elapsed_ns": 333931295.0
+    },
+    {
+      "x_step": 99,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": -7112.9961865632,
+      "pairing": 37422.2589536941,
+      "sign_ratio": 0.0014265335,
+      "elapsed_ns": 396623275.0
+    },
+    {
+      "x_step": 100,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": -909.7942520016,
+      "pairing": 42294.9485122607,
+      "sign_ratio": 0.0002229356,
+      "elapsed_ns": 462302204.0
+    },
+    {
+      "x_step": 101,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 10671.7042958516,
+      "pairing": 46975.7423567764,
+      "sign_ratio": 0.0002774695,
+      "elapsed_ns": 521590263.0
+    },
+    {
+      "x_step": 102,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 27507.4251044129,
+      "pairing": 51478.0797658553,
+      "sign_ratio": 0.0009633224,
+      "elapsed_ns": 578419642.0
+    },
+    {
+      "x_step": 103,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 48523.548041349,
+      "pairing": 55825.9311492352,
+      "sign_ratio": 0.0003892565,
+      "elapsed_ns": 629774851.0
+    },
+    {
+      "x_step": 104,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 73417.5265026903,
+      "pairing": 60041.1089030087,
+      "sign_ratio": 0.0009813251,
+      "elapsed_ns": 681366101.0
+    },
+    {
+      "x_step": 105,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 102324.8382846608,
+      "pairing": 64151.3477078741,
+      "sign_ratio": -0.0007137367,
+      "elapsed_ns": 733462860.0
+    },
+    {
+      "x_step": 106,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 134418.5166636288,
+      "pairing": 68192.6827458899,
+      "sign_ratio": -0.000203936,
+      "elapsed_ns": 783667049.0
+    },
+    {
+      "x_step": 107,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 167367.7945823471,
+      "pairing": 72212.0299220352,
+      "sign_ratio": -0.0001189683,
+      "elapsed_ns": 836318499.0
+    },
+    {
+      "x_step": 108,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 200408.8596335632,
+      "pairing": 76224.659061647,
+      "sign_ratio": 0.0019630588,
+      "elapsed_ns": 887168478.0
+    },
+    {
+      "x_step": 109,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 233512.5634308616,
+      "pairing": 80235.5445130608,
+      "sign_ratio": 0.0016796842,
+      "elapsed_ns": 938454087.0
+    },
+    {
+      "x_step": 110,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 266609.5004415903,
+      "pairing": 84247.2127771857,
+      "sign_ratio": 0.00156659,
+      "elapsed_ns": 991656637.0
+    },
+    {
+      "x_step": 111,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 299643.3441109832,
+      "pairing": 88260.8693631577,
+      "sign_ratio": 0.001258736,
+      "elapsed_ns": 1042109676.0
+    },
+    {
+      "x_step": 112,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 332686.2149710169,
+      "pairing": 92275.7711181127,
+      "sign_ratio": 0.0020168487,
+      "elapsed_ns": 1093386175.0
+    },
+    {
+      "x_step": 113,
+      "y_module": "quantum_chemistry_proxy",
+      "z_energy": 365840.9699513367,
+      "pairing": 96286.8675503502,
+      "sign_ratio": 0.0019378527,
+      "elapsed_ns": 1144765335.0
+    }
+  ],
+  "description": "3D scatter: x=sample index, y=module, z=energy, color=pairing"
+}

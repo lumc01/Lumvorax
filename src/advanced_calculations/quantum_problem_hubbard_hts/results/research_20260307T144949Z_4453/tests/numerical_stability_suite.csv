@@ -1,0 +1,7 @@
+test_id,module,metric,value,status,notes
+dt_sweep_extended,hubbard_hts_core,pairing_dt_0.25,0.5799338596,PASS,relative_to_dt_0.25=0.0000000000
+dt_sweep_extended,hubbard_hts_core,pairing_dt_0.50,0.5735347020,PASS,relative_to_dt_0.25=0.0110342887
+dt_sweep_extended,hubbard_hts_core,pairing_dt_1.00,0.5708668758,PASS,relative_to_dt_0.25=0.0156345136
+dt_sweep_extended,hubbard_hts_core,pairing_dt_2.00,0.5668805116,PASS,relative_to_dt_0.25=0.0225083392
+energy_conservation,quantum_field_noneq,energy_density_drift,0.1590431937,FAIL,comparison_2200_vs_4400_steps
+von_neumann,hubbard_hts_core,spectral_radius,1.0002246148,FAIL,stability_if_leq_1
