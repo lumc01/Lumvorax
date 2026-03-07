@@ -1,0 +1,6 @@
+problem,qubits_simulated_proxy,runtime_ns,module_runtime_share_pct,avg_cpu_percent,avg_mem_percent,calc_per_second,latency_ns_per_step,boundary_conditions,solver_mode
+dense_nuclear_proxy,72,1039142203,18.61,15.84,68.48,1924.66,49482962.05,periodic_proxy,advanced_proxy_deterministic
+hubbard_hts_core,100,1372508220,24.58,15.84,68.61,1967.20,49018150.71,periodic_proxy,advanced_proxy_deterministic
+qcd_lattice_proxy,81,1070527841,19.17,15.84,68.60,1961.65,48660356.41,periodic_proxy,advanced_proxy_deterministic
+quantum_chemistry_proxy,56,1080313451,19.35,15.84,68.46,1943.88,49105156.86,periodic_proxy,advanced_proxy_deterministic
+quantum_field_noneq,64,1020895663,18.28,15.84,68.56,1959.06,48614079.19,periodic_proxy,advanced_proxy_deterministic
