@@ -1,0 +1,6 @@
+gate,status,evidence
+CSV_INTEGRITY_GATE,PASS,malformed_rows=0
+MODULE_COVERAGE_GATE,PASS,module_count=5
+GLOSSARY_GATE,PASS,file=integration_terms_glossary.csv
+CONFIDENCE_TAG_GATE,PASS,file=integration_claim_confidence_tags.csv
+ABSENT_METADATA_EXTRACTOR_GATE,PASS,missing_fields=0
