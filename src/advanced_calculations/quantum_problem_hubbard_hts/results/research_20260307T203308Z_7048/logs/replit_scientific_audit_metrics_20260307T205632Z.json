@@ -1,0 +1,201 @@
+{
+  "generated_at_utc": "2026-03-07T20:56:32.830969+00:00",
+  "run": "research_20260307T203308Z_7048",
+  "counts": {
+    "physics_rows": 13,
+    "new_tests_rows": 80,
+    "stability_rows": 6,
+    "expert_rows": 19
+  },
+  "integrity": {
+    "checksums_main": {
+      "listed": 60,
+      "ok": 56,
+      "missing": 3,
+      "mismatch": 1,
+      "details": [
+        {
+          "status": "mismatch",
+          "path": "./logs/checksums.sha256",
+          "expected": "1709bdad06c2dcece0fef5d9b27d030aa9223f019668c989838ce4a8ec68ecf9",
+          "got": "6a7792aa25a2032168a610a8efe6b5df2da35127c9761800d6383e31e4883a5a"
+        },
+        {
+          "status": "missing",
+          "path": "./logs/environment_versions.log",
+          "expected": "5e634bbf4d48a7541f482c1c2b615b5a582708362bd60e22f9917db04c99b8c6"
+        },
+        {
+          "status": "missing",
+          "path": "./logs/provenance.log",
+          "expected": "33d7ec3e583c6d4b162c700bb2c4c59b9e6ad48ac165cc87e7a5c27300282f51"
+        },
+        {
+          "status": "missing",
+          "path": "./logs/research_execution.log",
+          "expected": "91ac39d407be95a830d61e404498217c703fca91f67c2ea6454e92c2815535cb"
+        }
+      ]
+    },
+    "checksums_scientific": {
+      "listed": 2,
+      "ok": 0,
+      "missing": 2,
+      "mismatch": 0,
+      "details": [
+        {
+          "status": "missing",
+          "path": "RAPPORT_ANALYSE_EXECUTION_COMPLETE_CYCLE06.md",
+          "expected": "82de73f982ae41c1f2e907db8b9462e481d20238976a369524fdfb7939bebd17"
+        },
+        {
+          "status": "missing",
+          "path": "analysis_scientifique_summary.json",
+          "expected": "59d727666c1125e62bc8037d2528e0f8a96cf5def19327497d1733bf342add4d"
+        }
+      ]
+    },
+    "duplicate_header_rows_in_correlations": 0
+  },
+  "scientific": {
+    "overall_progress_pct": 80.78947368421052,
+    "expert_complete_pct": 57.89473684210526,
+    "means_from_independent_review": {
+      "energy": 269610.9992807627,
+      "pairing": 84411.42227838027,
+      "sign_ratio": -0.0018804214659016393
+    },
+    "energy_per_site": {
+      "mean": 9612.135327021806,
+      "min": 5794.116482472251,
+      "max": 15874.430368231939
+    },
+    "pairing_normalized_end": {
+      "mean": 1638.478543629353,
+      "min": 1178.9401514429376,
+      "max": 2052.650015007499
+    },
+    "sign_ratio": {
+      "global_min": -0.1428571429,
+      "global_max": 0.1555555556,
+      "sign_bound_violations": 0
+    },
+    "entropy_combined_bits": {
+      "mean": 3.465980230769231,
+      "min": 3.297694,
+      "max": 3.63853
+    },
+    "benchmark": {
+      "pairing_points": 8,
+      "pairing_within_error_bar": 8,
+      "energy_points": 7,
+      "energy_within_error_bar": 0,
+      "pairing_within_pct": 100.0,
+      "energy_within_pct": 0.0
+    },
+    "tests_status": {
+      "pass": 21,
+      "fail": 10,
+      "observed": 49
+    },
+    "stability_fails": [
+      {
+        "test_id": "energy_conservation",
+        "module": "quantum_field_noneq",
+        "metric": "energy_density_drift",
+        "value": "0.1590431937",
+        "status": "FAIL",
+        "notes": "comparison_2200_vs_4400_steps"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "hubbard_hts_core",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      }
+    ],
+    "expert_questions": {
+      "complete": 11,
+      "partial": 8
+    },
+    "executed_extra_checks": {
+      "energy_zscore_outliers_gt3": 0,
+      "pairing_nonpositive_count": 0
+    }
+  },
+  "comparison": {
+    "available": true,
+    "previous_run": "research_20260307T195749Z_4022",
+    "overall_progress_pct_delta": 0.0,
+    "expert_complete_pct_delta": 0.0,
+    "per_problem_deltas": [
+      {
+        "problem": "bosonic_multimode_systems",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "correlated_fermions_non_hubbard",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "dense_nuclear_proxy",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "far_from_equilibrium_kinetic_lattices",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "hubbard_hts_core",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "multi_correlated_fermion_boson_networks",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "multi_state_excited_chemistry",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "multiscale_nonlinear_field_models",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "qcd_lattice_proxy",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "quantum_chemistry_proxy",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "quantum_field_noneq",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "spin_liquid_exotic",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "topological_correlated_materials",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      }
+    ]
+  }
+}
