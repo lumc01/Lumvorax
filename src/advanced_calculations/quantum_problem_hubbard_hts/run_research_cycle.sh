@@ -38,6 +38,7 @@ python3 "$ROOT_DIR/tools/post_run_chatgpt_critical_tests.py" "$RUN_DIR"
 python3 "$ROOT_DIR/tools/post_run_problem_solution_progress.py" "$RUN_DIR"
 python3 "$ROOT_DIR/tools/post_run_authenticity_audit.py" "$ROOT_DIR" "$RUN_DIR"
 python3 "$ROOT_DIR/tools/post_run_cycle35_exhaustive_report.py" "$ROOT_DIR" "$RUN_DIR"
+python3 "$ROOT_DIR/tools/post_run_full_scope_integrator.py" --root "$ROOT_DIR" "$RUN_DIR"
 
 (
   cd "$RUN_DIR"

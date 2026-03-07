@@ -42,4 +42,5 @@ Fichier: `tests/integration_test_coverage_dashboard.csv`
 ## Commande reproductible
 ```bash
 python src/advanced_calculations/quantum_problem_hubbard_hts/tools/post_run_forensic_extension_tests.py \
-  src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260306T033822Z_318i5
+  src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260306T033822Z_3185
+```
