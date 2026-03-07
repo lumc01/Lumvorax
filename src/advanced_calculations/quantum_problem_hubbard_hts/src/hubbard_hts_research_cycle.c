@@ -674,6 +674,7 @@ int main(int argc, char** argv) {
     problem_t stability = probs[0];
     stability.steps = 8700; /* 3x beyond +2000 requested extension */
     sim_result_t stable_ctl = simulate_advanced_proxy_controlled(&stability, 20260307, 125, NULL, &ctl, ts, 4096, &ts_n);
+    sim_result_t stable_open = simulate_advanced_proxy_controlled(&stability, 20260307, 125, NULL, NULL, NULL, 0, NULL);
     bool stability_finite = isfinite(stable_ctl.energy) && isfinite(stable_ctl.pairing) && isfinite(stable_ctl.sign_ratio);
     mark(&robustness, stability_finite);
     fprintf(tcsv, "control,phase_control_step800,enabled,%d,%s\n", ctl.phase_control ? 1 : 0, ctl.phase_control ? "PASS" : "FAIL");
@@ -681,6 +682,14 @@ int main(int argc, char** argv) {
     fprintf(tcsv, "control,magnetic_quench,enabled,%d,%s\n", ctl.magnetic_quench ? 1 : 0, ctl.magnetic_quench ? "PASS" : "FAIL");
     fprintf(tcsv, "stability,temporal_t_gt_2700_steps,steps,%.0f,%s\n", (double)stability.steps, stability_finite ? "PASS" : "FAIL");
     fprintf(tcsv, "stability,temporal_t_gt_2700_pairing,pairing,%.10f,%s\n", stable_ctl.pairing, stability_finite ? "PASS" : "FAIL");
+
+    double denom_open = fabs(stable_open.energy) + EPS;
+    double feedback_energy_reduction = (fabs(stable_open.energy) - fabs(stable_ctl.energy)) / denom_open;
+    double feedback_pairing_gain = stable_ctl.pairing - stable_open.pairing;
+    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,energy_reduction_ratio,%.10f,OBSERVED\n", feedback_energy_reduction);
+    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,pairing_gain,%.10f,OBSERVED\n", feedback_pairing_gain);
+    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,controlled_energy,%.10f,OBSERVED\n", stable_ctl.energy);
+    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,uncontrolled_energy,%.10f,OBSERVED\n", stable_open.energy);
 
     double dt_set[] = {0.001, 0.005, 0.010};
     double dt_pair[3] = {0};
@@ -857,9 +866,10 @@ int main(int argc, char** argv) {
                               {"numerics_open", "Q14", "Dépendance au pas temporel (dt) testée ?", dt_converged ? "complete" : "partial"},
                               {"experiment_open", "Q15", "Comparaison aux expériences réelles (ARPES/STM) ?", "partial"},
                               {"numerics_open", "Q16", "Analyse Von Neumann exécutée ?", vn.stable ? "complete" : "partial"},
-                              {"methodology_open", "Q17", "Paramètres physiques module-par-module explicités ?", "complete"}};
+                              {"methodology_open", "Q17", "Paramètres physiques module-par-module explicités ?", "complete"},
+                              {"controls_open", "Q18", "Pompage dynamique (feedback atomique) inclus et tracé ?", "complete"}};
 
-    for (size_t i = 0; i < 17; ++i) {
+    for (size_t i = 0; i < 18; ++i) {
         bool ok = strcmp(qrows[i][3], "complete") == 0;
         mark(&expert, ok);
         fprintf(qcsv, "%s,%s,%s,%s,see_report\n", qrows[i][0], qrows[i][1], qrows[i][2], qrows[i][3]);
@@ -906,6 +916,7 @@ int main(int argc, char** argv) {
     fprintf(rp, "- Écarts principaux attribués à la nature proxy vs exact-small-cluster.\n");
     fprintf(rp, "- Validation externe benchmark: RMSE=%s, within_error_bar=%s, CI95=%s.\n", bench_rmse_ok ? "PASS" : "FAIL", bench_within_ok ? "PASS" : "FAIL", bench_ci_ok ? "PASS" : "FAIL");
     fprintf(rp, "- Contrôles plasma actifs: phase_step=800, resonance_pump=on, magnetic_quench=on.\n");
+    fprintf(rp, "- Pompage dynamique (feedback atomique): energy_reduction_ratio=%.6f pairing_gain=%.6f.\n", feedback_energy_reduction, feedback_pairing_gain);
     fprintf(rp, "- FFT: dominant_freq=%.6f Hz dominant_amp=%.6f (n=%llu).\n\n", fft_freq, fft_amp, (unsigned long long)ts_n);
     fprintf(rp, "## 4) Comparaison littérature (niveau calcul numérique)\n");
     fprintf(rp, "- Solveur exact 2x2 inclus pour ancrage théorique minimal contrôlé.\n");
@@ -938,11 +949,13 @@ int main(int argc, char** argv) {
         fprintf(cr, "- Pas de suite explicite Von Neumann/cas jouet.\n\n");
         fprintf(cr, "## Après\n");
         fprintf(cr, "- Contrôles phase+pump+quench actifs, stabilité longue et sweep Δt conservés.\n");
+        fprintf(cr, "- Pompage dynamique actif et tracé contre une trajectoire sans contrôle.\n");
         fprintf(cr, "- `module_physics_metadata.csv` ajouté (lattice, U/t, dopage, BC, schéma, Δt, jauge, β, volume, type de champ).\n");
         fprintf(cr, "- `normalized_observables_trace.csv` ajouté (énergie/pairing normalisés).\n");
         fprintf(cr, "- `numerical_stability_suite.csv` + `toy_model_validation.csv` ajoutés.\n\n");
         fprintf(cr, "## Différences quantitatives clés\n");
         fprintf(cr, "- FFT dominant_freq=%.10f, dominant_amp=%.10f.\n", fft_freq, fft_amp);
+        fprintf(cr, "- Feedback energy_reduction_ratio=%.10f, pairing_gain=%.10f.\n", feedback_energy_reduction, feedback_pairing_gain);
         fprintf(cr, "- Drift énergie QF=%.10f (%s).\n", energy_drift, energy_conservation_ok ? "PASS" : "FAIL");
         fprintf(cr, "- Rayon spectral Von Neumann=%.10f (%s).\n", vn.spectral_radius, vn.stable ? "PASS" : "FAIL");
         fprintf(cr, "- Cas jouet exp_decay abs_error=%.10f (%s).\n", toy_err, toy_ok ? "PASS" : "FAIL");
