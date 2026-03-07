@@ -219,6 +219,10 @@ def build_metrics(run_dir: Path, prev_run_dir: Path | None) -> dict[str, Any]:
             "executed_extra_checks": {
                 "energy_zscore_outliers_gt3": energy_z_fail,
                 "pairing_nonpositive_count": pairing_nonpositive_count,
+                "energy_conservation_extended_check_present": any(
+                    r.get("test_id") == "energy_conservation" and "2200_4400_6600_8800" in r.get("notes", "")
+                    for r in stability_rows
+                ),
             },
         },
         "comparison": prev_compare,
@@ -278,16 +282,31 @@ def build_markdown(metrics: dict[str, Any], command: str) -> str:
     lines.append("   - Réponse: **non**.")
     lines.append("   - Solution: resserrer dt, schéma symplectique/implicit, puis retester drift et rayon spectral.")
     lines.append("3) **Question**: Le run est-il traçable et auditable ?")
-    lines.append("   - Analyse: oui mais manifestes checksums partiellement invalides (fichiers manquants + auto-référence mismatch).")
-    lines.append("   - Réponse: **partielle**.")
-    lines.append("   - Solution: régénérer checksums en excluant le fichier checksum lui-même et en fixant les chemins relatifs.")
+    checksum_issues = (
+        integ['checksums_main']['missing']
+        + integ['checksums_main']['mismatch']
+        + integ['checksums_scientific']['missing']
+        + integ['checksums_scientific']['mismatch']
+    )
+    if checksum_issues == 0:
+        lines.append("   - Analyse: oui, les manifestes checksum sont cohérents et totalement vérifiables.")
+        lines.append("   - Réponse: **oui**.")
+        lines.append("   - Solution: maintenir la génération append-only et la validation systématique par SHA256.")
+    else:
+        lines.append("   - Analyse: oui mais manifestes checksums partiellement invalides (fichiers manquants et/ou mismatch).")
+        lines.append("   - Réponse: **partielle**.")
+        lines.append("   - Solution: régénérer checksums en excluant le fichier checksum lui-même et en fixant les chemins relatifs.")
     lines.append("")
 
     lines.append("## Phase 7 — Correctifs proposés")
-    lines.append("- Correctif C1: réparer `logs/analysis_scientifique_checksums.sha256` (chemins vers `reports/` et `logs/`).")
-    lines.append("- Correctif C2: régénérer `logs/checksums.sha256` sans auto-hash du manifeste, avec inventaire des fichiers réellement présents.")
-    lines.append("- Correctif C3: corriger génération de `integration_spatial_correlations.csv` pour supprimer l'entête dupliquée.")
-    lines.append("- Correctif C4: campagne dt-sweep dense + contrôle de conservation énergie à t=2200,4400,6600,8800.")
+    c1_ok = integ['checksums_scientific']['missing'] == 0 and integ['checksums_scientific']['mismatch'] == 0
+    c2_ok = integ['checksums_main']['missing'] == 0 and integ['checksums_main']['mismatch'] == 0
+    c3_ok = integ['duplicate_header_rows_in_correlations'] == 0
+    has_extended_energy_check = bool(sci['executed_extra_checks'].get('energy_conservation_extended_check_present'))
+    lines.append(f"- Correctif C1 (checksum scientifique): {'implémenté' if c1_ok else 'à faire'}.")
+    lines.append(f"- Correctif C2 (checksum principal sans auto-hash): {'implémenté' if c2_ok else 'à faire'}.")
+    lines.append(f"- Correctif C3 (entête corrélations unique): {'implémenté' if c3_ok else 'à faire'}.")
+    lines.append(f"- Correctif C4 (contrôle énergie t=2200,4400,6600,8800): {'implémenté' if has_extended_energy_check else 'à faire'}.")
     lines.append("")
 
     lines.append("## Phase 8 — Intégration technique (nouveau contrôle automatique)")
