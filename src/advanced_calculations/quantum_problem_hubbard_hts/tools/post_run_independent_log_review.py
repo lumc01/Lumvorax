@@ -179,9 +179,14 @@ def main() -> int:
     lines.append("  - **Solution**: ajouter un test bloquant si question obligatoire absente.")
     lines.append("")
     lines.append("## Phase 7 — Correctifs proposés")
-    lines.append("1. Réduire dt et augmenter steps pour les cas `dt_convergence` en FAIL.")
-    lines.append("2. Ajuster les critères de tendance cluster-scale (ou le modèle) pour éviter incohérences globales.")
-    lines.append("3. Isoler module quantum_field_noneq pour réduire drift énergie observé.")
+    if fails_new_tests or fails_nstab:
+        lines.append("1. Réduire dt et augmenter steps uniquement sur modules/tests explicitement en FAIL.")
+        lines.append("2. Étendre la campagne multi-seed ciblée sur les familles en échec (pas sur les PASS).")
+        lines.append("3. Ajouter/resserrer benchmarks externes individuels pour les modules encore partiels.")
+    else:
+        lines.append("1. Aucun FAIL: conserver les paramètres et passer en campagne de reproductibilité élargie.")
+        lines.append("2. Vérifier périodiquement les checksums et la stabilité inter-run.")
+        lines.append("3. Étendre uniquement les observables physiques (pas de changement de base numérique).")
     lines.append("")
     lines.append("## Phase 8/9 — Intégration technique et traçabilité")
     lines.append("- Rapport indépendant écrit dans `reports/`.")
