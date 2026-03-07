@@ -1,6 +1,6 @@
 # RAPPORT_SYNC_REPLIT_CYCLE35_ULTRADETAIL
 
-Run analysé: `research_20260307T094855Z_1291`
+Run analysé: `research_20260307T111621Z_1197`
 
 ## Phase 1 — Synchronisation / intégrité
 - total_runs_audited: 35
@@ -36,18 +36,18 @@ Run analysé: `research_20260307T094855Z_1291`
   - energy: max_abs_diff=0.0, mean_abs_diff=0.0
   - pairing: max_abs_diff=0.0, mean_abs_diff=0.0
   - sign_ratio: max_abs_diff=0.0, mean_abs_diff=0.0
-  - elapsed_ns: max_abs_diff=68809861.0, mean_abs_diff=17975054.0
-  - cpu_percent: max_abs_diff=1.8200000000000003, mean_abs_diff=1.6760526315789472
-  - mem_percent: max_abs_diff=0.03000000000000025, mean_abs_diff=0.02552631578947383
+  - elapsed_ns: max_abs_diff=482135425.0, mean_abs_diff=204423275.13157895
+  - cpu_percent: max_abs_diff=23.72, mean_abs_diff=23.64438596491228
+  - mem_percent: max_abs_diff=0.10000000000000009, mean_abs_diff=0.03201754385964917
 
 ## Phase 5 — Métriques bas niveau (runtime/hardware proxy)
 | Problème | Qubits proxy | Module % | CPU% | MEM% | calc/s | latence ns/step |
 |---|---:|---:|---:|---:|---:|---:|
-| dense_nuclear_proxy | 72 | 18.61 | 18.03 | 67.38 | 1892.14 | 50333514.19 |
-| hubbard_hts_core | 100 | 24.68 | 18.03 | 67.85 | 1926.33 | 50058199.07 |
-| qcd_lattice_proxy | 81 | 19.07 | 18.03 | 67.84 | 1938.48 | 49241867.64 |
-| quantum_chemistry_proxy | 56 | 19.31 | 18.03 | 67.35 | 1914.47 | 49859514.45 |
-| quantum_field_noneq | 64 | 18.32 | 18.03 | 67.61 | 1921.69 | 49559564.62 |
+| dense_nuclear_proxy | 72 | 18.72 | 15.98 | 66.43 | 1898.11 | 50175292.24 |
+| hubbard_hts_core | 100 | 24.97 | 15.98 | 66.42 | 1921.64 | 50180235.07 |
+| qcd_lattice_proxy | 81 | 19.07 | 15.98 | 66.43 | 1957.12 | 48773079.82 |
+| quantum_chemistry_proxy | 56 | 19.11 | 15.98 | 66.43 | 1953.02 | 48875286.68 |
+| quantum_field_noneq | 64 | 18.13 | 15.98 | 66.42 | 1959.86 | 48594353.67 |
 
 ## Phase 6 — Réponse point par point (question/analyse/réponse/solution)
 ### Q1. Où en est chaque problème précisément ?
