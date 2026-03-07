@@ -481,7 +481,7 @@ int main(int argc, char** argv) {
     mkdir_if_missing(tests);
 
     char log_path[MAX_PATH], raw_csv[MAX_PATH], tests_csv[MAX_PATH], report[MAX_PATH], comparison_report[MAX_PATH], provenance[MAX_PATH], qa_csv[MAX_PATH], bench_csv[MAX_PATH], bench_ref[MAX_PATH];
-    char module_meta_csv[MAX_PATH], detailed_csv[MAX_PATH], numeric_stability_csv[MAX_PATH], toy_csv[MAX_PATH];
+    char module_meta_csv[MAX_PATH], detailed_csv[MAX_PATH], numeric_stability_csv[MAX_PATH], toy_csv[MAX_PATH], temporal_csv[MAX_PATH];
     pjoin(log_path, sizeof(log_path), logs, "research_execution.log");
     pjoin(raw_csv, sizeof(raw_csv), logs, "baseline_reanalysis_metrics.csv");
     pjoin(tests_csv, sizeof(tests_csv), tests, "new_tests_results.csv");
@@ -495,6 +495,7 @@ int main(int argc, char** argv) {
     pjoin(detailed_csv, sizeof(detailed_csv), logs, "normalized_observables_trace.csv");
     pjoin(numeric_stability_csv, sizeof(numeric_stability_csv), tests, "numerical_stability_suite.csv");
     pjoin(toy_csv, sizeof(toy_csv), tests, "toy_model_validation.csv");
+    pjoin(temporal_csv, sizeof(temporal_csv), tests, "temporal_derivatives_variance.csv");
 
     FILE* lg = fopen(log_path, "w");
     FILE* raw = fopen(raw_csv, "w");
@@ -506,7 +507,8 @@ int main(int argc, char** argv) {
     FILE* det = fopen(detailed_csv, "w");
     FILE* nstab = fopen(numeric_stability_csv, "w");
     FILE* toy = fopen(toy_csv, "w");
-    if (!lg || !raw || !tcsv || !qcsv || !prov || !bcsv || !mmeta || !det || !nstab || !toy) return 1;
+    FILE* tdrv = fopen(temporal_csv, "w");
+    if (!lg || !raw || !tcsv || !qcsv || !prov || !bcsv || !mmeta || !det || !nstab || !toy || !tdrv) return 1;
 
     fprintf(raw, "problem,step,energy,pairing,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
     fprintf(tcsv, "test_family,test_id,parameter,value,status\n");
@@ -516,6 +518,7 @@ int main(int argc, char** argv) {
     fprintf(det, "problem,step,energy_norm,pairing_norm,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
     fprintf(nstab, "test_id,module,metric,value,status,notes\n");
     fprintf(toy, "toy_case,module,metric,reference,measured,abs_error,status\n");
+    fprintf(tdrv, "module,series,step_index,value,d1,d2,rolling_variance\n");
 
     fprintf(lg, "000001 | START run_id=%s utc=%04d-%02d-%02dT%02d:%02d:%02dZ\n", run_id, g.tm_year + 1900, g.tm_mon + 1, g.tm_mday, g.tm_hour, g.tm_min, g.tm_sec);
     fprintf(lg, "000002 | ISOLATION run_dir_preexisting=%s\n", isolation_ok ? "NO" : "YES");
@@ -700,6 +703,44 @@ int main(int argc, char** argv) {
     fprintf(tcsv, "spectral,fft_dominant_frequency,hz,%.10f,%s\n", fft_freq, fft_valid ? "PASS" : "FAIL");
     fprintf(tcsv, "spectral,fft_dominant_amplitude,amplitude,%.10f,%s\n", fft_amp, fft_valid ? "PASS" : "FAIL");
 
+    if (ts_n > 6) {
+        for (uint64_t i = 2; i + 2 < ts_n; ++i) {
+            double d1 = (ts[i] - ts[i - 1]) / stability.dt;
+            double d2 = (ts[i + 1] - 2.0 * ts[i] + ts[i - 1]) / (stability.dt * stability.dt);
+            double mu = 0.0, mu2 = 0.0;
+            int w = 0;
+            for (int j = -2; j <= 2; ++j) {
+                double v = ts[i + (uint64_t)j];
+                mu += v;
+                mu2 += v * v;
+                w++;
+            }
+            mu /= (double)w;
+            double var = (mu2 / (double)w) - mu * mu;
+            fprintf(tdrv, "hubbard_hts_core,pairing_series,%llu,%.10f,%.10f,%.10f,%.10f\n",
+                    (unsigned long long)i,
+                    ts[i],
+                    d1,
+                    d2,
+                    var > 0.0 ? var : 0.0);
+        }
+    }
+
+    double dt_stability_set[] = {0.25, 0.5, 1.0, 2.0};
+    double dt_stability_ref = 0.0;
+    for (int i = 0; i < 4; ++i) {
+        problem_t dts = probs[0];
+        dts.dt = dt_stability_set[i];
+        dts.steps = 1200;
+        sim_result_t sr = simulate_advanced_proxy_controlled(&dts, (uint64_t)(7000 + i), 85, NULL, &ctl, NULL, 0, NULL);
+        double pair = sr.pairing;
+        if (i == 0) dt_stability_ref = pair;
+        double rel = fabs(pair - dt_stability_ref) / (fabs(dt_stability_ref) + EPS);
+        bool ok = isfinite(pair) && rel < 0.5;
+        fprintf(nstab, "dt_sweep_extended,hubbard_hts_core,pairing_dt_%0.2f,%.10f,%s,relative_to_dt_0.25=%.10f\n",
+                dt_stability_set[i], pair, ok ? "PASS" : "FAIL", rel);
+    }
+
     /* Numerical stability diagnostics: conservation, Von Neumann proxy, toy case */
     problem_t qf = probs[2];
     qf.steps = 2200;
@@ -835,6 +876,7 @@ int main(int argc, char** argv) {
     mark(&traceability, access(detailed_csv, F_OK) == 0);
     mark(&traceability, access(numeric_stability_csv, F_OK) == 0);
     mark(&traceability, access(toy_csv, F_OK) == 0);
+    mark(&traceability, access(temporal_csv, F_OK) == 0);
     mark(&traceability, access(comparison_report, F_OK) == 0);
 
     struct rusage ru;
@@ -873,7 +915,7 @@ int main(int argc, char** argv) {
     fprintf(rp, "## 5) Nouveaux tests exécutés\n");
     fprintf(rp, "- Reproductibilité\n- Convergence\n- Extrêmes\n- Vérification indépendante\n- Solveur exact 2x2\n- Sensibilités physiques\n- Benchmark externe QMC/DMRG\n- Erreurs absolues/relatives + RMSE\n- Intervalle de confiance (CI95)\n- Critères PASS/FAIL stricts\n- Test de stabilité temporelle t>2700 jusqu'à 8700 steps\n- Sweep de pas temporel dt=[0.001,0.005,0.010]\n- Analyse spectrale FFT\n- Tests multi-tailles de clusters (8x8..255x255 autoscaling)\n\n");
     fprintf(rp, "## 6) Traçabilité totale\n");
-    fprintf(rp, "- Log: `%s`\n- Bruts: `%s` `%s`\n- Matrice experte: `%s`\n- Provenance: `%s`\n- Métadonnées physiques: `%s`\n- Observables normalisés: `%s`\n- Stabilité numérique: `%s`\n- Cas jouet: `%s`\n\n", log_path, raw_csv, tests_csv, qa_csv, provenance, module_meta_csv, detailed_csv, numeric_stability_csv, toy_csv);
+    fprintf(rp, "- Log: `%s`\n- Bruts: `%s` `%s`\n- Matrice experte: `%s`\n- Provenance: `%s`\n- Métadonnées physiques: `%s`\n- Observables normalisés: `%s`\n- Stabilité numérique: `%s`\n- Dérivées/variance temporelles: `%s`\n- Cas jouet: `%s`\n\n", log_path, raw_csv, tests_csv, qa_csv, provenance, module_meta_csv, detailed_csv, numeric_stability_csv, temporal_csv, toy_csv);
     fprintf(rp, "## 6b) Comparaison avant/après (différences)\n");
     fprintf(rp, "- **Avant**: pas de table unifiée lattice/Ut/dopage/BC/Δt par module.\n");
     fprintf(rp, "- **Après**: `module_physics_metadata.csv` documente ces paramètres pour Hubbard/QCD/QF et modules associés.\n");
@@ -921,6 +963,7 @@ int main(int argc, char** argv) {
     fclose(mmeta);
     fclose(det);
     fclose(nstab);
+    fclose(tdrv);
     fclose(toy);
     return 0;
 }
