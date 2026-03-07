@@ -1,0 +1,9 @@
+parameter,influence,source_file,line
+timeseries_presence,Direct +30 points when problem in baseline metrics,tools/post_run_problem_solution_progress.py,80
+metadata_presence,Direct +20 points,tools/post_run_problem_solution_progress.py,82
+energy_pairing_correlation,Up to +20 points via corr_norm,tools/post_run_problem_solution_progress.py,87
+benchmark_crosscheck_T5,+15 points if PASS,tools/post_run_problem_solution_progress.py,91
+sign_watchdog_T6,+5 points if PASS,tools/post_run_problem_solution_progress.py,94
+critical_window_T8,+10 points when problem status is ok,tools/post_run_problem_solution_progress.py,99
+missing_advanced_tests_penalty,-8 per FAIL among T10/T11/T12,tools/post_run_problem_solution_progress.py,72
+score_clamp_to_percent,"Clamp [0,100] for solution_progress_percent",tools/post_run_problem_solution_progress.py,104
