@@ -1,0 +1,113 @@
+phase,test_id,objective,command,status,evidence
+time_separation,TS1,time_axis::explicit dual axis: step_index + t_phys,run TS3,planned,strict field separation in outputs
+time_separation,TS2,dt_control::log-grid dt + extrapolation,run TS2,planned,fail-fast gate on dt convergence
+time_separation,TS3,benchmark_energy::normalized energy per site,run TS4,planned,unit mapping table versioned
+time_separation,TS4,run_drift::physics/perf channels separated,run TS1,planned,separate acceptance criteria
+open_questions,Q_missing_units,Unités explicites,run unit_consistency_gate,planned,criterion==0
+open_questions,Q_solver_crosscheck,Cross-check non-proxy,run independent_solver_large_lattice,planned,criterion=<10%
+open_questions,Q_dt_real_sweep,Stabilité dt réelle,run dt_half_dt_double,planned,criterion=<1%
+open_questions,Q_phase_criteria,Critères transition phase,run finite_size_scaling_suite,planned,criterion=<0.05
+open_questions,Q_production_guardrails,Rollback V4 NEXT,run degradation_rollback_drill,planned,criterion=<60
+benchmark_blockers,BFAIL_001,hubbard_hts_core::energy,benchmark_recalibration_suite,planned,abs_error=12799.8539853615|error_bar=12000.0000000000
+benchmark_blockers,BFAIL_002,hubbard_hts_core::energy,benchmark_recalibration_suite,planned,abs_error=42196.8083606362|error_bar=9000.0000000000
+benchmark_blockers,BFAIL_003,hubbard_hts_core::energy,benchmark_recalibration_suite,planned,abs_error=33868.6816832828|error_bar=9000.0000000000
+benchmark_blockers,BFAIL_004,hubbard_hts_core::energy,benchmark_recalibration_suite,planned,abs_error=57430.0795911376|error_bar=9000.0000000000
+benchmark_blockers,BFAIL_005,hubbard_hts_core::energy,benchmark_recalibration_suite,planned,abs_error=110122.5293913716|error_bar=9000.0000000000
+benchmark_blockers,BFAIL_006,hubbard_hts_core::energy,benchmark_recalibration_suite,planned,abs_error=55146.6561204088|error_bar=12000.0000000000
+benchmark_blockers,BFAIL_007,hubbard_hts_core::energy,benchmark_recalibration_suite,planned,abs_error=53309.6107865246|error_bar=14000.0000000000
+benchmark_blockers,BFAIL_008,spin_liquid_exotic::pairing,benchmark_recalibration_suite,planned,abs_error=0.1422403823|error_bar=0.0900000000
+benchmark_blockers,BFAIL_009,spin_liquid_exotic::energy,benchmark_recalibration_suite,planned,abs_error=1733090.6792104105|error_bar=9500.0000000000
+benchmark_blockers,BFAIL_010,topological_correlated_materials::pairing,benchmark_recalibration_suite,planned,abs_error=0.1376075411|error_bar=0.0900000000
+benchmark_blockers,BFAIL_011,topological_correlated_materials::energy,benchmark_recalibration_suite,planned,abs_error=1264152.8372668442|error_bar=9500.0000000000
+benchmark_blockers,BFAIL_012,correlated_fermions_non_hubbard::pairing,benchmark_recalibration_suite,planned,abs_error=0.1749247335|error_bar=0.0900000000
+benchmark_blockers,BFAIL_013,correlated_fermions_non_hubbard::energy,benchmark_recalibration_suite,planned,abs_error=1031981.8518466770|error_bar=9500.0000000000
+benchmark_blockers,BFAIL_014,multi_state_excited_chemistry::pairing,benchmark_recalibration_suite,planned,abs_error=0.1113385169|error_bar=0.0900000000
+benchmark_blockers,BFAIL_015,multi_state_excited_chemistry::energy,benchmark_recalibration_suite,planned,abs_error=643700.3616473363|error_bar=9500.0000000000
+benchmark_blockers,BFAIL_016,bosonic_multimode_systems::pairing,benchmark_recalibration_suite,planned,abs_error=0.1956394136|error_bar=0.1000000000
+benchmark_blockers,BFAIL_017,bosonic_multimode_systems::energy,benchmark_recalibration_suite,planned,abs_error=485823.1416568772|error_bar=9500.0000000000
+benchmark_blockers,BFAIL_018,multiscale_nonlinear_field_models::pairing,benchmark_recalibration_suite,planned,abs_error=0.2457829491|error_bar=0.1000000000
+benchmark_blockers,BFAIL_019,multiscale_nonlinear_field_models::energy,benchmark_recalibration_suite,planned,abs_error=966970.7847945302|error_bar=9500.0000000000
+benchmark_blockers,BFAIL_020,far_from_equilibrium_kinetic_lattices::pairing,benchmark_recalibration_suite,planned,abs_error=0.3109764049|error_bar=0.1100000000
+benchmark_blockers,BFAIL_021,far_from_equilibrium_kinetic_lattices::energy,benchmark_recalibration_suite,planned,abs_error=991312.3412401110|error_bar=9500.0000000000
+benchmark_blockers,BFAIL_022,multi_correlated_fermion_boson_networks::pairing,benchmark_recalibration_suite,planned,abs_error=0.2092215230|error_bar=0.1000000000
+benchmark_blockers,BFAIL_023,multi_correlated_fermion_boson_networks::energy,benchmark_recalibration_suite,planned,abs_error=883716.5570258966|error_bar=9500.0000000000
+existing_suite,rep_fixed_seed,reproducibility::delta_same_seed,already in new_tests_results.csv,pass,value=0.00000000000000
+existing_suite,rep_diff_seed,reproducibility::delta_diff_seed,already in new_tests_results.csv,pass,value=55054.34619424162520
+existing_suite,conv_700_steps,convergence::pairing,already in new_tests_results.csv,pass,value=0.9399401921
+existing_suite,conv_1400_steps,convergence::pairing,already in new_tests_results.csv,pass,value=0.8237924021
+existing_suite,conv_2800_steps,convergence::pairing,already in new_tests_results.csv,pass,value=0.7021165105
+existing_suite,conv_4200_steps,convergence::pairing,already in new_tests_results.csv,pass,value=0.6599775880
+existing_suite,conv_monotonic,convergence::pairing_nonincreasing,already in new_tests_results.csv,pass,value=1
+existing_suite,extreme_temperature,stress::finite_pairing,already in new_tests_results.csv,pass,value=1
+existing_suite,independent_calc,verification::delta_main_vs_independent,already in new_tests_results.csv,pass,value=0.0000000007
+existing_suite,hubbard_2x2_ground_u4,exact_solver::energy,already in new_tests_results.csv,observed,value=-2.7205662327
+existing_suite,hubbard_2x2_ground_u8,exact_solver::energy,already in new_tests_results.csv,observed,value=-1.5043157123
+existing_suite,hubbard_2x2_energy_order,exact_solver::u8_gt_u4,already in new_tests_results.csv,pass,value=1
+existing_suite,sens_T_60,sensitivity::pairing,already in new_tests_results.csv,observed,value=0.7998507658
+existing_suite,sens_T_95,sensitivity::pairing,already in new_tests_results.csv,observed,value=0.6957790535
+existing_suite,sens_T_130,sensitivity::pairing,already in new_tests_results.csv,observed,value=0.6120484934
+existing_suite,sens_T_180,sensitivity::pairing,already in new_tests_results.csv,observed,value=0.5194348042
+existing_suite,pairing_vs_temperature,physics::monotonic_decrease,already in new_tests_results.csv,pass,value=1
+existing_suite,sens_U_6,sensitivity::energy,already in new_tests_results.csv,observed,value=1013869.2340054024
+existing_suite,sens_U_8,sensitivity::energy,already in new_tests_results.csv,observed,value=1374933.1004279954
+existing_suite,sens_U_10,sensitivity::energy,already in new_tests_results.csv,observed,value=1735996.9668464295
+existing_suite,sens_U_12,sensitivity::energy,already in new_tests_results.csv,observed,value=2097060.8332661754
+existing_suite,energy_vs_U,physics::monotonic_increase,already in new_tests_results.csv,pass,value=1
+existing_suite,phase_control_step800,control::enabled,already in new_tests_results.csv,pass,value=1
+existing_suite,resonance_pump,control::enabled,already in new_tests_results.csv,pass,value=1
+existing_suite,magnetic_quench,control::enabled,already in new_tests_results.csv,pass,value=1
+existing_suite,temporal_t_gt_2700_steps,stability::steps,already in new_tests_results.csv,pass,value=8700
+existing_suite,temporal_t_gt_2700_pairing,stability::pairing,already in new_tests_results.csv,pass,value=0.6866754566
+existing_suite,feedback_loop_atomic,dynamic_pumping::energy_reduction_ratio,already in new_tests_results.csv,observed,value=0.3692038634
+existing_suite,feedback_loop_atomic,dynamic_pumping::pairing_gain,already in new_tests_results.csv,observed,value=0.0740956015
+existing_suite,feedback_loop_atomic,dynamic_pumping::controlled_energy,already in new_tests_results.csv,observed,value=3769599.5148811894
+existing_suite,feedback_loop_atomic,dynamic_pumping::uncontrolled_energy,already in new_tests_results.csv,observed,value=5975939.4455449982
+existing_suite,dt_0.001,dt_sweep::pairing,already in new_tests_results.csv,observed,value=0.9039900751
+existing_suite,dt_0.005,dt_sweep::pairing,already in new_tests_results.csv,observed,value=0.7125458373
+existing_suite,dt_0.010,dt_sweep::pairing,already in new_tests_results.csv,observed,value=0.6837103128
+existing_suite,dt_convergence,dt_sweep::delta_threshold,already in new_tests_results.csv,fail,value=0
+existing_suite,fft_dominant_frequency,spectral::hz,already in new_tests_results.csv,pass,value=0.0244140625
+existing_suite,fft_dominant_amplitude,spectral::amplitude,already in new_tests_results.csv,pass,value=66.0786119413
+existing_suite,qmc_dmrg_rmse,benchmark::rmse,already in new_tests_results.csv,fail,value=40331.7478765852
+existing_suite,qmc_dmrg_mae,benchmark::mae,already in new_tests_results.csv,fail,value=24324.9527305010
+existing_suite,qmc_dmrg_within_error_bar,benchmark::percent_within,already in new_tests_results.csv,fail,value=53.333333
+existing_suite,qmc_dmrg_ci95_halfwidth,benchmark::ci95_halfwidth,already in new_tests_results.csv,fail,value=20410.6805456616
+existing_suite,external_modules_rmse,benchmark::rmse,already in new_tests_results.csv,fail,value=750655.3025163291
+existing_suite,external_modules_mae,benchmark::mae,already in new_tests_results.csv,fail,value=500046.8801512591
+existing_suite,external_modules_within_error_bar,benchmark::percent_within,already in new_tests_results.csv,fail,value=0.000000
+existing_suite,cluster_8x8,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8503161993
+existing_suite,cluster_8x8,cluster_scale::energy,already in new_tests_results.csv,observed,value=109916.2118819844
+existing_suite,cluster_10x10,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8700143443
+existing_suite,cluster_10x10,cluster_scale::energy,already in new_tests_results.csv,observed,value=117908.6203375818
+existing_suite,cluster_12x12,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8769187699
+existing_suite,cluster_12x12,cluster_scale::energy,already in new_tests_results.csv,observed,value=161888.2464987585
+existing_suite,cluster_14x14,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8713584470
+existing_suite,cluster_14x14,cluster_scale::energy,already in new_tests_results.csv,observed,value=244799.6338192856
+existing_suite,cluster_16x16,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8558119317
+existing_suite,cluster_16x16,cluster_scale::energy,already in new_tests_results.csv,observed,value=398964.0742976669
+existing_suite,cluster_18x18,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8565019670
+existing_suite,cluster_18x18,cluster_scale::energy,already in new_tests_results.csv,observed,value=477823.5393608424
+existing_suite,cluster_24x24,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8570219158
+existing_suite,cluster_24x24,cluster_scale::energy,already in new_tests_results.csv,observed,value=881227.3380750464
+existing_suite,cluster_26x26,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8483436130
+existing_suite,cluster_26x26,cluster_scale::energy,already in new_tests_results.csv,observed,value=1147814.5432916216
+existing_suite,cluster_28x28,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8536630666
+existing_suite,cluster_28x28,cluster_scale::energy,already in new_tests_results.csv,observed,value=1238636.9503267116
+existing_suite,cluster_32x32,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8622506267
+existing_suite,cluster_32x32,cluster_scale::energy,already in new_tests_results.csv,observed,value=1454344.1746898841
+existing_suite,cluster_36x36,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.8510476194
+existing_suite,cluster_36x36,cluster_scale::energy,already in new_tests_results.csv,observed,value=2136870.6483987160
+existing_suite,cluster_64x64,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.9649022340
+existing_suite,cluster_64x64,cluster_scale::energy,already in new_tests_results.csv,observed,value=-350375.5807126311
+existing_suite,cluster_66x66,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.9652971005
+existing_suite,cluster_66x66,cluster_scale::energy,already in new_tests_results.csv,observed,value=-374429.3782784457
+existing_suite,cluster_68x68,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.9655820299
+existing_suite,cluster_68x68,cluster_scale::energy,already in new_tests_results.csv,observed,value=-398482.0896946189
+existing_suite,cluster_128x128,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.9801808521
+existing_suite,cluster_128x128,cluster_scale::energy,already in new_tests_results.csv,observed,value=-621545.7686350979
+existing_suite,cluster_255x255,cluster_scale::pairing,already in new_tests_results.csv,observed,value=0.9853567656
+existing_suite,cluster_255x255,cluster_scale::energy,already in new_tests_results.csv,observed,value=-1265234.8994108196
+existing_suite,cluster_pair_trend,cluster_scale::nonincreasing,already in new_tests_results.csv,fail,value=0
+existing_suite,cluster_energy_trend,cluster_scale::nondecreasing,already in new_tests_results.csv,fail,value=0
+existing_suite,resource_autoscale,cluster_scale::cpu_count,already in new_tests_results.csv,pass,value=8
+existing_suite,resource_autoscale,cluster_scale::mem_available_kb,already in new_tests_results.csv,pass,value=24041244
