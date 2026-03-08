@@ -1,0 +1,12 @@
+{
+  "generated_at_utc": "2026-03-07T22:12:35.207742+00:00",
+  "run_dir": "/workspace/Lumvorax/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260307T220548Z_5643",
+  "outputs": {
+    "metrics_json": "replit_scientific_audit_metrics_20260307T221235Z.json",
+    "report_md": "RAPPORT_AUDIT_SCIENTIFIQUE_REPLIT_20260307T221235Z.md"
+  },
+  "sha256": {
+    "replit_scientific_audit_metrics_20260307T221235Z.json": "6ee87e32eca2208581ee1bcbc082e56454f13fdef394f4215c965f23d14ad367",
+    "RAPPORT_AUDIT_SCIENTIFIQUE_REPLIT_20260307T221235Z.md": "dd3b95ea8922f9ed3b501f572761603119e523222adb3c308bd05d0e691c4da6"
+  }
+}
