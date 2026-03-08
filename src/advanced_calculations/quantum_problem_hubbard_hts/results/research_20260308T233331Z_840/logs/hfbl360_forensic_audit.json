@@ -1,0 +1,71 @@
+{
+  "generated_at_utc": "2026-03-08T23:39:25.218746+00:00",
+  "run_dir": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260308T233331Z_840",
+  "standard_names_path": "/home/runner/workspace/STANDARD_NAMES.md",
+  "required": [
+    {
+      "name": "memory_tracker_enable",
+      "present": true,
+      "status": "PASS"
+    },
+    {
+      "name": "memory_tracker_is_enabled",
+      "present": true,
+      "status": "PASS"
+    },
+    {
+      "name": "memory_tracker_export_json",
+      "present": true,
+      "status": "PASS"
+    },
+    {
+      "name": "memory_tracker_set_release_mode",
+      "present": true,
+      "status": "PASS"
+    }
+  ],
+  "optional_hfbl": [
+    {
+      "name": "HFBL_360",
+      "present": false,
+      "status": "MISSING"
+    },
+    {
+      "name": "NX-11-HFBL-360",
+      "present": false,
+      "status": "MISSING"
+    },
+    {
+      "name": "forensic_research_chain_of_custody",
+      "present": true,
+      "status": "OBSERVED""
+    }
+  ],
+  "env": [
+    {
+      "key": "LUMVORAX_FORENSIC_REALTIME",
+      "value": "UNSET",
+      "status": "OBSERVED"
+    },
+    {
+      "key": "LUMVORAX_LOG_PERSISTENCE",
+      "value": "UNSET",
+      "status": "OBSERVED"
+    },
+    {
+      "key": "LUMVORAX_HFBL360_ENABLED",
+      "value": "UNSET",
+      "status": "OBSERVED"
+    },
+    {
+      "key": "LUMVORAX_MEMORY_TRACKER",
+      "value": "UNSET",
+      "status": "OBSERVED"
+    }
+  ],
+  "persistence": {
+    "target": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260308T233331Z_840/logs/hfbl360_realtime_persistent.log",
+    "ok": true,
+    "note": "writable"
+  }
+}

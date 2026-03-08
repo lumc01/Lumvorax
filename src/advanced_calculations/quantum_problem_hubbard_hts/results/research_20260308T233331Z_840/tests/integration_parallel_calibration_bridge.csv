@@ -1,0 +1,14 @@
+module,baseline_dt,recommended_dt,recommended_control_gain_factor,energy_drift_max,progress_percent,stability_severity,donor_modules,benchmark_parallel
+bosonic_multimode_systems,0.010000,0.005000,0.550,0.1208640125,57.35,high,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+correlated_fermions_non_hubbard,0.010000,0.002500,0.400,0.2521319218,59.75,critical,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+dense_nuclear_proxy,0.010000,0.002500,0.400,0.2872333590,58.60,critical,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+far_from_equilibrium_kinetic_lattices,0.010000,0.005000,0.550,0.1795711674,56.47,high,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+hubbard_hts_core,0.010000,0.005000,0.550,0.1697066628,70.03,high,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+multi_correlated_fermion_boson_networks,0.010000,0.005000,0.550,0.1659581953,59.82,high,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+multi_state_excited_chemistry,0.010000,0.005000,0.550,0.1603181144,69.44,high,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+multiscale_nonlinear_field_models,0.010000,0.002500,0.400,0.2586936885,65.76,critical,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+qcd_lattice_proxy,0.010000,0.002500,0.400,0.2200679841,56.41,critical,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+quantum_chemistry_proxy,0.010000,0.007500,0.700,0.1174284269,69.91,moderate,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+quantum_field_noneq,0.010000,0.005000,0.550,0.1708287840,63.43,high,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+spin_liquid_exotic,0.010000,0.005000,0.550,0.1750125163,62.33,high,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
+topological_correlated_materials,0.010000,0.007500,0.700,0.1109782920,61.93,moderate,topological_correlated_materials;quantum_chemistry_proxy;bosonic_multimode_systems,ENABLED
