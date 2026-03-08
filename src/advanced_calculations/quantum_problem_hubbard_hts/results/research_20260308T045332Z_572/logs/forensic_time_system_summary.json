@@ -1,0 +1,28 @@
+{
+  "generated_at_utc": "2026-03-08T19:46:55Z",
+  "report": "reports/RAPPORT_ANALYSE_MANUELLE_TEMPS_ET_BENCHMARK_CYCLE06_20260308.md",
+  "matrix": "tests/integration_time_step_vs_physical_time_separation_cycle06.csv",
+  "metrics": {
+    "benchmark_qmc_fail_pct": 46.666666666666664,
+    "benchmark_external_fail_pct": 100.0,
+    "energy_drift_mean": 0.18375331730769232,
+    "spectral_radius_mean": 1.0002246148,
+    "dt_entries": [
+      [
+        "dt_0.001",
+        0.9039900751,
+        "OBSERVED"
+      ],
+      [
+        "dt_0.005",
+        0.7125458373,
+        "OBSERVED"
+      ],
+      [
+        "dt_0.010",
+        0.6837103128,
+        "OBSERVED"
+      ]
+    ]
+  }
+}
