@@ -4,14 +4,22 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 STAMP_UTC="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_DIR="$ROOT_DIR/backups/research_cycle_$STAMP_UTC"
+SESSION_LOG_DIR="$ROOT_DIR/logs"
+SESSION_LOG="$SESSION_LOG_DIR/research_cycle_session_${STAMP_UTC}.log"
 
 mkdir -p "$BACKUP_DIR"
+mkdir -p "$SESSION_LOG_DIR"
+
+# Persistent real-time log (console + file)
+exec > >(stdbuf -oL tee -a "$SESSION_LOG") 2>&1
+
+echo "[$(date -u +%Y-%m-%dT%H:%M:%S.%N)Z] run_research_cycle start stamp=${STAMP_UTC}"
 cp -a "$ROOT_DIR/include" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/src" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/Makefile" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/benchmarks" "$BACKUP_DIR/"
 
-TOTAL_STEPS=21
+TOTAL_STEPS=23
 CURRENT_STEP=0
 
 print_progress() {
@@ -115,6 +123,12 @@ print_progress "3d model export"
 python3 "$ROOT_DIR/tools/post_run_remote_depot_independent_analysis.py" "$ROOT_DIR" --run-dir "$RUN_DIR"
 print_progress "remote independent analysis"
 
+python3 "$ROOT_DIR/tools/post_run_parallel_calibration_bridge.py" "$RUN_DIR"
+print_progress "parallel calibration bridge"
+
+python3 "$ROOT_DIR/tools/post_run_hfbl360_forensic_logger.py" "$RUN_DIR" --standard-names "$ROOT_DIR/../../../STANDARD_NAMES.md"
+print_progress "hfbl360 forensic logger"
+
 (
   cd "$RUN_DIR"
   find . -type f ! -path './logs/checksums.sha256' -print0 | sort -z | xargs -0 sha256sum > logs/checksums.sha256
@@ -122,3 +136,4 @@ print_progress "remote independent analysis"
 print_progress "checksums"
 
 echo "Research cycle terminé: $RUN_DIR"
+echo "Session log: $SESSION_LOG"
