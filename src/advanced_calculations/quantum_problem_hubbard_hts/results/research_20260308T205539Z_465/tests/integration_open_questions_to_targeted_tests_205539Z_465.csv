@@ -1,0 +1,6 @@
+question_id,question,targeted_test,metric,acceptance_criteria,priority
+Q_missing_units,Are physical units explicit and consistent for all observables?,unit_consistency_gate,unit_mismatch_count,=0,P1
+Q_solver_crosscheck,Do proxy results match at least one independent non-proxy solver on larger lattice?,independent_solver_large_lattice,rel_error,<10%,P1
+Q_dt_real_sweep,"Is dt stability validated by true multi-run dt/2,dt,2dt (not proxy only)?",dt_half_dt_double,observable_delta_pct,<1%,P1
+Q_phase_criteria,Are phase-transition criteria explicit (order parameter + finite-size scaling)?,finite_size_scaling_suite,critical_fit_rmse,<0.05,P2
+Q_production_guardrails,Can V4 NEXT rollback instantly on degraded metrics?,rollback_drill,rollback_latency_s,<60,P2

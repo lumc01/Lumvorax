@@ -1,0 +1,5 @@
+dimension,before_current_state,after_target_state,technical_guardrail,validation_test
+time_axis,step used implicitly with dt,explicit dual axis: step_index + t_phys,strict field separation in outputs,TS3
+dt_control,dt_convergence FAIL,log-grid dt + extrapolation,fail-fast gate on dt convergence,TS2
+benchmark_energy,mixed scale risk,normalized energy per site,unit mapping table versioned,TS4
+run_drift,elapsed_ns drift interpreted as runtime,physics/perf channels separated,separate acceptance criteria,TS1

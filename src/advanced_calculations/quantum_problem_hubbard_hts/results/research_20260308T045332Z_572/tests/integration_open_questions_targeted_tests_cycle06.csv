@@ -1,0 +1,6 @@
+question_id,question,targeted_test,metric,acceptance_criteria,priority
+Q_missing_units,Unités explicites,unit_consistency_gate,unit_mismatch_count,=0,P1
+Q_solver_crosscheck,Cross-check non-proxy,independent_solver_large_lattice,rel_error_vs_reference,<10%,P1
+Q_dt_real_sweep,Stabilité dt réelle,dt_half_dt_double,observable_delta,<1%,P1
+Q_phase_criteria,Critères transition phase,finite_size_scaling_suite,critical_exponent_fit_rmse,<0.05,P2
+Q_production_guardrails,Rollback V4 NEXT,degradation_rollback_drill,rollback_latency_s,<60,P2
