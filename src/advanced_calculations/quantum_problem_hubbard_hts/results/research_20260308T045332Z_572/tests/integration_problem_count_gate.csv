@@ -1,0 +1,3 @@
+metric,value,status,details
+problem_count,13,PASS,Expected at least 5 simulation problems in latest run
+five_simulations_present,0,OBSERVED,Explicit check requested by user

@@ -1,0 +1,28 @@
+{
+  "generated_at_utc": "2026-03-08T04:59:32.831554+00:00",
+  "run": "research_20260308T045332Z_572",
+  "modules": 13,
+  "donor_modules": [
+    "topological_correlated_materials",
+    "quantum_chemistry_proxy",
+    "bosonic_multimode_systems"
+  ],
+  "fail_families": {
+    "dt_sweep": 1,
+    "benchmark": 7,
+    "cluster_scale": 2
+  },
+  "bridge_file": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260308T045332Z_572/tests/integration_parallel_calibration_bridge.csv",
+  "method": {
+    "dt_factor_policy": {
+      "critical_drift_ge_0.20": 0.25,
+      "high_drift_ge_0.12": 0.5,
+      "moderate": 0.75
+    },
+    "control_gain_factor_policy": {
+      "critical": 0.4,
+      "high": 0.55,
+      "moderate": 0.7
+    }
+  }
+}

@@ -1,0 +1,6 @@
+run_id,mode_requested,rollout_status,connection_readiness_pct,shadow_safety_pct,realism_pct,global_weighted_readiness_pct
+research_20260307T211809Z_747,shadow,SHADOW_ACTIVE,80.00,85.00,63.79,89.12
+research_20260307T220548Z_5643,shadow,SHADOW_ACTIVE,80.00,85.00,63.79,89.12
+research_20260308T005728Z_2721,shadow,SHADOW_ACTIVE,80.00,85.00,63.79,89.12
+research_20260308T024230Z_4732,shadow,SHADOW_ACTIVE,80.00,85.00,63.79,89.12
+research_20260308T045332Z_572,shadow,SHADOW_ACTIVE,80.00,85.00,63.79,89.12
