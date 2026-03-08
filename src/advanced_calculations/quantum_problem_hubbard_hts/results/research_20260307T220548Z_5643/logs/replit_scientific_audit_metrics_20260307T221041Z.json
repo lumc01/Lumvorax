@@ -1,0 +1,168 @@
+{
+  "generated_at_utc": "2026-03-07T22:10:41.648787+00:00",
+  "run": "research_20260307T220548Z_5643",
+  "counts": {
+    "physics_rows": 13,
+    "new_tests_rows": 80,
+    "stability_rows": 6,
+    "expert_rows": 19
+  },
+  "integrity": {
+    "checksums_main": {
+      "listed": 67,
+      "ok": 67,
+      "missing": 0,
+      "mismatch": 0,
+      "details": []
+    },
+    "checksums_scientific": {
+      "listed": 2,
+      "ok": 2,
+      "missing": 0,
+      "mismatch": 0,
+      "details": []
+    },
+    "duplicate_header_rows_in_correlations": 0
+  },
+  "scientific": {
+    "overall_progress_pct": 70.78947368421052,
+    "expert_complete_pct": 57.89473684210526,
+    "means_from_independent_review": {
+      "energy": 269610.9992807627,
+      "pairing": 84411.42227838027,
+      "sign_ratio": -0.0018804214659016393
+    },
+    "energy_per_site": {
+      "mean": 9612.135327021806,
+      "min": 5794.116482472251,
+      "max": 15874.430368231939
+    },
+    "pairing_normalized_end": {
+      "mean": 1638.478543629353,
+      "min": 1178.9401514429376,
+      "max": 2052.650015007499
+    },
+    "sign_ratio": {
+      "global_min": -0.1428571429,
+      "global_max": 0.1555555556,
+      "sign_bound_violations": 0
+    },
+    "entropy_combined_bits": {
+      "mean": 3.465980230769231,
+      "min": 3.297694,
+      "max": 3.63853
+    },
+    "benchmark": {
+      "pairing_points": 8,
+      "pairing_within_error_bar": 8,
+      "energy_points": 7,
+      "energy_within_error_bar": 0,
+      "pairing_within_pct": 100.0,
+      "energy_within_pct": 0.0
+    },
+    "tests_status": {
+      "pass": 21,
+      "fail": 10,
+      "observed": 49
+    },
+    "stability_fails": [
+      {
+        "test_id": "energy_conservation",
+        "module": "quantum_field_noneq",
+        "metric": "energy_density_drift_max",
+        "value": "0.1590431937",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "hubbard_hts_core",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      }
+    ],
+    "expert_questions": {
+      "complete": 11,
+      "partial": 8
+    },
+    "executed_extra_checks": {
+      "energy_zscore_outliers_gt3": 0,
+      "pairing_nonpositive_count": 0
+    }
+  },
+  "comparison": {
+    "available": true,
+    "previous_run": "research_20260307T211809Z_747",
+    "overall_progress_pct_delta": -10.0,
+    "expert_complete_pct_delta": 0.0,
+    "per_problem_deltas": [
+      {
+        "problem": "bosonic_multimode_systems",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "correlated_fermions_non_hubbard",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "dense_nuclear_proxy",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "far_from_equilibrium_kinetic_lattices",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "hubbard_hts_core",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "multi_correlated_fermion_boson_networks",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "multi_state_excited_chemistry",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "multiscale_nonlinear_field_models",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "qcd_lattice_proxy",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "quantum_chemistry_proxy",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "quantum_field_noneq",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "spin_liquid_exotic",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      },
+      {
+        "problem": "topological_correlated_materials",
+        "energy_per_site_end_delta": 0.0,
+        "pairing_normalized_end_delta": 0.0
+      }
+    ]
+  }
+}

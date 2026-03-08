@@ -75,6 +75,14 @@ def run(cmd: list[str], cwd: Path) -> str:
     return out.strip()
 
 
+def run_optional(cmd: list[str], cwd: Path) -> tuple[bool, str]:
+    proc = subprocess.run(cmd, cwd=str(cwd), text=True, capture_output=True)
+    if proc.returncode == 0:
+        return True, proc.stdout.strip()
+    details = (proc.stderr or proc.stdout).strip()
+    return False, details
+
+
 def read_csv(path: Path) -> list[dict[str, str]]:
     if not path.exists() or path.stat().st_size == 0:
         return []
@@ -117,8 +125,20 @@ def main() -> int:
     report_path = report_dir / f"RAPPORT_ANALYSE_INDEPENDANTE_DEPOT_DISTANT_{stamp}.md"
     json_path = report_dir / f"RAPPORT_ANALYSE_INDEPENDANTE_DEPOT_DISTANT_{stamp}.json"
 
-    head = run(["git", "rev-parse", "HEAD"], cwd=root.parent.parent.parent)
-    fetch_head = run(["git", "rev-parse", "FETCH_HEAD"], cwd=root.parent.parent.parent)
+    repo_root = root.parent.parent.parent
+    head = run(["git", "rev-parse", "HEAD"], cwd=repo_root)
+
+    fetch_ok, fetch_details = run_optional(
+        ["git", "fetch", args.remote_url, "--prune"],
+        cwd=repo_root,
+    )
+    fetch_head = "UNAVAILABLE"
+    if fetch_ok:
+        fetch_head = run(["git", "rev-parse", "FETCH_HEAD"], cwd=repo_root)
+    else:
+        origin_main_ok, origin_main = run_optional(["git", "rev-parse", "origin/main"], cwd=repo_root)
+        if origin_main_ok:
+            fetch_head = origin_main
 
     module_meta = read_csv(tests_dir / "module_physics_metadata.csv")
     new_tests = read_csv(tests_dir / "new_tests_results.csv")
@@ -163,10 +183,11 @@ def main() -> int:
         f"- Dépôt distant synchronisé: `{args.remote_url}`",
         f"- Commit local courant: `{head}`",
         f"- Commit FETCH_HEAD: `{fetch_head}`",
+        f"- Résultat `git fetch`: `{'OK' if fetch_ok else 'FAIL (fallback origin/main ou indisponible)'}`",
         f"- Run analysé: `{run_dir.name}`",
         "",
         "## 1) Synchronisation / intégrité",
-        "- Synchronisation validée via `git fetch` puis analyse du dernier run local disponible.",
+        "- Analyse de synchronisation effectuée avant exploitation du run local.",
         f"- Artefacts analysés: tests={tests_dir}, logs={logs_dir}.",
         "- Les checksums listés plus bas permettent un audit externe bit-à-bit.",
         "",
@@ -207,9 +228,18 @@ def main() -> int:
     for rel, digest in checksums.items():
         lines.append(f"- `{rel}`: `{digest}`")
 
+    if not fetch_ok and fetch_details:
+        lines += [
+            "",
+            "## 8) Diagnostic fetch (non bloquant)",
+            "```text",
+            fetch_details,
+            "```",
+        ]
+
     lines += [
         "",
-        "## 8) Commandes exactes reproductibles",
+        "## 9) Commandes exactes reproductibles",
         "```bash",
         f"git fetch {args.remote_url} --prune",
         "bash src/advanced_calculations/quantum_problem_hubbard_hts/run_research_cycle.sh",
@@ -224,6 +254,8 @@ def main() -> int:
         "remote_url": args.remote_url,
         "head": head,
         "fetch_head": fetch_head,
+        "fetch_status": "ok" if fetch_ok else "failed",
+        "fetch_details": fetch_details,
         "run": run_dir.name,
         "integrated_modules": integrated_modules,
         "control_tests": control_by_id,
