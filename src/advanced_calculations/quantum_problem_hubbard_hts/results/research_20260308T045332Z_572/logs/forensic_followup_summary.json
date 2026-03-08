@@ -1,0 +1,39 @@
+{
+  "generated_at_utc": "2026-03-08T14:17:32Z",
+  "report": "reports/RAPPORT_FORENSIQUE_EXHAUSTIF_CYCLE06_20260308.md",
+  "targeted_tests": "tests/integration_open_questions_targeted_tests_cycle06.csv",
+  "new_insights": {
+    "overall_progress_pct": 70.78947368421052,
+    "independent_progress_pct": 68.14269005847953,
+    "expert_complete_pct": 57.89473684210526,
+    "numerical_stability_fail_pct": 86.66666666666667,
+    "qmc_within_error_bar_pct": 53.333333333333336,
+    "external_within_error_bar_pct": 0.0
+  },
+  "top_drift_metrics": [
+    {
+      "metric": "elapsed_ns",
+      "common_points": "305",
+      "max_abs_diff": "277636551.0",
+      "mean_abs_diff": "56010819.26885246",
+      "reference_run": "research_20260308T024230Z_4732",
+      "current_run": "research_20260308T045332Z_572"
+    },
+    {
+      "metric": "energy",
+      "common_points": "305",
+      "max_abs_diff": "0.0",
+      "mean_abs_diff": "0.0",
+      "reference_run": "research_20260308T024230Z_4732",
+      "current_run": "research_20260308T045332Z_572"
+    },
+    {
+      "metric": "pairing",
+      "common_points": "305",
+      "max_abs_diff": "0.0",
+      "mean_abs_diff": "0.0",
+      "reference_run": "research_20260308T024230Z_4732",
+      "current_run": "research_20260308T045332Z_572"
+    }
+  ]
+}
