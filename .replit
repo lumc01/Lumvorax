@@ -32,6 +32,7 @@ outputType = "console"
 [[workflows.workflow]]
 name = "Quantum Research Cycle"
 author = "agent"
+mode = "sequential"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
