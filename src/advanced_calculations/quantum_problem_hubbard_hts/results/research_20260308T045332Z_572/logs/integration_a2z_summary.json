@@ -1,0 +1,39 @@
+{
+  "generated_at_utc": "2026-03-08T20:14:02Z",
+  "checks": [
+    {
+      "cmd": "git fetch origin --prune",
+      "code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "python src/advanced_calculations/quantum_problem_hubbard_hts/tools/generate_cycle06_forensic_followup.py",
+      "code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "python src/advanced_calculations/quantum_problem_hubbard_hts/tools/generate_cycle06_benchmark_course_report.py",
+      "code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "python src/advanced_calculations/quantum_problem_hubbard_hts/tools/generate_cycle06_time_system_manual_analysis.py",
+      "code": 0,
+      "stdout": "",
+      "stderr": ""
+    },
+    {
+      "cmd": "sha256sum -c logs/checksums.sha256",
+      "code": 1,
+      "stdout": "./logs/analysis_scientifique_checksums.sha256: OK\n./logs/analysis_scientifique_summary.json: OK\n./logs/baseline_reanalysis_metrics.csv: OK\n./logs/environment_versions.log: FAILED open or read\n./logs/forensic_extension_summary.json: OK\n./logs/full_scope_integrator_summary.json: OK\n./logs/hfbl360_forensic_audit.json: OK\n./logs/hfbl360_realtime_persistent.log: FAILED open or read\n./logs/independent_log_review_checksums.sha256: OK\n./logs/independent_log_review_summary.json: OK\n./logs/model_metadata.csv: OK\n./logs/model_metadata.json: OK\n./logs/normalized_observables_trace.csv: OK\n./logs/parallel_calibration_bridge_summary.json: OK\n./logs/process_trace_commands_history.md: OK\n./logs/provenance.log: FAILED open or read\n./logs/research_execution.log: FAILED open or read\n./reports/3d/modelization_3d_dataset.json: OK\n./reports/3d/modelization_3d_view.html: OK\n./reports/RAPPORT_ANALYSE_EXECUTION_COMPLETE_CYCLE06.md: OK\n./reports/RAPPORT_ANALYSE_INDEPENDANTE_LOGS_CYCLE06.md: OK\n./reports/RAPPORT_COMPARAISON_AVANT_APRES_CYCLE06.md: OK\n./reports/RAPPORT_RECHERCHE_CYCLE_06_ADVANCED.md: OK\n./tests/benchmark_comparison_external_modules.csv: OK\n./tests/benchmark_comparison_qmc_dmrg.csv: OK\n./tests/expert_questions_matrix.csv: OK\n./tests/integration_absent_metadata_fields.csv: OK\n./tests/integration_alternative_solver_campaign.csv: OK\n./tests/integration_chatgpt_critical_tests.csv: OK\n./tests/integration_chatgpt_critical_tests.md: OK\n./tests/integration_claim_confidence_tags.csv: OK\n./tests/integration_code_authenticity_audit.csv: OK\n./tests/integration_entropy_observables.csv: OK\n./tests/integration_forensic_extension_tests.csv: OK\n./tests/integration_gate_summary.csv: OK\n./tests/integration_hardcoding_risk_register.csv: OK\n./tests/integration_hfbl360_forensic_audit.csv: OK\n./tests/integration_low_level_runtime_metrics.csv: OK\n./tests/integration_low_level_runtime_metrics.md: OK\n./tests/integration_manifest_check.csv: OK\n./tests/integration_new_questions_registry.csv: OK\n./tests/integration_new_tests_registry.csv: OK\n./tests/integration_open_questions_backlog.csv: OK\n./tests/integration_parallel_calibration_bridge.csv: OK\n./tests/integration_parameter_influence_realism.csv: OK\n./tests/integration_parameter_influence_solution_percent.csv: OK\n./tests/integration_physics_computed_observables.csv: OK\n./tests/integration_physics_enriched_test_matrix.csv: OK\n./tests/integration_physics_extra_observables.csv: OK\n./tests/integration_physics_gate_summary.csv: OK\n./tests/integration_physics_missing_inputs.csv: OK\n./tests/integration_problem_count_gate.csv: OK\n./tests/integration_problem_solution_progress.csv: OK\n./tests/integration_questions_traceability.csv: OK\n./tests/integration_run_drift_monitor.csv: OK\n./tests/integration_scaling_exponents_live.csv: OK\n./tests/integration_spatial_correlations.csv: OK\n./tests/integration_terms_glossary.csv: OK\n./tests/integration_test_coverage_dashboard.csv: OK\n./tests/integration_triple_execution_matrix.csv: OK\n./tests/integration_v4next_connection_readiness.csv: OK\n./tests/integration_v4next_realtime_evolution.md: OK\n./tests/integration_v4next_realtime_evolution_summary.csv: OK\n./tests/integration_v4next_realtime_evolution_timeline.csv: OK\n./tests/integration_v4next_rollback_plan.md: OK\n./tests/integration_v4next_rollout_progress.csv: OK\n./tests/integration_v4next_rollout_status.csv: OK\n./tests/module_physics_metadata.csv: OK\n./tests/new_tests_results.csv: OK\n./tests/numerical_stability_suite.csv: OK\n./tests/temporal_derivatives_variance.csv: OK\n./tests/toy_model_validation.csv: OK",
+      "stderr": "sha256sum: ./logs/environment_versions.log: No such file or directory\nsha256sum: ./logs/hfbl360_realtime_persistent.log: No such file or directory\nsha256sum: ./logs/provenance.log: No such file or directory\nsha256sum: ./logs/research_execution.log: No such file or directory\nsha256sum: WARNING: 4 listed files could not be read"
+    }
+  ],
+  "tracker_rows": 112,
+  "benchmark_blockers": 23,
+  "open_questions": 5,
+  "time_separation_items": 4
+}
