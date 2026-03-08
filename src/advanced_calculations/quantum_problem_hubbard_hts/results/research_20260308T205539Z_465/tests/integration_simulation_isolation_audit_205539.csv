@@ -1,0 +1,6 @@
+file,scope,isolation_status,details
+integration_problem_solution_progress.csv,module,PASS,"1 ligne par module, progression spécifique"
+benchmark_comparison_external_modules.csv,module,PASS,"colonne module explicite, erreurs spécifiques"
+benchmark_comparison_qmc_dmrg.csv,module,PARTIAL,module=hubbard_hts_core seulement (référence ciblée)
+numerical_stability_suite.csv,module,PASS,module explicite pour énergie/Von Neumann
+new_tests_results.csv,global,WARNING,tests globaux mélangent plusieurs modules sans clé module

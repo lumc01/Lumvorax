@@ -1,0 +1,42 @@
+{
+  "generated_at_utc": "2026-03-08T23:11:46Z",
+  "global_new_tests_status": {
+    "PASS": 21,
+    "OBSERVED": 49,
+    "FAIL": 10
+  },
+  "module_count": 13,
+  "isolation_audit": [
+    {
+      "file": "integration_problem_solution_progress.csv",
+      "scope": "module",
+      "isolation_status": "PASS",
+      "details": "1 ligne par module, progression spécifique"
+    },
+    {
+      "file": "benchmark_comparison_external_modules.csv",
+      "scope": "module",
+      "isolation_status": "PASS",
+      "details": "colonne module explicite, erreurs spécifiques"
+    },
+    {
+      "file": "benchmark_comparison_qmc_dmrg.csv",
+      "scope": "module",
+      "isolation_status": "PARTIAL",
+      "details": "module=hubbard_hts_core seulement (référence ciblée)"
+    },
+    {
+      "file": "numerical_stability_suite.csv",
+      "scope": "module",
+      "isolation_status": "PASS",
+      "details": "module explicite pour énergie/Von Neumann"
+    },
+    {
+      "file": "new_tests_results.csv",
+      "scope": "global",
+      "isolation_status": "WARNING",
+      "details": "tests globaux mélangent plusieurs modules sans clé module"
+    }
+  ],
+  "mean_module_own_validation_percent": 4.615384615384615
+}
