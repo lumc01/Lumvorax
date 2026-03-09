@@ -1,0 +1,9 @@
+field,status,action
+model_id,PRESENT,value=lumvorax_proxy_bosonic_multimode_v1
+hamiltonian_id,PRESENT,value=bosonic_multimode_proxy
+lattice_size,PRESENT,value=10x8
+boundary_conditions,PRESENT,value=periodic_proxy
+u_over_t,PRESENT,value=8.666666666666668
+time_step,PRESENT,value=1.0
+seed,PRESENT,value=deterministic_proxy_seed
+solver_version,PRESENT,value=hubbard_hts_research_runner_v4next
