@@ -1,0 +1,4 @@
+run_id,mode_requested,rollout_status,connection_readiness_pct,shadow_safety_pct,realism_pct,global_weighted_readiness_pct
+research_20260309T093816Z_2723,shadow,SHADOW_ACTIVE,80.00,85.00,52.75,87.46
+research_20260309T164343Z_2947,shadow,SHADOW_ACTIVE,80.00,85.00,52.75,87.46
+research_20260309T170434Z_3526,shadow,SHADOW_ACTIVE,80.00,85.00,52.75,87.46

@@ -1,5 +1,5 @@
 question_id,question,status
 NQ1,Tous les sous-tests triples sont-ils stables?,tracked
-NQ2,Le nombre de simulations est-il bien égal à 5?,tracked
+NQ2,Le nombre de simulations est-il bien égal à 13?,tracked
 NQ3,Quels paramètres exacts influencent le % de solution?,tracked
 NQ4,Quels paramètres influencent le réalisme?,tracked

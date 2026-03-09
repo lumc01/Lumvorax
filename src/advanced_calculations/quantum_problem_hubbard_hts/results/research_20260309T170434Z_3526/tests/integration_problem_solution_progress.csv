@@ -1,0 +1,14 @@
+problem,solution_progress_percent,evidence,constraints
+bosonic_multimode_systems,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+correlated_fermions_non_hubbard,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+dense_nuclear_proxy,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+far_from_equilibrium_kinetic_lattices,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+hubbard_hts_core,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+multi_correlated_fermion_boson_networks,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+multi_state_excited_chemistry,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+multiscale_nonlinear_field_models,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+qcd_lattice_proxy,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+quantum_chemistry_proxy,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+quantum_field_noneq,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+spin_liquid_exotic,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
+topological_correlated_materials,47.00,timeseries_present;metadata_present;energy_pairing_corr=-1.000;sign_watchdog;critical_window_off,-8 common_missing_tests
