@@ -1,0 +1,14 @@
+problem,qubits_simulated_proxy,runtime_ns,module_runtime_share_pct,avg_cpu_percent,avg_mem_percent,calc_per_second,latency_ns_per_step,boundary_conditions,solver_mode
+bosonic_multimode_systems,80,1086988788,7.01,21.20,68.31,1931.94,49408581.27,periodic_proxy,advanced_proxy_deterministic
+correlated_fermions_non_hubbard,90,1206092737,7.78,21.20,68.43,1906.98,50253864.04,periodic_proxy,advanced_proxy_deterministic
+dense_nuclear_proxy,72,1105217268,7.13,21.20,68.88,1809.60,52629393.71,periodic_proxy,advanced_proxy_deterministic
+far_from_equilibrium_kinetic_lattices,99,1197528137,7.72,21.20,68.27,1920.62,49897005.71,periodic_proxy,advanced_proxy_deterministic
+hubbard_hts_core,100,1412006124,9.11,21.19,68.84,1912.17,50428790.14,periodic_proxy,advanced_proxy_deterministic
+multi_correlated_fermion_boson_networks,100,1309275875,8.45,21.20,67.95,1756.70,54553161.46,periodic_proxy,advanced_proxy_deterministic
+multi_state_excited_chemistry,81,1138812707,7.35,21.20,68.33,1931.84,49513595.96,periodic_proxy,advanced_proxy_deterministic
+multiscale_nonlinear_field_models,96,1143537588,7.38,21.20,68.31,1923.85,49719025.57,periodic_proxy,advanced_proxy_deterministic
+qcd_lattice_proxy,81,1077216568,6.95,21.20,68.81,1949.47,48964389.45,periodic_proxy,advanced_proxy_deterministic
+quantum_chemistry_proxy,56,1126285768,7.26,21.20,68.91,1864.54,51194807.64,periodic_proxy,advanced_proxy_deterministic
+quantum_field_noneq,64,1079316089,6.96,21.20,68.83,1853.03,51396004.24,periodic_proxy,advanced_proxy_deterministic
+spin_liquid_exotic,120,1357010005,8.75,21.20,68.61,1842.29,52192692.50,periodic_proxy,advanced_proxy_deterministic
+topological_correlated_materials,121,1264220576,8.15,21.20,68.44,1898.40,50568823.04,periodic_proxy,advanced_proxy_deterministic
