@@ -1,0 +1,14 @@
+problem,solution_progress_percent,evidence,constraints
+bosonic_multimode_systems,42.00,timeseries_present;metadata_present;energy_pairing_corr=-0.395;critical_window_off,-8 common_missing_tests
+correlated_fermions_non_hubbard,52.00,timeseries_present;metadata_present;energy_pairing_corr=-0.006;critical_window_ok,-8 common_missing_tests
+dense_nuclear_proxy,42.00,timeseries_present;metadata_present;energy_pairing_corr=-0.217;critical_window_off,-8 common_missing_tests
+far_from_equilibrium_kinetic_lattices,42.00,timeseries_present;metadata_present;energy_pairing_corr=-0.254;critical_window_off,-8 common_missing_tests
+hubbard_hts_core,42.00,timeseries_present;metadata_present;energy_pairing_corr=-0.200;critical_window_off,-8 common_missing_tests
+multi_correlated_fermion_boson_networks,42.00,timeseries_present;metadata_present;energy_pairing_corr=-0.027;critical_window_off,-8 common_missing_tests
+multi_state_excited_chemistry,42.00,timeseries_present;metadata_present;energy_pairing_corr=0.161;critical_window_off,-8 common_missing_tests
+multiscale_nonlinear_field_models,42.00,timeseries_present;metadata_present;energy_pairing_corr=-0.226;critical_window_off,-8 common_missing_tests
+qcd_lattice_proxy,42.00,timeseries_present;metadata_present;energy_pairing_corr=-0.158;critical_window_off,-8 common_missing_tests
+quantum_chemistry_proxy,42.00,timeseries_present;metadata_present;energy_pairing_corr=-0.622;critical_window_off,-8 common_missing_tests
+quantum_field_noneq,42.00,timeseries_present;metadata_present;energy_pairing_corr=0.174;critical_window_off,-8 common_missing_tests
+spin_liquid_exotic,42.00,timeseries_present;metadata_present;energy_pairing_corr=-0.276;critical_window_off,-8 common_missing_tests
+topological_correlated_materials,42.00,timeseries_present;metadata_present;energy_pairing_corr=0.157;critical_window_off,-8 common_missing_tests
