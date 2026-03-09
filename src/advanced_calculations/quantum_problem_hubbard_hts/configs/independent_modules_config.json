@@ -1,0 +1,16 @@
+{
+  "qmc": {
+    "burn_in_fraction": 0.2,
+    "iterations_multiplier": 5
+  },
+  "dmrg": {
+    "max_sweeps": 40,
+    "power_tol": 1e-10
+  },
+  "arpes": {
+    "window": "hann"
+  },
+  "stm": {
+    "rolling_window": 5
+  }
+}

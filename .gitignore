@@ -15,3 +15,10 @@ venv/
 .local/state/replit/agent/
 .local/state/replit/agent/
 
+
+# Binary build/runtime artifacts
+*.o
+*.bin
+*.exe
+*.dll
+*.a

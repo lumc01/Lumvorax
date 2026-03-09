@@ -1,0 +1,57 @@
+test_family,test_id,parameter,value,status,details
+bootstrap_alpha,alpha_ci95_hubbard_hts_core,alpha_ci95_width,0.5699135567,OBSERVED,"alpha=-0.52291963;ci95=[-0.75817956,-0.18826601]"
+cross_validation,scaling_model_hubbard_hts_core,rmse_power_minus_linear,38998894431648.805,OBSERVED,rmse_power=38998894431648.8046875000;rmse_linear=0.0003389128
+dynamic_diagnostics,lyapunov_proxy_hubbard_hts_core,lyapunov_proxy,-0.0006822328,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_hubbard_hts_core,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_qcd_lattice_proxy,alpha_ci95_width,0.6367186989,OBSERVED,"alpha=-0.56293731;ci95=[-0.84069915,-0.20398045]"
+cross_validation,scaling_model_qcd_lattice_proxy,rmse_power_minus_linear,4.477649859632199e+16,OBSERVED,rmse_power=44776498596321992.0000000000;rmse_linear=0.0006074595
+dynamic_diagnostics,lyapunov_proxy_qcd_lattice_proxy,lyapunov_proxy,-0.0013979559,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_qcd_lattice_proxy,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_quantum_field_noneq,alpha_ci95_width,0.5997962771,OBSERVED,"alpha=-0.49445060;ci95=[-0.76373599,-0.16393971]"
+cross_validation,scaling_model_quantum_field_noneq,rmse_power_minus_linear,178705.0530324277,OBSERVED,rmse_power=178705.0532865002;rmse_linear=0.0002540725
+dynamic_diagnostics,lyapunov_proxy_quantum_field_noneq,lyapunov_proxy,-0.0005264955,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_quantum_field_noneq,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_dense_nuclear_proxy,alpha_ci95_width,0.6694361752,OBSERVED,"alpha=-0.55060768;ci95=[-0.84968805,-0.18025187]"
+cross_validation,scaling_model_dense_nuclear_proxy,rmse_power_minus_linear,183073.5387478175,OBSERVED,rmse_power=183073.5394578693;rmse_linear=0.0007100518
+dynamic_diagnostics,lyapunov_proxy_dense_nuclear_proxy,lyapunov_proxy,-0.001195999,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_dense_nuclear_proxy,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_quantum_chemistry_proxy,alpha_ci95_width,0.5308789992,OBSERVED,"alpha=-0.47516609;ci95=[-0.70111285,-0.17023385]"
+cross_validation,scaling_model_quantum_chemistry_proxy,rmse_power_minus_linear,6.6794389374740504e+16,OBSERVED,rmse_power=66794389374740504.0000000000;rmse_linear=0.0006643542
+dynamic_diagnostics,lyapunov_proxy_quantum_chemistry_proxy,lyapunov_proxy,0.0007820371,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_quantum_chemistry_proxy,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_spin_liquid_exotic,alpha_ci95_width,0.5899546827,OBSERVED,"alpha=-0.53468464;ci95=[-0.79242662,-0.20247194]"
+cross_validation,scaling_model_spin_liquid_exotic,rmse_power_minus_linear,118967.8460315955,OBSERVED,rmse_power=118967.8463748009;rmse_linear=0.0003432054
+dynamic_diagnostics,lyapunov_proxy_spin_liquid_exotic,lyapunov_proxy,-0.0008424035,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_spin_liquid_exotic,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_topological_correlated_materials,alpha_ci95_width,0.5393208213,OBSERVED,"alpha=-0.51299346;ci95=[-0.72995599,-0.19063517]"
+cross_validation,scaling_model_topological_correlated_materials,rmse_power_minus_linear,635470682869209.0,OBSERVED,rmse_power=635470682869209.0000000000;rmse_linear=0.0002819892
+dynamic_diagnostics,lyapunov_proxy_topological_correlated_materials,lyapunov_proxy,-0.0010310397,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_topological_correlated_materials,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_correlated_fermions_non_hubbard,alpha_ci95_width,0.5689251098,OBSERVED,"alpha=-0.50478547;ci95=[-0.74847302,-0.17954791]"
+cross_validation,scaling_model_correlated_fermions_non_hubbard,rmse_power_minus_linear,3780216939159238.0,OBSERVED,rmse_power=3780216939159238.0000000000;rmse_linear=0.0002638951
+dynamic_diagnostics,lyapunov_proxy_correlated_fermions_non_hubbard,lyapunov_proxy,-8.15397e-05,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_correlated_fermions_non_hubbard,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_multi_state_excited_chemistry,alpha_ci95_width,0.5233390067,OBSERVED,"alpha=-0.48255149;ci95=[-0.69947793,-0.17613892]"
+cross_validation,scaling_model_multi_state_excited_chemistry,rmse_power_minus_linear,1.3342474646775794e+16,OBSERVED,rmse_power=13342474646775794.0000000000;rmse_linear=0.0003535660
+dynamic_diagnostics,lyapunov_proxy_multi_state_excited_chemistry,lyapunov_proxy,-0.0005256107,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_multi_state_excited_chemistry,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_bosonic_multimode_systems,alpha_ci95_width,0.6587268432,OBSERVED,"alpha=-0.57910595;ci95=[-0.86835975,-0.20963290]"
+cross_validation,scaling_model_bosonic_multimode_systems,rmse_power_minus_linear,5.527708820736498e+16,OBSERVED,rmse_power=55277088207364976.0000000000;rmse_linear=0.0003521280
+dynamic_diagnostics,lyapunov_proxy_bosonic_multimode_systems,lyapunov_proxy,-0.000800516,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_bosonic_multimode_systems,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_multiscale_nonlinear_field_models,alpha_ci95_width,0.5281129434,OBSERVED,"alpha=-0.48854772;ci95=[-0.70663074,-0.17851780]"
+cross_validation,scaling_model_multiscale_nonlinear_field_models,rmse_power_minus_linear,1.5011588202070814e+16,OBSERVED,rmse_power=15011588202070814.0000000000;rmse_linear=0.0002295695
+dynamic_diagnostics,lyapunov_proxy_multiscale_nonlinear_field_models,lyapunov_proxy,2.9061e-06,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_multiscale_nonlinear_field_models,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_far_from_equilibrium_kinetic_lattices,alpha_ci95_width,0.5919703505,OBSERVED,"alpha=-0.52116209;ci95=[-0.77767640,-0.18570605]"
+cross_validation,scaling_model_far_from_equilibrium_kinetic_lattices,rmse_power_minus_linear,3240188708224454.5,OBSERVED,rmse_power=3240188708224454.5000000000;rmse_linear=0.0003095515
+dynamic_diagnostics,lyapunov_proxy_far_from_equilibrium_kinetic_lattices,lyapunov_proxy,-0.0006322828,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_far_from_equilibrium_kinetic_lattices,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+bootstrap_alpha,alpha_ci95_multi_correlated_fermion_boson_networks,alpha_ci95_width,0.585708837,OBSERVED,"alpha=-0.51754293;ci95=[-0.77006579,-0.18435695]"
+cross_validation,scaling_model_multi_correlated_fermion_boson_networks,rmse_power_minus_linear,3442357061732286.5,OBSERVED,rmse_power=3442357061732286.5000000000;rmse_linear=0.0003083939
+dynamic_diagnostics,lyapunov_proxy_multi_correlated_fermion_boson_networks,lyapunov_proxy,-0.0002637658,OBSERVED,proxy from local divergence logs
+dynamic_diagnostics,surrogate_delta_multi_correlated_fermion_boson_networks,lag1_autocorr_delta,0.0,OBSERVED,difference original vs reversed autocorr
+finite_size_scaling,energy_vs_size_exponent,slope_logE_logN,0.0,PASS,intercept=-27.6310211159
+finite_size_scaling,pairing_nonincreasing_with_size,bool,0,FAIL,"[(64, 0.9840822455), (100, 0.9839224815), (144, 0.9841885912)]"
+multi_seed_sensitivity,rep_diff_seed_distribution_count,count,60,PASS,from historical new_tests_results.csv
+multi_seed_sensitivity,rep_diff_seed_distribution_mean,mean_delta,48691.5423175813,OBSERVED,min=1.4166203176;max=55054.3461942416
