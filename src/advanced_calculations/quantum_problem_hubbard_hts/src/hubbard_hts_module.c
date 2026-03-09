@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -123,9 +124,56 @@ static int run_hfbl360_forensic_extension(hubbard_run_context_t* ctx, const char
     return 0;
 }
 
+
+static uint64_t hash_step_state(double energy, double pairing, double sign_ratio, uint64_t step) {
+    union { double d; uint64_t u; } e = {energy}, p = {pairing}, sr = {sign_ratio};
+    uint64_t h = 1469598103934665603ULL;
+    h ^= e.u; h *= 1099511628211ULL;
+    h ^= p.u; h *= 1099511628211ULL;
+    h ^= sr.u; h *= 1099511628211ULL;
+    h ^= step; h *= 1099511628211ULL;
+    return h;
+}
+
+static void hfbl_log_event(hubbard_run_context_t* ctx,
+                           const char* problem,
+                           const char* event,
+                           uint64_t step,
+                           double energy,
+                           double pairing,
+                           double sign_ratio) {
+    if (!ctx || !problem || !event) return;
+    char path[HUBBARD_MAX_PATH];
+    if (join_path(path, sizeof(path), ctx->logs_dir, "hfbl360_realtime_persistent.log") != 0) return;
+    FILE* fp = fopen(path, "a");
+    if (!fp) return;
+    uint64_t sh = hash_step_state(energy, pairing, sign_ratio, step);
+    fprintf(fp,
+            "ts_ns=%llu event=%s problem=%s simulation_step=%llu energy_update=%.12f observable_update=%.12f sign_ratio=%.12f state_hash=%016llx\n",
+            (unsigned long long)now_ns(),
+            event,
+            problem,
+            (unsigned long long)step,
+            energy,
+            pairing,
+            sign_ratio,
+            (unsigned long long)sh);
+    fclose(fp);
+}
+
 static double pseudo_rand01(uint64_t* state) {
     *state = (*state * 6364136223846793005ULL + 1ULL);
     return ((*state >> 11) & 0xFFFFFFFFULL) / (double)0xFFFFFFFFULL;
+}
+
+
+static void normalize_state_vector(double* d, int n) {
+    if (!d || n <= 0) return;
+    double norm2 = 0.0;
+    for (int i = 0; i < n; ++i) norm2 += d[i] * d[i];
+    if (norm2 <= 1e-15) return;
+    double inv_norm = 1.0 / sqrt(norm2);
+    for (int i = 0; i < n; ++i) d[i] *= inv_norm;
 }
 
 static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hubbard_problem_t* pb, int cpu_target_percent) {
@@ -135,6 +183,8 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
     if (sites > HUBBARD_GRID_MAX * HUBBARD_GRID_MAX) sites = HUBBARD_GRID_MAX * HUBBARD_GRID_MAX;
     double density[HUBBARD_GRID_MAX * HUBBARD_GRID_MAX] = {0};
     uint64_t t0 = now_ns();
+
+    hfbl_log_event(ctx, pb->name, "simulation_start", 0, 0.0, 0.0, 0.0);
 
     for (uint64_t step = 0; step < pb->steps; ++step) {
         double step_energy = 0.0;
@@ -150,6 +200,7 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
             step_sign += (fluct >= 0.0) ? 1.0 : -1.0;
         }
 
+        normalize_state_vector(density, sites);
         step_energy /= (double)sites;
         step_pairing /= (double)sites;
         step_sign /= (double)sites;
@@ -159,6 +210,10 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
         out.energy = step_energy + burn * 1e-8;
         out.pairing = step_pairing;
         out.sign_ratio = step_sign;
+
+        if ((step % 10) == 0) {
+            hfbl_log_event(ctx, pb->name, "simulation_step", step, out.energy, out.pairing, out.sign_ratio);
+        }
 
         if ((step % 100) == 0 && ctx->csv_fp) {
             double cpu = read_cpu_percent_snapshot();
@@ -181,6 +236,7 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
     for (int i = 0; i < sites; ++i) out.avg_density += density[i];
     out.avg_density /= (double)sites;
     out.elapsed_ns = now_ns() - t0;
+    hfbl_log_event(ctx, pb->name, "simulation_end", pb->steps, out.energy, out.pairing, out.sign_ratio);
     return out;
 }
 

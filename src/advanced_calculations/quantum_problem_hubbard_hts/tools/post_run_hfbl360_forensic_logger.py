@@ -43,7 +43,8 @@ def read_text(path: Path) -> str:
 def can_persist(path: Path) -> tuple[bool, str]:
     try:
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_text("hfbl360_persistence_probe=ok\n", encoding="utf-8")
+        with path.open("a", encoding="utf-8") as fp:
+            fp.write("hfbl360_persistence_probe=ok\n")
         return True, "writable"
     except OSError as exc:
         return False, f"not_writable:{exc}"

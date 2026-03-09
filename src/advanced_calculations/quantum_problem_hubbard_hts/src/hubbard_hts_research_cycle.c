@@ -125,6 +125,16 @@ static long mem_available_kb(void) {
     return avail;
 }
 
+
+static void normalize_state_vector(double* d, int n) {
+    if (!d || n <= 0) return;
+    double norm2 = 0.0;
+    for (int i = 0; i < n; ++i) norm2 += d[i] * d[i];
+    if (norm2 <= 1e-15) return;
+    double inv_norm = 1.0 / sqrt(norm2);
+    for (int i = 0; i < n; ++i) d[i] *= inv_norm;
+}
+
 static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
                                                        uint64_t seed,
                                                        int burn_scale,
@@ -177,6 +187,7 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
             collective_mode += corr[i];
         }
 
+        normalize_state_vector(d, sites);
         step_pairing /= (double)sites;
         step_sign /= (double)sites;
 
