@@ -53,7 +53,9 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("run_dir", help="Path to research_* run directory")
     ap.add_argument("--standard-names", default="STANDARD_NAMES.md")
+    ap.add_argument("--phase", default="runtime")
     args = ap.parse_args()
+    phase = args.phase
 
     run_dir = Path(args.run_dir).resolve()
     tests_dir = run_dir / "tests"
@@ -91,7 +93,7 @@ def main() -> int:
     persist_ok, persist_note = can_persist(persistent_target)
     if persist_ok:
         with persistent_target.open("a", encoding="utf-8") as rt:
-            rt.write(f"ts_ns={time.time_ns()} event=hfbl360_forensic_logger_started run_dir={run_dir}\n")
+            rt.write(f"ts_ns={time.time_ns()} event=hfbl360_forensic_logger_{phase} run_dir={run_dir}\n")
             for _, key, _, val, status in env_rows:
                 rt.write(f"ts_ns={time.time_ns()} env_key={key} value={val} status={status}\n")
     persist_row = ("filesystem", "persistent_log_target", "writable", "1" if persist_ok else "0", "PASS" if persist_ok else "FAIL")
@@ -106,6 +108,7 @@ def main() -> int:
     summary = {
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "run_dir": str(run_dir),
+        "phase": phase,
         "standard_names_path": str(std_path),
         "required": [
             {"name": name, "present": val == "1", "status": status}
