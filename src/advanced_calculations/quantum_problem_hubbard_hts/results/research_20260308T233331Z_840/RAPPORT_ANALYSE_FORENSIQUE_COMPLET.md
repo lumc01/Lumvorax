@@ -218,7 +218,7 @@ Imaginez les électrons comme des danseurs dans une salle :
 **Points Critiques ⚠️ (3) :**
 1. **Dérive énergétique :** Drift maximum = 0.1697 (> seuil ? nécessite clarification)
 2. **Stabilité spectrale :** Spectral radius Von Neumann = 1.0002 (≈ au seuil, très légèrement instable)
-3. **Fenêtre critique temps :** Minimum énergie à étape 600-800 ? NON observé ici → commence négatif, vire positif après 1000
+3. **Fenêtre critique temps :** Minimum énergie à étapeu 600-800 ? NON observé ici → commence négatif, vire positif après 1000
 
 **Quantification des Défauts :**
 - Dérive énergétique : -0.17 unités sur 2700 itérations = **0.0063% dérive relative**
@@ -339,7 +339,7 @@ Même structure que quantum_chemistry_proxy (69.91%), léger décalage en bas.
 
 ## PROBLÈME 4: MULTISCALE_NONLINEAR_FIELD_MODELS (Modèles Champs Non-Linéaires Multi-Échelles)
 
-### 4.1 Profil
+### 4.1 Profili
 
 Représente systèmes avec interactions multi-corps fortement non-linéaires. Ex. : cristaux liquides, polymères corrélés.
 
