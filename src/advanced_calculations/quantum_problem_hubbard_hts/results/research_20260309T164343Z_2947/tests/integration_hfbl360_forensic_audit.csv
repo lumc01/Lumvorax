@@ -1,0 +1,13 @@
+family,check_id,metric,value,status
+standard_required,memory_tracker_enable,present,1,PASS
+standard_required,memory_tracker_is_enabled,present,1,PASS
+standard_required,memory_tracker_export_json,present,1,PASS
+standard_required,memory_tracker_set_release_mode,present,1,PASS
+standard_optional,HFBL_360,present,0,MISSING
+standard_optional,NX-11-HFBL-360,present,0,MISSING
+standard_optional,forensic_research_chain_of_custody,present,1,OBSERVED
+runtime_env,LUMVORAX_FORENSIC_REALTIME,value,1,PASS
+runtime_env,LUMVORAX_LOG_PERSISTENCE,value,1,PASS
+runtime_env,LUMVORAX_HFBL360_ENABLED,value,1,PASS
+runtime_env,LUMVORAX_MEMORY_TRACKER,value,1,PASS
+filesystem,persistent_log_target,writable,1,PASS
