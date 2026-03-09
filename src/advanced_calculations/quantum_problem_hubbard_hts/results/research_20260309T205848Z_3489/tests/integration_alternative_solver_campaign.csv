@@ -1,0 +1,17 @@
+problem,solver_family,model_value,reference_value,abs_error,error_bar,status
+unknown,qmc_dmrg_reference,,,0.0975524556,0.0700000000,FAIL
+unknown,qmc_dmrg_reference,,,0.1589502296,0.0600000000,FAIL
+unknown,qmc_dmrg_reference,,,0.2058710159,0.0600000000,FAIL
+unknown,qmc_dmrg_reference,,,0.2486564447,0.0600000000,FAIL
+unknown,qmc_dmrg_reference,,,0.2903784225,0.0600000000,FAIL
+unknown,qmc_dmrg_reference,,,0.3171726215,0.0600000000,FAIL
+unknown,qmc_dmrg_reference,,,0.3584385583,0.0600000000,FAIL
+unknown,qmc_dmrg_reference,,,0.3951667136,0.0600000000,FAIL
+unknown,qmc_dmrg_reference,,,652800.2307495232,12000.0000000000,FAIL
+unknown,qmc_dmrg_reference,,,1013875.1784050991,9000.0000000000,FAIL
+unknown,qmc_dmrg_reference,,,1374940.1637852450,9000.0000000000,FAIL
+unknown,qmc_dmrg_reference,,,1736003.1531290582,9000.0000000000,FAIL
+unknown,qmc_dmrg_reference,,,2097068.0978825439,9000.0000000000,FAIL
+unknown,qmc_dmrg_reference,,,2458130.1005756836,12000.0000000000,FAIL
+unknown,qmc_dmrg_reference,,,2819200.0813641497,14000.0000000000,FAIL
+GLOBAL,qmc_dmrg_reference,,,,,FAIL

@@ -1,0 +1,14 @@
+module,baseline_dt,recommended_dt,recommended_control_gain_factor,energy_drift_max,progress_percent,stability_severity,donor_modules,benchmark_parallel
+bosonic_multimode_systems,0.010000,0.007500,0.700,0.0000002955,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+correlated_fermions_non_hubbard,0.010000,0.007500,0.700,0.0000002582,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+dense_nuclear_proxy,0.010000,0.007500,0.700,0.0000001604,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+far_from_equilibrium_kinetic_lattices,0.010000,0.007500,0.700,0.0000002407,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+hubbard_hts_core,0.010000,0.007500,0.700,0.0000002103,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+multi_correlated_fermion_boson_networks,0.010000,0.007500,0.700,0.0000003798,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+multi_state_excited_chemistry,0.010000,0.007500,0.700,0.0000006914,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+multiscale_nonlinear_field_models,0.010000,0.007500,0.700,0.0000004650,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+qcd_lattice_proxy,0.010000,0.007500,0.700,0.0000000882,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+quantum_chemistry_proxy,0.010000,0.007500,0.700,0.0000013451,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+quantum_field_noneq,0.010000,0.007500,0.700,0.0000005386,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+spin_liquid_exotic,0.010000,0.007500,0.700,0.0000001922,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
+topological_correlated_materials,0.010000,0.007500,0.700,0.0000002250,42.00,moderate,qcd_lattice_proxy;dense_nuclear_proxy;spin_liquid_exotic,ENABLED
