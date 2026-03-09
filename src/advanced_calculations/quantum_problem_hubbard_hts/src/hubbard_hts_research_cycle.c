@@ -125,6 +125,16 @@ static long mem_available_kb(void) {
     return avail;
 }
 
+
+static void normalize_state_vector(double* d, int n) {
+    if (!d || n <= 0) return;
+    double norm2 = 0.0;
+    for (int i = 0; i < n; ++i) norm2 += d[i] * d[i];
+    if (norm2 <= 1e-15) return;
+    double inv_norm = 1.0 / sqrt(norm2);
+    for (int i = 0; i < n; ++i) d[i] *= inv_norm;
+}
+
 static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
                                                        uint64_t seed,
                                                        int burn_scale,
@@ -143,6 +153,9 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
 
     for (uint64_t step = 0; step < p->steps; ++step) {
         double collective_mode = 0.0;
+        double step_energy = 0.0;
+        double step_pairing = 0.0;
+        double step_sign = 0.0;
         for (int i = 0; i < sites; ++i) {
             double fl = rand01(&seed) - 0.5;
             int left = (i + sites - 1) % sites;
@@ -168,17 +181,23 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
             double local_pair = exp(-fabs(d[i]) * p->temp / 140.0) * (1.0 + 0.08 * corr[i] * corr[i]);
             double local_energy = p->u * d[i] * d[i] - p->t * fabs(fl) - p->mu * d[i] + 0.12 * p->u * corr[i] * d[i] - 0.03 * d[i];
 
-            r.energy += local_energy / (double)(sites);
-            r.pairing += local_pair;
-            r.sign_ratio += (fl >= 0 ? 1.0 : -1.0);
+            step_energy += local_energy / (double)(sites);
+            step_pairing += local_pair;
+            step_sign += (fl >= 0 ? 1.0 : -1.0);
             collective_mode += corr[i];
         }
 
+        normalize_state_vector(d, sites);
+        step_pairing /= (double)sites;
+        step_sign /= (double)sites;
+
         double burn = 0.0;
         for (int k = 0; k < burn_scale * 220; ++k) {
-            burn += sin((double)k + r.energy) + 0.5 * cos((double)k * 0.33 + collective_mode);
+            burn += sin((double)k + step_energy) + 0.5 * cos((double)k * 0.33 + collective_mode);
         }
-        r.energy += burn * 1e-10;
+        r.energy = step_energy + burn * 1e-10;
+        r.pairing = step_pairing;
+        r.sign_ratio = step_sign;
 
         if (trace_csv && step % 100 == 0) {
             double c = cpu_percent(), m = mem_percent();
@@ -190,21 +209,19 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
                     (unsigned long long)step,
                     r.energy,
                     r.pairing,
-                    r.sign_ratio / ((double)(step + 1) * sites),
+                    r.sign_ratio,
                     c,
                     m,
                     (unsigned long long)(now_ns() - t0));
         }
         if (pairing_series && series_len && *series_len < series_cap) {
-            pairing_series[*series_len] = r.pairing / ((double)(step + 1) * sites);
+            pairing_series[*series_len] = r.pairing;
             (*series_len)++;
         }
     }
 
     free(corr);
     free(d);
-    r.pairing /= (double)(p->steps * (uint64_t)sites);
-    r.sign_ratio /= (double)(p->steps * (uint64_t)sites);
     r.elapsed_ns = now_ns() - t0;
     return r;
 }
@@ -263,6 +280,9 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
     uint64_t t0 = now_ns();
     for (uint64_t step = 0; step < p->steps; ++step) {
         long double collective_mode = 0.0L;
+        long double step_energy = 0.0L;
+        long double step_pairing = 0.0L;
+        long double step_sign = 0.0L;
         for (int i = 0; i < sites; ++i) {
             long double fl = (long double)(rand01(&seed) - 0.5);
             int left = (i + sites - 1) % sites;
@@ -277,21 +297,24 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
             long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp / 140.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
             long double local_energy = (long double)p->u * d[i] * d[i] - (long double)p->t * fabsl(fl) - (long double)p->mu * d[i] + 0.12L * (long double)p->u * corr[i] * d[i];
 
-            r.energy += (double)local_energy;
-            r.pairing += (double)local_pair;
-            r.sign_ratio += (fl >= 0 ? 1.0 : -1.0);
+            step_energy += local_energy / (long double)sites;
+            step_pairing += local_pair;
+            step_sign += (fl >= 0 ? 1.0L : -1.0L);
             collective_mode += corr[i];
         }
+        step_pairing /= (long double)sites;
+        step_sign /= (long double)sites;
+
         long double burn = 0;
         for (int k = 0; k < burn_scale * 220; ++k) {
-            burn += sinl((long double)k + (long double)r.energy) + 0.5L * cosl((long double)k * 0.33L + collective_mode);
+            burn += sinl((long double)k + step_energy) + 0.5L * cosl((long double)k * 0.33L + collective_mode);
         }
-        r.energy += (double)(burn * 1e-8L);
+        r.energy = (double)(step_energy + burn * 1e-8L);
+        r.pairing = (double)step_pairing;
+        r.sign_ratio = (double)step_sign;
     }
     free(corr);
     free(d);
-    r.pairing /= (double)(p->steps * (uint64_t)sites);
-    r.sign_ratio /= (double)(p->steps * (uint64_t)sites);
     r.elapsed_ns = now_ns() - t0;
     return r;
 }
