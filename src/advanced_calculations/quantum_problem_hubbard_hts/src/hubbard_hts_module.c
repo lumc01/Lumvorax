@@ -109,19 +109,28 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
     uint64_t t0 = now_ns();
 
     for (uint64_t step = 0; step < pb->steps; ++step) {
+        double step_energy = 0.0;
+        double step_pairing = 0.0;
+        double step_sign = 0.0;
         for (int i = 0; i < sites; ++i) {
             double fluct = pseudo_rand01(&seed) - 0.5;
             density[i] += 0.02 * fluct;
             if (density[i] > 1.0) density[i] = 1.0;
             if (density[i] < -1.0) density[i] = -1.0;
-            out.energy += pb->interaction_u * density[i] * density[i] - pb->hopping_t * fabs(fluct);
-            out.pairing += exp(-fabs(density[i]) * pb->temperature_k / 120.0);
-            out.sign_ratio += (fluct >= 0.0) ? 1.0 : -1.0;
+            step_energy += pb->interaction_u * density[i] * density[i] - pb->hopping_t * fabs(fluct);
+            step_pairing += exp(-fabs(density[i]) * pb->temperature_k / 120.0);
+            step_sign += (fluct >= 0.0) ? 1.0 : -1.0;
         }
 
+        step_energy /= (double)sites;
+        step_pairing /= (double)sites;
+        step_sign /= (double)sites;
+
         double burn = 0.0;
-        for (int k = 0; k < cpu_target_percent * 200; ++k) burn += sin((double)k + out.energy);
-        out.energy += burn * 1e-8;
+        for (int k = 0; k < cpu_target_percent * 200; ++k) burn += sin((double)k + step_energy);
+        out.energy = step_energy + burn * 1e-8;
+        out.pairing = step_pairing;
+        out.sign_ratio = step_sign;
 
         if ((step % 100) == 0 && ctx->csv_fp) {
             double cpu = read_cpu_percent_snapshot();
@@ -134,7 +143,7 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
                     (unsigned long long)step,
                     out.energy,
                     out.pairing,
-                    out.sign_ratio / (double)((step + 1) * sites),
+                    out.sign_ratio,
                     cpu,
                     mem,
                     (unsigned long long)ns);
@@ -143,8 +152,6 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
 
     for (int i = 0; i < sites; ++i) out.avg_density += density[i];
     out.avg_density /= (double)sites;
-    out.pairing /= (double)(pb->steps * sites);
-    out.sign_ratio /= (double)(pb->steps * sites);
     out.elapsed_ns = now_ns() - t0;
     return out;
 }
