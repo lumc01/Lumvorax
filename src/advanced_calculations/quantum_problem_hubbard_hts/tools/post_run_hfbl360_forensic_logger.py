@@ -16,6 +16,7 @@ import argparse
 import csv
 import json
 import os
+import time
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -82,10 +83,17 @@ def main() -> int:
     ]
     for key in env_keys:
         value = os.environ.get(key, "")
-        env_rows.append(("runtime_env", key, "value", value if value else "UNSET", "OBSERVED"))
+        normalized = value.strip().lower()
+        is_enabled = normalized in {"1", "true", "on", "yes", "enabled"}
+        env_rows.append(("runtime_env", key, "value", value if value else "UNSET", "PASS" if is_enabled else "FAIL"))
 
     persistent_target = logs_dir / "hfbl360_realtime_persistent.log"
     persist_ok, persist_note = can_persist(persistent_target)
+    if persist_ok:
+        with persistent_target.open("a", encoding="utf-8") as rt:
+            rt.write(f"ts_ns={time.time_ns()} event=hfbl360_forensic_logger_started run_dir={run_dir}\n")
+            for _, key, _, val, status in env_rows:
+                rt.write(f"ts_ns={time.time_ns()} env_key={key} value={val} status={status}\n")
     persist_row = ("filesystem", "persistent_log_target", "writable", "1" if persist_ok else "0", "PASS" if persist_ok else "FAIL")
 
     csv_path = tests_dir / "integration_hfbl360_forensic_audit.csv"
