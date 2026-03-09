@@ -9,13 +9,55 @@ from independent_modules.arpes_module import run_arpes
 from independent_modules.stm_module import run_stm
 
 
+def _safe_float(raw):
+    if raw is None:
+        return None
+    txt = str(raw).strip()
+    if txt == "":
+        return None
+    try:
+        return float(txt)
+    except ValueError:
+        return None
+
+
 def load_series(baseline_csv: Path):
-    rows=list(csv.DictReader(baseline_csv.open(encoding='utf-8')))
-    by=defaultdict(lambda: defaultdict(list))
+    if not baseline_csv.exists():
+        raise FileNotFoundError(f"baseline file missing: {baseline_csv}")
+
+    rows = list(csv.DictReader(baseline_csv.open(encoding='utf-8')))
+    by = defaultdict(lambda: defaultdict(list))
+    skipped = 0
     for r in rows:
-        p=r['problem']
-        for k in ['energy','pairing','sign_ratio']:
-            by[p][k].append(float(r[k]))
+        p = (r.get('problem') or '').strip()
+        if not p:
+            skipped += 1
+            continue
+
+        values = {}
+        valid = True
+        for k in ['energy', 'pairing', 'sign_ratio']:
+            val = _safe_float(r.get(k))
+            if val is None:
+                valid = False
+                break
+            values[k] = val
+
+        if not valid:
+            skipped += 1
+            continue
+
+        for k, v in values.items():
+            by[p][k].append(v)
+
+    # Guarantee every problem used downstream has full series arrays.
+    empty = [p for p, d in by.items() if not d['energy'] or not d['pairing'] or not d['sign_ratio']]
+    for p in empty:
+        del by[p]
+
+    if not by:
+        raise ValueError(f"no valid rows in baseline csv: {baseline_csv} (skipped={skipped})")
+
     return by
 
 

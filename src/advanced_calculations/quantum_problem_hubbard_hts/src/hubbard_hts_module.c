@@ -11,6 +11,7 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
+#include <stdint.h>
 
 #define ARRAY_SIZE(a) (sizeof(a) / sizeof((a)[0]))
 
@@ -95,9 +96,84 @@ static void write_hardware_snapshot(hubbard_run_context_t* ctx) {
     fclose(out);
 }
 
+
+static int run_hfbl360_forensic_extension(hubbard_run_context_t* ctx, const char* module_root, const char* phase) {
+    if (!ctx || !module_root || !phase) return -1;
+
+    const char* script_rel = "src/advanced_calculations/quantum_problem_hubbard_hts/tools/post_run_hfbl360_forensic_logger.py";
+    char cmd[HUBBARD_MAX_PATH * 3];
+    int w = snprintf(cmd,
+                     sizeof(cmd),
+                     "python3 %s '%s' --standard-names '%s/STANDARD_NAMES.md' --phase '%s'",
+                     script_rel,
+                     ctx->run_dir,
+                     module_root,
+                     phase);
+    if (w < 0 || (size_t)w >= sizeof(cmd)) {
+        log_line(ctx, "HFBL360 forensic extension command too long");
+        return -1;
+    }
+
+    int rc = system(cmd);
+    if (rc != 0) {
+        log_line(ctx, "HFBL360 forensic extension failed rc=%d cmd=%s", rc, cmd);
+        return rc;
+    }
+
+    log_line(ctx, "HFBL360 forensic extension completed phase=%s rc=%d", phase, rc);
+    return 0;
+}
+
+
+static uint64_t hash_step_state(double energy, double pairing, double sign_ratio, uint64_t step) {
+    union { double d; uint64_t u; } e = {energy}, p = {pairing}, sr = {sign_ratio};
+    uint64_t h = 1469598103934665603ULL;
+    h ^= e.u; h *= 1099511628211ULL;
+    h ^= p.u; h *= 1099511628211ULL;
+    h ^= sr.u; h *= 1099511628211ULL;
+    h ^= step; h *= 1099511628211ULL;
+    return h;
+}
+
+static void hfbl_log_event(hubbard_run_context_t* ctx,
+                           const char* problem,
+                           const char* event,
+                           uint64_t step,
+                           double energy,
+                           double pairing,
+                           double sign_ratio) {
+    if (!ctx || !problem || !event) return;
+    char path[HUBBARD_MAX_PATH];
+    if (join_path(path, sizeof(path), ctx->logs_dir, "hfbl360_realtime_persistent.log") != 0) return;
+    FILE* fp = fopen(path, "a");
+    if (!fp) return;
+    uint64_t sh = hash_step_state(energy, pairing, sign_ratio, step);
+    fprintf(fp,
+            "ts_ns=%llu event=%s problem=%s simulation_step=%llu energy_update=%.12f observable_update=%.12f sign_ratio=%.12f state_hash=%016llx\n",
+            (unsigned long long)now_ns(),
+            event,
+            problem,
+            (unsigned long long)step,
+            energy,
+            pairing,
+            sign_ratio,
+            (unsigned long long)sh);
+    fclose(fp);
+}
+
 static double pseudo_rand01(uint64_t* state) {
     *state = (*state * 6364136223846793005ULL + 1ULL);
     return ((*state >> 11) & 0xFFFFFFFFULL) / (double)0xFFFFFFFFULL;
+}
+
+
+static void normalize_state_vector(double* d, int n) {
+    if (!d || n <= 0) return;
+    double norm2 = 0.0;
+    for (int i = 0; i < n; ++i) norm2 += d[i] * d[i];
+    if (norm2 <= 1e-15) return;
+    double inv_norm = 1.0 / sqrt(norm2);
+    for (int i = 0; i < n; ++i) d[i] *= inv_norm;
 }
 
 static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hubbard_problem_t* pb, int cpu_target_percent) {
@@ -108,20 +184,36 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
     double density[HUBBARD_GRID_MAX * HUBBARD_GRID_MAX] = {0};
     uint64_t t0 = now_ns();
 
+    hfbl_log_event(ctx, pb->name, "simulation_start", 0, 0.0, 0.0, 0.0);
+
     for (uint64_t step = 0; step < pb->steps; ++step) {
+        double step_energy = 0.0;
+        double step_pairing = 0.0;
+        double step_sign = 0.0;
         for (int i = 0; i < sites; ++i) {
             double fluct = pseudo_rand01(&seed) - 0.5;
             density[i] += 0.02 * fluct;
             if (density[i] > 1.0) density[i] = 1.0;
             if (density[i] < -1.0) density[i] = -1.0;
-            out.energy += pb->interaction_u * density[i] * density[i] - pb->hopping_t * fabs(fluct);
-            out.pairing += exp(-fabs(density[i]) * pb->temperature_k / 120.0);
-            out.sign_ratio += (fluct >= 0.0) ? 1.0 : -1.0;
+            step_energy += pb->interaction_u * density[i] * density[i] - pb->hopping_t * fabs(fluct);
+            step_pairing += exp(-fabs(density[i]) * pb->temperature_k / 120.0);
+            step_sign += (fluct >= 0.0) ? 1.0 : -1.0;
         }
 
+        normalize_state_vector(density, sites);
+        step_energy /= (double)sites;
+        step_pairing /= (double)sites;
+        step_sign /= (double)sites;
+
         double burn = 0.0;
-        for (int k = 0; k < cpu_target_percent * 200; ++k) burn += sin((double)k + out.energy);
-        out.energy += burn * 1e-8;
+        for (int k = 0; k < cpu_target_percent * 200; ++k) burn += sin((double)k + step_energy);
+        out.energy = step_energy + burn * 1e-8;
+        out.pairing = step_pairing;
+        out.sign_ratio = step_sign;
+
+        if ((step % 10) == 0) {
+            hfbl_log_event(ctx, pb->name, "simulation_step", step, out.energy, out.pairing, out.sign_ratio);
+        }
 
         if ((step % 100) == 0 && ctx->csv_fp) {
             double cpu = read_cpu_percent_snapshot();
@@ -134,7 +226,7 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
                     (unsigned long long)step,
                     out.energy,
                     out.pairing,
-                    out.sign_ratio / (double)((step + 1) * sites),
+                    out.sign_ratio,
                     cpu,
                     mem,
                     (unsigned long long)ns);
@@ -143,9 +235,8 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
 
     for (int i = 0; i < sites; ++i) out.avg_density += density[i];
     out.avg_density /= (double)sites;
-    out.pairing /= (double)(pb->steps * sites);
-    out.sign_ratio /= (double)(pb->steps * sites);
     out.elapsed_ns = now_ns() - t0;
+    hfbl_log_event(ctx, pb->name, "simulation_end", pb->steps, out.energy, out.pairing, out.sign_ratio);
     return out;
 }
 
@@ -180,8 +271,12 @@ int hubbard_run_campaign(const char* module_root, int cpu_target_percent, int me
     fprintf(ctx.csv_fp, "problem,step,energy,pairing,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
 
     write_hardware_snapshot(&ctx);
+    setenv("LUMVORAX_FORENSIC_REALTIME", "1", 1);
+    setenv("LUMVORAX_LOG_PERSISTENCE", "1", 1);
+    setenv("LUMVORAX_HFBL360_ENABLED", "1", 1);
     log_line(&ctx, "Demarrage run_id=%s", ctx.run_id);
     log_line(&ctx, "Objectif CPU=%d%% RAM=%d%%", cpu_target_percent, mem_target_percent);
+    (void)run_hfbl360_forensic_extension(&ctx, module_root, "start");
 
     hubbard_problem_result_t results[ARRAY_SIZE(problems)];
     for (size_t i = 0; i < ARRAY_SIZE(problems); ++i) {
@@ -229,6 +324,8 @@ int hubbard_run_campaign(const char* module_root, int cpu_target_percent, int me
         fprintf(report, "- Les lignes numérotées du log `execution.log` permettent de référencer précisément les évènements.\n");
         fclose(report);
     }
+
+    (void)run_hfbl360_forensic_extension(&ctx, module_root, "end");
 
     log_line(&ctx, "FIN run_id=%s report=%s", ctx.run_id, ctx.report_md);
     fclose(ctx.log_fp);
