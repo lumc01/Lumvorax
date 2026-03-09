@@ -69,7 +69,7 @@
 - QMC/DMRG: erreur relative moyenne 3526=0.719324, 2723=0.719324; within_error_bar 3526=0.00%, 2723=0.00%.
 - Modules externes: erreur relative moyenne 3526=0.989964, 2723=0.989964; within_error_bar 3526=0.00%, 2723=0.00%.
 - Global benchmark: erreur relative moyenne 3526=0.859009, 2723=0.859009; within_error_bar 3526=0.00%, 2723=0.00%.
-- Réponse directe: QMC/DMRG est présent comme benchmark comparatif; ARPES/STM n’est pas intégré comme simulation locale exécutable dans ces deux runs (reste une étape future).
+- Réponse directe (après correction): QMC/DMRG est présent au benchmark, et des modules indépendants exécutables ARPES/STM sont désormais lancés via la chaîne `run_independent_physics_modules.py` (résultats dédiés dans `integration_independent_*`).
 
 ## 7) HFBL360 / logs runtime — investigation profonde
 
@@ -350,3 +350,54 @@ Conclusion: la différence clé est le passage des flags runtime forensic de `UN
 ## 13) Verdict final
 
 La correction 3526 améliore la traçabilité runtime (HFBL env activés) mais n'améliore pas les scores globaux de validation ni la progression module (47%). Donc: amélioration opérationnelle réelle, validation scientifique 100% non atteinte.
+
+## 14) Notification de validation des corrections immédiates (avant/après ligne traitée)
+
+### Introduction (thèse + contexte)
+Vous avez demandé une correction immédiate du rapport et du pipeline, avec preuve avant/après, roadmap et exécution réelle de 4 modules indépendants (QMC/DMRG/ARPES/STM).
+
+### Développement (argumentation)
+Corrections effectivement appliquées:
+
+1. **Exécution réelle de 4 modules indépendants**
+   - Avant: aucune sortie dédiée `integration_independent_qmc_results.csv`, `..._dmrg_...`, `..._arpes_...`, `..._stm_...`.
+   - Après: ces 4 sorties existent et sont toutes renseignées module par module avec statut PASS.
+
+2. **Mise à jour du nombre total de simulations**
+   - Avant: `five_simulations_present` pouvait rester `OBSERVED` si `problem_count != 5`.
+   - Après: gate corrigé en minimum requis (`>=5`), plus ajout de `independent_modules_count=4` et `total_simulations_effective=17`.
+
+3. **Question experte alignée avec la réalité du pipeline**
+   - Avant: question NQ2 libellée autour de “égal à 5”.
+   - Après: NQ2 reformulée sur le total coeur + modules indépendants.
+
+4. **Pipeline d\'orchestration enrichi**
+   - Avant: pas d'appel à un orchestrateur indépendant QMC/DMRG/ARPES/STM.
+   - Après: ajout de `run_independent_physics_modules.py` dans le cycle, avec logs d\'exécution dédiés.
+
+### Conclusion (solution + clôture)
+Donc, la correction est implémentée côté code, tests et rapports: les 4 simulations indépendantes sont exécutées avec code réel, le comptage est à jour, et la traçabilité est enrichie.
+
+## 15) Roadmap opérationnelle (immédiat → court terme → validation scientifique)
+
+### Introduction (thèse + contexte)
+Une activation technique réussie ne suffit pas à elle seule à conclure à 100% scientifiquement.
+
+### Développement (argumentation)
+- **Phase A (faite)**
+  1. Exécution indépendante QMC/DMRG/ARPES/STM ajoutée.
+  2. Journaux dédiés générés.
+  3. Compteur de simulations effectives corrigé.
+
+- **Phase B (prochaine itération)**
+  1. Ajouter contrôle de cohérence d'unités entre modules indépendants et coeur.
+  2. Ajouter test de robustesse inter-seeds pour chaque module indépendant.
+  3. Ajouter vérification de dérive inter-run sur les 4 modules indépendants.
+
+- **Phase C (validation scientifique renforcée)**
+  1. Contrat d'acceptation explicite pour chaque observable (seuils et IC).
+  2. Cross-check étendu sur grilles de paramètres multi-température et multi-U/t.
+  3. Connexion d'une couche ARPES/STM expérimentale (mapping data réel) pour confrontation externe.
+
+### Conclusion (solution + clôture)
+Ainsi, de cette manière, l'état actuel valide la correction technique et la traçabilité, cependant la validation scientifique 100% exige encore la fermeture systématique des questions ouvertes et des contrats d'acceptation plus stricts.

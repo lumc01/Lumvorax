@@ -19,7 +19,7 @@ cp -a "$ROOT_DIR/src" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/Makefile" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/benchmarks" "$BACKUP_DIR/"
 
-TOTAL_STEPS=26
+TOTAL_STEPS=27
 CURRENT_STEP=0
 
 print_progress() {
@@ -109,6 +109,9 @@ print_progress "low-level telemetry"
 
 python3 "$ROOT_DIR/tools/post_run_advanced_observables_pack.py" "$RUN_DIR"
 print_progress "advanced observables"
+
+python3 "$ROOT_DIR/tools/run_independent_physics_modules.py" "$RUN_DIR"
+print_progress "independent qmc/dmrg/arpes/stm"
 
 python3 "$ROOT_DIR/tools/post_run_chatgpt_critical_tests.py" "$RUN_DIR"
 print_progress "critical tests"

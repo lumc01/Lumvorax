@@ -1,0 +1,39 @@
+ts_ns=1773081689701847593 problem=bosonic_multimode_systems stage=start
+ts_ns=1773081689703474347 problem=bosonic_multimode_systems qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689703486298 problem=bosonic_multimode_systems stage=end
+ts_ns=1773081689703487916 problem=correlated_fermions_non_hubbard stage=start
+ts_ns=1773081689705209777 problem=correlated_fermions_non_hubbard qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689705219032 problem=correlated_fermions_non_hubbard stage=end
+ts_ns=1773081689705219986 problem=dense_nuclear_proxy stage=start
+ts_ns=1773081689706723620 problem=dense_nuclear_proxy qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689706732012 problem=dense_nuclear_proxy stage=end
+ts_ns=1773081689706733063 problem=far_from_equilibrium_kinetic_lattices stage=start
+ts_ns=1773081689708330851 problem=far_from_equilibrium_kinetic_lattices qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689708338647 problem=far_from_equilibrium_kinetic_lattices stage=end
+ts_ns=1773081689708339673 problem=hubbard_hts_core stage=start
+ts_ns=1773081689710349392 problem=hubbard_hts_core qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689710358833 problem=hubbard_hts_core stage=end
+ts_ns=1773081689710359646 problem=multi_correlated_fermion_boson_networks stage=start
+ts_ns=1773081689711969211 problem=multi_correlated_fermion_boson_networks qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689711976731 problem=multi_correlated_fermion_boson_networks stage=end
+ts_ns=1773081689711977571 problem=multi_state_excited_chemistry stage=start
+ts_ns=1773081689713545984 problem=multi_state_excited_chemistry qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689713554203 problem=multi_state_excited_chemistry stage=end
+ts_ns=1773081689713555040 problem=multiscale_nonlinear_field_models stage=start
+ts_ns=1773081689715130063 problem=multiscale_nonlinear_field_models qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689715137844 problem=multiscale_nonlinear_field_models stage=end
+ts_ns=1773081689715138720 problem=qcd_lattice_proxy stage=start
+ts_ns=1773081689716604149 problem=qcd_lattice_proxy qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689716664247 problem=qcd_lattice_proxy stage=end
+ts_ns=1773081689716665927 problem=quantum_chemistry_proxy stage=start
+ts_ns=1773081689718204872 problem=quantum_chemistry_proxy qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689718212908 problem=quantum_chemistry_proxy stage=end
+ts_ns=1773081689718213738 problem=quantum_field_noneq stage=start
+ts_ns=1773081689719607079 problem=quantum_field_noneq qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689719614539 problem=quantum_field_noneq stage=end
+ts_ns=1773081689719615587 problem=spin_liquid_exotic stage=start
+ts_ns=1773081689721334482 problem=spin_liquid_exotic qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689721342192 problem=spin_liquid_exotic stage=end
+ts_ns=1773081689721343083 problem=topological_correlated_materials stage=start
+ts_ns=1773081689723045335 problem=topological_correlated_materials qmc_status=PASS dmrg_status=PASS arpes_status=PASS stm_status=PASS
+ts_ns=1773081689723053114 problem=topological_correlated_materials stage=end
