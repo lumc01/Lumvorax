@@ -1,0 +1,5 @@
+# Proxy vs Advanced Parallel — comparaison
+
+- Proxy run: `/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260309T232528Z_978`
+- Advanced run: `/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260309T233119Z_1010`
+- Tableau: `/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/campaign_20260309T232522Z/proxy_vs_advanced_comparison.csv`

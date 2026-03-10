@@ -179,8 +179,7 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
             if (d[i] < -1.0) d[i] = -1.0;
 
             double local_pair = exp(-fabs(d[i]) * p->temp / 140.0) * (1.0 + 0.08 * corr[i] * corr[i]);
-            // RE-CALIBRATION: Scaling factor 1e6 to align with QMC/DMRG reference amplitudes (Order of magnitude correction)
-            double local_energy = 1000000.0 * (p->u * d[i] * d[i] - p->t * fabs(fl) - p->mu * d[i] + 0.12 * p->u * corr[i] * d[i] - 0.03 * d[i]);
+            double local_energy = p->u * d[i] * d[i] - p->t * fabs(fl) - p->mu * d[i] + 0.12 * p->u * corr[i] * d[i] - 0.03 * d[i];
 
             step_energy += local_energy / (double)(sites);
             step_pairing += local_pair;

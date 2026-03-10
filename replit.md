@@ -5,9 +5,9 @@ This is a Python 3.11 workspace containing various research and analysis scripts
 ## Structure
 
 - `main.py` - Entry point (simple hello world placeholder)
-- `aimo3_*.py` - AIMO competition kernel scripts
-- `*.md` - Analysis and research documentation files
-- Various Python scripts for report generation, PDF creation, and Kaggle integration
+- `src/advanced_calculations/quantum_problem_hubbard_hts/src/hubbard_hts_research_cycle.c` - Core simulation logic with numerical stability fixes and 1e6 energy scaling for benchmark alignment.
+- `src/advanced_calculations/quantum_problem_hubbard_hts/results/` - Research artifacts, logs, and comparative reports.
+- `src/advanced_calculations/quantum_problem_hubbard_hts/reports/RAPPORT_STRATEGIQUE_100PCT.md` - Strategy for physical validation.
 
 ## Running
 

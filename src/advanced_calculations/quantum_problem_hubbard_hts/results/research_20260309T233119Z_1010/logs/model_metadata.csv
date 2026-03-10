@@ -1,0 +1,14 @@
+problem,model_id,hamiltonian_id,schema_version,lattice_size,lattice_sites,geometry,boundary_conditions,t,U,u_over_t,mu,T,dt,time_step,seed,solver_version,method
+bosonic_multimode_systems,,,,10x8,80,,periodic,,,8.666667,0.060000,NA,0.010000,0.010000,,,euler_explicit
+correlated_fermions_non_hubbard,,,,10x9,90,,periodic,,,7.166667,0.180000,NA,0.010000,0.010000,,,euler_explicit
+dense_nuclear_proxy,,,,9x8,72,,open,,,13.750000,0.300000,NA,0.010000,0.010000,,,euler_explicit
+far_from_equilibrium_kinetic_lattices,,,,11x9,99,,periodic,,,8.000000,0.090000,NA,0.010000,0.010000,,,euler_explicit
+hubbard_hts_core,,,,10x10,100,,periodic,,,8.000000,0.200000,NA,0.010000,0.010000,,,euler_explicit
+multi_correlated_fermion_boson_networks,,,,10x10,100,,periodic,,,7.047619,0.140000,NA,0.010000,0.010000,,,euler_explicit
+multi_state_excited_chemistry,,,,9x9,81,,periodic,,,4.533333,0.220000,NA,0.010000,0.010000,,,euler_explicit
+multiscale_nonlinear_field_models,,,,12x8,96,,periodic,,,6.571429,0.100000,NA,0.010000,0.010000,,,euler_explicit
+qcd_lattice_proxy,,,,9x9,81,,periodic,,,12.857143,0.100000,5.700000,0.010000,0.010000,,,euler_explicit
+quantum_chemistry_proxy,,,,8x7,56,,periodic,,,4.062500,0.400000,NA,0.010000,0.010000,,,euler_explicit
+quantum_field_noneq,,,,8x8,64,,periodic,,,5.384615,0.050000,NA,0.010000,0.010000,,,euler_explicit
+spin_liquid_exotic,,,,12x10,120,,periodic,,,11.666667,0.120000,NA,0.010000,0.010000,,,euler_explicit
+topological_correlated_materials,,,,11x11,121,,periodic,,,7.090909,0.150000,NA,0.010000,0.010000,,,euler_explicit
