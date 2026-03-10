@@ -5,9 +5,9 @@ This is a Python 3.11 workspace containing various research and analysis scripts
 ## Structure
 
 - `main.py` - Entry point (simple hello world placeholder)
-- `src/advanced_calculations/quantum_problem_hubbard_hts/src/hubbard_hts_research_cycle.c` - Core simulation logic with numerical stability fixes and unit-consistent energy scaling.
-- `src/advanced_calculations/quantum_problem_hubbard_hts/results/` - Research artifacts, logs, and comparative reports.
-- `src/advanced_calculations/quantum_problem_hubbard_hts/results/research_*/reports/global_physics_validation.md` - Global physics audit and unit validation.
+- `src/advanced_calculations/quantum_problem_hubbard_hts/src/hubbard_hts_research_cycle.c` - Core simulation logic with 5 stability corrections: spectral radius (1e-6), damping (0.015), local dissipation, energy normalization by sites, drift reduction (1e-10).
+- `src/advanced_calculations/quantum_problem_hubbard_hts/results/` - Research artifacts, logs, and comparative reports (research_20260310T013238Z_2300, research_20260310T013832Z_2311, research_20260310T012023Z_1673).
+- `RAPPORT_FINAL_AVANT_APRES_COMPLET.md` - Comprehensive before/after analysis: removed artificial 1e6 factor, validated unit consistency, confirmed 3-run determinism.
 
 ## Running
 
