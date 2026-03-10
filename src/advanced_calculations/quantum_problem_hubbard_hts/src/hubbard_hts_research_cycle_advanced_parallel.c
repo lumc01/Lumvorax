@@ -19,7 +19,7 @@
 typedef struct {
     const char* name;
     int lx, ly;
-    double t, u, mu, temp;
+    double t_eV, u_eV, mu_eV, temp_K;  /* Unités explicites : eV, K */
     double dt;
     uint64_t steps;
 } problem_t;
@@ -41,8 +41,9 @@ typedef struct {
 } von_neumann_result_t;
 
 typedef struct {
-    double energy;
-    double pairing;
+    double energy_meV;
+    double energy_drift_metric;
+    double pairing_norm;
     double sign_ratio;
     double cpu_peak;
     double mem_peak;
@@ -178,8 +179,8 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
             if (d[i] > 1.0) d[i] = 1.0;
             if (d[i] < -1.0) d[i] = -1.0;
 
-            double local_pair = exp(-fabs(d[i]) * p->temp / 140.0) * (1.0 + 0.08 * corr[i] * corr[i]);
-            double local_energy = p->u * d[i] * d[i] - p->t * fabs(fl) - p->mu * d[i] + 0.12 * p->u * corr[i] * d[i] - 0.03 * d[i];
+            double local_pair = exp(-fabs(d[i]) * p->temp_K / 140.0) * (1.0 + 0.08 * corr[i] * corr[i]);
+            double local_energy = p->u_eV * d[i] * d[i] - p->t_eV * fabs(fl) - p->mu_eV * d[i] + 0.12 * p->u_eV * corr[i] * d[i] - 0.03 * d[i];
 
             step_energy += local_energy / (double)(sites);
             step_pairing += local_pair;
@@ -191,12 +192,13 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
         step_pairing /= (double)sites;
         step_sign /= (double)sites;
 
-        double burn = 0.0;
+        double burn_metric = 0.0;
         for (int k = 0; k < burn_scale * 220; ++k) {
-            burn += sin((double)k + step_energy) + 0.5 * cos((double)k * 0.33 + collective_mode);
+            burn_metric += sin((double)k + step_energy) + 0.5 * cos((double)k * 0.33 + collective_mode);
         }
-        r.energy = step_energy + burn * 1e-10;
-        r.pairing = step_pairing;
+        r.energy_meV = step_energy;
+        r.energy_drift_metric = burn_metric * 1e-10;
+        r.pairing_norm = step_pairing;
         r.sign_ratio = step_sign;
 
         if (trace_csv && step % 100 == 0) {
@@ -207,15 +209,15 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
                     "%s,%llu,%.10f,%.10f,%.10f,%.2f,%.2f,%llu\n",
                     p->name,
                     (unsigned long long)step,
-                    r.energy,
-                    r.pairing,
+                    r.energy_meV,
+                    r.pairing_norm,
                     r.sign_ratio,
                     c,
                     m,
                     (unsigned long long)(now_ns() - t0));
         }
         if (pairing_series && series_len && *series_len < series_cap) {
-            pairing_series[*series_len] = r.pairing;
+            pairing_series[*series_len] = r.pairing_norm;
             (*series_len)++;
         }
     }
@@ -294,8 +296,8 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
             if (d[i] > 1.0L) d[i] = 1.0L;
             if (d[i] < -1.0L) d[i] = -1.0L;
 
-            long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp / 140.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
-            long double local_energy = (long double)p->u * d[i] * d[i] - (long double)p->t * fabsl(fl) - (long double)p->mu * d[i] + 0.12L * (long double)p->u * corr[i] * d[i];
+            long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp_K / 140.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
+            long double local_energy = (long double)p->u_eV * d[i] * d[i] - (long double)p->t_eV * fabsl(fl) - (long double)p->mu_eV * d[i] + 0.12L * (long double)p->u_eV * corr[i] * d[i];
 
             step_energy += local_energy / (long double)sites;
             step_pairing += local_pair;
@@ -305,12 +307,13 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
         step_pairing /= (long double)sites;
         step_sign /= (long double)sites;
 
-        long double burn = 0;
+        long double burn_metric = 0;
         for (int k = 0; k < burn_scale * 220; ++k) {
-            burn += sinl((long double)k + step_energy) + 0.5L * cosl((long double)k * 0.33L + collective_mode);
+            burn_metric += sinl((long double)k + step_energy) + 0.5L * cosl((long double)k * 0.33L + collective_mode);
         }
-        r.energy = (double)(step_energy + burn * 1e-8L);
-        r.pairing = (double)step_pairing;
+        r.energy_meV = (double)step_energy;
+        r.energy_drift_metric = (double)(burn_metric * 1e-8L);
+        r.pairing_norm = (double)step_pairing;
         r.sign_ratio = (double)step_sign;
     }
     free(corr);
@@ -608,7 +611,7 @@ int main(int argc, char** argv) {
         if (strcmp(probs[i].name, "qcd_lattice_proxy") == 0) field_type = "gauge_field";
         if (strcmp(probs[i].name, "dense_nuclear_proxy") == 0) field_type = "mixed_proxy";
         fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%s,euler_explicit,%.6f,%s,",
-                probs[i].name, probs[i].lx, probs[i].ly, probs[i].u / probs[i].t, probs[i].mu, bc, probs[i].dt, gauge);
+                probs[i].name, probs[i].lx, probs[i].ly, probs[i].u_eV / probs[i].t_eV, probs[i].mu_eV, bc, probs[i].dt, gauge);
         if (isnan(beta)) fprintf(mmeta, "NA,"); else fprintf(mmeta, "%.6f,", beta);
         fprintf(mmeta, "1.000000,%d,%s\n", probs[i].lx * probs[i].ly, field_type);
     }
@@ -618,7 +621,7 @@ int main(int argc, char** argv) {
     int line = 4;
     for (int i = 0; i < nprobs; ++i) {
         base[i] = simulate_advanced_proxy(&probs[i], (uint64_t)(0xABC000 + i), 99, raw);
-        fprintf(lg, "%06d | BASE_RESULT problem=%s energy=%.6f pairing=%.6f sign=%.6f cpu_peak=%.2f mem_peak=%.2f elapsed_ns=%llu\n", line++, probs[i].name, base[i].energy, base[i].pairing, base[i].sign_ratio, base[i].cpu_peak, base[i].mem_peak, (unsigned long long)base[i].elapsed_ns);
+        fprintf(lg, "%06d | BASE_RESULT problem=%s energy=%.6f pairing=%.6f sign=%.6f cpu_peak=%.2f mem_peak=%.2f elapsed_ns=%llu\n", line++, probs[i].name, base[i].energy_meV, base[i].pairing_norm, base[i].sign_ratio, base[i].cpu_peak, base[i].mem_peak, (unsigned long long)base[i].elapsed_ns);
     }
 
     for (int i = 0; i < nprobs; ++i) {
@@ -630,8 +633,8 @@ int main(int argc, char** argv) {
             pp.steps = checkpoints[ci];
             sim_result_t rr = simulate_advanced_proxy(&pp, (uint64_t)(0xABC000 + i), 99, NULL);
             double volume = (double)(pp.lx * pp.ly);
-            double energy_norm = rr.energy / (volume * (double)pp.steps + EPS);
-            double pairing_norm = rr.pairing;
+            double energy_norm = rr.energy_meV / (volume * (double)pp.steps + EPS);
+            double pairing_norm = rr.pairing_norm;
             fprintf(det, "%s,%llu,%.10f,%.10f,%.10f,%.2f,%.2f,%llu\n",
                     pp.name,
                     (unsigned long long)pp.steps,
@@ -650,8 +653,8 @@ int main(int argc, char** argv) {
     sim_result_t a1 = simulate_advanced_proxy(&probs[0], 42, 99, NULL);
     sim_result_t a2 = simulate_advanced_proxy(&probs[0], 42, 99, NULL);
     sim_result_t b1 = simulate_advanced_proxy(&probs[0], 77, 99, NULL);
-    double delta_same = fabs(a1.energy - a2.energy) + fabs(a1.pairing - a2.pairing);
-    double delta_diff = fabs(a1.energy - b1.energy) + fabs(a1.pairing - b1.pairing);
+    double delta_same = fabs(a1.energy_meV - a2.energy_meV) + fabs(a1.pairing_norm - a2.pairing_norm);
+    double delta_diff = fabs(a1.energy_meV - b1.energy_meV) + fabs(a1.pairing_norm - b1.pairing_norm);
     bool rep_fixed = delta_same < EPS;
     bool rep_diff = delta_diff > 1e-6;
     mark(&reproducibility, rep_fixed);
@@ -665,28 +668,28 @@ int main(int argc, char** argv) {
         problem_t p = probs[0];
         p.steps = steps_set[i];
         sim_result_t r = simulate_advanced_proxy(&p, 31415, 99, NULL);
-        pvals[i] = r.pairing;
-        bool finite_ok = isfinite(r.energy) && isfinite(r.pairing) && isfinite(r.sign_ratio);
+        pvals[i] = r.pairing_norm;
+        bool finite_ok = isfinite(r.energy_meV) && isfinite(r.pairing_norm) && isfinite(r.sign_ratio);
         mark(&robustness, finite_ok);
-        fprintf(tcsv, "convergence,conv_%llu_steps,pairing,%.10f,%s\n", (unsigned long long)steps_set[i], r.pairing, finite_ok ? "PASS" : "FAIL");
+        fprintf(tcsv, "convergence,conv_%llu_steps,pairing,%.10f,%s\n", (unsigned long long)steps_set[i], r.pairing_norm, finite_ok ? "PASS" : "FAIL");
     }
     bool conv_nonincreasing = (pvals[0] >= pvals[1] && pvals[1] >= pvals[2] && pvals[2] >= pvals[3]);
     mark(&robustness, conv_nonincreasing);
     fprintf(tcsv, "convergence,conv_monotonic,pairing_nonincreasing,%d,%s\n", conv_nonincreasing ? 1 : 0, conv_nonincreasing ? "PASS" : "FAIL");
 
     problem_t extreme_low = probs[0];
-    extreme_low.temp = 3.0;
+    extreme_low.temp_K = 3.0;
     problem_t extreme_high = probs[0];
-    extreme_high.temp = 350.0;
+    extreme_high.temp_K = 350.0;
     sim_result_t rlow = simulate_advanced_proxy(&extreme_low, 999, 140, NULL);
     sim_result_t rhigh = simulate_advanced_proxy(&extreme_high, 999, 140, NULL);
-    bool extreme_finite = isfinite(rlow.pairing) && isfinite(rhigh.pairing);
+    bool extreme_finite = isfinite(rlow.pairing_norm) && isfinite(rhigh.pairing_norm);
     mark(&robustness, extreme_finite);
     fprintf(tcsv, "stress,extreme_temperature,finite_pairing,%d,%s\n", extreme_finite ? 1 : 0, extreme_finite ? "PASS" : "FAIL");
 
     sim_result_t main_model = simulate_advanced_proxy(&probs[0], 123456, 99, NULL);
     sim_result_t indep_model = simulate_problem_independent(&probs[0], 123456, 99);
-    double delta_indep = fabs(main_model.energy - indep_model.energy) + fabs(main_model.pairing - indep_model.pairing);
+    double delta_indep = fabs(main_model.energy_meV - indep_model.energy_meV) + fabs(main_model.pairing_norm - indep_model.pairing_norm);
     bool indep_ok = delta_indep < 1e-3;
     mark(&robustness, indep_ok);
     fprintf(tcsv, "verification,independent_calc,delta_main_vs_independent,%.10f,%s\n", delta_indep, indep_ok ? "PASS" : "FAIL");
@@ -703,10 +706,10 @@ int main(int argc, char** argv) {
     double pair_t[4];
     for (int i = 0; i < 4; ++i) {
         problem_t p = probs[0];
-        p.temp = t_set[i];
+        p.temp_K = t_set[i];
         sim_result_t r = simulate_advanced_proxy(&p, 1234, 99, NULL);
-        pair_t[i] = r.pairing;
-        fprintf(tcsv, "sensitivity,sens_T_%g,pairing,%.10f,OBSERVED\n", t_set[i], r.pairing);
+        pair_t[i] = r.pairing_norm;
+        fprintf(tcsv, "sensitivity,sens_T_%g,pairing,%.10f,OBSERVED\n", t_set[i], r.pairing_norm);
     }
     bool pairing_temp_monotonic = (pair_t[0] >= pair_t[1] && pair_t[1] >= pair_t[2] && pair_t[2] >= pair_t[3]);
     mark(&physical, pairing_temp_monotonic);
@@ -716,10 +719,10 @@ int main(int argc, char** argv) {
     double ene_u[4];
     for (int i = 0; i < 4; ++i) {
         problem_t p = probs[0];
-        p.u = u_set[i];
+        p.u_eV = u_set[i];
         sim_result_t r = simulate_advanced_proxy(&p, 1234, 99, NULL);
-        ene_u[i] = r.energy;
-        fprintf(tcsv, "sensitivity,sens_U_%g,energy,%.10f,OBSERVED\n", u_set[i], r.energy);
+        ene_u[i] = r.energy_meV;
+        fprintf(tcsv, "sensitivity,sens_U_%g,energy,%.10f,OBSERVED\n", u_set[i], r.energy_meV);
     }
     bool energy_u_monotonic = (ene_u[0] <= ene_u[1] && ene_u[1] <= ene_u[2] && ene_u[2] <= ene_u[3]);
     mark(&physical, energy_u_monotonic);
@@ -738,21 +741,21 @@ int main(int argc, char** argv) {
     stability.steps = 8700; /* 3x beyond +2000 requested extension */
     sim_result_t stable_ctl = simulate_advanced_proxy_controlled(&stability, 20260307, 125, NULL, &ctl, ts, 4096, &ts_n);
     sim_result_t stable_open = simulate_advanced_proxy_controlled(&stability, 20260307, 125, NULL, NULL, NULL, 0, NULL);
-    bool stability_finite = isfinite(stable_ctl.energy) && isfinite(stable_ctl.pairing) && isfinite(stable_ctl.sign_ratio);
+    bool stability_finite = isfinite(stable_ctl.energy_meV) && isfinite(stable_ctl.pairing_norm) && isfinite(stable_ctl.sign_ratio);
     mark(&robustness, stability_finite);
     fprintf(tcsv, "control,phase_control_step800,enabled,%d,%s\n", ctl.phase_control ? 1 : 0, ctl.phase_control ? "PASS" : "FAIL");
     fprintf(tcsv, "control,resonance_pump,enabled,%d,%s\n", ctl.resonance_pump ? 1 : 0, ctl.resonance_pump ? "PASS" : "FAIL");
     fprintf(tcsv, "control,magnetic_quench,enabled,%d,%s\n", ctl.magnetic_quench ? 1 : 0, ctl.magnetic_quench ? "PASS" : "FAIL");
     fprintf(tcsv, "stability,temporal_t_gt_2700_steps,steps,%.0f,%s\n", (double)stability.steps, stability_finite ? "PASS" : "FAIL");
-    fprintf(tcsv, "stability,temporal_t_gt_2700_pairing,pairing,%.10f,%s\n", stable_ctl.pairing, stability_finite ? "PASS" : "FAIL");
+    fprintf(tcsv, "stability,temporal_t_gt_2700_pairing,pairing,%.10f,%s\n", stable_ctl.pairing_norm, stability_finite ? "PASS" : "FAIL");
 
-    double denom_open = fabs(stable_open.energy) + EPS;
-    double feedback_energy_reduction = (fabs(stable_open.energy) - fabs(stable_ctl.energy)) / denom_open;
-    double feedback_pairing_gain = stable_ctl.pairing - stable_open.pairing;
+    double denom_open = fabs(stable_open.energy_meV) + EPS;
+    double feedback_energy_reduction = (fabs(stable_open.energy_meV) - fabs(stable_ctl.energy_meV)) / denom_open;
+    double feedback_pairing_gain = stable_ctl.pairing_norm - stable_open.pairing_norm;
     fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,energy_reduction_ratio,%.10f,OBSERVED\n", feedback_energy_reduction);
     fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,pairing_gain,%.10f,OBSERVED\n", feedback_pairing_gain);
-    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,controlled_energy,%.10f,OBSERVED\n", stable_ctl.energy);
-    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,uncontrolled_energy,%.10f,OBSERVED\n", stable_open.energy);
+    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,controlled_energy,%.10f,OBSERVED\n", stable_ctl.energy_meV);
+    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,uncontrolled_energy,%.10f,OBSERVED\n", stable_open.energy_meV);
 
     double dt_set[] = {0.001, 0.005, 0.010};
     double dt_pair[3] = {0};
@@ -761,8 +764,8 @@ int main(int argc, char** argv) {
         dp.dt = dt_set[i];
         dp.steps = 4700;
         sim_result_t dr = simulate_advanced_proxy_controlled(&dp, (uint64_t)(6000 + i), 99, NULL, &ctl, NULL, 0, NULL);
-        dt_pair[i] = dr.pairing;
-        fprintf(tcsv, "dt_sweep,dt_%0.3f,pairing,%.10f,OBSERVED\n", dt_set[i], dr.pairing);
+        dt_pair[i] = dr.pairing_norm;
+        fprintf(tcsv, "dt_sweep,dt_%0.3f,pairing,%.10f,OBSERVED\n", dt_set[i], dr.pairing_norm);
     }
     bool dt_converged = fabs(dt_pair[1] - dt_pair[2]) < 0.02 && fabs(dt_pair[0] - dt_pair[2]) < 0.03;
     mark(&robustness, dt_converged);
@@ -805,7 +808,7 @@ int main(int argc, char** argv) {
         dts.dt = dt_stability_set[i];
         dts.steps = 1200;
         sim_result_t sr = simulate_advanced_proxy_controlled(&dts, (uint64_t)(7000 + i), 85, NULL, &ctl, NULL, 0, NULL);
-        double pair = sr.pairing;
+        double pair = sr.pairing_norm;
         if (i == 0) dt_stability_ref = pair;
         double rel = fabs(pair - dt_stability_ref) / (fabs(dt_stability_ref) + EPS);
         bool ok = isfinite(pair) && rel < 0.5;
@@ -829,7 +832,7 @@ int main(int argc, char** argv) {
             int steps = stability_checkpoints[k];
             pm.steps = (uint64_t)steps;
             sim_result_t rr = simulate_advanced_proxy_controlled(&pm, 1701 + (uint64_t)(31 * ip), 99, NULL, &ctl, NULL, 0, NULL);
-            energy_density[k] = rr.energy / ((double)(pm.lx * pm.ly) * (double)steps + EPS);
+            energy_density[k] = rr.energy_meV / ((double)(pm.lx * pm.ly) * (double)steps + EPS);
         }
 
         double drift_max = 0.0;
@@ -882,10 +885,10 @@ int main(int argc, char** argv) {
         int ip = find_problem_index(probs, nprobs, brow[i].module);
         if (ip < 0) ip = 0;
         problem_t p = probs[ip];
-        p.temp = brow[i].t;
-        p.u = brow[i].u;
+        p.temp_K = brow[i].t;
+        p.u_eV = brow[i].u;
         sim_result_t rr = simulate_advanced_proxy(&p, 1234 + (uint64_t)i, 129, NULL);
-        double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing : rr.energy;
+        double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_meV;
         double abs_e = fabs(model - brow[i].value);
         double rel_e = fabs(abs_e / (fabs(brow[i].value) + EPS));
         int ok_bar = abs_e <= brow[i].err;
@@ -904,10 +907,10 @@ int main(int argc, char** argv) {
         int ip = find_problem_index(probs, nprobs, br->module);
         if (ip < 0) continue;
         problem_t p = probs[ip];
-        p.temp = br->t;
-        p.u = br->u;
+        p.temp_K = br->t;
+        p.u_eV = br->u;
         sim_result_t rr = simulate_advanced_proxy(&p, 5151 + (uint64_t)i, 129, NULL);
-        double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing : rr.energy;
+        double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_meV;
         double abs_e = fabs(model - br->value);
         double rel_e = fabs(abs_e / (fabs(br->value) + EPS));
         int ok_bar = abs_e <= br->err;
@@ -962,10 +965,10 @@ int main(int argc, char** argv) {
         cp.ly = c_sizes[ci];
         cp.steps = (cp.lx <= 36) ? 1200 : (cp.lx <= 68 ? 420 : (cp.lx <= 128 ? 160 : 80));
         sim_result_t cr = simulate_advanced_proxy(&cp, (uint64_t)(4321 + ci), 149, NULL);
-        c_pair[ci] = cr.pairing;
-        c_energy[ci] = cr.energy;
-        fprintf(tcsv, "cluster_scale,cluster_%dx%d,pairing,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.pairing);
-        fprintf(tcsv, "cluster_scale,cluster_%dx%d,energy,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.energy);
+        c_pair[ci] = cr.pairing_norm;
+        c_energy[ci] = cr.energy_meV;
+        fprintf(tcsv, "cluster_scale,cluster_%dx%d,pairing,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.pairing_norm);
+        fprintf(tcsv, "cluster_scale,cluster_%dx%d,energy,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.energy_meV);
     }
     bool cluster_pair_nonincreasing = true;
     bool cluster_energy_nondecreasing = true;
