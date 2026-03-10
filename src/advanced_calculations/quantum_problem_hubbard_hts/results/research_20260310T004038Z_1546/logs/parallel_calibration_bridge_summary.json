@@ -1,0 +1,29 @@
+{
+  "generated_at_utc": "2026-03-10T00:46:38.897788+00:00",
+  "run": "research_20260310T004038Z_1546",
+  "modules": 13,
+  "donor_modules": [
+    "qcd_lattice_proxy",
+    "dense_nuclear_proxy",
+    "spin_liquid_exotic"
+  ],
+  "fail_families": {
+    "convergence": 1,
+    "verification": 1,
+    "benchmark": 7,
+    "cluster_scale": 2
+  },
+  "bridge_file": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260310T004038Z_1546/tests/integration_parallel_calibration_bridge.csv",
+  "method": {
+    "dt_factor_policy": {
+      "critical_drift_ge_0.20": 0.25,
+      "high_drift_ge_0.12": 0.5,
+      "moderate": 0.75
+    },
+    "control_gain_factor_policy": {
+      "critical": 0.4,
+      "high": 0.55,
+      "moderate": 0.7
+    }
+  }
+}

@@ -1,7 +1,7 @@
 # 📊 Rapport de Validation et Plan Stratégique (100%)
 
 ## 1. Introduction (Thèse + Contexte)
-Le système VORAX/LUM v2.0 a franchi une étape critique de stabilité numérique. Cependant, une divergence d'amplitude majeure subsiste entre le modèle proxy déterministe et les références externes (QMC/DMRG). Actuellement, bien que le pipeline affiche 12/12 PASS, l'alignement physique nécessite une calibration d'échelle.
+Le système a franchi une étape critique de stabilité numérique. Cependant, une divergence d'amplitude majeure subsiste entre le modèle proxy déterministe et les références externes (QMC/DMRG). Actuellement, bien que le pipeline affiche 12/12 PASS, l'alignement physique nécessite une calibration d'échelle.
 
 ---
 
