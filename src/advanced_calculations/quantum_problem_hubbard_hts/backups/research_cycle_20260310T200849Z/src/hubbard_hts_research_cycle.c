@@ -470,14 +470,14 @@ static int load_benchmark_rows(const char* path, benchmark_row_t* rows, int max_
         if (n >= max_rows) break;
         benchmark_row_t r = {0};
         char c1[64] = "", c2[64] = "", c3[64] = "";
-        int parsed = sscanf(line, "%63[^,],%63[^,],%63[^,],%lf,%lf,%lf,%lf", c1, c2, c3, &r.t, &r.u, &r.value, &r.err);
+        int parsed = sscanf(line, "%63[^,],%63[^,],%63[^,],%lf,%lf,%lf,%lf", c1, c2, c3, &r.t_eV, &r.u_eV, &r.value, &r.err);
         if (parsed == 7) {
             snprintf(r.module, sizeof(r.module), "%s", c2);
             snprintf(r.observable, sizeof(r.observable), "%s", c3);
             rows[n++] = r;
             continue;
         }
-        parsed = sscanf(line, "%63[^,],%63[^,],%lf,%lf,%lf,%lf", c1, c2, &r.t, &r.u, &r.value, &r.err);
+        parsed = sscanf(line, "%63[^,],%63[^,],%lf,%lf,%lf,%lf", c1, c2, &r.t_eV, &r.u_eV, &r.value, &r.err);
         if (parsed == 6) {
             snprintf(r.module, sizeof(r.module), "%s", "hubbard_hts_core");
             snprintf(r.observable, sizeof(r.observable), "%s", c2);
@@ -887,8 +887,8 @@ int main(int argc, char** argv) {
         int ip = find_problem_index(probs, nprobs, brow[i].module);
         if (ip < 0) ip = 0;
         problem_t p = probs[ip];
-        p.temp_K = brow[i].t;
-        p.u_eV = brow[i].u;
+        p.temp_K = brow[i].t_eV;
+        p.u_eV = brow[i].u_eV;
         sim_result_t rr = simulate_advanced_proxy(&p, 1234 + (uint64_t)i, 129, NULL);
         double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing : rr.energy;
         double abs_e = fabs(model - brow[i].value);
@@ -899,7 +899,7 @@ int main(int argc, char** argv) {
         sum_abs += abs_e;
         m++;
         fprintf(bcsv, "%s,%s,%.6f,%.6f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n",
-                brow[i].module, brow[i].observable, brow[i].t, brow[i].u, brow[i].value, model, abs_e, rel_e, brow[i].err, ok_bar);
+                brow[i].module, brow[i].observable, brow[i].t_eV, brow[i].u_eV, brow[i].value, model, abs_e, rel_e, brow[i].err, ok_bar);
     }
 
     double sum_sq_mod = 0.0, sum_abs_mod = 0.0;
