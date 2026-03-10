@@ -1,0 +1,6 @@
+stamp_utc=20260310T214528Z
+run_group=campaign_20260310T214528Z
+proxy_run=research_20260310T214534Z_623
+advanced_run=research_20260310T215445Z_720
+proxy_run_dir=/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260310T214534Z_623
+advanced_run_dir=/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260310T215445Z_720

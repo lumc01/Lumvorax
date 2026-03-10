@@ -1,0 +1,9 @@
+field,status,action
+model_id,ABSENT,Add to schema/header/provenance before physics-claim gate
+hamiltonian_id,ABSENT,Add to schema/header/provenance before physics-claim gate
+lattice_size,PRESENT,value=10x8
+boundary_conditions,PRESENT,value=periodic
+u_over_t,PRESENT,value=8.666667
+time_step,PRESENT,value=0.010000
+seed,ABSENT,Add to schema/header/provenance before physics-claim gate
+solver_version,ABSENT,Add to schema/header/provenance before physics-claim gate
