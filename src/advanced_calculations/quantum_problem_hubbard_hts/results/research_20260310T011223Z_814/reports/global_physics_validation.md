@@ -1,4 +1,5 @@
-# 🧪 Audit de Physique Globale et Validation Scientifique
+# 
+ 🧪 Audit de Physique Globale et Validation Scientifique
 
 ## 1. Analyse des Anomalies de Normalisation
 L'audit a révélé que le facteur d'échelle $10^6$ précédemment introduit était une correction artificielle masquant un problème d'unités fondamentales. Les benchmarks externes utilisent des unités SI ou CGS (ex: meV), tandis que le moteur de simulation utilise des unités adimensionnelles ($t=1, \hbar=1$).

@@ -1,0 +1,311 @@
+{
+  "run": "research_20260310T013832Z_2311",
+  "generated_at_utc": "2026-03-10T01:44:27.835424+00:00",
+  "counts": {
+    "base_metrics_rows": 305,
+    "normalized_rows": 52,
+    "new_tests": 80,
+    "questions": 19,
+    "modules": 13,
+    "toy_rows": 1
+  },
+  "means": {
+    "energy": -0.1724791867652459,
+    "pairing": 0.9452169103111476,
+    "sign_ratio": -0.004999302156065574
+  },
+  "family_ratio": {
+    "benchmark": {
+      "total": 7,
+      "passed": 0,
+      "failed": 7,
+      "observed": 0,
+      "pass_pct": 0.0
+    },
+    "cluster_scale": {
+      "total": 36,
+      "passed": 2,
+      "failed": 2,
+      "observed": 32,
+      "pass_pct": 5.555555555555555
+    },
+    "control": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "convergence": {
+      "total": 5,
+      "passed": 4,
+      "failed": 1,
+      "observed": 0,
+      "pass_pct": 80.0
+    },
+    "dt_sweep": {
+      "total": 4,
+      "passed": 1,
+      "failed": 0,
+      "observed": 3,
+      "pass_pct": 25.0
+    },
+    "dynamic_pumping": {
+      "total": 4,
+      "passed": 0,
+      "failed": 0,
+      "observed": 4,
+      "pass_pct": 0.0
+    },
+    "exact_solver": {
+      "total": 3,
+      "passed": 1,
+      "failed": 0,
+      "observed": 2,
+      "pass_pct": 33.333333333333336
+    },
+    "physics": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "reproducibility": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "sensitivity": {
+      "total": 8,
+      "passed": 0,
+      "failed": 0,
+      "observed": 8,
+      "pass_pct": 0.0
+    },
+    "spectral": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "stability": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "stress": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "verification": {
+      "total": 1,
+      "passed": 0,
+      "failed": 1,
+      "observed": 0,
+      "pass_pct": 0.0
+    }
+  },
+  "question_status": {
+    "complete": 11,
+    "partial": 8
+  },
+  "question_complete_pct": 57.89473684210526,
+  "numerical_stability_pass_pct": 56.666666666666664,
+  "progress_score_pct": 68.8093567251462,
+  "fails": {
+    "new_tests": [
+      {
+        "test_family": "convergence",
+        "test_id": "conv_monotonic",
+        "parameter": "pairing_nonincreasing",
+        "value": "0",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "verification",
+        "test_id": "independent_calc",
+        "parameter": "delta_main_vs_independent",
+        "value": "8.3585898010",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "qmc_dmrg_rmse",
+        "parameter": "rmse",
+        "value": "1284425.8306754190",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "qmc_dmrg_mae",
+        "parameter": "mae",
+        "value": "810134.6052051842",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "qmc_dmrg_within_error_bar",
+        "parameter": "percent_within",
+        "value": "0.000000",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "qmc_dmrg_ci95_halfwidth",
+        "parameter": "ci95_halfwidth",
+        "value": "650009.1539482179",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "external_modules_rmse",
+        "parameter": "rmse",
+        "value": "30626.5888777254",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "external_modules_mae",
+        "parameter": "mae",
+        "value": "20345.2936596506",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "external_modules_within_error_bar",
+        "parameter": "percent_within",
+        "value": "0.000000",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "cluster_scale",
+        "test_id": "cluster_pair_trend",
+        "parameter": "nonincreasing",
+        "value": "0",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "cluster_scale",
+        "test_id": "cluster_energy_trend",
+        "parameter": "nondecreasing",
+        "value": "0",
+        "status": "FAIL"
+      }
+    ],
+    "numerical_stability": [
+      {
+        "test_id": "von_neumann",
+        "module": "hubbard_hts_core",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "qcd_lattice_proxy",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "quantum_field_noneq",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "dense_nuclear_proxy",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "quantum_chemistry_proxy",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "spin_liquid_exotic",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "topological_correlated_materials",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "correlated_fermions_non_hubbard",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "multi_state_excited_chemistry",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "bosonic_multimode_systems",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "multiscale_nonlinear_field_models",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "far_from_equilibrium_kinetic_lattices",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      },
+      {
+        "test_id": "von_neumann",
+        "module": "multi_correlated_fermion_boson_networks",
+        "metric": "spectral_radius",
+        "value": "1.0002246148",
+        "status": "FAIL",
+        "notes": "stability_if_leq_1"
+      }
+    ]
+  }
+}

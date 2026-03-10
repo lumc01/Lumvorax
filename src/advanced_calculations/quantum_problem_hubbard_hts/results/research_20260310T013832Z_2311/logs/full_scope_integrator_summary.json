@@ -1,0 +1,15 @@
+{
+  "generated_at_utc": "2026-03-10T01:44:27.644375+00:00",
+  "run_dir": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260310T013832Z_2311",
+  "triple_tests_count": 56,
+  "triple_all_stable": true,
+  "problem_count": 13,
+  "files_generated": [
+    "tests/integration_triple_execution_matrix.csv",
+    "tests/integration_problem_count_gate.csv",
+    "tests/integration_parameter_influence_realism.csv",
+    "tests/integration_parameter_influence_solution_percent.csv",
+    "tests/integration_new_questions_registry.csv",
+    "tests/integration_new_tests_registry.csv"
+  ]
+}
