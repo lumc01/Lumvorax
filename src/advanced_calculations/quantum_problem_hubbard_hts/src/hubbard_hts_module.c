@@ -205,10 +205,14 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
         step_pairing /= (double)sites;
         step_sign /= (double)sites;
 
-        double burn = 0.0;
-        for (int k = 0; k < cpu_target_percent * 200; ++k) burn += sin((double)k + step_energy);
-        out.energy = step_energy + burn * 1e-8;
-        out.pairing = step_pairing;
+        /* Burn métrique séparée - PAS injectée dans énergie physique */
+        double burn_metric = 0.0;
+        for (int k = 0; k < cpu_target_percent * 200; ++k) burn_metric += sin((double)k + step_energy);
+        
+        /* Conversion unités : énergie interne → meV (facteur 1.0 pour proxy) */
+        out.energy_meV = step_energy * 1.0;  /* Calibrage explicite ici, pas au export */
+        out.energy_drift_metric = burn_metric * 1e-8;  /* Métrique complètement séparée */
+        out.pairing_norm = step_pairing;
         out.sign_ratio = step_sign;
 
         if ((step % 10) == 0) {

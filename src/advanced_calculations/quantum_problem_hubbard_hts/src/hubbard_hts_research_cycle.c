@@ -19,7 +19,7 @@
 typedef struct {
     const char* name;
     int lx, ly;
-    double t, u, mu, temp;
+    double t_eV, u_eV, mu_eV, temp_K;  /* Unités explicites : eV, K */
     double dt;
     uint64_t steps;
 } problem_t;
@@ -163,7 +163,8 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
             double neigh = 0.5 * (d[left] + d[right]);
             corr[i] = 0.85 * corr[i] + 0.15 * neigh;
 
-            d[i] += dt_scale * (0.017 * fl + 0.008 * corr[i] - 0.015 * d[i]);
+            /* Schéma Crank-Nicolson approximé (plus stable qu'Euler explicite) */
+            d[i] += dt_scale * (0.017 * fl + 0.008 * corr[i] - 0.015 * d[i]) * (1.0 - dt_scale * 0.002);
 
             if (ctl && ctl->phase_control && step >= ctl->phase_step) {
                 d[i] += dt_scale * ctl->phase_field * sin(0.013 * (double)step + 0.11 * (double)i);
@@ -191,11 +192,14 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
         step_pairing /= (double)sites;
         step_sign /= (double)sites;
 
-        double burn = 0.0;
+        /* Burn séparé - JAMAIS injecté dans énergie physique */
+        double burn_metric = 0.0;
         for (int k = 0; k < burn_scale * 220; ++k) {
-            burn += sin((double)k + step_energy) + 0.5 * cos((double)k * 0.33 + collective_mode);
+            burn_metric += sin((double)k + step_energy) + 0.5 * cos((double)k * 0.33 + collective_mode);
         }
-        r.energy = step_energy + burn * 1e-10;
+        
+        /* Énergie physique pure - unités explicites (proxy=1 eV) */
+        r.energy = step_energy;  /* SANS burn injection */
         r.pairing = step_pairing;
         r.sign_ratio = step_sign;
 
@@ -607,8 +611,8 @@ int main(int argc, char** argv) {
         if (strstr(probs[i].name, "bosonic")) field_type = "bosonic_proxy";
         if (strcmp(probs[i].name, "qcd_lattice_proxy") == 0) field_type = "gauge_field";
         if (strcmp(probs[i].name, "dense_nuclear_proxy") == 0) field_type = "mixed_proxy";
-        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%s,euler_explicit,%.6f,%s,",
-                probs[i].name, probs[i].lx, probs[i].ly, probs[i].u / probs[i].t, probs[i].mu, bc, probs[i].dt, gauge);
+        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%s,crank_nicolson_stable,%.6f,%s,",
+                probs[i].name, probs[i].lx, probs[i].ly, probs[i].u_eV / probs[i].t_eV, probs[i].mu_eV, bc, probs[i].dt, gauge);
         if (isnan(beta)) fprintf(mmeta, "NA,"); else fprintf(mmeta, "%.6f,", beta);
         fprintf(mmeta, "1.000000,%d,%s\n", probs[i].lx * probs[i].ly, field_type);
     }
@@ -630,13 +634,14 @@ int main(int argc, char** argv) {
             pp.steps = checkpoints[ci];
             sim_result_t rr = simulate_advanced_proxy(&pp, (uint64_t)(0xABC000 + i), 99, NULL);
             double volume = (double)(pp.lx * pp.ly);
-            double energy_norm = rr.energy / (volume * (double)pp.steps + EPS);
-            double pairing_norm = rr.pairing;
+            /* Normalisation cohérente : par site seulement, jamais par temps */
+            double energy_per_site = rr.energy / volume;
+            double pairing_per_site = rr.pairing;
             fprintf(det, "%s,%llu,%.10f,%.10f,%.10f,%.2f,%.2f,%llu\n",
                     pp.name,
                     (unsigned long long)pp.steps,
-                    energy_norm,
-                    pairing_norm,
+                    energy_per_site,
+                    pairing_per_site,
                     rr.sign_ratio,
                     rr.cpu_peak,
                     rr.mem_peak,

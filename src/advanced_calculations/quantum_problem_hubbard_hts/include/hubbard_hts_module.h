@@ -34,8 +34,9 @@ typedef struct {
 } hubbard_run_context_t;
 
 typedef struct {
-    double energy;
-    double pairing;
+    double energy_meV;         /* Énergie physique en meV (unité explicite) */
+    double energy_drift_metric; /* Métrique de dérive séparée du burn */
+    double pairing_norm;       /* Observable appairage normalisé */
     double avg_density;
     double sign_ratio;
     double cpu_percent_peak;
