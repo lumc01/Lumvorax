@@ -216,7 +216,7 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
         out.sign_ratio = step_sign;
 
         if ((step % 10) == 0) {
-            hfbl_log_event(ctx, pb->name, "simulation_step", step, out.energy_meV, out.pairing_norm, out.sign_ratio);
+            hfbl_log_event(ctx, pb->name, "simulation_step", step, out.energy, out.pairing, out.sign_ratio);
         }
 
         if ((step % 100) == 0 && ctx->csv_fp) {
@@ -228,8 +228,8 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
             fprintf(ctx->csv_fp, "%s,%llu,%.10f,%.10f,%.10f,%.2f,%.2f,%llu\n",
                     pb->name,
                     (unsigned long long)step,
-                    out.energy_meV,
-                    out.pairing_norm,
+                    out.energy,
+                    out.pairing,
                     out.sign_ratio,
                     cpu,
                     mem,
@@ -240,7 +240,7 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
     for (int i = 0; i < sites; ++i) out.avg_density += density[i];
     out.avg_density /= (double)sites;
     out.elapsed_ns = now_ns() - t0;
-    hfbl_log_event(ctx, pb->name, "simulation_end", pb->steps, out.energy_meV, out.pairing_norm, out.sign_ratio);
+    hfbl_log_event(ctx, pb->name, "simulation_end", pb->steps, out.energy, out.pairing, out.sign_ratio);
     return out;
 }
 
@@ -291,8 +291,8 @@ int hubbard_run_campaign(const char* module_root, int cpu_target_percent, int me
         log_line(&ctx, "END problem=%s elapsed_ns=%llu energy=%.6f pairing=%.6f sign=%.6f",
                  problems[i].name,
                  (unsigned long long)results[i].elapsed_ns,
-                 results[i].energy_meV,
-                 results[i].pairing_norm,
+                 results[i].energy,
+                 results[i].pairing,
                  results[i].sign_ratio);
     }
 
@@ -315,8 +315,8 @@ int hubbard_run_campaign(const char* module_root, int cpu_target_percent, int me
             fprintf(report,
                     "- **%s**: énergie=%.4f, pairing=%.6f, ratio de signe=%.6f, CPU max=%.2f%%, RAM max=%.2f%%, temps=%lluns.\n",
                     problems[i].name,
-                    results[i].energy_meV,
-                    results[i].pairing_norm,
+                    results[i].energy,
+                    results[i].pairing,
                     results[i].sign_ratio,
                     results[i].cpu_percent_peak,
                     results[i].mem_percent_peak,

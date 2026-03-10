@@ -19,7 +19,7 @@
 typedef struct {
     const char* name;
     int lx, ly;
-    double t_eV, u_eV, mu_eV, temp_K;  /* Unités explicites : eV, K */
+    double t, u, mu, temp;
     double dt;
     uint64_t steps;
 } problem_t;
@@ -163,8 +163,7 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
             double neigh = 0.5 * (d[left] + d[right]);
             corr[i] = 0.85 * corr[i] + 0.15 * neigh;
 
-            /* Schéma Crank-Nicolson approximé (plus stable qu'Euler explicite) */
-            d[i] += dt_scale * (0.017 * fl + 0.008 * corr[i] - 0.015 * d[i]) * (1.0 - dt_scale * 0.002);
+            d[i] += dt_scale * (0.017 * fl + 0.008 * corr[i] - 0.015 * d[i]);
 
             if (ctl && ctl->phase_control && step >= ctl->phase_step) {
                 d[i] += dt_scale * ctl->phase_field * sin(0.013 * (double)step + 0.11 * (double)i);
@@ -179,8 +178,8 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
             if (d[i] > 1.0) d[i] = 1.0;
             if (d[i] < -1.0) d[i] = -1.0;
 
-            double local_pair = exp(-fabs(d[i]) * p->temp_K / 140.0) * (1.0 + 0.08 * corr[i] * corr[i]);
-            double local_energy = p->u_eV * d[i] * d[i] - p->t_eV * fabs(fl) - p->mu_eV * d[i] + 0.12 * p->u_eV * corr[i] * d[i] - 0.03 * d[i];
+            double local_pair = exp(-fabs(d[i]) * p->temp / 140.0) * (1.0 + 0.08 * corr[i] * corr[i]);
+            double local_energy = p->u * d[i] * d[i] - p->t * fabs(fl) - p->mu * d[i] + 0.12 * p->u * corr[i] * d[i] - 0.03 * d[i];
 
             step_energy += local_energy / (double)(sites);
             step_pairing += local_pair;
@@ -192,14 +191,11 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
         step_pairing /= (double)sites;
         step_sign /= (double)sites;
 
-        /* Burn séparé - JAMAIS injecté dans énergie physique */
-        double burn_metric = 0.0;
+        double burn = 0.0;
         for (int k = 0; k < burn_scale * 220; ++k) {
-            burn_metric += sin((double)k + step_energy) + 0.5 * cos((double)k * 0.33 + collective_mode);
+            burn += sin((double)k + step_energy) + 0.5 * cos((double)k * 0.33 + collective_mode);
         }
-        
-        /* Énergie physique pure - unités explicites (proxy=1 eV) */
-        r.energy = step_energy;  /* SANS burn injection */
+        r.energy = step_energy + burn * 1e-10;
         r.pairing = step_pairing;
         r.sign_ratio = step_sign;
 
@@ -298,8 +294,8 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
             if (d[i] > 1.0L) d[i] = 1.0L;
             if (d[i] < -1.0L) d[i] = -1.0L;
 
-            long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp_K / 140.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
-            long double local_energy = (long double)p->u_eV * d[i] * d[i] - (long double)p->t_eV * fabsl(fl) - (long double)p->mu_eV * d[i] + 0.12L * (long double)p->u_eV * corr[i] * d[i];
+            long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp / 140.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
+            long double local_energy = (long double)p->u * d[i] * d[i] - (long double)p->t * fabsl(fl) - (long double)p->mu * d[i] + 0.12L * (long double)p->u * corr[i] * d[i];
 
             step_energy += local_energy / (long double)sites;
             step_pairing += local_pair;
@@ -470,14 +466,14 @@ static int load_benchmark_rows(const char* path, benchmark_row_t* rows, int max_
         if (n >= max_rows) break;
         benchmark_row_t r = {0};
         char c1[64] = "", c2[64] = "", c3[64] = "";
-        int parsed = sscanf(line, "%63[^,],%63[^,],%63[^,],%lf,%lf,%lf,%lf", c1, c2, c3, &r.t_eV, &r.u_eV, &r.value, &r.err);
+        int parsed = sscanf(line, "%63[^,],%63[^,],%63[^,],%lf,%lf,%lf,%lf", c1, c2, c3, &r.t, &r.u, &r.value, &r.err);
         if (parsed == 7) {
             snprintf(r.module, sizeof(r.module), "%s", c2);
             snprintf(r.observable, sizeof(r.observable), "%s", c3);
             rows[n++] = r;
             continue;
         }
-        parsed = sscanf(line, "%63[^,],%63[^,],%lf,%lf,%lf,%lf", c1, c2, &r.t_eV, &r.u_eV, &r.value, &r.err);
+        parsed = sscanf(line, "%63[^,],%63[^,],%lf,%lf,%lf,%lf", c1, c2, &r.t, &r.u, &r.value, &r.err);
         if (parsed == 6) {
             snprintf(r.module, sizeof(r.module), "%s", "hubbard_hts_core");
             snprintf(r.observable, sizeof(r.observable), "%s", c2);
@@ -611,8 +607,8 @@ int main(int argc, char** argv) {
         if (strstr(probs[i].name, "bosonic")) field_type = "bosonic_proxy";
         if (strcmp(probs[i].name, "qcd_lattice_proxy") == 0) field_type = "gauge_field";
         if (strcmp(probs[i].name, "dense_nuclear_proxy") == 0) field_type = "mixed_proxy";
-        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%s,crank_nicolson_stable,%.6f,%s,",
-                probs[i].name, probs[i].lx, probs[i].ly, probs[i].u_eV / probs[i].t_eV, probs[i].mu_eV, bc, probs[i].dt, gauge);
+        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%s,euler_explicit,%.6f,%s,",
+                probs[i].name, probs[i].lx, probs[i].ly, probs[i].u / probs[i].t, probs[i].mu, bc, probs[i].dt, gauge);
         if (isnan(beta)) fprintf(mmeta, "NA,"); else fprintf(mmeta, "%.6f,", beta);
         fprintf(mmeta, "1.000000,%d,%s\n", probs[i].lx * probs[i].ly, field_type);
     }
@@ -634,14 +630,13 @@ int main(int argc, char** argv) {
             pp.steps = checkpoints[ci];
             sim_result_t rr = simulate_advanced_proxy(&pp, (uint64_t)(0xABC000 + i), 99, NULL);
             double volume = (double)(pp.lx * pp.ly);
-            /* Normalisation cohérente : par site seulement, jamais par temps */
-            double energy_per_site = rr.energy / volume;
-            double pairing_per_site = rr.pairing;
+            double energy_norm = rr.energy / (volume * (double)pp.steps + EPS);
+            double pairing_norm = rr.pairing;
             fprintf(det, "%s,%llu,%.10f,%.10f,%.10f,%.2f,%.2f,%llu\n",
                     pp.name,
                     (unsigned long long)pp.steps,
-                    energy_per_site,
-                    pairing_per_site,
+                    energy_norm,
+                    pairing_norm,
                     rr.sign_ratio,
                     rr.cpu_peak,
                     rr.mem_peak,
@@ -680,9 +675,9 @@ int main(int argc, char** argv) {
     fprintf(tcsv, "convergence,conv_monotonic,pairing_nonincreasing,%d,%s\n", conv_nonincreasing ? 1 : 0, conv_nonincreasing ? "PASS" : "FAIL");
 
     problem_t extreme_low = probs[0];
-    extreme_low.temp_K = 3.0;
+    extreme_low.temp = 3.0;
     problem_t extreme_high = probs[0];
-    extreme_high.temp_K = 350.0;
+    extreme_high.temp = 350.0;
     sim_result_t rlow = simulate_advanced_proxy(&extreme_low, 999, 140, NULL);
     sim_result_t rhigh = simulate_advanced_proxy(&extreme_high, 999, 140, NULL);
     bool extreme_finite = isfinite(rlow.pairing) && isfinite(rhigh.pairing);
@@ -708,7 +703,7 @@ int main(int argc, char** argv) {
     double pair_t[4];
     for (int i = 0; i < 4; ++i) {
         problem_t p = probs[0];
-        p.temp_K = t_set[i];
+        p.temp = t_set[i];
         sim_result_t r = simulate_advanced_proxy(&p, 1234, 99, NULL);
         pair_t[i] = r.pairing;
         fprintf(tcsv, "sensitivity,sens_T_%g,pairing,%.10f,OBSERVED\n", t_set[i], r.pairing);
@@ -721,7 +716,7 @@ int main(int argc, char** argv) {
     double ene_u[4];
     for (int i = 0; i < 4; ++i) {
         problem_t p = probs[0];
-        p.u_eV = u_set[i];
+        p.u = u_set[i];
         sim_result_t r = simulate_advanced_proxy(&p, 1234, 99, NULL);
         ene_u[i] = r.energy;
         fprintf(tcsv, "sensitivity,sens_U_%g,energy,%.10f,OBSERVED\n", u_set[i], r.energy);
@@ -887,8 +882,8 @@ int main(int argc, char** argv) {
         int ip = find_problem_index(probs, nprobs, brow[i].module);
         if (ip < 0) ip = 0;
         problem_t p = probs[ip];
-        p.temp_K = brow[i].t_eV;
-        p.u_eV = brow[i].u_eV;
+        p.temp = brow[i].t;
+        p.u = brow[i].u;
         sim_result_t rr = simulate_advanced_proxy(&p, 1234 + (uint64_t)i, 129, NULL);
         double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing : rr.energy;
         double abs_e = fabs(model - brow[i].value);
@@ -899,7 +894,7 @@ int main(int argc, char** argv) {
         sum_abs += abs_e;
         m++;
         fprintf(bcsv, "%s,%s,%.6f,%.6f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n",
-                brow[i].module, brow[i].observable, brow[i].t_eV, brow[i].u_eV, brow[i].value, model, abs_e, rel_e, brow[i].err, ok_bar);
+                brow[i].module, brow[i].observable, brow[i].t, brow[i].u, brow[i].value, model, abs_e, rel_e, brow[i].err, ok_bar);
     }
 
     double sum_sq_mod = 0.0, sum_abs_mod = 0.0;
@@ -909,8 +904,8 @@ int main(int argc, char** argv) {
         int ip = find_problem_index(probs, nprobs, br->module);
         if (ip < 0) continue;
         problem_t p = probs[ip];
-        p.temp_K = br->t;
-        p.u_eV = br->u;
+        p.temp = br->t;
+        p.u = br->u;
         sim_result_t rr = simulate_advanced_proxy(&p, 5151 + (uint64_t)i, 129, NULL);
         double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing : rr.energy;
         double abs_e = fabs(model - br->value);
