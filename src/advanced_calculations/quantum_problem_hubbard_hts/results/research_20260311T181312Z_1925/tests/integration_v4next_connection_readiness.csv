@@ -1,0 +1,10 @@
+dimension,percent,interpretation,confidence
+pipeline_gates,80.00,PASS ratio in integration_gate_summary.csv,MEDIUM
+physics_gates,50.00,PASS ratio in integration_physics_gate_summary.csv,LOW
+physics_matrix,80.00,PASS ratio in integration_physics_enriched_test_matrix.csv,MEDIUM
+metadata_completeness,50.00,PRESENT ratio in integration_absent_metadata_fields.csv,LOW
+proxy_modularity,71.00,Derived from matrix+metadata+gate coverage,LOW
+v4next_connection_readiness,53.50,"Derived from gates, metadata, rollout, checksums",LOW
+shadow_mode_safety,60.50,"Derived from gate stability, drift stability and rollout",LOW
+realistic_simulation_level,46.75,"Derived from benchmarks, matrix, non-fail tests and drift",LOW
+global_weighted_readiness,60.35,Weighted aggregate readiness score,LOW
