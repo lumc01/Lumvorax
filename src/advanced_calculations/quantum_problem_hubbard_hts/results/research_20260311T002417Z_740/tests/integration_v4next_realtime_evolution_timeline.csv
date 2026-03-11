@@ -1,0 +1,3 @@
+run_id,mode_requested,rollout_status,connection_readiness_pct,shadow_safety_pct,realism_pct,global_weighted_readiness_pct
+research_20260310T215445Z_720,shadow,SHADOW_BLOCKED,53.50,60.50,46.94,60.38
+research_20260311T002417Z_740,shadow,SHADOW_BLOCKED,53.50,60.50,46.94,60.38
