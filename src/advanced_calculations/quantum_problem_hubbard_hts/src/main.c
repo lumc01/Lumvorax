@@ -4,11 +4,10 @@
 #include <stdlib.h>
 
 int main(int argc, char** argv) {
-    const char* root = "src/advanced_calculations/quantum_problem_hubbard_hts";
+    const char* root = (argc > 1) ? argv[1] : ".";
     int cpu_target = 99;
     int mem_target = 99;
 
-    if (argc > 1) root = argv[1];
     if (argc > 2) cpu_target = atoi(argv[2]);
     if (argc > 3) mem_target = atoi(argv[3]);
 
