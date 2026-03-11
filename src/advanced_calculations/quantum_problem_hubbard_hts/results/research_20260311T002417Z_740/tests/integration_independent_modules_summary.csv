@@ -1,0 +1,14 @@
+problem,independent_modules_pass_count,independent_modules_total,status
+bosonic_multimode_systems,4,4,PASS
+correlated_fermions_non_hubbard,4,4,PASS
+dense_nuclear_proxy,4,4,PASS
+far_from_equilibrium_kinetic_lattices,4,4,PASS
+hubbard_hts_core,4,4,PASS
+multi_correlated_fermion_boson_networks,4,4,PASS
+multi_state_excited_chemistry,4,4,PASS
+multiscale_nonlinear_field_models,4,4,PASS
+qcd_lattice_proxy,4,4,PASS
+quantum_chemistry_proxy,4,4,PASS
+quantum_field_noneq,4,4,PASS
+spin_liquid_exotic,4,4,PASS
+topological_correlated_materials,4,4,PASS
