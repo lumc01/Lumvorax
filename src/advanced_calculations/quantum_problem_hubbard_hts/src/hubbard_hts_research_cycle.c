@@ -182,7 +182,7 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
             double n_up = 0.5 * (1.0 + d[i]);
             double n_dn = 0.5 * (1.0 - d[i]);
             double density = n_up + n_dn;
-            double dH_ddi = p->u_eV * (n_dn - n_up) + p->t_eV * (d[i] - corr[i]) - p->mu_eV;
+            double dH_ddi = p->u_eV * (n_dn - n_up) + p->t_eV * (d[i] - corr[i]);
             d[i] += -dt_scale * dH_ddi;
 
             if (ctl && ctl->phase_control && step >= ctl->phase_step) {
@@ -314,12 +314,19 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
             long double neigh = 0.5L * (d[left] + d[right]);
             corr[i] = 0.85L * corr[i] + 0.15L * neigh;
 
-            d[i] += 0.017L * fl + 0.008L * corr[i] - 0.004L * d[i];
+            long double hopping_term = fabsl(corr[i] - d[i]);
+            long double n_up = 0.5L * (1.0L + d[i]);
+            long double n_dn = 0.5L * (1.0L - d[i]);
+            long double density = n_up + n_dn;
+            long double dt = (p->dt > 0.0) ? (long double)p->dt : 0.01L;
+            long double dt_scale = dt / (long double)HBAR_eV_NS;
+            long double dH_ddi = (long double)p->u_eV * (n_dn - n_up) + (long double)p->t_eV * (d[i] - corr[i]);
+            d[i] += -dt_scale * dH_ddi;
             if (d[i] > 1.0L) d[i] = 1.0L;
             if (d[i] < -1.0L) d[i] = -1.0L;
 
             long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp_K / 65.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
-            long double local_energy = (long double)p->u_eV * d[i] * d[i] - (long double)p->t_eV * fabsl(fl) - (long double)p->mu_eV * d[i] + 0.12L * (long double)p->u_eV * corr[i] * d[i];
+            long double local_energy = (long double)p->u_eV * n_up * n_dn - (long double)p->t_eV * hopping_term - (long double)p->mu_eV * density;
 
             step_energy += local_energy / (long double)sites;
             step_pairing += local_pair;
