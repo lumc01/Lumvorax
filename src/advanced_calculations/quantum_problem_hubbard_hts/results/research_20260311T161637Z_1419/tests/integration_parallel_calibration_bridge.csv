@@ -1,0 +1,14 @@
+module,baseline_dt,recommended_dt,recommended_control_gain_factor,energy_drift_max,progress_percent,stability_severity,donor_modules,benchmark_parallel
+bosonic_multimode_systems,0.010000,0.007500,0.700,0.0000001620,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+correlated_fermions_non_hubbard,0.010000,0.007500,0.700,0.0000004354,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+dense_nuclear_proxy,0.010000,0.007500,0.700,0.0000000566,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+far_from_equilibrium_kinetic_lattices,0.010000,0.007500,0.700,0.0000002950,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+hubbard_hts_core,0.010000,0.007500,0.700,0.0000001681,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+multi_correlated_fermion_boson_networks,0.010000,0.007500,0.700,0.0000003130,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+multi_state_excited_chemistry,0.010000,0.007500,0.700,0.0000008968,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+multiscale_nonlinear_field_models,0.010000,0.007500,0.700,0.0000005094,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+qcd_lattice_proxy,0.010000,0.007500,0.700,0.0000001145,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+quantum_chemistry_proxy,0.010000,0.007500,0.700,0.0000008766,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+quantum_field_noneq,0.010000,0.007500,0.700,0.0000006027,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+spin_liquid_exotic,0.010000,0.007500,0.700,0.0000002142,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED
+topological_correlated_materials,0.010000,0.007500,0.700,0.0000003571,75.00,moderate,dense_nuclear_proxy;qcd_lattice_proxy;bosonic_multimode_systems,ENABLED

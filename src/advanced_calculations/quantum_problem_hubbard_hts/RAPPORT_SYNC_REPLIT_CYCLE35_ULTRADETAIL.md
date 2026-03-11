@@ -1,6 +1,6 @@
 # RAPPORT_SYNC_REPLIT_CYCLE35_ULTRADETAIL
 
-Run analysé: `research_20260311T002417Z_740`
+Run analysé: `research_20260311T161637Z_1419`
 
 ## Phase 1 — Synchronisation / intégrité
 - total_runs_audited: 35
@@ -24,17 +24,17 @@ Run analysé: `research_20260311T002417Z_740`
 | topological_correlated_materials | 75.00% | 25.00% |
 
 ## Phase 3 — Vérification exhaustive
-- tests_critiques: PASS=11, OBSERVED=0, FAIL=1
+- tests_critiques: PASS=10, OBSERVED=0, FAIL=2
 - Détails T1..T12:
   - T1_finite_size_scaling_coverage: PASS (11 sizes: [56, 64, 72, 80, 81, 90, 96, 99, 100, 120, 121])
   - T2_parameter_sweep_u_over_t: PASS (12 values: [4.0625, 4.533333, 5.384615, 6.571429, 7.047619, 7.090909, 7.166667, 8.0, 8.666667, 11.666667, 12.857143, 13.75])
   - T3_temperature_sweep_coverage: PASS (9 values: [5.7, 40.0, 60.0, 80.0, 95.0, 110.0, 130.0, 155.0, 180.0])
   - T4_boundary_condition_traceability: PASS (['open', 'periodic'])
-  - T5_qmc_dmrg_crosscheck: PASS (within_error_bar=0/15 (0.00%);trend_pairing=0.9947;trend_energy=0.9673)
-  - T6_sign_problem_watchdog: PASS (median(|sign_ratio|)=0.070707)
-  - T7_energy_pairing_scaling: PASS (min_abs_pearson=0.580077)
+  - T5_qmc_dmrg_crosscheck: PASS (within_error_bar=0/15 (0.00%);trend_pairing=0.9839;trend_energy=0.9693)
+  - T6_sign_problem_watchdog: PASS (median(|sign_ratio|)=0.062500)
+  - T7_energy_pairing_scaling: FAIL (min_abs_pearson=0.449328)
   - T8_critical_minimum_window: PASS (hubbard_hts_core:ok; qcd_lattice_proxy:ok; quantum_field_noneq:ok; dense_nuclear_proxy:ok; quantum_chemistry_proxy:ok; spin_liquid_exotic:ok; topological_correlated_materials:ok; correlated_fermions_non_hubbard:ok; multi_state_excited_chemistry:ok; bosonic_multimode_systems:ok; multiscale_nonlinear_field_models:ok; far_from_equilibrium_kinetic_lattices:ok; multi_correlated_fermion_boson_networks:ok)
-  - T9_dt_sensitivity_proxy: PASS (max_dt_sensitivity_proxy=0.052535)
+  - T9_dt_sensitivity_proxy: PASS (max_dt_sensitivity_proxy=0.089170)
   - T10_spatial_correlations_required: PASS (rows=65 from integration_spatial_correlations.csv)
   - T11_entropy_required: PASS (rows=13 from integration_entropy_observables.csv)
   - T12_alternative_solver_required: FAIL (rows=16; global_status=NA; independent_status=NA)
@@ -51,19 +51,19 @@ Run analysé: `research_20260311T002417Z_740`
 ## Phase 5 — Métriques bas niveau (runtime/hardware proxy)
 | Problème | Qubits proxy | Module % | CPU% | MEM% | calc/s | latence ns/step |
 |---|---:|---:|---:|---:|---:|---:|
-| bosonic_multimode_systems | 80 | 7.18 | 23.10 | 51.36 | 1202.50 | 79379903.68 |
-| correlated_fermions_non_hubbard | 90 | 7.88 | 23.10 | 51.36 | 1199.89 | 79868396.08 |
-| dense_nuclear_proxy | 72 | 6.80 | 23.11 | 51.36 | 1208.66 | 78796291.43 |
-| far_from_equilibrium_kinetic_lattices | 99 | 7.85 | 23.09 | 51.41 | 1203.44 | 79632809.12 |
-| hubbard_hts_core | 100 | 9.18 | 23.11 | 51.39 | 1208.26 | 79807675.96 |
-| multi_correlated_fermion_boson_networks | 100 | 7.89 | 23.09 | 51.40 | 1197.45 | 80031399.12 |
-| multi_state_excited_chemistry | 81 | 7.54 | 23.10 | 51.36 | 1198.45 | 79813165.57 |
-| multiscale_nonlinear_field_models | 96 | 7.60 | 23.09 | 51.39 | 1190.07 | 80375510.00 |
-| qcd_lattice_proxy | 81 | 7.16 | 23.11 | 51.37 | 1205.71 | 79168859.86 |
-| quantum_chemistry_proxy | 56 | 7.17 | 23.10 | 51.35 | 1203.72 | 79299669.45 |
-| quantum_field_noneq | 64 | 6.98 | 23.11 | 51.36 | 1177.94 | 80851740.38 |
-| spin_liquid_exotic | 120 | 8.55 | 23.10 | 51.36 | 1201.04 | 80058850.12 |
-| topological_correlated_materials | 121 | 8.22 | 23.10 | 51.35 | 1200.49 | 79967023.00 |
+| bosonic_multimode_systems | 80 | 7.24 | 16.79 | 64.06 | 1160.47 | 82254806.68 |
+| correlated_fermions_non_hubbard | 90 | 7.74 | 16.79 | 64.05 | 1189.47 | 80568004.12 |
+| dense_nuclear_proxy | 72 | 6.97 | 16.76 | 67.11 | 1149.21 | 82872378.81 |
+| far_from_equilibrium_kinetic_lattices | 99 | 7.94 | 16.81 | 64.45 | 1158.88 | 82694767.50 |
+| hubbard_hts_core | 100 | 9.26 | 16.73 | 67.40 | 1167.37 | 82603061.86 |
+| multi_correlated_fermion_boson_networks | 100 | 7.83 | 16.82 | 64.43 | 1175.91 | 81497477.46 |
+| multi_state_excited_chemistry | 81 | 7.45 | 16.79 | 64.03 | 1182.27 | 80905598.35 |
+| multiscale_nonlinear_field_models | 96 | 7.67 | 16.81 | 64.36 | 1148.13 | 83310912.43 |
+| qcd_lattice_proxy | 81 | 7.21 | 16.75 | 67.58 | 1165.67 | 81887863.95 |
+| quantum_chemistry_proxy | 56 | 7.22 | 16.77 | 65.45 | 1164.99 | 81936282.23 |
+| quantum_field_noneq | 64 | 6.78 | 16.75 | 67.64 | 1180.01 | 80709466.33 |
+| spin_liquid_exotic | 120 | 8.48 | 16.77 | 65.06 | 1179.84 | 81497128.92 |
+| topological_correlated_materials | 121 | 8.20 | 16.78 | 64.31 | 1171.41 | 81952780.56 |
 
 ## Phase 6 — Réponse point par point (question/analyse/réponse/solution)
 ### Q1. Où en est chaque problème précisément ?
@@ -79,9 +79,9 @@ Run analysé: `research_20260311T002417Z_740`
   - Rebond/minimum critique (T8=PASS)
   - Hypothèse artefact numérique via proxy dt (T9=PASS)
   - Corrélations spatiales/proxy corrélations 2-points (T10=PASS)
-  - Validation structure multi-échelle/scaling (T7=PASS)
   - Proxy entropie pour compétition de phases/pseudogap (T11=PASS)
 - Non intégré / partiellement intégré:
+  - Validation structure multi-échelle/scaling (T7=FAIL)
   - Flux RG inversé: nécessite campagne dédiée multi-U/t, multi-tail... + solveurs indépendants
 
 ## Phase 7 — Correctifs proposés (simultanés)

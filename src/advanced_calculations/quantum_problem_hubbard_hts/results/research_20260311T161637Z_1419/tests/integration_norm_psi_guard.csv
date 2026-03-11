@@ -1,0 +1,14 @@
+module,norm_deviation_max,threshold,status,notes
+hubbard_hts_core,6.661338147751e-16,1.000000000000e-06,PASS,normalized_after_each_step
+qcd_lattice_proxy,6.661338147751e-16,1.000000000000e-06,PASS,normalized_after_each_step
+quantum_field_noneq,5.551115123126e-16,1.000000000000e-06,PASS,normalized_after_each_step
+dense_nuclear_proxy,6.661338147751e-16,1.000000000000e-06,PASS,normalized_after_each_step
+quantum_chemistry_proxy,5.551115123126e-16,1.000000000000e-06,PASS,normalized_after_each_step
+spin_liquid_exotic,6.661338147751e-16,1.000000000000e-06,PASS,normalized_after_each_step
+topological_correlated_materials,7.771561172376e-16,1.000000000000e-06,PASS,normalized_after_each_step
+correlated_fermions_non_hubbard,6.661338147751e-16,1.000000000000e-06,PASS,normalized_after_each_step
+multi_state_excited_chemistry,6.661338147751e-16,1.000000000000e-06,PASS,normalized_after_each_step
+bosonic_multimode_systems,6.661338147751e-16,1.000000000000e-06,PASS,normalized_after_each_step
+multiscale_nonlinear_field_models,6.661338147751e-16,1.000000000000e-06,PASS,normalized_after_each_step
+far_from_equilibrium_kinetic_lattices,6.661338147751e-16,1.000000000000e-06,PASS,normalized_after_each_step
+multi_correlated_fermion_boson_networks,6.661338147751e-16,1.000000000000e-06,PASS,normalized_after_each_step

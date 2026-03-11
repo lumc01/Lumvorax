@@ -1,0 +1,14 @@
+problem,alpha_pairing_vs_energy_shifted,points
+bosonic_multimode_systems,-0.0035841657928294334,22
+correlated_fermions_non_hubbard,-0.002557651513397872,24
+dense_nuclear_proxy,-0.002670847212855219,21
+far_from_equilibrium_kinetic_lattices,-0.004419442656196784,24
+hubbard_hts_core,-0.0026734791496318866,28
+multi_correlated_fermion_boson_networks,-0.0029723915706437514,24
+multi_state_excited_chemistry,-0.0015584651609708824,23
+multiscale_nonlinear_field_models,-0.003648845864971056,23
+qcd_lattice_proxy,-0.004595078066350118,22
+quantum_chemistry_proxy,-0.002398729182090086,22
+quantum_field_noneq,-0.00647155890839926,21
+spin_liquid_exotic,-0.001395626793947757,26
+topological_correlated_materials,-0.0018279485740488833,25
