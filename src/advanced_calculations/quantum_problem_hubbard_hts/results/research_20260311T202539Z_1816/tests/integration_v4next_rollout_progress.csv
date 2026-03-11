@@ -1,0 +1,4 @@
+stage,status,connection_readiness_pct,shadow_safety_pct,realism_pct,rule
+shadow,BLOCKED,53.50,60.50,47.31,rollback enabled
+canary,ROLLBACK_REQUIRED,53.50,60.50,47.31,thresholds conn>=65 shadow>=80
+full,ROLLBACK_REQUIRED,53.50,60.50,47.31,thresholds conn>=80 realism>=55 shadow>=85

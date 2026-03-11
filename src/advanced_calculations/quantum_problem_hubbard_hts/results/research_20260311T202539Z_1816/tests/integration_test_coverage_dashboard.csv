@@ -1,0 +1,5 @@
+suite,total,pass,observed,fail,pass_pct,status
+new_tests_results.csv,80,22,49,9,27.5,OK
+integration_chatgpt_critical_tests.csv,12,10,1,1,83.3333,OK
+integration_forensic_extension_tests.csv,56,4,52,0,7.1429,OK
+GLOBAL,148,36,102,10,24.3243,OK
