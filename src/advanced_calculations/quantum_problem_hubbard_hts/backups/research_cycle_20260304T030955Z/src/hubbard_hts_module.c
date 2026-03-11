@@ -100,9 +100,19 @@ static double pseudo_rand01(uint64_t* state) {
     return ((*state >> 11) & 0xFFFFFFFFULL) / (double)0xFFFFFFFFULL;
 }
 
+static uint64_t seed_from_module_name(const char* module_name) {
+    uint64_t h = 1469598103934665603ULL;
+    if (!module_name) return h;
+    for (const unsigned char* c = (const unsigned char*)module_name; *c; ++c) {
+        h ^= (uint64_t)(*c);
+        h *= 1099511628211ULL;
+    }
+    return h;
+}
+
 static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hubbard_problem_t* pb, int cpu_target_percent) {
     hubbard_problem_result_t out = {0};
-    uint64_t seed = now_ns() ^ (uint64_t)getpid();
+    uint64_t seed = now_ns() ^ (uint64_t)getpid() ^ seed_from_module_name(pb->name);
     int sites = pb->lattice_x * pb->lattice_y;
     if (sites > HUBBARD_GRID_MAX * HUBBARD_GRID_MAX) sites = HUBBARD_GRID_MAX * HUBBARD_GRID_MAX;
     double density[HUBBARD_GRID_MAX * HUBBARD_GRID_MAX] = {0};
@@ -114,14 +124,14 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
             density[i] += 0.02 * fluct;
             if (density[i] > 1.0) density[i] = 1.0;
             if (density[i] < -1.0) density[i] = -1.0;
-            out.energy += pb->interaction_u * density[i] * density[i] - pb->hopping_t * fabs(fluct);
-            out.pairing += exp(-fabs(density[i]) * pb->temperature_k / 120.0);
+            out.energy += (pb->interaction_u * density[i] * density[i] - pb->hopping_t * fabs(fluct)) / (double)sites;
+            out.pairing += exp(-fabs(density[i]) * pb->temperature_k / 120.0) / (double)sites;
             out.sign_ratio += (fluct >= 0.0) ? 1.0 : -1.0;
         }
 
         double burn = 0.0;
         for (int k = 0; k < cpu_target_percent * 200; ++k) burn += sin((double)k + out.energy);
-        out.energy += burn * 1e-8;
+        /* burn metric intentionally excluded from physical energy to avoid artificial drift injection */
 
         if ((step % 100) == 0 && ctx->csv_fp) {
             double cpu = read_cpu_percent_snapshot();

@@ -93,7 +93,18 @@ static double rand01(uint64_t* x) {
     return ((*x >> 11) & 0xffffffffULL) / (double)0xffffffffULL;
 }
 
+static uint64_t seed_from_module_name(const char* module_name) {
+    uint64_t h = 1469598103934665603ULL;
+    if (!module_name) return h;
+    for (const unsigned char* c = (const unsigned char*)module_name; *c; ++c) {
+        h ^= (uint64_t)(*c);
+        h *= 1099511628211ULL;
+    }
+    return h;
+}
+
 static sim_result_t simulate_advanced_proxy(const problem_t* p, uint64_t seed, int burn_scale, FILE* trace_csv) {
+    seed ^= seed_from_module_name(p->name);
     sim_result_t r = {0};
     int sites = p->lx * p->ly;
     double* d = calloc((size_t)sites, sizeof(double));
@@ -116,8 +127,8 @@ static sim_result_t simulate_advanced_proxy(const problem_t* p, uint64_t seed, i
             double local_pair = exp(-fabs(d[i]) * p->temp / 140.0) * (1.0 + 0.08 * corr[i] * corr[i]);
             double local_energy = p->u * d[i] * d[i] - p->t * fabs(fl) - p->mu * d[i] + 0.12 * p->u * corr[i] * d[i];
 
-            r.energy += local_energy;
-            r.pairing += local_pair;
+            r.energy += local_energy / (double)sites;
+            r.pairing += local_pair / (double)sites;
             r.sign_ratio += (fl >= 0 ? 1.0 : -1.0);
             collective_mode += corr[i];
         }
@@ -126,7 +137,7 @@ static sim_result_t simulate_advanced_proxy(const problem_t* p, uint64_t seed, i
         for (int k = 0; k < burn_scale * 220; ++k) {
             burn += sin((double)k + r.energy) + 0.5 * cos((double)k * 0.33 + collective_mode);
         }
-        r.energy += burn * 1e-8;
+        /* burn_metric kept for diagnostics only; not injected into physical energy */
 
         if (trace_csv && step % 100 == 0) {
             double c = cpu_percent(), m = mem_percent();
@@ -154,6 +165,7 @@ static sim_result_t simulate_advanced_proxy(const problem_t* p, uint64_t seed, i
 }
 
 static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t seed, int burn_scale) {
+    seed ^= seed_from_module_name(p->name);
     sim_result_t r = {0};
     int sites = p->lx * p->ly;
     long double* d = calloc((size_t)sites, sizeof(long double));
@@ -175,8 +187,8 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
             long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp / 140.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
             long double local_energy = (long double)p->u * d[i] * d[i] - (long double)p->t * fabsl(fl) - (long double)p->mu * d[i] + 0.12L * (long double)p->u * corr[i] * d[i];
 
-            r.energy += (double)local_energy;
-            r.pairing += (double)local_pair;
+            r.energy += (double)local_energy / (double)sites;
+            r.pairing += (double)local_pair / (double)sites;
             r.sign_ratio += (fl >= 0 ? 1.0 : -1.0);
             collective_mode += corr[i];
         }
@@ -184,7 +196,7 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
         for (int k = 0; k < burn_scale * 220; ++k) {
             burn += sinl((long double)k + (long double)r.energy) + 0.5L * cosl((long double)k * 0.33L + collective_mode);
         }
-        r.energy += (double)(burn * 1e-8L);
+        /* burn_metric kept for diagnostics only; not injected into physical energy */
     }
     free(corr);
     free(d);

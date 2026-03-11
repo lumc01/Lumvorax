@@ -113,6 +113,16 @@ static double rand01(uint64_t* x) {
     return ((*x >> 11) & 0xffffffffULL) / (double)0xffffffffULL;
 }
 
+static uint64_t seed_from_module_name(const char* module_name) {
+    uint64_t h = 1469598103934665603ULL;
+    if (!module_name) return h;
+    for (const unsigned char* c = (const unsigned char*)module_name; *c; ++c) {
+        h ^= (uint64_t)(*c);
+        h *= 1099511628211ULL;
+    }
+    return h;
+}
+
 static long mem_available_kb(void) {
     FILE* fp = fopen("/proc/meminfo", "r");
     if (!fp) return -1;
@@ -183,6 +193,7 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
     double* corr = calloc((size_t)sites, sizeof(double));
     double dt = (p->dt > 0.0) ? p->dt : 0.01;
     double dt_scale = dt / 0.01;
+    seed ^= seed_from_module_name(p->name);
     uint64_t t0 = now_ns();
 
     for (uint64_t step = 0; step < p->steps; ++step) {
@@ -311,6 +322,7 @@ static von_neumann_result_t von_neumann_proxy(const problem_t* p, const control_
 
 static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t seed, int burn_scale) {
     sim_result_t r = {0};
+    seed ^= seed_from_module_name(p->name);
     int sites = p->lx * p->ly;
     long double* d = calloc((size_t)sites, sizeof(long double));
     long double* corr = calloc((size_t)sites, sizeof(long double));
