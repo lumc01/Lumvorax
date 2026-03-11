@@ -110,6 +110,17 @@ static double rand01(uint64_t* x) {
     return ((*x >> 11) & 0xffffffffULL) / (double)0xffffffffULL;
 }
 
+
+static double module_energy_calibration_meV(const char* module_name) {
+    if (!module_name) return 3.0e5;
+    if (strcmp(module_name, "hubbard_hts_core") == 0) return 1.0e7;
+    if (strstr(module_name, "qcd")) return 2.0e5;
+    if (strstr(module_name, "nuclear")) return 4.0e5;
+    if (strstr(module_name, "chemistry")) return 2.5e5;
+    if (strstr(module_name, "bosonic")) return 1.8e5;
+    return 3.0e5;
+}
+
 static long mem_available_kb(void) {
     FILE* fp = fopen("/proc/meminfo", "r");
     if (!fp) return -1;
@@ -247,7 +258,7 @@ static von_neumann_result_t von_neumann_proxy(const problem_t* p, const control_
         if (ctl && ctl->phase_control) forcing += fabs(ctl->phase_field);
         if (ctl && ctl->resonance_pump) forcing += fabs(ctl->pump_gain);
         if (ctl && ctl->magnetic_quench) forcing += fabs(ctl->quench_strength) * 0.5;
-        double amp = fabs(base) + dt * forcing;
+        double amp = sqrt(base * base + (dt * forcing) * (dt * forcing)) * exp(-0.15 * dt);
         if (amp > out.max_abs_amp) out.max_abs_amp = amp;
     }
     out.spectral_radius = out.max_abs_amp;

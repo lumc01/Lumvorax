@@ -125,8 +125,8 @@ static int run_hfbl360_forensic_extension(hubbard_run_context_t* ctx, const char
 }
 
 
-static uint64_t hash_step_state(double energy, double pairing, double sign_ratio, uint64_t step) {
-    union { double d; uint64_t u; } e = {energy}, p = {pairing}, sr = {sign_ratio};
+static uint64_t hash_step_state(double energy_meV, double pairing_norm, double sign_ratio, uint64_t step) {
+    union { double d; uint64_t u; } e = {energy_meV}, p = {pairing_norm}, sr = {sign_ratio};
     uint64_t h = 1469598103934665603ULL;
     h ^= e.u; h *= 1099511628211ULL;
     h ^= p.u; h *= 1099511628211ULL;
@@ -139,23 +139,23 @@ static void hfbl_log_event(hubbard_run_context_t* ctx,
                            const char* problem,
                            const char* event,
                            uint64_t step,
-                           double energy,
-                           double pairing,
+                           double energy_meV,
+                           double pairing_norm,
                            double sign_ratio) {
     if (!ctx || !problem || !event) return;
     char path[HUBBARD_MAX_PATH];
     if (join_path(path, sizeof(path), ctx->logs_dir, "hfbl360_realtime_persistent.log") != 0) return;
     FILE* fp = fopen(path, "a");
     if (!fp) return;
-    uint64_t sh = hash_step_state(energy, pairing, sign_ratio, step);
+    uint64_t sh = hash_step_state(energy_meV, pairing_norm, sign_ratio, step);
     fprintf(fp,
             "ts_ns=%llu event=%s problem=%s simulation_step=%llu energy_update=%.12f observable_update=%.12f sign_ratio=%.12f state_hash=%016llx\n",
             (unsigned long long)now_ns(),
             event,
             problem,
             (unsigned long long)step,
-            energy,
-            pairing,
+            energy_meV,
+            pairing_norm,
             sign_ratio,
             (unsigned long long)sh);
     fclose(fp);
