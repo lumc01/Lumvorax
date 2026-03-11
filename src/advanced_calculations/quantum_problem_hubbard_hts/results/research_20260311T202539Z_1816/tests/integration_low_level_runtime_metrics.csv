@@ -1,0 +1,14 @@
+problem,qubits_simulated_proxy,runtime_ns,module_runtime_share_pct,avg_cpu_percent,avg_mem_percent,calc_per_second,latency_ns_per_step,boundary_conditions,solver_mode
+bosonic_multimode_systems,80,1743525729,7.13,17.56,63.82,1204.46,79251169.50,periodic,euler_explicit
+correlated_fermions_non_hubbard,90,1917696730,7.84,17.56,63.81,1199.36,79904030.42,periodic,euler_explicit
+dense_nuclear_proxy,72,1679480408,6.87,17.56,63.82,1190.84,79975257.52,open,euler_explicit
+far_from_equilibrium_kinetic_lattices,99,1932451761,7.90,17.56,63.81,1190.20,80518823.38,periodic,euler_explicit
+hubbard_hts_core,100,2274188153,9.30,17.56,63.84,1187.24,81221005.46,periodic,euler_explicit
+multi_correlated_fermion_boson_networks,100,1939071272,7.93,17.56,63.83,1186.13,80794636.33,periodic,euler_explicit
+multi_state_excited_chemistry,81,1839002080,7.52,17.56,63.82,1196.30,79956612.17,periodic,euler_explicit
+multiscale_nonlinear_field_models,96,1839613200,7.52,17.56,63.81,1195.90,79983182.61,periodic,euler_explicit
+qcd_lattice_proxy,81,1753393678,7.17,17.56,63.83,1197.68,79699712.64,periodic,euler_explicit
+quantum_chemistry_proxy,56,1757273558,7.18,17.56,63.82,1195.03,79876070.82,periodic,euler_explicit
+quantum_field_noneq,64,1670494927,6.83,17.56,63.83,1197.25,79547377.48,periodic,euler_explicit
+spin_liquid_exotic,120,2109888403,8.63,17.56,63.81,1184.90,81149553.96,periodic,euler_explicit
+topological_correlated_materials,121,2004637712,8.20,17.56,63.81,1197.22,80185508.48,periodic,euler_explicit
