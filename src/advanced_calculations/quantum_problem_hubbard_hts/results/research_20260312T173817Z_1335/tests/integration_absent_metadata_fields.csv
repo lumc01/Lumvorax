@@ -1,0 +1,9 @@
+field,status,action
+model_id,PRESENT,value=hubbard::bosonic_multimode_systems
+hamiltonian_id,PRESENT,value=single_band_hubbard_2d
+lattice_size,PRESENT,value=10x8
+boundary_conditions,PRESENT,value=periodic
+u_over_t,PRESENT,value=8.666666666666668
+time_step,PRESENT,value=0.010000
+seed,PRESENT,value=11255817
+solver_version,PRESENT,value=hubbard_hts_research_cycle_advanced_parallel_v8_metadata

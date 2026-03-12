@@ -1,0 +1,13 @@
+pattern,severity,file,line,snippet
+HARDCODING,review,src/hubbard_hts_research_cycle.c,654,problem_t probs[64] = {0};
+HARDCODING,review,src/hubbard_hts_research_cycle_advanced_parallel.c,768,problem_t probs[64] = {0};
+PLACEHOLDER,risk,tools/post_run_hfbl360_forensic_logger.py,8,Purpose: verify (without placeholder data) whether requested forensic naming/
+PLACEHOLDER,risk,tools/generate_cycle06_benchmark_course_report.py,53,"'- Règle qualité: aucun placeholder/stub/hardcoding ajouté; uniquement exploitation des données brutes existantes et génération de nouveaux artefacts sidecar.',"
+STUB,risk,tools/generate_cycle06_benchmark_course_report.py,53,"'- Règle qualité: aucun placeholder/stub/hardcoding ajouté; uniquement exploitation des données brutes existantes et génération de nouveaux artefacts sidecar.',"
+TODO,warning,tools/fullscale_strict_protocol_runner.py,21,"""TODO"","
+FIXME,warning,tools/fullscale_strict_protocol_runner.py,22,"""FIXME"","
+PLACEHOLDER,risk,tools/fullscale_strict_protocol_runner.py,23,"""placeholder"","
+MOCK,risk,tools/fullscale_strict_protocol_runner.py,24,"""mock"","
+STUB,risk,tools/fullscale_strict_protocol_runner.py,25,"""stub"","
+TODO,warning,tools/tests/test_fullscale_strict_protocol.py,27,"src.write_text(""# TODO placeholder\nprint('x')\n"", encoding=""utf-8"")"
+PLACEHOLDER,risk,tools/tests/test_fullscale_strict_protocol.py,27,"src.write_text(""# TODO placeholder\nprint('x')\n"", encoding=""utf-8"")"
