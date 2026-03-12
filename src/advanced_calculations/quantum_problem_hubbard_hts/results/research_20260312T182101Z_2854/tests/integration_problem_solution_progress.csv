@@ -1,0 +1,14 @@
+problem,solution_progress_percent,evidence,constraints
+bosonic_multimode_systems,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.702;sign_watchdog;critical_window_ok,-5 global_penalties
+correlated_fermions_non_hubbard,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.838;sign_watchdog;critical_window_ok,-5 global_penalties
+dense_nuclear_fullscale,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.971;sign_watchdog;critical_window_ok,-5 global_penalties
+far_from_equilibrium_kinetic_lattices,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.853;sign_watchdog;critical_window_ok,-5 global_penalties
+hubbard_hts_core,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.818;sign_watchdog;critical_window_ok,-5 global_penalties
+multi_correlated_fermion_boson_networks,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.882;sign_watchdog;critical_window_ok,-5 global_penalties
+multi_state_excited_chemistry,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.744;sign_watchdog;critical_window_ok,-5 global_penalties
+multiscale_nonlinear_field_models,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.837;sign_watchdog;critical_window_ok,-5 global_penalties
+qcd_lattice_fullscale,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.946;sign_watchdog;critical_window_ok,-5 global_penalties
+quantum_chemistry_fullscale,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.939;sign_watchdog;critical_window_ok,-5 global_penalties
+quantum_field_noneq,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.842;sign_watchdog;critical_window_ok,-5 global_penalties
+spin_liquid_exotic,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.721;sign_watchdog;critical_window_ok,-5 global_penalties
+topological_correlated_materials,60.00,timeseries_present;metadata_present;energy_pairing_corr=-0.721;sign_watchdog;critical_window_ok,-5 global_penalties

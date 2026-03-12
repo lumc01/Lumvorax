@@ -1,0 +1,14 @@
+module,norm_deviation_max,threshold,status,notes
+hubbard_hts_core,7.771561172376e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+qcd_lattice_fullscale,6.661338147751e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+quantum_field_noneq,6.661338147751e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+dense_nuclear_fullscale,6.661338147751e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+quantum_chemistry_fullscale,5.551115123126e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+spin_liquid_exotic,6.661338147751e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+topological_correlated_materials,7.771561172376e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+correlated_fermions_non_hubbard,7.771561172376e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+multi_state_excited_chemistry,7.771561172376e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+bosonic_multimode_systems,6.661338147751e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+multiscale_nonlinear_field_models,6.661338147751e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+far_from_equilibrium_kinetic_lattices,6.661338147751e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
+multi_correlated_fermion_boson_networks,5.551115123126e-16,1.000000000000e-06,PASS,rk2_stabilized_conditional_renorm
