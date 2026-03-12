@@ -737,13 +737,13 @@ int main(int argc, char** argv) {
     FILE* dmcsv = fopen(dimless_csv, "w");
     if (!lg || !raw || !tcsv || !qcsv || !prov || !bcsv || !bcsvm || !mmeta || !det || !nstab || !toy || !tdrv || !ucsv || !ngcsv || !dmcsv) return 1;
 
-    fprintf(raw, "problem,step,energy,pairing,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
+    fprintf(raw, "problem,step,energy,pairing,sign_ratio,cpu_percent,mem_percent,elapsed_ns,norm_deviation,ema_abs_energy\n");
     fprintf(tcsv, "test_family,test_id,parameter,value,status\n");
     fprintf(qcsv, "category,question_id,question,response_status,evidence\n");
     fprintf(bcsv, "module,observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
     fprintf(bcsvm, "module,observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
     fprintf(mmeta, "module,lattice_size,U_over_t,t,U,doping,boundary_conditions,integration_scheme,dt,gauge_group,beta,lattice_spacing,volume,field_type,seed,solver_version,model_id,hamiltonian_id,schema_version\n");
-    fprintf(det, "problem,step,energy_norm,pairing_norm,sign_ratio,cpu_percent,mem_percent,elapsed_ns,norm_deviation,ema_abs_energy\n");
+    fprintf(det, "problem,step,energy_norm,pairing_norm,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
     fprintf(nstab, "test_id,module,metric,value,status,notes\n");
     fprintf(toy, "toy_case,module,metric,reference,measured,abs_error,status\n");
     fprintf(tdrv, "module,series,step_index,value,d1,d2,rolling_variance\n");
