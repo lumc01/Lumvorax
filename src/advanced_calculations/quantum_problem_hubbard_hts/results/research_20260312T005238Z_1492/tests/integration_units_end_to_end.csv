@@ -1,0 +1,14 @@
+module,energy_internal_eV,expected_unit,converted_value,status,notes
+hubbard_hts_core,1.8000000000,meV,1800.0000000000,PASS,module_specific_conversion
+qcd_lattice_fullscale,2.1500000000,GeV,0.0000000022,PASS,module_specific_conversion
+quantum_field_noneq,1.7000000000,eV,1.7000000000,PASS,module_specific_conversion
+dense_nuclear_fullscale,2.4500000000,MeV,0.0000024500,PASS,module_specific_conversion
+quantum_chemistry_fullscale,1.2250000000,eV,1.2250000000,PASS,module_specific_conversion
+spin_liquid_exotic,2.5050000000,eV,2.5050000000,PASS,module_specific_conversion
+topological_correlated_materials,1.8000000000,eV,1.8000000000,PASS,module_specific_conversion
+correlated_fermions_non_hubbard,1.9700000000,eV,1.9700000000,PASS,module_specific_conversion
+multi_state_excited_chemistry,1.4800000000,eV,1.4800000000,PASS,module_specific_conversion
+bosonic_multimode_systems,1.2400000000,eV,1.2400000000,PASS,module_specific_conversion
+multiscale_nonlinear_field_models,2.2000000000,eV,2.2000000000,PASS,module_specific_conversion
+far_from_equilibrium_kinetic_lattices,1.9100000000,eV,1.9100000000,PASS,module_specific_conversion
+multi_correlated_fermion_boson_networks,1.7100000000,eV,1.7100000000,PASS,module_specific_conversion
