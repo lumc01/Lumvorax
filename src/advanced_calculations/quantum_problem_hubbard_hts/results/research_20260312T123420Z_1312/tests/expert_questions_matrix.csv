@@ -4,7 +4,7 @@ methodology,Q2,Deux solveurs indépendants concordent-ils ?,partial,see_report
 numerics,Q3,Convergence multi-échelle testée ?,partial,see_report
 numerics,Q4,Stabilité aux extrêmes validée ?,partial,see_report
 theory,Q5,Pairing décroît avec T ?,complete,see_report
-theory,Q6,Énergie croît avec U ?,partial,see_report
+theory,Q6,Énergie croît avec U ?,complete,see_report
 theory,Q7,Solveur exact 2x2 exécuté ?,complete,see_report
 experiment,Q8,Traçabilité run+UTC ?,complete,see_report
 literature,Q11,Benchmark externe QMC/DMRG (plus de points + clusters) validé ?,partial,see_report
