@@ -1,0 +1,9 @@
+key,value,description
+run_id,research_20260312T222838Z_3447,Latest run id
+global_weighted_readiness_pct,76.15,Global weighted readiness from integration status
+full_threshold_progress_pct,88.16,Progress toward full rollout hard thresholds
+gap_connection_pct,11.50,Need this improvement to reach full threshold
+gap_shadow_safety_pct,12.50,Need this improvement to reach full threshold
+gap_realism_pct,3.54,Need this improvement to reach full threshold
+full_rollout_possible_now,NO,Whether all full thresholds are satisfied now
+active_blockers,connection+11.50;shadow_safety+12.50;realism+3.54,Blocking dimensions before full rollout
