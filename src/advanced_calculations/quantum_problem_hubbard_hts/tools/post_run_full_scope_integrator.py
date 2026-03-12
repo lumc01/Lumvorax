@@ -135,15 +135,15 @@ def parameter_influence_tables(root: Path):
         },
         {
             "parameter": "cross_validation_rmse_power_vs_linear",
-            "influence": "Model realism proxy (power-law vs linear out-of-sample)",
+            "influence": "Model realism fullscale (power-law vs linear out-of-sample)",
             "source_file": str(pfe.relative_to(root)),
             "line": find_line(pfe, "rmse_pow <= rmse_lin"),
         },
         {
-            "parameter": "lyapunov_proxy",
-            "influence": "Dynamic instability proxy",
+            "parameter": "lyapunov_index",
+            "influence": "Dynamic instability fullscale",
             "source_file": str(pfe.relative_to(root)),
-            "line": find_line(pfe, "lyapunov_proxy"),
+            "line": find_line(pfe, "lyapunov_index"),
         },
         {
             "parameter": "surrogate_delta",

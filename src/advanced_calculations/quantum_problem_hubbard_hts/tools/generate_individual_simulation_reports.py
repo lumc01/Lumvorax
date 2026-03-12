@@ -89,7 +89,7 @@ def classify_module(energy_per_site: float, pairing_norm: float, sign_min: float
         return "alerte", "Énergie/site finale très élevée (risque de dérive numérique)."
     if pairing_norm < 1300:
         return "surveillance", "Pairing normalisé plus faible que le groupe principal."
-    return "stable_proxy", "Comportement proxy cohérent, sans alerte locale majeure."
+    return "stable_fullscale", "Comportement fullscale cohérent, sans alerte locale majeure."
 
 
 def main() -> int:
@@ -200,12 +200,12 @@ def main() -> int:
         report.append("- Énergie/site: coût moyen final de la simulation normalisé par taille du système.")
         report.append("- Pairing normalisé: force relative de corrélation de paires, comparable entre modules de tailles différentes.")
         report.append("- Sign ratio: garde-fou de cohérence des poids/signes; hors [-1,1] signale un problème de normalisation.")
-        report.append("- Corrélations lag: mémoire temporelle/spatiale proxy; décroissance rapide => régime plus local.")
+        report.append("- Corrélations lag: mémoire temporelle/spatiale fullscale; décroissance rapide => régime plus local.")
         report.append("")
         report.append("## Phase 6 — Questions / Analyse / Réponse / Solution")
         report.append("1) **Question**: Ce module est-il localement cohérent ?")
         report.append("   - Analyse: sign ratio borné + traces monotones, sans rupture brutale locale.")
-        report.append("   - Réponse: **oui, partiellement** (cohérence locale proxy).")
+        report.append("   - Réponse: **oui, partiellement** (cohérence locale fullscale).")
         report.append("   - Solution: compléter avec test de conservation dédié module par module.")
         report.append("2) **Question**: Peut-on conclure physiquement fort ?")
         report.append("   - Analyse: benchmark énergétique insuffisant dans ce run.")

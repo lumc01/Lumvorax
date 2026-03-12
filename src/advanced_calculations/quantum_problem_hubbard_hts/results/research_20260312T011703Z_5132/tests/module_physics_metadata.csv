@@ -1,0 +1,14 @@
+module,lattice_size,U_over_t,doping,boundary_conditions,integration_scheme,dt,gauge_group,beta,lattice_spacing,volume,field_type
+hubbard_hts_core,10x10,8.000000,0.200000,periodic,euler_explicit,0.010000,NA,NA,1.000000,100,fermionic_fullscale
+qcd_lattice_fullscale,9x9,12.857143,0.100000,periodic,euler_explicit,0.010000,SU(3)_fullscale,5.700000,1.000000,81,gauge_field
+quantum_field_noneq,8x8,5.384615,0.050000,periodic,euler_explicit,0.010000,NA,NA,1.000000,64,field_fullscale
+dense_nuclear_fullscale,9x8,13.750000,0.300000,open,euler_explicit,0.010000,NA,NA,1.000000,72,mixed_fullscale
+quantum_chemistry_fullscale,8x7,4.062500,0.400000,periodic,euler_explicit,0.010000,NA,NA,1.000000,56,fermionic_fullscale
+spin_liquid_exotic,12x10,11.666667,0.120000,periodic,euler_explicit,0.010000,NA,NA,1.000000,120,fermionic_fullscale
+topological_correlated_materials,11x11,7.090909,0.150000,periodic,euler_explicit,0.010000,NA,NA,1.000000,121,fermionic_fullscale
+correlated_fermions_non_hubbard,10x9,7.166667,0.180000,periodic,euler_explicit,0.010000,NA,NA,1.000000,90,fermionic_fullscale
+multi_state_excited_chemistry,9x9,4.533333,0.220000,periodic,euler_explicit,0.010000,NA,NA,1.000000,81,fermionic_fullscale
+bosonic_multimode_systems,10x8,8.666667,0.060000,periodic,euler_explicit,0.010000,NA,NA,1.000000,80,bosonic_fullscale
+multiscale_nonlinear_field_models,12x8,6.571429,0.100000,periodic,euler_explicit,0.010000,NA,NA,1.000000,96,field_fullscale
+far_from_equilibrium_kinetic_lattices,11x9,8.000000,0.090000,periodic,euler_explicit,0.010000,NA,NA,1.000000,99,field_fullscale
+multi_correlated_fermion_boson_networks,10x10,7.047619,0.140000,periodic,euler_explicit,0.010000,NA,NA,1.000000,100,fermionic_fullscale

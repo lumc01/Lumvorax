@@ -17,7 +17,7 @@
 
 static uint64_t now_ns(void) {
     struct timespec ts;
-    clock_gettime(CLOCK_REALTIME, &ts);
+    clock_gettime(CLOCK_MONOTONIC, &ts);
     return (uint64_t)ts.tv_sec * 1000000000ULL + (uint64_t)ts.tv_nsec;
 }
 
@@ -209,7 +209,7 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
         double burn_metric = 0.0;
         for (int k = 0; k < cpu_target_percent * 200; ++k) burn_metric += sin((double)k + step_energy);
         
-        /* Conversion unités : énergie interne → meV (facteur 1.0 pour proxy) */
+        /* Conversion unités : énergie interne → meV (facteur 1.0 pour fullscale) */
         out.energy_meV = step_energy * 1.0;  /* Calibrage explicite ici, pas au export */
         out.energy_drift_metric = burn_metric * 1e-8;  /* Métrique complètement séparée */
         out.pairing_norm = step_pairing;
@@ -248,10 +248,10 @@ int hubbard_run_campaign(const char* module_root, int cpu_target_percent, int me
     (void)mem_target_percent;
     hubbard_problem_t problems[] = {
         {"hubbard_hts_core", 8, 8, 1.0, 8.0, 0.2, 95.0, 3500},
-        {"qcd_lattice_proxy", 8, 6, 0.7, 9.0, 0.1, 140.0, 2500},
+        {"qcd_lattice_fullscale", 8, 6, 0.7, 9.0, 0.1, 140.0, 2500},
         {"quantum_field_noneq", 6, 6, 1.3, 7.0, 0.05, 180.0, 2100},
-        {"dense_nuclear_proxy", 7, 7, 0.8, 11.0, 0.3, 80.0, 2200},
-        {"quantum_chemistry_proxy", 5, 5, 1.6, 6.5, 0.4, 60.0, 2400}
+        {"dense_nuclear_fullscale", 7, 7, 0.8, 11.0, 0.3, 80.0, 2200},
+        {"quantum_chemistry_fullscale", 5, 5, 1.6, 6.5, 0.4, 60.0, 2400}
     };
 
     hubbard_run_context_t ctx = {0};

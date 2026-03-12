@@ -1,0 +1,14 @@
+problem,energy_entropy_bits,pairing_entropy_bits,sign_abs_entropy_bits,combined_entropy_bits,method
+bosonic_multimode_systems,0.266765,0.266765,3.079226,0.266765,shannon_entropy_proxy_from_timeseries_distribution
+correlated_fermions_non_hubbard,0.249882,0.249882,2.836039,0.249882,shannon_entropy_proxy_from_timeseries_distribution
+dense_nuclear_proxy,0.276195,0.276195,2.815202,0.276195,shannon_entropy_proxy_from_timeseries_distribution
+far_from_equilibrium_kinetic_lattices,0.249882,0.249882,2.959148,0.249882,shannon_entropy_proxy_from_timeseries_distribution
+hubbard_hts_core,0.222285,0.222285,2.784884,0.222285,shannon_entropy_proxy_from_timeseries_distribution
+multi_correlated_fermion_boson_networks,0.249882,0.249882,2.677694,0.249882,shannon_entropy_proxy_from_timeseries_distribution
+multi_state_excited_chemistry,0.258019,0.258019,2.892702,0.258019,shannon_entropy_proxy_from_timeseries_distribution
+multiscale_nonlinear_field_models,0.258019,0.258019,2.853720,0.258019,shannon_entropy_proxy_from_timeseries_distribution
+qcd_lattice_proxy,0.266765,0.266765,3.106048,0.266765,shannon_entropy_proxy_from_timeseries_distribution
+quantum_chemistry_proxy,0.266765,0.266765,2.640522,0.266765,shannon_entropy_proxy_from_timeseries_distribution
+quantum_field_noneq,0.276195,0.276195,2.684017,0.276195,shannon_entropy_proxy_from_timeseries_distribution
+spin_liquid_exotic,0.235193,0.235193,2.840266,0.235193,shannon_entropy_proxy_from_timeseries_distribution
+topological_correlated_materials,0.242292,0.242292,3.273270,0.242292,shannon_entropy_proxy_from_timeseries_distribution

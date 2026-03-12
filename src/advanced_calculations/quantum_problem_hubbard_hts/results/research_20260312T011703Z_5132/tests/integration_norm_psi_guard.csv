@@ -1,0 +1,14 @@
+module,norm_deviation_max,threshold,status,notes
+hubbard_hts_core,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+qcd_lattice_fullscale,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+quantum_field_noneq,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+dense_nuclear_fullscale,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+quantum_chemistry_fullscale,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+spin_liquid_exotic,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+topological_correlated_materials,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+correlated_fermions_non_hubbard,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+multi_state_excited_chemistry,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+bosonic_multimode_systems,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+multiscale_nonlinear_field_models,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+far_from_equilibrium_kinetic_lattices,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step
+multi_correlated_fermion_boson_networks,1.000000000000e+00,1.000000000000e-06,FAIL,normalized_after_each_step

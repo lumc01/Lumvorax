@@ -1,0 +1,3 @@
+file,line,snippet,status
+src/hubbard_hts_research_cycle.c,615,problem_t probs[] = {,REVIEW_REQUIRED
+src/hubbard_hts_research_cycle_advanced_parallel.c,659,problem_t probs[] = {,REVIEW_REQUIRED

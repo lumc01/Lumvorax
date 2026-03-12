@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import csv, json, hashlib, subprocess
+import csv, json, hashlib, shlex, subprocess
 from pathlib import Path
 from datetime import datetime, UTC
 
@@ -13,7 +13,8 @@ def rcsv(p):
         return list(csv.DictReader(f))
 
 def run(cmd, cwd='.'):
-    p=subprocess.run(cmd, shell=True, cwd=cwd, text=True, capture_output=True)
+    args = shlex.split(cmd) if isinstance(cmd, str) else cmd
+    p=subprocess.run(args, cwd=cwd, text=True, capture_output=True)
     return {"cmd":cmd,"code":p.returncode,"stdout":p.stdout.strip(),"stderr":p.stderr.strip()}
 
 
