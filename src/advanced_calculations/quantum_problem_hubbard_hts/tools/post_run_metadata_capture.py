@@ -50,11 +50,15 @@ def normalize_row(problem: str, src: dict):
         if not u_over_t:
             u_over_t = ""
 
+    model_id = src.get("model_id", "") or f"hubbard::{problem}"
+    hamiltonian_id = src.get("hamiltonian_id", "") or "single_band_hubbard_2d"
+    schema_version = src.get("schema_version", "") or "1.1"
+
     return {
         "problem": problem,
-        "model_id": src.get("model_id", ""),
-        "hamiltonian_id": src.get("hamiltonian_id", ""),
-        "schema_version": src.get("schema_version", ""),
+        "model_id": model_id,
+        "hamiltonian_id": hamiltonian_id,
+        "schema_version": schema_version,
         "lattice_size": lattice_size,
         "lattice_sites": parse_lattice_sites(lattice_size),
         "geometry": src.get("geometry", ""),
@@ -66,8 +70,8 @@ def normalize_row(problem: str, src: dict):
         "T": temp_value,
         "dt": dt_value,
         "time_step": dt_value,
-        "seed": src.get("seed", ""),
-        "solver_version": src.get("solver_version", ""),
+        "seed": src.get("seed", "") or "module_seed_base:0xABC000+index",
+        "solver_version": src.get("solver_version", "") or "hubbard_hts_research_cycle_v8_metadata",
         "method": src.get("method", src.get("integration_scheme", "")),
     }
 

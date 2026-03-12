@@ -14,10 +14,10 @@ def run_stm(series: list[float], rolling_window: int=5) -> dict:
     residual=[vals[i]-smooth[i] for i in range(len(vals))]
     roughness=math.sqrt(sum(r*r for r in residual)/len(residual))
     contrast=max(vals)-min(vals)
-    ldos_proxy=sum(abs(v) for v in smooth)/len(smooth)
+    ldos_index=sum(abs(v) for v in smooth)/len(smooth)
     return {
         "status":"PASS",
-        "ldos_proxy":ldos_proxy,
+        "ldos_index":ldos_index,
         "surface_roughness":roughness,
         "contrast":contrast
     }

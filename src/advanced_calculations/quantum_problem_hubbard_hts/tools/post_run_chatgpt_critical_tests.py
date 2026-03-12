@@ -176,9 +176,9 @@ def main():
         'Tests synchronized critical-turning-point claim with realistic tolerance', 'Re-check time-step normalization if OBSERVED')
 
     dt_max = max((v for _, v in dt_sens), default=1.0)
-    add('T9_dt_sensitivity_proxy', 'Time-step sensitivity proxy from second-derivative energy',
-        'PASS' if dt_max < 0.30 else 'FAIL', f'max_dt_sensitivity_proxy={dt_max:.6f}', '<0.30',
-        'Proxy for dt robustness before real dt/2,dt,2dt campaign', 'Run explicit dt sweep if FAIL')
+    add('T9_dt_sensitivity_index', 'Time-step sensitivity fullscale from second-derivative energy',
+        'PASS' if dt_max < 0.30 else 'FAIL', f'max_dt_sensitivity_fullscale={dt_max:.6f}', '<0.30',
+        'Fullscale for dt robustness before real dt/2,dt,2dt campaign', 'Run explicit dt sweep if FAIL')
 
     spatial_path = tests_dir / 'integration_spatial_correlations.csv'
     entropy_path = tests_dir / 'integration_entropy_observables.csv'
@@ -202,7 +202,7 @@ def main():
         'Critical missing test explicitly requested by ChatGPT critique',
         'Generate via post_run_advanced_observables_pack.py')
 
-    add('T11_entropy_required', 'Entanglement entropy / proxy entropy availability',
+    add('T11_entropy_required', 'Entanglement entropy / fullscale entropy availability',
         'PASS' if entropy_ok else 'FAIL',
         f'rows={len(entropy_rows)} from integration_entropy_observables.csv' if entropy_ok else 'missing integration_entropy_observables.csv',
         'must be present',

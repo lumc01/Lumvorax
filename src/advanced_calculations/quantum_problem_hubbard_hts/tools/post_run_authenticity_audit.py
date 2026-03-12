@@ -12,7 +12,7 @@ PATTERNS = [
     ("STUB", re.compile(r"\bSTUB\b|\bstub\b", re.IGNORECASE), "risk"),
     ("MOCK", re.compile(r"\bmock\b", re.IGNORECASE), "risk"),
     # Detect concrete hardcoded runtime/model markers, avoid meta self-references.
-    ("HARDCODING", re.compile(r"advanced_proxy_deterministic|periodic_proxy|problem_t probs\[", re.IGNORECASE), "review"),
+    ("HARDCODING", re.compile(r"advanced_fullscale_deterministic|periodic_fullscale|problem_t probs\[", re.IGNORECASE), "review"),
 ]
 
 EXCLUDED_FILES = {

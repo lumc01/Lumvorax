@@ -40,7 +40,7 @@ POSSIBLE_UNTREATED_MODULES = [
     {
         "module": "multi_state_excited_chemistry",
         "domain": "Chimie quantique",
-        "observables": "énergie par état, densité électronique locale, gap excité, pairing proxy",
+        "observables": "énergie par état, densité électronique locale, gap excité, pairing fullscale",
         "constraints": "petites molécules et bases réduites",
     },
     {
@@ -215,7 +215,7 @@ def main() -> int:
         "- Correctif opérationnel immédiat: considérer tout `toy_model_validation.csv` de taille 0 comme **FAIL bloquant** lors des post-runs.",
         "",
         "## 5) Intégration métrique avancée (`METRIQUE/METRIQUE.md`)",
-        "- Le référentiel métrique doit contenir les métriques exploitables immédiatement (énergie, pairing, sign ratio, corrélations, convergence dt, FFT dominante, entropie proxy, stabilité numérique, runtime matériel).",
+        "- Le référentiel métrique doit contenir les métriques exploitables immédiatement (énergie, pairing, sign ratio, corrélations, convergence dt, FFT dominante, entropie fullscale, stabilité numérique, runtime matériel).",
         "- Ce rapport renvoie vers cette base pour planifier les nouveaux modules sans simplifications non contrôlées.",
         "",
         "## 6) Modélisation 3D + serveur",
