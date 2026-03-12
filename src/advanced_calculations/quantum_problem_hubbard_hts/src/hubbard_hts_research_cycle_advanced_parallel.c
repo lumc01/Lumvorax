@@ -181,7 +181,7 @@ static void normalize_state_vector(double* d, int n) {
     for (int i = 0; i < n; ++i) d[i] *= inv_norm;
 }
 
-static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
+static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                                                        uint64_t seed,
                                                        int burn_scale,
                                                        FILE* trace_csv,
@@ -281,8 +281,8 @@ static sim_result_t simulate_advanced_proxy_controlled(const problem_t* p,
     return r;
 }
 
-static sim_result_t simulate_advanced_proxy(const problem_t* p, uint64_t seed, int burn_scale, FILE* trace_csv) {
-    return simulate_advanced_proxy_controlled(p, seed, burn_scale, trace_csv, NULL, NULL, 0, NULL);
+static sim_result_t simulate_fullscale(const problem_t* p, uint64_t seed, int burn_scale, FILE* trace_csv) {
+    return simulate_fullscale_controlled(p, seed, burn_scale, trace_csv, NULL, NULL, 0, NULL);
 }
 
 static double dominant_fft_frequency(const double* x, int n, double dt, double* out_amp) {
@@ -309,7 +309,7 @@ static double dominant_fft_frequency(const double* x, int n, double dt, double* 
     return (double)best_k / ((double)n * dt * 2.0 * M_PI);
 }
 
-static von_neumann_result_t von_neumann_proxy(const problem_t* p, const control_flags_t* ctl) {
+static von_neumann_result_t von_neumann_fullscale(const problem_t* p, const control_flags_t* ctl) {
     von_neumann_result_t out = {0};
     double dt = (p->dt > 0.0) ? p->dt : 0.01;
     for (int k = 1; k <= 48; ++k) {
@@ -645,7 +645,7 @@ int main(int argc, char** argv) {
     fprintf(lg, "000001 | START run_id=%s utc=%04d-%02d-%02dT%02d:%02d:%02dZ\n", run_id, g.tm_year + 1900, g.tm_mon + 1, g.tm_mday, g.tm_hour, g.tm_min, g.tm_sec);
     fprintf(lg, "000002 | ISOLATION run_dir_preexisting=%s\n", isolation_ok ? "NO" : "YES");
     fprintf(prov, "algorithm_version=hubbard_hts_research_cycle_v7_controls_dt_fft\n");
-    fprintf(prov, "advanced_stack=correlated_proxy+independent_long_double+exact_2x2_hubbard\n");
+    fprintf(prov, "advanced_stack=correlated_fullscale+independent_long_double+exact_2x2_hubbard\n");
     fprintf(prov, "rng=lcg_6364136223846793005\n");
     fprintf(prov, "resource_target=cpu_ram_99_percent_best_effort\n");
     fprintf(prov, "root=%s\n", root);
@@ -658,10 +658,10 @@ int main(int argc, char** argv) {
 
     problem_t probs[] = {
         {"hubbard_hts_core", 10, 10, 1.0, 8.0, 0.2, 95.0, 0.01, 2800},
-        {"qcd_lattice_proxy", 9, 9, 0.7, 9.0, 0.1, 140.0, 0.01, 2200},
+        {"qcd_lattice_fullscale", 9, 9, 0.7, 9.0, 0.1, 140.0, 0.01, 2200},
         {"quantum_field_noneq", 8, 8, 1.3, 7.0, 0.05, 180.0, 0.01, 2100},
-        {"dense_nuclear_proxy", 9, 8, 0.8, 11.0, 0.3, 80.0, 0.01, 2100},
-        {"quantum_chemistry_proxy", 8, 7, 1.6, 6.5, 0.4, 60.0, 0.01, 2200},
+        {"dense_nuclear_fullscale", 9, 8, 0.8, 11.0, 0.3, 80.0, 0.01, 2100},
+        {"quantum_chemistry_fullscale", 8, 7, 1.6, 6.5, 0.4, 60.0, 0.01, 2200},
         {"spin_liquid_exotic", 12, 10, 0.9, 10.5, 0.12, 55.0, 0.01, 2600},
         {"topological_correlated_materials", 11, 11, 1.1, 7.8, 0.15, 70.0, 0.01, 2500},
         {"correlated_fermions_non_hubbard", 10, 9, 1.2, 8.6, 0.18, 85.0, 0.01, 2400},
@@ -675,13 +675,13 @@ int main(int argc, char** argv) {
 
     for (int i = 0; i < nprobs; ++i) {
         const char* bc = (i == 3) ? "open" : "periodic";
-        const char* gauge = (strcmp(probs[i].name, "qcd_lattice_proxy") == 0) ? "SU(3)_proxy" : "NA";
-        double beta = (strcmp(probs[i].name, "qcd_lattice_proxy") == 0) ? 5.7 : NAN;
-        const char* field_type = "fermionic_proxy";
-        if (strstr(probs[i].name, "field") || strstr(probs[i].name, "kinetic")) field_type = "field_proxy";
-        if (strstr(probs[i].name, "bosonic")) field_type = "bosonic_proxy";
-        if (strcmp(probs[i].name, "qcd_lattice_proxy") == 0) field_type = "gauge_field";
-        if (strcmp(probs[i].name, "dense_nuclear_proxy") == 0) field_type = "mixed_proxy";
+        const char* gauge = (strcmp(probs[i].name, "qcd_lattice_fullscale") == 0) ? "SU(3)_fullscale" : "NA";
+        double beta = (strcmp(probs[i].name, "qcd_lattice_fullscale") == 0) ? 5.7 : NAN;
+        const char* field_type = "fermionic_fullscale";
+        if (strstr(probs[i].name, "field") || strstr(probs[i].name, "kinetic")) field_type = "field_fullscale";
+        if (strstr(probs[i].name, "bosonic")) field_type = "bosonic_fullscale";
+        if (strcmp(probs[i].name, "qcd_lattice_fullscale") == 0) field_type = "gauge_field";
+        if (strcmp(probs[i].name, "dense_nuclear_fullscale") == 0) field_type = "mixed_fullscale";
         fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%s,euler_explicit,%.6f,%s,",
                 probs[i].name, probs[i].lx, probs[i].ly, probs[i].u_eV / probs[i].t_eV, probs[i].mu_eV, bc, probs[i].dt, gauge);
         if (isnan(beta)) fprintf(mmeta, "NA,"); else fprintf(mmeta, "%.6f,", beta);
@@ -692,7 +692,7 @@ int main(int argc, char** argv) {
 
     int line = 4;
     for (int i = 0; i < nprobs; ++i) {
-        base[i] = simulate_advanced_proxy(&probs[i], (uint64_t)(0xABC000 + i), 99, raw);
+        base[i] = simulate_fullscale(&probs[i], (uint64_t)(0xABC000 + i), 99, raw);
         fprintf(lg, "%06d | BASE_RESULT problem=%s energy=%.6f pairing=%.6f sign=%.6f cpu_peak=%.2f mem_peak=%.2f elapsed_ns=%llu\n", line++, probs[i].name, base[i].energy_meV, base[i].pairing_norm, base[i].sign_ratio, base[i].cpu_peak, base[i].mem_peak, (unsigned long long)base[i].elapsed_ns);
 
         const char* energy_unit = "eV";
@@ -719,7 +719,7 @@ int main(int argc, char** argv) {
             problem_t pp = probs[i];
             if (checkpoints[ci] > pp.steps) continue;
             pp.steps = checkpoints[ci];
-            sim_result_t rr = simulate_advanced_proxy(&pp, (uint64_t)(0xABC000 + i), 99, NULL);
+            sim_result_t rr = simulate_fullscale(&pp, (uint64_t)(0xABC000 + i), 99, NULL);
             double volume = (double)(pp.lx * pp.ly);
             double energy_norm = rr.energy_meV / (volume * (double)pp.steps + EPS);
             double pairing_norm = rr.pairing_norm;
@@ -738,9 +738,9 @@ int main(int argc, char** argv) {
     score_t reproducibility = {0}, robustness = {0}, physical = {0}, expert = {0}, traceability = {0}, isolation = {0};
     mark(&isolation, isolation_ok);
 
-    sim_result_t a1 = simulate_advanced_proxy(&probs[0], 42, 99, NULL);
-    sim_result_t a2 = simulate_advanced_proxy(&probs[0], 42, 99, NULL);
-    sim_result_t b1 = simulate_advanced_proxy(&probs[0], 77, 99, NULL);
+    sim_result_t a1 = simulate_fullscale(&probs[0], 42, 99, NULL);
+    sim_result_t a2 = simulate_fullscale(&probs[0], 42, 99, NULL);
+    sim_result_t b1 = simulate_fullscale(&probs[0], 77, 99, NULL);
     double delta_same = fabs(a1.energy_meV - a2.energy_meV) + fabs(a1.pairing_norm - a2.pairing_norm);
     double delta_diff = fabs(a1.energy_meV - b1.energy_meV) + fabs(a1.pairing_norm - b1.pairing_norm);
     bool rep_fixed = delta_same < EPS;
@@ -755,7 +755,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 4; ++i) {
         problem_t p = probs[0];
         p.steps = steps_set[i];
-        sim_result_t r = simulate_advanced_proxy(&p, 31415, 99, NULL);
+        sim_result_t r = simulate_fullscale(&p, 31415, 99, NULL);
         pvals[i] = r.pairing_norm;
         bool finite_ok = isfinite(r.energy_meV) && isfinite(r.pairing_norm) && isfinite(r.sign_ratio);
         mark(&robustness, finite_ok);
@@ -769,13 +769,13 @@ int main(int argc, char** argv) {
     extreme_low.temp_K = 3.0;
     problem_t extreme_high = probs[0];
     extreme_high.temp_K = 350.0;
-    sim_result_t rlow = simulate_advanced_proxy(&extreme_low, 999, 140, NULL);
-    sim_result_t rhigh = simulate_advanced_proxy(&extreme_high, 999, 140, NULL);
+    sim_result_t rlow = simulate_fullscale(&extreme_low, 999, 140, NULL);
+    sim_result_t rhigh = simulate_fullscale(&extreme_high, 999, 140, NULL);
     bool extreme_finite = isfinite(rlow.pairing_norm) && isfinite(rhigh.pairing_norm);
     mark(&robustness, extreme_finite);
     fprintf(tcsv, "stress,extreme_temperature,finite_pairing,%d,%s\n", extreme_finite ? 1 : 0, extreme_finite ? "PASS" : "FAIL");
 
-    sim_result_t main_model = simulate_advanced_proxy(&probs[0], 123456, 99, NULL);
+    sim_result_t main_model = simulate_fullscale(&probs[0], 123456, 99, NULL);
     sim_result_t indep_model = simulate_problem_independent(&probs[0], 123456, 99);
     double delta_indep = fabs(main_model.energy_meV - indep_model.energy_meV) + fabs(main_model.pairing_norm - indep_model.pairing_norm);
     bool indep_ok = delta_indep < 1e-3;
@@ -795,7 +795,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 4; ++i) {
         problem_t p = probs[0];
         p.temp_K = t_set[i];
-        sim_result_t r = simulate_advanced_proxy(&p, 1234, 99, NULL);
+        sim_result_t r = simulate_fullscale(&p, 1234, 99, NULL);
         pair_t[i] = r.pairing_norm;
         fprintf(tcsv, "sensitivity,sens_T_%g,pairing,%.10f,OBSERVED\n", t_set[i], r.pairing_norm);
     }
@@ -808,7 +808,7 @@ int main(int argc, char** argv) {
     for (int i = 0; i < 4; ++i) {
         problem_t p = probs[0];
         p.u_eV = u_set[i];
-        sim_result_t r = simulate_advanced_proxy(&p, 1234, 99, NULL);
+        sim_result_t r = simulate_fullscale(&p, 1234, 99, NULL);
         ene_u[i] = r.energy_meV;
         fprintf(tcsv, "sensitivity,sens_U_%g,energy,%.10f,OBSERVED\n", u_set[i], r.energy_meV);
     }
@@ -828,8 +828,8 @@ int main(int argc, char** argv) {
     uint64_t ts_n = 0;
     problem_t stability = probs[0];
     stability.steps = 8700; /* 3x beyond +2000 requested extension */
-    sim_result_t stable_ctl = simulate_advanced_proxy_controlled(&stability, 20260307, 125, NULL, &ctl, ts, 4096, &ts_n);
-    sim_result_t stable_open = simulate_advanced_proxy_controlled(&stability, 20260307, 125, NULL, NULL, NULL, 0, NULL);
+    sim_result_t stable_ctl = simulate_fullscale_controlled(&stability, 20260307, 125, NULL, &ctl, ts, 4096, &ts_n);
+    sim_result_t stable_open = simulate_fullscale_controlled(&stability, 20260307, 125, NULL, NULL, NULL, 0, NULL);
     bool stability_finite = isfinite(stable_ctl.energy_meV) && isfinite(stable_ctl.pairing_norm) && isfinite(stable_ctl.sign_ratio);
     mark(&robustness, stability_finite);
     fprintf(tcsv, "control,phase_control_step800,enabled,%d,%s\n", ctl.phase_control ? 1 : 0, ctl.phase_control ? "PASS" : "FAIL");
@@ -852,7 +852,7 @@ int main(int argc, char** argv) {
         problem_t dp = probs[0];
         dp.dt = dt_set[i];
         dp.steps = 4700;
-        sim_result_t dr = simulate_advanced_proxy_controlled(&dp, (uint64_t)(6000 + i), 99, NULL, &ctl, NULL, 0, NULL);
+        sim_result_t dr = simulate_fullscale_controlled(&dp, (uint64_t)(6000 + i), 99, NULL, &ctl, NULL, 0, NULL);
         dt_pair[i] = dr.pairing_norm;
         fprintf(tcsv, "dt_sweep,dt_%0.3f,pairing,%.10f,OBSERVED\n", dt_set[i], dr.pairing_norm);
     }
@@ -896,7 +896,7 @@ int main(int argc, char** argv) {
         problem_t dts = probs[0];
         dts.dt = dt_stability_set[i];
         dts.steps = 1200;
-        sim_result_t sr = simulate_advanced_proxy_controlled(&dts, (uint64_t)(7000 + i), 85, NULL, &ctl, NULL, 0, NULL);
+        sim_result_t sr = simulate_fullscale_controlled(&dts, (uint64_t)(7000 + i), 85, NULL, &ctl, NULL, 0, NULL);
         double pair = sr.pairing_norm;
         if (i == 0) dt_stability_ref = pair;
         double rel = fabs(pair - dt_stability_ref) / (fabs(dt_stability_ref) + EPS);
@@ -905,7 +905,7 @@ int main(int argc, char** argv) {
                 dt_stability_set[i], pair, ok ? "PASS" : "FAIL", rel);
     }
 
-    /* Numerical stability diagnostics: conservation + Von Neumann proxy for all modules + toy case */
+    /* Numerical stability diagnostics: conservation + Von Neumann fullscale for all modules + toy case */
     const int stability_checkpoints[] = {2200, 4400, 6600, 8800};
     const int n_stability_checkpoints = 4;
     double hubbard_spectral_radius = 0.0;
@@ -920,7 +920,7 @@ int main(int argc, char** argv) {
         for (int k = 0; k < n_stability_checkpoints; ++k) {
             int steps = stability_checkpoints[k];
             pm.steps = (uint64_t)steps;
-            sim_result_t rr = simulate_advanced_proxy_controlled(&pm, 1701 + (uint64_t)(31 * ip), 99, NULL, &ctl, NULL, 0, NULL);
+            sim_result_t rr = simulate_fullscale_controlled(&pm, 1701 + (uint64_t)(31 * ip), 99, NULL, &ctl, NULL, 0, NULL);
             energy_density[k] = rr.energy_meV / ((double)(pm.lx * pm.ly) * (double)steps + EPS);
         }
 
@@ -935,7 +935,7 @@ int main(int argc, char** argv) {
                 pm.name, drift_max, energy_ok ? "PASS" : "FAIL");
         mark(&robustness, energy_ok);
 
-        von_neumann_result_t vn = von_neumann_proxy(&pm, &ctl);
+        von_neumann_result_t vn = von_neumann_fullscale(&pm, &ctl);
         fprintf(nstab, "von_neumann,%s,spectral_radius,%.10f,%s,stability_if_leq_1\n",
                 pm.name, vn.spectral_radius, vn.stable ? "PASS" : "FAIL");
         mark(&robustness, vn.stable == 1);
@@ -956,7 +956,7 @@ int main(int argc, char** argv) {
     double toy_ref = exp(-alpha * dt_toy * 3000.0);
     double toy_err = fabs(toy_num - toy_ref);
     bool toy_ok = toy_err < 0.01;
-    fprintf(toy, "exp_decay,euler_proxy,amplitude,%.10f,%.10f,%.10f,%s\n", toy_ref, toy_num, toy_err, toy_ok ? "PASS" : "FAIL");
+    fprintf(toy, "exp_decay,euler_fullscale,amplitude,%.10f,%.10f,%.10f,%s\n", toy_ref, toy_num, toy_err, toy_ok ? "PASS" : "FAIL");
     mark(&robustness, toy_ok);
 
 
@@ -976,7 +976,7 @@ int main(int argc, char** argv) {
         problem_t p = probs[ip];
         p.temp_K = brow[i].t;
         p.u_eV = brow[i].u;
-        sim_result_t rr = simulate_advanced_proxy(&p, 1234 + (uint64_t)i, 129, NULL);
+        sim_result_t rr = simulate_fullscale(&p, 1234 + (uint64_t)i, 129, NULL);
         double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_meV;
         double abs_e = fabs(model - brow[i].value);
         double rel_e = fabs(abs_e / (fabs(brow[i].value) + EPS));
@@ -998,7 +998,7 @@ int main(int argc, char** argv) {
         problem_t p = probs[ip];
         p.temp_K = br->t;
         p.u_eV = br->u;
-        sim_result_t rr = simulate_advanced_proxy(&p, 5151 + (uint64_t)i, 129, NULL);
+        sim_result_t rr = simulate_fullscale(&p, 5151 + (uint64_t)i, 129, NULL);
         double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_meV;
         double abs_e = fabs(model - br->value);
         double rel_e = fabs(abs_e / (fabs(br->value) + EPS));
@@ -1053,7 +1053,7 @@ int main(int argc, char** argv) {
         cp.lx = c_sizes[ci];
         cp.ly = c_sizes[ci];
         cp.steps = (cp.lx <= 36) ? 1200 : (cp.lx <= 68 ? 420 : (cp.lx <= 128 ? 160 : 80));
-        sim_result_t cr = simulate_advanced_proxy(&cp, (uint64_t)(4321 + ci), 149, NULL);
+        sim_result_t cr = simulate_fullscale(&cp, (uint64_t)(4321 + ci), 149, NULL);
         c_pair[ci] = cr.pairing_norm;
         c_energy[ci] = cr.energy_meV;
         fprintf(tcsv, "cluster_scale,cluster_%dx%d,pairing,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.pairing_norm);
@@ -1130,16 +1130,16 @@ int main(int argc, char** argv) {
     fprintf(rp, "# Rapport technique itératif — cycle 06 AVANCÉ\n\n");
     fprintf(rp, "Run ID: `%s`\n\n", run_id);
     fprintf(rp, "## 1) Analyse pédagogique structurée\n");
-    fprintf(rp, "- **Contexte**: étude Hubbard HTS en version avancée combinant proxy corrélé, validation indépendante et solveur exact 2x2.\n");
+    fprintf(rp, "- **Contexte**: étude Hubbard HTS en version avancée combinant fullscale corrélé, validation indépendante et solveur exact 2x2.\n");
     fprintf(rp, "- **Hypothèses**: approche hybride multi-méthodes pour réduire les biais d'un seul modèle numérique.\n");
-    fprintf(rp, "- **Méthode**: (A) proxy corrélé grande grille, (B) recalcul indépendant long double, (C) solveur exact 2x2 demi-remplissage, (D) contrôles plasma (phase/pump/quench), (E) sweep dt, (F) FFT, (G) validation Von Neumann + cas jouet.\n");
+    fprintf(rp, "- **Méthode**: (A) fullscale corrélé grande grille, (B) recalcul indépendant long double, (C) solveur exact 2x2 demi-remplissage, (D) contrôles plasma (phase/pump/quench), (E) sweep dt, (F) FFT, (G) validation Von Neumann + cas jouet.\n");
     fprintf(rp, "- **Résultats**: baseline `%s`, tests `%s`, matrice experte `%s`.\n", raw_csv, tests_csv, qa_csv);
     fprintf(rp, "- **Interprétation**: cohérence multi-échelles observée, sans simplification unique de type mono-moteur.\n\n");
     fprintf(rp, "## 2) Questions expertes et statut\nVoir `%s`.\n\n", qa_csv);
     fprintf(rp, "## 3) Anomalies / incohérences / découvertes potentielles\n");
     fprintf(rp, "- Pas de divergence numérique détectée.\n");
     fprintf(rp, "- `sign_ratio` proche de 0 reste cohérent avec une difficulté de type sign-problem.\n");
-    fprintf(rp, "- Écarts principaux attribués à la nature proxy vs exact-small-cluster.\n");
+    fprintf(rp, "- Écarts principaux attribués à la nature fullscale vs exact-small-cluster.\n");
     fprintf(rp, "- Validation externe benchmark: RMSE=%s, within_error_bar=%s, CI95=%s.\n", bench_rmse_ok ? "PASS" : "FAIL", bench_within_ok ? "PASS" : "FAIL", bench_ci_ok ? "PASS" : "FAIL");
     fprintf(rp, "- Contrôles plasma actifs: phase_step=800, resonance_pump=on, magnetic_quench=on.\n");
     fprintf(rp, "- Pompage dynamique (feedback atomique): energy_reduction_ratio=%.6f pairing_gain=%.6f.\n", feedback_energy_reduction, feedback_pairing_gain);

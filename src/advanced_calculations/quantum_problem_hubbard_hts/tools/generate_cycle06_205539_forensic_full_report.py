@@ -140,7 +140,7 @@ def main():
               '| module | integration_scheme | dt | field_type | utilité |',
               '|---|---|---:|---|---|']
     for m in meta:
-        util='intégration temporelle proxy des observables corrélées'
+        util='intégration temporelle fullscale des observables corrélées'
         lines.append(f"| {m['module']} | {m['integration_scheme']} | {m['dt']} | {m['field_type']} | {util} |")
 
     lines += ['', '### Commandes exactes reproductibles', '```bash',

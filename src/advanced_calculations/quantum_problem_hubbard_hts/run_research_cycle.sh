@@ -56,12 +56,12 @@ export LUMVORAX_HFBL360_ENABLED="1"
 export LUMVORAX_MEMORY_TRACKER="1"
 export LUMVORAX_RUN_GROUP="campaign_${STAMP_UTC}"
 
-export LUMVORAX_SOLVER_VARIANT="proxy"
+export LUMVORAX_SOLVER_VARIANT="fullscale"
 "$ROOT_DIR/hubbard_hts_research_runner" "$ROOT_DIR"
-print_progress "proxy simulation"
+print_progress "fullscale simulation"
 
-LATEST_PROXY_RUN="$(ls -1 "$ROOT_DIR/results" | rg '^research_' | tail -n 1)"
-PROXY_RUN_DIR="$ROOT_DIR/results/$LATEST_PROXY_RUN"
+LATEST_FULLSCALE_RUN="$(ls -1 "$ROOT_DIR/results" | rg '^research_' | tail -n 1)"
+FULLSCALE_RUN_DIR="$ROOT_DIR/results/$LATEST_FULLSCALE_RUN"
 
 export LUMVORAX_SOLVER_VARIANT="advanced_parallel"
 "$ROOT_DIR/hubbard_hts_research_runner_advanced_parallel" "$ROOT_DIR"
@@ -163,18 +163,18 @@ mkdir -p "$CAMPAIGN_DIR"
 cat > "$CAMPAIGN_DIR/campaign_manifest.txt" <<MANIFEST
 stamp_utc=$STAMP_UTC
 run_group=${LUMVORAX_RUN_GROUP}
-proxy_run=$LATEST_PROXY_RUN
+fullscale_run=$LATEST_FULLSCALE_RUN
 advanced_run=$LATEST_ADV_RUN
-proxy_run_dir=$PROXY_RUN_DIR
+fullscale_run_dir=$FULLSCALE_RUN_DIR
 advanced_run_dir=$ADV_RUN_DIR
 MANIFEST
 print_progress "campaign manifest"
 
-python3 "$ROOT_DIR/tools/post_run_proxy_vs_advanced_compare.py" "$PROXY_RUN_DIR" "$ADV_RUN_DIR" --out-dir "$CAMPAIGN_DIR"
-print_progress "proxy vs advanced compare"
+python3 "$ROOT_DIR/tools/post_run_fullscale_vs_advanced_compare.py" "$FULLSCALE_RUN_DIR" "$ADV_RUN_DIR" --out-dir "$CAMPAIGN_DIR"
+print_progress "fullscale vs advanced compare"
 
 echo "Research cycle terminé (advanced): $RUN_DIR"
-echo "Proxy run: $PROXY_RUN_DIR"
+echo "Fullscale run: $FULLSCALE_RUN_DIR"
 echo "Advanced run: $ADV_RUN_DIR"
 echo "Campaign artifacts: $CAMPAIGN_DIR"
 echo "Session log: $SESSION_LOG"

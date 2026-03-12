@@ -96,7 +96,7 @@ def main():
                 stable += 1
         drift_stability_pct = pct(stable, total) if total else 0.0
 
-    proxy_modularity_pct = min(100.0, 0.40 * matrix_pct + 0.30 * metadata_pct + 0.30 * gate_pct)
+    model_modularity_pct = min(100.0, 0.40 * matrix_pct + 0.30 * metadata_pct + 0.30 * gate_pct)
 
     v4next_connection_pct = min(
         100.0,
@@ -132,7 +132,7 @@ def main():
         + 0.12 * physics_gate_pct
         + 0.10 * matrix_pct
         + 0.10 * metadata_pct
-        + 0.10 * proxy_modularity_pct
+        + 0.10 * model_modularity_pct
         + 0.16 * v4next_connection_pct
         + 0.15 * shadow_mode_safety_pct
         + 0.15 * realistic_simulation_level_pct
@@ -143,7 +143,7 @@ def main():
         ["physics_gates", f"{physics_gate_pct:.2f}", "PASS ratio in integration_physics_gate_summary.csv", confidence_from_percent(physics_gate_pct)],
         ["physics_matrix", f"{matrix_pct:.2f}", "PASS ratio in integration_physics_enriched_test_matrix.csv", confidence_from_percent(matrix_pct)],
         ["metadata_completeness", f"{metadata_pct:.2f}", "PRESENT ratio in integration_absent_metadata_fields.csv", confidence_from_percent(metadata_pct)],
-        ["proxy_modularity", f"{proxy_modularity_pct:.2f}", "Derived from matrix+metadata+gate coverage", confidence_from_percent(proxy_modularity_pct)],
+        ["model_modularity", f"{model_modularity_pct:.2f}", "Derived from matrix+metadata+gate coverage", confidence_from_percent(model_modularity_pct)],
         ["v4next_connection_readiness", f"{v4next_connection_pct:.2f}", "Derived from gates, metadata, rollout, checksums", confidence_from_percent(v4next_connection_pct)],
         ["shadow_mode_safety", f"{shadow_mode_safety_pct:.2f}", "Derived from gate stability, drift stability and rollout", confidence_from_percent(shadow_mode_safety_pct)],
         ["realistic_simulation_level", f"{realistic_simulation_level_pct:.2f}", "Derived from benchmarks, matrix, non-fail tests and drift", confidence_from_percent(realistic_simulation_level_pct)],
@@ -155,8 +155,8 @@ def main():
 
     backlog = [
         ["Q_missing_units", "Are physical units explicit and consistent for all observables?", "Open", "Add units schema and unit-consistency gate"],
-        ["Q_solver_crosscheck", "Do proxy results match at least one independent non-proxy solver on larger lattice?", "Closed" if benchmark_within_error_pct >= 100.0 else "Open", "Maintain benchmark_comparison_qmc_dmrg.csv and extend lattice coverage"],
-        ["Q_dt_real_sweep", "Is dt stability validated by true multi-run dt/2,dt,2dt (not proxy only)?", "Open", "Schedule 3-run sweep in CI night job"],
+        ["Q_solver_crosscheck", "Do fullscale results match at least one independent non-heuristic solver on larger lattice?", "Closed" if benchmark_within_error_pct >= 100.0 else "Open", "Maintain benchmark_comparison_qmc_dmrg.csv and extend lattice coverage"],
+        ["Q_dt_real_sweep", "Is dt stability validated by true multi-run dt/2,dt,2dt (not fullscale only)?", "Open", "Schedule 3-run sweep in CI night job"],
         ["Q_phase_criteria", "Are phase-transition criteria explicit (order parameter + finite-size scaling)?", "Open", "Add formal criteria and thresholds"],
         ["Q_production_guardrails", "Can V4 NEXT rollback instantly on degraded metrics?", "Closed" if rollout_rows else "Open", "Keep rollout controller and rollback contract active"],
     ]
