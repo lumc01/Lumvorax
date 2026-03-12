@@ -1,9 +1,9 @@
 # final_scientific_audit.md
 
-- generated_utc: `2026-03-12T02:54:01Z`
-- code_hash: `cf17bbc7cb4fb03193809a23505436efa9be4950bf749b13dfa3e38ce117f30b`
-- dependency_hash: `663033b5c82e711dd949c7aff9b0b8b7cc030acb475823b9f84bfac88c2414ef`
-- result_hash: `67b1c9e08124a5dca2a66b411e029728e97c9280fcd61092b1ecad158659a40f`
+- generated_utc: `2026-03-12T03:11:55Z`
+- code_hash: `5d97bcc22d45bdd3ae65c40cf369e1a0533b0ff15f1ebe28f5c873586218fb85`
+- dependency_hash: `0a3f346151e12a0aaca03ee50c5c623d1321d173ddb4b7c04e51b6b6e435f984`
+- result_hash: `70fabf9acf6909c4cb01908b176d317f08d5e048f3ac0659c9561729ef001c50`
 
 ## pipeline_formal_validation
 - initialization: PASS

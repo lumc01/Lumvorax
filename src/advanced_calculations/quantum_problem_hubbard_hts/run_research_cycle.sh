@@ -19,7 +19,7 @@ cp -a "$ROOT_DIR/src" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/Makefile" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/benchmarks" "$BACKUP_DIR/"
 
-TOTAL_STEPS=27
+TOTAL_STEPS=28
 CURRENT_STEP=0
 
 print_progress() {
@@ -172,6 +172,9 @@ print_progress "campaign manifest"
 
 python3 "$ROOT_DIR/tools/post_run_fullscale_vs_advanced_compare.py" "$FULLSCALE_RUN_DIR" "$ADV_RUN_DIR" --out-dir "$CAMPAIGN_DIR"
 print_progress "fullscale vs advanced compare"
+
+python3 "$ROOT_DIR/tools/post_run_fullscale_vs_fullscale_benchmark.py" "$RUN_DIR"
+print_progress "fullscale vs fullscale benchmark"
 
 echo "Research cycle terminé (advanced): $RUN_DIR"
 echo "Fullscale run: $FULLSCALE_RUN_DIR"

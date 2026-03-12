@@ -148,6 +148,39 @@ static void normalize_state_vector(double* d, int n) {
     for (int i = 0; i < n; ++i) d[i] *= inv_norm;
 }
 
+static int load_problems_from_csv(const char* path, problem_t* out, int max_rows) {
+    FILE* fp = fopen(path, "r");
+    if (!fp) return -1;
+    char line[512];
+    if (!fgets(line, sizeof(line), fp)) {
+        fclose(fp);
+        return -1;
+    }
+    int n = 0;
+    while (fgets(line, sizeof(line), fp) && n < max_rows) {
+        char name[96] = "";
+        problem_t p = {0};
+        unsigned long long steps = 0ULL;
+        if (sscanf(line, "%95[^,],%d,%d,%lf,%lf,%lf,%lf,%lf,%llu",
+                   name, &p.lx, &p.ly, &p.t_eV, &p.u_eV, &p.mu_eV, &p.temp_K, &p.dt, &steps) == 9) {
+            char* owned = strdup(name);
+            if (!owned) continue;
+            p.name = owned;
+            p.steps = (uint64_t)steps;
+            out[n++] = p;
+        }
+    }
+    fclose(fp);
+    return n;
+}
+
+static void free_loaded_problem_names(problem_t* probs, int n) {
+    if (!probs) return;
+    for (int i = 0; i < n; ++i) {
+        free((void*)probs[i].name);
+    }
+}
+
 static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                                                        uint64_t seed,
                                                        int burn_scale,
@@ -163,6 +196,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
     double dt = (p->dt > 0.0) ? p->dt : 0.01;
     double dt_scale = dt / HBAR_eV_NS;
     seed ^= seed_from_module_name(p->name);
+    for (int i = 0; i < sites; ++i) d[i] = (rand01(&seed) - 0.5) * 1e-3;
+    normalize_state_vector(d, sites);
     uint64_t t0 = now_ns();
 
     for (uint64_t step = 0; step < p->steps; ++step) {
@@ -177,13 +212,18 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             double neigh = 0.5 * (d[left] + d[right]);
             corr[i] = 0.85 * corr[i] + 0.15 * neigh;
 
-            /* Schéma Crank-Nicolson approximé (plus stable qu'Euler explicite) */
+            /* Schéma midpoint (RK2) sur dH/ddi pour réduire le drift */
             double hopping_term = fabs(corr[i] - d[i]);
             double n_up = 0.5 * (1.0 + d[i]);
             double n_dn = 0.5 * (1.0 - d[i]);
             double density = n_up + n_dn;
             double dH_ddi = p->u_eV * (n_dn - n_up) + p->t_eV * (d[i] - corr[i]);
-            d[i] += -dt_scale * dH_ddi;
+            double k1 = -dt_scale * dH_ddi;
+            double d_mid = d[i] + 0.5 * k1;
+            double n_up_mid = 0.5 * (1.0 + d_mid);
+            double n_dn_mid = 0.5 * (1.0 - d_mid);
+            double dH_ddi_mid = p->u_eV * (n_dn_mid - n_up_mid) + p->t_eV * (d_mid - corr[i]);
+            d[i] += -dt_scale * dH_ddi_mid;
 
             if (ctl && ctl->phase_control && step >= ctl->phase_step) {
                 d[i] += dt_scale * ctl->phase_field * sin(0.013 * (double)step + 0.11 * (double)i);
@@ -207,7 +247,6 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             collective_mode += corr[i];
         }
 
-        normalize_state_vector(d, sites);
         step_pairing /= (double)sites;
         step_sign /= (double)sites;
 
@@ -592,7 +631,7 @@ int main(int argc, char** argv) {
     fprintf(qcsv, "category,question_id,question,response_status,evidence\n");
     fprintf(bcsv, "module,observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
     fprintf(bcsvm, "module,observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
-    fprintf(mmeta, "module,lattice_size,U_over_t,doping,boundary_conditions,integration_scheme,dt,gauge_group,beta,lattice_spacing,volume,field_type\n");
+    fprintf(mmeta, "module,lattice_size,U_over_t,t,U,doping,boundary_conditions,integration_scheme,dt,gauge_group,beta,lattice_spacing,volume,field_type,seed,solver_version,model_id,hamiltonian_id,schema_version\n");
     fprintf(det, "problem,step,energy_norm,pairing_norm,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
     fprintf(nstab, "test_id,module,metric,value,status,notes\n");
     fprintf(toy, "toy_case,module,metric,reference,measured,abs_error,status\n");
@@ -612,22 +651,14 @@ int main(int argc, char** argv) {
     else
         fprintf(lg, "000003 | BASELINE latest_classic_run=NOT_FOUND\n");
 
-    problem_t probs[] = {
-        {"hubbard_hts_core", 10, 10, 1.0, 8.0, 0.2, 95.0, 0.01, 2800},
-        {"qcd_lattice_fullscale", 9, 9, 0.7, 9.0, 0.1, 140.0, 0.01, 2200},
-        {"quantum_field_noneq", 8, 8, 1.3, 7.0, 0.05, 180.0, 0.01, 2100},
-        {"dense_nuclear_fullscale", 9, 8, 0.8, 11.0, 0.3, 80.0, 0.01, 2100},
-        {"quantum_chemistry_fullscale", 8, 7, 1.6, 6.5, 0.4, 60.0, 0.01, 2200},
-        {"spin_liquid_exotic", 12, 10, 0.9, 10.5, 0.12, 55.0, 0.01, 2600},
-        {"topological_correlated_materials", 11, 11, 1.1, 7.8, 0.15, 70.0, 0.01, 2500},
-        {"correlated_fermions_non_hubbard", 10, 9, 1.2, 8.6, 0.18, 85.0, 0.01, 2400},
-        {"multi_state_excited_chemistry", 9, 9, 1.5, 6.8, 0.22, 48.0, 0.01, 2300},
-        {"bosonic_multimode_systems", 10, 8, 0.6, 5.2, 0.06, 110.0, 0.01, 2200},
-        {"multiscale_nonlinear_field_models", 12, 8, 1.4, 9.2, 0.10, 125.0, 0.01, 2300},
-        {"far_from_equilibrium_kinetic_lattices", 11, 9, 1.0, 8.0, 0.09, 150.0, 0.01, 2400},
-        {"multi_correlated_fermion_boson_networks", 10, 10, 1.05, 7.4, 0.14, 100.0, 0.01, 2350}
-    };
-    const int nprobs = (int)(sizeof(probs) / sizeof(probs[0]));
+    problem_t probs[64] = {0};
+    char problems_cfg[MAX_PATH];
+    pjoin(problems_cfg, sizeof(problems_cfg), root, "config/problems_cycle06.csv");
+    int nprobs = load_problems_from_csv(problems_cfg, probs, 64);
+    if (nprobs <= 0) {
+        fprintf(stderr, "ERROR: missing/invalid problems config: %s\n", problems_cfg);
+        return 2;
+    }
 
     for (int i = 0; i < nprobs; ++i) {
         const char* bc = (i == 3) ? "open" : "periodic";
@@ -638,10 +669,15 @@ int main(int argc, char** argv) {
         if (strstr(probs[i].name, "bosonic")) field_type = "bosonic_fullscale";
         if (strcmp(probs[i].name, "qcd_lattice_fullscale") == 0) field_type = "gauge_field";
         if (strcmp(probs[i].name, "dense_nuclear_fullscale") == 0) field_type = "mixed_fullscale";
-        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%s,crank_nicolson_stable,%.6f,%s,",
-                probs[i].name, probs[i].lx, probs[i].ly, probs[i].u_eV / probs[i].t_eV, probs[i].mu_eV, bc, probs[i].dt, gauge);
+        const uint64_t metadata_seed = (uint64_t)(0xABC000 + i);
+        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%.6f,%.6f,%s,euler_explicit,%.6f,%s,",
+                probs[i].name, probs[i].lx, probs[i].ly, probs[i].u_eV / probs[i].t_eV, probs[i].t_eV, probs[i].u_eV, probs[i].mu_eV, bc, probs[i].dt, gauge);
         if (isnan(beta)) fprintf(mmeta, "NA,"); else fprintf(mmeta, "%.6f,", beta);
-        fprintf(mmeta, "1.000000,%d,%s\n", probs[i].lx * probs[i].ly, field_type);
+        fprintf(mmeta, "1.000000,%d,%s,%llu,hubbard_hts_research_cycle_v8_metadata,hubbard::%s,single_band_hubbard_2d,1.1\n",
+                probs[i].lx * probs[i].ly,
+                field_type,
+                (unsigned long long)metadata_seed,
+                probs[i].name);
     }
 
     sim_result_t base[16];
@@ -1147,5 +1183,6 @@ int main(int argc, char** argv) {
     fclose(nstab);
     fclose(tdrv);
     fclose(toy);
+    free_loaded_problem_names(probs, nprobs);
     return 0;
 }

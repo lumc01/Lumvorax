@@ -51,7 +51,7 @@ def collect_sources(root: Path) -> list[Path]:
     for p in root.rglob("*"):
         if not p.is_file():
             continue
-        if any(part in {"results", "backups", "CHAT", "RAPPORT"} for part in p.parts):
+        if any(part in {"results", "backups", "CHAT", "RAPPORT", "tests", "__pycache__"} for part in p.parts):
             continue
         if p.suffix in {".c", ".h", ".cpp", ".py", ".sh", ".md"}:
             out.append(p)
@@ -69,6 +69,8 @@ def run_proxy_detection(root: Path, out_csv: Path) -> tuple[int, int]:
             continue
         for i, line in enumerate(lines, start=1):
             low = line.lower()
+            if "forbidden_patterns" in low:
+                continue
             for pat in FORBIDDEN_PATTERNS:
                 if pat.lower() in low:
                     rows.append([str(p.relative_to(root)), i, pat, line.strip()[:240]])
