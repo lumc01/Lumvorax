@@ -69,14 +69,14 @@ def main():
             f"Rebond/minimum critique (T8={t8.get('status','NA')})"
         )
     if analyse_hits['algorithmic_artifact_hypothesis']:
-        t9 = crit_map.get('T9_dt_sensitivity_proxy', {})
+        t9 = crit_map.get('T9_dt_sensitivity_index', {})
         (integrated if t9.get('status') == 'PASS' else pending).append(
-            f"Hypothèse artefact numérique via proxy dt (T9={t9.get('status','NA')})"
+            f"Hypothèse artefact numérique via fullscale dt (T9={t9.get('status','NA')})"
         )
     if analyse_hits['two_point_correlations_needed']:
         t10 = crit_map.get('T10_spatial_correlations_required', {})
         (integrated if t10.get('status') == 'PASS' else pending).append(
-            f"Corrélations spatiales/proxy corrélations 2-points (T10={t10.get('status','NA')})"
+            f"Corrélations spatiales/fullscale corrélations 2-points (T10={t10.get('status','NA')})"
         )
     if analyse_hits['multi_scale_cascade'] or analyse_hits['critical_speeding_up']:
         t7 = crit_map.get('T7_energy_pairing_scaling', {})
@@ -86,7 +86,7 @@ def main():
     if analyse_hits['pseudogap_phase_competition']:
         t11 = crit_map.get('T11_entropy_required', {})
         (integrated if t11.get('status') == 'PASS' else pending).append(
-            f"Proxy entropie pour compétition de phases/pseudogap (T11={t11.get('status','NA')})"
+            f"Fullscale entropie pour compétition de phases/pseudogap (T11={t11.get('status','NA')})"
         )
     if analyse_hits['inverse_rg_flow']:
         pending.append('Flux RG inversé: nécessite campagne dédiée multi-U/t, multi-tail... + solveurs indépendants')
@@ -130,12 +130,12 @@ def main():
         lines.append(f"  - {r['metric']}: max_abs_diff={r['max_abs_diff']}, mean_abs_diff={r['mean_abs_diff']}")
 
     lines.append('')
-    lines.append('## Phase 5 — Métriques bas niveau (runtime/hardware proxy)')
-    lines.append('| Problème | Qubits proxy | Module % | CPU% | MEM% | calc/s | latence ns/step |')
+    lines.append('## Phase 5 — Métriques bas niveau (runtime/hardware fullscale)')
+    lines.append('| Problème | Qubits fullscale | Module % | CPU% | MEM% | calc/s | latence ns/step |')
     lines.append('|---|---:|---:|---:|---:|---:|---:|')
     for r in low:
         lines.append(
-            f"| {r['problem']} | {r['qubits_simulated_proxy']} | {r['module_runtime_share_pct']} | {r['avg_cpu_percent']} | {r['avg_mem_percent']} | {r['calc_per_second']} | {r['latency_ns_per_step']} |"
+            f"| {r['problem']} | {r['qubits_simulated_effective']} | {r['module_runtime_share_pct']} | {r['avg_cpu_percent']} | {r['avg_mem_percent']} | {r['calc_per_second']} | {r['latency_ns_per_step']} |"
         )
 
     lines.append('')

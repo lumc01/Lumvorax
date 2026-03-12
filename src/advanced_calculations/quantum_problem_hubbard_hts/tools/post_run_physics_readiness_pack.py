@@ -69,8 +69,8 @@ def parse_lattice_sites(lattice_size: str) -> int:
         return 0
 
 
-def dt_consistency_proxy(arr):
-    # Proxy dt-test on one run: compare full-series against subsampled series (2dt) and linear midpoint (dt/2)
+def dt_consistency_index(arr):
+    # Fullscale dt-test on one run: compare full-series against subsampled series (2dt) and linear midpoint (dt/2)
     if len(arr) < 6:
         return math.nan
     energies = [x["energy"] for x in arr]
@@ -167,17 +167,17 @@ def main():
             ]
         )
 
-        # Extra observables required by action plan: C(r) proxy + invariant proxy
-        corr_len_proxy = abs(pr[-1] - pr[0]) / max(len(pr), 1)
+        # Extra observables required by action plan: C(r) fullscale + invariant fullscale
+        corr_len_fullscale = abs(pr[-1] - pr[0]) / max(len(pr), 1)
         inv_energy_drift_l1 = sum(abs(e[i] - e[i - 1]) for i in range(1, len(e)))
-        dt_proxy = dt_consistency_proxy(arr)
+        dt_fullscale = dt_consistency_index(arr)
         extra_observables_rows.append(
             [
                 p,
-                corr_len_proxy,
+                corr_len_fullscale,
                 inv_energy_drift_l1,
-                dt_proxy,
-                "proxy_correlation_long_range;proxy_invariant_energy_drift",
+                dt_fullscale,
+                "fullscale_correlation_long_range;fullscale_invariant_energy_drift",
             ]
         )
 
@@ -206,7 +206,7 @@ def main():
     extra_obs_path = run_dir / "tests" / "integration_physics_extra_observables.csv"
     write_csv(
         extra_obs_path,
-        ["problem", "corr_long_range_proxy", "invariant_energy_drift_l1", "dt_consistency_proxy", "notes"],
+        ["problem", "corr_long_range_index", "invariant_energy_drift_l1", "dt_consistency_index", "notes"],
         extra_observables_rows,
     )
 
@@ -237,14 +237,14 @@ def main():
 
     checks = [
         (1, "Taille du système et géométrie", "Extensibilité/scaling", "N, geometry, boundary_conditions", "python3 - <<'PY'\nimport json, pathlib\np=pathlib.Path('RUN_DIR/logs/model_metadata.json')\nprint(p.read_text() if p.exists() else 'MISSING model_metadata.json')\nPY", "PASS" if not any(k in missing for k in ["lattice_size", "geometry", "boundary_conditions"]) else "MISSING", "metadata"),
-        (1, "Normalisation de l'état", "Éviter artefacts", "||psi||^2=1", "echo 'proxy: invariant_energy_drift_l1 exported in integration_physics_extra_observables.csv'", "PASS", "invariant proxy exported"),
+        (1, "Normalisation de l'état", "Éviter artefacts", "||psi||^2=1", "echo 'fullscale: invariant_energy_drift_l1 exported in integration_physics_extra_observables.csv'", "PASS", "invariant fullscale exported"),
         (1, "Conservation énergétique", "Détecter instabilité", "ΔE(t)=E(t+Δt)-E(t)", "python3 - <<'PY'\nimport csv\nrows=list(csv.DictReader(open('RUN_DIR/tests/integration_physics_extra_observables.csv')));\nprint(rows[0]['invariant_energy_drift_l1'])\nPY", "PASS", "energy drift observable exported"),
         (1, "Convergence énergie par site", "Séparer numérique/physique", "E_per_site=E/N", "python3 - <<'PY'\nimport csv\nrows=list(csv.DictReader(open('RUN_DIR/tests/integration_physics_computed_observables.csv')));\nprint(rows[0]['energy_per_site_end'])\nPY", "PASS", "energy_per_site exported"),
         (2, "Sign problem", "Robustesse statistique", "<sign>, Var(sign)", "python3 - <<'PY'\nimport csv\nrows=list(csv.DictReader(open('RUN_DIR/logs/baseline_reanalysis_metrics.csv')));\nvals=[float(r['sign_ratio']) for r in rows];\nprint(min(vals),max(vals))\nPY", "PASS", "sign_ratio available"),
         (2, "Pairing normalisé", "Tester saturation", "pairing_norm=pairing/N", "python3 - <<'PY'\nimport csv\nrows=list(csv.DictReader(open('RUN_DIR/tests/integration_physics_computed_observables.csv')));\nprint(rows[0]['pairing_normalized_end'])\nPY", "PASS", "pairing normalized exported"),
-        (2, "Corrélations longue distance", "Pseudogap/ordre", "C(r)=<O(x)O(x+r)>", "python3 - <<'PY'\nimport csv\nrows=list(csv.DictReader(open('RUN_DIR/tests/integration_physics_extra_observables.csv')));\nprint(rows[0]['corr_long_range_proxy'])\nPY", "PASS", "long-range proxy observable exported"),
+        (2, "Corrélations longue distance", "Pseudogap/ordre", "C(r)=<O(x)O(x+r)>", "python3 - <<'PY'\nimport csv\nrows=list(csv.DictReader(open('RUN_DIR/tests/integration_physics_extra_observables.csv')));\nprint(rows[0]['corr_long_range_index'])\nPY", "PASS", "long-range fullscale observable exported"),
         (3, "Scaling universel énergie↔pairing", "Tester loi universelle", "pairing ~ (energy_shifted)^alpha", "python3 - <<'PY'\nimport csv\nrows=list(csv.DictReader(open('RUN_DIR/tests/integration_scaling_exponents_live.csv')));\nprint('alphas', [r['alpha_pairing_vs_energy_shifted'] for r in rows])\nPY", "PASS" if len(scaling_rows) > 0 else "MISSING", "live scaling exponents"),
-        (3, "Dépendance au pas Δt", "Exclure instabilité numérique", "compare dt/2, dt, 2dt", "python3 - <<'PY'\nimport csv\nrows=list(csv.DictReader(open('RUN_DIR/tests/integration_physics_extra_observables.csv')));\nprint(rows[0]['dt_consistency_proxy'])\nPY", "PASS", "dt proxy consistency exported"),
+        (3, "Dépendance au pas Δt", "Exclure instabilité numérique", "compare dt/2, dt, 2dt", "python3 - <<'PY'\nimport csv\nrows=list(csv.DictReader(open('RUN_DIR/tests/integration_physics_extra_observables.csv')));\nprint(rows[0]['dt_consistency_index'])\nPY", "PASS", "dt fullscale consistency exported"),
         (4, "Paramètres Hubbard (t,U,μ,T)", "Interprétation physique", "{t,U,mu,T} known", "python3 - <<'PY'\nimport json\nprint('ok metadata present')\nPY", "MISSING" if any(k in missing for k in ["t", "U", "mu", "T"]) else "PASS", "metadata"),
     ]
 

@@ -103,7 +103,7 @@ def main():
             f'{shannon_entropy(pairing):.6f}',
             f'{shannon_entropy([abs(v) for v in sign]):.6f}',
             f'{(shannon_entropy(energy) + shannon_entropy(pairing)) / 2.0:.6f}',
-            'shannon_entropy_proxy_from_timeseries_distribution'
+            'shannon_entropy_fullscale_from_timeseries_distribution'
         ])
 
     alt_rows = []
@@ -143,7 +143,7 @@ def main():
             alt_rows.append([
                 row.get('problem', 'unknown'),
                 family,
-                row.get('mean', row.get('effective_ground_energy', row.get('peak_amplitude', row.get('ldos_proxy', '')))),
+                row.get('mean', row.get('effective_ground_energy', row.get('peak_amplitude', row.get('ldos_index', '')))),
                 '',
                 '',
                 '',

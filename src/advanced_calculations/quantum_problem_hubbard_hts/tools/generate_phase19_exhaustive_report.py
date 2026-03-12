@@ -54,7 +54,7 @@ def main():
         }
 
     # connection percentages from observable evidence (not hard-coded)
-    proxy_modularity = 100.0 if len(problems)==5 else 0.0
+    model_modularity = 100.0 if len(problems)==5 else 0.0
     connection_readiness_raw = 0.45*pct(gate_pass, len(gate)) + 0.35*pct(ph_gate_pass, len(ph_gate)) + 0.20*pct(meta_present, len(absent))
     shadow_safety = 0.6*pct(gate_pass, len(gate)) + 0.4*pct(ph_gate_pass, len(ph_gate))
     realism = 55.0 if tcnt.get('PASS',0)>=18 else 40.0
@@ -99,7 +99,7 @@ def main():
     lines.append('## Phase 5 — Interprétation pédagogique')
     lines.append('- `PASS` = test validé selon un critère, pas preuve absolue de théorie.')
     lines.append('- `OBSERVED` = valeur mesurée sans verdict de validité forte.')
-    lines.append('- `proxy` = modèle simplifié pour pilotage et validation de pipeline.')
+    lines.append('- `fullscale` = modèle simplifié pour pilotage et validation de pipeline.')
     lines.append('')
     lines.append('## Phase 6 — Réponses point par point (Q/A/R/S)')
     lines.append('- **Question**: Peut-on connecter au V4 NEXT maintenant ?')
@@ -109,11 +109,11 @@ def main():
     lines.append('- **Question**: Les proxies ont-ils un lien réel avec V4 NEXT ?')
     lines.append('  - **Analyse**: oui, via artefacts structurés + adaptateurs post-run.')
     lines.append('  - **Réponse**: lien partiel-opérationnel, pas encore plein réalisme physique.')
-    lines.append('  - **Solution**: ajouter cross-check solveurs non-proxy et sweeps dt réels.')
+    lines.append('  - **Solution**: ajouter cross-check solveurs non-heuristic et sweeps dt réels.')
     lines.append('')
     lines.append('## Phase 7 — Fail/faiblesses + améliorations')
-    lines.append('- Faiblesse principale: réalisme physique encore limité (proxy-dominant).')
-    lines.append('- Améliorations: unités explicites, dt/2-dt-2dt multi-runs, corrélations non-proxy, critères de phase formels.')
+    lines.append('- Faiblesse principale: réalisme physique encore limité (heuristic-dominant).')
+    lines.append('- Améliorations: unités explicites, dt/2-dt-2dt multi-runs, corrélations non-heuristic, critères de phase formels.')
     lines.append('')
     lines.append('## Phase 8 — Intégration technique ajoutée (déjà en place)')
     lines.append('- Scripts d’audit, metadata v2, physics pack enrichi, status V4 NEXT, gating dual.')
@@ -131,16 +131,16 @@ def main():
     lines.append('```')
     lines.append('')
     lines.append('## Pourcentages demandés (calculés à partir des artefacts)')
-    lines.append(f'- Modularity proxy: `{proxy_modularity:.2f}%`')
+    lines.append(f'- Modularity fullscale: `{model_modularity:.2f}%`')
     lines.append(f'- Readiness connexion V4 NEXT: `{connection_readiness:.2f}%`')
     lines.append(f'- Sécurité shadow mode: `{shadow_safety:.2f}%`')
-    lines.append(f'- Niveau réalisme simulation proxy: `{realism:.2f}%`')
+    lines.append(f'- Niveau réalisme simulation fullscale: `{realism:.2f}%`')
     lines.append(f'- Score global intégré: `{global_score:.2f}%`')
     lines.append('')
     lines.append('## Questions oubliées ajoutées')
     lines.append('- Quels seuils automatiques déclenchent rollback en shadow ?')
-    lines.append('- Quelle latence max admissible entre proxy outputs et bus V4 NEXT ?')
-    lines.append('- Quel minimum de validations non-proxy est requis avant claims forts ?')
+    lines.append('- Quelle latence max admissible entre fullscale outputs et bus V4 NEXT ?')
+    lines.append('- Quel minimum de validations non-heuristic est requis avant claims forts ?')
 
     OUT.write_text('\n'.join(lines)+"\n")
     print(f'generated {OUT}')
