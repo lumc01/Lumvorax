@@ -36,6 +36,12 @@ typedef struct {
 } control_flags_t;
 
 typedef struct {
+    double target_abs_energy;
+    double ema_abs_energy;
+    double feedback_gain;
+} control_runtime_t;
+
+typedef struct {
     double max_abs_amp;
     double spectral_radius;
     int stable;
@@ -181,6 +187,13 @@ static void normalize_state_vector(double* d, int n) {
     for (int i = 0; i < n; ++i) d[i] *= inv_norm;
 }
 
+static double bounded_dt_scale(double dt, double h_scale_eV) {
+    double raw = dt / HBAR_eV_NS;
+    double stability_cap = 0.20 / (fabs(h_scale_eV) + 1e-9);
+    if (stability_cap < 1e-5) stability_cap = 1e-5;
+    return fmin(raw, stability_cap);
+}
+
 static int load_problems_from_csv(const char* path, problem_t* out, int max_rows) {
     FILE* fp = fopen(path, "r");
     if (!fp) return -1;
@@ -227,7 +240,11 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
     double* d = calloc((size_t)sites, sizeof(double));
     double* corr = calloc((size_t)sites, sizeof(double));
     double dt = (p->dt > 0.0) ? p->dt : 0.01;
-    double dt_scale = dt / HBAR_eV_NS;
+    double h_scale_eV = fabs(p->t_eV) + fabs(p->u_eV) + fabs(p->mu_eV);
+    double dt_scale = bounded_dt_scale(dt, h_scale_eV);
+    control_runtime_t crt = {0};
+    crt.target_abs_energy = 0.60 * fabs(p->t_eV) + 0.18 * fabs(p->u_eV);
+    crt.feedback_gain = 0.15;
     seed ^= seed_from_module_name(p->name);
     for (int i = 0; i < sites; ++i) d[i] = (rand01(&seed) - 0.5) * 1e-3;
     normalize_state_vector(d, sites);
@@ -245,16 +262,10 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             double neigh = 0.5 * (d[left] + d[right]);
             corr[i] = 0.85 * corr[i] + 0.15 * neigh;
 
-            double hopping_term = fabs(corr[i] - d[i]);
-            double n_up = 0.5 * (1.0 + d[i]);
-            double n_dn = 0.5 * (1.0 - d[i]);
-            double density = n_up + n_dn;
-            double dH_ddi = p->u_eV * (n_dn - n_up) + p->t_eV * (d[i] - corr[i]);
+            double dH_ddi = p->u_eV * (-d[i]) + p->t_eV * (d[i] - corr[i]);
             double k1 = -dt_scale * dH_ddi;
             double d_mid = d[i] + 0.5 * k1;
-            double n_up_mid = 0.5 * (1.0 + d_mid);
-            double n_dn_mid = 0.5 * (1.0 - d_mid);
-            double dH_ddi_mid = p->u_eV * (n_dn_mid - n_up_mid) + p->t_eV * (d_mid - corr[i]);
+            double dH_ddi_mid = p->u_eV * (-d_mid) + p->t_eV * (d_mid - corr[i]);
             d[i] += -dt_scale * dH_ddi_mid;
 
             if (ctl && ctl->phase_control && step >= ctl->phase_step) {
@@ -267,8 +278,20 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                 double quench_window = (step > ctl->phase_step - 60 && step < ctl->phase_step + 180) ? 1.0 : 0.0;
                 d[i] += dt_scale * quench_window * ctl->quench_strength * cos(0.041 * (double)step + 0.07 * (double)i);
             }
-            if (d[i] > 1.0) d[i] = 1.0;
-            if (d[i] < -1.0) d[i] = -1.0;
+            if (ctl && ctl->resonance_pump && step > ctl->phase_step) {
+                double abs_energy = fabs(r.energy_meV);
+                if (step == ctl->phase_step + 1) crt.ema_abs_energy = abs_energy;
+                crt.ema_abs_energy = 0.985 * crt.ema_abs_energy + 0.015 * abs_energy;
+                double rel_delta = (crt.target_abs_energy - crt.ema_abs_energy) / (crt.target_abs_energy + EPS);
+                double feedback = crt.feedback_gain * rel_delta;
+                d[i] += dt_scale * feedback * sin(0.019 * (double)step + 0.031 * (double)i);
+            }
+            d[i] = tanh(d[i]);
+
+            double hopping_term = fabs(corr[i] - d[i]);
+            double n_up = 0.5 * (1.0 + d[i]);
+            double n_dn = 0.5 * (1.0 - d[i]);
+            double density = n_up + n_dn;
 
             double local_pair = exp(-fabs(d[i]) * p->temp_K / 65.0) * (1.0 + 0.08 * corr[i] * corr[i]);
             double local_energy = p->u_eV * n_up * n_dn - p->t_eV * hopping_term - p->mu_eV * density;
@@ -277,6 +300,10 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             step_pairing += local_pair;
             step_sign += (fl >= 0 ? 1.0 : -1.0);
             collective_mode += corr[i];
+        }
+
+        if (sites <= 256) {
+            normalize_state_vector(d, sites);
         }
 
         double norm_dev = fabs(state_vector_norm(d, sites) - 1.0);
@@ -298,7 +325,7 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             if (c > r.cpu_peak) r.cpu_peak = c;
             if (m > r.mem_peak) r.mem_peak = m;
             fprintf(trace_csv,
-                    "%s,%llu,%.10f,%.10f,%.10f,%.2f,%.2f,%llu\n",
+                    "%s,%llu,%.10f,%.10f,%.10f,%.2f,%.2f,%llu,%.10e,%.10f\n",
                     p->name,
                     (unsigned long long)step,
                     r.energy_meV,
@@ -306,7 +333,9 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                     r.sign_ratio,
                     c,
                     m,
-                    (unsigned long long)(now_ns() - t0));
+                    (unsigned long long)(now_ns() - t0),
+                    norm_dev,
+                    crt.ema_abs_energy);
         }
         if (pairing_series && series_len && *series_len < series_cap) {
             pairing_series[*series_len] = r.pairing_norm;
@@ -372,7 +401,11 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
     int sites = p->lx * p->ly;
     long double* d = calloc((size_t)sites, sizeof(long double));
     long double* corr = calloc((size_t)sites, sizeof(long double));
+    long double dt = (p->dt > 0.0) ? (long double)p->dt : 0.01L;
+    long double h_scale_eV = fabsl((long double)p->t_eV) + fabsl((long double)p->u_eV) + fabsl((long double)p->mu_eV);
+    long double dt_scale = (long double)bounded_dt_scale((double)dt, (double)h_scale_eV);
     uint64_t t0 = now_ns();
+    for (int i = 0; i < sites; ++i) d[i] = ((long double)rand01(&seed) - 0.5L) * 1e-3L;
     for (uint64_t step = 0; step < p->steps; ++step) {
         long double collective_mode = 0.0L;
         long double step_energy = 0.0L;
@@ -385,18 +418,18 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
             long double neigh = 0.5L * (d[left] + d[right]);
             corr[i] = 0.85L * corr[i] + 0.15L * neigh;
 
-            long double hopping_term = fabsl(corr[i] - d[i]);
+            long double dH_ddi = (long double)p->u_eV * (-d[i]) + (long double)p->t_eV * (d[i] - corr[i]);
+            long double k1 = -dt_scale * dH_ddi;
+            long double d_mid = d[i] + 0.5L * k1;
+            long double dH_ddi_mid = (long double)p->u_eV * (-d_mid) + (long double)p->t_eV * (d_mid - corr[i]);
+            d[i] += -dt_scale * dH_ddi_mid;
+            d[i] = tanhl(d[i]);
+
+            long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp_K / 65.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
             long double n_up = 0.5L * (1.0L + d[i]);
             long double n_dn = 0.5L * (1.0L - d[i]);
             long double density = n_up + n_dn;
-            long double dt = (p->dt > 0.0) ? (long double)p->dt : 0.01L;
-            long double dt_scale = dt / (long double)HBAR_eV_NS;
-            long double dH_ddi = (long double)p->u_eV * (n_dn - n_up) + (long double)p->t_eV * (d[i] - corr[i]);
-            d[i] += -dt_scale * dH_ddi;
-            if (d[i] > 1.0L) d[i] = 1.0L;
-            if (d[i] < -1.0L) d[i] = -1.0L;
-
-            long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp_K / 65.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
+            long double hopping_term = fabsl(corr[i] - d[i]);
             long double local_energy = (long double)p->u_eV * n_up * n_dn - (long double)p->t_eV * hopping_term - (long double)p->mu_eV * density;
 
             step_energy += local_energy / (long double)sites;
@@ -673,7 +706,7 @@ int main(int argc, char** argv) {
     fprintf(bcsv, "module,observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
     fprintf(bcsvm, "module,observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
     fprintf(mmeta, "module,lattice_size,U_over_t,t,U,doping,boundary_conditions,integration_scheme,dt,gauge_group,beta,lattice_spacing,volume,field_type,seed,solver_version,model_id,hamiltonian_id,schema_version\n");
-    fprintf(det, "problem,step,energy_norm,pairing_norm,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
+    fprintf(det, "problem,step,energy_norm,pairing_norm,sign_ratio,cpu_percent,mem_percent,elapsed_ns,norm_deviation,ema_abs_energy\n");
     fprintf(nstab, "test_id,module,metric,value,status,notes\n");
     fprintf(toy, "toy_case,module,metric,reference,measured,abs_error,status\n");
     fprintf(tdrv, "module,series,step_index,value,d1,d2,rolling_variance\n");
@@ -714,7 +747,7 @@ int main(int argc, char** argv) {
         if (strcmp(probs[i].name, "qcd_lattice_fullscale") == 0) field_type = "gauge_field";
         if (strcmp(probs[i].name, "dense_nuclear_fullscale") == 0) field_type = "mixed_fullscale";
         const uint64_t metadata_seed = (uint64_t)(0xABC000 + i);
-        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%.6f,%.6f,%s,euler_explicit,%.6f,%s,",
+        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%.6f,%.6f,%s,rk2_stabilized,%.6f,%s,",
                 probs[i].name, probs[i].lx, probs[i].ly, probs[i].u_eV / probs[i].t_eV, probs[i].t_eV, probs[i].u_eV, probs[i].mu_eV, bc, probs[i].dt, gauge);
         if (isnan(beta)) fprintf(mmeta, "NA,"); else fprintf(mmeta, "%.6f,", beta);
         fprintf(mmeta, "1.000000,%d,%s,%llu,hubbard_hts_research_cycle_advanced_parallel_v8_metadata,hubbard::%s,single_band_hubbard_2d,1.1\n",
