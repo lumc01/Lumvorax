@@ -99,7 +99,7 @@ qcd_lattice_fullscale, 1.000000e+00, 1.000000e-06, FAIL
 Note : "normalized_after_each_step" — c'est-à-dire que la norme est forcée à 1 après chaque pas.
 
 **Analyse critique :**  
-Le FAIL signifie que la norme dévie de plus de 1e-6 **avant** correction. Le code normalise ensuite de force. Cela confirme que l'intégrateur Euler explicite est toujours actif. Comme documenté dans analysechatgpt4.md, forcer la norme à 1 après chaque step masque le problème mais ne le corrige pas : l'énergie injectée reste cachée. **Ce bug n'est pas corrigé dans 5132.** Il est cependant maintenant *détecté et documenté*, ce qui est un progrès.
+Le FAIL signifie que la norme dévie de plus de 1e-6 **avant** oi correction. Le code normalise ensuite de force. Cela confirme que l'intégrateur Euler explicite est toujours actif. Comme documenté dans analysechatgpt4.md, forcer la norme à 1 après chaque step masque le problème mais ne le corrige pas : l'énergie injectée reste cachée. **Ce bug n'est pas corrigé dans 5132.** Il est cependant maintenant *détecté et documenté*, ce qui est un progrès.
 
 **Preuve d'absence de correction :** `model_metadata.json` confirme `"method": "euler_explicit"` pour tous les modules.
 
@@ -386,7 +386,7 @@ uncontrolled_energy    : 1.80
 ```
 
 **Explication pédagogique :**  
-Le pompage dynamique simule ce qui se passe quand on applique une perturbation externe au système (comme un laser dans une expérience réelle). Le feedback atomique réduit l'énergie de 1.80 à 1.33, soit une réduction de 26.1%. Cela signifie que le système externe peut induire une transition vers un état d'énergie plus basse. Le pairing_gain négatif (-0.76) indique que cette réduction d'énergie s'accompagne d'une **diminution de l'appariement** : le pompage défait partiellement les paires de Cooper. Ce résultat est physiquement cohérent et constitue une observation intéressante sur la compétition entre énergie et supraconductivité.
+Le pompage dynamique simule ce qui se passe quand on applique une perturbation externe au système (comme un laser dans une expérience réelle). Le feedback atomique réduit l'énergie de 1.80 à 1.33, soit une réduction de 26.1%. Cela -signifie que le système externe peut induire une transition vers un état d'énergie plus basse. Le pairing_gain négatif (-0.76) indique que cette réduction d'énergie s'accompagne d'une **diminution de l'appariement** : le pompage défait partiellement les paires de Cooper. Ce résultat est physiquement cohérent et constitue une observation intéressante sur la compétition entre énergie et supraconductivité.
 
 ---
 
