@@ -3,7 +3,8 @@
 Date: 2026-03-11  
 Run principal analysé: `results/research_20260311T202539Z_1816`  
 Run comparaison avant: `results/research_20260311T181312Z_1925`
-i1) Vue globale
+
+## 1) Vue globale
 
 ### Score global
 - Avant: PASS=19, FAIL=12, OBSERVED=49

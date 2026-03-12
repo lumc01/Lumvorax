@@ -178,3 +178,8 @@ echo "Fullscale run: $FULLSCALE_RUN_DIR"
 echo "Advanced run: $ADV_RUN_DIR"
 echo "Campaign artifacts: $CAMPAIGN_DIR"
 echo "Session log: $SESSION_LOG"
+
+if [ "${LUMVORAX_FULLSCALE_STRICT:-1}" = "1" ]; then
+  "$ROOT_DIR/run_fullscale_strict_protocol.sh" "$RUN_DIR"
+  print_progress "fullscale strict protocol audit"
+fi
