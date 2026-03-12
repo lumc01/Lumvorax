@@ -1,0 +1,14 @@
+module,baseline_dt,recommended_dt,recommended_control_gain_factor,energy_drift_max,progress_percent,stability_severity,donor_modules,benchmark_parallel
+bosonic_multimode_systems,0.010000,0.007500,0.700,0.0000017045,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+correlated_fermions_non_hubbard,0.010000,0.007500,0.700,0.0000032828,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+dense_nuclear_fullscale,0.010000,0.007500,0.700,0.0000031916,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+far_from_equilibrium_kinetic_lattices,0.010000,0.007500,0.700,0.0000021545,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+hubbard_hts_core,0.010000,0.007500,0.700,0.0000023636,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+multi_correlated_fermion_boson_networks,0.010000,0.007500,0.700,0.0000026091,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+multi_state_excited_chemistry,0.010000,0.007500,0.700,0.0000041506,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+multiscale_nonlinear_field_models,0.010000,0.007500,0.700,0.0000028606,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+qcd_lattice_fullscale,0.010000,0.007500,0.700,0.0000023174,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+quantum_chemistry_fullscale,0.010000,0.007500,0.700,0.0000071892,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+quantum_field_noneq,0.010000,0.007500,0.700,0.0000036399,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+spin_liquid_exotic,0.010000,0.007500,0.700,0.0000018750,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED
+topological_correlated_materials,0.010000,0.007500,0.700,0.0000022625,50.00,moderate,bosonic_multimode_systems;spin_liquid_exotic;far_from_equilibrium_kinetic_lattices,ENABLED

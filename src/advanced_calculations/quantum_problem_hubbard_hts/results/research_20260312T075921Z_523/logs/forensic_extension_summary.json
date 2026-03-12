@@ -1,0 +1,45 @@
+{
+  "run_dir": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260312T075921Z_523",
+  "extension_tests_rows": 56,
+  "extension_pass": 17,
+  "extension_observed": 38,
+  "extension_fail": 1,
+  "coverage": [
+    {
+      "suite": "new_tests_results.csv",
+      "total": 80,
+      "pass": 20,
+      "observed": 49,
+      "fail": 11,
+      "pass_pct": 25.0,
+      "status": "OK"
+    },
+    {
+      "suite": "integration_chatgpt_critical_tests.csv",
+      "total": 12,
+      "pass": 9,
+      "observed": 1,
+      "fail": 2,
+      "pass_pct": 75.0,
+      "status": "OK"
+    },
+    {
+      "suite": "integration_forensic_extension_tests.csv",
+      "total": 56,
+      "pass": 17,
+      "observed": 38,
+      "fail": 1,
+      "pass_pct": 30.3571,
+      "status": "OK"
+    },
+    {
+      "suite": "GLOBAL",
+      "total": 148,
+      "pass": 46,
+      "observed": 88,
+      "fail": 14,
+      "pass_pct": 31.0811,
+      "status": "OK"
+    }
+  ]
+}

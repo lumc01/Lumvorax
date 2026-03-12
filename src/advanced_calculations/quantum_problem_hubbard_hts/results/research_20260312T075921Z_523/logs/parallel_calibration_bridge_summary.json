@@ -1,0 +1,29 @@
+{
+  "generated_at_utc": "2026-03-12T08:08:51.948714+00:00",
+  "run": "research_20260312T075921Z_523",
+  "modules": 13,
+  "donor_modules": [
+    "bosonic_multimode_systems",
+    "spin_liquid_exotic",
+    "far_from_equilibrium_kinetic_lattices"
+  ],
+  "fail_families": {
+    "verification": 1,
+    "physics": 1,
+    "benchmark": 7,
+    "cluster_scale": 2
+  },
+  "bridge_file": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260312T075921Z_523/tests/integration_parallel_calibration_bridge.csv",
+  "method": {
+    "dt_factor_policy": {
+      "critical_drift_ge_0.20": 0.25,
+      "high_drift_ge_0.12": 0.5,
+      "moderate": 0.75
+    },
+    "control_gain_factor_policy": {
+      "critical": 0.4,
+      "high": 0.55,
+      "moderate": 0.7
+    }
+  }
+}

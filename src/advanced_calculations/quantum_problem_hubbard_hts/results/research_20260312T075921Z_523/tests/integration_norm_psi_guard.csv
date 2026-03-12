@@ -1,0 +1,14 @@
+module,norm_deviation_max,threshold,status,notes
+hubbard_hts_core,9.000000000000e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+qcd_lattice_fullscale,8.000000000000e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+quantum_field_noneq,7.000000000000e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+dense_nuclear_fullscale,7.485281374239e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+quantum_chemistry_fullscale,6.483314773548e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+spin_liquid_exotic,9.954451150103e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+topological_correlated_materials,1.000000000000e+01,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+correlated_fermions_non_hubbard,8.486832980505e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+multi_state_excited_chemistry,8.000000000000e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+bosonic_multimode_systems,7.944271909999e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+multiscale_nonlinear_field_models,8.797958971133e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+far_from_equilibrium_kinetic_lattices,8.949874371066e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
+multi_correlated_fermion_boson_networks,9.000000000000e+00,1.000000000000e-06,FAIL,rk2_without_forced_renorm
