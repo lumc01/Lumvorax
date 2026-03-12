@@ -429,46 +429,52 @@ Le pompage dynamique simule ce qui se passe quand on applique une perturbation e
 
 ---
 
-## PARTIE XII — PROBLÈMES NON RÉSOLUS ET ACTIONS REQUISES POUR LE CYCLE SUIVANT
+ ## PARTIE XII — PROBLÈMES NON RÉSOLUS ET ACTIONS REQUISES POUR LE CYCLE SUIVANT
 
-Par ordre de criticité :
+ Par ordre de criticité :
 
-### CRITIQUE
-1. **Intégrateur Euler explicite → remplacer par Velocity-Verlet ou RK4**  
-   Les drifts d'énergie (2-6 × 10⁻⁶) persistent. L'intégrateur symplectique est la seule vraie correction.
+ ### CRITIQUE
+ 1. **Intégrateur Euler explicite → remplacer par Velocity-Verlet ou RK4**  
+    Les drifts d'énergie (2-6 × 10⁻⁶) persistent. L'intégrateur symplectique est la seule vraie correction.
 
-2. **Norm guard : tous FAIL**  
-   La normalisation forcée après chaque step masque le problème. La solution physiquement correcte est un intégrateur unitaire (qui conserve la norme sans correction artificielle).
+ 2. **Norm guard : tous FAIL**  
+    La normalisation forcée après chaque step masque le problème. La solution physiquement correcte est un intégrateur unitaire (qui conserve la norme sans correction artificielle).
 
-### IMPORTANT
-3. **Champs vides dans model_metadata.json**  
-   `t`, `U`, `seed`, `solver_version`, `model_id`, `hamiltonian_id` doivent être remplis dynamiquement lors de chaque run.
+ ### IMPORTANT
+ 3. **Champs vides dans model_metadata.json**  
+    `t`, `U`, `seed`, `solver_version`, `model_id`, `hamiltonian_id` doivent être remplis dynamiquement lors de chaque run.
 
-4. **Reproductibilité à graine différente : FAIL suspect**  
-   Delta = 0.0 avec deux graines différentes indique que le générateur aléatoire n'est pas correctement initialisé ou que le calcul est entièrement déterministe (sans tirage de Monte-Carlo réel).
+ 4. **Reproductibilité à graine différente : FAIL suspect**  
+    Delta = 0.0 avec deux graines différentes indique que le générateur aléatoire n'est pas correctement initialisé ou que le calcul est entièrement déterministe (sans tirage de Monte-Carlo réel).
 
-5. **Hardcoding du tableau de problèmes dans les fichiers C**  
-   `problem_t probs[]` aux lignes 615 et 659 des deux fichiers sources doivent être chargés depuis un fichier de configuration externe.
+ 5. **Hardcoding du tableau de problèmes dans les fichiers C**  
+    `problem_t probs[]` aux lignes 615 et 659 des deux fichiers sources doivent être chargés depuis un fichier de configuration externe.
 
-### AMÉLIORATION
-6. **V4-Next : 3 blockers à résoudre pour passer en FULL**  
-   Connection (+26.5 pts), Shadow safety (+24.5 pts), Realism (+7.7 pts).
+ ### AMÉLIORATION
+ 6. **V4-Next : 3 blockers à résoudre pour passer en FULL**  
+    Connection (+26.5 pts), Shadow safety (+24.5 pts), Realism (+7.7 pts).
 
-7. **Benchmark externe : construire une comparaison fullscale vs fullscale**  
-   Le RMSE de 1.28 million est artificiel car les échelles de grille sont incomparables.
+ 7. **Benchmark externe : construire une comparaison fullscale vs fullscale**  
+    Le RMSE de 1.28 million est artificiel car les échelles de grille sont incomparables.
 
-8. **Trend énergie vs taille cluster non monotone**  
-   Le test `cluster_energy_trend → nonincreasing = 0 → FAIL` signifie que l'énergie ne diminue pas systématiquement quand la grille grossit. À investiguer physiquement (peut être un vrai effet de taille finie).
+ 8. **Trend énergie vs taille cluster non monotone**  
+    Le test `cluster_energy_trend → nonincreasing = 0 → FAIL` signifie que l'énergie ne diminue pas systématiquement quand la grille grossit. À investiguer physiquement (peut être un vrai effet de taille finie).
 
----
+ ---
 
-## CONCLUSION GÉNÉRALE
+ ## CONCLUSION GÉNÉRALE
 
-La version `5132` représente un **progrès qualitatif majeur** par rapport à la version `4839` :
+ La version `5132` représente un **progrès qualitatif majeur** par rapport à la version `4839` :
 
-- Elle n'est pas plus performante en termes de calcul brut (les valeurs physiques sont identiques).
-- Elle est **incomparablement plus transparente, plus auditée, et plus honnête** sur ses propres limites.
-- Les 38 fichiers supplémentaires ne sont pas du gonflement — ils représentent de nouvelles couches de validation qui répondent point par point aux exigences identifiées dans les analyses précédentes.
-- Les FAILs nouvellement apparus (drift, norm guard) ne sont pas des régressions : ce sont des problèmes qui existaient avant et qui sont maintenant **mesurés et documentés** pour la première fois.
+ - Elle n'est pas plus performante en termes de calcul brut (les valeurs physiques sont identiques).
+ - Elle est **incomparablement plus transparente, plus auditée, et plus honnête** sur ses propres limites.
+ - Les 38 fichiers supplémentaires ne sont pas du gonflement — ils représentent de nouvelles couches de validation qui répondent point par point aux exigences identifiées dans les analyses précédentes.
+ - Les FAILs nouvellement apparus (drift, norm guard) ne sont pas des régressions : ce sont des problèmes qui existaient avant et qui sont maintenant **mesurés et documentés** pour la première fois.
 
-**L'axe de travail prioritaire pour le prochain cycle est unique et clair :** remplacer l'intégrateur Euler explicite par un intégrateur conservatif (symplectique), ce qui réglera simultanément les FAILs de drift d'énergie et de norme ψ.
+ **L'axe de travail prioritaire pour le prochain cycle est unique et clair :** remplacer l'intégrateur Euler explicite par un intégrateur conservatif (symplectique), ce qui réglera simultanément les FAILs de drift d'énergie et de norme ψ.
+
+ 
+src/advanced_calculations/quantum_problem_hubbard_hts/CHAT/RAPPORT_ANALYSE_COMPARATIVE_5132_vs_4839_VALIDATION_CORRECTIONS.md
+
+**Benchmark externe : construire une comparaison fullscale vs fullscale**  
+ Le RMSE de 1.28 million est artificiel car les échelles de grille sont incomparables.
