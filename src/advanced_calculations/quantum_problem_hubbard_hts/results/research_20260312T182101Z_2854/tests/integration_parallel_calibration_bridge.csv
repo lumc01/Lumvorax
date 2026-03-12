@@ -1,0 +1,14 @@
+module,baseline_dt,recommended_dt,recommended_control_gain_factor,energy_drift_max,progress_percent,stability_severity,donor_modules,benchmark_parallel
+bosonic_multimode_systems,0.010000,0.007500,0.700,0.0000000977,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+correlated_fermions_non_hubbard,0.010000,0.007500,0.700,0.0000000984,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+dense_nuclear_fullscale,0.010000,0.007500,0.700,0.0000001983,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+far_from_equilibrium_kinetic_lattices,0.010000,0.007500,0.700,0.0000000921,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+hubbard_hts_core,0.010000,0.007500,0.700,0.0000000830,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+multi_correlated_fermion_boson_networks,0.010000,0.007500,0.700,0.0000000959,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+multi_state_excited_chemistry,0.010000,0.007500,0.700,0.0000001627,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+multiscale_nonlinear_field_models,0.010000,0.007500,0.700,0.0000000973,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+qcd_lattice_fullscale,0.010000,0.007500,0.700,0.0000001280,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+quantum_chemistry_fullscale,0.010000,0.007500,0.700,0.0000002534,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+quantum_field_noneq,0.010000,0.007500,0.700,0.0000002034,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+spin_liquid_exotic,0.010000,0.007500,0.700,0.0000000769,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED
+topological_correlated_materials,0.010000,0.007500,0.700,0.0000000701,60.00,moderate,topological_correlated_materials;spin_liquid_exotic;hubbard_hts_core,ENABLED

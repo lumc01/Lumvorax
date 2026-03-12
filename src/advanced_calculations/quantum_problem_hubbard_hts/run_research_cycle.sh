@@ -19,7 +19,7 @@ cp -a "$ROOT_DIR/src" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/Makefile" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/benchmarks" "$BACKUP_DIR/"
 
-TOTAL_STEPS=28
+TOTAL_STEPS=30
 CURRENT_STEP=0
 
 print_progress() {
@@ -63,6 +63,9 @@ print_progress "fullscale simulation"
 LATEST_FULLSCALE_RUN="$(ls -1 "$ROOT_DIR/results" | rg '^research_' | tail -n 1)"
 FULLSCALE_RUN_DIR="$ROOT_DIR/results/$LATEST_FULLSCALE_RUN"
 
+python3 "$ROOT_DIR/tools/post_run_csv_schema_guard.py" "$FULLSCALE_RUN_DIR"
+print_progress "fullscale csv schema guard"
+
 export LUMVORAX_SOLVER_VARIANT="advanced_parallel"
 "$ROOT_DIR/hubbard_hts_research_runner_advanced_parallel" "$ROOT_DIR"
 print_progress "advanced parallel simulation"
@@ -72,6 +75,9 @@ ADV_RUN_DIR="$ROOT_DIR/results/$LATEST_ADV_RUN"
 
 RUN_DIR="$ADV_RUN_DIR"
 LATEST_RUN="$LATEST_ADV_RUN"
+
+python3 "$ROOT_DIR/tools/post_run_csv_schema_guard.py" "$RUN_DIR"
+print_progress "advanced csv schema guard"
 
 {
   echo "timestamp_utc=$STAMP_UTC"

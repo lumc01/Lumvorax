@@ -16,6 +16,10 @@ from pathlib import Path
 from statistics import mean
 
 
+MAX_EXP_ARG = 700.0
+MAX_SAFE_MAG = 1e154
+
+
 def read_csv(path: Path):
     with path.open(newline="", encoding="utf-8") as f:
         return list(csv.DictReader(f))
@@ -51,9 +55,29 @@ def linreg(x, y):
 
 
 def rmse(y_true, y_pred):
-    if not y_true:
-        return 0.0
-    return math.sqrt(sum((a - b) ** 2 for a, b in zip(y_true, y_pred)) / len(y_true))
+    finite_pairs = [
+        (a, b)
+        for a, b in zip(y_true, y_pred)
+        if math.isfinite(a) and math.isfinite(b)
+    ]
+    if not finite_pairs:
+        return float("inf")
+    squared = [safe_square(a - b) for a, b in finite_pairs]
+    return math.sqrt(math.fsum(squared) / len(finite_pairs))
+
+
+def safe_square(x):
+    if not math.isfinite(x):
+        return float("inf")
+    if abs(x) > MAX_SAFE_MAG:
+        return float("inf")
+    return x * x
+
+
+def safe_exp(x):
+    if not math.isfinite(x):
+        return float("inf")
+    return math.exp(max(-MAX_EXP_ARG, min(MAX_EXP_ARG, x)))
 
 
 def alpha_from_series(rows):
@@ -109,7 +133,7 @@ def kfold_compare_models(rows, k=5):
         lx = [math.log(v + eps) for v in xtr]
         ly = [math.log(v + eps) for v in ytr]
         la, lb = linreg(lx, ly)
-        yhat_pow = [math.exp(la + lb * math.log(v + eps)) for v in xte]
+        yhat_pow = [safe_exp(la + lb * math.log(v + eps)) for v in xte]
 
         rmse_lin.append(rmse(yte, yhat_lin))
         rmse_pow.append(rmse(yte, yhat_pow))
@@ -216,7 +240,7 @@ def main():
         out_rows.append({"test_family": "bootstrap_alpha", "test_id": f"alpha_ci95_{problem}", "parameter": "alpha_ci95_width", "value": round(hi - lo, 10), "status": status, "details": f"alpha={est:.8f};ci95=[{lo:.8f},{hi:.8f}]"})
 
         rmse_pow, rmse_lin = kfold_compare_models(rows)
-        status = "PASS" if rmse_pow <= rmse_lin else "OBSERVED"
+        status = "PASS" if (math.isfinite(rmse_pow) and math.isfinite(rmse_lin) and rmse_pow <= rmse_lin) else "OBSERVED"
         out_rows.append({"test_family": "cross_validation", "test_id": f"scaling_model_{problem}", "parameter": "rmse_power_minus_linear", "value": round(rmse_pow - rmse_lin, 10), "status": status, "details": f"rmse_power={rmse_pow:.10f};rmse_linear={rmse_lin:.10f}"})
 
         energy = [to_float(r["energy"]) for r in rows]
