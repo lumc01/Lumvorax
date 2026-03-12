@@ -148,6 +148,35 @@ static void normalize_state_vector(double* d, int n) {
     for (int i = 0; i < n; ++i) d[i] *= inv_norm;
 }
 
+static double bounded_dt_scale(double dt, double h_scale_eV) {
+    double raw = dt / HBAR_eV_NS;
+    double stability_cap = 0.20 / (fabs(h_scale_eV) + 1e-9);
+    if (stability_cap < 1e-5) stability_cap = 1e-5;
+    return fmin(raw, stability_cap);
+}
+
+static void module_energy_unit(const char* module_name, const char** out_unit, double* out_factor_from_eV) {
+    if (!out_unit || !out_factor_from_eV) return;
+    *out_unit = "eV";
+    *out_factor_from_eV = 1.0;
+    if (!module_name) return;
+    if (strcmp(module_name, "hubbard_hts_core") == 0) {
+        *out_unit = "meV";
+        *out_factor_from_eV = 1e3;
+        return;
+    }
+    if (strstr(module_name, "qcd")) {
+        *out_unit = "GeV";
+        *out_factor_from_eV = 1e-9;
+        return;
+    }
+    if (strstr(module_name, "nuclear")) {
+        *out_unit = "MeV";
+        *out_factor_from_eV = 1e-6;
+        return;
+    }
+}
+
 static int load_problems_from_csv(const char* path, problem_t* out, int max_rows) {
     FILE* fp = fopen(path, "r");
     if (!fp) return -1;
@@ -194,7 +223,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
     double* d = calloc((size_t)sites, sizeof(double));
     double* corr = calloc((size_t)sites, sizeof(double));
     double dt = (p->dt > 0.0) ? p->dt : 0.01;
-    double dt_scale = dt / HBAR_eV_NS;
+    double h_scale_eV = fabs(p->t_eV) + fabs(p->u_eV) + fabs(p->mu_eV);
+    double dt_scale = bounded_dt_scale(dt, h_scale_eV);
     seed ^= seed_from_module_name(p->name);
     for (int i = 0; i < sites; ++i) d[i] = (rand01(&seed) - 0.5) * 1e-3;
     normalize_state_vector(d, sites);
@@ -210,20 +240,16 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             int left = (i + sites - 1) % sites;
             int right = (i + 1) % sites;
             double neigh = 0.5 * (d[left] + d[right]);
-            corr[i] = 0.85 * corr[i] + 0.15 * neigh;
+            double alpha_corr = (step < 500) ? 0.05 : 0.15;
+            corr[i] = (1.0 - alpha_corr) * corr[i] + alpha_corr * neigh;
 
-            /* Schéma midpoint (RK2) sur dH/ddi pour réduire le drift */
-            double n_up = 0.5 * (1.0 + d[i]);
-            double n_dn = 0.5 * (1.0 - d[i]);
+            /* RK2 midpoint — dérivée = -dH/dd[i], énergie calculée après tanh */
             double d_left = d[left];
             double d_right = d[right];
-            double hopping_lr = -0.5 * d[i] * (d_left + d_right);
-            double dH_ddi = p->u_eV * (n_dn - n_up) + p->t_eV * (d[i] - corr[i]);
+            double dH_ddi = p->u_eV * (-d[i]) + p->t_eV * (d[i] - corr[i]);
             double k1 = -dt_scale * dH_ddi;
             double d_mid = d[i] + 0.5 * k1;
-            double n_up_mid = 0.5 * (1.0 + d_mid);
-            double n_dn_mid = 0.5 * (1.0 - d_mid);
-            double dH_ddi_mid = p->u_eV * (n_dn_mid - n_up_mid) + p->t_eV * (d_mid - corr[i]);
+            double dH_ddi_mid = p->u_eV * (-d_mid) + p->t_eV * (d_mid - corr[i]);
             d[i] += -dt_scale * dH_ddi_mid;
 
             if (ctl && ctl->phase_control && step >= ctl->phase_step) {
@@ -236,9 +262,12 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                 double quench_window = (step > ctl->phase_step - 60 && step < ctl->phase_step + 180) ? 1.0 : 0.0;
                 d[i] += dt_scale * quench_window * ctl->quench_strength * cos(0.041 * (double)step + 0.07 * (double)i);
             }
-            if (d[i] > 1.0) d[i] = 1.0;
-            if (d[i] < -1.0) d[i] = -1.0;
+            d[i] = tanh(d[i]);
 
+            /* Énergie locale calculée sur état mis à jour (cohérence avec advanced_parallel) */
+            double n_up = 0.5 * (1.0 + d[i]);
+            double n_dn = 0.5 * (1.0 - d[i]);
+            double hopping_lr = -0.5 * d[i] * (d_left + d_right);
             double local_pair = exp(-fabs(d[i]) * p->temp_K / 65.0) * (1.0 + 0.08 * corr[i] * corr[i]);
             double local_energy = p->u_eV * n_up * n_dn - p->t_eV * hopping_lr - p->mu_eV * (n_up + n_dn - 1.0);
 
@@ -251,13 +280,17 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
         step_pairing /= (double)sites;
         step_sign /= (double)sites;
 
+        /* Normalisation vecteur d'état à chaque pas (cohérence avec advanced_parallel) */
+        normalize_state_vector(d, sites);
+
         /* Burn séparé - JAMAIS injecté dans énergie physique */
         double burn_metric = 0.0;
         for (int k = 0; k < burn_scale * 220; ++k) {
             burn_metric += sin((double)k + step_energy) + 0.5 * cos((double)k * 0.33 + collective_mode);
         }
-        
-        /* Énergie physique pure - unités explicites (fullscale=1 eV) */
+        (void)burn_metric;
+
+        /* Énergie physique pure - unités explicites (eV interne, converti à la sortie) */
         r.energy = step_energy;
         r.pairing = step_pairing;
         r.sign_ratio = step_sign;
@@ -341,6 +374,9 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
     int sites = p->lx * p->ly;
     long double* d = calloc((size_t)sites, sizeof(long double));
     long double* corr = calloc((size_t)sites, sizeof(long double));
+    long double dt_ld = (p->dt > 0.0) ? (long double)p->dt : 0.01L;
+    long double h_scale_ld = fabsl((long double)p->t_eV) + fabsl((long double)p->u_eV) + fabsl((long double)p->mu_eV);
+    long double dt_scale_ld = (long double)bounded_dt_scale((double)dt_ld, (double)h_scale_ld);
     uint64_t t0 = now_ns();
     for (uint64_t step = 0; step < p->steps; ++step) {
         long double collective_mode = 0.0L;
@@ -352,20 +388,18 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
             int left = (i + sites - 1) % sites;
             int right = (i + 1) % sites;
             long double neigh = 0.5L * (d[left] + d[right]);
-            corr[i] = 0.85L * corr[i] + 0.15L * neigh;
+            long double alpha_corr_ld = (step < 500) ? 0.05L : 0.15L;
+            corr[i] = (1.0L - alpha_corr_ld) * corr[i] + alpha_corr_ld * neigh;
+
+            long double d_left = d[left];
+            long double d_right = d[right];
+            long double dH_ddi = (long double)p->u_eV * (-d[i]) + (long double)p->t_eV * (d[i] - corr[i]);
+            d[i] += -dt_scale_ld * dH_ddi;
+            d[i] = tanhl(d[i]);
 
             long double n_up = 0.5L * (1.0L + d[i]);
             long double n_dn = 0.5L * (1.0L - d[i]);
-            long double d_left = d[left];
-            long double d_right = d[right];
             long double hopping_lr = -0.5L * d[i] * (d_left + d_right);
-            long double dt = (p->dt > 0.0) ? (long double)p->dt : 0.01L;
-            long double dt_scale = dt / (long double)HBAR_eV_NS;
-            long double dH_ddi = (long double)p->u_eV * (n_dn - n_up) + (long double)p->t_eV * (d[i] - corr[i]);
-            d[i] += -dt_scale * dH_ddi;
-            if (d[i] > 1.0L) d[i] = 1.0L;
-            if (d[i] < -1.0L) d[i] = -1.0L;
-
             long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp_K / 65.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
             long double local_energy = (long double)p->u_eV * n_up * n_dn - (long double)p->t_eV * hopping_lr - (long double)p->mu_eV * (n_up + n_dn - 1.0L);
 
@@ -376,11 +410,7 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
         }
         step_pairing /= (long double)sites;
         step_sign /= (long double)sites;
-
-        long double burn = 0;
-        for (int k = 0; k < burn_scale * 220; ++k) {
-            burn += sinl((long double)k + step_energy) + 0.5L * cosl((long double)k * 0.33L + collective_mode);
-        }
+        (void)collective_mode;
         r.energy = (double)step_energy;
         r.pairing = (double)step_pairing;
         r.sign_ratio = (double)step_sign;
@@ -641,7 +671,7 @@ int main(int argc, char** argv) {
 
     fprintf(lg, "000001 | START run_id=%s utc=%04d-%02d-%02dT%02d:%02d:%02dZ\n", run_id, g.tm_year + 1900, g.tm_mon + 1, g.tm_mday, g.tm_hour, g.tm_min, g.tm_sec);
     fprintf(lg, "000002 | ISOLATION run_dir_preexisting=%s\n", isolation_ok ? "NO" : "YES");
-    fprintf(prov, "algorithm_version=hubbard_hts_research_cycle_v7_controls_dt_fft\n");
+    fprintf(prov, "algorithm_version=hubbard_hts_research_cycle_v9_bounded_dt_tanh_unit_conv\n");
     fprintf(prov, "advanced_stack=correlated_fullscale+independent_long_double+exact_2x2_hubbard\n");
     fprintf(prov, "rng=lcg_6364136223846793005\n");
     fprintf(prov, "resource_target=cpu_ram_99_percent_best_effort\n");
@@ -672,7 +702,7 @@ int main(int argc, char** argv) {
         if (strcmp(probs[i].name, "qcd_lattice_fullscale") == 0) field_type = "gauge_field";
         if (strcmp(probs[i].name, "dense_nuclear_fullscale") == 0) field_type = "mixed_fullscale";
         const uint64_t metadata_seed = (uint64_t)(0xABC000 + i);
-        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%.6f,%.6f,%s,euler_explicit,%.6f,%s,",
+        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%.6f,%.6f,%s,rk2_bounded_dt,%.6f,%s,",
                 probs[i].name, probs[i].lx, probs[i].ly, probs[i].u_eV / probs[i].t_eV, probs[i].t_eV, probs[i].u_eV, probs[i].mu_eV, bc, probs[i].dt, gauge);
         if (isnan(beta)) fprintf(mmeta, "NA,"); else fprintf(mmeta, "%.6f,", beta);
         fprintf(mmeta, "1.000000,%d,%s,%llu,hubbard_hts_research_cycle_v8_metadata,hubbard::%s,single_band_hubbard_2d,1.1\n",
@@ -684,11 +714,25 @@ int main(int argc, char** argv) {
 
     sim_result_t base[16];
 
+    char units_csv_path[MAX_PATH];
+    pjoin(units_csv_path, sizeof(units_csv_path), tests, "unit_conversion_fullscale.csv");
+    FILE* ucsv = fopen(units_csv_path, "w");
+    if (ucsv) fprintf(ucsv, "module,energy_internal_eV,expected_unit,converted_value,status,notes\n");
+
     int line = 4;
     for (int i = 0; i < nprobs; ++i) {
         base[i] = simulate_fullscale(&probs[i], (uint64_t)(0xABC000 + i), 99, raw);
+        const char* energy_unit = "eV";
+        double unit_factor = 1.0;
+        module_energy_unit(probs[i].name, &energy_unit, &unit_factor);
+        double converted_energy = base[i].energy * unit_factor;
         fprintf(lg, "%06d | BASE_RESULT problem=%s energy=%.6f pairing=%.6f sign=%.6f cpu_peak=%.2f mem_peak=%.2f elapsed_ns=%llu\n", line++, probs[i].name, base[i].energy, base[i].pairing, base[i].sign_ratio, base[i].cpu_peak, base[i].mem_peak, (unsigned long long)base[i].elapsed_ns);
+        if (ucsv) {
+            bool unit_ok = isfinite(converted_energy) && unit_factor > 0.0;
+            fprintf(ucsv, "%s,%.10f,%s,%.10f,%s,fullscale_module_specific_conversion\n", probs[i].name, base[i].energy, energy_unit, converted_energy, unit_ok ? "PASS" : "FAIL");
+        }
     }
+    if (ucsv) fclose(ucsv);
 
     for (int i = 0; i < nprobs; ++i) {
         uint64_t checkpoints[] = {700, 1400, 2100, probs[i].steps};

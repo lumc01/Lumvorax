@@ -292,7 +292,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             int left = (i + sites - 1) % sites;
             int right = (i + 1) % sites;
             double neigh = 0.5 * (d[left] + d[right]);
-            corr[i] = 0.85 * corr[i] + 0.15 * neigh;
+            double alpha_corr = (step < 500) ? 0.05 : 0.15;
+            corr[i] = (1.0 - alpha_corr) * corr[i] + alpha_corr * neigh;
 
             double dH_ddi = p->u_eV * (-d[i]) + p->t_eV * (d[i] - corr[i]);
             double k1 = -dt_scale * dH_ddi;
@@ -449,7 +450,8 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
             int left = (i + sites - 1) % sites;
             int right = (i + 1) % sites;
             long double neigh = 0.5L * (d[left] + d[right]);
-            corr[i] = 0.85L * corr[i] + 0.15L * neigh;
+            long double alpha_corr_ld = (step < 500) ? 0.05L : 0.15L;
+            corr[i] = (1.0L - alpha_corr_ld) * corr[i] + alpha_corr_ld * neigh;
 
             long double dH_ddi = (long double)p->u_eV * (-d[i]) + (long double)p->t_eV * (d[i] - corr[i]);
             long double k1 = -dt_scale * dH_ddi;
