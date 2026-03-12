@@ -1,0 +1,275 @@
+{
+  "run": "research_20260312T203411Z_1748",
+  "generated_at_utc": "2026-03-12T20:34:24.019334+00:00",
+  "counts": {
+    "new_tests": 80,
+    "expert_questions": 19,
+    "module_metadata": 13,
+    "temporal_rows": 4092
+  },
+  "family_stats": {
+    "reproducibility": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "convergence": {
+      "percent": 80.0,
+      "pass": 4,
+      "total": 5
+    },
+    "stress": {
+      "percent": 100.0,
+      "pass": 1,
+      "total": 1
+    },
+    "verification": {
+      "percent": 100.0,
+      "pass": 1,
+      "total": 1
+    },
+    "exact_solver": {
+      "percent": 33.333333333333336,
+      "pass": 1,
+      "total": 3
+    },
+    "sensitivity": {
+      "percent": 0.0,
+      "pass": 0,
+      "total": 8
+    },
+    "physics": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "control": {
+      "percent": 100.0,
+      "pass": 3,
+      "total": 3
+    },
+    "stability": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "dynamic_pumping": {
+      "percent": 0.0,
+      "pass": 0,
+      "total": 4
+    },
+    "dt_sweep": {
+      "percent": 25.0,
+      "pass": 1,
+      "total": 4
+    },
+    "spectral": {
+      "percent": 50.0,
+      "pass": 1,
+      "total": 2
+    },
+    "benchmark": {
+      "percent": 0.0,
+      "pass": 0,
+      "total": 7
+    },
+    "cluster_scale": {
+      "percent": 5.555555555555555,
+      "pass": 2,
+      "total": 36
+    }
+  },
+  "question_status": {
+    "complete": 13,
+    "partial": 6
+  },
+  "expert_complete_pct": 68.42105263157895,
+  "overall_progress_pct": 63.8421052631579,
+  "fails": {
+    "new_tests": [
+      {
+        "test_family": "convergence",
+        "test_id": "conv_monotonic",
+        "parameter": "pairing_nonincreasing",
+        "value": "0",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "spectral",
+        "test_id": "fft_dominant_amplitude",
+        "parameter": "amplitude",
+        "value": "5.3544682043",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "qmc_dmrg_rmse",
+        "parameter": "rmse",
+        "value": "1284423.9315536623",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "qmc_dmrg_mae",
+        "parameter": "mae",
+        "value": "810133.3232714880",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "qmc_dmrg_within_error_bar",
+        "parameter": "percent_within",
+        "value": "6.666667",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "qmc_dmrg_ci95_halfwidth",
+        "parameter": "ci95_halfwidth",
+        "value": "650008.1928600050",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "external_modules_rmse",
+        "parameter": "rmse",
+        "value": "30625.1038188286",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "external_modules_mae",
+        "parameter": "mae",
+        "value": "20344.1671267064",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "benchmark",
+        "test_id": "external_modules_within_error_bar",
+        "parameter": "percent_within",
+        "value": "0.000000",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "cluster_scale",
+        "test_id": "cluster_pair_trend",
+        "parameter": "nonincreasing",
+        "value": "0",
+        "status": "FAIL"
+      },
+      {
+        "test_family": "cluster_scale",
+        "test_id": "cluster_energy_trend",
+        "parameter": "nonincreasing",
+        "value": "0",
+        "status": "FAIL"
+      }
+    ],
+    "numerical_stability": [
+      {
+        "test_id": "energy_conservation",
+        "module": "hubbard_hts_core",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000045111",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "qcd_lattice_fullscale",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000062324",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "quantum_field_noneq",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000061714",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "dense_nuclear_fullscale",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000085557",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "quantum_chemistry_fullscale",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000065798",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "spin_liquid_exotic",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000049307",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "topological_correlated_materials",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000036419",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "correlated_fermions_non_hubbard",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000053880",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "multi_state_excited_chemistry",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000047557",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "bosonic_multimode_systems",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000036550",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "multiscale_nonlinear_field_models",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000054082",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "far_from_equilibrium_kinetic_lattices",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000045559",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      },
+      {
+        "test_id": "energy_conservation",
+        "module": "multi_correlated_fermion_boson_networks",
+        "metric": "energy_density_drift_max",
+        "value": "0.0000041759",
+        "status": "FAIL",
+        "notes": "comparison_2200_4400_6600_8800_steps"
+      }
+    ]
+  }
+}

@@ -1,0 +1,6 @@
+stamp_utc=20260312T202809Z
+run_group=campaign_20260312T202809Z
+fullscale_run=research_20260312T202816Z_1682
+advanced_run=research_20260312T203411Z_1748
+fullscale_run_dir=/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260312T202816Z_1682
+advanced_run_dir=/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260312T203411Z_1748

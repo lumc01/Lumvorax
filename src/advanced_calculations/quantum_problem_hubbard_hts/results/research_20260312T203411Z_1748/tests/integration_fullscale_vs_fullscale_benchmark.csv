@@ -1,0 +1,4 @@
+test_id,metric,value,status,notes
+fullscale_vs_fullscale,rmse,1.4445612009,OBSERVED,research_20260312T202816Z_1682
+fullscale_vs_fullscale,mae,1.2412164775,OBSERVED,research_20260312T202816Z_1682
+fullscale_vs_fullscale,common_modules,13,OBSERVED,research_20260312T202816Z_1682

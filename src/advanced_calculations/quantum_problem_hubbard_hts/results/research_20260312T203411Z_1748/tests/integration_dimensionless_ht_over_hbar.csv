@@ -1,0 +1,14 @@
+module,H_eV,t_ns,hbar_eV_ns,dimensionless_ratio,status,notes
+hubbard_hts_core,9.2000000000,28.0000000000,6.5821195690e-07,3.9136270002e+08,PASS,H_t_over_hbar_dimensionless
+qcd_lattice_fullscale,9.8000000000,22.0000000000,6.5821195690e-07,3.2755356415e+08,PASS,H_t_over_hbar_dimensionless
+quantum_field_noneq,8.3500000000,21.0000000000,6.5821195690e-07,2.6640314227e+08,PASS,H_t_over_hbar_dimensionless
+dense_nuclear_fullscale,12.1000000000,21.0000000000,6.5821195690e-07,3.8604527203e+08,PASS,H_t_over_hbar_dimensionless
+quantum_chemistry_fullscale,8.5000000000,22.0000000000,6.5821195690e-07,2.8410258115e+08,PASS,H_t_over_hbar_dimensionless
+spin_liquid_exotic,11.5200000000,26.0000000000,6.5821195690e-07,4.5505029468e+08,PASS,H_t_over_hbar_dimensionless
+topological_correlated_materials,9.0500000000,25.0000000000,6.5821195690e-07,3.4373373789e+08,PASS,H_t_over_hbar_dimensionless
+correlated_fermions_non_hubbard,9.9800000000,24.0000000000,6.5821195690e-07,3.6389438629e+08,PASS,H_t_over_hbar_dimensionless
+multi_state_excited_chemistry,8.5200000000,23.0000000000,6.5821195690e-07,2.9771519680e+08,PASS,H_t_over_hbar_dimensionless
+bosonic_multimode_systems,5.8600000000,22.0000000000,6.5821195690e-07,1.9586366183e+08,PASS,H_t_over_hbar_dimensionless
+multiscale_nonlinear_field_models,10.7000000000,23.0000000000,6.5821195690e-07,3.7389115091e+08,PASS,H_t_over_hbar_dimensionless
+far_from_equilibrium_kinetic_lattices,9.0900000000,24.0000000000,6.5821195690e-07,3.3144288290e+08,PASS,H_t_over_hbar_dimensionless
+multi_correlated_fermion_boson_networks,8.5900000000,23.5000000000,6.5821195690e-07,3.0668645745e+08,PASS,H_t_over_hbar_dimensionless
