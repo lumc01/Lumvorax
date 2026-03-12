@@ -292,9 +292,9 @@ Le dossier `scientific_diagnostics/` est entièrement nouveau. Il documente form
 |---|---|---|---|
 | Fréquence dominante | 0.003886 Hz | 0.003886 Hz | Identique → signal physique stable |
 | **Amplitude dominante** | 0.0426 | **0.0751** | +76% d'amplitude |
-
-L'amplitude FFT augmente de 76%. Cela signifie que l'oscillation quantique dominante est **plus visible** dans les données de 523. C'est cohérent : puisque les énergies sont maintenant calculées avec de vrais paramètres (t, U réels), les corrélations temporelles sont plus marquées.
-
+ff#ma
+L'amplitude FFT augmente de 76%. Cela signifie que l'oscillation quantique dominante est **plus visible** dans les données de 523. C'est cohérent : puisque les énergies sont maintenant calculées avec de vrais paramètres (t, U réels), les corrélations temporelles sont plus marquées.A#
+ws va
 ### 4.6 Sensitivity pairing vs température — réaliste
 
 | Température | Pairing 5132 | Pairing 523 |
