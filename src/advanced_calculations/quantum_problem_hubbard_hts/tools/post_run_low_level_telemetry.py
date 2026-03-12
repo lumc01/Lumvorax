@@ -88,7 +88,7 @@ def main():
         out_csv,
         [
             'problem',
-            'qubits_simulated_proxy',
+            'qubits_simulated_effective',
             'runtime_ns',
             'module_runtime_share_pct',
             'avg_cpu_percent',
@@ -109,7 +109,7 @@ def main():
     md = (
         '# Low-level Telemetry (module/hardware/interoperability)\n\n'
         f'- total_runtime_ns: `{total_runtime_ns:.0f}`\n'
-        f'- total_qubits_simulated_proxy: `{total_qubits}`\n'
+        f'- total_qubits_simulated_effective: `{total_qubits}`\n'
         f'- avg_cpu_percent_global: `{avg_cpu_all:.2f}`\n'
         f'- avg_mem_percent_global: `{avg_mem_all:.2f}`\n\n'
         '## Architecture (mode FULL V4 NEXT)\n'

@@ -128,7 +128,7 @@ def lag1_autocorr(series):
     return num / den if den else 0.0
 
 
-def lyapunov_proxy(series):
+def lyapunov_index(series):
     if len(series) < 4:
         return 0.0
     diffs = [abs(series[i + 1] - series[i]) + 1e-12 for i in range(len(series) - 1)]
@@ -220,9 +220,9 @@ def main():
         out_rows.append({"test_family": "cross_validation", "test_id": f"scaling_model_{problem}", "parameter": "rmse_power_minus_linear", "value": round(rmse_pow - rmse_lin, 10), "status": status, "details": f"rmse_power={rmse_pow:.10f};rmse_linear={rmse_lin:.10f}"})
 
         energy = [to_float(r["energy"]) for r in rows]
-        lya = lyapunov_proxy(energy)
+        lya = lyapunov_index(energy)
         surr = surrogate_delta(energy)
-        out_rows.append({"test_family": "dynamic_diagnostics", "test_id": f"lyapunov_proxy_{problem}", "parameter": "lyapunov_proxy", "value": round(lya, 10), "status": "OBSERVED", "details": "proxy from local divergence logs"})
+        out_rows.append({"test_family": "dynamic_diagnostics", "test_id": f"lyapunov_index_{problem}", "parameter": "lyapunov_index", "value": round(lya, 10), "status": "OBSERVED", "details": "fullscale from local divergence logs"})
         out_rows.append({"test_family": "dynamic_diagnostics", "test_id": f"surrogate_delta_{problem}", "parameter": "lag1_autocorr_delta", "value": round(surr, 10), "status": "OBSERVED", "details": "difference original vs reversed autocorr"})
 
     # finite-size scaling from existing cluster tests

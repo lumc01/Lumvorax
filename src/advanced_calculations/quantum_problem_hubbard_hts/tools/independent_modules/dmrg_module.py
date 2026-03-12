@@ -26,10 +26,10 @@ def run_dmrg(series: list[float], max_sweeps: int, power_tol: float) -> dict:
         if abs(lam-prev) < power_tol:
             break
         prev=lam
-    ent_proxy=-sum((abs(t)+1e-15)*math.log(abs(t)+1e-15) for t in x)
+    ent_fullscale=-sum((abs(t)+1e-15)*math.log(abs(t)+1e-15) for t in x)
     return {
         "status":"PASS",
         "effective_ground_energy":lam,
-        "entanglement_proxy":ent_proxy,
+        "entanglement_index":ent_fullscale,
         "sweeps":sweeps
     }

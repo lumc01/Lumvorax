@@ -1,0 +1,7 @@
+{
+  "R2_module_energy_conversion": "IMPLEMENTED_WITH_TEST_EXPORT",
+  "R7_energy_drift_threshold": "ENFORCED_1e-6",
+  "R8_norm_guard": "integration_norm_psi_guard.csv",
+  "R9_dimensionless_guard": "integration_dimensionless_ht_over_hbar.csv",
+  "R11_line_by_line_table": "CHAT/RAPPORT_AUDIT_CONFORMITE_PROMPTS_P1_P4.md"
+}
