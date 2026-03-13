@@ -1,58 +1,36 @@
-# Project Overview
+# LUM/VORAX Quantum Research System
 
-This workspace contains research scripts for the AI Mathematical Olympiad (AIMO) and a Quantum HTS (High-Temperature Superconductor) Hubbard model simulation project.
+## Project Overview
+A scientific computing project focused on quantum physics research, black hole simulation (Kerr metric/Gargantua), and advanced numerical methods. The system includes:
 
-## Primary Project: Quantum HTS Hubbard Model Simulation
+- **LUM/VORAX engine**: Core C-based computation framework with 39+ modules
+- **Quantum simulations**: Hubbard model, high-temperature superconductors (HTS)
+- **Forensic logging**: Bit-level traceability and hardware timestamping (nanosecond precision)
+- **Advanced algorithms**: Neural networks, SIMD optimization, parallel processing, TSP, Pareto optimization
 
-Located in `src/advanced_calculations/quantum_problem_hubbard_hts/`.
+## Architecture
+- **Language**: C (primary), Python (utilities), Bash (orchestration)
+- **Build system**: GNU Make
+- **Binaries**: Pre-compiled in `bin/` directory
+  - `bin/lum_vorax_complete` — Main computation engine
+  - `bin/test_forensic_complete_system` — Forensic test suite
+  - `bin/test_integration_complete_39_modules` — Integration tests
+  - `bin/test_quantum` — Quantum module tests
 
-### Architecture
+## Key Directories
+- `src/` — C source code (core, lum, vorax, crypto, debug, advanced_calculations, etc.)
+- `bin/` — Compiled executables
+- `dataset/`, `DATASET/` — Research data
+- `evidence/` — Scientific evidence/results
+- `docs/` — Documentation
 
-- **Fullscale runner**: `src/hubbard_hts_research_cycle.c` — 13-module, 30-step research cycle with RK2 midpoint integration, per-step normalization, QMC/DMRG benchmarks
-- **Advanced parallel runner**: `src/hubbard_hts_research_cycle_advanced_parallel.c` — extended cycle with physics gate summaries, entropy, spatial correlations, cross-module analytics
-- **Makefile**: `LDFLAGS = -Wl,-Bdynamic,--as-needed` (fixes NixOS static glibc segfault; reduced binary 997KB→64KB)
-- **Entry script**: `run_research_cycle.sh` — 35-step pipeline: build → fullscale → advanced_parallel → audit → CHAT
+## Workflows
+- **Run Python**: Runs `main.py` (Python utility entry point)
+- **Quantum Research Cycle**: Runs the full quantum research bash script
 
-### Benchmark Reference Files (calibrated 2026-03-13)
+## Dependencies (Nix packages)
+arrow-cpp, cairo, clang, ffmpeg-full, gcc, gdb, ghostscript, glib, glibc, glibcLocales, gnumake, gobject-introspection, gtk3, kaggle, libxcrypt, nano, openssh, pkg-config, qhull, tcl, tk, tree, vim-full, xsimd, zlib
 
-- `benchmarks/qmc_dmrg_reference_v2.csv` — energies now in **eV/site** (was meV-total: 652800 → 0.9985)
-- `benchmarks/external_module_benchmarks_v1.csv` — energies in **eV/site**, error_bar=0.15
-
-### Key Corrections Applied (session 2026-03-13)
-
-| Fix | File | Description |
-|-----|------|-------------|
-| F0 | Makefile | LDFLAGS anti-segfault NixOS (historical) |
-| F1 | hubbard_hts_research_cycle.c | `simulate_problem_independent`: Euler→RK2+normalization (delta: 16.6%→<0.01%) |
-| F2 | hubbard_hts_research_cycle.c | Removed `* 1000.0` from energy comparison; seuils eV/site (rmse≤0.30, mae≤0.25, within≥40%) |
-| F3 | hubbard_hts_research_cycle.c | External module thresholds: 40000→0.30, 0%→40% |
-| F4 | hubbard_hts_research_cycle_advanced_parallel.c | QMC/DMRG thresholds: 1300000→0.30 |
-| F5 | hubbard_hts_research_cycle_advanced_parallel.c | External module thresholds: eV/site scale |
-| F6 | benchmarks/qmc_dmrg_reference_v2.csv | Energy references: meV-total → eV/site |
-| F7 | benchmarks/external_module_benchmarks_v1.csv | Energy references: meV-total → eV/site |
-
-### Test Status
-
-- **Run 2866** (fullscale): 30 PASS, 49 OBSERVED, 1 FAIL → FIXED (RK2 integration)
-- **Run 3001** (advanced): 31 PASS, 49 OBSERVED, 0 FAIL
-- **New run** (post-corrections): in progress, 0 FAILs expected
-
-### CHAT Reports
-
-Located in `CHAT/`. Key reports:
-- `AUTO_PROMPT_ANALYSE_CROISEE_RUNS_3001_2866_20260313.md` — cross-parallel analysis of runs 3001 and 2866 with all corrections documented
-
-## Secondary Project
-
-- `main.py` — Python entry point (placeholder)
-
-## Environment
-
-- **Runtime**: Python 3.11, GCC
-- **Key packages**: kaggle, gcc, clang, ffmpeg, and many scientific/graphics libraries via Nix
-- **Workflow**: "Quantum Research Cycle" — 35-step pipeline (runs both fullscale and advanced_parallel)
-
-## Security Notes
-
-- `KAGGLE_USERNAME` and `KAGGLE_CONFIG_DIR` are stored as non-sensitive env vars
-- API tokens (KAGGLE_API_TOKEN, ARISTOTLE_API_KEY) should be stored as secrets via the Replit Secrets panel, not in `.replit`
+## Kaggle Integration
+- Username: ndarray2000
+- Config stored in `$KAGGLE_CONFIG_DIR/kaggle.json`
