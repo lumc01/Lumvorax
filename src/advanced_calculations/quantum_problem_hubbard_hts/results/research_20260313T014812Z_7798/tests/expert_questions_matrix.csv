@@ -1,6 +1,6 @@
 category,question_id,question,response_status,evidence
 methodology,Q1,Le seed est-il contrôlé ?,complete,see_report
-methodology,Q2,Deux solveurs indépendants concordent-ils ?,partial,see_report
+methodology,Q2,Deux solveurs indépendants concordent-ils ?,complete,see_report
 numerics,Q3,Convergence multi-échelle testée ?,partial,see_report
 numerics,Q4,Stabilité aux extrêmes validée ?,partial,see_report
 theory,Q5,Pairing décroît avec T ?,complete,see_report
