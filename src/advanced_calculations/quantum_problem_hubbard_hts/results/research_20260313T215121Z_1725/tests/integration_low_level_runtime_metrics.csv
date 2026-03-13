@@ -1,0 +1,14 @@
+problem,qubits_simulated_effective,runtime_ns,module_runtime_share_pct,avg_cpu_percent,avg_mem_percent,calc_per_second,latency_ns_per_step,boundary_conditions,solver_mode
+bosonic_multimode_systems,80,16710440,6.32,11.72,54.36,125669.94,759565.45,periodic,rk2_stabilized
+correlated_fermions_non_hubbard,90,20898130,7.90,11.72,54.36,110057.69,870755.42,periodic,rk2_stabilized
+dense_nuclear_fullscale,72,14438500,5.46,11.72,54.36,138518.54,687547.62,open,rk2_stabilized
+far_from_equilibrium_kinetic_lattices,99,22644080,8.56,11.72,54.36,101571.80,943503.33,periodic,rk2_stabilized
+hubbard_hts_core,100,27209220,10.29,11.72,54.36,99231.07,971757.86,periodic,rk2_stabilized
+multi_correlated_fermion_boson_networks,100,22531480,8.52,11.72,54.36,102079.40,938811.67,periodic,rk2_stabilized
+multi_state_excited_chemistry,81,17957970,6.79,11.72,54.36,122508.28,780781.30,periodic,rk2_stabilized
+multiscale_nonlinear_field_models,96,20751689,7.85,11.72,54.36,106015.47,902247.35,periodic,rk2_stabilized
+qcd_lattice_fullscale,81,17099210,6.47,11.72,54.36,122812.69,777236.82,periodic,rk2_stabilized
+quantum_chemistry_fullscale,56,12604340,4.77,11.72,54.36,166609.28,572924.55,periodic,rk2_stabilized
+quantum_field_noneq,64,13416539,5.07,11.72,54.36,149069.74,638882.81,periodic,rk2_stabilized
+spin_liquid_exotic,120,29628480,11.21,11.72,54.36,84378.27,1139556.92,periodic,rk2_stabilized
+topological_correlated_materials,121,28525669,10.79,11.72,54.36,84134.75,1141026.76,periodic,rk2_stabilized

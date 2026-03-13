@@ -2,7 +2,7 @@ AUTO-PROMPT — MODÈLE DE REQUÊTE POUR CE TYPE D'ANALYSE
 (Inclus en tête de rapport conformément aux instructions. À réutiliser tel quel pour les cycles suivants.)
 
 Lis toi-même ligne par ligne, fichier par fichier, sous-dossier par sous-dossier, chaque
-CSV, JSON, log, MD et code source C des nouveaux runs ainsi que les anciens runs de référence
+CSV, JSON, log, MD et code source .c, .h, .py,.sh des nouveaux runs ainsi que les anciens runs de référence
 et TOUTES les analyses antérieures dans CHAT/ (ne jamais modifier les anciens fichiers) :
 
 NOUVEAUX RUNS (à analyser en priorité) :
@@ -32,9 +32,9 @@ Le rapport doit couvrir :
 1. INVENTAIRE des fichiers nouveaux/disparus entre chaque run
 2. IDENTIFICATION du moteur utilisé (fullscale vs advanced_parallel) — CRITIQUE
 3. TABLEAU COMPARATIF ligne par ligne : énergie, pairing, drift, signe, benchmark
-4. DÉTECTION des invariants artificiels / valeurs gelées / hardcodes
+4. DÉTECTION des invariants artificiels / valeurs gelées / hardcodes / bug / erreur passer reintroduite
 5. AUDIT CODE .c, .h, .py, .sh ligne par ligne : localiser la présence ou absence de chaque correction BC-xx
-6. INVENTAIRE DE CHAQUE ERREUR : fichier, ligne exacte avant/après, cause, solution
+6. INVENTAIRE DE CHAQUE ERREUR : fichier, ligne exacte avant/après, cause, solution , date & heure actuelle de modification
 7. VALIDATION des corrections recommandées dans CHAT/ antérieurs — appliquées ou pas ?
 8. POINTS INÉDITS détectés par toi-même que les analyses précédentes n'avaient pas signalés
 9. TABLEAU BILAN final : score par dimension, FAILs restants, priorités

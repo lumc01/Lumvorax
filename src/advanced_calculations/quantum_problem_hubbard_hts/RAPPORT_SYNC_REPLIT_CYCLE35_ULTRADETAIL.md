@@ -1,6 +1,6 @@
 # RAPPORT_SYNC_REPLIT_CYCLE35_ULTRADETAIL
 
-Run analysé: `research_20260313T211645Z_6647`
+Run analysé: `research_20260313T215121Z_1725`
 
 ## Phase 1 — Synchronisation / intégrité
 - total_runs_audited: 35
@@ -51,19 +51,19 @@ Run analysé: `research_20260313T211645Z_6647`
 ## Phase 5 — Métriques bas niveau (runtime/hardware fullscale)
 | Problème | Qubits fullscale | Module % | CPU% | MEM% | calc/s | latence ns/step |
 |---|---:|---:|---:|---:|---:|---:|
-| bosonic_multimode_systems | 80 | 6.43 | 15.98 | 54.86 | 122914.33 | 776594.09 |
-| correlated_fermions_non_hubbard | 90 | 7.94 | 15.98 | 54.86 | 108919.62 | 879853.75 |
-| dense_nuclear_fullscale | 72 | 5.47 | 15.98 | 54.86 | 137567.00 | 692303.33 |
-| far_from_equilibrium_kinetic_lattices | 99 | 8.53 | 15.98 | 54.86 | 101375.89 | 945326.67 |
-| hubbard_hts_core | 100 | 10.12 | 15.98 | 54.86 | 100328.37 | 961129.64 |
-| multi_correlated_fermion_boson_networks | 100 | 8.63 | 15.98 | 54.86 | 100199.23 | 956427.88 |
-| multi_state_excited_chemistry | 81 | 6.82 | 15.98 | 54.86 | 121237.24 | 788966.96 |
-| multiscale_nonlinear_field_models | 96 | 7.99 | 15.98 | 54.86 | 103593.62 | 923340.43 |
-| qcd_lattice_fullscale | 81 | 6.47 | 15.98 | 54.86 | 121983.03 | 782523.18 |
-| quantum_chemistry_fullscale | 56 | 4.70 | 15.98 | 54.86 | 168073.41 | 567933.64 |
-| quantum_field_noneq | 64 | 5.02 | 15.98 | 54.86 | 149925.04 | 635238.10 |
-| spin_liquid_exotic | 120 | 11.15 | 15.98 | 54.86 | 84299.35 | 1140623.85 |
-| topological_correlated_materials | 121 | 10.73 | 15.98 | 54.86 | 84156.22 | 1140735.60 |
+| bosonic_multimode_systems | 80 | 6.32 | 11.72 | 54.36 | 125669.94 | 759565.45 |
+| correlated_fermions_non_hubbard | 90 | 7.90 | 11.72 | 54.36 | 110057.69 | 870755.42 |
+| dense_nuclear_fullscale | 72 | 5.46 | 11.72 | 54.36 | 138518.54 | 687547.62 |
+| far_from_equilibrium_kinetic_lattices | 99 | 8.56 | 11.72 | 54.36 | 101571.80 | 943503.33 |
+| hubbard_hts_core | 100 | 10.29 | 11.72 | 54.36 | 99231.07 | 971757.86 |
+| multi_correlated_fermion_boson_networks | 100 | 8.52 | 11.72 | 54.36 | 102079.40 | 938811.67 |
+| multi_state_excited_chemistry | 81 | 6.79 | 11.72 | 54.36 | 122508.28 | 780781.30 |
+| multiscale_nonlinear_field_models | 96 | 7.85 | 11.72 | 54.36 | 106015.47 | 902247.35 |
+| qcd_lattice_fullscale | 81 | 6.47 | 11.72 | 54.36 | 122812.69 | 777236.82 |
+| quantum_chemistry_fullscale | 56 | 4.77 | 11.72 | 54.36 | 166609.28 | 572924.55 |
+| quantum_field_noneq | 64 | 5.07 | 11.72 | 54.36 | 149069.74 | 638882.81 |
+| spin_liquid_exotic | 120 | 11.21 | 11.72 | 54.36 | 84378.27 | 1139556.92 |
+| topological_correlated_materials | 121 | 10.79 | 11.72 | 54.36 | 84134.75 | 1141026.76 |
 
 ## Phase 6 — Réponse point par point (question/analyse/réponse/solution)
 ### Q1. Où en est chaque problème précisément ?

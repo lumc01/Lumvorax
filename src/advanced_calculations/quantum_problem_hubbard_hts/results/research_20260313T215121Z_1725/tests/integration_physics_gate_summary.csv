@@ -1,0 +1,5 @@
+gate,status,evidence
+PHYSICS_METADATA_GATE,FAIL,missing=1
+PHYSICS_ENRICHED_MATRIX_GATE,FAIL,rows=10
+PHYSICS_COMPUTED_OBSERVABLES_GATE,PASS,file=integration_physics_computed_observables.csv
+PHYSICS_EXTRA_OBSERVABLES_GATE,PASS,file=integration_physics_extra_observables.csv
