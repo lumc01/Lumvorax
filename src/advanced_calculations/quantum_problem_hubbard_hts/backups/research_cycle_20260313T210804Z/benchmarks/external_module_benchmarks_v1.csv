@@ -1,0 +1,17 @@
+source,module,observable,T,U,value,error_bar
+literature_proxy_2026,spin_liquid_exotic,pairing,55,10.5,0.846,0.150
+literature_proxy_2026,spin_liquid_exotic,energy,55,10.5,2.553,0.150
+literature_proxy_2026,topological_correlated_materials,pairing,70,7.8,0.825,0.150
+literature_proxy_2026,topological_correlated_materials,energy,70,7.8,1.889,0.150
+literature_proxy_2026,correlated_fermions_non_hubbard,pairing,85,8.6,0.783,0.150
+literature_proxy_2026,correlated_fermions_non_hubbard,energy,85,8.6,2.083,0.150
+literature_proxy_2026,multi_state_excited_chemistry,pairing,48,6.8,0.844,0.150
+literature_proxy_2026,multi_state_excited_chemistry,energy,48,6.8,1.645,0.150
+literature_proxy_2026,bosonic_multimode_systems,pairing,110,5.2,0.736,0.150
+literature_proxy_2026,bosonic_multimode_systems,energy,110,5.2,1.237,0.150
+literature_proxy_2026,multiscale_nonlinear_field_models,pairing,125,9.2,0.728,0.150
+literature_proxy_2026,multiscale_nonlinear_field_models,energy,125,9.2,2.235,0.150
+literature_proxy_2026,far_from_equilibrium_kinetic_lattices,pairing,150,8.0,0.698,0.150
+literature_proxy_2026,far_from_equilibrium_kinetic_lattices,energy,150,8.0,1.934,0.150
+literature_proxy_2026,multi_correlated_fermion_boson_networks,pairing,100,7.4,0.769,0.150
+literature_proxy_2026,multi_correlated_fermion_boson_networks,energy,100,7.4,1.787,0.150
