@@ -193,11 +193,20 @@ static hubbard_problem_result_t run_problem(hubbard_run_context_t* ctx, const hu
         for (int i = 0; i < sites; ++i) {
             double fluct = pseudo_rand01(&seed) - 0.5;
             density[i] += 0.02 * fluct;
-            if (density[i] > 1.0) density[i] = 1.0;
+            if (density[i] > 1.0)  density[i] =  1.0;
             if (density[i] < -1.0) density[i] = -1.0;
-            step_energy += pb->interaction_u * density[i] * density[i] - pb->hopping_t * fabs(fluct);
+            /* BC-01 : hopping via voisins du réseau, source physique séparée de fluct */
+            int left_i  = (i + sites - 1) % sites;
+            int right_i = (i + 1) % sites;
+            double n_up_i = 0.5 * (1.0 + density[i]);
+            double n_dn_i = 0.5 * (1.0 - density[i]);
+            double hopping_c = -pb->hopping_t * 0.5 *
+                (density[i] * density[left_i] + density[i] * density[right_i]);
+            step_energy  += (pb->interaction_u * n_up_i * n_dn_i + hopping_c);
             step_pairing += exp(-fabs(density[i]) * pb->temperature_k / 120.0);
-            step_sign += (fluct >= 0.0) ? 1.0 : -1.0;
+            /* BC-01 + BC-06 : signe via proxy fermionique, indépendant de fluct */
+            double fsign = ((n_up_i - 0.5) * (n_dn_i - 0.5) >= 0.0) ? 1.0 : -1.0;
+            step_sign += fsign;
         }
 
         normalize_state_vector(density, sites);

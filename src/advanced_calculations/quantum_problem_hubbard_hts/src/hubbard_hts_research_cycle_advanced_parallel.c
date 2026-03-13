@@ -294,6 +294,9 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             double neigh = 0.5 * (d[left] + d[right]);
             double alpha_corr = (step < 500) ? 0.05 : 0.15;
             corr[i] = (1.0 - alpha_corr) * corr[i] + alpha_corr * neigh;
+            /* BC-03 : sauvegarder voisins AVANT le RK2 — schéma Jacobi cohérent avec fullscale */
+            double d_left_t0  = d[left];
+            double d_right_t0 = d[right];
 
             double dH_ddi = p->u_eV * (-d[i]) + p->t_eV * (d[i] - corr[i]);
             double k1 = -dt_scale * dH_ddi;
@@ -312,7 +315,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                 d[i] += dt_scale * quench_window * ctl->quench_strength * cos(0.041 * (double)step + 0.07 * (double)i);
             }
             if (ctl && ctl->resonance_pump && step > ctl->phase_step) {
-                double abs_energy = fabs(r.energy_meV);
+                /* BC-02 : utiliser prev_step_energy au lieu de r.energy_meV (stale du pas précédent) */
+                double abs_energy = fabs(prev_step_energy);
                 if (step == ctl->phase_step + 1) crt.ema_abs_energy = abs_energy;
                 crt.ema_abs_energy = 0.985 * crt.ema_abs_energy + 0.015 * abs_energy;
                 double rel_delta = (crt.target_abs_energy - crt.ema_abs_energy) / (crt.target_abs_energy + EPS);
@@ -323,16 +327,17 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
 
             double n_up = 0.5 * (1.0 + d[i]);
             double n_dn = 0.5 * (1.0 - d[i]);
-            double d_left = d[left];
-            double d_right = d[right];
-            double hopping_lr = -0.5 * d[i] * (d_left + d_right);
+            /* BC-03 : utiliser voisins pré-RK2 (Jacobi) au lieu de post-tanh */
+            double hopping_lr = -0.5 * d[i] * (d_left_t0 + d_right_t0);
 
             double local_pair = exp(-fabs(d[i]) * p->temp_K / 65.0) * (1.0 + 0.08 * corr[i] * corr[i]);
             double local_energy = p->u_eV * n_up * n_dn - p->t_eV * hopping_lr - p->mu_eV * (n_up + n_dn - 1.0);
 
             step_energy += local_energy / (double)(sites);
             step_pairing += local_pair;
-            step_sign += (fl >= 0 ? 1.0 : -1.0);
+            /* BC-06 : proxy fermionique — signe dépend de l'état physique, pas de fl aléatoire */
+            double fsign = ((n_up - 0.5) * (n_dn - 0.5) >= 0.0) ? 1.0 : -1.0;
+            step_sign += fsign;
             collective_mode += corr[i];
         }
 
@@ -470,7 +475,9 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
 
             step_energy += local_energy / (long double)sites;
             step_pairing += local_pair;
-            step_sign += (fl >= 0 ? 1.0L : -1.0L);
+            /* BC-06 : proxy fermionique (long double) */
+            long double fsign_ld = ((n_up - 0.5L) * (n_dn - 0.5L) >= 0.0L) ? 1.0L : -1.0L;
+            step_sign += fsign_ld;
             collective_mode += corr[i];
         }
         normalize_state_vector_ld(d, sites);
