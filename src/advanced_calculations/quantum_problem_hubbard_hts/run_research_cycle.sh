@@ -19,7 +19,7 @@ cp -a "$ROOT_DIR/src" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/Makefile" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/benchmarks" "$BACKUP_DIR/"
 
-TOTAL_STEPS=30
+TOTAL_STEPS=32
 CURRENT_STEP=0
 
 print_progress() {
@@ -45,6 +45,15 @@ print_progress() {
   fi
 }
 
+write_checksums() {
+  local target_run_dir="$1"
+  (
+    cd "$target_run_dir"
+    rm -f logs/checksums.sha256
+    find . -type f ! -path './logs/checksums.sha256' -print0 | sort -z | xargs -0 sha256sum > logs/checksums.sha256
+  )
+}
+
 make -C "$ROOT_DIR" clean all
 print_progress "build"
 
@@ -65,6 +74,9 @@ FULLSCALE_RUN_DIR="$ROOT_DIR/results/$LATEST_FULLSCALE_RUN"
 
 python3 "$ROOT_DIR/tools/post_run_csv_schema_guard.py" "$FULLSCALE_RUN_DIR"
 print_progress "fullscale csv schema guard"
+
+write_checksums "$FULLSCALE_RUN_DIR"
+print_progress "fullscale checksums"
 
 export LUMVORAX_SOLVER_VARIANT="advanced_parallel"
 "$ROOT_DIR/hubbard_hts_research_runner_advanced_parallel" "$ROOT_DIR"
@@ -157,10 +169,7 @@ print_progress "parallel calibration bridge"
 python3 "$ROOT_DIR/tools/post_run_hfbl360_forensic_logger.py" "$RUN_DIR" --standard-names "$ROOT_DIR/../../../STANDARD_NAMES.md"
 print_progress "hfbl360 forensic logger"
 
-(
-  cd "$RUN_DIR"
-  find . -type f ! -path './logs/checksums.sha256' -print0 | sort -z | xargs -0 sha256sum > logs/checksums.sha256
-)
+write_checksums "$RUN_DIR"
 print_progress "checksums"
 
 
@@ -192,3 +201,7 @@ if [ "${LUMVORAX_FULLSCALE_STRICT:-1}" = "1" ]; then
   "$ROOT_DIR/run_fullscale_strict_protocol.sh" "$RUN_DIR"
   print_progress "fullscale strict protocol audit"
 fi
+
+# Finalize checksums at very end so later post-steps cannot stale the manifest.
+write_checksums "$RUN_DIR"
+print_progress "final checksums"

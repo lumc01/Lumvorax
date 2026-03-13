@@ -370,6 +370,7 @@ static von_neumann_result_t von_neumann_fullscale(const problem_t* p, const cont
 
 static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t seed, int burn_scale) {
     sim_result_t r = {0};
+    (void)burn_scale;
     seed ^= seed_from_module_name(p->name);
     int sites = p->lx * p->ly;
     long double* d = calloc((size_t)sites, sizeof(long double));
