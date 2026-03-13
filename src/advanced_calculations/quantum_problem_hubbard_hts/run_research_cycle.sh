@@ -2,6 +2,7 @@
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
+SCRIPT_PATH="$(realpath "$0")"
 STAMP_UTC="$(date -u +%Y%m%dT%H%M%SZ)"
 BACKUP_DIR="$ROOT_DIR/backups/research_cycle_$STAMP_UTC"
 SESSION_LOG_DIR="$ROOT_DIR/logs"
@@ -19,7 +20,10 @@ cp -a "$ROOT_DIR/src" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/Makefile" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/benchmarks" "$BACKUP_DIR/"
 
-TOTAL_STEPS=32
+TOTAL_STEPS="$(grep -c '^[[:space:]]*print_progress "' "$SCRIPT_PATH")"
+if [ "${TOTAL_STEPS:-0}" -le 0 ]; then
+  TOTAL_STEPS=1
+fi
 CURRENT_STEP=0
 
 print_progress() {
