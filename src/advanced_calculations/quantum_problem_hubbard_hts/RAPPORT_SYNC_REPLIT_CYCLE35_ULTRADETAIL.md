@@ -1,6 +1,6 @@
 # RAPPORT_SYNC_REPLIT_CYCLE35_ULTRADETAIL
 
-Run analysé: `research_20260313T205708Z_5060`
+Run analysé: `research_20260313T211645Z_6647`
 
 ## Phase 1 — Synchronisation / intégrité
 - total_runs_audited: 35
@@ -51,19 +51,19 @@ Run analysé: `research_20260313T205708Z_5060`
 ## Phase 5 — Métriques bas niveau (runtime/hardware fullscale)
 | Problème | Qubits fullscale | Module % | CPU% | MEM% | calc/s | latence ns/step |
 |---|---:|---:|---:|---:|---:|---:|
-| bosonic_multimode_systems | 80 | 6.33 | 16.02 | 55.13 | 123664.79 | 771881.36 |
-| correlated_fermions_non_hubbard | 90 | 7.77 | 16.02 | 55.13 | 110218.29 | 869486.67 |
-| dense_nuclear_fullscale | 72 | 5.54 | 16.02 | 55.13 | 134500.80 | 708085.71 |
-| far_from_equilibrium_kinetic_lattices | 99 | 8.75 | 16.02 | 55.12 | 97905.84 | 978831.67 |
-| hubbard_hts_core | 100 | 10.11 | 16.02 | 55.13 | 99476.46 | 969360.71 |
-| multi_correlated_fermion_boson_networks | 100 | 8.59 | 16.02 | 55.12 | 99729.21 | 960935.42 |
-| multi_state_excited_chemistry | 81 | 6.82 | 16.02 | 55.13 | 120108.12 | 796383.91 |
-| multiscale_nonlinear_field_models | 96 | 7.93 | 16.02 | 55.13 | 103421.76 | 924874.74 |
-| qcd_lattice_fullscale | 81 | 6.46 | 16.02 | 55.13 | 121126.89 | 788054.14 |
-| quantum_chemistry_fullscale | 56 | 4.65 | 16.02 | 55.13 | 168299.71 | 567170.00 |
-| quantum_field_noneq | 64 | 5.19 | 16.02 | 55.13 | 143614.40 | 663151.43 |
-| spin_liquid_exotic | 120 | 11.13 | 16.02 | 55.13 | 83665.60 | 1149263.85 |
-| topological_correlated_materials | 121 | 10.72 | 16.02 | 55.13 | 83422.49 | 1150768.76 |
+| bosonic_multimode_systems | 80 | 6.43 | 15.98 | 54.86 | 122914.33 | 776594.09 |
+| correlated_fermions_non_hubbard | 90 | 7.94 | 15.98 | 54.86 | 108919.62 | 879853.75 |
+| dense_nuclear_fullscale | 72 | 5.47 | 15.98 | 54.86 | 137567.00 | 692303.33 |
+| far_from_equilibrium_kinetic_lattices | 99 | 8.53 | 15.98 | 54.86 | 101375.89 | 945326.67 |
+| hubbard_hts_core | 100 | 10.12 | 15.98 | 54.86 | 100328.37 | 961129.64 |
+| multi_correlated_fermion_boson_networks | 100 | 8.63 | 15.98 | 54.86 | 100199.23 | 956427.88 |
+| multi_state_excited_chemistry | 81 | 6.82 | 15.98 | 54.86 | 121237.24 | 788966.96 |
+| multiscale_nonlinear_field_models | 96 | 7.99 | 15.98 | 54.86 | 103593.62 | 923340.43 |
+| qcd_lattice_fullscale | 81 | 6.47 | 15.98 | 54.86 | 121983.03 | 782523.18 |
+| quantum_chemistry_fullscale | 56 | 4.70 | 15.98 | 54.86 | 168073.41 | 567933.64 |
+| quantum_field_noneq | 64 | 5.02 | 15.98 | 54.86 | 149925.04 | 635238.10 |
+| spin_liquid_exotic | 120 | 11.15 | 15.98 | 54.86 | 84299.35 | 1140623.85 |
+| topological_correlated_materials | 121 | 10.73 | 15.98 | 54.86 | 84156.22 | 1140735.60 |
 
 ## Phase 6 — Réponse point par point (question/analyse/réponse/solution)
 ### Q1. Où en est chaque problème précisément ?
@@ -95,7 +95,7 @@ Run analysé: `research_20260313T205708Z_5060`
 - Aucun ancien rapport modifié.
 
 ## Phase 9 — Traçabilité
-- readiness_global: 80.61%
+- readiness_global: 80.64%
 - rollout_status: SHADOW_BLOCKED / rollback=ENABLED
 
 ## Phase 10 — Commandes exactes reproductibles

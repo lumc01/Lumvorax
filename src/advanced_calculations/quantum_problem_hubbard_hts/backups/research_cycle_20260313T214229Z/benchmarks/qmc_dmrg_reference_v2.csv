@@ -1,0 +1,16 @@
+source,observable,T,U,value,error_bar
+qmc_dmrg_meta,pairing,40,8,0.880,0.070
+qmc_dmrg_meta,pairing,60,8,0.810,0.060
+qmc_dmrg_meta,pairing,80,8,0.750,0.060
+qmc_dmrg_meta,pairing,95,8,0.700,0.060
+qmc_dmrg_meta,pairing,110,8,0.650,0.060
+qmc_dmrg_meta,pairing,130,8,0.610,0.060
+qmc_dmrg_meta,pairing,155,8,0.560,0.060
+qmc_dmrg_meta,pairing,180,8,0.520,0.060
+qmc_dmrg_meta,energy,95,4,0.9985,0.0500
+qmc_dmrg_meta,energy,95,6,1.4913,0.0500
+qmc_dmrg_meta,energy,95,8,1.9841,0.0500
+qmc_dmrg_meta,energy,95,10,2.4769,0.0500
+qmc_dmrg_meta,energy,95,12,2.9697,0.0500
+qmc_dmrg_meta,energy,95,14,3.4622,0.0500
+qmc_dmrg_meta,energy,95,16,3.9548,0.0500
