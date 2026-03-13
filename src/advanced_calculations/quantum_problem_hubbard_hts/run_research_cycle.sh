@@ -58,6 +58,14 @@ write_checksums() {
   )
 }
 
+verify_checksums() {
+  local target_run_dir="$1"
+  (
+    cd "$target_run_dir"
+    sha256sum -c logs/checksums.sha256 >/dev/null
+  )
+}
+
 make -C "$ROOT_DIR" clean all
 print_progress "build"
 
@@ -81,6 +89,8 @@ print_progress "fullscale csv schema guard"
 
 write_checksums "$FULLSCALE_RUN_DIR"
 print_progress "fullscale checksums"
+verify_checksums "$FULLSCALE_RUN_DIR"
+print_progress "fullscale checksum verify"
 
 export LUMVORAX_SOLVER_VARIANT="advanced_parallel"
 "$ROOT_DIR/hubbard_hts_research_runner_advanced_parallel" "$ROOT_DIR"
@@ -209,3 +219,5 @@ fi
 # Finalize checksums at very end so later post-steps cannot stale the manifest.
 write_checksums "$RUN_DIR"
 print_progress "final checksums"
+verify_checksums "$RUN_DIR"
+print_progress "final checksum verify"
