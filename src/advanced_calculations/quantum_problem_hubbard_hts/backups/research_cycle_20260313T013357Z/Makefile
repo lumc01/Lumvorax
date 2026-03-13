@@ -1,6 +1,6 @@
 CC ?= gcc
 CFLAGS ?= -O2 -std=c11 -Wall -Wextra -Wpedantic
-LDFLAGS = -Wl,-Bdynamic,--as-needed
+LDFLAGS ?=
 LDLIBS ?= -lm
 
 BIN_MAIN := hubbard_hts_runner
