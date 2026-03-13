@@ -1,6 +1,6 @@
 # RAPPORT_SYNC_REPLIT_CYCLE35_ULTRADETAIL
 
-Run analysé: `research_20260313T163211Z_7163`
+Run analysé: `research_20260313T202627Z_6545`
 
 ## Phase 1 — Synchronisation / intégrité
 - total_runs_audited: 35
@@ -9,29 +9,29 @@ Run analysé: `research_20260313T163211Z_7163`
 ## Phase 2 — Résultats par problème (pourcentages exacts)
 | Problème | Progression | Reste à valider |
 |---|---:|---:|
-| bosonic_multimode_systems | 75.00% | 25.00% |
-| correlated_fermions_non_hubbard | 75.00% | 25.00% |
-| dense_nuclear_fullscale | 75.00% | 25.00% |
-| far_from_equilibrium_kinetic_lattices | 75.00% | 25.00% |
-| hubbard_hts_core | 75.00% | 25.00% |
-| multi_correlated_fermion_boson_networks | 75.00% | 25.00% |
-| multi_state_excited_chemistry | 75.00% | 25.00% |
-| multiscale_nonlinear_field_models | 75.00% | 25.00% |
-| qcd_lattice_fullscale | 75.00% | 25.00% |
-| quantum_chemistry_fullscale | 75.00% | 25.00% |
-| quantum_field_noneq | 75.00% | 25.00% |
-| spin_liquid_exotic | 75.00% | 25.00% |
-| topological_correlated_materials | 75.00% | 25.00% |
+| bosonic_multimode_systems | 70.00% | 30.00% |
+| correlated_fermions_non_hubbard | 70.00% | 30.00% |
+| dense_nuclear_fullscale | 70.00% | 30.00% |
+| far_from_equilibrium_kinetic_lattices | 70.00% | 30.00% |
+| hubbard_hts_core | 70.00% | 30.00% |
+| multi_correlated_fermion_boson_networks | 70.00% | 30.00% |
+| multi_state_excited_chemistry | 70.00% | 30.00% |
+| multiscale_nonlinear_field_models | 70.00% | 30.00% |
+| qcd_lattice_fullscale | 70.00% | 30.00% |
+| quantum_chemistry_fullscale | 70.00% | 30.00% |
+| quantum_field_noneq | 70.00% | 30.00% |
+| spin_liquid_exotic | 70.00% | 30.00% |
+| topological_correlated_materials | 70.00% | 30.00% |
 
 ## Phase 3 — Vérification exhaustive
-- tests_critiques: PASS=11, OBSERVED=0, FAIL=1
+- tests_critiques: PASS=10, OBSERVED=1, FAIL=1
 - Détails T1..T12:
   - T1_finite_size_scaling_coverage: PASS (11 sizes: [56, 64, 72, 80, 81, 90, 96, 99, 100, 120, 121])
   - T2_parameter_sweep_u_over_t: PASS (12 values: [4.0625, 4.533333, 5.384615, 6.571429, 7.047619, 7.090909, 7.166667, 8.0, 8.666667, 11.666667, 12.857143, 13.75])
   - T3_temperature_sweep_coverage: PASS (9 values: [5.7, 40.0, 60.0, 80.0, 95.0, 110.0, 130.0, 155.0, 180.0])
   - T4_boundary_condition_traceability: PASS (['open', 'periodic'])
   - T5_qmc_dmrg_crosscheck: PASS (within_error_bar=8/15 (53.33%);trend_pairing=0.9941;trend_energy=1.0000)
-  - T6_sign_problem_watchdog: PASS (median(|sign_ratio|)=0.080000)
+  - T6_sign_problem_watchdog: OBSERVED (median(|sign_ratio|)=1.000000)
   - T7_energy_pairing_scaling: PASS (min_abs_pearson=0.610544)
   - T8_critical_minimum_window: PASS (hubbard_hts_core:ok; qcd_lattice_fullscale:ok; quantum_field_noneq:ok; dense_nuclear_fullscale:ok; quantum_chemistry_fullscale:ok; spin_liquid_exotic:ok; topological_correlated_materials:ok; correlated_fermions_non_hubbard:ok; multi_state_excited_chemistry:ok; bosonic_multimode_systems:ok; multiscale_nonlinear_field_models:ok; far_from_equilibrium_kinetic_lattices:ok; multi_correlated_fermion_boson_networks:ok)
   - T9_dt_sensitivity_index: PASS (max_dt_sensitivity_fullscale=0.001210)
@@ -51,19 +51,19 @@ Run analysé: `research_20260313T163211Z_7163`
 ## Phase 5 — Métriques bas niveau (runtime/hardware fullscale)
 | Problème | Qubits fullscale | Module % | CPU% | MEM% | calc/s | latence ns/step |
 |---|---:|---:|---:|---:|---:|---:|
-| bosonic_multimode_systems | 80 | 6.32 | 21.64 | 69.52 | 124712.16 | 765398.86 |
-| correlated_fermions_non_hubbard | 90 | 7.79 | 21.64 | 69.52 | 110788.79 | 865009.33 |
-| dense_nuclear_fullscale | 72 | 5.44 | 21.64 | 69.52 | 137971.71 | 690272.62 |
-| far_from_equilibrium_kinetic_lattices | 99 | 8.57 | 21.64 | 69.52 | 100707.52 | 951600.54 |
-| hubbard_hts_core | 100 | 10.24 | 21.64 | 69.52 | 99021.30 | 973816.46 |
-| multi_correlated_fermion_boson_networks | 100 | 8.51 | 21.64 | 69.52 | 101503.79 | 944135.54 |
-| multi_state_excited_chemistry | 81 | 7.13 | 21.64 | 69.52 | 115907.18 | 825248.04 |
-| multiscale_nonlinear_field_models | 96 | 7.98 | 21.64 | 69.52 | 103448.44 | 924636.22 |
-| qcd_lattice_fullscale | 81 | 6.47 | 21.64 | 69.52 | 121775.74 | 783855.18 |
-| quantum_chemistry_fullscale | 56 | 4.67 | 21.64 | 69.52 | 168781.31 | 565551.64 |
-| quantum_field_noneq | 64 | 4.98 | 21.64 | 69.52 | 150700.84 | 631967.90 |
-| spin_liquid_exotic | 120 | 11.21 | 21.64 | 69.52 | 83749.85 | 1148107.69 |
-| topological_correlated_materials | 121 | 10.69 | 21.64 | 69.52 | 84292.04 | 1138897.64 |
+| bosonic_multimode_systems | 80 | 6.30 | 13.62 | 49.20 | 125615.61 | 759893.95 |
+| correlated_fermions_non_hubbard | 90 | 7.82 | 13.62 | 49.20 | 110841.22 | 864600.12 |
+| dense_nuclear_fullscale | 72 | 5.51 | 13.62 | 49.20 | 136691.31 | 696738.48 |
+| far_from_equilibrium_kinetic_lattices | 99 | 8.63 | 13.62 | 49.19 | 100491.04 | 953650.50 |
+| hubbard_hts_core | 100 | 10.21 | 13.62 | 49.20 | 99663.62 | 967540.29 |
+| multi_correlated_fermion_boson_networks | 100 | 8.67 | 13.62 | 49.19 | 99954.06 | 958773.83 |
+| multi_state_excited_chemistry | 81 | 6.76 | 13.62 | 49.20 | 122679.16 | 779693.74 |
+| multiscale_nonlinear_field_models | 96 | 7.98 | 13.62 | 49.19 | 103839.20 | 921156.65 |
+| qcd_lattice_fullscale | 81 | 6.42 | 13.62 | 49.20 | 123222.10 | 774654.41 |
+| quantum_chemistry_fullscale | 56 | 4.68 | 13.62 | 49.20 | 169229.30 | 564054.50 |
+| quantum_field_noneq | 64 | 5.05 | 13.62 | 49.20 | 149122.43 | 638657.10 |
+| spin_liquid_exotic | 120 | 11.15 | 13.62 | 49.20 | 84504.92 | 1137849.08 |
+| topological_correlated_materials | 121 | 10.81 | 13.62 | 49.20 | 83680.67 | 1147218.28 |
 
 ## Phase 6 — Réponse point par point (question/analyse/réponse/solution)
 ### Q1. Où en est chaque problème précisément ?

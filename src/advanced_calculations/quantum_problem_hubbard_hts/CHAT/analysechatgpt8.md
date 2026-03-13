@@ -29,12 +29,12 @@ Le rapport doit couvrir :
 2. IDENTIFICATION du moteur utilisé (fullscale vs advanced_parallel) — CRITIQUE
 3. TABLEAU COMPARATIF ligne par ligne : énergie, pairing, drift, signe, benchmark
 4. DÉTECTION des invariants artificiels / valeurs gelées / hardcodes
-5. AUDIT CODE C ligne par ligne : localiser la présence ou absence de chaque correction BC-xx
+5. AUDIT CODE .c, .h, .py ,.sh ligne par ligne : localiser la présence ou absence de chaque correction BC-xx
 6. INVENTAIRE DE CHAQUE ERREUR : fichier, ligne exacte avant/après, cause, solution
 7. VALIDATION des corrections recommandées dans CHAT/ antérieurs — appliquées ou pas ?
 8. POINTS INÉDITS détectés par toi-même que les analyses précédentes n'avaient pas signalés
 9. TABLEAU BILAN final : score par dimension, FAILs restants, priorités
-10. FEUILLE DE ROUTE corrections prioritaires avec fichier et numéro de ligne exact
+10. FEUILLE DE ROUTE corrections prioritaires avec fichier et numéro de ligne exact et identifiant unique(format de code penal unique)
 
 Objectif: inspection A→Z reproductible sans modifier les anciens rapports.
 Produire les corrections immédiatement dans les fichiers src/ après le rapport.
