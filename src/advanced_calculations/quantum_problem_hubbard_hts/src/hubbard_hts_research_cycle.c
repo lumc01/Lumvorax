@@ -12,6 +12,9 @@
 #include <time.h>
 #include <unistd.h>
 
+/* BC-LV01/LV02/LV03/LV04/LV05 : Intégration LumVorax forensique — 2026-03-14 */
+#include "../include/lumvorax_integration.h"
+
 #define MAX_PATH 768
 #define EPS 1e-12
 #define HUBBARD_2X2_SITES 4
@@ -220,8 +223,9 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                                                        uint64_t* series_len) {
     sim_result_t r = {0};
     int sites = p->lx * p->ly;
-    double* d = calloc((size_t)sites, sizeof(double));
-    double* corr = calloc((size_t)sites, sizeof(double));
+    /* BC-LV05 : calloc remplacés par LV_CALLOC pour tracking mémoire forensique */
+    double* d = LV_CALLOC((size_t)sites, sizeof(double));
+    double* corr = LV_CALLOC((size_t)sites, sizeof(double));
     double dt = (p->dt > 0.0) ? p->dt : 0.01;
     double h_scale_eV = fabs(p->t_eV) + fabs(p->u_eV) + fabs(p->mu_eV);
     double dt_scale = bounded_dt_scale(dt, h_scale_eV);
@@ -229,6 +233,13 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
     for (int i = 0; i < sites; ++i) d[i] = (rand01(&seed) - 0.5) * 1e-3;
     normalize_state_vector(d, sites);
     uint64_t t0 = now_ns();
+
+    /* BC-LV04 : point forensique — début simulation (nanoseconde CLOCK_MONOTONIC) */
+    LV_MODULE_START("simulate_fs", p->name);
+    LV_MODULE_METRIC("simulate_fs", "sites", (double)sites);
+    LV_MODULE_METRIC("simulate_fs", "steps", (double)p->steps);
+    LV_MODULE_METRIC("simulate_fs", "temp_K", p->temp_K);
+    LV_MODULE_METRIC("simulate_fs", "U_eV", p->u_eV);
 
     for (uint64_t step = 0; step < p->steps; ++step) {
         double collective_mode = 0.0;
@@ -271,6 +282,11 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             double hopping_lr = -0.5 * d[i] * (d_left + d_right);
             /* BC-05-H4 : constante physique corrigée 65→27 K (fit QMC/DMRG, RMSE≈0.007) */
             double local_pair = exp(-fabs(d[i]) * p->temp_K / 27.0) * (1.0 + 0.08 * corr[i] * corr[i]);
+            /* BC-LV04 : trace forensique local_pair au site 0, step 0 uniquement */
+            if (step == 0 && i == 0) {
+                LV_MODULE_METRIC("simulate_fs", "local_pair_site0_step0", local_pair);
+                LV_MODULE_METRIC("simulate_fs", "d_site0_step0", d[i]);
+            }
             double local_energy = p->u_eV * n_up * n_dn - p->t_eV * hopping_lr - p->mu_eV * (n_up + n_dn - 1.0);
 
             step_energy += local_energy / (double)(sites);
@@ -285,6 +301,11 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
         /* BC-05-H3 : réversion BC-04 — diviseur N seul (BCS estimateur déjà normalisé) */
         step_pairing /= (double)sites;
         step_sign /= (double)sites;
+        /* BC-LV04 : trace forensique step_pairing après normalisation (step 0 seulement) */
+        if (step == 0) {
+            LV_MODULE_METRIC("simulate_fs", "step_pairing_norm_step0", step_pairing);
+            LV_MODULE_METRIC("simulate_fs", "step_energy_norm_step0", step_energy);
+        }
 
         /* Normalisation vecteur d'état à chaque pas (cohérence avec advanced_parallel) */
         normalize_state_vector(d, sites);
@@ -322,9 +343,16 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
         }
     }
 
-    free(corr);
-    free(d);
+    /* BC-LV05 : free remplacés par LV_FREE */
+    LV_FREE(corr);
+    LV_FREE(d);
     r.elapsed_ns = now_ns() - t0;
+    /* BC-LV04 : point forensique — fin simulation, métriques finales */
+    LV_MODULE_END("simulate_fs", p->name, true);
+    LV_MODULE_METRIC("simulate_fs", "pairing_final", r.pairing);
+    LV_MODULE_METRIC("simulate_fs", "energy_final_eV", r.energy);
+    LV_MODULE_METRIC("simulate_fs", "sign_ratio_final", r.sign_ratio);
+    LV_MODULE_METRIC("simulate_fs", "elapsed_ns", (double)r.elapsed_ns);
     return r;
 }
 
@@ -1084,6 +1112,14 @@ int main(int argc, char** argv) {
     double mae = (m > 0) ? (sum_abs / (double)m) : 1e9;
     double p_within = (m > 0) ? (100.0 * (double)within_bar / (double)m) : 0.0;
     double ci95_half = (m > 1) ? (1.96 * (rmse / sqrt((double)m))) : rmse;
+
+    /* BC-LV04 : métriques benchmark forensiques — détection immédiate des anomalies ×1000 */
+    LV_MODULE_METRIC("benchmark_qmc", "rmse", rmse);
+    LV_MODULE_METRIC("benchmark_qmc", "mae", mae);
+    LV_MODULE_METRIC("benchmark_qmc", "pct_within_error_bar", p_within);
+    LV_MODULE_METRIC("benchmark_qmc", "ci95_halfwidth", ci95_half);
+    LV_MODULE_METRIC("benchmark_qmc", "n_points", (double)m);
+    LV_MODULE_METRIC("benchmark_qmc", "n_within", (double)within_bar);
 
     /* BC-09 : seuils physiques corrects — corrigé 2026-03-14 (anciens seuils fictifs : rmse<=1300000, within>=5, ci<=700000, mae<=900000) */
     bool bench_rmse_ok  = rmse      <= 0.05;   /* eV/site — seuil QMC/DMRG réaliste */

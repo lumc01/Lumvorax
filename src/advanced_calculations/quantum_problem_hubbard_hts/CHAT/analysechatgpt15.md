@@ -71,7 +71,7 @@ Ce projet est architecturalement double. D'un côté, un moteur de simulation ph
 
 Le problème est que ces deux systèmes **ne se parlent jamais**. Ils coexistent dans le même dépôt comme deux projets placés côte à côte par hasard, sans intégration. Le script shell `run_research_cycle.sh` exporte 5 variables d'environnement avec le préfixe `LUMVORAX_` (lignes 74–80), créant l'illusion d'une activation. Mais le code C compilé ne les lit jamais. C'est un trompe-l'œil.
 
-La conséquence directe : quand un bug apparaît (comme BC-11 — `energy_meV × 1000`), nous n'avons aucun moyen de savoir À QUELLE NANOSECONDE et DANS QUELLE FONCTION EXACTE la valeur erronée a été produite. Nous devons reconstruire la chaîne causale à partir des CSV post-run, comme des archéologues sur des ruines. LumVorax nous donnerait ce que la physique forensique réclame : `fichier:ligne:fonction:timestamp_ns:valeur_avant:valeur_après`. Nous n'avons rien de tout cela.
+La conséquence directe : quand un bug apparaît (comme BC-11 — `energy_meV × 1000`), nous n'avons aucun moyen de savoir À QUELLE NANOSECONDE et DANS QUELLE FONCTION EXACTE la valeur erronée a été produite. Nous devons reconstruire la chaîne causale à partir des CSV post-run, comme des archéologues sur des ruines. LumVorax nous donnerait> ce que la physique forensique réclame : `fichier:ligne:fonction:timestamp_ns:valeur_avant:valeur_après`. Nous n'avons rien de tout cela.
 
 Voici le diagnostic complet, ligne par ligne.
 

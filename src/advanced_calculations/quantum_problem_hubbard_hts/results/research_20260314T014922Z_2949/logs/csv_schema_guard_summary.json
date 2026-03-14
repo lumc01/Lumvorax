@@ -1,0 +1,17 @@
+{
+  "run_dir": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T014922Z_2949",
+  "csv_count": 11,
+  "pass": 10,
+  "observed": 0,
+  "fail": 1,
+  "failed_files": [
+    {
+      "file": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T014922Z_2949/tests/expert_questions_matrix.csv",
+      "status": "FAIL",
+      "expected_columns": 5,
+      "row": 24,
+      "actual_columns": 7,
+      "details": "column_count_mismatch"
+    }
+  ]
+}
