@@ -59,7 +59,7 @@ typedef struct {
 } von_neumann_result_t;
 
 typedef struct {
-    double energy_eV;
+    double energy_meV;
     double energy_drift_metric;
     double pairing_norm;
     double sign_ratio;
@@ -330,7 +330,7 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                 d[i] += dt_scale * quench_window * ctl->quench_strength * cos(0.041 * (double)step + 0.07 * (double)i);
             }
             if (ctl && ctl->resonance_pump && step > ctl->phase_step) {
-                /* BC-02 : utiliser prev_step_energy au lieu de r.energy_eV (stale du pas précédent) */
+                /* BC-02 : utiliser prev_step_energy au lieu de r.energy_meV (stale du pas précédent) */
                 double abs_energy = fabs(prev_step_energy);
                 if (step == ctl->phase_step + 1) crt.ema_abs_energy = abs_energy;
                 crt.ema_abs_energy = 0.985 * crt.ema_abs_energy + 0.015 * abs_energy;
@@ -378,7 +378,7 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
 
         (void)burn_scale;
         (void)collective_mode;
-        r.energy_eV = step_energy;
+        r.energy_meV = step_energy;
         r.energy_drift_metric = has_prev_step_energy ? fabs(step_energy - prev_step_energy) : 0.0;
         prev_step_energy = step_energy;
         has_prev_step_energy = true;
@@ -393,7 +393,7 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                     "%s,%llu,%.10f,%.10f,%.10f,%.2f,%.2f,%llu,%.10e,%.10f\n",
                     p->name,
                     (unsigned long long)step,
-                    r.energy_eV,
+                    r.energy_meV,
                     r.pairing_norm,
                     r.sign_ratio,
                     c,
@@ -416,7 +416,7 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
     /* BC-LV04 : fin simulation + métriques finales */
     FORENSIC_LOG_MODULE_END("simulate_adv", p->name, true);
     FORENSIC_LOG_MODULE_METRIC("simulate_adv", "pairing_final", r.pairing_norm);
-    FORENSIC_LOG_MODULE_METRIC("simulate_adv", "energy_final_eV", r.energy_eV);
+    FORENSIC_LOG_MODULE_METRIC("simulate_adv", "energy_final_eV", r.energy_meV);
     FORENSIC_LOG_MODULE_METRIC("simulate_adv", "sign_ratio_final", r.sign_ratio);
     FORENSIC_LOG_MODULE_METRIC("simulate_adv", "elapsed_ns", (double)r.elapsed_ns);
     return r;
@@ -527,7 +527,7 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
 
         (void)burn_scale;
         (void)collective_mode;
-        r.energy_eV = (double)step_energy;
+        r.energy_meV = (double)step_energy;
         r.energy_drift_metric = has_prev_step_energy ? fabs((double)(step_energy - prev_step_energy)) : 0.0;
         prev_step_energy = step_energy;
         has_prev_step_energy = true;
@@ -867,14 +867,14 @@ int main(int argc, char** argv) {
     int line = 4;
     for (int i = 0; i < nprobs; ++i) {
         base[i] = simulate_fullscale(&probs[i], (uint64_t)(0xABC000 + i), 99, raw);
-        fprintf(lg, "%06d | BASE_RESULT problem=%s energy=%.6f pairing=%.6f sign=%.6f cpu_peak=%.2f mem_peak=%.2f elapsed_ns=%llu\n", line++, probs[i].name, base[i].energy_eV, base[i].pairing_norm, base[i].sign_ratio, base[i].cpu_peak, base[i].mem_peak, (unsigned long long)base[i].elapsed_ns);
+        fprintf(lg, "%06d | BASE_RESULT problem=%s energy=%.6f pairing=%.6f sign=%.6f cpu_peak=%.2f mem_peak=%.2f elapsed_ns=%llu\n", line++, probs[i].name, base[i].energy_meV, base[i].pairing_norm, base[i].sign_ratio, base[i].cpu_peak, base[i].mem_peak, (unsigned long long)base[i].elapsed_ns);
 
         const char* energy_unit = "eV";
         double unit_factor = 1.0;
         module_energy_unit(probs[i].name, &energy_unit, &unit_factor);
-        double converted = base[i].energy_eV * unit_factor;
+        double converted = base[i].energy_meV * unit_factor;
         bool unit_ok = isfinite(converted) && unit_factor > 0.0;
-        fprintf(ucsv, "%s,%.10f,%s,%.10f,%s,module_specific_conversion\n", probs[i].name, base[i].energy_eV, energy_unit, converted, unit_ok ? "PASS" : "FAIL");
+        fprintf(ucsv, "%s,%.10f,%s,%.10f,%s,module_specific_conversion\n", probs[i].name, base[i].energy_meV, energy_unit, converted, unit_ok ? "PASS" : "FAIL");
 
         bool norm_ok = base[i].norm_deviation_max <= 1e-6;
         const char* norm_method = "rk2_stabilized_always_renorm";
@@ -896,7 +896,7 @@ int main(int argc, char** argv) {
             pp.steps = checkpoints[ci];
             sim_result_t rr = simulate_fullscale(&pp, (uint64_t)(0xABC000 + i), 99, NULL);
             double volume = (double)(pp.lx * pp.ly);
-            double energy_norm = rr.energy_eV / (volume * (double)pp.steps + EPS);
+            double energy_norm = rr.energy_meV / (volume * (double)pp.steps + EPS);
             double pairing_norm = rr.pairing_norm;
             fprintf(det, "%s,%llu,%.10f,%.10f,%.10f,%.2f,%.2f,%llu\n",
                     pp.name,
@@ -916,8 +916,8 @@ int main(int argc, char** argv) {
     sim_result_t a1 = simulate_fullscale(&probs[0], 42, 99, NULL);
     sim_result_t a2 = simulate_fullscale(&probs[0], 42, 99, NULL);
     sim_result_t b1 = simulate_fullscale(&probs[0], 77, 99, NULL);
-    double delta_same = fabs(a1.energy_eV - a2.energy_eV) + fabs(a1.pairing_norm - a2.pairing_norm);
-    double delta_diff = fabs(a1.energy_eV - b1.energy_eV) + fabs(a1.pairing_norm - b1.pairing_norm);
+    double delta_same = fabs(a1.energy_meV - a2.energy_meV) + fabs(a1.pairing_norm - a2.pairing_norm);
+    double delta_diff = fabs(a1.energy_meV - b1.energy_meV) + fabs(a1.pairing_norm - b1.pairing_norm);
     bool rep_fixed = delta_same < EPS;
     bool rep_diff = delta_diff > 1e-6;
     mark(&reproducibility, rep_fixed);
@@ -932,7 +932,7 @@ int main(int argc, char** argv) {
         p.steps = steps_set[i];
         sim_result_t r = simulate_fullscale(&p, 31415, 99, NULL);
         pvals[i] = r.pairing_norm;
-        bool finite_ok = isfinite(r.energy_eV) && isfinite(r.pairing_norm) && isfinite(r.sign_ratio);
+        bool finite_ok = isfinite(r.energy_meV) && isfinite(r.pairing_norm) && isfinite(r.sign_ratio);
         mark(&robustness, finite_ok);
         fprintf(tcsv, "convergence,conv_%llu_steps,pairing,%.10f,%s\n", (unsigned long long)steps_set[i], r.pairing_norm, finite_ok ? "PASS" : "FAIL");
     }
@@ -952,7 +952,7 @@ int main(int argc, char** argv) {
 
     sim_result_t main_model = simulate_fullscale(&probs[0], 123456, 99, NULL);
     sim_result_t indep_model = simulate_problem_independent(&probs[0], 123456, 99);
-    double delta_indep = fabs(main_model.energy_eV - indep_model.energy_eV) + fabs(main_model.pairing_norm - indep_model.pairing_norm);
+    double delta_indep = fabs(main_model.energy_meV - indep_model.energy_meV) + fabs(main_model.pairing_norm - indep_model.pairing_norm);
     bool indep_ok = delta_indep < 1e-3;
     mark(&robustness, indep_ok);
     fprintf(tcsv, "verification,independent_calc,delta_main_vs_independent,%.10f,%s\n", delta_indep, indep_ok ? "PASS" : "FAIL");
@@ -995,8 +995,8 @@ int main(int argc, char** argv) {
         problem_t p = probs[0];
         p.u_eV = u_set[i];
         sim_result_t r = simulate_fullscale(&p, 1234, 99, NULL);
-        ene_u[i] = r.energy_eV;
-        fprintf(tcsv, "sensitivity,sens_U_%g,energy,%.10f,OBSERVED\n", u_set[i], r.energy_eV);
+        ene_u[i] = r.energy_meV;
+        fprintf(tcsv, "sensitivity,sens_U_%g,energy,%.10f,OBSERVED\n", u_set[i], r.energy_meV);
     }
     double dEabs_dU_avg = ((fabs(ene_u[1]) - fabs(ene_u[0])) + (fabs(ene_u[2]) - fabs(ene_u[1])) + (fabs(ene_u[3]) - fabs(ene_u[2]))) / 3.0;
     bool energy_u_abs_positive_slope = dEabs_dU_avg > 0.0;
@@ -1016,7 +1016,7 @@ int main(int argc, char** argv) {
     stability.steps = 8700; /* 3x beyond +2000 requested extension */
     sim_result_t stable_ctl = simulate_fullscale_controlled(&stability, 20260307, 125, NULL, &ctl, ts, 4096, &ts_n);
     sim_result_t stable_open = simulate_fullscale_controlled(&stability, 20260307, 125, NULL, NULL, NULL, 0, NULL);
-    bool stability_finite = isfinite(stable_ctl.energy_eV) && isfinite(stable_ctl.pairing_norm) && isfinite(stable_ctl.sign_ratio);
+    bool stability_finite = isfinite(stable_ctl.energy_meV) && isfinite(stable_ctl.pairing_norm) && isfinite(stable_ctl.sign_ratio);
     mark(&robustness, stability_finite);
     fprintf(tcsv, "control,phase_control_step800,enabled,%d,%s\n", ctl.phase_control ? 1 : 0, ctl.phase_control ? "PASS" : "FAIL");
     fprintf(tcsv, "control,resonance_pump,enabled,%d,%s\n", ctl.resonance_pump ? 1 : 0, ctl.resonance_pump ? "PASS" : "FAIL");
@@ -1024,13 +1024,13 @@ int main(int argc, char** argv) {
     fprintf(tcsv, "stability,temporal_t_gt_2700_steps,steps,%.0f,%s\n", (double)stability.steps, stability_finite ? "PASS" : "FAIL");
     fprintf(tcsv, "stability,temporal_t_gt_2700_pairing,pairing,%.10f,%s\n", stable_ctl.pairing_norm, stability_finite ? "PASS" : "FAIL");
 
-    double denom_open = fabs(stable_open.energy_eV) + EPS;
-    double feedback_energy_reduction = (fabs(stable_open.energy_eV) - fabs(stable_ctl.energy_eV)) / denom_open;
+    double denom_open = fabs(stable_open.energy_meV) + EPS;
+    double feedback_energy_reduction = (fabs(stable_open.energy_meV) - fabs(stable_ctl.energy_meV)) / denom_open;
     double feedback_pairing_gain = stable_ctl.pairing_norm - stable_open.pairing_norm;
     fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,energy_reduction_ratio,%.10f,OBSERVED\n", feedback_energy_reduction);
     fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,pairing_gain,%.10f,OBSERVED\n", feedback_pairing_gain);
-    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,controlled_energy,%.10f,OBSERVED\n", stable_ctl.energy_eV);
-    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,uncontrolled_energy,%.10f,OBSERVED\n", stable_open.energy_eV);
+    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,controlled_energy,%.10f,OBSERVED\n", stable_ctl.energy_meV);
+    fprintf(tcsv, "dynamic_pumping,feedback_loop_atomic,uncontrolled_energy,%.10f,OBSERVED\n", stable_open.energy_meV);
 
     double dt_set[] = {0.001, 0.005, 0.010};
     double dt_pair[3] = {0};
@@ -1110,8 +1110,8 @@ int main(int argc, char** argv) {
             int steps = stability_checkpoints[k];
             pm.steps = (uint64_t)steps;
             sim_result_t rr = simulate_fullscale_controlled(&pm, 1701 + (uint64_t)(31 * ip), 99, NULL, &ctl, NULL, 0, NULL);
-            /* BC-11-ADV : energy_eV est en eV (pas en meV) — supprimer division /1000 erronée */
-            energy_density[k] = rr.energy_eV / ((double)(pm.lx * pm.ly) * (double)steps + EPS);
+            /* BC-11-ADV : energy_meV est en eV (pas en meV) — supprimer division /1000 erronée */
+            energy_density[k] = rr.energy_meV / ((double)(pm.lx * pm.ly) * (double)steps + EPS);
         }
 
         double drift_max = 0.0;
@@ -1167,8 +1167,8 @@ int main(int argc, char** argv) {
         p.temp_K = brow[i].t;
         p.u_eV = brow[i].u;
         sim_result_t rr = simulate_fullscale(&p, 1234 + (uint64_t)i, 129, NULL);
-        /* BC-11-ADV : energy_eV est déjà en eV (même formule que fullscale) — supprimer /1000 erroné */
-        double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_eV;
+        /* BC-11-ADV : energy_meV est déjà en eV (même formule que fullscale) — supprimer /1000 erroné */
+        double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_meV;
         double abs_e = fabs(model - brow[i].value);
         double rel_e = fabs(abs_e / (fabs(brow[i].value) + EPS));
         int ok_bar = abs_e <= brow[i].err;
@@ -1190,8 +1190,8 @@ int main(int argc, char** argv) {
         p.temp_K = br->t;
         p.u_eV = br->u;
         sim_result_t rr = simulate_fullscale(&p, 5151 + (uint64_t)i, 129, NULL);
-        /* BC-11-ADV : energy_eV est déjà en eV — même correction que QMC/DMRG */
-        double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_eV;
+        /* BC-11-ADV : energy_meV est déjà en eV — même correction que QMC/DMRG */
+        double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_meV;
         double abs_e = fabs(model - br->value);
         double rel_e = fabs(abs_e / (fabs(br->value) + EPS));
         int ok_bar = abs_e <= br->err;
@@ -1256,9 +1256,9 @@ int main(int argc, char** argv) {
         cp.steps = (cp.lx <= 36) ? 1200 : (cp.lx <= 68 ? 420 : (cp.lx <= 128 ? 160 : 80));
         sim_result_t cr = simulate_fullscale(&cp, (uint64_t)(4321 + ci), 149, NULL);
         c_pair[ci] = cr.pairing_norm;
-        c_energy[ci] = cr.energy_eV;
+        c_energy[ci] = cr.energy_meV;
         fprintf(tcsv, "cluster_scale,cluster_%dx%d,pairing,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.pairing_norm);
-        fprintf(tcsv, "cluster_scale,cluster_%dx%d,energy,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.energy_eV);
+        fprintf(tcsv, "cluster_scale,cluster_%dx%d,energy,%.10f,OBSERVED\n", cp.lx, cp.ly, cr.energy_meV);
     }
     const double cluster_pair_tol = 0.03;
     const double cluster_energy_tol = 0.03;

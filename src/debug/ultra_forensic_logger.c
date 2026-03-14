@@ -21,6 +21,7 @@ static module_forensic_tracker_t g_module_trackers[MAX_MODULES];
 static int g_tracker_count = 0;
 static pthread_mutex_t g_global_mutex = PTHREAD_MUTEX_INITIALIZER;
 static bool g_forensic_initialized = false;
+static char g_run_csv_path[4096] = {0};
 
 // Obtenir timestamp nanoseconde précis
 static uint64_t get_precise_timestamp_ns(void) {
@@ -85,36 +86,35 @@ bool ultra_forensic_logger_init(void) {
 void ultra_forensic_logger_init_lum(const char* log_file) {
     /* Initialisation 100% inconditionnelle du vrai système LumVorax forensique.
      * Crée les répertoires logs/forensic/ dans le CWD (répertoire du workspace).
-     * Écrit également un fichier de log ancré dans le run_dir passé en paramètre.
+     * Écrit un fichier CSV structuré dans le run_dir passé en paramètre.
+     * Format CSV : event,timestamp_utc,timestamp_ns,pid,detail,value
      */
     if (!g_forensic_initialized) {
         ultra_forensic_logger_init();
     }
-    /* Écriture du fichier de log supplémentaire dans le répertoire de run */
     if (log_file && log_file[0]) {
+        strncpy(g_run_csv_path, log_file, sizeof(g_run_csv_path) - 1);
+        g_run_csv_path[sizeof(g_run_csv_path) - 1] = '\0';
+
         FILE* lf = fopen(log_file, "w");
         if (lf) {
             uint64_t ts = get_precise_timestamp_ns();
             time_t tnow = time(NULL);
             struct tm gmt;
             gmtime_r(&tnow, &gmt);
-            char iso[32];
+            char iso[64];
             snprintf(iso, sizeof(iso), "%04d-%02d-%02dT%02d:%02d:%02dZ",
                      gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday,
                      gmt.tm_hour, gmt.tm_min, gmt.tm_sec);
-            fprintf(lf,
-                    "=== LUMVORAX FORENSIC REALTIME LOG — HUBBARD HTS ===\n"
-                    "timestamp_utc=%s\n"
-                    "timestamp_ns=%" PRIu64 "\n"
-                    "pid=%d\n"
-                    "log_file=%s\n"
-                    "activation=100PCT_INCONDITIONNELLE\n"
-                    "modules_reels=ultra_forensic_logger+memory_tracker\n"
-                    "====================================================\n",
-                    iso, ts, getpid(), log_file);
+            fprintf(lf, "event,timestamp_utc,timestamp_ns,pid,detail,value\n");
+            fprintf(lf, "INIT,%s,%" PRIu64 ",%d,activation,100PCT_INCONDITIONNELLE\n",
+                    iso, ts, getpid());
+            fprintf(lf, "INIT,%s,%" PRIu64 ",%d,modules_reels,ultra_forensic_logger+memory_tracker\n",
+                    iso, ts, getpid());
             fflush(lf);
             fclose(lf);
         } else {
+            g_run_csv_path[0] = '\0';
             fprintf(stderr,
                     "[LUMVORAX] AVERTISSEMENT: impossible d'écrire dans %s — "
                     "le logger forensique central reste actif (logs/forensic/)\n",
@@ -218,13 +218,31 @@ void ultra_forensic_log_module_start(const char* file, int line, const char* fun
     strncpy(tracker->test_name, test, sizeof(tracker->test_name) - 1);
     tracker->test_name[sizeof(tracker->test_name) - 1] = '\0';
 
-    fprintf(tracker->module_log_file,
-            "[%lu] TEST_START: %s\n", tracker->start_timestamp_ns, test);
-    fprintf(tracker->module_log_file,
-            "  Source: %s:%d in %s()\n", file, line, func);
-    fprintf(tracker->module_log_file,
-            "  Module: %s\n", module);
-    fflush(tracker->module_log_file);
+    if (tracker->module_log_file) {
+        fprintf(tracker->module_log_file,
+                "[%lu] TEST_START: %s\n", tracker->start_timestamp_ns, test);
+        fprintf(tracker->module_log_file,
+                "  Source: %s:%d in %s()\n", file, line, func);
+        fprintf(tracker->module_log_file,
+                "  Module: %s\n", module);
+        fflush(tracker->module_log_file);
+    }
+
+    if (g_run_csv_path[0]) {
+        time_t tnow = time(NULL);
+        struct tm gmt;
+        gmtime_r(&tnow, &gmt);
+        char iso[64];
+        snprintf(iso, sizeof(iso), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+                 gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday,
+                 gmt.tm_hour, gmt.tm_min, gmt.tm_sec);
+        FILE* csv = fopen(g_run_csv_path, "a");
+        if (csv) {
+            fprintf(csv, "MODULE_START,%s,%" PRIu64 ",%d,%s,%s\n",
+                    iso, tracker->start_timestamp_ns, getpid(), module, test);
+            fclose(csv);
+        }
+    }
 
     pthread_mutex_unlock(&tracker->mutex);
 }
@@ -241,15 +259,33 @@ void ultra_forensic_log_module_end(const char* file, int line, const char* func,
     tracker->end_timestamp_ns = get_precise_timestamp_ns();
     uint64_t duration_ns = tracker->end_timestamp_ns - tracker->start_timestamp_ns;
 
-    fprintf(tracker->module_log_file,
-            "[%lu] TEST_END: %s\n", tracker->end_timestamp_ns, test);
-    fprintf(tracker->module_log_file,
-            "  Résultat: %s\n", success ? "SUCCÈS" : "ÉCHEC");
-    fprintf(tracker->module_log_file,
-            "  Durée: %lu ns (%.3f ms)\n", duration_ns, duration_ns / 1000000.0);
-    fprintf(tracker->module_log_file,
-            "  Source: %s:%d in %s()\n", file, line, func);
-    fflush(tracker->module_log_file);
+    if (tracker->module_log_file) {
+        fprintf(tracker->module_log_file,
+                "[%lu] TEST_END: %s\n", tracker->end_timestamp_ns, test);
+        fprintf(tracker->module_log_file,
+                "  Résultat: %s\n", success ? "SUCCÈS" : "ÉCHEC");
+        fprintf(tracker->module_log_file,
+                "  Durée: %lu ns (%.3f ms)\n", duration_ns, duration_ns / 1000000.0);
+        fprintf(tracker->module_log_file,
+                "  Source: %s:%d in %s()\n", file, line, func);
+        fflush(tracker->module_log_file);
+    }
+
+    if (g_run_csv_path[0]) {
+        time_t tnow = time(NULL);
+        struct tm gmt;
+        gmtime_r(&tnow, &gmt);
+        char iso[64];
+        snprintf(iso, sizeof(iso), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+                 gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday,
+                 gmt.tm_hour, gmt.tm_min, gmt.tm_sec);
+        FILE* csv = fopen(g_run_csv_path, "a");
+        if (csv) {
+            fprintf(csv, "MODULE_END,%s,%" PRIu64 ",%d,%s:%s,%" PRIu64 "\n",
+                    iso, tracker->end_timestamp_ns, getpid(), module, test, duration_ns);
+            fclose(csv);
+        }
+    }
 
     pthread_mutex_unlock(&tracker->mutex);
 }
@@ -307,15 +343,33 @@ void ultra_forensic_log_module_metric(const char* file, int line, const char* fu
 
     uint64_t timestamp = get_precise_timestamp_ns();
 
-    fprintf(tracker->module_log_file,
-            "[%lu] MÉTRIQUE: %s = %.6f\n", timestamp, metric_name, value);
-    fprintf(tracker->module_log_file,
-            "  Source: %s:%d in %s()\n", file, line, func);
-    fflush(tracker->module_log_file);
+    if (tracker->module_log_file) {
+        fprintf(tracker->module_log_file,
+                "[%lu] MÉTRIQUE: %s = %.6f\n", timestamp, metric_name, value);
+        fprintf(tracker->module_log_file,
+                "  Source: %s:%d in %s()\n", file, line, func);
+        fflush(tracker->module_log_file);
+    }
 
-    // Log séparé pour métriques
+    time_t tnow = time(NULL);
+    struct tm gmt;
+    gmtime_r(&tnow, &gmt);
+    char iso[64];
+    snprintf(iso, sizeof(iso), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+             gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday,
+             gmt.tm_hour, gmt.tm_min, gmt.tm_sec);
+
+    if (g_run_csv_path[0]) {
+        FILE* csv = fopen(g_run_csv_path, "a");
+        if (csv) {
+            fprintf(csv, "METRIC,%s,%" PRIu64 ",%d,%s:%s,%.10f\n",
+                    iso, timestamp, getpid(), module, metric_name, value);
+            fclose(csv);
+        }
+    }
+
     char metrics_filename[256];
-    snprintf(metrics_filename, sizeof(metrics_filename), 
+    snprintf(metrics_filename, sizeof(metrics_filename),
              "logs/forensic/metrics/%s_metrics.log", module);
     FILE* metrics_file = fopen(metrics_filename, "a");
     if (metrics_file) {
@@ -371,26 +425,44 @@ bool ultra_forensic_validate_all_logs_exist(void) {
 }
 
 void ultra_forensic_generate_summary_report(void) {
+    uint64_t ts = get_precise_timestamp_ns();
     char summary_path[512];
-    snprintf(summary_path, sizeof(summary_path), 
-             "logs/forensic/sessions/summary_%lu.txt", get_precise_timestamp_ns());
+    snprintf(summary_path, sizeof(summary_path),
+             "logs/forensic/sessions/summary_%lu.txt", ts);
 
     FILE* summary_file = fopen(summary_path, "w");
     if (!summary_file) return;
 
     fprintf(summary_file, "=== RAPPORT RÉSUMÉ FORENSIQUE ULTRA-STRICT ===\n");
-    fprintf(summary_file, "Timestamp génération: %lu\n", get_precise_timestamp_ns());
+    fprintf(summary_file, "Timestamp génération: %lu\n", ts);
     fprintf(summary_file, "Modules totaux tracés: %d\n", g_tracker_count);
     fprintf(summary_file, "\nDétails par module:\n");
 
+    time_t tnow = time(NULL);
+    struct tm gmt;
+    gmtime_r(&tnow, &gmt);
+    char iso[64];
+    snprintf(iso, sizeof(iso), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+             gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday,
+             gmt.tm_hour, gmt.tm_min, gmt.tm_sec);
+
+    FILE* csv = (g_run_csv_path[0]) ? fopen(g_run_csv_path, "a") : NULL;
+
     for (int i = 0; i < g_tracker_count; i++) {
         module_forensic_tracker_t* tracker = &g_module_trackers[i];
-        fprintf(summary_file, "- %s: %lu opérations, %zu bytes mémoire\n", 
+        fprintf(summary_file, "- %s: %lu opérations, %zu bytes mémoire\n",
                 tracker->module_name, tracker->operations_count, tracker->memory_used);
+        if (csv) {
+            fprintf(csv, "SUMMARY,%s,%" PRIu64 ",%d,%s:operations,%lu\n",
+                    iso, ts, getpid(), tracker->module_name, tracker->operations_count);
+            fprintf(csv, "SUMMARY,%s,%" PRIu64 ",%d,%s:memory_bytes,%zu\n",
+                    iso, ts, getpid(), tracker->module_name, tracker->memory_used);
+        }
     }
+    if (csv) fclose(csv);
 
     fprintf(summary_file, "\n=== FIN RAPPORT RÉSUMÉ ===\n");
     fclose(summary_file);
 
-    printf("📄 Rapport résumé généré: %s\n", summary_path);
+    printf("Rapport résumé généré: %s\n", summary_path);
 }
