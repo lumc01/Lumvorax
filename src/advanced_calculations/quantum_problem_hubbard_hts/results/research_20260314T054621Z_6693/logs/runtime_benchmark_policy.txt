@@ -1,0 +1,10 @@
+stamp_utc=20260314T054630Z
+rmse=0.023006
+rmse_threshold=0.05
+action=runtime_ref_created
+runtime_ref=/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/benchmarks/qmc_dmrg_reference_runtime.csv
+archive=/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/benchmarks/history/qmc_dmrg_reference_runtime_20260314T054630Z.csv
+policy=R13_plan_simulateur_v3.1.0
+Q20_status=runtime_auto_sous_seuil_RMSE<0.05
+Q21_status=refs_publiees_v2csv_immuables_runtime_calibration_interne
+Q22_status=archive_versionnee_par_stamp_utc

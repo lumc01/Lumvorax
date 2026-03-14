@@ -1,0 +1,8 @@
+{
+  "code_hash": "873da5f900e087f12ffb9ce247b9839492bc1ff37f697ba0e21b5b1f8608734a",
+  "dependency_hash": "d825e3c73ddfbb8141ef7c089571517c24092a9a99598e3acca65465a215bc85",
+  "result_hash": "1fe7811267a9acf0714858844bfc3454cf19923da8925a707026b2f193dd3328",
+  "timestamp": "2026-03-14T05:46:34.325321+00:00",
+  "cluster_id": "local_fullscale_cluster",
+  "compiler_version": "gcc"
+}
