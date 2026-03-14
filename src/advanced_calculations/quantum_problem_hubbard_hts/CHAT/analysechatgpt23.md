@@ -380,7 +380,7 @@ des phases 8–39 au niveau shell.
 
 | ID       | Sévérité   | Description                                      | Correction requise                           |
 |----------|------------|--------------------------------------------------|----------------------------------------------|
-| AC-02    | Faible     | Solution progress bloqué à 75%                  | PT-MC comme solver alternatif → Cycle 19     |
+| AC-02    | Faible     | Solution progress bloqué à 75%                  |  PT-MC comme solver alternatif → Cycle 19     |
 | AC-04    | Moyen      | T12 "PASS" avec solver NA                       | Brancher PT-MC sur le critère solver          |
 | NV-03    | Moyen      | dt_consistency_index > 1.0 pour 9/13            | Vérifier formule normalisation dt             |
 | BC-LV04  | Structurel | Phases 8–39 Python : logger créé, non intégré   | Intégrer lv_python_logger.py → Cycle 19      |
