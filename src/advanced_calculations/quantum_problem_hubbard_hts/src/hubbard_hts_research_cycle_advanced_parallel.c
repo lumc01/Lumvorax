@@ -1110,7 +1110,8 @@ int main(int argc, char** argv) {
         p.temp_K = brow[i].t;
         p.u_eV = brow[i].u;
         sim_result_t rr = simulate_fullscale(&p, 1234 + (uint64_t)i, 129, NULL);
-        double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_meV;
+        /* BC-11 : références en eV — convertir energy_meV → eV (÷1000) pour cohérence avec v2.csv */
+        double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing_norm : (rr.energy_meV / 1000.0);
         double abs_e = fabs(model - brow[i].value);
         double rel_e = fabs(abs_e / (fabs(brow[i].value) + EPS));
         int ok_bar = abs_e <= brow[i].err;
@@ -1132,7 +1133,8 @@ int main(int argc, char** argv) {
         p.temp_K = br->t;
         p.u_eV = br->u;
         sim_result_t rr = simulate_fullscale(&p, 5151 + (uint64_t)i, 129, NULL);
-        double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_meV;
+        /* BC-11 : références en eV — convertir energy_meV → eV (÷1000) pour modules externes */
+        double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing_norm : (rr.energy_meV / 1000.0);
         double abs_e = fabs(model - br->value);
         double rel_e = fabs(abs_e / (fabs(br->value) + EPS));
         int ok_bar = abs_e <= br->err;
