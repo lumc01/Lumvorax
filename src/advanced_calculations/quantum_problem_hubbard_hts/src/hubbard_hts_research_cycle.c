@@ -97,19 +97,32 @@ static double mem_percent(void) {
     return 100.0 * (double)(total - avail) / (double)total;
 }
 
+/* AC-01 fix : mesure CPU réelle par DELTA /proc/stat (non cumulative depuis boot) */
 static double cpu_percent(void) {
+    static unsigned long long prev_idle  = 0;
+    static unsigned long long prev_total = 0;
+    static pthread_mutex_t    cpu_mu     = PTHREAD_MUTEX_INITIALIZER;
     FILE* fp = fopen("/proc/stat", "r");
     if (!fp) return -1.0;
     unsigned long long u, n, s, i, iw, ir, si, st;
-    if (fscanf(fp, "cpu %llu %llu %llu %llu %llu %llu %llu %llu", &u, &n, &s, &i, &iw, &ir, &si, &st) != 8) {
-        fclose(fp);
-        return -1.0;
-    }
+    int ok = (fscanf(fp, "cpu %llu %llu %llu %llu %llu %llu %llu %llu",
+                     &u, &n, &s, &i, &iw, &ir, &si, &st) == 8);
     fclose(fp);
-    unsigned long long idle = i + iw;
+    if (!ok) return -1.0;
+    unsigned long long idle  = i + iw;
     unsigned long long total = u + n + s + i + iw + ir + si + st;
-    if (!total) return -1.0;
-    return 100.0 * (double)(total - idle) / (double)total;
+    pthread_mutex_lock(&cpu_mu);
+    double result = 0.0;
+    if (prev_total > 0 && total > prev_total) {
+        unsigned long long d_idle  = idle  - prev_idle;
+        unsigned long long d_total = total - prev_total;
+        if (d_total > 0)
+            result = 100.0 * (double)(d_total - d_idle) / (double)d_total;
+    }
+    prev_idle  = idle;
+    prev_total = total;
+    pthread_mutex_unlock(&cpu_mu);
+    return result;
 }
 
 static double rand01(uint64_t* x) {
@@ -388,18 +401,31 @@ static double dominant_fft_frequency(const double* x, int n, double dt, double* 
     return (double)best_k / ((double)n * dt * 2.0 * M_PI);
 }
 
+/* NV-01 fix : calcul réel du rayon spectral Von Neumann par eigenvalue Hamiltonien Hubbard.
+ * SR_RK2 = |1 + i*dt*λ - (dt*λ)²/2| = sqrt((1-(z²/2))² + z²), z = dt*λ_max
+ * λ_max(Hubbard 2D carré) = 4|t| + |U| + |μ|                              */
 static von_neumann_result_t von_neumann_fullscale(const problem_t* p, const control_flags_t* ctl) {
     von_neumann_result_t out = {0};
     double dt = (p->dt > 0.0) ? p->dt : 0.01;
-    for (int k = 1; k <= 48; ++k) {
-        double kn = (2.0 * M_PI * (double)k) / 64.0;
-        double base = 1.0 - dt * (0.004 + 0.008 * (1.0 - cos(kn)));
-        double forcing = 0.0;
-        if (ctl && ctl->phase_control) forcing += fabs(ctl->phase_field);
-        if (ctl && ctl->resonance_pump) forcing += fabs(ctl->pump_gain);
-        if (ctl && ctl->magnetic_quench) forcing += fabs(ctl->quench_strength) * 0.5;
-        double amp = sqrt(base * base + (dt * forcing) * (dt * forcing)) * exp(-0.15 * dt);
-        if (amp > out.max_abs_amp) out.max_abs_amp = amp;
+
+    double lambda_max = 4.0 * fabs(p->t_eV) + fabs(p->u_eV);
+    if (p->mu_eV != 0.0) lambda_max += fabs(p->mu_eV);
+
+    double z  = dt * lambda_max;
+    double re = 1.0 - z * z * 0.5;
+    double im = z;
+    out.max_abs_amp = sqrt(re * re + im * im);
+
+    double forcing = 0.0;
+    if (ctl && ctl->phase_control)   forcing += fabs(ctl->phase_field);
+    if (ctl && ctl->resonance_pump)  forcing += fabs(ctl->pump_gain);
+    if (ctl && ctl->magnetic_quench) forcing += fabs(ctl->quench_strength) * 0.5;
+    if (forcing > 0.0) {
+        double z2   = dt * (lambda_max + forcing);
+        double re2  = 1.0 - z2 * z2 * 0.5;
+        double im2  = z2;
+        double amp2 = sqrt(re2 * re2 + im2 * im2);
+        if (amp2 > out.max_abs_amp) out.max_abs_amp = amp2;
     }
     out.spectral_radius = out.max_abs_amp;
     out.stable = (out.spectral_radius <= 1.0 + 1e-9) ? 1 : 0;
@@ -748,7 +774,8 @@ int main(int argc, char** argv) {
     fprintf(qcsv, "category,question_id,question,response_status,evidence\n");
     fprintf(bcsv, "module,observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
     fprintf(bcsvm, "module,observable,T,U,reference,model,abs_error,rel_error,error_bar,within_error_bar\n");
-    fprintf(mmeta, "module,lattice_size,U_over_t,t,U,doping,boundary_conditions,integration_scheme,dt,gauge_group,beta,lattice_spacing,volume,field_type,seed,solver_version,model_id,hamiltonian_id,schema_version\n");
+    /* AC-03 fix : ajout colonne geometry pour débloquer PHYSICS_METADATA_GATE */
+    fprintf(mmeta, "module,lattice_size,geometry,U_over_t,t,U,doping,boundary_conditions,integration_scheme,dt,gauge_group,beta,lattice_spacing,volume,field_type,seed,solver_version,model_id,hamiltonian_id,schema_version\n");
     fprintf(det, "problem,step,energy_norm,pairing_norm,sign_ratio,cpu_percent,mem_percent,elapsed_ns\n");
     fprintf(nstab, "test_id,module,metric,value,status,notes\n");
     fprintf(toy, "toy_case,module,metric,reference,measured,abs_error,status\n");
@@ -787,8 +814,12 @@ int main(int argc, char** argv) {
         if (strcmp(probs[i].name, "qcd_lattice_fullscale") == 0) field_type = "gauge_field";
         if (strcmp(probs[i].name, "dense_nuclear_fullscale") == 0) field_type = "mixed_fullscale";
         const uint64_t metadata_seed = (uint64_t)(0xABC000 + i);
-        fprintf(mmeta, "%s,%dx%d,%.6f,%.6f,%.6f,%.6f,%s,rk2_bounded_dt,%.6f,%s,",
-                probs[i].name, probs[i].lx, probs[i].ly, probs[i].u_eV / probs[i].t_eV, probs[i].t_eV, probs[i].u_eV, probs[i].mu_eV, bc, probs[i].dt, gauge);
+        /* AC-03 fix : geometry dérivée de lx/ly */
+        const char* geometry = (probs[i].lx == probs[i].ly) ? "square_2d" : "rectangular_2d";
+        fprintf(mmeta, "%s,%dx%d,%s,%.6f,%.6f,%.6f,%.6f,%s,rk2_bounded_dt,%.6f,%s,",
+                probs[i].name, probs[i].lx, probs[i].ly, geometry,
+                probs[i].u_eV / probs[i].t_eV, probs[i].t_eV, probs[i].u_eV, probs[i].mu_eV,
+                bc, probs[i].dt, gauge);
         if (isnan(beta)) fprintf(mmeta, "NA,"); else fprintf(mmeta, "%.6f,", beta);
         fprintf(mmeta, "1.000000,%d,%s,%llu,hubbard_hts_research_cycle_v8_metadata,hubbard::%s,single_band_hubbard_2d,1.1\n",
                 probs[i].lx * probs[i].ly,

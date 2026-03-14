@@ -15,6 +15,62 @@ mkdir -p "$SESSION_LOG_DIR"
 exec > >(stdbuf -oL tee -a "$SESSION_LOG") 2>&1
 
 echo "[$(date -u +%Y-%m-%dT%H:%M:%S.%N)Z] run_research_cycle start stamp=${STAMP_UTC}"
+
+# ── BC-LV04 fix : Suppression TOTALE de toutes les restrictions de ressources ──
+# Aucun ulimit RAM/CPU — test jusqu'aux limites hardware réelles (99% dynamique)
+ulimit -v unlimited 2>/dev/null || true
+ulimit -m unlimited 2>/dev/null || true
+ulimit -s unlimited 2>/dev/null || true
+
+# ── BC-LV04 fix : Wrapper LumVorax pour phases Python 8-39 ──────────
+# Lit LUMVORAX_CSV_PATH (défini après le run C) et instrumente chaque phase Python
+_LV_PHASE_NUM=7  # Compteur de phase Python (commence à 8 = après 7 phases C)
+
+lv_wrap() {
+  # Usage: lv_wrap phase_num python3 script.py [args...]
+  local phase="$1"; shift
+  local t_start; t_start="$(date +%s%N)"
+  local iso; iso="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+  local pid="$$"
+  local script_name; script_name="$(basename "$1" 2>/dev/null || echo unknown)"
+
+  # Écriture PHASE_BRIDGE START + HW_SAMPLE dans le CSV LumVorax
+  if [ -n "${LUMVORAX_CSV_PATH:-}" ] && [ -f "${LUMVORAX_CSV_PATH:-}" ]; then
+    local mem_pct cpu_info
+    mem_pct="$(awk '/MemTotal/{t=$2} /MemAvailable/{a=$2} END{printf "%.2f", 100*(t-a)/t}' /proc/meminfo 2>/dev/null || echo -1)"
+    cpu_info="$(awk 'NR==1{u=$2+$4; i=$5; t=u+i; printf "%.2f", 100*u/t}' /proc/stat 2>/dev/null || echo -1)"
+    local ts; ts="$(date +%s%N)"
+    {
+      printf "PHASE_BRIDGE,%s,%s,%s,phase%02d:%s,START\n" "$iso" "$ts" "$pid" "$phase" "$script_name"
+      printf "HW_SAMPLE,%s,%s,%s,phase%02d:mem_pct,%s\n" "$iso" "$ts" "$pid" "$phase" "$mem_pct"
+      printf "HW_SAMPLE,%s,%s,%s,phase%02d:cpu_snapshot,%s\n" "$iso" "$ts" "$pid" "$phase" "$cpu_info"
+    } >> "${LUMVORAX_CSV_PATH}"
+  fi
+
+  # Exécution du script Python avec capture de statut
+  local exit_code=0
+  "$@" || exit_code=$?
+
+  # Écriture PHASE_BRIDGE END + durée
+  if [ -n "${LUMVORAX_CSV_PATH:-}" ] && [ -f "${LUMVORAX_CSV_PATH:-}" ]; then
+    local t_end; t_end="$(date +%s%N)"
+    local duration_ns=$(( t_end - t_start ))
+    local status="SUCCESS"
+    [ "$exit_code" -ne 0 ] && status="FAILURE_exit${exit_code}"
+    local mem_pct_end; mem_pct_end="$(awk '/MemTotal/{t=$2} /MemAvailable/{a=$2} END{printf "%.2f", 100*(t-a)/t}' /proc/meminfo 2>/dev/null || echo -1)"
+    local iso2; iso2="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+    {
+      printf "PHASE_BRIDGE,%s,%s,%s,phase%02d:%s,%s\n" "$iso2" "$t_end" "$pid" "$phase" "$script_name" "$status"
+      printf "METRIC,%s,%s,%s,phase%02d:duration_ns,%s\n" "$iso2" "$t_end" "$pid" "$phase" "$duration_ns"
+      printf "HW_SAMPLE,%s,%s,%s,phase%02d:mem_pct_end,%s\n" "$iso2" "$t_end" "$pid" "$phase" "$mem_pct_end"
+    } >> "${LUMVORAX_CSV_PATH}"
+    # Détection anomalie si exit_code != 0
+    if [ "$exit_code" -ne 0 ]; then
+      printf "ANOMALY,%s,%s,%s,phase%02d:exit_code,%s\n" "$iso2" "$t_end" "$pid" "$phase" "$exit_code" >> "${LUMVORAX_CSV_PATH}"
+    fi
+  fi
+  return $exit_code
+}
 cp -a "$ROOT_DIR/include" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/src" "$BACKUP_DIR/"
 cp -a "$ROOT_DIR/Makefile" "$BACKUP_DIR/"
@@ -114,7 +170,17 @@ ADV_RUN_DIR="$ROOT_DIR/results/$LATEST_ADV_RUN"
 RUN_DIR="$ADV_RUN_DIR"
 LATEST_RUN="$LATEST_ADV_RUN"
 
-python3 "$ROOT_DIR/tools/post_run_csv_schema_guard.py" "$RUN_DIR"
+# ── BC-LV04 fix : Export LUMVORAX_CSV_PATH pour les phases Python 8-39 ──
+# Trouve le dernier CSV LumVorax créé par le runner C (advanced_parallel)
+LUMVORAX_CSV_PATH="$(find "$RUN_DIR/logs" -name 'lumvorax_*.csv' -type f 2>/dev/null | sort | tail -n 1 || true)"
+export LUMVORAX_CSV_PATH
+if [ -n "${LUMVORAX_CSV_PATH:-}" ]; then
+  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] LUMVORAX_CSV_PATH=$LUMVORAX_CSV_PATH (phases 8-39 instrumented)"
+else
+  echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] LUMVORAX_CSV_PATH not found — phases 8-39 will run uninstrumented"
+fi
+
+lv_wrap 8 python3 "$ROOT_DIR/tools/post_run_csv_schema_guard.py" "$RUN_DIR"
 print_progress "advanced csv schema guard"
 
 {
@@ -126,54 +192,54 @@ print_progress "advanced csv schema guard"
 
 # Cycle integrations: metadata first, then guard/gates, then physics pack.
 
-python3 "$ROOT_DIR/tools/post_run_metadata_capture.py" "$RUN_DIR"
+lv_wrap 9  python3 "$ROOT_DIR/tools/post_run_metadata_capture.py" "$RUN_DIR"
 print_progress "metadata capture"
 
-python3 "$ROOT_DIR/tools/post_run_cycle_guard.py" "$ROOT_DIR" "$RUN_DIR"
+lv_wrap 10 python3 "$ROOT_DIR/tools/post_run_cycle_guard.py" "$ROOT_DIR" "$RUN_DIR"
 print_progress "cycle guard"
 
-python3 "$ROOT_DIR/tools/post_run_physics_readiness_pack.py" "$RUN_DIR"
+lv_wrap 11 python3 "$ROOT_DIR/tools/post_run_physics_readiness_pack.py" "$RUN_DIR"
 print_progress "physics readiness"
 
 # BC-10 : mise à jour automatique runtime benchmark (R13 — RMSE < 0.05 requis)
-python3 "$ROOT_DIR/tools/post_run_update_runtime_benchmark.py" "$RUN_DIR" "$ROOT_DIR/benchmarks"
+lv_wrap 12 python3 "$ROOT_DIR/tools/post_run_update_runtime_benchmark.py" "$RUN_DIR" "$ROOT_DIR/benchmarks"
 print_progress "runtime benchmark update"
 
-python3 "$ROOT_DIR/tools/post_run_v4next_integration_status.py" "$RUN_DIR"
+lv_wrap 13 python3 "$ROOT_DIR/tools/post_run_v4next_integration_status.py" "$RUN_DIR"
 print_progress "v4next status"
 
 ROLL_MODE="${LUMVORAX_ROLLOUT_MODE:-shadow}"
-python3 "$ROOT_DIR/tools/v4next_rollout_controller.py" "$RUN_DIR" "$ROLL_MODE"
+lv_wrap 14 python3 "$ROOT_DIR/tools/v4next_rollout_controller.py" "$RUN_DIR" "$ROLL_MODE"
 print_progress "rollout controller"
 
-python3 "$ROOT_DIR/tools/post_run_v4next_rollout_progress.py" "$RUN_DIR"
+lv_wrap 15 python3 "$ROOT_DIR/tools/post_run_v4next_rollout_progress.py" "$RUN_DIR"
 print_progress "rollout progress"
 
-python3 "$ROOT_DIR/tools/post_run_v4next_realtime_evolution.py" "$ROOT_DIR" "$RUN_DIR"
+lv_wrap 16 python3 "$ROOT_DIR/tools/post_run_v4next_realtime_evolution.py" "$ROOT_DIR" "$RUN_DIR"
 print_progress "realtime evolution"
 
-python3 "$ROOT_DIR/tools/post_run_low_level_telemetry.py" "$RUN_DIR"
+lv_wrap 17 python3 "$ROOT_DIR/tools/post_run_low_level_telemetry.py" "$RUN_DIR"
 print_progress "low-level telemetry"
 
-python3 "$ROOT_DIR/tools/post_run_advanced_observables_pack.py" "$RUN_DIR"
+lv_wrap 18 python3 "$ROOT_DIR/tools/post_run_advanced_observables_pack.py" "$RUN_DIR"
 print_progress "advanced observables"
 
-python3 "$ROOT_DIR/tools/run_independent_physics_modules.py" "$RUN_DIR"
+lv_wrap 19 python3 "$ROOT_DIR/tools/run_independent_physics_modules.py" "$RUN_DIR"
 print_progress "independent qmc/dmrg/arpes/stm"
 
-python3 "$ROOT_DIR/tools/post_run_chatgpt_critical_tests.py" "$RUN_DIR"
+lv_wrap 20 python3 "$ROOT_DIR/tools/post_run_chatgpt_critical_tests.py" "$RUN_DIR"
 print_progress "critical tests"
 
-python3 "$ROOT_DIR/tools/post_run_problem_solution_progress.py" "$RUN_DIR"
+lv_wrap 21 python3 "$ROOT_DIR/tools/post_run_problem_solution_progress.py" "$RUN_DIR"
 print_progress "solution progress"
 
-python3 "$ROOT_DIR/tools/post_run_authenticity_audit.py" "$ROOT_DIR" "$RUN_DIR"
+lv_wrap 22 python3 "$ROOT_DIR/tools/post_run_authenticity_audit.py" "$ROOT_DIR" "$RUN_DIR"
 print_progress "authenticity audit"
 
-python3 "$ROOT_DIR/tools/post_run_cycle35_exhaustive_report.py" "$ROOT_DIR" "$RUN_DIR"
+lv_wrap 23 python3 "$ROOT_DIR/tools/post_run_cycle35_exhaustive_report.py" "$ROOT_DIR" "$RUN_DIR"
 print_progress "cycle35 report"
 
-python3 "$ROOT_DIR/tools/post_run_full_scope_integrator.py" --root "$ROOT_DIR" "$RUN_DIR"
+lv_wrap 24 python3 "$ROOT_DIR/tools/post_run_full_scope_integrator.py" --root "$ROOT_DIR" "$RUN_DIR"
 print_progress "full-scope integration"
 
 (
@@ -181,22 +247,22 @@ print_progress "full-scope integration"
   rm -f logs/checksums.sha256
 )
 
-python3 "$ROOT_DIR/tools/post_run_scientific_report_cycle.py" "$RUN_DIR"
+lv_wrap 25 python3 "$ROOT_DIR/tools/post_run_scientific_report_cycle.py" "$RUN_DIR"
 print_progress "scientific report"
 
-python3 "$ROOT_DIR/tools/post_run_independent_log_review.py" "$RUN_DIR"
+lv_wrap 26 python3 "$ROOT_DIR/tools/post_run_independent_log_review.py" "$RUN_DIR"
 print_progress "independent review"
 
-python3 "$ROOT_DIR/tools/post_run_3d_modelization_export.py" "$RUN_DIR"
+lv_wrap 27 python3 "$ROOT_DIR/tools/post_run_3d_modelization_export.py" "$RUN_DIR"
 print_progress "3d model export"
 
-python3 "$ROOT_DIR/tools/post_run_remote_depot_independent_analysis.py" "$ROOT_DIR" --run-dir "$RUN_DIR"
+lv_wrap 28 python3 "$ROOT_DIR/tools/post_run_remote_depot_independent_analysis.py" "$ROOT_DIR" --run-dir "$RUN_DIR"
 print_progress "remote independent analysis"
 
-python3 "$ROOT_DIR/tools/post_run_parallel_calibration_bridge.py" "$RUN_DIR"
+lv_wrap 29 python3 "$ROOT_DIR/tools/post_run_parallel_calibration_bridge.py" "$RUN_DIR"
 print_progress "parallel calibration bridge"
 
-python3 "$ROOT_DIR/tools/post_run_hfbl360_forensic_logger.py" "$RUN_DIR" --standard-names "$ROOT_DIR/../../../STANDARD_NAMES.md"
+lv_wrap 30 python3 "$ROOT_DIR/tools/post_run_hfbl360_forensic_logger.py" "$RUN_DIR" --standard-names "$ROOT_DIR/../../../STANDARD_NAMES.md"
 print_progress "hfbl360 forensic logger"
 
 write_checksums "$RUN_DIR"
