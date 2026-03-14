@@ -1,0 +1,5 @@
+file,line,snippet,status
+src/hubbard_hts_research_cycle.c,798,problem_t probs[64] = {0};,REVIEW_REQUIRED
+src/hubbard_hts_research_cycle_advanced_parallel.c,906,problem_t probs[64] = {0};,REVIEW_REQUIRED
+_originals_pre_cycle17/src/hubbard_hts_research_cycle.c,771,problem_t probs[64] = {0};,REVIEW_REQUIRED
+_originals_pre_cycle17/src/hubbard_hts_research_cycle_advanced_parallel.c,836,problem_t probs[64] = {0};,REVIEW_REQUIRED

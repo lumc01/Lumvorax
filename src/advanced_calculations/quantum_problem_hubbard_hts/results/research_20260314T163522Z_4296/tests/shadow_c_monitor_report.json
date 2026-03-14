@@ -1,0 +1,180 @@
+{
+  "timestamp_utc": "2026-03-14T16:39:40.966265+00:00",
+  "run_dir": "src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T163522Z_4296",
+  "shadow_comparisons": [
+    {
+      "problem": "hubbard_hts_core",
+      "c_energy_eV": 1.9847211096,
+      "py_energy_eV": -0.029060503510913063,
+      "c_pairing": 0.6710523185,
+      "py_pairing": 0.03387577133634602,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=1.984721_PY=-0.029061_delta=69.296",
+        "PAIRING_DIVERGE_C=0.671052_PY=0.033876_delta=18.809"
+      ],
+      "py_elapsed_ns": 7982646
+    },
+    {
+      "problem": "qcd_lattice_fullscale",
+      "c_energy_eV": 2.2213200331,
+      "py_energy_eV": -0.008265914739139658,
+      "c_pairing": 0.5257032147,
+      "py_pairing": 0.017132954714384516,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=2.221320_PY=-0.008266_delta=269.733",
+        "PAIRING_DIVERGE_C=0.525703_PY=0.017133_delta=29.684"
+      ],
+      "py_elapsed_ns": 6603946
+    },
+    {
+      "problem": "quantum_field_noneq",
+      "c_energy_eV": 1.7379608594,
+      "py_energy_eV": -0.06462158990745984,
+      "c_pairing": 0.3942168897,
+      "py_pairing": 0.06707918735534288,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=1.737961_PY=-0.064622_delta=27.894",
+        "PAIRING_DIVERGE_C=0.394217_PY=0.067079_delta=4.877"
+      ],
+      "py_elapsed_ns": 5072628
+    },
+    {
+      "problem": "dense_nuclear_fullscale",
+      "c_energy_eV": 2.7096749256,
+      "py_energy_eV": -0.013322526696247772,
+      "c_pairing": 0.6742937373,
+      "py_pairing": 0.02474389652485616,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=2.709675_PY=-0.013323_delta=204.390",
+        "PAIRING_DIVERGE_C=0.674294_PY=0.024744_delta=26.251"
+      ],
+      "py_elapsed_ns": 5365258
+    },
+    {
+      "problem": "quantum_chemistry_fullscale",
+      "c_energy_eV": 1.6206796268,
+      "py_energy_eV": -0.11238681440821313,
+      "c_pairing": 0.7265527427,
+      "py_pairing": 0.08495250320239013,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=1.620680_PY=-0.112387_delta=15.421",
+        "PAIRING_DIVERGE_C=0.726553_PY=0.084953_delta=7.552"
+      ],
+      "py_elapsed_ns": 4098998
+    },
+    {
+      "problem": "spin_liquid_exotic",
+      "c_energy_eV": 2.6034391697,
+      "py_energy_eV": -0.009941021882739657,
+      "c_pairing": 0.8084269021,
+      "py_pairing": 0.015330147035294601,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=2.603439_PY=-0.009941_delta=262.888",
+        "PAIRING_DIVERGE_C=0.808427_PY=0.015330_delta=51.734"
+      ],
+      "py_elapsed_ns": 7236196
+    },
+    {
+      "problem": "topological_correlated_materials",
+      "c_energy_eV": 1.9389457561,
+      "py_energy_eV": -0.02033857514445978,
+      "c_pairing": 0.7725687452,
+      "py_pairing": 0.022387038526818226,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=1.938946_PY=-0.020339_delta=96.333",
+        "PAIRING_DIVERGE_C=0.772569_PY=0.022387_delta=33.510"
+      ],
+      "py_elapsed_ns": 7237567
+    },
+    {
+      "problem": "correlated_fermions_non_hubbard",
+      "c_energy_eV": 2.1335664699,
+      "py_energy_eV": -0.028608641874654724,
+      "c_pairing": 0.6883312195,
+      "py_pairing": 0.030020800767836784,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=2.133566_PY=-0.028609_delta=75.578",
+        "PAIRING_DIVERGE_C=0.688331_PY=0.030021_delta=21.928"
+      ],
+      "py_elapsed_ns": 6592677
+    },
+    {
+      "problem": "multi_state_excited_chemistry",
+      "c_energy_eV": 1.6944832679,
+      "py_energy_eV": -0.04621088725317686,
+      "c_pairing": 0.8048825384,
+      "py_pairing": 0.038524876575661005,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=1.694483_PY=-0.046211_delta=37.668",
+        "PAIRING_DIVERGE_C=0.804883_PY=0.038525_delta=19.893"
+      ],
+      "py_elapsed_ns": 6118947
+    },
+    {
+      "problem": "bosonic_multimode_systems",
+      "c_energy_eV": 1.2867385334,
+      "py_energy_eV": -0.011376455207045399,
+      "c_pairing": 0.5996257437,
+      "py_pairing": 0.028083012136000143,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=1.286739_PY=-0.011376_delta=114.105",
+        "PAIRING_DIVERGE_C=0.599626_PY=0.028083_delta=20.352"
+      ],
+      "py_elapsed_ns": 5997747
+    },
+    {
+      "problem": "multiscale_nonlinear_field_models",
+      "c_energy_eV": 2.284663283,
+      "py_energy_eV": -0.024565330705251513,
+      "c_pairing": 0.6022507361,
+      "py_pairing": 0.022936783636177363,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=2.284663_PY=-0.024565_delta=94.004",
+        "PAIRING_DIVERGE_C=0.602251_PY=0.022937_delta=25.257"
+      ],
+      "py_elapsed_ns": 6919657
+    },
+    {
+      "problem": "far_from_equilibrium_kinetic_lattices",
+      "c_energy_eV": 1.984457584,
+      "py_energy_eV": -0.011730287912800622,
+      "c_pairing": 0.5392279526,
+      "py_pairing": 0.016315362559021315,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=1.984458_PY=-0.011730_delta=170.174",
+        "PAIRING_DIVERGE_C=0.539228_PY=0.016315_delta=32.050"
+      ],
+      "py_elapsed_ns": 6973416
+    },
+    {
+      "problem": "multi_correlated_fermion_boson_networks",
+      "c_energy_eV": 1.8374762322,
+      "py_energy_eV": -0.02841919619512521,
+      "c_pairing": 0.6641954486,
+      "py_pairing": 0.03273293293368508,
+      "shadow_match": false,
+      "anomalies": [
+        "ENERGY_DIVERGE_C=1.837476_PY=-0.028419_delta=65.656",
+        "PAIRING_DIVERGE_C=0.664195_PY=0.032733_delta=19.291"
+      ],
+      "py_elapsed_ns": 7271597
+    }
+  ],
+  "anomalies_total": 26,
+  "shadow_match_rate": 0.0,
+  "status": "ANOMALIES_DETECTED",
+  "total_comparisons": 13,
+  "total_elapsed_ns": 86496029
+}
