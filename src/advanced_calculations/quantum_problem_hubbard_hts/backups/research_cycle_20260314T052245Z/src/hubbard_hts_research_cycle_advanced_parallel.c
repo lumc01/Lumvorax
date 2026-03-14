@@ -1110,8 +1110,7 @@ int main(int argc, char** argv) {
             int steps = stability_checkpoints[k];
             pm.steps = (uint64_t)steps;
             sim_result_t rr = simulate_fullscale_controlled(&pm, 1701 + (uint64_t)(31 * ip), 99, NULL, &ctl, NULL, 0, NULL);
-            /* BC-11-ADV : energy_meV est en eV (pas en meV) — supprimer division /1000 erronée */
-            energy_density[k] = rr.energy_meV / ((double)(pm.lx * pm.ly) * (double)steps + EPS);
+            energy_density[k] = (rr.energy_meV / 1000.0) / ((double)(pm.lx * pm.ly) * (double)steps + EPS);
         }
 
         double drift_max = 0.0;
@@ -1167,8 +1166,8 @@ int main(int argc, char** argv) {
         p.temp_K = brow[i].t;
         p.u_eV = brow[i].u;
         sim_result_t rr = simulate_fullscale(&p, 1234 + (uint64_t)i, 129, NULL);
-        /* BC-11-ADV : energy_meV est déjà en eV (même formule que fullscale) — supprimer /1000 erroné */
-        double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_meV;
+        /* BC-11 : références en eV — convertir energy_meV → eV (÷1000) pour cohérence avec v2.csv */
+        double model = (strcmp(brow[i].observable, "pairing") == 0) ? rr.pairing_norm : (rr.energy_meV / 1000.0);
         double abs_e = fabs(model - brow[i].value);
         double rel_e = fabs(abs_e / (fabs(brow[i].value) + EPS));
         int ok_bar = abs_e <= brow[i].err;
@@ -1190,8 +1189,8 @@ int main(int argc, char** argv) {
         p.temp_K = br->t;
         p.u_eV = br->u;
         sim_result_t rr = simulate_fullscale(&p, 5151 + (uint64_t)i, 129, NULL);
-        /* BC-11-ADV : energy_meV est déjà en eV — même correction que QMC/DMRG */
-        double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing_norm : rr.energy_meV;
+        /* BC-11 : références en eV — convertir energy_meV → eV (÷1000) pour modules externes */
+        double model = (strcmp(br->observable, "pairing") == 0) ? rr.pairing_norm : (rr.energy_meV / 1000.0);
         double abs_e = fabs(model - br->value);
         double rel_e = fabs(abs_e / (fabs(br->value) + EPS));
         int ok_bar = abs_e <= br->err;

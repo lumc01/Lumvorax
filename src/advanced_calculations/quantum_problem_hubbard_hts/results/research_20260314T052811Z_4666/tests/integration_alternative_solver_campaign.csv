@@ -1,0 +1,17 @@
+problem,solver_family,model_value,reference_value,abs_error,error_bar,status
+hubbard_hts_core,qmc_dmrg_reference,0.8475908968,0.8800000000,0.0324091032,0.0700000000,PASS
+hubbard_hts_core,qmc_dmrg_reference,0.7831079791,0.8100000000,0.0268920209,0.0600000000,PASS
+hubbard_hts_core,qmc_dmrg_reference,0.7201284984,0.7500000000,0.0298715016,0.0600000000,PASS
+hubbard_hts_core,qmc_dmrg_reference,0.6722199887,0.7000000000,0.0277800113,0.0600000000,PASS
+hubbard_hts_core,qmc_dmrg_reference,0.6396860178,0.6500000000,0.0103139822,0.0600000000,PASS
+hubbard_hts_core,qmc_dmrg_reference,0.5744613528,0.6100000000,0.0355386472,0.0600000000,PASS
+hubbard_hts_core,qmc_dmrg_reference,0.5195171646,0.5600000000,0.0404828354,0.0600000000,PASS
+hubbard_hts_core,qmc_dmrg_reference,0.4813740970,0.5200000000,0.0386259030,0.0600000000,PASS
+hubbard_hts_core,qmc_dmrg_reference,0.0009989113,0.9985000000,0.9975010887,0.0500000000,FAIL
+hubbard_hts_core,qmc_dmrg_reference,0.0014917690,1.4913000000,1.4898082310,0.0500000000,FAIL
+hubbard_hts_core,qmc_dmrg_reference,0.0019847302,1.9841000000,1.9821152698,0.0500000000,FAIL
+hubbard_hts_core,qmc_dmrg_reference,0.0024771848,2.4769000000,2.4744228152,0.0500000000,FAIL
+hubbard_hts_core,qmc_dmrg_reference,0.0029701958,2.9697000000,2.9667298042,0.0500000000,FAIL
+hubbard_hts_core,qmc_dmrg_reference,0.0034626070,3.4622000000,3.4587373930,0.0500000000,FAIL
+hubbard_hts_core,qmc_dmrg_reference,0.0039552623,3.9548000000,3.9508447377,0.0500000000,FAIL
+GLOBAL_BENCHMARK,qmc_dmrg_reference,,,,,FAIL
