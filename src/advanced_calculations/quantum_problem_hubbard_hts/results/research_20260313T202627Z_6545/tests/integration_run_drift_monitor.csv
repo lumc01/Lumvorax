@@ -1,0 +1,6 @@
+metric,common_points,max_abs_diff,mean_abs_diff,reference_run,current_run
+energy,305,0.0,0.0,research_20260313T201749Z_5480,research_20260313T202627Z_6545
+pairing,305,0.0,0.0,research_20260313T201749Z_5480,research_20260313T202627Z_6545
+sign_ratio,305,0.0,0.0,research_20260313T201749Z_5480,research_20260313T202627Z_6545
+elapsed_ns,305,2227978481.0,933609569.9672132,research_20260313T201749Z_5480,research_20260313T202627Z_6545
+prev_malformed_rows,0,,,research_20260313T201749Z_5480,research_20260313T202627Z_6545

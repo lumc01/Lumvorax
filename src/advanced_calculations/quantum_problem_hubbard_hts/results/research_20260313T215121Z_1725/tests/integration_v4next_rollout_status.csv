@@ -1,0 +1,11 @@
+key,value,description
+mode_requested,shadow,Rollout mode requested by operator
+gate_pass,True,All technical integration gates
+physics_gate_pass,False,All physics readiness gates
+v4next_connection_readiness_pct,68.50,Connection readiness percentage
+shadow_mode_safety_pct,72.50,Shadow safety percentage
+realistic_simulation_level_pct,81.33,Realism percentage
+activated,False,Whether requested stage is active
+rollout_status,SHADOW_BLOCKED,Current rollout status
+rollback_state,ENABLED,Automatic rollback is always enabled
+decision_reason,Shadow mode always first stage; auto rollback armed.,Decision explanation

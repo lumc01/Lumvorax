@@ -1,0 +1,8 @@
+parameter,influence,source_file,line
+bootstrap_ci_alpha_width,Determines PASS/OBSERVED for alpha confidence robustness,tools/post_run_forensic_extension_tests.py,239
+cross_validation_rmse_power_vs_linear,Model realism fullscale (power-law vs linear out-of-sample),tools/post_run_forensic_extension_tests.py,243
+lyapunov_index,Dynamic instability fullscale,tools/post_run_forensic_extension_tests.py,155
+surrogate_delta,Distinguishes structured dynamics from surrogate behavior,tools/post_run_forensic_extension_tests.py,163
+finite_size_energy_slope,Finite-size scaling consistency,tools/post_run_forensic_extension_tests.py,268
+multi_seed_rep_diff_distribution,Sensitivity to seeds / reproducibility spread,tools/post_run_forensic_extension_tests.py,279
+external_simulation_crosscheck_qmc_dmrg,External solver agreement evidence (benchmark table),results/<run>/tests/benchmark_comparison_qmc_dmrg.csv,-1

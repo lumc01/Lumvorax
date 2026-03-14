@@ -236,7 +236,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
         double step_pairing = 0.0;
         double step_sign = 0.0;
         for (int i = 0; i < sites; ++i) {
-            double fl = rand01(&seed) - 0.5;
+            /* BC-08 : fl supprimé (inutilisé après BC-06bis) — seed progression préservée */
+            (void)rand01(&seed);
             int left = (i + sites - 1) % sites;
             int right = (i + 1) % sites;
             double neigh = 0.5 * (d[left] + d[right]);
@@ -273,11 +274,15 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
 
             step_energy += local_energy / (double)(sites);
             step_pairing += local_pair;
-            step_sign += (fl >= 0 ? 1.0 : -1.0);
+            /* BC-06bis : proxy state-dépendant — sign(d[i]) varie avec l'état physique */
+            /* (n_up-0.5)*(n_dn-0.5) = -d²/4 ≤ 0 toujours — remplacé par sign(d[i]) */
+            double fsign = (d[i] >= 0.0) ? 1.0 : -1.0;
+            step_sign += fsign;
             collective_mode += corr[i];
         }
 
-        step_pairing /= (double)sites;
+        /* BC-04 : normalisation par 2*sites (deux canaux de spin up+dn) */
+        step_pairing /= (2.0 * (double)sites);
         step_sign /= (double)sites;
 
         /* Normalisation vecteur d'état à chaque pas (cohérence avec advanced_parallel) */
@@ -379,37 +384,62 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
     long double h_scale_ld = fabsl((long double)p->t_eV) + fabsl((long double)p->u_eV) + fabsl((long double)p->mu_eV);
     long double dt_scale_ld = (long double)bounded_dt_scale((double)dt_ld, (double)h_scale_ld);
     uint64_t t0 = now_ns();
+    for (int i = 0; i < sites; ++i) d[i] = ((long double)rand01(&seed) - 0.5L) * 1e-3L;
+    /* Normalisation initiale identique a simulate_fullscale_controlled */
+    {
+        long double norm2 = 0.0L;
+        for (int i = 0; i < sites; ++i) norm2 += d[i] * d[i];
+        if (norm2 > 1e-30L) {
+            long double inv = 1.0L / sqrtl(norm2);
+            for (int i = 0; i < sites; ++i) d[i] *= inv;
+        }
+    }
     for (uint64_t step = 0; step < p->steps; ++step) {
         long double collective_mode = 0.0L;
         long double step_energy = 0.0L;
         long double step_pairing = 0.0L;
         long double step_sign = 0.0L;
         for (int i = 0; i < sites; ++i) {
-            long double fl = (long double)(rand01(&seed) - 0.5);
+            /* BC-08 : fl supprimé (inutilisé après BC-06bis/BC-07) — seed progression préservée */
+            (void)rand01(&seed);
             int left = (i + sites - 1) % sites;
             int right = (i + 1) % sites;
             long double neigh = 0.5L * (d[left] + d[right]);
             long double alpha_corr_ld = (step < 500) ? 0.05L : 0.15L;
             corr[i] = (1.0L - alpha_corr_ld) * corr[i] + alpha_corr_ld * neigh;
-
             long double d_left = d[left];
             long double d_right = d[right];
+            /* RK2 midpoint — methode identique a simulate_fullscale_controlled */
             long double dH_ddi = (long double)p->u_eV * (-d[i]) + (long double)p->t_eV * (d[i] - corr[i]);
-            d[i] += -dt_scale_ld * dH_ddi;
+            long double k1 = -dt_scale_ld * dH_ddi;
+            long double d_mid = d[i] + 0.5L * k1;
+            long double dH_ddi_mid = (long double)p->u_eV * (-d_mid) + (long double)p->t_eV * (d_mid - corr[i]);
+            d[i] += -dt_scale_ld * dH_ddi_mid;
             d[i] = tanhl(d[i]);
-
             long double n_up = 0.5L * (1.0L + d[i]);
             long double n_dn = 0.5L * (1.0L - d[i]);
             long double hopping_lr = -0.5L * d[i] * (d_left + d_right);
             long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp_K / 65.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
             long double local_energy = (long double)p->u_eV * n_up * n_dn - (long double)p->t_eV * hopping_lr - (long double)p->mu_eV * (n_up + n_dn - 1.0L);
-
             step_energy += local_energy / (long double)sites;
             step_pairing += local_pair;
-            step_sign += (fl >= 0 ? 1.0L : -1.0L);
+            /* BC-07 : proxy state-dépendant dans simulate_problem_independent — sign(d[i]) */
+            /* (n_up-0.5)*(n_dn-0.5) = -d²/4 ≤ 0 toujours — remplacé par sign(d[i]) comme main */
+            long double fsign_ld = (d[i] >= 0.0L) ? 1.0L : -1.0L;
+            step_sign += fsign_ld;
             collective_mode += corr[i];
         }
-        step_pairing /= (long double)sites;
+        /* Normalisation vecteur d'etat — identique a simulate_fullscale_controlled */
+        {
+            long double norm2 = 0.0L;
+            for (int i = 0; i < sites; ++i) norm2 += d[i] * d[i];
+            if (norm2 > 1e-30L) {
+                long double inv = 1.0L / sqrtl(norm2);
+                for (int i = 0; i < sites; ++i) d[i] *= inv;
+            }
+        }
+        /* BC-04 : normalisation par 2*sites (deux canaux de spin up+dn) — cohérence avec simulate_fullscale_controlled */
+        step_pairing /= (2.0L * (long double)sites);
         step_sign /= (long double)sites;
         (void)collective_mode;
         r.energy = (double)step_energy;

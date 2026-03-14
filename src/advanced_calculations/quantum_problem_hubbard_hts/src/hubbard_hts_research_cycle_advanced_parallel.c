@@ -288,12 +288,16 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
         double step_pairing = 0.0;
         double step_sign = 0.0;
         for (int i = 0; i < sites; ++i) {
-            double fl = rand01(&seed) - 0.5;
+            /* BC-08 : fl supprimé (inutilisé après BC-06bis) — seed progression préservée */
+            (void)rand01(&seed);
             int left = (i + sites - 1) % sites;
             int right = (i + 1) % sites;
             double neigh = 0.5 * (d[left] + d[right]);
             double alpha_corr = (step < 500) ? 0.05 : 0.15;
             corr[i] = (1.0 - alpha_corr) * corr[i] + alpha_corr * neigh;
+            /* BC-03 : sauvegarder voisins AVANT le RK2 — schéma Jacobi cohérent avec fullscale */
+            double d_left_t0  = d[left];
+            double d_right_t0 = d[right];
 
             double dH_ddi = p->u_eV * (-d[i]) + p->t_eV * (d[i] - corr[i]);
             double k1 = -dt_scale * dH_ddi;
@@ -312,7 +316,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                 d[i] += dt_scale * quench_window * ctl->quench_strength * cos(0.041 * (double)step + 0.07 * (double)i);
             }
             if (ctl && ctl->resonance_pump && step > ctl->phase_step) {
-                double abs_energy = fabs(r.energy_meV);
+                /* BC-02 : utiliser prev_step_energy au lieu de r.energy_meV (stale du pas précédent) */
+                double abs_energy = fabs(prev_step_energy);
                 if (step == ctl->phase_step + 1) crt.ema_abs_energy = abs_energy;
                 crt.ema_abs_energy = 0.985 * crt.ema_abs_energy + 0.015 * abs_energy;
                 double rel_delta = (crt.target_abs_energy - crt.ema_abs_energy) / (crt.target_abs_energy + EPS);
@@ -323,16 +328,18 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
 
             double n_up = 0.5 * (1.0 + d[i]);
             double n_dn = 0.5 * (1.0 - d[i]);
-            double d_left = d[left];
-            double d_right = d[right];
-            double hopping_lr = -0.5 * d[i] * (d_left + d_right);
+            /* BC-03 : utiliser voisins pré-RK2 (Jacobi) au lieu de post-tanh */
+            double hopping_lr = -0.5 * d[i] * (d_left_t0 + d_right_t0);
 
             double local_pair = exp(-fabs(d[i]) * p->temp_K / 65.0) * (1.0 + 0.08 * corr[i] * corr[i]);
             double local_energy = p->u_eV * n_up * n_dn - p->t_eV * hopping_lr - p->mu_eV * (n_up + n_dn - 1.0);
 
             step_energy += local_energy / (double)(sites);
             step_pairing += local_pair;
-            step_sign += (fl >= 0 ? 1.0 : -1.0);
+            /* BC-06bis : proxy state-dépendant — sign(d[i]) varie avec l'état physique */
+            /* (n_up-0.5)*(n_dn-0.5) = -d²/4 ≤ 0 toujours — remplacé par sign(d[i]) */
+            double fsign = (d[i] >= 0.0) ? 1.0 : -1.0;
+            step_sign += fsign;
             collective_mode += corr[i];
         }
 
@@ -340,7 +347,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
 
         double norm_dev = fabs(state_vector_norm(d, sites) - 1.0);
         if (norm_dev > r.norm_deviation_max) r.norm_deviation_max = norm_dev;
-        step_pairing /= (double)sites;
+        /* BC-04 : normalisation par 2*sites (deux canaux de spin up+dn) */
+        step_pairing /= (2.0 * (double)sites);
         step_sign /= (double)sites;
 
         (void)burn_scale;
@@ -446,7 +454,8 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
         long double step_pairing = 0.0L;
         long double step_sign = 0.0L;
         for (int i = 0; i < sites; ++i) {
-            long double fl = (long double)(rand01(&seed) - 0.5);
+            /* BC-08 : fl supprimé (inutilisé après BC-06bis/BC-07) — seed progression préservée */
+            (void)rand01(&seed);
             int left = (i + sites - 1) % sites;
             int right = (i + 1) % sites;
             long double neigh = 0.5L * (d[left] + d[right]);
@@ -470,11 +479,15 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
 
             step_energy += local_energy / (long double)sites;
             step_pairing += local_pair;
-            step_sign += (fl >= 0 ? 1.0L : -1.0L);
+            /* BC-07 : proxy state-dépendant dans simulate_problem_independent — sign(d[i]) */
+            /* (n_up-0.5)*(n_dn-0.5) = -d²/4 ≤ 0 toujours — remplacé par sign(d[i]) comme main */
+            long double fsign_ld = (d[i] >= 0.0L) ? 1.0L : -1.0L;
+            step_sign += fsign_ld;
             collective_mode += corr[i];
         }
         normalize_state_vector_ld(d, sites);
-        step_pairing /= (long double)sites;
+        /* BC-04 : normalisation par 2*sites (deux canaux de spin up+dn) — cohérence avec simulate_fullscale_controlled */
+        step_pairing /= (2.0L * (long double)sites);
         step_sign /= (long double)sites;
 
         (void)burn_scale;

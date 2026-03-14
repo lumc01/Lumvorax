@@ -1,0 +1,92 @@
+{
+  "run": "research_20260313T215121Z_1725",
+  "generated_at_utc": "2026-03-13T21:51:33.686055+00:00",
+  "counts": {
+    "new_tests": 80,
+    "expert_questions": 19,
+    "module_metadata": 13,
+    "temporal_rows": 4092
+  },
+  "family_stats": {
+    "reproducibility": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "convergence": {
+      "percent": 100.0,
+      "pass": 5,
+      "total": 5
+    },
+    "stress": {
+      "percent": 100.0,
+      "pass": 1,
+      "total": 1
+    },
+    "verification": {
+      "percent": 100.0,
+      "pass": 1,
+      "total": 1
+    },
+    "exact_solver": {
+      "percent": 33.333333333333336,
+      "pass": 1,
+      "total": 3
+    },
+    "sensitivity": {
+      "percent": 0.0,
+      "pass": 0,
+      "total": 8
+    },
+    "physics": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "control": {
+      "percent": 100.0,
+      "pass": 3,
+      "total": 3
+    },
+    "stability": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "dynamic_pumping": {
+      "percent": 0.0,
+      "pass": 0,
+      "total": 4
+    },
+    "dt_sweep": {
+      "percent": 25.0,
+      "pass": 1,
+      "total": 4
+    },
+    "spectral": {
+      "percent": 100.0,
+      "pass": 2,
+      "total": 2
+    },
+    "benchmark": {
+      "percent": 100.0,
+      "pass": 7,
+      "total": 7
+    },
+    "cluster_scale": {
+      "percent": 11.11111111111111,
+      "pass": 4,
+      "total": 36
+    }
+  },
+  "question_status": {
+    "complete": 17,
+    "partial": 2
+  },
+  "expert_complete_pct": 89.47368421052632,
+  "overall_progress_pct": 88.94736842105263,
+  "fails": {
+    "new_tests": [],
+    "numerical_stability": []
+  }
+}

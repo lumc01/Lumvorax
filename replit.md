@@ -1,24 +1,36 @@
-# Project Overview
+# LUM/VORAX Quantum Research System
 
-This is a Python 3.11 workspace containing various research and analysis scripts, primarily related to the AI Mathematical Olympiad (AIMO) competition and related mathematical/algorithmic work.
+## Project Overview
+A scientific computing project focused on quantum physics research, black hole simulation (Kerr metric/Gargantua), and advanced numerical methods. The system includes:
 
-## Structure
+- **LUM/VORAX engine**: Core C-based computation framework with 39+ modules
+- **Quantum simulations**: Hubbard model, high-temperature superconductors (HTS)
+- **Forensic logging**: Bit-level traceability and hardware timestamping (nanosecond precision)
+- **Advanced algorithms**: Neural networks, SIMD optimization, parallel processing, TSP, Pareto optimization
 
-- `main.py` - Entry point (simple hello world placeholder)
-- `src/advanced_calculations/quantum_problem_hubbard_hts/src/hubbard_hts_research_cycle.c` - Core simulation logic with 5 stability corrections: spectral radius (1e-6), damping (0.015), local dissipation, energy normalization by sites, drift reduction (1e-10).
-- `src/advanced_calculations/quantum_problem_hubbard_hts/results/` - Research artifacts, logs, and comparative reports (research_20260310T013238Z_2300, research_20260310T013832Z_2311, research_20260310T012023Z_1673).
-- `RAPPORT_FINAL_AVANT_APRES_COMPLET.md` - Comprehensive before/after analysis: removed artificial 1e6 factor, validated unit consistency, confirmed 3-run determinism.
+## Architecture
+- **Language**: C (primary), Python (utilities), Bash (orchestration)
+- **Build system**: GNU Make
+- **Binaries**: Pre-compiled in `bin/` directory
+  - `bin/lum_vorax_complete` — Main computation engine
+  - `bin/test_forensic_complete_system` — Forensic test suite
+  - `bin/test_integration_complete_39_modules` — Integration tests
+  - `bin/test_quantum` — Quantum module tests
 
-## Running
+## Key Directories
+- `src/` — C source code (core, lum, vorax, crypto, debug, advanced_calculations, etc.)
+- `bin/` — Compiled executables
+- `dataset/`, `DATASET/` — Research data
+- `evidence/` — Scientific evidence/results
+- `docs/` — Documentation
 
-The project runs via the "Run Python" workflow which executes `main.py`.
+## Workflows
+- **Run Python**: Runs `main.py` (Python utility entry point)
+- **Quantum Research Cycle**: Runs the full quantum research bash script
 
-## Environment
+## Dependencies (Nix packages)
+arrow-cpp, cairo, clang, ffmpeg-full, gcc, gdb, ghostscript, glib, glibc, glibcLocales, gnumake, gobject-introspection, gtk3, kaggle, libxcrypt, nano, openssh, pkg-config, qhull, tcl, tk, tree, vim-full, xsimd, zlib
 
-- **Runtime**: Python 3.11
-- **Key packages**: kaggle, gcc, clang, ffmpeg, and many scientific/graphics libraries via Nix
-
-## Security Notes
-
-- `KAGGLE_USERNAME` and `KAGGLE_CONFIG_DIR` are stored as non-sensitive env vars
-- API tokens (KAGGLE_API_TOKEN, ARISTOTLE_API_KEY) should be stored as secrets via the Replit Secrets panel, not in `.replit`
+## Kaggle Integration
+- Username: ndarray2000
+- Config stored in `$KAGGLE_CONFIG_DIR/kaggle.json`

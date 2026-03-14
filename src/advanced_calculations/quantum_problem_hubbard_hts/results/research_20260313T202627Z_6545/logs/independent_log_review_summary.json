@@ -1,0 +1,128 @@
+{
+  "run": "research_20260313T202627Z_6545",
+  "generated_at_utc": "2026-03-13T20:26:39.156240+00:00",
+  "counts": {
+    "base_metrics_rows": 305,
+    "normalized_rows": 52,
+    "new_tests": 80,
+    "questions": 19,
+    "modules": 13,
+    "toy_rows": 1
+  },
+  "means": {
+    "energy": 2.007008762132131,
+    "pairing": 0.8384991134770492,
+    "sign_ratio": -1.0
+  },
+  "family_ratio": {
+    "benchmark": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "cluster_scale": {
+      "total": 36,
+      "passed": 4,
+      "failed": 0,
+      "observed": 32,
+      "pass_pct": 11.11111111111111
+    },
+    "control": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "convergence": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "dt_sweep": {
+      "total": 4,
+      "passed": 1,
+      "failed": 0,
+      "observed": 3,
+      "pass_pct": 25.0
+    },
+    "dynamic_pumping": {
+      "total": 4,
+      "passed": 0,
+      "failed": 0,
+      "observed": 4,
+      "pass_pct": 0.0
+    },
+    "exact_solver": {
+      "total": 3,
+      "passed": 1,
+      "failed": 0,
+      "observed": 2,
+      "pass_pct": 33.333333333333336
+    },
+    "physics": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "reproducibility": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "sensitivity": {
+      "total": 8,
+      "passed": 0,
+      "failed": 0,
+      "observed": 8,
+      "pass_pct": 0.0
+    },
+    "spectral": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "stability": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "stress": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "verification": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    }
+  },
+  "question_status": {
+    "complete": 17,
+    "partial": 2
+  },
+  "question_complete_pct": 89.47368421052632,
+  "numerical_stability_pass_pct": 100.0,
+  "progress_score_pct": 92.046783625731,
+  "fails": {
+    "new_tests": [],
+    "numerical_stability": []
+  }
+}
