@@ -695,6 +695,14 @@ int main(int argc, char** argv) {
     mkdir_if_missing(reports);
     mkdir_if_missing(tests);
 
+    /* BC-LV02/LV03 : Initialisation LumVorax — lecture toggles env + init forensique */
+    {
+        const char* lv_forensic = getenv("LUMVORAX_FORENSIC_REALTIME");
+        if (lv_forensic && lv_forensic[0] == '1') {
+            lv_init(logs);
+        }
+    }
+
     char log_path[MAX_PATH], raw_csv[MAX_PATH], tests_csv[MAX_PATH], report[MAX_PATH], comparison_report[MAX_PATH], provenance[MAX_PATH], qa_csv[MAX_PATH], bench_csv[MAX_PATH], bench_ref[MAX_PATH], bench_csv_modules[MAX_PATH], bench_ref_modules[MAX_PATH];
     char module_meta_csv[MAX_PATH], detailed_csv[MAX_PATH], numeric_stability_csv[MAX_PATH], toy_csv[MAX_PATH], temporal_csv[MAX_PATH];
     pjoin(log_path, sizeof(log_path), logs, "research_execution.log");
@@ -1214,7 +1222,8 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < 23; ++i) {
         bool ok = strcmp(qrows[i][3], "complete") == 0;
         mark(&expert, ok);
-        fprintf(qcsv, "%s,%s,%s,%s,see_report\n", qrows[i][0], qrows[i][1], qrows[i][2], qrows[i][3]);
+        /* BC-CSV-FIX : guillemets autour du texte question — évite colonnes parasites (virgules dans texte) */
+        fprintf(qcsv, "%s,%s,\"%s\",%s,see_report\n", qrows[i][0], qrows[i][1], qrows[i][2], qrows[i][3]);
     }
 
     mark(&traceability, access(log_path, F_OK) == 0);
@@ -1325,5 +1334,10 @@ int main(int argc, char** argv) {
     fclose(tdrv);
     fclose(toy);
     free_loaded_problem_names(probs, nprobs);
+
+    /* BC-LV03 : Rapport fuites mémoire + destruction logger forensique */
+    lv_report_leaks();
+    lv_destroy();
+
     return 0;
 }

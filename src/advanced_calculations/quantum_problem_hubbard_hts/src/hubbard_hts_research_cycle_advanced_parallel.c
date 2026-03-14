@@ -12,6 +12,9 @@
 #include <time.h>
 #include <unistd.h>
 
+/* BC-LV01/LV02/LV03/LV04/LV05 : Intégration LumVorax forensique — 2026-03-14 */
+#include "../include/lumvorax_integration.h"
+
 #define MAX_PATH 768
 #define EPS 1e-12
 #define HUBBARD_2X2_SITES 4
@@ -266,8 +269,9 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
                                                        uint64_t* series_len) {
     sim_result_t r = {0};
     int sites = p->lx * p->ly;
-    double* d = calloc((size_t)sites, sizeof(double));
-    double* corr = calloc((size_t)sites, sizeof(double));
+    /* BC-LV05 : calloc remplacés par LV_CALLOC pour tracking mémoire forensique */
+    double* d = LV_CALLOC((size_t)sites, sizeof(double));
+    double* corr = LV_CALLOC((size_t)sites, sizeof(double));
     double dt = (p->dt > 0.0) ? p->dt : 0.01;
     double h_scale_eV = fabs(p->t_eV) + fabs(p->u_eV) + fabs(p->mu_eV);
     double dt_scale = bounded_dt_scale(dt, h_scale_eV);
@@ -281,6 +285,13 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
     uint64_t t0 = now_ns();
     double prev_step_energy = 0.0;
     bool has_prev_step_energy = false;
+
+    /* BC-LV04 : Point forensique — démarrage simulation advanced_parallel */
+    LV_MODULE_START("simulate_adv", p->name);
+    LV_MODULE_METRIC("simulate_adv", "sites", (double)sites);
+    LV_MODULE_METRIC("simulate_adv", "steps", (double)p->steps);
+    LV_MODULE_METRIC("simulate_adv", "temp_K", p->temp_K);
+    LV_MODULE_METRIC("simulate_adv", "U_eV", p->u_eV);
 
     for (uint64_t step = 0; step < p->steps; ++step) {
         double collective_mode = 0.0;
@@ -333,6 +344,11 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
 
             /* BC-05-H4 : constante physique corrigée 65→27 K (fit QMC/DMRG, RMSE≈0.007) */
             double local_pair = exp(-fabs(d[i]) * p->temp_K / 27.0) * (1.0 + 0.08 * corr[i] * corr[i]);
+            /* BC-LV04 : trace forensique step 0, site 0 */
+            if (step == 0 && i == 0) {
+                LV_MODULE_METRIC("simulate_adv", "local_pair_site0_step0", local_pair);
+                LV_MODULE_METRIC("simulate_adv", "d_site0_step0", d[i]);
+            }
             double local_energy = p->u_eV * n_up * n_dn - p->t_eV * hopping_lr - p->mu_eV * (n_up + n_dn - 1.0);
 
             step_energy += local_energy / (double)(sites);
@@ -351,6 +367,11 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
         /* BC-05-H3 : réversion BC-04 — diviseur N seul (BCS estimateur déjà normalisé) */
         step_pairing /= (double)sites;
         step_sign /= (double)sites;
+        /* BC-LV04 : métriques step 0 après normalisation */
+        if (step == 0) {
+            LV_MODULE_METRIC("simulate_adv", "step_pairing_norm_step0", step_pairing);
+            LV_MODULE_METRIC("simulate_adv", "step_energy_norm_step0", step_energy);
+        }
 
         (void)burn_scale;
         (void)collective_mode;
@@ -384,9 +405,17 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
         }
     }
 
-    free(corr);
-    free(d);
+    /* BC-LV05 : free remplacés par LV_FREE */
+    LV_FREE(corr);
+    LV_FREE(d);
     r.elapsed_ns = now_ns() - t0;
+
+    /* BC-LV04 : fin simulation + métriques finales */
+    LV_MODULE_END("simulate_adv", p->name, true);
+    LV_MODULE_METRIC("simulate_adv", "pairing_final", r.pairing_norm);
+    LV_MODULE_METRIC("simulate_adv", "energy_final_eV", r.energy_meV);
+    LV_MODULE_METRIC("simulate_adv", "sign_ratio_final", r.sign_ratio);
+    LV_MODULE_METRIC("simulate_adv", "elapsed_ns", (double)r.elapsed_ns);
     return r;
 }
 
@@ -719,6 +748,14 @@ int main(int argc, char** argv) {
     mkdir_if_missing(logs);
     mkdir_if_missing(reports);
     mkdir_if_missing(tests);
+
+    /* BC-LV02/LV03 : Initialisation LumVorax — lecture toggles env + init forensique */
+    {
+        const char* lv_forensic = getenv("LUMVORAX_FORENSIC_REALTIME");
+        if (lv_forensic && lv_forensic[0] == '1') {
+            lv_init(logs);
+        }
+    }
 
     char log_path[MAX_PATH], raw_csv[MAX_PATH], tests_csv[MAX_PATH], report[MAX_PATH], comparison_report[MAX_PATH], provenance[MAX_PATH], qa_csv[MAX_PATH], bench_csv[MAX_PATH], bench_ref[MAX_PATH], bench_csv_modules[MAX_PATH], bench_ref_modules[MAX_PATH];
     char module_meta_csv[MAX_PATH], detailed_csv[MAX_PATH], numeric_stability_csv[MAX_PATH], toy_csv[MAX_PATH], temporal_csv[MAX_PATH];
@@ -1161,6 +1198,13 @@ int main(int argc, char** argv) {
     fprintf(tcsv, "benchmark,qmc_dmrg_mae,mae,%.10f,%s\n", mae, bench_mae_ok ? "PASS" : "FAIL");
     fprintf(tcsv, "benchmark,qmc_dmrg_within_error_bar,percent_within,%.6f,%s\n", p_within, bench_within_ok ? "PASS" : "FAIL");
     fprintf(tcsv, "benchmark,qmc_dmrg_ci95_halfwidth,ci95_halfwidth,%.10f,%s\n", ci95_half, bench_ci_ok ? "PASS" : "FAIL");
+    /* BC-LV04 : métriques benchmark forensiques */
+    LV_MODULE_METRIC("benchmark_adv", "rmse", rmse);
+    LV_MODULE_METRIC("benchmark_adv", "mae", mae);
+    LV_MODULE_METRIC("benchmark_adv", "pct_within_error_bar", p_within);
+    LV_MODULE_METRIC("benchmark_adv", "ci95_halfwidth", ci95_half);
+    LV_MODULE_METRIC("benchmark_adv", "n_points", (double)m);
+    LV_MODULE_METRIC("benchmark_adv", "n_within", (double)within_bar);
 
     mark(&robustness, bench_rmse_ok && bench_mae_ok);
     mark(&physical, bench_within_ok && bench_ci_ok);
@@ -1244,7 +1288,8 @@ int main(int argc, char** argv) {
     for (size_t i = 0; i < 23; ++i) {
         bool ok = strcmp(qrows[i][3], "complete") == 0;
         mark(&expert, ok);
-        fprintf(qcsv, "%s,%s,%s,%s,see_report\n", qrows[i][0], qrows[i][1], qrows[i][2], qrows[i][3]);
+        /* BC-CSV-FIX : guillemets autour du texte question — évite colonnes parasites (virgules dans texte) */
+        fprintf(qcsv, "%s,%s,\"%s\",%s,see_report\n", qrows[i][0], qrows[i][1], qrows[i][2], qrows[i][3]);
     }
 
     mark(&traceability, access(log_path, F_OK) == 0);
