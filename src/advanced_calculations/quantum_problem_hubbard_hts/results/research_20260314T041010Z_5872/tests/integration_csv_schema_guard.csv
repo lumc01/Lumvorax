@@ -1,0 +1,14 @@
+file,status,expected_columns,row,actual_columns,details
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/logs/baseline_reanalysis_metrics.csv,PASS,10,,10,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/logs/normalized_observables_trace.csv,PASS,8,,8,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/benchmark_comparison_external_modules.csv,PASS,10,,10,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/benchmark_comparison_qmc_dmrg.csv,PASS,10,,10,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/expert_questions_matrix.csv,PASS,5,,5,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/integration_dimensionless_ht_over_hbar.csv,PASS,7,,7,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/integration_norm_psi_guard.csv,PASS,5,,5,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/integration_units_end_to_end.csv,PASS,6,,6,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/module_physics_metadata.csv,PASS,19,,19,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/new_tests_results.csv,PASS,5,,5,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/numerical_stability_suite.csv,PASS,6,,6,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/temporal_derivatives_variance.csv,PASS,7,,7,ok
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260314T041010Z_5872/tests/toy_model_validation.csv,PASS,7,,7,ok

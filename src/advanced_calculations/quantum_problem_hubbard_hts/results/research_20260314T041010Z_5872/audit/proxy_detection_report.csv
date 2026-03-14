@@ -1,0 +1,160 @@
+file,line,pattern,snippet
+CONTRE_RAPPORT_REPLIT_MAJ_PLAN_V4NEXT_CYCLE17.md,86,hardcod,2. **Risque de hardcoding (audit authenticité)**
+CONTRE_RAPPORT_REPLIT_MAJ_PLAN_V4NEXT_CYCLE17.md,130,hardcod,4. **Pack anti-hardcoding scientifique**
+CONTRE_RAPPORT_REPLIT_MAJ_PLAN_V4NEXT_CYCLE17.md,143,proxy,- Le passage cluster 8x8→12x12 capture-t-il un scaling physique ou un artefact de proxy?
+RAPPORT_ANALYSE_3MODES_REPLIT_CYCLE26.md,64,proxy,- Les observables proxy de corrélation longue portée sont bien exportées (`integration_physics_extra_observables.csv`).
+RAPPORT_ANALYSE_3MODES_REPLIT_CYCLE26.md,65,proxy,"- Elles améliorent le diagnostic, mais ne remplacent pas une corrélation non-proxy publication-grade."
+RAPPORT_ANALYSE_3MODES_REPLIT_CYCLE26.md,118,proxy,1. Cross-check non-proxy supplémentaire.
+RAPPORT_CORRECTIONS_APPLIQUEES.md,110,proxy,/* ✅ Conversion unités : énergie interne → meV (facteur 1.0 pour proxy) */
+RAPPORT_CORRECTIONS_APPLIQUEES.md,236,proxy,/* ✅ Énergie physique pure - unités explicites (proxy=1 eV) */
+RAPPORT_CORRECTIONS_APPLIQUEES.md,373,hardcod,4. **Von Neumann Audit** : Vérifier si SR reste = 1.0002 (doute code hardcoding)
+RAPPORT_CORRECTIONS_APPLIQUEES.md,467,hardcod,**Hypothèse :** Valeur hardcodée ou métadonnée fausse
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,21,proxy,"- `dense_nuclear_proxy`: E[min,max]=`[-3672.6240,758316.8419]`, pairing[start,end]=`[71.8208,112246.5076]`, sign[min,max]=`[-0.001925,0.111111]`."
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,23,proxy,"- `qcd_lattice_proxy`: E[min,max]=`[-4182.2019,735070.0408]`, pairing[start,end]=`[80.6744,112566.2484]`, sign[min,max]=`[-0.012346,0.006941]`."
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,24,proxy,"- `quantum_chemistry_proxy`: E[min,max]=`[-9285.6032,365840.9700]`, pairing[start,end]=`[55.8853,96286.8676]`, sign[min,max]=`[-0.142857,0.022277]`."
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,31,proxy,- `proxy` = modèle simplifié pour pilotage et validation de pipeline.
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,41,proxy,- **Solution**: ajouter cross-check solveurs non-proxy et sweeps dt réels.
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,44,proxy,- Faiblesse principale: réalisme physique encore limité (proxy-dominant).
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,45,proxy,"- Améliorations: unités explicites, dt/2-dt-2dt multi-runs, corrélations non-proxy, critères de phase formels."
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,63,proxy,- Modularity proxy: `100.00%`
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,66,proxy,- Niveau réalisme simulation proxy: `55.00%`
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,71,proxy,- Quelle latence max admissible entre proxy outputs et bus V4 NEXT ?
+RAPPORT_EXHAUSTIF_PHASES_CYCLE19_REV3.md,72,proxy,- Quel minimum de validations non-proxy est requis avant claims forts ?
+RAPPORT_EXHAUSTIF_SYNC_REPLIT_V4NEXT_CYCLE17_REV2.md,50,hardcod,- Risque d’interprétation: certains paramètres sont signalés `REVIEW_REQUIRED` dans l’audit de hardcoding.
+RAPPORT_EXHAUSTIF_SYNC_REPLIT_V4NEXT_CYCLE17_REV2.md,59,proxy,- qcd_lattice_proxy
+RAPPORT_EXHAUSTIF_SYNC_REPLIT_V4NEXT_CYCLE17_REV2.md,61,proxy,- dense_nuclear_proxy
+RAPPORT_EXHAUSTIF_SYNC_REPLIT_V4NEXT_CYCLE17_REV2.md,62,proxy,- quantum_chemistry_proxy
+RAPPORT_EXHAUSTIF_SYNC_REPLIT_V4NEXT_CYCLE17_REV2.md,152,hardcod,3. Hardcoding potentiellement excessif sur paramètres de certains modules/scripts.
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,22,proxy,| QCD Lattice Proxy | **-0.0566** | **0.9184** | ✓ Stable |
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,24,proxy,| Dense Nuclear Proxy | **-0.0451** | **0.9488** | ✓ Stable |
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,44,proxy,2. **Les unités adimensionnelles sont cohérentes.** Les énergies en $[t]$ (unité de saut) sont désormais les seules sorties du modèle proxy.
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,49,proxy,"**Cependant,** il demeure une discordance entre les sorties proxy et les références externes QMC/DMRG :"
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,51,proxy,| Domaine | Proxy | Benchmark | Écart d'Unité | Facteur de Conversion |
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,57,proxy,- **La tendance énergétique est cohérente** entre proxy et benchmark (décroissance monotone).
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,62,proxy,"- Proxy : $t = 1$ (hoppings adimensionnels), $\hbar = 1$, $k_B = 1$"
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,76,proxy,"1. Les barres d'erreur du benchmark QMC (~9,000–14,000 meV) sont **10⁶ fois plus larges** que l'énergie proxy (0.14 u.a.)."
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,88,proxy,✅ **Restauré la pureté physique** du modèle proxy (unités adimensionnelles cohérentes).
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,119,proxy,"def convert_proxy_to_si_units(energy_ua, t_hopping_ev):"
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,148,proxy,"- ❌ Énergie proxy : -140,000 u.a. (artificiel)"
+RAPPORT_FINAL_AVANT_APRES_COMPLET.md,153,proxy,"- ✅ Énergie proxy : -0.14 u.a. (pur, déterministe)"
+RAPPORT_IMPLEMENTATION_TOTALE_CYCLE32.md,6,proxy,"- Ajout des métriques bas niveau demandées (utilisation modules, hardware, latence, débit de calcul, qubits simulés proxy, interop)."
+RAPPORT_IMPLEMENTATION_TOTALE_CYCLE32.md,31,proxy,- calculs/seconde (proxy)
+RAPPORT_IMPLEMENTATION_TOTALE_CYCLE32.md,33,proxy,- qubits simulés proxy (`lattice_sites`)
+RAPPORT_IMPLEMENTATION_TOTALE_CYCLE32.md,47,placeholder,### 2.3 Durcissement anti-stub/placeholder/hardcoding/smoke
+RAPPORT_IMPLEMENTATION_TOTALE_CYCLE32.md,93,proxy,- qubits simulés proxy
+RAPPORT_IMPLEMENTATION_TOTALE_CYCLE32.md,95,placeholder,### Q: « Stub/placeholder/hardcoding/smoke éliminés ? »
+RAPPORT_IMPLEMENTATION_TOTALE_CYCLE32.md,98,placeholder,- État: pas de STUB/MOCK/PLACEHOLDER détecté dans le scope code courant ; risques `HARDCODING` résiduels explicités dans `src`/`tools`.
+RAPPORT_IMPLEMENTATION_TOTALE_CYCLE32.md,113,proxy,2. Export entropie (intrication ou proxy validé).
+RAPPORT_IMPLEMENTATION_TOTALE_CYCLE32.md,115,proxy,"4. Sweep explicite `dt/2, dt, 2dt` (et pas seulement proxy)."
+RAPPORT_INSPECTION_SIMULATEURS_V4NEXT_FULL_CYCLE33.md,8,placeholder,- stub_or_placeholder_hits: 7
+RAPPORT_INSPECTION_SIMULATEURS_V4NEXT_FULL_CYCLE33.md,9,hardcod,- hardcoding_risk_hits: 1
+RAPPORT_INSPECTION_SIMULATEURS_V4NEXT_FULL_CYCLE33.md,28,placeholder,- stub_or_placeholder_hits: 1270
+RAPPORT_INSPECTION_SIMULATEURS_V4NEXT_FULL_CYCLE33.md,29,hardcod,- hardcoding_risk_hits: 133
+RAPPORT_INSPECTION_SIMULATEURS_V4NEXT_FULL_CYCLE33.md,55,placeholder,- stub_or_placeholder_hits: 0
+RAPPORT_INSPECTION_SIMULATEURS_V4NEXT_FULL_CYCLE33.md,56,hardcod,- hardcoding_risk_hits: 0
+RAPPORT_INSPECTION_SIMULATEURS_V4NEXT_FULL_CYCLE33.md,74,placeholder,- stub_or_placeholder_hits: 9
+RAPPORT_INSPECTION_SIMULATEURS_V4NEXT_FULL_CYCLE33.md,75,hardcod,- hardcoding_risk_hits: 1
+RAPPORT_INSPECTION_SIMULATEURS_V4NEXT_FULL_CYCLE33.md,94,placeholder,- stub_or_placeholder_hits: 2
+RAPPORT_INSPECTION_SIMULATEURS_V4NEXT_FULL_CYCLE33.md,95,hardcod,- hardcoding_risk_hits: 0
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,9,proxy,"- état réel de connexion proxy ↔ simulateur V4 NEXT,"
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,35,proxy,1. `corr_long_range_proxy` (proxy corrélations longue distance).
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,36,proxy,2. `invariant_energy_drift_l1` (proxy invariant/stabilité énergétique).
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,37,proxy,"3. `dt_consistency_proxy` (proxy stabilité pas de temps, en attendant sweep réel multi-run)."
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,52,proxy,- qcd_lattice_proxy
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,54,proxy,- dense_nuclear_proxy
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,55,proxy,- quantum_chemistry_proxy
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,63,proxy,"- Interprétation: robuste numériquement, encore proxy sur la preuve de phase."
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,73,proxy,"- Pseudogap: **non démontré** (corrélations proxy ajoutées, mais pas encore observables complètes publication-grade)."
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,80,proxy,- **Proxy** = version simplifiée/contrôlée d’un modèle réel pour tester pipeline et tendances.
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,102,proxy,"- modularité proxy: **92%**,"
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,105,proxy,"- niveau de réalisme physique proxy: **47%**,"
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,107,proxy,- **Solution**: prioriser hausse de réalisme (observables non-proxy + cross-check solveurs externes).
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,125,proxy,"3. cross-check non-proxy sur sous-ensemble,"
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,141,proxy,"- proxy dt consistency,"
+RAPPORT_INTEGRATION_TOTALE_PHASES_CYCLE18.md,200,proxy,5. Quel est le minimum de solveurs non-proxy requis avant claims forts?
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,51,proxy,2. `qcd_lattice_proxy`
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,53,proxy,4. `dense_nuclear_proxy`
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,54,proxy,5. `quantum_chemistry_proxy`
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,69,proxy,- Ajout de `corr_long_range_proxy` par module.
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,70,proxy,"- Interprétation: bon indicateur opérationnel, mais pas encore corrélation physique complète C(r) dérivée d’un solveur non-proxy."
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,80,proxy,- Transition de phase: **non démontrée formellement** (il manque encore des critères explicites + scaling non-proxy).
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,91,proxy,- **Proxy** = version simplifiée d’un modèle réel pour tester le pipeline.
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,111,proxy,- modularité proxy: 92%
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,114,proxy,- réalisme simulation proxy: 47%
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,121,proxy,"- **Solution**: prioriser sweeps dt réels, cross-check solveur non-proxy, critères de phase explicites."
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,128,proxy,"2. Ajouter un test CI nocturne `dt/2, dt, 2dt` multi-runs (pas uniquement proxy interne)."
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,129,proxy,3. Ajouter au moins une validation croisée non-proxy sur cluster intermédiaire.
+RAPPORT_MAJ_DEPOT_DISTANT_REPLIT_CYCLE24.md,171,proxy,3. Quel minimum de validations non-proxy avant annonce scientifique forte ?
+RAPPORT_PHASES_NOUVELLES_EVOLUTION_TEMPS_REEL_CYCLE27.md,65,proxy,- Corrélations et invariants proxy présents (diagnostic enrichi).
+RAPPORT_SYNC_ANALYSE_EXHAUSTIVE_REPLIT_CYCLE29.md,92,proxy,- Solution : ajouter des tests non-proxy (benchmarks physiques additionnels + critères de réalisme renforcés).
+RAPPORT_SYNC_ANALYSE_EXHAUSTIVE_REPLIT_CYCLE29.md,103,proxy,- Dépendance à des proxys pour le réalisme.
+RAPPORT_SYNC_ANALYSE_EXHAUSTIVE_REPLIT_CYCLE29.md,108,proxy,2. Introduire un score de réalisme multi-critères pondéré (pas uniquement proxy).
+RAPPORT_SYNC_REPLIT_CRITIQUES_CHATGPT_CYCLE31.md,107,proxy,- Solution : exporter une métrique d’entropie (Von Neumann / proxy) dans post-run.
+RAPPORT_SYNC_REPLIT_CRITIQUES_CHATGPT_CYCLE33.md,14,proxy,- Exporte `integration_spatial_correlations.csv` (corrélations spatiales proxy via autocorrélations en lag de pas).
+RAPPORT_SYNC_REPLIT_CRITIQUES_CHATGPT_CYCLE33.md,15,proxy,- Exporte `integration_entropy_observables.csv` (entropie Shannon proxy énergie/pairing/sign).
+RAPPORT_SYNC_REPLIT_CRITIQUES_CHATGPT_CYCLE33.md,18,hardcod,### 2.2 Tests critiques ChatGPT rendus dynamiques (plus de FAIL hardcodé)
+RAPPORT_SYNC_REPLIT_CRITIQUES_CHATGPT_CYCLE33.md,31,TODO,- Recherche systématique des marqueurs `stub/placeholder/todo/fixme/hardcod*`.
+RAPPORT_SYNC_REPLIT_CRITIQUES_CHATGPT_CYCLE33.md,74,proxy,1. Corrélations spatiales natives solveur (au-delà proxy lag).
+RAPPORT_SYNC_REPLIT_CRITIQUES_CHATGPT_CYCLE33.md,75,proxy,2. Entropie d’intrication native solveur (au-delà proxy Shannon).
+README.md,3,proxy,"Ce dossier est **indépendant** des modules existants et traite des campagnes Hubbard HTS + proxys, avec traçabilité forte."
+README.md,43,proxy,"Le cycle v3 ajoute une pile multi-méthodes avancée: proxy corrélé, vérification indépendante long double, solveur exact 2x2 Hubbard, puis scoring audité sur 6 axes."
+METRIQUE/METRIQUE.md,9,proxy,| Énergie | `energy` | `logs/baseline_reanalysis_metrics.csv` | Niveau d’énergie total proxy du système simulé | suivre dérive inter-run et par module |
+METRIQUE/METRIQUE.md,12,proxy,| Densité locale | `density_proxy` | `tests/module_physics_metadata.csv` + observables dérivées | Occupation locale | vérifier cohérence avec température / µ |
+METRIQUE/METRIQUE.md,13,proxy,| Corrélations spatiales | `corr_2pt` (proxy) | `tests/integration_spatial_correlations.csv` | Corrélation courte/moyenne portée | validation structurelle multi-modules |
+METRIQUE/METRIQUE.md,19,proxy,"| Convergence temporelle | `dt_sensitivity_proxy` | `tests/new_tests_results.csv` | Variation réponse entre `dt/2`, `dt`, `2dt` | plus faible = plus robuste |"
+METRIQUE/METRIQUE.md,22,proxy,"| Entropie proxy | `von_neumann_proxy` | `tests/integration_entropy_observables.csv` | Mélange d’états / désordre effectif | suivre variation vs T, U/t |"
+METRIQUE/METRIQUE.md,40,hardcod,| Authenticité code | `hardcoding_risk` + flags audit | `tests/integration_code_authenticity_audit.csv` | risque de logique non-physique | doit rester bas/justifié |
+METRIQUE/METRIQUE.md,54,proxy,- `qcd_lattice_proxy`
+METRIQUE/METRIQUE.md,56,proxy,- `dense_nuclear_proxy`
+METRIQUE/METRIQUE.md,57,proxy,- `quantum_chemistry_proxy`
+audit/PROTOCOL_FULLSCALE_STRICT.md,5,proxy,- détection anti-proxy (`tools/fullscale_strict_protocol_runner.py`)
+include/lumvorax_integration.h,66,stub,#else /* LUMVORAX_ENABLED not defined — stubs zero-overhead */
+src/hubbard_hts_module.c,207,proxy,/* BC-06bis : proxy state-dépendant — sign(density[i]) varie avec l'état physique */
+src/hubbard_hts_research_cycle.c,294,proxy,/* BC-06bis : proxy state-dépendant — sign(d[i]) varie avec l'état physique */
+src/hubbard_hts_research_cycle.c,457,proxy,/* BC-07 : proxy state-dépendant dans simulate_problem_independent — sign(d[i]) */
+src/hubbard_hts_research_cycle_advanced_parallel.c,356,proxy,/* BC-06bis : proxy state-dépendant — sign(d[i]) varie avec l'état physique */
+src/hubbard_hts_research_cycle_advanced_parallel.c,514,proxy,/* BC-07 : proxy state-dépendant dans simulate_problem_independent — sign(d[i]) */
+tools/fullscale_strict_protocol_runner.py,21,TODO,"""TODO"","
+tools/fullscale_strict_protocol_runner.py,22,FIXME,"""FIXME"","
+tools/fullscale_strict_protocol_runner.py,23,placeholder,"""placeholder"","
+tools/fullscale_strict_protocol_runner.py,24,mock,"""mock"","
+tools/fullscale_strict_protocol_runner.py,25,stub,"""stub"","
+tools/fullscale_strict_protocol_runner.py,26,hardcode,"""hardcode"","
+tools/fullscale_strict_protocol_runner.py,27,hardcod,"""hardcod"","
+tools/fullscale_strict_protocol_runner.py,28,proxy,"""proxy"","
+tools/fullscale_strict_protocol_runner.py,61,proxy,"def run_proxy_detection(root: Path, out_csv: Path) -> tuple[int, int]:"
+tools/fullscale_strict_protocol_runner.py,135,proxy,"""## anti_proxy_detection"","
+tools/fullscale_strict_protocol_runner.py,136,proxy,"f""- source_files_scanned: `{data['anti_proxy']['files_scanned']}`"","
+tools/fullscale_strict_protocol_runner.py,137,proxy,"f""- violations_detected: `{data['anti_proxy']['violations_detected']}`"","
+tools/fullscale_strict_protocol_runner.py,138,proxy,"f""- report_csv: `{data['anti_proxy']['report_csv']}`"","
+tools/fullscale_strict_protocol_runner.py,141,hardcod,"""- hardcoding scientifique: FORBIDDEN"","
+tools/fullscale_strict_protocol_runner.py,142,placeholder,"""- placeholders/stubs/mocks trompeurs: FORBIDDEN"","
+tools/fullscale_strict_protocol_runner.py,143,proxy,"""- proxy algorithmique caché: FORBIDDEN"","
+tools/fullscale_strict_protocol_runner.py,165,proxy,"anti_proxy_csv = run / ""audit"" / ""proxy_detection_report.csv"""
+tools/fullscale_strict_protocol_runner.py,166,proxy,"scanned, violations = run_proxy_detection(root, anti_proxy_csv)"
+tools/fullscale_strict_protocol_runner.py,192,proxy,"""anti_proxy"": {"
+tools/fullscale_strict_protocol_runner.py,195,proxy,"""report_csv"": str(anti_proxy_csv.relative_to(run)),"
+tools/fullscale_strict_protocol_runner.py,202,proxy,"f""- anti_proxy_violations: {violations}\n"""
+tools/generate_cycle06_benchmark_course_report.py,53,placeholder,"'- Règle qualité: aucun placeholder/stub/hardcoding ajouté; uniquement exploitation des données brutes existantes et génération de nouveaux artefacts sidecar.',"
+tools/inspect_quantum_simulator_stacks.py,17,TODO,"'stub_or_placeholder': re.compile(r'\b(stub|placeholder|todo|fixme|mock)\b', re.IGNORECASE),"
+tools/inspect_quantum_simulator_stacks.py,18,hardcod,"'hardcoding_risk': re.compile(r'\b(hardcod|magic number|temporary|test-only)\b', re.IGNORECASE),"
+tools/inspect_quantum_simulator_stacks.py,74,placeholder,"lines.append(f""- stub_or_placeholder_hits: {counts['stub_or_placeholder']}"")"
+tools/inspect_quantum_simulator_stacks.py,75,hardcod,"lines.append(f""- hardcoding_risk_hits: {counts['hardcoding_risk']}"")"
+tools/inspect_quantum_simulator_stacks.py,99,TODO,"cmd = ['rg', '-n', '-i', 'stub|placeholder|todo|fixme|hardcod', *TARGETS]"
+tools/post_run_authenticity_audit.py,9,TODO,"(""TODO"", re.compile(r""\bTODO\b"", re.IGNORECASE), ""warning""),"
+tools/post_run_authenticity_audit.py,10,FIXME,"(""FIXME"", re.compile(r""\bFIXME\b"", re.IGNORECASE), ""warning""),"
+tools/post_run_authenticity_audit.py,11,placeholder,"(""PLACEHOLDER"", re.compile(r""\bPLACEHOLDER\b"", re.IGNORECASE), ""risk""),"
+tools/post_run_authenticity_audit.py,12,stub,"(""STUB"", re.compile(r""\bSTUB\b|\bstub\b"", re.IGNORECASE), ""risk""),"
+tools/post_run_authenticity_audit.py,13,mock,"(""MOCK"", re.compile(r""\bmock\b"", re.IGNORECASE), ""risk""),"
+tools/post_run_authenticity_audit.py,14,hardcode,"# Detect concrete hardcoded runtime/model markers, avoid meta self-references."
+tools/post_run_authenticity_audit.py,15,hardcod,"(""HARDCODING"", re.compile(r""advanced_fullscale_deterministic|periodic_fullscale|problem_t probs\["", re.IGNORECASE), ""review""),"
+tools/post_run_authenticity_audit.py,60,hardcod,hardcoding = []
+tools/post_run_authenticity_audit.py,74,hardcod,"if name == ""HARDCODING"":"
+tools/post_run_authenticity_audit.py,75,hardcod,"hardcoding.append([str(rel), i, line.strip()[:240], ""REVIEW_REQUIRED""])"
+tools/post_run_authenticity_audit.py,80,hardcod,"hard_path = run_dir / ""tests"" / ""integration_hardcoding_risk_register.csv"""
+tools/post_run_authenticity_audit.py,81,hardcod,"write_csv(hard_path, [""file"", ""line"", ""snippet"", ""status""], hardcoding)"
+tools/post_run_authenticity_audit.py,95,hardcod,"""7. `cat <RUN_DIR>/tests/integration_hardcoding_risk_register.csv`\n"""
+tools/post_run_authenticity_audit.py,103,placeholder,"[""Q3"", ""Des placeholders/stubs/hardcoding compromettent-ils l'authenticité ?"", ""integration_code_authenticity_audit.csv"", ""AUTO""],"
+tools/post_run_hfbl360_forensic_logger.py,8,placeholder,Purpose: verify (without placeholder data) whether requested forensic naming/
+tools/post_run_metadata_capture.py,23,hardcode,"""""""Load metadata from generated run artifacts (no hardcoded physics table)."""""""
+tools/post_run_metadata_capture.py,148,hardcode,"""source"": ""post_run_metadata_capture_no_hardcoded_table"","

@@ -95,16 +95,42 @@ Appel en 3 points :
 
 ---
 
-## 2. Run 3677 — Résultats attendus
+## 2. Résultats confirmés
 
-| Test | Run 2949 | Run 3677 attendu |
+### 2.1 Run 3677 — Corrections T16/T17/T02T18 validées
+
+| Test | Run 2949 | Run 3677 confirmé |
 |---|---|---|
-| `spectral,fft_dominant_amplitude` | `12.7259,FAIL` | `~0.0031,PASS` |
-| `exact_solver,hubbard_2x2_ground_u4` | `-2.7205...,OBSERVED` | `-2.7205...,PASS` |
-| `exact_solver,hubbard_2x2_ground_u8` | `-1.5043...,OBSERVED` | `-1.5043...,PASS` |
-| `GLOBAL_CHECKSUM.sha512` | Absent | Présent dans RUN_DIR |
-| RMSE QMC/DMRG | 0.023 | ≤ 0.05 (objectif maintenu) |
-| within_error_bar | 15/15 (100%) | ≥ 70% (objectif maintenu) |
+| `spectral,fft_dominant_amplitude` | `12.7259,FAIL` | `0.0031069115,PASS` ✅ |
+| `exact_solver,hubbard_2x2_ground_u4` | `-2.7205...,OBSERVED` | `-2.7205662327,PASS` ✅ |
+| `exact_solver,hubbard_2x2_ground_u8` | `-1.5043...,OBSERVED` | `-1.5043157123,PASS` ✅ |
+| `GLOBAL_CHECKSUM.sha512` | Absent | **92 fichiers hashés** ✅ |
+| RMSE QMC/DMRG | 0.023 | **0.023006** ✅ |
+| within_error_bar | 15/15 (100%) | **15/15 (100%)** ✅ |
+| Pipeline | FAILED (step 38/39) | — |
+
+### 2.2 Run 5008/5872 — Fix ordre SHA512/SHA256 confirmé
+
+**Problème détecté run 3677 :** `write_checksums` (SHA256) était appelé AVANT `write_global_sha512`. Quand le SHA512 était ensuite mis à jour (92 vs 86 fichiers), le SHA256 incluait l'ancien contenu SHA512 → `verify_checksums` échouait avec WARNING mismatch → FAILED au step 38/39.
+
+**Fix appliqué :** Dans le step final de `run_research_cycle.sh`, inversion de l'ordre :
+```bash
+# Avant (ordre défectueux)
+write_checksums "$RUN_DIR"      # sha256 inclut sha512 v86
+write_global_sha512 "$RUN_DIR"  # sha512 passe à v92 → sha256 obsolète
+verify_checksums "$RUN_DIR"     # FAIL : sha512 hash mismatch
+
+# Après (ordre correct)
+write_global_sha512 "$RUN_DIR"  # sha512 v92 (état final)
+write_checksums "$RUN_DIR"      # sha256 inclut sha512 v92 → cohérent
+verify_checksums "$RUN_DIR"     # PASS ✅
+```
+
+**Résultat run 5008/5872 :**
+```
+[########################################] 100% (39/39) final checksum verify
+```
+**Pipeline complet 39/39 — AUCUN WARNING — FINISHED** ✅
 
 ---
 
