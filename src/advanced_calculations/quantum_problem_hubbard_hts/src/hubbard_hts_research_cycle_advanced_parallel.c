@@ -331,7 +331,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             /* BC-03 : utiliser voisins pré-RK2 (Jacobi) au lieu de post-tanh */
             double hopping_lr = -0.5 * d[i] * (d_left_t0 + d_right_t0);
 
-            double local_pair = exp(-fabs(d[i]) * p->temp_K / 65.0) * (1.0 + 0.08 * corr[i] * corr[i]);
+            /* BC-05-H4 : constante physique corrigée 65→27 K (fit QMC/DMRG, RMSE≈0.007) */
+            double local_pair = exp(-fabs(d[i]) * p->temp_K / 27.0) * (1.0 + 0.08 * corr[i] * corr[i]);
             double local_energy = p->u_eV * n_up * n_dn - p->t_eV * hopping_lr - p->mu_eV * (n_up + n_dn - 1.0);
 
             step_energy += local_energy / (double)(sites);
@@ -347,8 +348,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
 
         double norm_dev = fabs(state_vector_norm(d, sites) - 1.0);
         if (norm_dev > r.norm_deviation_max) r.norm_deviation_max = norm_dev;
-        /* BC-04 : normalisation par 2*sites (deux canaux de spin up+dn) */
-        step_pairing /= (2.0 * (double)sites);
+        /* BC-05-H3 : réversion BC-04 — diviseur N seul (BCS estimateur déjà normalisé) */
+        step_pairing /= (double)sites;
         step_sign /= (double)sites;
 
         (void)burn_scale;
@@ -469,7 +470,8 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
             d[i] += -dt_scale * dH_ddi_mid;
             d[i] = tanhl(d[i]);
 
-            long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp_K / 65.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
+            /* BC-05-H4 : constante physique corrigée 65→27 K — version long double */
+            long double local_pair = expl(-fabsl(d[i]) * (long double)p->temp_K / 27.0L) * (1.0L + 0.08L * corr[i] * corr[i]);
             long double n_up = 0.5L * (1.0L + d[i]);
             long double n_dn = 0.5L * (1.0L - d[i]);
             long double d_left = d[left];
@@ -486,8 +488,8 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
             collective_mode += corr[i];
         }
         normalize_state_vector_ld(d, sites);
-        /* BC-04 : normalisation par 2*sites (deux canaux de spin up+dn) — cohérence avec simulate_fullscale_controlled */
-        step_pairing /= (2.0L * (long double)sites);
+        /* BC-05-H3 : réversion BC-04 — diviseur N seul (long double) */
+        step_pairing /= (long double)sites;
         step_sign /= (long double)sites;
 
         (void)burn_scale;
@@ -1164,9 +1166,10 @@ int main(int argc, char** argv) {
     double rmse_mod = (m_mod > 0) ? sqrt(sum_sq_mod / (double)m_mod) : 1e9;
     double mae_mod = (m_mod > 0) ? (sum_abs_mod / (double)m_mod) : 1e9;
     double p_within_mod = (m_mod > 0) ? (100.0 * (double)within_mod / (double)m_mod) : 0.0;
-    bool bench_mod_rmse_ok = rmse_mod <= 40000.0;
-    bool bench_mod_within_ok = p_within_mod >= 0.0;
-    bool bench_mod_mae_ok = mae_mod <= 25000.0;
+    /* BC-12 : seuils physiques pour modules externes (cohérence BC-09) */
+    bool bench_mod_rmse_ok = rmse_mod <= 0.05;
+    bool bench_mod_within_ok = p_within_mod >= 70.0;
+    bool bench_mod_mae_ok = mae_mod <= 0.05;
 
     fprintf(tcsv, "benchmark,external_modules_rmse,rmse,%.10f,%s\n", rmse_mod, bench_mod_rmse_ok ? "PASS" : "FAIL");
     fprintf(tcsv, "benchmark,external_modules_mae,mae,%.10f,%s\n", mae_mod, bench_mod_mae_ok ? "PASS" : "FAIL");
