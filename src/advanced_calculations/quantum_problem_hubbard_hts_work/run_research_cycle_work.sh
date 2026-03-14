@@ -84,7 +84,7 @@ lv_wrap() {
 
 # ── Barre de progression ───────────────────────────────────────────────────
 TOTAL_STEPS="$(grep -c '^[[:space:]]*print_progress "' "$SCRIPT_PATH" 2>/dev/null || echo 35)"
-[ "${TOTAL_STEPS:-0}" -le 0 ] && TOTAL_STEPS=35
+if [ "${TOTAL_STEPS:-0}" -le 0 ]; then TOTAL_STEPS=35; fi
 CURRENT_STEP=0
 
 print_progress() {
@@ -96,8 +96,7 @@ print_progress() {
   local bar
   bar=$(printf '%*s' "$filled" '' | tr ' ' '#')
   bar+=$(printf '%*s' "$empty" '' | tr ' ' '-')
-  printf "\r[%s] %3d%% (%d/%d) %s" "$bar" "$((CURRENT_STEP * 100 / TOTAL_STEPS))" "$CURRENT_STEP" "$TOTAL_STEPS" "$label"
-  [ "$CURRENT_STEP" -eq "$TOTAL_STEPS" ] && printf "\n"
+  printf "\r[%s] %3d%% (%d/%d) %s\n" "$bar" "$((CURRENT_STEP * 100 / TOTAL_STEPS))" "$CURRENT_STEP" "$TOTAL_STEPS" "$label"
 }
 
 # ── Fonctions de traçabilité forensique (forensic_research_chain_of_custody) ──
