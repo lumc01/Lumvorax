@@ -398,6 +398,28 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
         r.pairing_norm = step_pairing;
         r.sign_ratio = step_sign;
 
+        /* Granularité LumVorax nanoseconde : toutes les couches, tous les 10 steps */
+        if (step % 10 == 0) {
+            uint64_t ns_now = now_ns() - t0;
+            FORENSIC_LOG_MODULE_METRIC("simulate_adv", "step_ns_elapsed",  (double)ns_now);
+            FORENSIC_LOG_MODULE_METRIC("simulate_adv", "step_energy_eV",   r.energy_eV);
+            FORENSIC_LOG_MODULE_METRIC("simulate_adv", "step_pairing",     r.pairing_norm);
+            FORENSIC_LOG_MODULE_METRIC("simulate_adv", "step_sign_ratio",  r.sign_ratio);
+            FORENSIC_LOG_MODULE_METRIC("simulate_adv", "step_norm_dev",    norm_dev);
+            /* HW_SAMPLE toutes les 50 steps (plus léger que chaque step) */
+            if (step % 50 == 0) {
+                FORENSIC_LOG_HW_SAMPLE("simulate_adv");
+            }
+            /* Détection comportement non programmé step-level :
+             * - Énergie NaN ou +/-Inf → anomalie physique grave
+             * - Dérive énergie > 10× step précédent → instabilité MC            */
+            if (!isfinite(r.energy_eV)) {
+                FORENSIC_LOG_MODULE_METRIC("simulate_adv", "ANOMALY_step_energy_nan_or_inf", (double)step);
+            }
+            if (step > 0 && r.energy_drift_metric > 10.0 * fabs(r.energy_eV) + 1e-12) {
+                FORENSIC_LOG_MODULE_METRIC("simulate_adv", "ANOMALY_step_energy_drift_spike", r.energy_drift_metric);
+            }
+        }
         if (trace_csv && step % 100 == 0) {
             double c = cpu_percent(), m = mem_percent();
             if (c > r.cpu_peak) r.cpu_peak = c;
@@ -468,6 +490,262 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
 
 static sim_result_t simulate_fullscale(const problem_t* p, uint64_t seed, int burn_scale, FILE* trace_csv) {
     return simulate_fullscale_controlled(p, seed, burn_scale, trace_csv, NULL, NULL, 0, NULL);
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+ * PARALLEL TEMPERING MONTE CARLO (PT-MC) — Cycle 18 — algorithme alternatif
+ * Plus précis que le MC simple : évite les pièges des minima locaux en
+ * échangeant des configurations entre répliques à températures différentes.
+ * Conforme STANDARD_NAMES.md — événements : ALGO_PT, METRIC, ANOMALY, HW_SAMPLE
+ * ═══════════════════════════════════════════════════════════════════════════ */
+#define PT_N_REPLICAS   6
+#define PT_SWEEPS       200
+#define PT_SWAP_EVERY   10   /* tentative d'échange tous les 10 sweeps */
+
+typedef struct {
+    double temp_K;
+    double beta;          /* 1 / (kB * T)  en unités eV^-1, kB=8.617e-5 eV/K */
+    double energy_eV;
+    double pairing;
+    double sign_ratio;
+    double* state;        /* vecteur d'état (taille = sites) */
+    uint64_t seed;
+    uint64_t accepted_swaps;
+    uint64_t attempted_swaps;
+    uint64_t accepted_mc;
+    uint64_t total_mc;
+} pt_replica_t;
+
+typedef struct {
+    double energy_eV;      /* énergie moyenne réplique de plus basse température */
+    double pairing;
+    double sign_ratio;
+    double swap_accept_rate;
+    uint64_t elapsed_ns;
+} pt_result_t;
+
+static const double kB_eV = 8.617333262e-5;  /* eV/K */
+
+/* Initialise un état aléatoire normalisé pour une réplique */
+static void pt_init_state(double* state, int sites, uint64_t* rng) {
+    if (!state || sites <= 0) return;
+    double norm2 = 0.0;
+    for (int i = 0; i < sites; i++) {
+        state[i] = rand01(rng) - 0.5;
+        norm2 += state[i] * state[i];
+    }
+    double inv_norm = (norm2 > 1e-12) ? 1.0 / sqrt(norm2) : 1.0;
+    for (int i = 0; i < sites; i++) state[i] *= inv_norm;
+}
+
+/* Énergie locale Hubbard pour un état (approximation MC classique) */
+static double pt_local_energy(const double* state, int sites,
+                               double t_eV, double u_eV, double mu_eV) {
+    if (!state || sites < 2) return 0.0;
+    double e_hop = 0.0, e_hubb = 0.0, e_mu = 0.0;
+    for (int i = 0; i < sites; i++) {
+        int j = (i + 1) % sites;
+        e_hop  += -t_eV * state[i] * state[j];
+        e_hubb += u_eV  * state[i] * state[i] * state[(i + sites/2) % sites] * state[(i + sites/2) % sites];
+        e_mu   += -mu_eV * state[i] * state[i];
+    }
+    return (e_hop + e_hubb + e_mu) / (double)sites;
+}
+
+/* Un sweep MC classique pour une réplique (déplace un site aléatoire) */
+static void pt_mc_sweep(pt_replica_t* rep, int sites, double t_eV, double u_eV, double mu_eV) {
+    if (!rep || !rep->state || sites <= 0) return;
+    for (int k = 0; k < sites; k++) {
+        int i = (int)(rand01(&rep->seed) * (double)sites) % sites;
+        double old_val = rep->state[i];
+        double delta   = (rand01(&rep->seed) - 0.5) * 0.3;
+        rep->state[i] += delta;
+        double old_e = pt_local_energy(rep->state, sites, t_eV, u_eV, mu_eV);
+        double new_val = rep->state[i];
+        rep->state[i] = old_val;
+        double cur_e = pt_local_energy(rep->state, sites, t_eV, u_eV, mu_eV);
+        double dE = old_e - cur_e;  /* différence après/avant */
+        rep->total_mc++;
+        if (dE <= 0.0 || rand01(&rep->seed) < exp(-rep->beta * dE)) {
+            rep->state[i] = new_val;
+            rep->accepted_mc++;
+            rep->energy_eV = old_e;
+        } else {
+            rep->state[i] = old_val;
+            rep->energy_eV = cur_e;
+        }
+    }
+    /* Mise à jour pairing (corrélation entre sites voisins) */
+    double pair_sum = 0.0;
+    for (int i = 0; i < sites - 1; i++) pair_sum += rep->state[i] * rep->state[i+1];
+    rep->pairing = (sites > 1) ? fabs(pair_sum / (double)(sites - 1)) : 0.0;
+}
+
+/* Tentative d'échange Metropolis entre deux répliques adjacentes */
+static void pt_try_swap(pt_replica_t* a, pt_replica_t* b, int sites) {
+    if (!a || !b || !a->state || !b->state) return;
+    a->attempted_swaps++;
+    b->attempted_swaps++;
+    /* Critère PT : ΔE × Δβ */
+    double delta_beta = b->beta - a->beta;
+    double delta_E    = b->energy_eV - a->energy_eV;
+    double accept     = exp(delta_beta * delta_E);
+    uint64_t tmp_seed = a->seed ^ (uint64_t)now_ns();
+    if (accept >= 1.0 || rand01(&tmp_seed) < accept) {
+        /* Échange des états */
+        double* tmp_state = a->state;
+        a->state = b->state;
+        b->state = tmp_state;
+        double tmp_e = a->energy_eV;
+        a->energy_eV = b->energy_eV;
+        b->energy_eV = tmp_e;
+        a->accepted_swaps++;
+        b->accepted_swaps++;
+    }
+}
+
+/* Fonction principale Parallel Tempering MC */
+static pt_result_t run_parallel_tempering_mc(const problem_t* p, uint64_t base_seed, FILE* pt_csv) {
+    pt_result_t result = {0};
+    if (!p) return result;
+
+    uint64_t t0 = now_ns();
+    int sites = p->lx * p->ly;
+    if (sites <= 0) { result.elapsed_ns = now_ns() - t0; return result; }
+
+    FORENSIC_LOG_MODULE_START("pt_mc", p->name);
+    FORENSIC_LOG_MODULE_METRIC("pt_mc", "n_replicas", (double)PT_N_REPLICAS);
+    FORENSIC_LOG_MODULE_METRIC("pt_mc", "pt_sweeps",  (double)PT_SWEEPS);
+    FORENSIC_LOG_MODULE_METRIC("pt_mc", "sites",      (double)sites);
+    FORENSIC_LOG_MODULE_METRIC("pt_mc", "U_eV",       p->u_eV);
+    FORENSIC_LOG_MODULE_METRIC("pt_mc", "temp_K_base",p->temp_K);
+
+    /* Initialisation des répliques — températures exponentiellement espacées
+     * de T_base à 5×T_base (exploration élargie de l'espace des phases) */
+    pt_replica_t replicas[PT_N_REPLICAS];
+    double* all_states = (double*)TRACKED_MALLOC(
+        (size_t)(PT_N_REPLICAS * sites) * sizeof(double));
+    if (!all_states) {
+        FORENSIC_LOG_MODULE_END("pt_mc", p->name, false);
+        result.elapsed_ns = now_ns() - t0;
+        return result;
+    }
+    for (int r = 0; r < PT_N_REPLICAS; r++) {
+        double ratio = (PT_N_REPLICAS > 1)
+                     ? exp(log(5.0) * (double)r / (double)(PT_N_REPLICAS - 1))
+                     : 1.0;
+        replicas[r].temp_K          = p->temp_K * ratio;
+        replicas[r].beta            = 1.0 / (kB_eV * replicas[r].temp_K);
+        replicas[r].state           = all_states + r * sites;
+        replicas[r].seed            = base_seed ^ ((uint64_t)r * 0xdeadbeef12345678ULL);
+        replicas[r].energy_eV       = 0.0;
+        replicas[r].pairing         = 0.0;
+        replicas[r].sign_ratio      = 0.0;
+        replicas[r].accepted_swaps  = 0;
+        replicas[r].attempted_swaps = 0;
+        replicas[r].accepted_mc     = 0;
+        replicas[r].total_mc        = 0;
+        pt_init_state(replicas[r].state, sites, &replicas[r].seed);
+        replicas[r].energy_eV = pt_local_energy(replicas[r].state, sites,
+                                                 p->t_eV, p->u_eV, p->mu_eV);
+        FORENSIC_LOG_MODULE_METRIC("pt_mc", "replica_temp_K", replicas[r].temp_K);
+    }
+
+    /* En-tête CSV Parallel Tempering */
+    if (pt_csv) {
+        fprintf(pt_csv, "problem,sweep,replica,temp_K,beta,energy_eV,pairing,"
+                        "mc_accept_rate,swap_accept_rate,elapsed_ns\n");
+    }
+
+    /* ── Boucle principale PT ── */
+    uint64_t total_swaps_accepted = 0, total_swaps_attempted = 0;
+    for (int sweep = 0; sweep < PT_SWEEPS; sweep++) {
+        uint64_t sweep_t0 = now_ns();
+
+        /* Sweeps MC pour chaque réplique */
+        for (int r = 0; r < PT_N_REPLICAS; r++) {
+            pt_mc_sweep(&replicas[r], sites, p->t_eV, p->u_eV, p->mu_eV);
+        }
+
+        /* Tentatives d'échange entre répliques adjacentes */
+        if (sweep % PT_SWAP_EVERY == 0) {
+            int start = (sweep / PT_SWAP_EVERY) % 2;  /* alternance pairs/impairs */
+            for (int r = start; r < PT_N_REPLICAS - 1; r += 2) {
+                pt_try_swap(&replicas[r], &replicas[r+1], sites);
+            }
+        }
+
+        /* Log nanoseconde tous les 50 sweeps pour traçabilité LumVorax */
+        if (sweep % 50 == 0 || sweep == PT_SWEEPS - 1) {
+            uint64_t elapsed_sweep = now_ns() - sweep_t0;
+            double cold_e  = replicas[0].energy_eV;
+            double cold_p  = replicas[0].pairing;
+            FORENSIC_LOG_MODULE_METRIC("pt_mc", "sweep_energy_cold_eV", cold_e);
+            FORENSIC_LOG_MODULE_METRIC("pt_mc", "sweep_pairing_cold",   cold_p);
+            FORENSIC_LOG_MODULE_METRIC("pt_mc", "sweep_elapsed_ns",     (double)elapsed_sweep);
+            FORENSIC_LOG_HW_SAMPLE("pt_mc");
+
+            /* CSV Parallel Tempering */
+            if (pt_csv) {
+                for (int r = 0; r < PT_N_REPLICAS; r++) {
+                    double mc_rate  = (replicas[r].total_mc > 0)
+                                    ? (double)replicas[r].accepted_mc / (double)replicas[r].total_mc
+                                    : 0.0;
+                    double swp_rate = (replicas[r].attempted_swaps > 0)
+                                    ? (double)replicas[r].accepted_swaps / (double)replicas[r].attempted_swaps
+                                    : 0.0;
+                    fprintf(pt_csv,
+                            "%s,%d,%d,%.4f,%.6f,%.10f,%.10f,%.4f,%.4f,%llu\n",
+                            p->name, sweep, r,
+                            replicas[r].temp_K, replicas[r].beta,
+                            replicas[r].energy_eV, replicas[r].pairing,
+                            mc_rate, swp_rate,
+                            (unsigned long long)elapsed_sweep);
+                }
+            }
+
+            /* Détection anomalie PT : énergie divergente ou NaN */
+            if (!isfinite(cold_e) || fabs(cold_e) > 1000.0) {
+                FORENSIC_LOG_MODULE_METRIC("pt_mc", "ANOMALY_energy_diverge", cold_e);
+            }
+        }
+
+        /* Accumulation statistiques échanges */
+        for (int r = 0; r < PT_N_REPLICAS; r++) {
+            total_swaps_accepted  += replicas[r].accepted_swaps;
+            total_swaps_attempted += replicas[r].attempted_swaps;
+        }
+    }
+
+    /* Résultat final depuis la réplique la plus froide (T_base) */
+    result.energy_eV   = replicas[0].energy_eV;
+    result.pairing     = replicas[0].pairing;
+    result.sign_ratio  = replicas[0].sign_ratio;
+    result.swap_accept_rate = (total_swaps_attempted > 0)
+                            ? (double)total_swaps_accepted / (double)total_swaps_attempted
+                            : 0.0;
+    result.elapsed_ns = now_ns() - t0;
+
+    /* Métriques finales PT loggées dans LumVorax */
+    FORENSIC_LOG_MODULE_METRIC("pt_mc", "pt_energy_final_eV",     result.energy_eV);
+    FORENSIC_LOG_MODULE_METRIC("pt_mc", "pt_pairing_final",       result.pairing);
+    FORENSIC_LOG_MODULE_METRIC("pt_mc", "pt_swap_accept_rate",    result.swap_accept_rate);
+    FORENSIC_LOG_MODULE_METRIC("pt_mc", "pt_elapsed_ns",          (double)result.elapsed_ns);
+    FORENSIC_LOG_MODULE_METRIC("pt_mc", "pt_total_mc_steps",
+                                (double)(PT_N_REPLICAS * PT_SWEEPS * sites));
+
+    /* Anomalie comportementale : swap_rate < 5% = répliques non connectées */
+    if (result.swap_accept_rate < 0.05 && PT_N_REPLICAS > 1) {
+        FORENSIC_LOG_MODULE_METRIC("pt_mc", "ANOMALY_swap_rate_too_low", result.swap_accept_rate);
+    }
+    /* Anomalie : convergence trop rapide (énergie identique sur toutes répliques) */
+    if (fabs(replicas[0].energy_eV - replicas[PT_N_REPLICAS-1].energy_eV) < 1e-6) {
+        FORENSIC_LOG_MODULE_METRIC("pt_mc", "ANOMALY_all_replicas_converged", 1.0);
+    }
+
+    TRACKED_FREE(all_states);
+    FORENSIC_LOG_MODULE_END("pt_mc", p->name, true);
+    return result;
 }
 
 static double dominant_fft_frequency(const double* x, int n, double dt, double* out_amp) {
@@ -836,6 +1114,7 @@ int main(int argc, char** argv) {
     char log_path[MAX_PATH], raw_csv[MAX_PATH], tests_csv[MAX_PATH], report[MAX_PATH], comparison_report[MAX_PATH], provenance[MAX_PATH], qa_csv[MAX_PATH], bench_csv[MAX_PATH], bench_ref[MAX_PATH], bench_csv_modules[MAX_PATH], bench_ref_modules[MAX_PATH];
     char module_meta_csv[MAX_PATH], detailed_csv[MAX_PATH], numeric_stability_csv[MAX_PATH], toy_csv[MAX_PATH], temporal_csv[MAX_PATH];
     char units_csv[MAX_PATH], norm_guard_csv[MAX_PATH], dimless_csv[MAX_PATH], compliance_json[MAX_PATH];
+    char pt_csv_path[MAX_PATH]; /* Parallel Tempering MC — Cycle 18 */
     pjoin(log_path, sizeof(log_path), logs, "research_execution.log");
     pjoin(raw_csv, sizeof(raw_csv), logs, "baseline_reanalysis_metrics.csv");
     pjoin(tests_csv, sizeof(tests_csv), tests, "new_tests_results.csv");
@@ -856,6 +1135,7 @@ int main(int argc, char** argv) {
     pjoin(norm_guard_csv, sizeof(norm_guard_csv), tests, "integration_norm_psi_guard.csv");
     pjoin(dimless_csv, sizeof(dimless_csv), tests, "integration_dimensionless_ht_over_hbar.csv");
     pjoin(compliance_json, sizeof(compliance_json), logs, "compliance_promptcorrection1_analysechatgpt4.json");
+    pjoin(pt_csv_path, sizeof(pt_csv_path), tests, "parallel_tempering_mc_results.csv");
 
     FILE* lg = fopen(log_path, "w");
     FILE* raw = fopen(raw_csv, "w");
@@ -872,7 +1152,9 @@ int main(int argc, char** argv) {
     FILE* ucsv = fopen(units_csv, "w");
     FILE* ngcsv = fopen(norm_guard_csv, "w");
     FILE* dmcsv = fopen(dimless_csv, "w");
+    FILE* ptcsv = fopen(pt_csv_path, "w");  /* PT-MC Cycle 18 */
     if (!lg || !raw || !tcsv || !qcsv || !prov || !bcsv || !bcsvm || !mmeta || !det || !nstab || !toy || !tdrv || !ucsv || !ngcsv || !dmcsv) return 1;
+    if (!ptcsv) { fprintf(stderr, "[WARN] PT-MC CSV non ouvert — parallel tempering sans CSV\n"); }
 
     fprintf(raw, "problem,step,energy,pairing,sign_ratio,cpu_percent,mem_percent,elapsed_ns,norm_deviation,ema_abs_energy\n");
     fprintf(tcsv, "test_family,test_id,parameter,value,status\n");
@@ -943,6 +1225,21 @@ int main(int argc, char** argv) {
     for (int i = 0; i < nprobs; ++i) {
         base[i] = simulate_fullscale(&probs[i], (uint64_t)(0xABC000 + i), 99, raw);
         fprintf(lg, "%06d | BASE_RESULT problem=%s energy=%.6f pairing=%.6f sign=%.6f cpu_peak=%.2f mem_peak=%.2f elapsed_ns=%llu\n", line++, probs[i].name, base[i].energy_eV, base[i].pairing_norm, base[i].sign_ratio, base[i].cpu_peak, base[i].mem_peak, (unsigned long long)base[i].elapsed_ns);
+
+        /* ── PT-MC Cycle 18 : Parallel Tempering en parallèle du MC standard ── */
+        pt_result_t pt_res = run_parallel_tempering_mc(&probs[i], (uint64_t)(0xABD000ULL + (uint64_t)i), ptcsv);
+        fprintf(lg, "%06d | PT_MC_RESULT problem=%s pt_energy=%.6f pt_pairing=%.6f pt_swap_rate=%.4f pt_elapsed_ns=%llu\n",
+                line++, probs[i].name,
+                pt_res.energy_eV, pt_res.pairing,
+                pt_res.swap_accept_rate,
+                (unsigned long long)pt_res.elapsed_ns);
+        /* Comparaison MC standard vs Parallel Tempering (détection comportement inattendu) */
+        double pt_mc_energy_delta = fabs(pt_res.energy_eV - base[i].energy_eV);
+        FORENSIC_LOG_MODULE_METRIC("pt_mc_vs_mc", "energy_delta_pt_vs_mc", pt_mc_energy_delta);
+        /* Anomalie : PT et MC divergent fortement (>50%) → comportement non programmé */
+        if (pt_mc_energy_delta > 0.5 * (fabs(base[i].energy_eV) + 1e-12)) {
+            FORENSIC_LOG_MODULE_METRIC("pt_mc_vs_mc", "ANOMALY_large_pt_mc_divergence", pt_mc_energy_delta);
+        }
 
         const char* energy_unit = "eV";
         double unit_factor = 1.0;
@@ -1508,6 +1805,7 @@ int main(int argc, char** argv) {
     fclose(ngcsv);
     fclose(dmcsv);
     fclose(toy);
+    if (ptcsv) fclose(ptcsv);   /* PT-MC Cycle 18 */
     free_loaded_problem_names(probs, nprobs);
     /* BC-LV03 : Rapport forensique final + destruction vrai système LumVorax */
     FORENSIC_LOG_MODULE_END("hubbard_hts_advanced_parallel", "main_campaign", true);

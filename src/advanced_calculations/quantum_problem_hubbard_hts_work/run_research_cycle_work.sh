@@ -65,7 +65,7 @@ lv_wrap() {
     local t_end; t_end="$(date +%s%N)"
     local duration_ns=$(( t_end - t_start ))
     local status="SUCCESS"
-    [ "$exit_code" -ne 0 ] && status="FAILURE_exit${exit_code}"
+    if [ "$exit_code" -ne 0 ]; then status="FAILURE_exit${exit_code}"; fi
     local mem_end iso2
     mem_end="$(awk '/MemTotal/{t=$2} /MemAvailable/{a=$2} END{printf "%.2f", 100*(t-a)/t}' /proc/meminfo 2>/dev/null || echo -1)"
     iso2="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
@@ -270,6 +270,17 @@ print_progress "parallel calibration bridge"
 lv_wrap 30 python3 "$ORIG_DIR/tools/post_run_hfbl360_forensic_logger.py" "$RUN_DIR" \
   --standard-names "$ORIG_DIR/../../../STANDARD_NAMES.md"
 print_progress "hfbl360 forensic logger (HFBL_360)"
+
+# ── SHADOW C MONITOR (Cycle 18) — Comparaison C vs Python référence ────────
+SHADOW_SCRIPT="$WORK_DIR/tools/shadow_c_monitor.py"
+if [ -f "$SHADOW_SCRIPT" ]; then
+  python3 "$SHADOW_SCRIPT" "$ADV_RUN_DIR" \
+    ${LUMVORAX_CSV_PATH:+--lumvorax-csv "$LUMVORAX_CSV_PATH"} \
+    && print_progress "shadow C monitor [OK]" \
+    || print_progress "shadow C monitor [WARNING — voir shadow_c_monitor_report.json]"
+else
+  echo "[WARN] shadow_c_monitor.py introuvable — skipped"
+fi
 
 # ── Traçabilité forensique finale (forensic_research_chain_of_custody) ─────
 write_checksums "$RUN_DIR"
