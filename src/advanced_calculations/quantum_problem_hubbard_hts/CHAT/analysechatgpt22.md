@@ -22,6 +22,20 @@ CODE SOURCE C (auditer) :
   src/debug/ultra_forensic_logger.c
   src/debug/ultra_forensic_logger.h
 
+AUTO OPTIMISATION DE L'AUTO-PROMPT (CECI DOIT TOUJOUR ETRE INCLUS):
+
+  (adapte le src/advanced_calculations/quantum_problem_hubbard_hts/CHAT/prompt.md à ton propre système et aux limitations propres à ton cas)
+
+  Utiliser un auto-prompt pour répéter les tâches identifiées afin de ne rien oublier.
+
+  Mettre à jour en permanence le protocole existant lorsque c’est nécessaire.
+
+  Éviter de reproduire les erreurs passées déjà corrigées.
+
+  Analyser automatiquement les conséquences de chaque modification de code pour prévenir les bugs futurs.
+
+  Sauvegarde le rapport dans CHAT/analysechatgpt22.md sans modifier aucun fichier existant dans CHAT/.
+
 Sauvegarde le rapport dans CHAT/analysechatgpt23.md sans modifier aucun fichier existant dans CHAT/.
 
 ---
