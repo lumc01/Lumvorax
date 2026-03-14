@@ -58,6 +58,16 @@ write_checksums() {
   )
 }
 
+# T02/T18 — GLOBAL_CHECKSUM.sha512 : traçabilité totale par run (sha512 de tous les fichiers résultats)
+write_global_sha512() {
+  local target_run_dir="$1"
+  (
+    cd "$target_run_dir"
+    find . -type f ! -name 'GLOBAL_CHECKSUM.sha512' -print0 | sort -z | xargs -0 sha512sum > GLOBAL_CHECKSUM.sha512
+    echo "[$(date -u +%Y-%m-%dT%H:%M:%S.%N)Z] GLOBAL_CHECKSUM.sha512 generated — $(wc -l < GLOBAL_CHECKSUM.sha512) files hashed"
+  )
+}
+
 verify_checksums() {
   local target_run_dir="$1"
   (
@@ -89,6 +99,8 @@ print_progress "fullscale csv schema guard"
 
 write_checksums "$FULLSCALE_RUN_DIR"
 print_progress "fullscale checksums"
+write_global_sha512 "$FULLSCALE_RUN_DIR"
+print_progress "fullscale sha512 global"
 verify_checksums "$FULLSCALE_RUN_DIR"
 print_progress "fullscale checksum verify"
 
@@ -189,6 +201,8 @@ print_progress "hfbl360 forensic logger"
 
 write_checksums "$RUN_DIR"
 print_progress "checksums"
+write_global_sha512 "$RUN_DIR"
+print_progress "sha512 global"
 
 
 CAMPAIGN_DIR="$ROOT_DIR/results/${LUMVORAX_RUN_GROUP}"
@@ -221,6 +235,9 @@ if [ "${LUMVORAX_FULLSCALE_STRICT:-1}" = "1" ]; then
 fi
 
 # Finalize checksums at very end so later post-steps cannot stale the manifest.
+# T02/T18 : SHA512 AVANT SHA256 pour que le sha256 inclue le sha512 final (évite mismatch).
+write_global_sha512 "$RUN_DIR"
+print_progress "final sha512 global (T02/T18)"
 write_checksums "$RUN_DIR"
 print_progress "final checksums"
 verify_checksums "$RUN_DIR"
