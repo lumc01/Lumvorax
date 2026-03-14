@@ -123,6 +123,10 @@ print_progress "cycle guard"
 python3 "$ROOT_DIR/tools/post_run_physics_readiness_pack.py" "$RUN_DIR"
 print_progress "physics readiness"
 
+# BC-10 : mise à jour automatique runtime benchmark (R13 — RMSE < 0.05 requis)
+python3 "$ROOT_DIR/tools/post_run_update_runtime_benchmark.py" "$RUN_DIR" "$ROOT_DIR/benchmarks"
+print_progress "runtime benchmark update"
+
 python3 "$ROOT_DIR/tools/post_run_v4next_integration_status.py" "$RUN_DIR"
 print_progress "v4next status"
 

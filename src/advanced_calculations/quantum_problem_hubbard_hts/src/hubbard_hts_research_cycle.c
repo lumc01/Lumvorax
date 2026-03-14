@@ -1081,10 +1081,11 @@ int main(int argc, char** argv) {
     double p_within = (m > 0) ? (100.0 * (double)within_bar / (double)m) : 0.0;
     double ci95_half = (m > 1) ? (1.96 * (rmse / sqrt((double)m))) : rmse;
 
-    bool bench_rmse_ok = rmse <= 1300000.0;
-    bool bench_within_ok = p_within >= 5.0;
-    bool bench_ci_ok = ci95_half <= 700000.0;
-    bool bench_mae_ok = mae <= 900000.0;
+    /* BC-09 : seuils physiques corrects — corrigé 2026-03-14 (anciens seuils fictifs : rmse<=1300000, within>=5, ci<=700000, mae<=900000) */
+    bool bench_rmse_ok  = rmse      <= 0.05;   /* eV/site — seuil QMC/DMRG réaliste */
+    bool bench_within_ok = p_within >= 70.0;   /* R08 plan nouveau simulateur */
+    bool bench_ci_ok    = ci95_half <= 0.05;   /* eV/site — cohérent error_bar=0.06 */
+    bool bench_mae_ok   = mae       <= 0.05;   /* eV/site */
 
     fprintf(tcsv, "benchmark,qmc_dmrg_rmse,rmse,%.10f,%s\n", rmse, bench_rmse_ok ? "PASS" : "FAIL");
     fprintf(tcsv, "benchmark,qmc_dmrg_mae,mae,%.10f,%s\n", mae, bench_mae_ok ? "PASS" : "FAIL");
@@ -1162,9 +1163,14 @@ int main(int argc, char** argv) {
                               {"numerics_open", "Q16", "Analyse Von Neumann exécutée ?", hubbard_vn_stable ? "complete" : "partial"},
                               {"methodology_open", "Q17", "Paramètres physiques module-par-module explicités ?", "complete"},
                               {"controls_open", "Q18", "Pompage dynamique (feedback atomique) inclus et tracé ?", "complete"},
-                              {"coverage_open", "Q19", "Nouveaux modules avancés CPU/RAM intégrés et benchmarkés individuellement ?", (m_mod > 0 && bench_mod_within_ok) ? "complete" : "partial"}};
+                              {"coverage_open", "Q19", "Nouveaux modules avancés CPU/RAM intégrés et benchmarkés individuellement ?", (m_mod > 0 && bench_mod_within_ok) ? "complete" : "partial"},
+                              /* Q20-Q23 : nouvelles questions expertes ajoutées 2026-03-14 (analysechatgpt13) */
+                              {"benchmark_policy", "Q20", "Politique de promotion runtime->canonique définie (auto sous seuils ou validation humaine) ?", "partial"},
+                              {"benchmark_policy", "Q21", "Séparation stricte refs publiées immuables / calibration interne évolutive documentée ?", "partial"},
+                              {"benchmark_policy", "Q22", "Versionnage historique des refs runtime par campagne archivé ?", "partial"},
+                              {"numerics_open",    "Q23", "Solveur 2x2 validé contre solution analytique exacte (U/t=0, U/t=inf, U=4t) ?", "partial"}};
 
-    for (size_t i = 0; i < 19; ++i) {
+    for (size_t i = 0; i < 23; ++i) {
         bool ok = strcmp(qrows[i][3], "complete") == 0;
         mark(&expert, ok);
         fprintf(qcsv, "%s,%s,%s,%s,see_report\n", qrows[i][0], qrows[i][1], qrows[i][2], qrows[i][3]);

@@ -52,6 +52,14 @@ Ces éléments manquaient dans toutes les versions antérieures — ajoutés ici
 | **T08** | Modules ARPES/STM (`independent_modules/`) reçoivent CSV, pas G(k,ω) — Q15 toujours partielle | OC-02 session 2026-03-13 |
 | **T09** | Aucun document `PHYSICS_REFERENCE.md` canonique — équations et unités non documentées dans le code | Absent de tous rapports |
 | **T10** | Pas de versionnage sémantique du simulateur — impossible de relier un résultat à une version exacte | Absent de tous rapports |
+| **T11** | Seuils de test benchmark hardcodés à des valeurs fictives (RMSE ≤ 1 300 000, within ≥ 5%) — masquent toute dégradation réelle | analysechatgpt13 2026-03-14 |
+| **T12** | Formule `local_pair = exp(-|d|*T/65)*(1+0.08*corr²)` non physique — constante 65 arbitraire, pas de lien BCS/DQMC | analysechatgpt13 2026-03-14 |
+| **T13** | Fichier `benchmarks/qmc_dmrg_reference_runtime.csv` référencé par le runner C mais jamais créé par aucun outil Python | analysechatgpt13 2026-03-14 |
+| **T14** | Aucune règle métasystème sur l'audit des seuils numériques hardcodés dans les runners C à chaque cycle | analysechatgpt13 2026-03-14 |
+| **T15** | Aucune séparation documentée entre "références physiques publiées immuables" et "calibration interne évolutive" | analysechatgpt13 2026-03-14 |
+| **T16** | T05 (fft_dominant_freq invariant vs U/t) confirmé cycles 01-09 — jamais résolu malgré détection | analysechatgpt13 2026-03-14 |
+| **T17** | Solveur 2×2 (`hubbard_2x2_ground_u4/u8`) = OBSERVED depuis cycle 01 — jamais validé contre solution analytique exacte | analysechatgpt13 2026-03-14 |
+| **T18** | `GLOBAL_CHECKSUM.sha512` (T02) toujours absent des runs 01-09 malgré planification — implémentation manquante | analysechatgpt13 2026-03-14 |
 
 ---
 
@@ -244,6 +252,16 @@ Ces règles codifient les leçons de BC-01 à BC-06. Toute violation est une ré
 
 **R10 — Traçabilité complète** : Chaque run génère `GLOBAL_CHECKSUM.sha512` + `HFBAL_360/hfbl360_realtime_persistent.log` + provenance log + backup sources.
 
+**R11 — Seuils benchmark physiques obligatoires** : Les tests benchmark utilisent des seuils physiquement motivés : RMSE ≤ 0.05 eV/site, MAE ≤ 0.05 eV/site, within_error_bar ≥ 70%, CI95_halfwidth ≤ 0.05 eV/site. Tout seuil > 1.0 dans ces métriques est un bug de niveau BC-09 et doit être corrigé immédiatement. (T11 — détecté analysechatgpt13)
+
+**R12 — Formule pairing physiquement motivée** : La formule `local_pair` doit être dérivable d'un principe physique de la théorie BCS ou DQMC. Formule recommandée : `2*f(ε)*(1-f(ε))*exp(-kBT/U)` avec `f` = Fermi-Dirac. Une formule exponentielle avec constante arbitraire (ex: `/65`) est interdite sans justification publiée dans `docs/PHYSICS_REFERENCE.md`. (T12 — BC-05-H3 — analysechatgpt13)
+
+**R13 — Politique benchmark runtime** : Le fichier `benchmarks/qmc_dmrg_reference_runtime.csv` est optionnel (calibration interne uniquement). Il est créé automatiquement uniquement si RMSE < 0.05 eV/site vs refs publiées. Il ne remplace jamais `qmc_dmrg_reference_v2.csv` (données publiées immuables). Archive versionnée obligatoire dans `benchmarks/history/`. (T13 — BC-10 — analysechatgpt13)
+
+**R14 — Audit des seuils C à chaque cycle** : À chaque cycle, vérifier que tout seuil numérique dans les runners C est dimensionnellement cohérent avec l'observable. Un seuil RMSE en eV/site doit être dans [0.001, 0.1]. Un seuil > 100 dans cette gamme est suspect et doit être justifié ou corrigé. (T14 — analysechatgpt13)
+
+**R15 — Validation analytique 2×2** : Le solveur `hubbard_2x2` doit être validé contre la solution analytique exacte : U=0 → E₀ = -4t ; U→∞ → E₀ = 0 ; U=4t, t=0.96 eV → E₀ ≈ -2.720 eV (diagonalisation exacte 16×16). Résultat marqué OBSERVED interdit pour plus de 3 cycles consécutifs. (T17 — Q23 — analysechatgpt13)
+
 ---
 
 ## PARTIE 6 — PHASES DE DÉVELOPPEMENT ORDONNÉES
@@ -337,11 +355,12 @@ Ces corrections ont été appliquées **immédiatement** dans les sources actuel
 ---
 
 ```
-VERSION     : HUBBARD_HTS_PLAN_v3.0.0
-DATE        : 2026-03-13T19:45Z
+VERSION     : HUBBARD_HTS_PLAN_v3.1.0
+DATE        : 2026-03-14T00:00Z (mis à jour depuis v3.0.0 du 2026-03-13T19:45Z)
 AUTEUR      : Agent Replit — inspection totale ligne par ligne confirmée
-TROUS COMBLÉS : T01-T10 (tous nouveaux par rapport aux versions précédentes du plan)
-CORRECTIONS APPLIQUÉES : BC-01, BC-02, BC-03, BC-06 (×4 emplacements)
-CORRECTIONS EN ATTENTE : BC-04, BC-05, seuils, checksum global
-PROCHAIN RUN : Recompiler + exécuter pour valider corrections BC-01/02/03/06
+TROUS COMBLÉS : T01-T18 (T11-T18 nouveaux — analysechatgpt13)
+RÈGLES AJOUTÉES : R11-R15 (T11-T15 — analysechatgpt13)
+CORRECTIONS APPLIQUÉES : BC-01, BC-02, BC-03, BC-04-IND-REG, BC-06, BC-06bis, BC-07, BC-08, BC-09 (seuils fictifs), BC-10 (outil runtime)
+CORRECTIONS EN ATTENTE : BC-05-H3 (formule local_pair + réversion BC-04), intégration BC-10 run_research_cycle.sh ✅
+PROCHAIN RUN : Recompiler + exécuter → benchmark FAIL attendu et physique → valider BC-05-H3
 ```
