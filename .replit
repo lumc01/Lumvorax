@@ -3,7 +3,7 @@ modules = ["python-3.11"]
 expertMode = true
 
 [workflows]
-runButton = "Quantum Research Cycle"
+runButton = "Project"
 
 [[workflows.workflow]]
 name = "Project"
@@ -17,6 +17,10 @@ args = "Run Python"
 [[workflows.workflow.tasks]]
 task = "workflow.run"
 args = "Quantum Research Cycle"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Quantum Research Cycle WORK"
 
 [[workflows.workflow]]
 name = "Run Python"
@@ -37,6 +41,17 @@ author = "agent"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "bash src/advanced_calculations/quantum_problem_hubbard_hts/run_research_cycle.sh"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "Quantum Research Cycle WORK"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash src/advanced_calculations/quantum_problem_hubbard_hts_work/run_research_cycle_work.sh"
 
 [workflows.workflow.metadata]
 outputType = "console"
