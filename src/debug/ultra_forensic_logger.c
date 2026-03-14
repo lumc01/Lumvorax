@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <time.h>
 #include <pthread.h>
+#include <inttypes.h>
 
 #define MAX_MODULES 50
 #define LOG_BUFFER_SIZE 4096
@@ -79,6 +80,49 @@ bool ultra_forensic_logger_init(void) {
     // ultra_forensic_log_header("SYSTEM", "INIT", "Système forensique initialisé");
 
     return true;
+}
+
+void ultra_forensic_logger_init_lum(const char* log_file) {
+    /* Initialisation 100% inconditionnelle du vrai système LumVorax forensique.
+     * Crée les répertoires logs/forensic/ dans le CWD (répertoire du workspace).
+     * Écrit également un fichier de log ancré dans le run_dir passé en paramètre.
+     */
+    if (!g_forensic_initialized) {
+        ultra_forensic_logger_init();
+    }
+    /* Écriture du fichier de log supplémentaire dans le répertoire de run */
+    if (log_file && log_file[0]) {
+        FILE* lf = fopen(log_file, "w");
+        if (lf) {
+            uint64_t ts = get_precise_timestamp_ns();
+            time_t tnow = time(NULL);
+            struct tm gmt;
+            gmtime_r(&tnow, &gmt);
+            char iso[32];
+            snprintf(iso, sizeof(iso), "%04d-%02d-%02dT%02d:%02d:%02dZ",
+                     gmt.tm_year + 1900, gmt.tm_mon + 1, gmt.tm_mday,
+                     gmt.tm_hour, gmt.tm_min, gmt.tm_sec);
+            fprintf(lf,
+                    "=== LUMVORAX FORENSIC REALTIME LOG — HUBBARD HTS ===\n"
+                    "timestamp_utc=%s\n"
+                    "timestamp_ns=%" PRIu64 "\n"
+                    "pid=%d\n"
+                    "log_file=%s\n"
+                    "activation=100PCT_INCONDITIONNELLE\n"
+                    "modules_reels=ultra_forensic_logger+memory_tracker\n"
+                    "====================================================\n",
+                    iso, ts, getpid(), log_file);
+            fflush(lf);
+            fclose(lf);
+        } else {
+            fprintf(stderr,
+                    "[LUMVORAX] AVERTISSEMENT: impossible d'écrire dans %s — "
+                    "le logger forensique central reste actif (logs/forensic/)\n",
+                    log_file);
+        }
+        fprintf(stderr, "[LUMVORAX] ultra_forensic_logger_init_lum: log_run=%s — ACTIF\n",
+                log_file);
+    }
 }
 
 void ultra_forensic_logger_destroy(void) {

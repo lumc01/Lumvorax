@@ -4,6 +4,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -13,7 +14,9 @@
 #include <unistd.h>
 
 /* BC-LV01/LV02/LV03/LV04/LV05 : Intégration LumVorax forensique — 2026-03-14 */
-#include "../include/lumvorax_integration.h"
+/* LumVorax — vrais modules forensiques — activation 100% inconditionnelle */
+#include "../../../debug/ultra_forensic_logger.h"
+#include "../../../debug/memory_tracker.h"
 
 #define MAX_PATH 768
 #define EPS 1e-12
@@ -224,8 +227,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
     sim_result_t r = {0};
     int sites = p->lx * p->ly;
     /* BC-LV05 : calloc remplacés par LV_CALLOC pour tracking mémoire forensique */
-    double* d = LV_CALLOC((size_t)sites, sizeof(double));
-    double* corr = LV_CALLOC((size_t)sites, sizeof(double));
+    double* d = TRACKED_CALLOC((size_t)sites, sizeof(double));
+    double* corr = TRACKED_CALLOC((size_t)sites, sizeof(double));
     double dt = (p->dt > 0.0) ? p->dt : 0.01;
     double h_scale_eV = fabs(p->t_eV) + fabs(p->u_eV) + fabs(p->mu_eV);
     double dt_scale = bounded_dt_scale(dt, h_scale_eV);
@@ -235,11 +238,11 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
     uint64_t t0 = now_ns();
 
     /* BC-LV04 : point forensique — début simulation (nanoseconde CLOCK_MONOTONIC) */
-    LV_MODULE_START("simulate_fs", p->name);
-    LV_MODULE_METRIC("simulate_fs", "sites", (double)sites);
-    LV_MODULE_METRIC("simulate_fs", "steps", (double)p->steps);
-    LV_MODULE_METRIC("simulate_fs", "temp_K", p->temp_K);
-    LV_MODULE_METRIC("simulate_fs", "U_eV", p->u_eV);
+    FORENSIC_LOG_MODULE_START("simulate_fs", p->name);
+    FORENSIC_LOG_MODULE_METRIC("simulate_fs", "sites", (double)sites);
+    FORENSIC_LOG_MODULE_METRIC("simulate_fs", "steps", (double)p->steps);
+    FORENSIC_LOG_MODULE_METRIC("simulate_fs", "temp_K", p->temp_K);
+    FORENSIC_LOG_MODULE_METRIC("simulate_fs", "U_eV", p->u_eV);
 
     for (uint64_t step = 0; step < p->steps; ++step) {
         double collective_mode = 0.0;
@@ -284,8 +287,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
             double local_pair = exp(-fabs(d[i]) * p->temp_K / 27.0) * (1.0 + 0.08 * corr[i] * corr[i]);
             /* BC-LV04 : trace forensique local_pair au site 0, step 0 uniquement */
             if (step == 0 && i == 0) {
-                LV_MODULE_METRIC("simulate_fs", "local_pair_site0_step0", local_pair);
-                LV_MODULE_METRIC("simulate_fs", "d_site0_step0", d[i]);
+                FORENSIC_LOG_MODULE_METRIC("simulate_fs", "local_pair_site0_step0", local_pair);
+                FORENSIC_LOG_MODULE_METRIC("simulate_fs", "d_site0_step0", d[i]);
             }
             double local_energy = p->u_eV * n_up * n_dn - p->t_eV * hopping_lr - p->mu_eV * (n_up + n_dn - 1.0);
 
@@ -303,8 +306,8 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
         step_sign /= (double)sites;
         /* BC-LV04 : trace forensique step_pairing après normalisation (step 0 seulement) */
         if (step == 0) {
-            LV_MODULE_METRIC("simulate_fs", "step_pairing_norm_step0", step_pairing);
-            LV_MODULE_METRIC("simulate_fs", "step_energy_norm_step0", step_energy);
+            FORENSIC_LOG_MODULE_METRIC("simulate_fs", "step_pairing_norm_step0", step_pairing);
+            FORENSIC_LOG_MODULE_METRIC("simulate_fs", "step_energy_norm_step0", step_energy);
         }
 
         /* Normalisation vecteur d'état à chaque pas (cohérence avec advanced_parallel) */
@@ -344,15 +347,15 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
     }
 
     /* BC-LV05 : free remplacés par LV_FREE */
-    LV_FREE(corr);
-    LV_FREE(d);
+    TRACKED_FREE(corr);
+    TRACKED_FREE(d);
     r.elapsed_ns = now_ns() - t0;
     /* BC-LV04 : point forensique — fin simulation, métriques finales */
-    LV_MODULE_END("simulate_fs", p->name, true);
-    LV_MODULE_METRIC("simulate_fs", "pairing_final", r.pairing);
-    LV_MODULE_METRIC("simulate_fs", "energy_final_eV", r.energy);
-    LV_MODULE_METRIC("simulate_fs", "sign_ratio_final", r.sign_ratio);
-    LV_MODULE_METRIC("simulate_fs", "elapsed_ns", (double)r.elapsed_ns);
+    FORENSIC_LOG_MODULE_END("simulate_fs", p->name, true);
+    FORENSIC_LOG_MODULE_METRIC("simulate_fs", "pairing_final", r.pairing);
+    FORENSIC_LOG_MODULE_METRIC("simulate_fs", "energy_final_eV", r.energy);
+    FORENSIC_LOG_MODULE_METRIC("simulate_fs", "sign_ratio_final", r.sign_ratio);
+    FORENSIC_LOG_MODULE_METRIC("simulate_fs", "elapsed_ns", (double)r.elapsed_ns);
     return r;
 }
 
@@ -408,8 +411,8 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
     (void)burn_scale;
     seed ^= seed_from_module_name(p->name);
     int sites = p->lx * p->ly;
-    long double* d = calloc((size_t)sites, sizeof(long double));
-    long double* corr = calloc((size_t)sites, sizeof(long double));
+    long double* d = TRACKED_CALLOC((size_t)sites, sizeof(long double));
+    long double* corr = TRACKED_CALLOC((size_t)sites, sizeof(long double));
     long double dt_ld = (p->dt > 0.0) ? (long double)p->dt : 0.01L;
     long double h_scale_ld = fabsl((long double)p->t_eV) + fabsl((long double)p->u_eV) + fabsl((long double)p->mu_eV);
     long double dt_scale_ld = (long double)bounded_dt_scale((double)dt_ld, (double)h_scale_ld);
@@ -477,8 +480,8 @@ static sim_result_t simulate_problem_independent(const problem_t* p, uint64_t se
         r.pairing = (double)step_pairing;
         r.sign_ratio = (double)step_sign;
     }
-    free(corr);
-    free(d);
+    TRACKED_FREE(corr);
+    TRACKED_FREE(d);
     r.elapsed_ns = now_ns() - t0;
     return r;
 }
@@ -554,9 +557,9 @@ static void apply_hamiltonian_2x2(const state2x2_t* basis, int n, double t, doub
 static double exact_ground_energy_2x2(double t, double u) {
     state2x2_t basis[64];
     int n = build_basis_2x2_half_filling(basis, 64);
-    double* vec = calloc((size_t)n, sizeof(double));
-    double* w = calloc((size_t)n, sizeof(double));
-    double* tmp = calloc((size_t)n, sizeof(double));
+    double* vec = TRACKED_CALLOC((size_t)n, sizeof(double));
+    double* w = TRACKED_CALLOC((size_t)n, sizeof(double));
+    double* tmp = TRACKED_CALLOC((size_t)n, sizeof(double));
 
     for (int i = 0; i < n; ++i) vec[i] = 1.0 / sqrt((double)n);
 
@@ -579,9 +582,9 @@ static double exact_ground_energy_2x2(double t, double u) {
         den += vec[i] * vec[i];
     }
 
-    free(tmp);
-    free(w);
-    free(vec);
+    TRACKED_FREE(tmp);
+    TRACKED_FREE(w);
+    TRACKED_FREE(vec);
     return num / den;
 }
 
@@ -696,12 +699,15 @@ int main(int argc, char** argv) {
     mkdir_if_missing(reports);
     mkdir_if_missing(tests);
 
-    /* BC-LV02/LV03 : Initialisation LumVorax — lecture toggles env + init forensique */
+    /* BC-LV02/LV03 : Activation LumVorax 100% INCONDITIONNELLE — premier à s'activer */
     {
-        const char* lv_forensic = getenv("LUMVORAX_FORENSIC_REALTIME");
-        if (lv_forensic && lv_forensic[0] == '1') {
-            lv_init(logs);
-        }
+        char lv_log_path[MAX_PATH];
+        snprintf(lv_log_path, sizeof(lv_log_path),
+                 "%s/lumvorax_hubbard_hts_fullscale_%" PRIu64 ".log",
+                 logs, (uint64_t)time(NULL));
+        ultra_forensic_logger_init_lum(lv_log_path);
+        memory_tracker_init();
+        FORENSIC_LOG_MODULE_START("hubbard_hts_fullscale", "main_campaign");
     }
 
     char log_path[MAX_PATH], raw_csv[MAX_PATH], tests_csv[MAX_PATH], report[MAX_PATH], comparison_report[MAX_PATH], provenance[MAX_PATH], qa_csv[MAX_PATH], bench_csv[MAX_PATH], bench_ref[MAX_PATH], bench_csv_modules[MAX_PATH], bench_ref_modules[MAX_PATH];
@@ -1135,12 +1141,12 @@ int main(int argc, char** argv) {
     double ci95_half = (m > 1) ? (1.96 * (rmse / sqrt((double)m))) : rmse;
 
     /* BC-LV04 : métriques benchmark forensiques — détection immédiate des anomalies ×1000 */
-    LV_MODULE_METRIC("benchmark_qmc", "rmse", rmse);
-    LV_MODULE_METRIC("benchmark_qmc", "mae", mae);
-    LV_MODULE_METRIC("benchmark_qmc", "pct_within_error_bar", p_within);
-    LV_MODULE_METRIC("benchmark_qmc", "ci95_halfwidth", ci95_half);
-    LV_MODULE_METRIC("benchmark_qmc", "n_points", (double)m);
-    LV_MODULE_METRIC("benchmark_qmc", "n_within", (double)within_bar);
+    FORENSIC_LOG_MODULE_METRIC("benchmark_qmc", "rmse", rmse);
+    FORENSIC_LOG_MODULE_METRIC("benchmark_qmc", "mae", mae);
+    FORENSIC_LOG_MODULE_METRIC("benchmark_qmc", "pct_within_error_bar", p_within);
+    FORENSIC_LOG_MODULE_METRIC("benchmark_qmc", "ci95_halfwidth", ci95_half);
+    FORENSIC_LOG_MODULE_METRIC("benchmark_qmc", "n_points", (double)m);
+    FORENSIC_LOG_MODULE_METRIC("benchmark_qmc", "n_within", (double)within_bar);
 
     /* BC-09 : seuils physiques corrects — corrigé 2026-03-14 (anciens seuils fictifs : rmse<=1300000, within>=5, ci<=700000, mae<=900000) */
     bool bench_rmse_ok  = rmse      <= 0.05;   /* eV/site — seuil QMC/DMRG réaliste */
@@ -1172,8 +1178,8 @@ int main(int argc, char** argv) {
     /* Cluster-size scaling benchmark (more reference points + larger clusters) */
     int c_sizes[] = {8, 10, 12, 14, 16, 18, 24, 26, 28, 32, 36, 64, 66, 68, 128, 255};
     int c_n = (int)(sizeof(c_sizes) / sizeof(c_sizes[0]));
-    double* c_pair = calloc((size_t)c_n, sizeof(double));
-    double* c_energy = calloc((size_t)c_n, sizeof(double));
+    double* c_pair = TRACKED_CALLOC((size_t)c_n, sizeof(double));
+    double* c_energy = TRACKED_CALLOC((size_t)c_n, sizeof(double));
     int nproc = (int)sysconf(_SC_NPROCESSORS_ONLN);
     long avail_kb = mem_available_kb();
     for (int ci = 0; ci < c_n; ++ci) {
@@ -1204,8 +1210,8 @@ int main(int argc, char** argv) {
     fprintf(tcsv, "cluster_scale,resource_autoscale,cpu_count,%.0f,%s\n", (double)nproc, nproc > 0 ? "PASS" : "FAIL");
     fprintf(tcsv, "cluster_scale,resource_autoscale,mem_available_kb,%.0f,%s\n", (double)avail_kb, avail_kb > 0 ? "PASS" : "FAIL");
     mark(&robustness, cluster_pair_nonincreasing && cluster_energy_nonincreasing);
-    free(c_pair);
-    free(c_energy);
+    TRACKED_FREE(c_pair);
+    TRACKED_FREE(c_energy);
 
     const char* qrows[][4] = {{"methodology", "Q1", "Le seed est-il contrôlé ?", rep_fixed ? "complete" : "absent"},
                               {"methodology", "Q2", "Deux solveurs indépendants concordent-ils ?", indep_ok ? "complete" : "partial"},
@@ -1348,9 +1354,11 @@ int main(int argc, char** argv) {
     fclose(toy);
     free_loaded_problem_names(probs, nprobs);
 
-    /* BC-LV03 : Rapport fuites mémoire + destruction logger forensique */
-    lv_report_leaks();
-    lv_destroy();
+    /* BC-LV03 : Rapport forensique final + destruction vrai système LumVorax */
+    FORENSIC_LOG_MODULE_END("hubbard_hts_fullscale", "main_campaign", true);
+    ultra_forensic_generate_summary_report();
+    memory_tracker_check_leaks();
+    ultra_forensic_logger_destroy();
 
     return 0;
 }
