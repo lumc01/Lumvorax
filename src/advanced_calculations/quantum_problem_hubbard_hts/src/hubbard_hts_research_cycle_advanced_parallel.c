@@ -1414,5 +1414,7 @@ int main(int argc, char** argv) {
     fclose(dmcsv);
     fclose(toy);
     free_loaded_problem_names(probs, nprobs);
+    lv_report_leaks();
+    lv_destroy();
     return 0;
 }

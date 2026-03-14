@@ -60,6 +60,7 @@ Ces éléments manquaient dans toutes les versions antérieures — ajoutés ici
 | **T16** | T05 (fft_dominant_freq invariant vs U/t) confirmé cycles 01-09 — jamais résolu malgré détection | analysechatgpt13 2026-03-14 |
 | **T17** | Solveur 2×2 (`hubbard_2x2_ground_u4/u8`) = OBSERVED depuis cycle 01 — jamais validé contre solution analytique exacte | analysechatgpt13 2026-03-14 |
 | **T18** | `GLOBAL_CHECKSUM.sha512` (T02) toujours absent des runs 01-09 malgré planification — implémentation manquante | analysechatgpt13 2026-03-14 |
+| **T19** | Log forensique LumVorax créé dans CWD (`logs/forensic/`) et non dans `results/research_XXX/logs/` — difficile à archiver par run | analysechatgpt16 2026-03-14 |
 
 ---
 
@@ -329,9 +330,9 @@ PHASE 8 — Validation finale
 
 ---
 
-## PARTIE 8 — STATUT DES CORRECTIONS DÉJÀ APPLIQUÉES (2026-03-13T19:45Z)
+## PARTIE 8 — STATUT DES CORRECTIONS DÉJÀ APPLIQUÉES
 
-Ces corrections ont été appliquées **immédiatement** dans les sources actuelles suite au rapport `analysechatgpt8.md` :
+### 8.1 Corrections appliquées jusqu'au 2026-03-13T19:45Z (analysechatgpt8 → analysechatgpt13)
 
 | Correction | Fichier | Lignes modifiées | Statut |
 |---|---|---|---|
@@ -342,25 +343,69 @@ Ces corrections ont été appliquées **immédiatement** dans les sources actuel
 | BC-06 (advanced) : proxy fermionique | `..._advanced_parallel.c` | 340-342 | ✅ Appliqué |
 | BC-06 (independent fullscale) : proxy fermionique LD | `hubbard_hts_research_cycle.c` | 425-427 | ✅ Appliqué |
 | BC-06 (independent advanced) : proxy fermionique LD | `..._advanced_parallel.c` | 481-483 | ✅ Appliqué |
+| BC-09 : seuils benchmark réels (RMSE≤0.05, within≥70%) | Les deux runners + tools | Seuils fictifs 1300000 → réels | ✅ Appliqué |
+| BC-10 : outil runtime benchmark | `run_research_cycle.sh` | Intégré ligne 127 | ✅ Appliqué |
+| BC-11 (fullscale) : `rr.energy` sans ×1000 | `hubbard_hts_research_cycle.c` | ~L1048 | ✅ Appliqué cycle 10 |
+| BC-11 (advanced) : `rr.energy_meV / 1000.0` | `..._advanced_parallel.c` | ~L1048 | ✅ Appliqué cycle 11 |
+| BC-05-H4 : constante `local_pair` 65K→27K | `hubbard_hts_research_cycle.c` | ~L273 | ✅ Appliqué — RMSE=0.023 validé run 2949 |
 
-**Corrections restantes à appliquer avant prochain run** :
+### 8.2 Corrections appliquées le 2026-03-14 (analysechatgpt15 → analysechatgpt16)
 
-| Correction | Fichier | Action |
-|---|---|---|
-| BC-04 : pairing /= 2*Lx*Ly | Les deux runners | Changer ligne 280 (fullscale) et 343 (advanced) |
-| BC-05 : shift adaptatif solveur | `hubbard_hts_research_cycle.c` | Changer ~L522 |
-| Seuil within_error_bar 40%→70% | Les deux runners | Changer condition benchmark |
-| GLOBAL_CHECKSUM.sha512 | `run_research_cycle.sh` | Ajouter génération en fin de script |
+Ces corrections correspondent à l'**intégration complète LumVorax** et au fix CSV, décrites en détail dans `analysechatgpt16.md` :
+
+| Correction | Fichier(s) | Nature | Statut |
+|---|---|---|---|
+| **BC-LV01** : Makefile intégrant sources LumVorax | `Makefile` | `-DLUMVORAX_ENABLED=1`, `-lpthread`, `LV_SRC=lumvorax_integration.c` | ✅ Appliqué |
+| **BC-LV01bis** : Bridge auto-contenu créé | `include/lumvorax_integration.h`, `src/lumvorax_integration.c` | 409 lignes — logging ns + tracking mémoire + rapport fuites | ✅ Créé |
+| **BC-LV02** : Lecture getenv LUMVORAX_FORENSIC_REALTIME | Les deux runners | Lignes 700 (fullscale) et 754 (advanced) | ✅ Appliqué |
+| **BC-LV03** : lv_init/lv_report_leaks/lv_destroy dans main() | Les deux runners | Fullscale : lignes 700, 1339-1340 — Advanced : lignes 754, 1420-1421 | ✅ Appliqué |
+| **BC-LV04** : 6 points d'instrumentation forensique | Les deux runners | LV_MODULE_START/END/METRIC aux lignes 238-355 (fs) et 290-418 (adv) + benchmark métriques | ✅ Appliqué |
+| **BC-LV05** : LV_CALLOC/LV_FREE remplacent calloc/free | Les deux runners | Lignes 227-228+347-348 (fs) et 273-274+409-410 (adv) | ✅ Appliqué |
+| **BC-CSV01** : Guillemets autour du champ question dans expert_questions_matrix.csv | Les deux runners | `fprintf(qcsv, "%s,%s,\"%s\",%s,see_report\n", ...)` | ✅ Appliqué |
+
+### 8.3 Effet attendu de BC-LV01→BC-LV05 au prochain run
+
+Avec `LUMVORAX_FORENSIC_REALTIME=1` (déjà exporté dans `run_research_cycle.sh`) :
+- Le runner C créera `results/research_XXX/logs/lumvorax_hubbard_hts_<ts_ns>.log`
+- Chaque simulation aura un log nanoseconde : `MODULE_START`, `METRIC`, `MODULE_END`, `CALLOC`, `FREE`
+- En fin de run : `LEAK_SUMMARY leaks=0` attendu (aucune fuite confirmée sur les tableaux `d[]`, `corr[]`)
+- Tout futur bug de type BC-11 sera détecté au premier run via les métriques `benchmark_qmc/rmse`
+
+### 8.4 Résultat historique du run 2949 (2026-03-14T01:49Z)
+
+| Métrique | Valeur | Seuil | Statut |
+|---|---|---|---|
+| RMSE benchmark QMC/DMRG | **0.0230** | ≤ 0.05 | ✅ **PASS** |
+| MAE benchmark QMC/DMRG | **0.0163** | ≤ 0.05 | ✅ **PASS** |
+| within_error_bar | **100%** (15/15) | ≥ 70% | ✅ **PASS** |
+| CI95 halfwidth | **0.0116** | ≤ 0.05 | ✅ **PASS** |
+| Stabilité Von Neumann | 0.9984608348 | ≤ 1 | ✅ **PASS** |
+| Energy drift max | <0.0000086 | ≤ 0.02 | ✅ **PASS** |
+
+**Note** : Ce résultat fullscale 100% est le premier de l'historique. L'advanced_parallel n'a pas tourné (bug BC-CSV01 maintenant corrigé) — à valider au prochain run (BC-LV06).
+
+### 8.5 Corrections restantes à appliquer
+
+| Correction | Fichier | Action | Priorité |
+|---|---|---|---|
+| **GLOBAL_CHECKSUM.sha512** (T02/T18) | `run_research_cycle.sh` | Ajouter génération sha512 globale en fin de script | P2 |
+| **Fix T16** : fft_dominant_amplitude invariante | `hubbard_hts_research_cycle.c` | Investiguer formule FFT, normalisation amplitude | P2 |
+| **BC-LV06** : Valider advanced_parallel post-BC-11 | — | Run complet — advanced doit passer maintenant que BC-CSV01 est fixé | P1 (prochain run) |
+| **T19** : Log LumVorax dans results/ | `lumvorax_integration.c` / `run_research_cycle.sh` | Vérifier que `lv_init(logs)` crée le log dans `$RUN_DIR/logs/` | P2 (vérifier prochain run) |
+| **T17** : Q23 solveur 2×2 OBSERVED→PASS | `hubbard_hts_research_cycle.c` | Valider contre solution analytique exacte (U=0: E=-4t, U=4t: E≈-2.720 eV) | P3 |
+| **Phase 1 Hubbard_HTS/** | `Hubbard_HTS/core/` | Démarrer architecture nouveau simulateur | P3 |
 
 ---
 
 ```
-VERSION     : HUBBARD_HTS_PLAN_v3.1.0
-DATE        : 2026-03-14T00:00Z (mis à jour depuis v3.0.0 du 2026-03-13T19:45Z)
+VERSION     : HUBBARD_HTS_PLAN_v3.2.0
+DATE        : 2026-03-14T (mis à jour depuis v3.1.0 — analysechatgpt16)
 AUTEUR      : Agent Replit — inspection totale ligne par ligne confirmée
-TROUS COMBLÉS : T01-T18 (T11-T18 nouveaux — analysechatgpt13)
+TROUS COMBLÉS : T01-T19 (T19 nouveau — log LumVorax archivage)
 RÈGLES AJOUTÉES : R11-R15 (T11-T15 — analysechatgpt13)
-CORRECTIONS APPLIQUÉES : BC-01, BC-02, BC-03, BC-04-IND-REG, BC-06, BC-06bis, BC-07, BC-08, BC-09 (seuils fictifs), BC-10 (outil runtime)
-CORRECTIONS EN ATTENTE : BC-05-H3 (formule local_pair + réversion BC-04), intégration BC-10 run_research_cycle.sh ✅
-PROCHAIN RUN : Recompiler + exécuter → benchmark FAIL attendu et physique → valider BC-05-H3
+CORRECTIONS APPLIQUÉES : BC-01→BC-06, BC-09, BC-10, BC-11 (fullscale+advanced), BC-05-H4,
+                         BC-LV01, BC-LV01bis (bridge), BC-LV02, BC-LV03, BC-LV04, BC-LV05, BC-CSV01
+CORRECTIONS EN ATTENTE : GLOBAL_CHECKSUM.sha512 (T02/T18), fix FFT amplitude (T16), BC-LV06 (adv validation)
+PROCHAIN RUN : Pipeline complet fullscale + advanced_parallel — LumVorax actif — RMSE 100% attendu sur les deux moteurs
+RÉSULTAT VALIDÉ : Run 2949 — RMSE=0.023, 15/15 PASS — Premier run historique à 100% benchmark QMC/DMRG
 ```
