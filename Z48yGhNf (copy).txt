@@ -1,3 +1,122 @@
+
+
+
+
+# Fichiers de logs
+*.log
+logs/
+final_logs/
+final_logs_capture/
+final_logs_v14/
+final_logs_v15/
+final_logs_v16/
+
+# Rapports, analyses, PDF, documentation
+*.pdf
+RAPPORT/
+docs/
+*.txt
+*.json
+
+# Données / datasets / fichiers volumineux
+dataset/
+DATASET/
+v28_forensic_logs/
+v2_output/
+v28_kaggle_output/
+attached_assets/
+evidence/
+metrics_modules_reels/
+benchmarks/
+*.zip
+*.tar
+*.parquet
+
+# Images / figures / captures
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Fichiers temporaires / caches / IDE
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+.cache/
+.ccls-cache/
+.pythonlibs/
+.ipynb_checkpoints/
+
+# Fichiers spécifiques au projet à ignorer
+ultra_analyse_cluster_10_problemes.md
+*.log.sha512
+*.lock
+
+
+
+
+NNNNNNNNNNNNNNNNNNNNNNNN
+
+
+
+# Fichiers de logs
+*.log
+logs/
+final_logs/
+final_logs_capture/
+final_logs_v14/
+final_logs_v15/
+final_logs_v16/
+
+# Rapports, analyses, PDF, documentation
+*.pdf
+RAPPORT/
+docs/
+*.txt
+*.json
+
+# Données / datasets / fichiers volumineux
+dataset/
+DATASET/
+v28_forensic_logs/
+v2_output/
+v28_kaggle_output/
+attached_assets/
+evidence/
+metrics_modules_reels/
+benchmarks/
+*.zip
+*.tar
+*.parquet
+
+# Images / figures / captures
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Fichiers temporaires / caches / IDE
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.swp
+.cache/
+.ccls-cache/
+.pythonlibs/
+.ipynb_checkpoints/
+
+# Fichiers spécifiques au projet à ignorer
+ultra_analyse_cluster_10_problemes.md
+*.log.sha512
+*.lock
+
+
+
 # Mise à jour dépôt distant + analyse des logs (2026-02-28)
 
 ## 1) Statut de synchronisation avec le dépôt distant
