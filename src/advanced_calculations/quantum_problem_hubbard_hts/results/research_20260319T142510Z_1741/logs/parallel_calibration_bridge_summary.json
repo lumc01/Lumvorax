@@ -1,0 +1,26 @@
+{
+  "generated_at_utc": "2026-03-19T14:59:42.320549+00:00",
+  "run": "research_20260319T142510Z_1741",
+  "modules": 15,
+  "donor_modules": [
+    "bosonic_multimode_systems",
+    "topological_correlated_materials",
+    "multi_correlated_fermion_boson_networks"
+  ],
+  "fail_families": {
+    "benchmark": 3
+  },
+  "bridge_file": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260319T142510Z_1741/tests/integration_parallel_calibration_bridge.csv",
+  "method": {
+    "dt_factor_policy": {
+      "critical_drift_ge_0.20": 0.25,
+      "high_drift_ge_0.12": 0.5,
+      "moderate": 0.75
+    },
+    "control_gain_factor_policy": {
+      "critical": 0.4,
+      "high": 0.55,
+      "moderate": 0.7
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "run_dir": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260319T172401Z_2276",
+  "csv_count": 22,
+  "pass": 20,
+  "observed": 0,
+  "fail": 2,
+  "failed_files": [
+    {
+      "file": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260319T172401Z_2276/tests/worm_mc_attempt_log.csv",
+      "status": "FAIL",
+      "expected_columns": 11,
+      "row": 2,
+      "actual_columns": 10,
+      "details": "column_count_mismatch"
+    },
+    {
+      "file": "/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260319T172401Z_2276/tests/worm_mc_sweep_log.csv",
+      "status": "FAIL",
+      "expected_columns": 9,
+      "row": 2,
+      "actual_columns": 8,
+      "details": "column_count_mismatch"
+    }
+  ]
+}

@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <title>Modelisation 3D - research_20260319T172401Z_2276</title>
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <style>body{font-family:Arial,sans-serif;margin:0}#plot{width:100vw;height:92vh}</style>
+</head>
+<body>
+<h3 style="padding:10px 12px;margin:0">Modelisation 3D (run research_20260319T172401Z_2276)</h3>
+<div id="plot"></div>
+<script>
+fetch('modelization_3d_dataset.json').then(r => r.json()).then(data => {
+  const modules = [...new Set(data.points.map(p => p.y_module))];
+  const yMap = new Map(modules.map((m, i) => [m, i]));
+  const trace = {
+    type: 'scatter3d',
+    mode: 'markers',
+    x: data.points.map(p => p.x_step),
+    y: data.points.map(p => yMap.get(p.y_module)),
+    z: data.points.map(p => p.z_energy),
+    marker: {
+      size: 4,
+      color: data.points.map(p => p.pairing),
+      colorscale: 'Turbo',
+      colorbar: {title: 'pairing'},
+      opacity: 0.85
+    },
+    text: data.points.map(p => `${p.y_module}<br>energy=${p.z_energy.toFixed(6)}<br>pairing=${p.pairing.toFixed(6)}<br>sign=${p.sign_ratio.toFixed(6)}`),
+    hoverinfo: 'text'
+  };
+  const layout = {
+    scene: {
+      xaxis: {title: 'sample index'},
+      yaxis: {title: 'module index', tickvals: modules.map((_,i)=>i), ticktext: modules},
+      zaxis: {title: 'energy'}
+    },
+    margin: {l: 0, r: 0, b: 0, t: 30}
+  };
+  Plotly.newPlot('plot', [trace], layout, {responsive: true});
+});
+</script>
+</body>
+</html>

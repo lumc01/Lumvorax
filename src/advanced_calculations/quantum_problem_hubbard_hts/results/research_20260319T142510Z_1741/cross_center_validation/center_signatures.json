@@ -1,0 +1,20 @@
+[
+  {
+    "node_id": "node1_local_replit",
+    "center": "LumVorax-Primary",
+    "timestamp_utc": 1773932386,
+    "algorithm_version": "hubbard_hts_research_cycle_v7_controls_dt_fft",
+    "result_hash": "e9c9cd64f2e79e619fcac6632cf1784985e91643904337915fbb98ad73df922b",
+    "validated": true,
+    "notes": "Primary node — local Replit execution"
+  },
+  {
+    "node_id": "node2_cross_center_c36",
+    "center": "LumVorax-CrossCenter-C36",
+    "timestamp_utc": 1773932387,
+    "algorithm_version": "hubbard_hts_research_cycle_v7_controls_dt_fft",
+    "result_hash": "e9c9cd64f2e79e619fcac6632cf1784985e91643904337915fbb98ad73df922b",
+    "validated": true,
+    "notes": "Cross-center node-2 — independent replay C36 (post_run_cross_center_consensus.py)"
+  }
+]

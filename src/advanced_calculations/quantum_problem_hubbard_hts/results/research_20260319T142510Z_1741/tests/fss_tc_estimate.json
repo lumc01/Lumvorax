@@ -1,0 +1,10 @@
+{
+  "Tc_fss_K": null,
+  "crossing_diff": Infinity,
+  "L_pair": [
+    12,
+    14
+  ],
+  "status": "NO_CROSSING",
+  "data_source": "PTMC_real"
+}

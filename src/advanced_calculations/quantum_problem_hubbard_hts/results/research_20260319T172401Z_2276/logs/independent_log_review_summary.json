@@ -1,0 +1,134 @@
+{
+  "run": "research_20260319T172401Z_2276",
+  "generated_at_utc": "2026-03-19T17:56:21.822990+00:00",
+  "counts": {
+    "base_metrics_rows": 187250,
+    "normalized_rows": 60,
+    "new_tests": 82,
+    "questions": 25,
+    "modules": 15,
+    "toy_rows": 1
+  },
+  "means": {
+    "energy": 1.9963674120886552,
+    "pairing": 0.7625187298249138,
+    "sign_ratio": 0.05395886142742804
+  },
+  "family_ratio": {
+    "benchmark": {
+      "total": 7,
+      "passed": 7,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "cluster_scale": {
+      "total": 36,
+      "passed": 4,
+      "failed": 0,
+      "observed": 32,
+      "pass_pct": 11.11111111111111
+    },
+    "control": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "convergence": {
+      "total": 5,
+      "passed": 5,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "dt_sweep": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "dynamic_pumping": {
+      "total": 4,
+      "passed": 4,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "exact_solver": {
+      "total": 3,
+      "passed": 3,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "physics": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "reproducibility": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "sensitivity": {
+      "total": 8,
+      "passed": 8,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "spectral": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "stability": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "stress": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "thermodynamic_limit": {
+      "total": 2,
+      "passed": 2,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    },
+    "verification": {
+      "total": 1,
+      "passed": 1,
+      "failed": 0,
+      "observed": 0,
+      "pass_pct": 100.0
+    }
+  },
+  "question_status": {
+    "complete": 25
+  },
+  "question_complete_pct": 100.0,
+  "numerical_stability_pass_pct": 62.0253164556962,
+  "progress_score_pct": 89.85091420534458,
+  "fails": {
+    "new_tests": [],
+    "numerical_stability": []
+  }
+}

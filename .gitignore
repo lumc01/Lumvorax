@@ -1,0 +1,46 @@
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.pythonlibs/
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+.env
+.venv/
+venv/
+*.whl
+.local/state/replit/agent/
+
+# Binary build/runtime artifacts
+*.o
+*.bin
+*.exe
+*.dll
+*.a
+
+# ── C26-GITPUSH : Gros CSV Lumvorax bruts (> 90 MB) — ignorés car trop volumineux pour GitHub ──
+# Les morceaux découpés (lumvorax_*_part_aa, _ab, etc.) sont EUX trackés dans git.
+# NE PAS ajouter de règle **/lumvorax_*_part_* ici — les morceaux DOIVENT être pushés.
+# Le script auto_git_push.sh gère le découpage et le push automatiquement.
+**/lumvorax_hubbard_hts_advanced_parallel_*.csv
+**/lumvorax_hubbard_hts_fullscale_*.csv
+
+# Fichier de checkpoint du run (interne — ne pas versionner)
+.run_checkpoint
+.run_current_phase
+
+# Gros logs forensiques spécifiques (> 90 MB) — ignorés individuellement
+logs/forensic/modules/simulate_adv_forensic_74369880261775.log
+logs/forensic/modules/pt_mc_swap_detail_forensic_74375464697295.log
+logs/forensic/metrics/simulate_adv_metrics.log
+logs/forensic/modules/simulate_adv_forensic_25686430305799.log
+logs/forensic/modules/pt_mc_swap_detail_forensic_25692899785269.log
+
+# CSV Lumvorax bruts spécifiques déjà pushés via morceaux — doublon de sécurité
+src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260315T225836Z_3502/logs/lumvorax_hubbard_hts_advanced_parallel_1773615516.csv
+src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260316T002920Z_8669/logs/lumvorax_hubbard_hts_advanced_parallel_1773620960.csv
+src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260316T185855Z_3306/logs/lumvorax_hubbard_hts_advanced_parallel_1773687535.csv
+src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260316T202736Z_5304/logs/lumvorax_hubbard_hts_advanced_parallel_1773692856.csv

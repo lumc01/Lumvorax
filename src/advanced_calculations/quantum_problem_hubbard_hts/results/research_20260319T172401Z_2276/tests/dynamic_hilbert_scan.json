@@ -1,0 +1,28 @@
+{
+  "c38_dynscale_version": "1.0",
+  "timestamp": "2026-03-19T17:56:30Z",
+  "resources": {
+    "ram_total_mb": 64306.0,
+    "ram_available_mb": 21331.0,
+    "ram_used_pct_at_scan": 66.83,
+    "cpu_count": 8,
+    "cpu_load_pct_at_scan": 16.32
+  },
+  "scan_results": {
+    "n_sizes_tested": 90,
+    "max_feasible_n_sites": 121,
+    "max_feasible_qubits": 242,
+    "max_hilbert_log10": 72.85,
+    "feasible_sizes": [],
+    "oom_first_n": null
+  },
+  "interpretation": {
+    "max_qubits_simulated": 242,
+    "hilbert_space_size": "4^121 \u2248 10^72.8",
+    "vs_c37_baseline_n121": "+0 sites (0% augmentation)",
+    "ram_99pct_limit_mb": 63663.0,
+    "last_feasible_qmc_ram_mb": 102.06
+  },
+  "elapsed_scan_s": 0.529,
+  "status": "PASS"
+}
