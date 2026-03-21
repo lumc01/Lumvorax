@@ -1,0 +1,94 @@
+modules = ["python-3.11"]
+[agent]
+expertMode = true
+
+[workflows]
+runButton = "Project"
+
+[[workflows.workflow]]
+name = "Project"
+mode = "parallel"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Run Python"
+
+[[workflows.workflow.tasks]]
+task = "workflow.run"
+args = "Quantum Research Cycle C37"
+
+[[workflows.workflow]]
+name = "Run Python"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python main.py"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[[workflows.workflow]]
+name = "git fetch "
+mode = "sequential"
+author = 54178035
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "git fetch origin git reset --hard origin/main"
+
+[[workflows.workflow]]
+name = "chmod +x generate_ssh_key.sh"
+mode = "sequential"
+author = 54178035
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "chmod +x generate_ssh_key.sh"
+
+[[workflows.workflow]]
+name = "bash generate_ssh_key.sh"
+mode = "sequential"
+author = 54178035
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "bash generate_ssh_key.sh"
+
+[[workflows.workflow]]
+name = "ssh -T git@github.com"
+mode = "sequential"
+author = 54178035
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "ssh -T git@github.com"
+
+[[workflows.workflow]]
+name = "Quantum Research Cycle C37"
+author = "agent"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "cd src/advanced_calculations/quantum_problem_hubbard_hts && bash run_research_cycle.sh"
+
+[workflows.workflow.metadata]
+outputType = "console"
+
+[nix]
+packages = ["arrow-cpp", "cairo", "clang", "ffmpeg-full", "file", "freetype", "gcc", "gdb", "ghostscript", "glib", "glibc", "glibcLocales", "gnumake", "gobject-introspection", "gtk3", "kaggle", "lcms2", "libimagequant", "libjpeg", "libtiff", "libwebp", "libxcrypt", "nano", "openjpeg", "openssh", "pkg-config", "qhull", "tcl", "tk", "tree", "vim-full", "xsimd", "zlib", "rsync"]
+channel = "stable-25_05"
+
+[deployment]
+deploymentTarget = "vm"
+run = ["./bin/lum_vorax_complete", "--progressive-stress-all"]
+build = ["make", "clean", "all"]
+
+[userenv]
+
+[userenv.shared]
+KAGGLE_API_TOKEN = "KGAT_5fcd05f27636ded50a5c8053f13da836"
+KAGGLE_USERNAME = "ndarray2000"
+ARISTOTLE_API_KEY = "arstl_YykBEXr6oNR5R9toq_wI1wTtyfVrj5eUZfgpe_BlgYo"
+KAGGLE_CONFIG_DIR = "/home/runner/.kaggle"

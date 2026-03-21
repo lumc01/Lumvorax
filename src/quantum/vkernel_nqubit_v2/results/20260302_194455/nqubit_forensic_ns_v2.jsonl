@@ -1,0 +1,7 @@
+{"ts_ns":138435688456245,"delta_ns":158530,"event":"scenario_margin","scenario":0,"margin":0.012527362103}
+{"ts_ns":138435695486235,"delta_ns":7188520,"event":"scenario_margin","scenario":64,"margin":0.029527007699}
+{"ts_ns":138435703040475,"delta_ns":14742760,"event":"scenario_margin","scenario":128,"margin":0.041200057765}
+{"ts_ns":138435709560045,"delta_ns":21262330,"event":"scenario_margin","scenario":192,"margin":0.046015425694}
+{"ts_ns":138435716083615,"delta_ns":27785900,"event":"scenario_margin","scenario":256,"margin":-0.018772675840}
+{"ts_ns":138435722259135,"delta_ns":33961420,"event":"scenario_margin","scenario":320,"margin":0.048843111192}
+{"event":"summary","nqubits_simulated":504000,"nqubits_per_sec":13330519.113,"elapsed_ns":37807980,"nqubit_avg_score":0.960970600076,"baseline_qubit_avg_score":0.940176696297,"nqubit_win_rate":0.652777777778}

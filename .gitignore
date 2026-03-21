@@ -1,0 +1,31 @@
+# Rapports, documents, logs non suivis
+*.pdf
+*.txt
+*.json
+RAPPORT/
+docs/
+attached_assets/
+evidence/
+dataset/
+DATASET/
+v28_forensic_logs/
+v2_output/
+v28_kaggle_output/
+metrics_modules_reels/
+final_logs/
+final_logs_capture/
+final_logs_v14/
+final_logs_v15/
+final_logs_v16/
+
+# Images / figures
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+
+# Caches IDE / temporaires
+.ipynb_checkpoints/
+.cache/
+.ccls-cache/
