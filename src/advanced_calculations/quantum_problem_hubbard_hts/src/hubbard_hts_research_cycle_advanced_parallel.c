@@ -12,9 +12,6 @@
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
-#ifdef _OPENMP
-#include <omp.h>
-#endif
 
 /* BC-LV01/LV02/LV03/LV04/LV05 : Intégration LumVorax forensique — 2026-03-14 */
 /* LumVorax — vrais modules forensiques — activation 100% inconditionnelle */
@@ -494,23 +491,6 @@ static sim_result_t simulate_fullscale_controlled(const problem_t* p,
     FORENSIC_LOG_MODULE_METRIC("simulate_adv", "n_steps_total",     (double)p->steps);
     FORENSIC_LOG_MODULE_METRIC("simulate_adv", "n_sites",           (double)(p->lx * p->ly));
     FORENSIC_LOG_MODULE_METRIC("simulate_adv", "equiv_qubits",      2.0 * (double)(p->lx * p->ly));
-    /* C59-P5 : complexité Hilbert log₂(dim) = 2×sites (Hubbard: 4 états/site, dim=4^sites=2^(2×sites)).
-     * NOM D'ORIGINE "equiv_qubits" CONSERVÉ — ce nom ne peut pas être renommé (STANDARD_NAMES.md §A).
-     * "hilbert_log2_dim" est une métrique ADDITIONNELLE distincte pour les lecteurs experts. */
-    FORENSIC_LOG_MODULE_METRIC("simulate_adv", "hilbert_log2_dim",  2.0 * (double)(p->lx * p->ly));
-    /* C59-P4 : σ_corr = σ_MC / |⟨sign⟩| — correction barre d'erreur par signe fermionique.
-     * |⟨sign⟩| = |sign_ratio_final| (accumulé sur tous les steps de production).
-     * σ_MC ≈ écart-type empirique de l'énergie — approximé par (U_eV + t_eV) × 0.01 / √N_steps.
-     * Valeur physique : σ_corr >> σ_MC en régime sign-problem (⟨sign⟩ ≪ 1). */
-    {
-        double sign_abs   = fabs(r.sign_ratio);
-        double sigma_mc   = (fabs(p->u_eV) + fabs(p->t_eV)) * 0.01
-                          / ((p->steps > 0) ? sqrt((double)p->steps) : 1.0);
-        double sigma_corr = (sign_abs > 1e-10) ? sigma_mc / sign_abs : 1e6;
-        FORENSIC_LOG_MODULE_METRIC("simulate_adv", "sigma_mc_estimate",   sigma_mc);
-        FORENSIC_LOG_MODULE_METRIC("simulate_adv", "sigma_corr_sign",     sigma_corr);
-        FORENSIC_LOG_MODULE_METRIC("simulate_adv", "sign_abs_mean",       sign_abs);
-    }
     FORENSIC_LOG_MODULE_METRIC("simulate_adv", "U_over_t",          (p->t_eV > 1e-12) ? p->u_eV / p->t_eV : 0.0);
     FORENSIC_LOG_MODULE_METRIC("simulate_adv", "temp_K",            p->temp_K);
     /* C43 : métriques sign_problem dédiées — traçabilité totale */
@@ -665,8 +645,8 @@ static von_neumann_result_t von_neumann_fullscale(const problem_t* p, const cont
  * ==================================================================== */
 #define PT_MC_N_REPLICAS       8      /* C43 : 6→8 répliques (meilleure couverture T) */
 #define PT_MC_T_RATIO          50.0   /* P1-C19-01 : ratio 5→50, T_max/T_min=50 */
-#define PT_MC_N_SWEEPS         200000 /* C59-P3 : 20000→200000 sweeps (×10, N_eff≥30 garanti) */
-#define PT_MC_N_THERMALIZE     40000  /* C59-P3 : 4000→40000 (20% de N_SWEEPS, équilibration complète) */
+#define PT_MC_N_SWEEPS         20000  /* C43 : 4000→20000 sweeps (×5, τ_int≈10000) */
+#define PT_MC_N_THERMALIZE     4000   /* C43 : 800→4000 (×5, équilibration garantie) */
 #define PT_MC_STEPS_PER_SWEEP  500    /* C43 : 200→500 (×2.5, statistiques améliorées) */
 #define PT_MC_DELTA_MC_INIT    0.20
 #define PT_MC_DIVERGENCE_THR   0.5   /* C43 BUG-PTMC-DIV-FIX : 2.0→0.5 eV/site (normalisé) */
@@ -744,24 +724,7 @@ static void pt_mc_run(const problem_t* p, uint64_t seed,
     for (int r = 0; r < R; ++r)
         E_rep[r] = pt_mc_local_energy(p, d_rep[r], sites);
 
-    /* C59-OMP : seeds indépendantes par réplique → parallélisation sans race condition.
-     * Chaque réplique a sa propre chaîne pseudo-aléatoire ; les swaps utilisent seed_swap.
-     * Nombre de threads OMP effectif : omp_get_max_threads() (8 sur AMD EPYC 7B13). */
-    uint64_t seed_per_rep[PT_MC_N_REPLICAS];
-    for (int r2 = 0; r2 < R; ++r2)
-        seed_per_rep[r2] = seed ^ ((uint64_t)(r2 + 1) * 0x9F4A2C7E8B3D1E5FULL)
-                                ^ ((uint64_t)sites * 0x1F2E3D4CULL);
-    uint64_t seed_swap = seed ^ 0xFACEB00CDEADBEEFULL;
-
     double delta_mc = PT_MC_DELTA_MC_INIT;
-
-#ifdef _OPENMP
-    fprintf(stderr, "[C59-OMP] OpenMP actif — %d threads sur %d cœurs logiques\n",
-            omp_get_max_threads(), omp_get_num_procs());
-    omp_set_num_threads(R);
-#else
-    fprintf(stderr, "[C59-OMP] OpenMP NON disponible — exécution mono-thread\n");
-#endif
 
     /* PT-05 : Phase de thermalisation — Q-NEW-03
      * 500 sweeps non-enregistrés avant la production. Sans cette phase,
@@ -778,19 +741,14 @@ static void pt_mc_run(const problem_t* p, uint64_t seed,
         double mc_acc_th = 0.0;
         int swap_n_th = 0;
         double swap_acc_th = 0.0;
-        /* C59-OMP : 8 répliques en parallèle — chaque thread a sa propre seed locale
-         * pour éviter toute race condition. delta_mc est read-only ici → thread-safe. */
-#pragma omp parallel for num_threads(R) schedule(static) reduction(+:mc_acc_th)
         for (int r = 0; r < R; ++r) {
-            double beta     = beta_rep[r];
-            double acc      = 0.0;
-            double dmc_loc  = delta_mc;
-            uint64_t loc_seed = seed_per_rep[r];
+            double beta = beta_rep[r];
+            double acc  = 0.0;
             for (int step = 0; step < N_STEP; ++step) {
-                int idx = (int)(rand01(&loc_seed) * (double)sites);
+                int idx = (int)(rand01(&seed) * (double)sites);
                 if (idx >= sites) idx = sites - 1;
                 double d_old = d_rep[r][idx];
-                double d_new = d_old + dmc_loc * (2.0 * rand01(&loc_seed) - 1.0);
+                double d_new = d_old + delta_mc * (2.0 * rand01(&seed) - 1.0);
                 /* C22-BUG03 FIX (thermalisation) : clipper AVANT calcul énergie */
                 if (d_new >  1.0) d_new =  1.0;
                 if (d_new < -1.0) d_new = -1.0;
@@ -805,12 +763,11 @@ static void pt_mc_run(const problem_t* p, uint64_t seed,
                 double dE = (En - Eo) / (double)sites;
                 double pr = (dE <= 0.0) ? 1.0 : exp(-beta * dE * (double)sites);
                 if (pr > 1.0) pr = 1.0;
-                if (rand01(&loc_seed) < pr) {
+                if (rand01(&seed) < pr) {
                     d_rep[r][idx] = d_new;
                     acc += 1.0;
                 }
             }
-            seed_per_rep[r] = loc_seed;
             E_rep[r] = pt_mc_local_energy(p, d_rep[r], sites);
             mc_acc_th += acc / (double)N_STEP;
         }
@@ -821,7 +778,7 @@ static void pt_mc_run(const problem_t* p, uint64_t seed,
             double ps = exp(db * de * (double)sites);
             if (ps > 1.0) ps = 1.0;
             swap_n_th++;
-            if (rand01(&seed_swap) < ps) {
+            if (rand01(&seed) < ps) {
                 double* tmp = d_rep[r]; d_rep[r] = d_rep[r+1]; d_rep[r+1] = tmp;
                 double et  = E_rep[r];  E_rep[r] = E_rep[r+1]; E_rep[r+1] = et;
                 swap_acc_th += 1.0;
@@ -877,19 +834,16 @@ static void pt_mc_run(const problem_t* p, uint64_t seed,
         double rej_per_rep[PT_MC_N_REPLICAS];
         for (int r = 0; r < R; ++r) { acc_per_rep[r] = 0.0; rej_per_rep[r] = 0.0; }
 
-        /* --- Sweeps Metropolis par réplique — C59-OMP : 8 répliques × 8 cœurs --- */
-#pragma omp parallel for num_threads(R) schedule(static) reduction(+:mc_acc_sw)
+        /* --- Sweeps Metropolis par réplique --- */
         for (int r = 0; r < R; ++r) {
-            double beta       = beta_rep[r];
-            double acc        = 0.0;
-            double dmc_loc    = delta_mc;
-            uint64_t loc_seed = seed_per_rep[r];
+            double beta = beta_rep[r];
+            double acc  = 0.0;
             for (int step = 0; step < N_STEP; ++step) {
-                /* Site aléatoire — loc_seed privé par thread (pas de race condition) */
-                int idx = (int)(rand01(&loc_seed) * (double)sites);
+                /* Site aléatoire */
+                int idx = (int)(rand01(&seed) * (double)sites);
                 if (idx >= sites) idx = sites - 1;
                 double d_old = d_rep[r][idx];
-                double d_new = d_old + dmc_loc * (2.0 * rand01(&loc_seed) - 1.0);
+                double d_new = d_old + delta_mc * (2.0 * rand01(&seed) - 1.0);
                 /* C22-BUG03 FIX : clipping physique ±1 AVANT le calcul de l'énergie.
                  * Sans ce fix, dE est calculé pour d_new non-clippé → biais Metropolis
                  * systématique à fort couplage U (prob acceptation incorrecte). */
@@ -907,7 +861,7 @@ static void pt_mc_run(const problem_t* p, uint64_t seed,
                 double E_new_i = p->u_eV * n_up_new * n_dn_new - p->t_eV * hop_new
                                  - p->mu_eV * (n_up_new + n_dn_new - 1.0);
                 double dE = (E_new_i - E_old_i) / (double)sites;
-                double r01 = rand01(&loc_seed);
+                double r01 = rand01(&seed);
                 double prob = (dE <= 0.0) ? 1.0 : exp(-beta * dE * (double)sites);
                 if (prob > 1.0) prob = 1.0;
                 if (r01 < prob) {
@@ -920,7 +874,6 @@ static void pt_mc_run(const problem_t* p, uint64_t seed,
                 }
             }
             /* Recalcul énergie exacte après sweep (corrige accumulation d'erreurs ΔE) */
-            seed_per_rep[r] = loc_seed;
             E_rep[r] = pt_mc_local_energy(p, d_rep[r], sites);
             mc_acc_sw += acc / (double)N_STEP;
         }
@@ -934,7 +887,7 @@ static void pt_mc_run(const problem_t* p, uint64_t seed,
             if (p_swap > 1.0) p_swap = 1.0;
             swap_n_sw++;
             int swapped = 0;
-            if (rand01(&seed_swap) < p_swap) {
+            if (rand01(&seed) < p_swap) {
                 double* tmp  = d_rep[r]; d_rep[r] = d_rep[r+1]; d_rep[r+1] = tmp;
                 double  etmp = E_rep[r]; E_rep[r] = E_rep[r+1]; E_rep[r+1] = etmp;
                 swap_acc_sw += 1.0;
@@ -968,23 +921,6 @@ static void pt_mc_run(const problem_t* p, uint64_t seed,
             chi_pair_sum    += p_cold_sw;
             chi_pair_sq_sum += p_cold_sw * p_cold_sw;
             chi_n++;
-        }
-
-        /* C59-ULTRA : Logging NANO sweep-par-sweep — ZÉRO filtre, TOUT capturé.
-         * FORENSIC_LOG_NANO → ring buffer 4096 entrées, flush vers CSV LumVorax.
-         * FORENSIC_LOG_HW_SAMPLE → /proc/stat + /proc/meminfo chaque 100 sweeps.
-         * Règle tracabilité 100% : chaque sweep = une entrée NANO dans le CSV.
-         * Noms conformes STANDARD_NAMES.md Section A + Section C (préfixe pt_mc:). */
-        FORENSIC_LOG_NANO("pt_mc", "sw",         (double)sw);
-        FORENSIC_LOG_NANO("pt_mc", "mc_rate",    mc_rate);
-        FORENSIC_LOG_NANO("pt_mc", "swap_rate",  swap_rate);
-        FORENSIC_LOG_NANO("pt_mc", "delta_mc",   delta_mc);
-        FORENSIC_LOG_NANO("pt_mc", "E_cold",     E_rep[0]);
-        FORENSIC_LOG_NANO("pt_mc", "elapsed_ns", (double)(now_ns() - t0));
-        /* FORENSIC_LOG_HW_SAMPLE toutes les 100 sweeps — lit /proc/stat et /proc/meminfo.
-         * Garantit la traçabilité RAM/CPU 100% exigée sans flood I/O à chaque sweep. */
-        if (sw % 100 == 0) {
-            FORENSIC_LOG_HW_SAMPLE("pt_mc");
         }
 
         /* G-C23-01 : Enregistrement CSV à CHAQUE sweep de production (pas seulement 7).
@@ -1080,26 +1016,6 @@ static void pt_mc_run(const problem_t* p, uint64_t seed,
     FORENSIC_LOG_MODULE_METRIC("pt_mc", "site_updates_per_sec",site_ups_ps);
     FORENSIC_LOG_MODULE_METRIC("pt_mc", "total_site_updates",  total_site_updates);
     FORENSIC_LOG_MODULE_METRIC("pt_mc", "equiv_qubits",        equiv_qubits);
-    /* C59-P5 : complexité Hilbert log₂(dim) — métrique additionnelle pour experts.
-     * NOM D'ORIGINE "equiv_qubits" CONSERVÉ (STANDARD_NAMES.md §A, ligne 1035). */
-    FORENSIC_LOG_MODULE_METRIC("pt_mc", "hilbert_log2_dim",   equiv_qubits);
-    /* C59-P4 : σ_corr = σ_MC / |⟨sign⟩| dans pt_mc_run.
-     * avg_mc_accept ≈ ⟨sign⟩ effectif sur les sweeps de production.
-     * sigma_MC ≈ variance de l'énergie froide (variée de chi_pair_sum/chi_n autour de E_rep[0]).
-     * sigma_corr_ptmc : correction de la barre d'erreur par signe. */
-    {
-        double sign_abs_ptmc  = fabs(avg_mc_accept);
-        double sigma_mc_ptmc  = (chi_n > 1 && chi_pair_sq_sum > 0.0)
-                              ? sqrt(fabs(chi_pair_sq_sum / (double)chi_n
-                                         - (chi_pair_sum  / (double)chi_n)
-                                         * (chi_pair_sum  / (double)chi_n)))
-                              : 0.0;
-        double sigma_corr_ptmc = (sign_abs_ptmc > 1e-10)
-                               ? sigma_mc_ptmc / sign_abs_ptmc : 1e6;
-        FORENSIC_LOG_MODULE_METRIC("pt_mc", "sigma_mc_ptmc",      sigma_mc_ptmc);
-        FORENSIC_LOG_MODULE_METRIC("pt_mc", "sigma_corr_sign",    sigma_corr_ptmc);
-        FORENSIC_LOG_MODULE_METRIC("pt_mc", "sign_abs_mc_accept", sign_abs_ptmc);
-    }
 
     for (int r = 0; r < R; ++r) TRACKED_FREE(d_rep[r]);
 }
@@ -1557,42 +1473,6 @@ int main(int argc, char** argv) {
     }
     fprintf(stderr, "[OK-FOPEN-C41] Tous les %d fichiers ouverts avec succès\n", 15);
 
-    /* C59-RAM90 : setvbuf dynamique — cible 80-90% d'utilisation RAM.
-     * Budget = 80% de la RAM disponible / 15 fichiers CSV ouverts.
-     * Plancher 4MB, plafond 32MB par handle pour rester raisonnable.
-     * Plus 200MB de préallocation (tampon chaud) pour maintenir la pression mémoire. */
-    {
-        long avail_kb = mem_available_kb();
-        if (avail_kb > 0) {
-            long budget_kb  = (long)(avail_kb * 0.80);
-            long per_fh_kb  = budget_kb / 15;
-            if (per_fh_kb < 4096)  per_fh_kb = 4096;   /* min 4 MB */
-            if (per_fh_kb > 32768) per_fh_kb = 32768;  /* max 32 MB */
-            size_t buf_sz = (size_t)per_fh_kb * 1024UL;
-            FILE* fhs[15] = {lg, raw, tcsv, qcsv, prov, bcsv, bcsvm, mmeta, det,
-                             nstab, toy, tdrv, ucsv, ngcsv, dmcsv};
-            for (int fi = 0; fi < 15; ++fi)
-                if (fhs[fi]) setvbuf(fhs[fi], NULL, _IOFBF, buf_sz);
-            /* Préallocation 200MB pour maintenir la pression mémoire à 80-90% */
-            void* ram_pressure_buf = malloc(200UL * 1024UL * 1024UL);
-            if (ram_pressure_buf) memset(ram_pressure_buf, 0xAB, 200UL * 1024UL * 1024UL);
-            fprintf(stderr, "[C59-RAM90] setvbuf=%zuMB/fh × 15 | avail_before=%ldMB | "
-                    "pressure_buf=%s\n",
-                    buf_sz / (1024UL*1024UL), avail_kb / 1024L,
-                    ram_pressure_buf ? "200MB_OK" : "FAIL");
-            /* Note : ram_pressure_buf volontairement NON libéré — maintient la pression
-             * RAM pendant toute la durée du run pour stabiliser entre 80-90%. */
-            (void)ram_pressure_buf;
-        } else {
-            fprintf(stderr, "[C59-RAM90] WARN: mem_available_kb() failed — "
-                    "setvbuf ignoré (valeur par défaut OS)\n");
-        }
-#ifdef _OPENMP
-        fprintf(stderr, "[C59-OMP-MAIN] %d threads OpenMP actifs — %d cœurs logiques "
-                "AMD EPYC 7B13\n", omp_get_max_threads(), omp_get_num_procs());
-#endif
-    }
-
     fprintf(raw, "problem,step,energy,pairing,sign_ratio,cpu_percent,mem_percent,elapsed_ns,norm_deviation,ema_abs_energy\n");
     fprintf(tcsv, "test_family,test_id,parameter,value,status\n");
     fprintf(qcsv, "category,question_id,question,response_status,evidence\n");
@@ -1714,8 +1594,8 @@ int main(int argc, char** argv) {
                     wparams.mu       = probs[i].mu_eV;
                     wparams.beta     = 1.0 / (KB_EV_PER_K * T_ref);
                     wparams.seed     = (0xC37B05C1CULL ^ (uint64_t)(i + 1)) ^ g_run_seed_xor;
-                    wparams.n_sweeps = 200000; /* C59-WORM : 2000→200000 (vrais sweeps, N_eff≥30) */
-                    wparams.n_warmup = 40000;  /* C59-WORM : 400→40000 (20% thermalization) */
+                    wparams.n_sweeps = 2000;
+                    wparams.n_warmup = 400;
                     worm_mc_state_t  wstate;
                     worm_mc_result_t wresult;
                     memset(&wstate,  0, sizeof(wstate));
@@ -1956,39 +1836,6 @@ int main(int argc, char** argv) {
                 bethe_e0, er.gap_eV, er.double_occupancy, er.pairing_corr,
                 er.converged ? 1 : 0, er.lanczos_iter,
                 (unsigned long long)er.elapsed_ns);
-
-            /* C59-P2 : Injection ED→bcsv garantit que benchmark_comparison_qmc_dmrg.csv
-             * n'est JAMAIS vide même si les fichiers de référence LFS sont absents.
-             * Source : ED Hubbard 2×2 (exact) — authentique, reproductible, zéro hardcoding.
-             * error_bar = 50% × |ed_E0| (domaine validité PTMC : 12×12 à 16×16, pas 2×2).
-             * Colonnes conformes STANDARD_NAMES.md : module,observable,T,U,reference,model,
-             *   abs_error,rel_error,error_bar,within_error_bar. */
-            if (bcsv && er.converged) {
-                /* Observable : énergie fondamentale (eV) */
-                double ref_e   = er.ground_energy_eV;
-                double mod_e   = pt_E_cold[i];
-                double abs_e   = fabs(mod_e - ref_e);
-                double rel_e   = fabs(abs_e / (fabs(ref_e) + 1e-15));
-                /* Barre d'erreur 50% pour PTMC sur petits réseaux (domaine validité) */
-                double ebar_e  = 0.50 * fabs(ref_e);
-                int    ok_e    = (abs_e <= ebar_e) ? 1 : 0;
-                fprintf(bcsv, "ed_internal_%s,energy,%.4f,%.4f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n",
-                        probs[i].name, probs[i].temp_K, probs[i].u_eV,
-                        ref_e, mod_e, abs_e, rel_e, ebar_e, ok_e);
-                /* Observable : pairing_corr (ED) vs pairing_cold (PTMC) */
-                double ref_p   = er.pairing_corr;
-                double mod_p   = pt_pairing_cold[i];
-                double abs_p   = fabs(mod_p - ref_p);
-                double rel_p   = fabs(abs_p / (fabs(ref_p) + 1e-15));
-                double ebar_p  = 0.50 * fabs(ref_p) + 0.05;
-                int    ok_p    = (abs_p <= ebar_p) ? 1 : 0;
-                fprintf(bcsv, "ed_internal_%s,pairing,%.4f,%.4f,%.10f,%.10f,%.10f,%.10f,%.10f,%d\n",
-                        probs[i].name, probs[i].temp_K, probs[i].u_eV,
-                        ref_p, mod_p, abs_p, rel_p, ebar_p, ok_p);
-                /* Métriques FORENSIC pour traçabilité C59-P2 */
-                FORENSIC_LOG_MODULE_METRIC("benchmark_adv", "ed_benchmark_energy_within", (double)ok_e);
-                FORENSIC_LOG_MODULE_METRIC("benchmark_adv", "ed_benchmark_pairing_within", (double)ok_p);
-            }
             ed_count++;
         }
         if (edcsv) fclose(edcsv);
@@ -2536,23 +2383,8 @@ int main(int argc, char** argv) {
         problem_t cp = probs[0];
         cp.lx = c_sizes[ci];
         cp.ly = c_sizes[ci];
-        /* C59-SCALE : vrais steps par taille — INTERDICTION de steps < 500 sur toute taille.
-         * Règle physique : N_eff ≥ 30 exige steps ≥ 30 × τ_int_estimé.
-         * Pour les grandes tailles, τ_int croît comme L^z (z≈2), donc steps adaptatifs
-         * mais JAMAIS inférieurs à 500 (minimum pour extrapolation thermodynamique fiable).
-         *   lx ≤ 20   : 14 000 steps (simulation complète, même résolution que module PT-MC)
-         *   lx ≤ 36   : 7 000 steps (réseau ≤ 1296 sites, τ_int ≤ 700)
-         *   lx ≤ 68   : 3 500 steps (réseau ≤ 4624 sites, τ_int ≤ 1400)
-         *   lx ≤ 128  : 1 500 steps (réseau ≤ 16384 sites, τ_int ≤ 3000)
-         *   lx ≤ 255  : 700 steps  (réseau ≤ 65025 sites, τ_int ≤ 7000)
-         *   lx ≤ 512  : 500 steps  (réseau ≤ 262144 sites, minimum extrapolation fiable)
-         * Chaque taille : seed indépendante pour reproductibilité et détection de biais. */
-        cp.steps = (cp.lx <= 20)  ? 14000
-                 : (cp.lx <= 36)  ?  7000
-                 : (cp.lx <= 68)  ?  3500
-                 : (cp.lx <= 128) ?  1500
-                 : (cp.lx <= 255) ?   700
-                 :                    500;
+        /* C57-512 : règle steps adaptative — 512x512 = 262144 sites → steps=40 (mémoire + temps contrôlés) */
+        cp.steps = (cp.lx <= 36) ? 1200 : (cp.lx <= 68 ? 420 : (cp.lx <= 128 ? 160 : (cp.lx <= 255 ? 80 : 40)));
         sim_result_t cr = simulate_fullscale(&cp, (uint64_t)(4321 + ci), 149, NULL);
         c_pair[ci] = cr.pairing_norm;
         c_energy[ci] = cr.energy_eV;

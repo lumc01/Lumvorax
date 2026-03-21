@@ -112,12 +112,12 @@ Format d'une ligne : `METRIC,timestamp_utc,timestamp_ns,pid,PRÉFIXE:nom_métriq
 
 | PRÉFIXE D'ORIGINE (officiel) | Signification | Métriques associées |
 |---|---|---|
-| `simulate_adv:` | Simulation HTS avancée (boucle RK2) | `elapsed_ns`, `steps`, `step_energy_eV`(C25), `step_pairing_norm`(C25), `step_sign_ratio`(C25), `step_elapsed_ns`(C25), `step_pairing_norm_step0`, `step_energy_norm_step0`, `local_pair_site0_step0`, `d_site0_step0`, `autocorr_tau_lower_steps`, `autocorr_tau_upper_steps`, `hilbert_log2_dim`(C59-P5), `sigma_mc_estimate`(C59-P4), `sigma_corr_sign`(C59-P4), `sign_abs_mean`(C59-P4) |
+| `simulate_adv:` | Simulation HTS avancée (boucle RK2) | `elapsed_ns`, `steps`, `step_energy_eV`(C25), `step_pairing_norm`(C25), `step_sign_ratio`(C25), `step_elapsed_ns`(C25), `step_pairing_norm_step0`, `step_energy_norm_step0`, `local_pair_site0_step0`, `d_site0_step0`, `autocorr_tau_lower_steps`, `autocorr_tau_upper_steps` |
 | `pt_mc_therm:` | Thermalisation PT-MC (800 sweeps × 26 modules) | `n_thermalize_sweeps`, `n_replicas`, `n_step_per_sweep`, `sw`, `mc_rate`, `swap_rate`, `delta_mc`, `E_cold` |
-| `pt_mc:` | Récapitulatif PT-MC par module | `elapsed_ns`, `avg_mc_accept`, `chi_sc_avg`, `chi_sc_max`, `pairing_cold_avg`, `tau_int_energy`(C25-TAU), `err_corrected_energy_eV`(C25-TAU), `hilbert_log2_dim`(C59-P5), `sigma_mc_ptmc`(C59-P4), `sigma_corr_sign`(C59-P4), `sign_abs_mc_accept`(C59-P4), `sw`(C59-ULTRA), `mc_rate`(C59-ULTRA), `swap_rate`(C59-ULTRA), `delta_mc`(C59-ULTRA), `E_cold`(C59-ULTRA), `elapsed_ns`(C59-ULTRA) [via FORENSIC_LOG_NANO] |
+| `pt_mc:` | Récapitulatif PT-MC par module | `elapsed_ns`, `avg_mc_accept`, `chi_sc_avg`, `chi_sc_max`, `pairing_cold_avg`, `tau_int_energy`(C25-TAU), `err_corrected_energy_eV`(C25-TAU) |
 | `pt_mc_swap_detail:` | Chaque tentative d'échange répliques | `sw`, `r_lo`, `r_hi`, `delta_beta_dE`, `swap_accepted` |
 | `pt_mc_vs_mc:` | Anomalies divergence PT-MC vs MC simple | `energy_diff`, `pairing_diff` |
-| `benchmark_adv:` | Benchmarks QMC/DMRG | `qmc_rmse`, `dmrg_mae`, `within_error_bar`, `ed_benchmark_energy_within`(C59-P2), `ed_benchmark_pairing_within`(C59-P2) |
+| `benchmark_adv:` | Benchmarks QMC/DMRG | `qmc_rmse`, `dmrg_mae`, `within_error_bar` |
 | `ed_` (sous-préfixe) | Diagonalisation exacte (C24-02) | `ed_E0_eV`, `ed_gap_eV`, `ed_double_occ`, `ed_pairing_corr`, `ed_bethe_E0_eV`, `ed_rel_err_mc_pct`, `ed_converged`, `ed_lanczos_iter` |
 
 **⚠️ PRÉFIXES INTERDITS (doublons/erreurs historiques) :**

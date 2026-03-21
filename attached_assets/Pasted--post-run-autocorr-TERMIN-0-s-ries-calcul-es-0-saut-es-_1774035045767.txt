@@ -1,0 +1,16 @@
+
+[post_run_autocorr] TERMINÉ — 0 séries calculées, 0 sautées — sortie : /home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260320T192921Z_727/tests/autocorr_tau_int_sokal.csv
+[post_run_autocorr] Timestamp : 2026-03-20T19:29:30Z
+[#################################-------]  82% (39/47) checksums[2026-03-20T19:29:30.224191879Z] GLOBAL_CHECKSUM.sha512 generated — 89 files hashed
+[###################################-----]  89% (42/47) fullscale vs advanced co[####################################----]  91% (43/47) fullscale vs fullscale benchmarkResearch cycle terminé (advanced): /home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260320T192921Z_727
+Fullscale run: /home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260320T192910Z_610
+Advanced run: /home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260320T192921Z_727
+Campaign artifacts: /home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/campaign_20260320T192853Z
+Session log: /home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/logs/research_cycle_session_20260320T192853Z.log
+/home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260320T192921Z_727/audit/run_signature.json
+[fullscale-strict] audit generated in: /home/runner/workspace/src/advanced_calculations/quantum_problem_hubbard_hts/results/research_20260320T192921Z_727/audit
+[#####################################---]  93% (44/47) fullscale strict protocol audit[2026-03-20T19:29:31.888410630Z] GLOBAL_CHECKSUM.sha512 generated — 95 files hashed
+[######################################--]  95% (45/47) final sha512 global (T02[########################################] 100% (47/47) final checksum verify
+[2026-03-20T19:29:31.949046012Z] CHECKPOINT sauvegardé : phase 99
+[2026-03-20T19:29:31.952420652Z] Run complet à 100% — checkpoint supprimé
+[2026-03-20T19:29:31.959527942Z] ===== run_research_cycle.sh TERMINÉ AVEC SUCCÈS =====

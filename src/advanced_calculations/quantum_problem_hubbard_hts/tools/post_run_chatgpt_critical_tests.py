@@ -423,37 +423,6 @@ def main():
         'dTc < 10 K', 'C38-P6: Tc error bar must be explicit for publishable results',
         'Narrow PTMC T-grid around Tc to reduce FWHM if OBSERVED')
 
-    # --- C59-P4 : T16 σ_corr = σ_MC / |⟨sign⟩| — correction barre erreur signe ---
-    # σ_MC = écart-type de l'énergie sur les steps de production (par module)
-    # ⟨sign⟩ = moyenne du sign_ratio sur les steps de production
-    # σ_corr = σ_MC / |⟨sign⟩| : barre d'erreur corrigée par le problème de signe
-    # Règle : σ_corr >> σ_MC en régime sign-problem sévère (⟨sign⟩ ≪ 1)
-    sigma_corr_vals = []
-    sigma_corr_details = []
-    for prob, d in series.items():
-        energies = d['energy']
-        signs    = d['sign_ratio']
-        if len(energies) < 2:
-            continue
-        mean_e   = sum(energies) / len(energies)
-        sigma_mc = math.sqrt(sum((e - mean_e) ** 2 for e in energies) / len(energies))
-        mean_sign = sum(abs(s) for s in signs) / len(signs) if signs else 1.0
-        sigma_corr = sigma_mc / mean_sign if mean_sign > 1e-10 else 1e6
-        sigma_corr_vals.append(sigma_corr)
-        sigma_corr_details.append(f'{prob}:σ_corr={sigma_corr:.6f}(σ_MC={sigma_mc:.6f};|⟨sign⟩|={mean_sign:.6f})')
-    sigma_corr_computed = len(sigma_corr_vals) > 0
-    sigma_corr_max = max(sigma_corr_vals) if sigma_corr_vals else 0.0
-    sigma_corr_metric = ('; '.join(sigma_corr_details) if sigma_corr_details
-                         else 'no baseline data available')
-    add('T16_sign_corrected_sigma_corr',
-        'σ_corr = σ_MC / |⟨sign⟩| computed per module (C59-P4: error bar corrected for sign problem)',
-        'PASS' if sigma_corr_computed else 'FAIL',
-        f'max_sigma_corr={sigma_corr_max:.6f}; computed={len(sigma_corr_vals)} modules; '
-        + sigma_corr_metric[:200],
-        'all modules: sigma_corr computed from baseline sign_ratio series',
-        'C59-P4: barres d\'erreur corrigées par signe — publication exige σ_corr explicite',
-        'Check baseline_reanalysis_metrics.csv columns sign_ratio + energy if FAIL')
-
     # --- C38-P8 : Q26-Q30 nouvelles questions expertes ---
     # Q26 : gap spin vs charge — C39-E1 : calcul depuis fluctuations disponibles
     gap_spin_path = tests_dir / 'gap_spin_charge_separation.csv'

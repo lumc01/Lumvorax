@@ -20,7 +20,6 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <time.h>
-#include <inttypes.h>  /* C59-ULTRA : PRIu64 pour timestamps nanoseconde portables */
 
 /* -------------------------------------------------------------------------
  * RNG LCG (même graine que le runner principal pour reproductibilité)
@@ -166,21 +165,17 @@ static void mc_sweep(worm_mc_state_t *st, const worm_mc_params_t *p,
             if (xs == 0 && xt == Lx - 1) winding--;
         }
 
-        /* G-C39-WORM-ULTRA : log chaque tentative Metropolis worm.
-         * C59-ULTRA : flush immédiat après chaque écriture — zéro perte de données.
-         * Timestamp nanoseconde via CLOCK_MONOTONIC sur toutes architectures.
-         * Colonnes : phase,sw,attempt,site_s,site_t,n_s,n_t,dE_eV,ratio,accepted,ts_ns */
+        /* G-C39-WORM-ULTRA : log chaque tentative Metropolis worm */
         if (g_worm_attempt_log) {
-            struct timespec _ts;
-            clock_gettime(CLOCK_MONOTONIC, &_ts);
-            uint64_t now_ns_val = (uint64_t)_ts.tv_sec * 1000000000ULL
-                                + (uint64_t)_ts.tv_nsec;
+            uint64_t now_ns_val = 0;
+#if defined(__x86_64__) || defined(__i386__)
+            struct timespec _ts; clock_gettime(CLOCK_MONOTONIC, &_ts);
+            now_ns_val = (uint64_t)_ts.tv_sec * 1000000000ULL + (uint64_t)_ts.tv_nsec;
+#endif
             fprintf(g_worm_attempt_log,
-                "%s,%d,%d,%d,%d,%.0f,%.0f,%.10f,%.10f,%d,%" PRIu64 "\n",
+                "%s,%d,%d,%d,%d,%.0f,%.0f,%.10f,%.10f,%d\n",
                 phase_label, sw_idx, attempt, s, t_site,
-                n_s, n_t, dE, ratio, accepted, now_ns_val);
-            /* C59-ULTRA : flush immédiat — tracabilité 100%, aucune donnée en buffer */
-            fflush(g_worm_attempt_log);
+                n_s, n_t, dE, ratio, accepted);
         }
     }
     *winding_sq_sum += winding * winding;

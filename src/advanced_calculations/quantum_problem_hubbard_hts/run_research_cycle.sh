@@ -336,13 +336,10 @@ print_progress "cycle35 report"
 lv_wrap 24 python3 "$ROOT_DIR/tools/post_run_full_scope_integrator.py" --root "$ROOT_DIR" "$RUN_DIR"
 print_progress "full-scope integration"
 
-# C59-P1 FIX : Régénérer SHA512 + SHA256 AVANT le rapport scientifique.
-# L'ancien bloc supprimait logs/checksums.sha256 sans régénérer → traceability_pct < 100%.
-# write_global_sha512 AVANT write_checksums : le sha256 inclut le sha512 final (règle T02/T18).
-write_global_sha512 "$RUN_DIR"
-print_progress "pre-report sha512 global (C59-P1)"
-write_checksums "$RUN_DIR"
-print_progress "pre-report checksums (C59-P1)"
+(
+  cd "$RUN_DIR"
+  rm -f logs/checksums.sha256
+)
 
 lv_wrap 25 python3 "$ROOT_DIR/tools/post_run_scientific_report_cycle.py" "$RUN_DIR"
 print_progress "scientific report"

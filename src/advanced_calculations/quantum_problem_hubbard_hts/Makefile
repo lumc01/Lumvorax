@@ -1,9 +1,7 @@
-CC := gcc
-CFLAGS     ?= -O3 -std=c11 -Wall -Wextra -D_POSIX_C_SOURCE=200809L -DLUMVORAX_ENABLED=1
-CFLAGS_OMP := $(CFLAGS) -fopenmp -DN_OMP_CORES=8
-LDFLAGS     = -Wl,-Bdynamic,--as-needed
-LDLIBS     ?= -lm -lpthread
-LDLIBS_OMP := $(LDLIBS) -lgomp
+CC ?= gcc
+CFLAGS ?= -O2 -std=c11 -Wall -Wextra -D_POSIX_C_SOURCE=200809L -DLUMVORAX_ENABLED=1
+LDFLAGS = -Wl,-Bdynamic,--as-needed
+LDLIBS ?= -lm -lpthread
 
 LUM_ROOT := ../../
 LUM_INC  := -I$(LUM_ROOT)
@@ -29,7 +27,7 @@ $(BIN_RESEARCH): $(SRC_RESEARCH)
 	$(CC) $(CFLAGS) $(LUM_INC) $(LDFLAGS) -o $@ $(SRC_RESEARCH) $(LDLIBS)
 
 $(BIN_RESEARCH_ADV): $(SRC_RESEARCH_ADV)
-	$(CC) $(CFLAGS_OMP) $(LUM_INC) $(LDFLAGS) -o $@ $(SRC_RESEARCH_ADV) $(LDLIBS_OMP)
+	$(CC) $(CFLAGS) $(LUM_INC) $(LDFLAGS) -o $@ $(SRC_RESEARCH_ADV) $(LDLIBS)
 
 clean:
 	rm -f $(BIN_MAIN) $(BIN_RESEARCH) $(BIN_RESEARCH_ADV)
